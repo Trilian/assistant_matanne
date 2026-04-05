@@ -1,4 +1,4 @@
-"""Tests admin dédiés aux routes innovations après redistribution Phase 2."""
+"""Tests admin dédiés aux routes legacy d'innovations."""
 
 from __future__ import annotations
 

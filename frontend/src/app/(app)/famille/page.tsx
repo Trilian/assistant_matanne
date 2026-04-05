@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -43,6 +43,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/composants/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/composants/ui/sheet";
 import { BandeauMeteo } from "@/composants/famille/bandeau-meteo";
 import { CarteAnniversaire } from "@/composants/famille/carte-anniversaire";
 import { CarteDocumentExpire } from "@/composants/famille/carte-document-expire";
@@ -69,6 +70,9 @@ import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
 import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
 import type { ContexteFamilial, RappelFamille } from "@/types/famille";
+import { useIsMobile } from "@/crochets/use-mobile";
+import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
+import { LienTransition } from "@/composants/ui/lien-transition";
 
 const MODULES = [
   { id: "jules", titre: "Jules", chemin: "/famille/jules", Icone: Baby },
@@ -96,6 +100,54 @@ const LABELS_POUR_QUI: Record<string, string> = {
   mathieu: "🧔 Mathieu",
   famille: "🏠 Famille",
 };
+
+function ResponsiveWeekendOverlay({
+  open,
+  onOpenChange,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: ReactNode;
+}) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[92vh] overflow-y-auto rounded-t-3xl border-x-0 border-b-0 px-0"
+        >
+          <SheetHeader className="px-4 pb-2">
+            <SheetTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-500" />
+              Suggestions weekend IA
+            </SheetTitle>
+          </SheetHeader>
+          <div className="px-4 pb-4">{children}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            Suggestions weekend IA
+          </DialogTitle>
+          <DialogDescription>
+            Idées d'activités pour le weekend, adaptées à Jules et à la météo
+          </DialogDescription>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function PageFamille() {
   const router = useRouter();
@@ -265,37 +317,44 @@ export default function PageFamille() {
 
   return (
     <div className="space-y-8">
-      <CarteNotificationsModule moduleKey="famille" moduleLabel="Famille" />
+      <SectionReveal>
+        <CarteNotificationsModule moduleKey="famille" moduleLabel="Famille" />
+      </SectionReveal>
 
-      <CarteActionsAdminModule
-        moduleLabel="Famille"
-        description="Lancement manuel des jobs Jules, weekend et résumé hebdo depuis le hub."
-        jobs={[
-          {
-            id: "rapport_nutritionnel_jules",
-            label: "Rapport nutrition Jules",
-            hint: "Bilan hebdo Jules",
-          },
-          {
-            id: "score_weekend",
-            label: "Score weekend",
-            hint: "Suggestions activités / météo",
-          },
-          {
-            id: "s16_resume_weekend_telegram",
-            label: "Résumé weekend Telegram",
-            hint: "Digest du vendredi 18h",
-          },
-        ]}
-      />
+      <SectionReveal delay={0.02}>
+        <CarteActionsAdminModule
+          moduleLabel="Famille"
+          description="Lancement manuel des jobs Jules, weekend et résumé hebdo depuis le hub."
+          jobs={[
+            {
+              id: "rapport_nutritionnel_jules",
+              label: "Rapport nutrition Jules",
+              hint: "Bilan hebdo Jules",
+            },
+            {
+              id: "score_weekend",
+              label: "Score weekend",
+              hint: "Suggestions activités / météo",
+            },
+            {
+              id: "s16_resume_weekend_telegram",
+              label: "Résumé weekend Telegram",
+              hint: "Digest du vendredi 18h",
+            },
+          ]}
+        />
+      </SectionReveal>
 
       {/* En-tête */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">👨‍👩‍👦 Famille</h1>
-        <p className="text-muted-foreground">Votre contexte familial en un coup d'œil</p>
-      </div>
+      <SectionReveal delay={0.04}>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">👨‍👩‍👦 Famille</h1>
+          <p className="text-muted-foreground">Votre contexte familial en un coup d'œil</p>
+        </div>
+      </SectionReveal>
 
-      <Card>
+      <SectionReveal delay={0.06}>
+        <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
@@ -320,7 +379,8 @@ export default function PageFamille() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </SectionReveal>
 
       {/* Section 0: Rappels urgents */}
       {rappelsUrgents.length > 0 && (
@@ -641,62 +701,58 @@ export default function PageFamille() {
       </section>
 
       {/* Section 5: Modules (grille compacte) */}
-      <GrilleWidgets
-        stockageCle="widgets:hub:famille"
-        titre="Modules"
-        items={MODULES}
-        classeGrille="grid gap-3 grid-cols-2 sm:grid-cols-4"
-        renderItem={({ id, titre, chemin, Icone }) => {
-          const nbUrgences = urgencesPourModule(id);
-          return (
-            <Link key={chemin} href={chemin}>
-              <div className="relative h-full">
-                {nbUrgences > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[10px] flex items-center justify-center z-10 rounded-full"
-                  >
-                    {nbUrgences}
-                  </Badge>
-                )}
-                <Card className="hover:bg-accent/50 transition-colors h-full">
-                  <CardContent className="pt-5 pb-4">
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <div className="rounded-lg bg-primary/10 p-2.5">
-                        <Icone className="h-5 w-5 text-primary" />
-                      </div>
-                      <p className="text-sm font-medium">{titre}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </Link>
-          );
-        }}
-      />
+      <SectionReveal delay={0.1}>
+        <GrilleWidgets
+          stockageCle="widgets:hub:famille"
+          titre="Modules"
+          items={MODULES}
+          classeGrille="grid gap-3 grid-cols-2 sm:grid-cols-4"
+          renderItem={({ id, titre, chemin, Icone }, index) => {
+            const nbUrgences = urgencesPourModule(id);
+            return (
+              <ItemAnime key={chemin} index={index}>
+                <LienTransition href={chemin} className="block h-full">
+                  <div className="relative h-full">
+                    {nbUrgences > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="absolute -top-1 -right-1 z-10 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]"
+                      >
+                        {nbUrgences}
+                      </Badge>
+                    )}
+                    <Card className="h-full transition-all hover:-translate-y-0.5 hover:bg-accent/50">
+                      <CardContent className="pt-5 pb-4">
+                        <div className="flex flex-col items-center gap-2 text-center">
+                          <div className="rounded-lg bg-primary/10 p-2.5">
+                            <Icone className="h-5 w-5 text-primary" />
+                          </div>
+                          <p className="text-sm font-medium">{titre}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </LienTransition>
+              </ItemAnime>
+            );
+          }}
+        />
+      </SectionReveal>
 
       {/* Dialog Suggestions Weekend IA */}
-      <Dialog open={dialogWeekendOuvert} onOpenChange={setDialogWeekendOuvert}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-purple-500" />
-              Suggestions weekend IA
-            </DialogTitle>
-            <DialogDescription>
-              Idées d'activités pour le weekend, adaptées à Jules et à la météo
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 text-sm whitespace-pre-wrap leading-relaxed">
-            {suggestionsWeekend ?? "Chargement…"}
-          </div>
-          <div className="mt-4 flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => router.push("/famille/weekend")}>
-              Voir plus sur la page Weekend
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveWeekendOverlay open={dialogWeekendOuvert} onOpenChange={setDialogWeekendOuvert}>
+        <p className="text-sm text-muted-foreground">
+          Idées d'activités pour le weekend, adaptées à Jules et à la météo
+        </p>
+        <div className="mt-4 text-sm whitespace-pre-wrap leading-relaxed">
+          {suggestionsWeekend ?? "Chargement…"}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => router.push("/famille/weekend")}>
+            Voir plus sur la page Weekend
+          </Button>
+        </div>
+      </ResponsiveWeekendOverlay>
     </div>
   );
 }

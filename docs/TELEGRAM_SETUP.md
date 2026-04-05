@@ -17,7 +17,7 @@ L'intégration Telegram sert à :
 Fichiers clés :
 
 - `src/services/integrations/telegram.py` — Client Telegram (envoi messages + boutons)
-- `src/api/routes/webhooks_telegram.py` — Webhook réception (messages + callback_query)
+- `src/api/routes/telegram/` — Webhook réception (messages + callback_query)
 
 ---
 
@@ -206,7 +206,7 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/sendMessage" \
 
 ## Structure des routes
 
-`src/api/routes/webhooks_telegram.py` expose :
+`src/api/routes/telegram/` expose :
 
 - `POST /api/v1/telegram/webhook` — Réception des updates Telegram
 
@@ -252,7 +252,7 @@ Types d'updates gérés :
 1. Vérifier le token : `curl https://api.telegram.org/bot<TOKEN>/getMe`
 2. Vérifier le webhook : `curl https://api.telegram.org/bot<TOKEN>/getWebhookInfo`
 3. Vérifier que l'endpoint `/api/v1/telegram/webhook` est accessible publiquement
-4. Inspecter les logs : `logger.error` dans `webhooks_telegram.py`
+4. Inspecter les logs : `logger.error` dans `telegram/`
 
 ### Messages proactifs non reçus
 

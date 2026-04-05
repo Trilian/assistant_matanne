@@ -16,7 +16,7 @@ from typing import Any
 from apscheduler.triggers.cron import CronTrigger
 
 from src.core.db import obtenir_contexte_db
-from src.core.exceptions import ErreurService
+from src.core.exceptions import ErreurServiceIA
 from src.core.models.jeux import TirageLoto, TirageEuromillions, GrilleLoto, GrilleEuromillions
 
 logger = logging.getLogger(__name__)
@@ -88,7 +88,7 @@ def _telecharger_csv_fdj(url: str) -> str:
         with zipfile.ZipFile(io.BytesIO(response.content)) as zf:
             csv_files = [n for n in zf.namelist() if n.endswith(".csv")]
             if not csv_files:
-                raise ErreurService("Aucun fichier CSV trouvé dans l'archive ZIP FDJ")
+                raise ErreurServiceIA("Aucun fichier CSV trouvé dans l'archive ZIP FDJ")
             return zf.read(csv_files[0]).decode("utf-8-sig")
 
     # Sinon, c'est directement un CSV
@@ -418,7 +418,7 @@ def backtest_grilles():
     
     except Exception as e:
         logger.error(f"❌ Erreur backtest grilles: {e}", exc_info=True)
-        raise ErreurService(f"Échec backtest: {e}")
+        raise ErreurServiceIA(f"Échec backtest: {e}")
 
 
 def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]:

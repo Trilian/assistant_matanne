@@ -1,222 +1,222 @@
-"""Service IA - resume hebdomadaire famille contextualise.
-
-IA1:
-- Contexte: planning semaine, inventaire, budget, score Jules, meteo.
-- Utilisable par endpoint dashboard et cron resume_hebdo.
-"""
-
-from __future__ import annotations
-
-from datetime import date, timedelta
-from typing import Any
-
-from pydantic import BaseModel, Field
-from sqlalchemy import func
-
-from src.core.ai import obtenir_client_ia
-from src.core.db import obtenir_contexte_db
-from src.services.core.base import BaseAIService
-from src.services.core.registry import service_factory
-
-
-class ResumeHebdoIAResponse(BaseModel):
-    """Structure de sortie IA pour le resume hebdo."""
-
-    resume: str = ""
-    points_attention: list[str] = Field(default_factory=list)
-    recommandations: list[str] = Field(default_factory=list)
-    score_semaine: int = Field(default=0, ge=0, le=100)
-
-
-class ResumeFamilleIAService(BaseAIService):
-    """Genere un resume hebdomadaire famille avec contexte multi-modules."""
-
-    def __init__(self) -> None:
-        super().__init__(
-            client=obtenir_client_ia(),
-            cache_prefix="dashboard_resume_hebdo_ia",
-            default_ttl=1800,
-            service_name="resume_famille_ia",
-        )
-
-    def _collecter_contexte(self, reference: date | None = None) -> dict[str, Any]:
-        """Collecte le contexte metier pour l'IA."""
-        today = reference or date.today()
-        debut_semaine = today - timedelta(days=today.weekday())
-        fin_semaine = debut_semaine + timedelta(days=6)
-        fin_horizon = today + timedelta(days=7)
-
-        contexte: dict[str, Any] = {
-            "periode": {
-                "debut": debut_semaine.isoformat(),
-                "fin": fin_semaine.isoformat(),
-            },
-            "planning": {"repas_planifies_7j": 0, "activites_7j": 0, "evenements_7j": 0},
-            "inventaire": {"stock_bas": 0, "peremptions_7j": 0},
-            "budget": {"depenses_mois": 0.0},
-            "score_jules": {"total_points": 0},
-            "meteo": {"conditions": [], "tendance": "inconnue"},
-        }
-
-        with obtenir_contexte_db() as session:
-            from src.core.models import ActiviteFamille, ArticleInventaire, BudgetFamille, Repas
-            from src.core.models.calendrier import EvenementPlanning
-
-            # Planning semaine/horizon court
-            repas_planifies = (
-                session.query(func.count(Repas.id))
-                .filter(Repas.date_repas >= today, Repas.date_repas <= fin_horizon)
-                .scalar()
-                or 0
-            )
-            activites = (
-                session.query(func.count(ActiviteFamille.id))
-                .filter(
-                    ActiviteFamille.date_prevue >= today,
-                    ActiviteFamille.date_prevue <= fin_horizon,
-                )
-                .scalar()
-                or 0
-            )
-            evenements = (
-                session.query(func.count(EvenementPlanning.id))
-                .filter(
-                    EvenementPlanning.date_debut >= today,
-                    EvenementPlanning.date_debut <= fin_horizon,
-                )
-                .scalar()
-                or 0
-            )
-
-            # Inventaire
-            stock_bas = (
-                session.query(func.count(ArticleInventaire.id))
-                .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_min)
-                .scalar()
-                or 0
-            )
-            peremptions = (
-                session.query(func.count(ArticleInventaire.id))
-                .filter(
-                    ArticleInventaire.date_peremption.isnot(None),
-                    ArticleInventaire.date_peremption >= today,
-                    ArticleInventaire.date_peremption <= fin_horizon,
-                )
-                .scalar()
-                or 0
-            )
-
-            # Budget mois courant
-            debut_mois = today.replace(day=1)
-            depenses_mois = (
-                session.query(func.sum(BudgetFamille.montant))
-                .filter(BudgetFamille.date >= debut_mois)
-                .scalar()
-                or 0.0
-            )
-
-            contexte["planning"] = {
-                "repas_planifies_7j": int(repas_planifies),
-                "activites_7j": int(activites),
-                "evenements_7j": int(evenements),
-            }
-            contexte["inventaire"] = {
-                "stock_bas": int(stock_bas),
-                "peremptions_7j": int(peremptions),
-            }
-            contexte["budget"] = {"depenses_mois": float(depenses_mois)}
-
-        # Meteo (3 prochains jours)
-        try:
-            from src.services.integrations.weather import obtenir_service_meteo
-
-            previsions = obtenir_service_meteo().get_previsions(nb_jours=3)
-            conditions = [
-                {
-                    "jour": getattr(p, "date", None).isoformat()
-                    if getattr(p, "date", None)
-                    else None,
-                    "condition": getattr(p, "condition", ""),
-                    "tmin": float(getattr(p, "temperature_min", 0.0) or 0.0),
-                    "tmax": float(getattr(p, "temperature_max", 0.0) or 0.0),
-                }
-                for p in (previsions or [])
-            ]
-            tendance = conditions[0]["condition"] if conditions else "inconnue"
-            contexte["meteo"] = {"conditions": conditions, "tendance": tendance}
-        except Exception:
-            pass
-
-        return contexte
-
-    def generer_resume_hebdo(self, reference: date | None = None) -> dict[str, Any]:
-        """Genere un resume hebdo contextualise."""
-        contexte = self._collecter_contexte(reference)
-
-        prompt = (
-            "Genere un resume hebdomadaire familial concis et utile a partir du contexte JSON suivant:\n"
-            f"{contexte}\n\n"
-            "Retourne uniquement du JSON avec les cles: "
-            "resume, points_attention (liste), recommandations (liste), score_semaine (0-100)."
-        )
-
-        system_prompt = (
-            "Tu es un coach familial bienveillant. "
-            "Priorise actions concretes pour la semaine a venir. "
-            "Reponds en francais avec JSON strict."
-        )
-
-        parsed = self.call_with_json_parsing_sync(
-            prompt=prompt,
-            response_model=ResumeHebdoIAResponse,
-            system_prompt=system_prompt,
-            max_tokens=700,
-            use_cache=True,
-        )
-
-        if parsed is None:
-            # Fallback robuste sans IA
-            stock_bas = contexte["inventaire"]["stock_bas"]
-            peremptions = contexte["inventaire"]["peremptions_7j"]
-            repas = contexte["planning"]["repas_planifies_7j"]
-            score = max(
-                0,
-                min(
-                    100,
-                    80 - (stock_bas * 3) - (peremptions * 2) + min(repas, 14),
-                ),
-            )
-            parsed = ResumeHebdoIAResponse(
-                resume=(
-                    "Semaine globalement stable. "
-                    f"{repas} repas planifies, {stock_bas} stocks bas, {peremptions} peremptions proches."
-                ),
-                points_attention=[
-                    "Verifier les stocks faibles avant les courses",
-                    "Prioriser les produits proches de peremption",
-                ],
-                recommandations=[
-                    "Bloquer 20 minutes pour preparer la liste de courses",
-                    "Planifier 1 activite famille exterieure selon la meteo",
-                    "Revoir le budget de fin de mois avant weekend",
-                ],
-                score_semaine=int(score),
-            )
-
-        return {
-            "periode": contexte.get("periode"),
-            "contexte": contexte,
-            "resume": parsed.resume,
-            "points_attention": parsed.points_attention,
-            "recommandations": parsed.recommandations,
-            "score_semaine": parsed.score_semaine,
-        }
-
-
-@service_factory("resume_famille_ia", tags={"dashboard", "ia", "famille"})
-def obtenir_service_resume_famille_ia() -> ResumeFamilleIAService:
-    """Factory singleton du service resume famille IA."""
-    return ResumeFamilleIAService()
-
-
-get_resume_famille_ia_service = obtenir_service_resume_famille_ia
+"""Service IA - resume hebdomadaire famille contextualise.
+
+IA1:
+- Contexte: planning semaine, inventaire, budget, score Jules, meteo.
+- Utilisable par endpoint dashboard et cron resume_hebdo.
+"""
+
+from __future__ import annotations
+
+from datetime import date, timedelta
+from typing import Any
+
+from pydantic import BaseModel, Field
+from sqlalchemy import func
+
+from src.core.ai import obtenir_client_ia
+from src.core.db import obtenir_contexte_db
+from src.services.core.base import BaseAIService
+from src.services.core.registry import service_factory
+
+
+class ResumeHebdoIAResponse(BaseModel):
+    """Structure de sortie IA pour le resume hebdo."""
+
+    resume: str = ""
+    points_attention: list[str] = Field(default_factory=list)
+    recommandations: list[str] = Field(default_factory=list)
+    score_semaine: int = Field(default=0, ge=0, le=100)
+
+
+class ResumeFamilleIAService(BaseAIService):
+    """Genere un resume hebdomadaire famille avec contexte multi-modules."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            client=obtenir_client_ia(),
+            cache_prefix="dashboard_resume_hebdo_ia",
+            default_ttl=1800,
+            service_name="resume_famille_ia",
+        )
+
+    def _collecter_contexte(self, reference: date | None = None) -> dict[str, Any]:
+        """Collecte le contexte metier pour l'IA."""
+        today = reference or date.today()
+        debut_semaine = today - timedelta(days=today.weekday())
+        fin_semaine = debut_semaine + timedelta(days=6)
+        fin_horizon = today + timedelta(days=7)
+
+        contexte: dict[str, Any] = {
+            "periode": {
+                "debut": debut_semaine.isoformat(),
+                "fin": fin_semaine.isoformat(),
+            },
+            "planning": {"repas_planifies_7j": 0, "activites_7j": 0, "evenements_7j": 0},
+            "inventaire": {"stock_bas": 0, "peremptions_7j": 0},
+            "budget": {"depenses_mois": 0.0},
+            "score_jules": {"total_points": 0},
+            "meteo": {"conditions": [], "tendance": "inconnue"},
+        }
+
+        with obtenir_contexte_db() as session:
+            from src.core.models import ActiviteFamille, ArticleInventaire, BudgetFamille, Repas
+            from src.core.models.calendrier import EvenementPlanning
+
+            # Planning semaine/horizon court
+            repas_planifies = (
+                session.query(func.count(Repas.id))
+                .filter(Repas.date_repas >= today, Repas.date_repas <= fin_horizon)
+                .scalar()
+                or 0
+            )
+            activites = (
+                session.query(func.count(ActiviteFamille.id))
+                .filter(
+                    ActiviteFamille.date_prevue >= today,
+                    ActiviteFamille.date_prevue <= fin_horizon,
+                )
+                .scalar()
+                or 0
+            )
+            evenements = (
+                session.query(func.count(EvenementPlanning.id))
+                .filter(
+                    EvenementPlanning.date_debut >= today,
+                    EvenementPlanning.date_debut <= fin_horizon,
+                )
+                .scalar()
+                or 0
+            )
+
+            # Inventaire
+            stock_bas = (
+                session.query(func.count(ArticleInventaire.id))
+                .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_min)
+                .scalar()
+                or 0
+            )
+            peremptions = (
+                session.query(func.count(ArticleInventaire.id))
+                .filter(
+                    ArticleInventaire.date_peremption.isnot(None),
+                    ArticleInventaire.date_peremption >= today,
+                    ArticleInventaire.date_peremption <= fin_horizon,
+                )
+                .scalar()
+                or 0
+            )
+
+            # Budget mois courant
+            debut_mois = today.replace(day=1)
+            depenses_mois = (
+                session.query(func.sum(BudgetFamille.montant))
+                .filter(BudgetFamille.date >= debut_mois)
+                .scalar()
+                or 0.0
+            )
+
+            contexte["planning"] = {
+                "repas_planifies_7j": int(repas_planifies),
+                "activites_7j": int(activites),
+                "evenements_7j": int(evenements),
+            }
+            contexte["inventaire"] = {
+                "stock_bas": int(stock_bas),
+                "peremptions_7j": int(peremptions),
+            }
+            contexte["budget"] = {"depenses_mois": float(depenses_mois)}
+
+        # Meteo (3 prochains jours)
+        try:
+            from src.services.integrations.weather import obtenir_service_meteo
+
+            previsions = obtenir_service_meteo().get_previsions(nb_jours=3)
+            conditions = [
+                {
+                    "jour": getattr(p, "date", None).isoformat()
+                    if getattr(p, "date", None)
+                    else None,
+                    "condition": getattr(p, "condition", ""),
+                    "tmin": float(getattr(p, "temperature_min", 0.0) or 0.0),
+                    "tmax": float(getattr(p, "temperature_max", 0.0) or 0.0),
+                }
+                for p in (previsions or [])
+            ]
+            tendance = conditions[0]["condition"] if conditions else "inconnue"
+            contexte["meteo"] = {"conditions": conditions, "tendance": tendance}
+        except Exception:
+            pass
+
+        return contexte
+
+    def generer_resume_hebdo(self, reference: date | None = None) -> dict[str, Any]:
+        """Genere un resume hebdo contextualise."""
+        contexte = self._collecter_contexte(reference)
+
+        prompt = (
+            "Genere un resume hebdomadaire familial concis et utile a partir du contexte JSON suivant:\n"
+            f"{contexte}\n\n"
+            "Retourne uniquement du JSON avec les cles: "
+            "resume, points_attention (liste), recommandations (liste), score_semaine (0-100)."
+        )
+
+        system_prompt = (
+            "Tu es un coach familial bienveillant. "
+            "Priorise actions concretes pour la semaine a venir. "
+            "Reponds en francais avec JSON strict."
+        )
+
+        parsed = self.call_with_json_parsing_sync(
+            prompt=prompt,
+            response_model=ResumeHebdoIAResponse,
+            system_prompt=system_prompt,
+            max_tokens=700,
+            use_cache=True,
+        )
+
+        if parsed is None:
+            # Fallback robuste sans IA
+            stock_bas = contexte["inventaire"]["stock_bas"]
+            peremptions = contexte["inventaire"]["peremptions_7j"]
+            repas = contexte["planning"]["repas_planifies_7j"]
+            score = max(
+                0,
+                min(
+                    100,
+                    80 - (stock_bas * 3) - (peremptions * 2) + min(repas, 14),
+                ),
+            )
+            parsed = ResumeHebdoIAResponse(
+                resume=(
+                    "Semaine globalement stable. "
+                    f"{repas} repas planifies, {stock_bas} stocks bas, {peremptions} peremptions proches."
+                ),
+                points_attention=[
+                    "Verifier les stocks faibles avant les courses",
+                    "Prioriser les produits proches de peremption",
+                ],
+                recommandations=[
+                    "Bloquer 20 minutes pour preparer la liste de courses",
+                    "Planifier 1 activite famille exterieure selon la meteo",
+                    "Revoir le budget de fin de mois avant weekend",
+                ],
+                score_semaine=int(score),
+            )
+
+        return {
+            "periode": contexte.get("periode"),
+            "contexte": contexte,
+            "resume": parsed.resume,
+            "points_attention": parsed.points_attention,
+            "recommandations": parsed.recommandations,
+            "score_semaine": parsed.score_semaine,
+        }
+
+
+@service_factory("resume_famille_ia", tags={"dashboard", "ia", "famille"})
+def obtenir_service_resume_famille_ia() -> ResumeFamilleIAService:
+    """Factory singleton du service resume famille IA."""
+    return ResumeFamilleIAService()
+
+
+obtenir_service_resume_famille_ia = obtenir_service_resume_famille_ia

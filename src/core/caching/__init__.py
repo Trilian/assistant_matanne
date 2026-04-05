@@ -25,11 +25,10 @@ from .session import CacheSessionN2
 
 # Optional Redis import (requires redis package)
 try:
-    from .redis import CacheRedis, est_redis_disponible, is_redis_available, obtenir_cache_redis
+    from .redis import CacheRedis, est_redis_disponible, obtenir_cache_redis
 except ImportError:
     CacheRedis = None  # type: ignore
     est_redis_disponible = lambda: False  # noqa: E731
-    is_redis_available = lambda: False  # noqa: E731  # Alias rétrocompatibilité
     obtenir_cache_redis = lambda: None  # noqa: E731
 
 __all__ = [
@@ -43,7 +42,6 @@ __all__ = [
     # Redis (optionnel)
     "CacheRedis",
     "est_redis_disponible",
-    "is_redis_available",  # Alias rétrocompatibilité
     "obtenir_cache_redis",
     # Orchestrateur (usage recommandé)
     "CacheMultiNiveau",

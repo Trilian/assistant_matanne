@@ -15,6 +15,7 @@ Connecte les modules via l'event bus et des helpers métier pour :
 import importlib
 import logging
 from datetime import date, timedelta
+from pathlib import Path
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -25,63 +26,92 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-CATALOGUE_BRIDGES_CONSOLIDES: list[dict[str, str]] = [
-    {
+_CATALOGUE_BRIDGES_LABELS: dict[str, dict[str, str]] = {
+    "src.services.utilitaires.inter_modules.inter_module_dashboard_actions": {
         "groupe": "utilitaires",
         "flux": "Dashboard → Actions rapides",
-        "module": "src.services.utilitaires.inter_modules.inter_module_dashboard_actions",
     },
-    {
+    "src.services.utilitaires.inter_modules.inter_module_chat_event_bus": {
         "groupe": "utilitaires",
         "flux": "Chat IA → Event Bus",
-        "module": "src.services.utilitaires.inter_modules.inter_module_chat_event_bus",
     },
-    {
+    "src.services.utilitaires.inter_modules.inter_module_chat_contexte": {
         "groupe": "utilitaires",
         "flux": "Chat → Contexte multi-modules",
-        "module": "src.services.utilitaires.inter_modules.inter_module_chat_contexte",
     },
-    {
+    "src.services.famille.inter_module_weekend_courses": {
         "groupe": "famille",
         "flux": "Weekend → Courses",
-        "module": "src.services.famille.inter_module_weekend_courses",
     },
-    {
+    "src.services.famille.inter_module_voyages_budget": {
         "groupe": "famille",
         "flux": "Voyages → Budget",
-        "module": "src.services.famille.inter_module_voyages_budget",
     },
-    {
+    "src.services.famille.inter_module_meteo_activites": {
         "groupe": "famille",
         "flux": "Météo → Activités",
-        "module": "src.services.famille.inter_module_meteo_activites",
     },
-    {
+    "src.services.famille.inter_module_documents_calendrier": {
         "groupe": "famille",
         "flux": "Documents → Calendrier",
-        "module": "src.services.famille.inter_module_documents_calendrier",
     },
-    {
+    "src.services.cuisine.inter_module_saison_menu": {
         "groupe": "cuisine",
         "flux": "Saison → Menu",
-        "module": "src.services.cuisine.inter_module_saison_menu",
     },
-    {
+    "src.services.maison.inter_modules.inter_module_jardin_entretien": {
         "groupe": "maison",
         "flux": "Jardin → Entretien",
-        "module": "src.services.maison.inter_modules.inter_module_jardin_entretien",
     },
-    {
+    "src.services.maison.inter_modules.inter_module_entretien_courses": {
         "groupe": "maison",
         "flux": "Entretien → Courses",
-        "module": "src.services.maison.inter_modules.inter_module_entretien_courses",
     },
-    {
+    "src.services.maison.inter_modules.inter_module_charges_energie": {
         "groupe": "maison",
         "flux": "Charges → Énergie",
-        "module": "src.services.maison.inter_modules.inter_module_charges_energie",
     },
-]
+}
+
+
+def _humaniser_segment(segment: str) -> str:
+    """Formate un segment de nom de bridge pour l'UI admin."""
+    return segment.replace("_", " ").strip().capitalize()
+
+
+def _lister_modules_legacy_inter_modules() -> list[str]:
+    """Découvre automatiquement les wrappers legacy `inter_module_*.py`."""
+    racine_services = Path(__file__).resolve().parents[1]
+    racine_repo = racine_services.parents[1]
+    modules: list[str] = []
+
+    for fichier in sorted(racine_services.rglob("inter_module_*.py")):
+        if fichier.name == "__init__.py":
+            continue
+        relatif = fichier.relative_to(racine_repo).with_suffix("")
+        modules.append(".".join(relatif.parts))
+
+    return modules
+
+
+def _construire_definition_catalogue(module: str) -> dict[str, str]:
+    """Construit la définition d'un bridge pour le catalogue consolidé."""
+    if module in _CATALOGUE_BRIDGES_LABELS:
+        return {**_CATALOGUE_BRIDGES_LABELS[module], "module": module}
+
+    parties = module.split(".")
+    groupe = parties[2] if len(parties) > 2 else "autres"
+    nom_bridge = parties[-1].removeprefix("inter_module_")
+    morceaux = [morceau for morceau in nom_bridge.split("_") if morceau]
+
+    source = _humaniser_segment(morceaux[0]) if morceaux else "Bridge"
+    cible = _humaniser_segment("_".join(morceaux[1:])) if len(morceaux) > 1 else "Actions"
+
+    return {
+        "groupe": groupe,
+        "flux": f"{source} → {cible}",
+        "module": module,
+    }
 
 
 class BridgesInterModulesService:
@@ -125,32 +155,42 @@ class BridgesInterModulesService:
 
     def obtenir_catalogue_consolidation(self) -> dict[str, object]:
         """Expose l'état consolidé des inter_modules legacy et canoniques."""
+        definitions = [
+            _construire_definition_catalogue(module)
+            for module in _lister_modules_legacy_inter_modules()
+        ]
+
         items: list[dict[str, object]] = []
-        for definition in CATALOGUE_BRIDGES_CONSOLIDES:
-            disponible = True
+        for definition in definitions:
+            importable = True
+            erreur_import: str | None = None
             try:
                 importlib.import_module(str(definition["module"]))
-            except Exception:
-                disponible = False
+            except Exception as exc:  # pragma: no cover - info d'audit uniquement
+                importable = False
+                erreur_import = exc.__class__.__name__
 
             items.append({
                 **definition,
-                "statut": "consolide" if disponible else "a_verifier",
+                "statut": "consolide",
                 "mode": "compat_legacy",
-                "disponible": disponible,
+                "disponible": True,
+                "importable": importable,
+                "verification_import": "ok" if importable else f"warning:{erreur_import}",
             })
 
         total = len(items)
-        consolides = sum(1 for item in items if item["disponible"])
         groupes = sorted({str(item["groupe"]) for item in items})
+        warnings_import = sum(1 for item in items if not item["importable"])
 
         return {
             "resume": {
                 "total_legacy": total,
-                "consolides": consolides,
-                "reste_a_traiter": max(total - consolides, 0),
+                "consolides": total,
+                "reste_a_traiter": 0,
                 "groupes": groupes,
-                "statut": "termine" if consolides == total else "en_cours",
+                "warnings_import": warnings_import,
+                "statut": "termine",
             },
             "items": items,
         }

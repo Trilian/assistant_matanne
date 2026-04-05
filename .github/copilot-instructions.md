@@ -564,7 +564,7 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | `src/services/core/base/` | BaseAIService, mixins IA, streaming, protocols |
 | `docs/CHANGELOG.md` | Historique synthétique des jalons du projet |
 | `docs/DEPRECATED.md` | Fonctionnalités retirées / refusées et raisons |
-| `docs/ADMIN_MODE.md` | Guide d'exploitation du mode admin |
+| `docs/ADMIN.md` | Guide complet du module admin et de l'exploitation runtime |
 | `docs/AUTOMATION_GUIDE.md` | Vue d'ensemble des jobs planifiés et automations |
 | `pyproject.toml` | Dépendances Python, config test, règles de linting |
 

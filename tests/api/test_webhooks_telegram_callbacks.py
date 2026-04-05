@@ -120,14 +120,14 @@ class TestWebhookTelegramCallbacksEndpoint:
 
     def test_webhook_planning_callback_route(self, client):
         """Webhook accepte callback planning_valider:ID."""
-        with patch("src.api.routes.webhooks_telegram._traiter_callback_planning", new_callable=AsyncMock):
+        with patch("src.api.routes.telegram._routes._traiter_callback_planning", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_PLANNING_VALIDER)
             # Ne doit pas échouer sur route invalide
             assert response.status_code in (200, 500)
 
     def test_webhook_courses_callback_route(self, client):
         """Webhook accepte callback courses_confirmer:ID."""
-        with patch("src.api.routes.webhooks_telegram._traiter_callback_courses", new_callable=AsyncMock):
+        with patch("src.api.routes.telegram._routes._traiter_callback_courses", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_COURSES_CONFIRMER)
             assert response.status_code in (200, 500)
 
@@ -142,28 +142,28 @@ class TestExtrairIdDepuisCallback:
 
     def test_extraire_id_format_valide(self):
         """Extraction d'ID depuis format 'prefix:ID' fonctionne."""
-        from src.api.routes.webhooks_telegram import _extraire_id_depuis_callback
+        from src.api.routes.telegram import _extraire_id_depuis_callback
 
         result = _extraire_id_depuis_callback("planning_valider:42", "planning_valider")
         assert result == 42
 
     def test_extraire_id_format_sans_id(self):
         """Extraction retourne None si pas d'ID."""
-        from src.api.routes.webhooks_telegram import _extraire_id_depuis_callback
+        from src.api.routes.telegram import _extraire_id_depuis_callback
 
         result = _extraire_id_depuis_callback("planning_valider", "planning_valider")
         assert result is None
 
     def test_extraire_id_format_invalide(self):
         """Extraction retourne None si format invalide."""
-        from src.api.routes.webhooks_telegram import _extraire_id_depuis_callback
+        from src.api.routes.telegram import _extraire_id_depuis_callback
 
         result = _extraire_id_depuis_callback("planning_valider:abc", "planning_valider")
         assert result is None
 
     def test_extraire_id_prefix_different(self):
         """Extraction retourne None si prefix différent."""
-        from src.api.routes.webhooks_telegram import _extraire_id_depuis_callback
+        from src.api.routes.telegram import _extraire_id_depuis_callback
 
         result = _extraire_id_depuis_callback("planning_valider:42", "courses_confirmer")
         assert result is None
@@ -186,7 +186,7 @@ class TestPlanningCallbackValider:
                 # Simuler le résultat de _valider()
                     mock_execute.return_value = {"message": "Planning validé", "id": 42, "status": 200}
 
-                    from src.api.routes.webhooks_telegram import _traiter_callback_planning
+                    from src.api.routes.telegram import _traiter_callback_planning
 
                     await _traiter_callback_planning("planning_valider:42", "callback_123", 123456)
 
@@ -205,7 +205,7 @@ class TestPlanningCallbackValider:
                 # Simuler planning inexistant
                 mock_execute.return_value = {"error": "Planning non trouvé", "status": 404}
 
-                from src.api.routes.webhooks_telegram import _traiter_callback_planning
+                from src.api.routes.telegram import _traiter_callback_planning
 
                 await _traiter_callback_planning("planning_valider:999", "callback_123", 123456)
 
@@ -222,7 +222,7 @@ class TestPlanningCallbackModifier:
     async def test_planning_modifier_envoie_url(self):
         """Callback modifier envoie URL web."""
         with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
-            from src.api.routes.webhooks_telegram import _traiter_callback_planning
+            from src.api.routes.telegram import _traiter_callback_planning
 
             await _traiter_callback_planning("planning_modifier:42", "callback_124", 123456)
 
@@ -244,7 +244,7 @@ class TestPlanningCallbackRegenerer:
                 # Simuler succès de régénération
                     mock_execute.return_value = {"message": "Planning régénéré", "id": 43, "status": 200}
 
-                    from src.api.routes.webhooks_telegram import _traiter_callback_planning
+                    from src.api.routes.telegram import _traiter_callback_planning
 
                     await _traiter_callback_planning("planning_regenerer:42", "callback_125", 123456)
 
@@ -271,7 +271,7 @@ class TestCoursesCallbackConfirmer:
                 # Simuler succès
                     mock_execute.return_value = {"message": "Courses confirmées", "id": 15, "status": 200}
 
-                    from src.api.routes.webhooks_telegram import _traiter_callback_courses
+                    from src.api.routes.telegram import _traiter_callback_courses
 
                     await _traiter_callback_courses("courses_confirmer:15", "callback_201", 123456)
 
@@ -288,7 +288,7 @@ class TestCoursesCallbackConfirmer:
                 # Simuler liste inexistante
                 mock_execute.return_value = {"error": "Liste non trouvée", "status": 404}
 
-                from src.api.routes.webhooks_telegram import _traiter_callback_courses
+                from src.api.routes.telegram import _traiter_callback_courses
 
                 await _traiter_callback_courses("courses_confirmer:999", "callback_201", 123456)
 
@@ -305,7 +305,7 @@ class TestCoursesCallbackAjouter:
     async def test_courses_ajouter_envoie_url(self):
         """Callback ajouter envoie URL web."""
         with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
-            from src.api.routes.webhooks_telegram import _traiter_callback_courses
+            from src.api.routes.telegram import _traiter_callback_courses
 
             await _traiter_callback_courses("courses_ajouter:15", "callback_202", 123456)
 
@@ -327,7 +327,7 @@ class TestCoursesCallbackRefaire:
                 # Simuler succès
                     mock_execute.return_value = {"message": "Nouvelle liste créée", "id": 16, "status": 200}
 
-                    from src.api.routes.webhooks_telegram import _traiter_callback_courses
+                    from src.api.routes.telegram import _traiter_callback_courses
 
                     await _traiter_callback_courses("courses_refaire:15", "callback_203", 123456)
 
@@ -347,13 +347,13 @@ class TestCallbackDispatcher:
 
     def test_dispatcher_route_planning_callbacks(self, client):
         """Dispatcher reconnait et route planning_* callbacks."""
-        with patch("src.api.routes.webhooks_telegram._traiter_callback_planning", new_callable=AsyncMock):
+        with patch("src.api.routes.telegram._routes._traiter_callback_planning", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_PLANNING_VALIDER)
             assert response.status_code in (200, 500)
 
     def test_dispatcher_route_courses_callbacks(self, client):
         """Dispatcher reconnait et route courses_* callbacks."""
-        with patch("src.api.routes.webhooks_telegram._traiter_callback_courses", new_callable=AsyncMock):
+        with patch("src.api.routes.telegram._routes._traiter_callback_courses", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_COURSES_CONFIRMER)
             assert response.status_code in (200, 500)
 
@@ -370,7 +370,7 @@ class TestCallbackDispatcher:
             },
         }
 
-        with patch("src.api.routes.webhooks_telegram._envoyer_repas_du_soir", new_callable=AsyncMock):
+        with patch("src.api.routes.telegram._routes._envoyer_repas_du_soir", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=legacy_callback)
             # Ne doit pas échouer
             assert response.status_code in (200, 500)
@@ -392,7 +392,7 @@ class TestCallbackErrorHandling:
                 # Simuler exception
                 mock_execute.side_effect = Exception("DB Error")
 
-                from src.api.routes.webhooks_telegram import _traiter_callback_planning
+                from src.api.routes.telegram import _traiter_callback_planning
 
                 await _traiter_callback_planning("planning_valider:42", "callback_123", 123456)
 

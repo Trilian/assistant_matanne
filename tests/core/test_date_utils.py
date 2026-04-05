@@ -187,10 +187,10 @@ class TestFormater_label_semaine:
         result = formater_label_semaine(date(2025, 1, 6))
         assert result == "Semaine du 06/01/2025"
 
-    def test_alias_format_week_label(self):
-        from src.core.date_utils import format_week_label, formater_label_semaine
+    def test_formater_label_semaine_export(self):
+        from src.core.date_utils import formater_label_semaine
 
-        assert format_week_label is formater_label_semaine
+        assert callable(formater_label_semaine)
 
 
 class TestFormater_temps:
@@ -314,19 +314,16 @@ class TestDomaineJours:
 
         assert obtenir_index_jour_semaine("Lundiiii") == -1
 
-    def test_aliases(self):
+    def test_exports_canoniques(self):
         from src.core.date_utils import (
-            get_weekday_index,
-            get_weekday_name,
-            get_weekday_names,
             obtenir_index_jour_semaine,
             obtenir_nom_jour_semaine,
             obtenir_noms_jours_semaine,
         )
 
-        assert get_weekday_names is obtenir_noms_jours_semaine
-        assert get_weekday_name is obtenir_nom_jour_semaine
-        assert get_weekday_index is obtenir_index_jour_semaine
+        assert callable(obtenir_noms_jours_semaine)
+        assert callable(obtenir_nom_jour_semaine)
+        assert callable(obtenir_index_jour_semaine)
 
 
 # ═══════════════════════════════════════════════════════════

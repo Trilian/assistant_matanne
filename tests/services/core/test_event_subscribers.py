@@ -117,3 +117,40 @@ class TestEventSubscribers:
 
         patterns = [call.kwargs.get("pattern") for call in mock_cache.invalidate.call_args_list]
         assert "dashboard" in patterns
+
+    def test_subscriber_projet_termine_maj_scenario_habitat(self):
+        from decimal import Decimal
+
+        from src.services.core.events.subscribers import _mettre_a_jour_scenario_habitat_apres_projet_termine
+
+        event = EvenementDomaine(
+            type="projets.modifie",
+            data={"projets_id": 7, "nom": "Isolation des combles", "action": "termine"},
+            source="projets",
+        )
+
+        scenario = MagicMock()
+        scenario.id = 3
+        scenario.nom = "Rester et rénover"
+        scenario.avantages = ["Base existante"]
+        scenario.notes = "Suivi habitat"
+        scenario.statut = "actif"
+
+        critere = MagicMock()
+        critere.commentaire = ""
+        critere.note = Decimal("6.0")
+        critere.poids = Decimal("1.5")
+
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.all.return_value = [scenario]
+        mock_session.query.return_value.filter.return_value.first.return_value = critere
+
+        @contextmanager
+        def _ctx():
+            yield mock_session
+
+        with patch("src.core.db.obtenir_contexte_db", return_value=_ctx()):
+            _mettre_a_jour_scenario_habitat_apres_projet_termine(event)
+
+        assert mock_session.commit.called
+        assert "Isolation des combles" in (scenario.notes or "")

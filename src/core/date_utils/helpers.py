@@ -37,10 +37,6 @@ def obtenir_noms_jours_semaine() -> list[str]:
     return JOURS_SEMAINE.copy()
 
 
-# Alias rétrocompatibilité
-get_weekday_names = obtenir_noms_jours_semaine
-
-
 def obtenir_nom_jour_semaine(day_index: int) -> str:
     """
     Retourne le nom du jour pour un index donné.
@@ -54,10 +50,6 @@ def obtenir_nom_jour_semaine(day_index: int) -> str:
     if 0 <= day_index <= 6:
         return JOURS_SEMAINE[day_index]
     return ""
-
-
-# Alias rétrocompatibilité
-get_weekday_name = obtenir_nom_jour_semaine
 
 
 def obtenir_index_jour_semaine(day_name: str) -> int:
@@ -75,6 +67,3 @@ def obtenir_index_jour_semaine(day_name: str) -> int:
     except ValueError:
         return -1
 
-
-# Alias rétrocompatibilité
-get_weekday_index = obtenir_index_jour_semaine

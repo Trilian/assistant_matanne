@@ -114,6 +114,8 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("rapport_nutritionnel_jules", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)
     planifier_job("nettoyage_notifications_30j", CronTrigger(day=1, hour=2, minute=30), replace_existing=True)
     planifier_job("prediction_depenses", CronTrigger(day=15, hour=8, minute=30), replace_existing=True)
+    planifier_job("recap_journee", CronTrigger(hour=20, minute=0), replace_existing=True)
+    planifier_job("suggestion_soiree", CronTrigger(day_of_week="fri", hour=18, minute=0), replace_existing=True)
     planifier_job("alerte_plantes_arrosage", CronTrigger(hour=8, minute=0), replace_existing=True)
 
     # Notifications Telegram et Email

@@ -1,4 +1,4 @@
-"""Tests unitaires pour `InnovationsService` après redistribution Phase 2."""
+"""Tests unitaires pour `InnovationsService`."""
 
 from __future__ import annotations
 

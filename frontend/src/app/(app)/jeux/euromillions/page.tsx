@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
+import { BoutonExportCsv } from "@/composants/ui/bouton-export-csv";
 import {
   Table,
   TableBody,
@@ -112,6 +113,17 @@ export default function EuromillionsPage() {
 
   const retardNumeros = retard.filter((n) => n.type_numero === "principal");
   const retardEtoiles = retard.filter((n) => n.type_numero === "etoile");
+  const donneesExportTirages = useMemo(
+    () =>
+      tirages.map((tirage) => ({
+        date: formaterDate(tirage.date_tirage),
+        numeros: tirage.numeros.join(" - "),
+        etoiles: tirage.etoiles.join(" - "),
+        jackpot_euros: tirage.jackpot_euros ?? "",
+        gagnants_rang1: tirage.gagnants_rang1 ?? "",
+      })),
+    [tirages]
+  );
 
   return (
     <TooltipProvider>
@@ -126,7 +138,12 @@ export default function EuromillionsPage() {
               <Badge variant="outline">Jackpot : 1/139 M</Badge>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <BoutonExportCsv
+              data={donneesExportTirages}
+              filename="euromillions-tirages.csv"
+              label="Exporter CSV"
+            />
             <Button
               variant={modeVue === "simple" ? "default" : "outline"}
               size="sm"

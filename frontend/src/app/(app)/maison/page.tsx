@@ -51,6 +51,8 @@ import { obtenirConseilsIA } from "@/bibliotheque/api/maison";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
 import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
 import { utiliserSyntheseVocale } from "@/crochets/utiliser-synthese-vocale";
+import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
+import { LienTransition } from "@/composants/ui/lien-transition";
 
 // Sections consolidées — 9 modules
 const SECTIONS: Array<{ id: string; titre: string; description: string; chemin: string; Icone: typeof Hammer; statKey: StatsKeys | null }> = [
@@ -156,96 +158,109 @@ export default function PageMaison() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">🏡 Maison</h1>
-          <p className="text-muted-foreground">
-            {briefing?.resume ?? "Projets, jardin, entretien, cellier et plus"}
-          </p>
+      <SectionReveal>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">🏡 Maison</h1>
+            <p className="text-muted-foreground">
+              {briefing?.resume ?? "Projets, jardin, entretien, cellier et plus"}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => envoyerRappels(undefined)}
+            disabled={envoi}
+          >
+            <Bell className="h-4 w-4 mr-1.5" />
+            {envoi ? "Envoi…" : "Rappels push"}
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => envoyerRappels(undefined)}
-          disabled={envoi}
-        >
-          <Bell className="h-4 w-4 mr-1.5" />
-          {envoi ? "Envoi…" : "Rappels push"}
-        </Button>
-      </div>
+      </SectionReveal>
 
       {estSupporte && (
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => lire(resumeVocal)}>
-            <Volume2 className="h-4 w-4 mr-1.5" />
-            Lire le briefing
-          </Button>
-          {enLecture && (
-            <Button type="button" variant="ghost" size="sm" onClick={arreter}>
-              <VolumeX className="h-4 w-4 mr-1.5" />
-              Arrêter
+        <SectionReveal delay={0.02}>
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => lire(resumeVocal)}>
+              <Volume2 className="h-4 w-4 mr-1.5" />
+              Lire le briefing
             </Button>
-          )}
-        </div>
+            {enLecture && (
+              <Button type="button" variant="ghost" size="sm" onClick={arreter}>
+                <VolumeX className="h-4 w-4 mr-1.5" />
+                Arrêter
+              </Button>
+            )}
+          </div>
+        </SectionReveal>
       )}
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Fonctionnalités Avancées</CardTitle>
-          <CardDescription>Accès rapide aux nouveautés différenciantes.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-2 md:grid-cols-3">
-          <Button asChild variant="outline" size="sm">
-            <Link href="/outils">Mode pilote (Outils)</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/maison/visualisation">Vue jardin 2D/3D</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/">Score famille (Dashboard)</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <SectionReveal delay={0.04}>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Fonctionnalités Avancées</CardTitle>
+            <CardDescription>Accès rapide aux nouveautés différenciantes.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-2 md:grid-cols-3">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/outils">Mode pilote (Outils)</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/maison/visualisation">Vue jardin 2D/3D</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/">Score famille (Dashboard)</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </SectionReveal>
 
-      <CarteNotificationsModule moduleKey="maison" moduleLabel="Maison" />
+      <SectionReveal delay={0.06}>
+        <CarteNotificationsModule moduleKey="maison" moduleLabel="Maison" />
+      </SectionReveal>
 
-      <CarteActionsAdminModule
-        moduleLabel="Maison"
-        description="Déclenchement manuel des jobs maison, abonnements et jardin directement depuis le hub."
-        jobs={[
-          {
-            id: "comparateur_abonnements",
-            label: "Comparateur abonnements",
-            hint: "Opportunités d'économies maison",
-          },
-          {
-            id: "alerte_plantes_arrosage",
-            label: "Alerte arrosage",
-            hint: "Rappels jardin / entretien",
-          },
-          {
-            id: "s16_rappel_entretien_telegram",
-            label: "Rappel entretien Telegram",
-            hint: "Push maison ciblé",
-          },
-        ]}
-      />
+      <SectionReveal delay={0.08}>
+        <CarteActionsAdminModule
+          moduleLabel="Maison"
+          description="Déclenchement manuel des jobs maison, abonnements et jardin directement depuis le hub."
+          jobs={[
+            {
+              id: "comparateur_abonnements",
+              label: "Comparateur abonnements",
+              hint: "Opportunités d'économies maison",
+            },
+            {
+              id: "alerte_plantes_arrosage",
+              label: "Alerte arrosage",
+              hint: "Rappels jardin / entretien",
+            },
+            {
+              id: "s16_rappel_entretien_telegram",
+              label: "Rappel entretien Telegram",
+              hint: "Push maison ciblé",
+            },
+          ]}
+        />
+      </SectionReveal>
 
-      {/* Bandeau IA */}
-      <BandeauIA section="general" />
+      <SectionReveal delay={0.1}>
+        <BandeauIA section="general" />
+      </SectionReveal>
 
-      {/* Stats rapides */}
       {stats && (
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.projets_en_cours}</p><p className="text-xs text-muted-foreground">Projets en cours</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className={`text-2xl font-bold ${stats.taches_en_retard > 0 ? "text-destructive" : ""}`}>{stats.taches_en_retard}</p><p className="text-xs text-muted-foreground">Tâches en retard</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.depenses_mois.toFixed(0)} €</p><p className="text-xs text-muted-foreground">Dépenses du mois</p></CardContent></Card>
-        </div>
+        <SectionReveal delay={0.12}>
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+            <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.projets_en_cours}</p><p className="text-xs text-muted-foreground">Projets en cours</p></CardContent></Card>
+            <Card><CardContent className="pt-4 text-center"><p className={`text-2xl font-bold ${stats.taches_en_retard > 0 ? "text-destructive" : ""}`}>{stats.taches_en_retard}</p><p className="text-xs text-muted-foreground">Tâches en retard</p></CardContent></Card>
+            <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.depenses_mois.toFixed(0)} €</p><p className="text-xs text-muted-foreground">Dépenses du mois</p></CardContent></Card>
+          </div>
+        </SectionReveal>
       )}
 
       {/* Section Aujourd'hui / Alertes (visibles seulement si données) */}
       {briefing && (alertesCritiques.length > 0 || tachesRestantes.length > 0 || briefing.meteo) && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <SectionReveal delay={0.14}>
+          <div className="grid gap-4 md:grid-cols-2">
 
           {/* Tâches du jour */}
           {tachesRestantes.length > 0 && (
@@ -327,7 +342,8 @@ export default function PageMaison() {
               </CardContent>
             </Card>
           )}
-        </div>
+          </div>
+        </SectionReveal>
       )}
 
       {/* Jardin — tâches saisonnières */}
@@ -400,58 +416,64 @@ export default function PageMaison() {
 
       {/* Conseils IA hub */}
       {conseilsIA && conseilsIA.filter(c => !estDismissed(c)).length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold flex items-center gap-2">
-              <span>💡</span> Conseils du moment
-            </h2>
+        <SectionReveal delay={0.16}>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold flex items-center gap-2">
+                <span>💡</span> Conseils du moment
+              </h2>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {conseilsIA
+                .filter(c => !estDismissed(c))
+                .slice(0, 4)
+                .map((conseil, i) => (
+                  <CarteConseil
+                    key={i}
+                    conseil={conseil}
+                    onDismiss={() => setDismisses(d => d + 1)}
+                  />
+                ))}
+            </div>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {conseilsIA
-              .filter(c => !estDismissed(c))
-              .slice(0, 4)
-              .map((conseil, i) => (
-                <CarteConseil
-                  key={i}
-                  conseil={conseil}
-                  onDismiss={() => setDismisses(d => d + 1)}
-                />
-              ))}
-          </div>
-        </div>
+        </SectionReveal>
       )}
 
       {/* Grille des modules */}
-      <GrilleWidgets
-        stockageCle="widgets:hub:maison"
-        items={SECTIONS}
-        classeGrille="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        titre="Modules"
-        renderItem={({ titre, description, chemin, Icone, statKey }) => (
-          <Link key={chemin} href={chemin}>
-            <Card className="hover:bg-accent/50 transition-colors h-full">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <Icone className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">{titre}</CardTitle>
-                      {stats && statKey && stats[statKey] > 0 && (
-                        <Badge variant={statKey.includes("retard") || statKey.includes("alerte") || statKey.includes("renouveler") ? "destructive" : "secondary"} className="text-xs">
-                          {formatStat(statKey, stats[statKey])} {labelStat(statKey)}
-                        </Badge>
-                      )}
+      <SectionReveal delay={0.18}>
+        <GrilleWidgets
+          stockageCle="widgets:hub:maison"
+          items={SECTIONS}
+          classeGrille="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          titre="Modules"
+          renderItem={({ titre, description, chemin, Icone, statKey }, index) => (
+            <ItemAnime key={chemin} index={index}>
+              <LienTransition href={chemin} className="block h-full">
+                <Card className="h-full transition-all hover:-translate-y-0.5 hover:bg-accent/50">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-lg bg-primary/10 p-2">
+                        <Icone className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <CardTitle className="text-base">{titre}</CardTitle>
+                          {stats && statKey && stats[statKey] > 0 && (
+                            <Badge variant={statKey.includes("retard") || statKey.includes("alerte") || statKey.includes("renouveler") ? "destructive" : "secondary"} className="text-xs">
+                              {formatStat(statKey, stats[statKey])} {labelStat(statKey)}
+                            </Badge>
+                          )}
+                        </div>
+                        <CardDescription className="text-sm">{description}</CardDescription>
+                      </div>
                     </div>
-                    <CardDescription className="text-sm">{description}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          </Link>
-        )}
-      />
+                  </CardHeader>
+                </Card>
+              </LienTransition>
+            </ItemAnime>
+          )}
+        />
+      </SectionReveal>
     </div>
   );
 }

@@ -15,7 +15,9 @@ from ._cuisine import (
 )
 from ._famille import (
     _envoyer_meteo_telegram,
+    _envoyer_projection_budget_telegram,
     _envoyer_rapport_hebdo,
+    _envoyer_recap_journee,
     _envoyer_resume_budget,
     _envoyer_resume_jules,
     _envoyer_resume_weekend,
@@ -86,6 +88,12 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
     if normalise == "/budget":
         await _envoyer_resume_budget(chat_id)
         return True
+    if normalise == "/projection":
+        await _envoyer_projection_budget_telegram(chat_id)
+        return True
+    if normalise == "/recap":
+        await _envoyer_recap_journee(chat_id)
+        return True
     if normalise == "/rapport":
         await _envoyer_rapport_hebdo(chat_id)
         return True
@@ -95,7 +103,11 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
     if normalise == "/meteo":
         await _envoyer_meteo_telegram(chat_id)
         return True
-    if normalise.startswith("/ajout") or normalise.startswith("/ajouter_course"):
+    if (
+        normalise.startswith("/ajout")
+        or normalise.startswith("/ajouter_course")
+        or normalise.startswith("/acheter")
+    ):
         await _ajouter_article_liste(chat_id, argument)
         return True
     if normalise.startswith("/repas"):

@@ -93,6 +93,163 @@ async def _envoyer_resume_budget(chat_id: str) -> None:
     )
 
 
+async def _envoyer_projection_budget_telegram(chat_id: str) -> None:
+    from src.services.ia_avancee import get_ia_avancee_service
+    from src.services.integrations.telegram import envoyer_message_interactif
+
+    try:
+        prediction = get_ia_avancee_service().prevoir_depenses_fin_mois()
+    except Exception as exc:
+        logger.warning("Projection budget Telegram indisponible: %s", exc)
+        prediction = None
+
+    if prediction is None:
+        await envoyer_message_interactif(
+            destinataire=chat_id,
+            corps=(
+                "📈 <b>Projection budget</b>\n\n"
+                "La projection IA n'est pas disponible pour le moment, mais le module Budget reste accessible."
+            ),
+            boutons=[
+                {"url": _obtenir_url_app("/famille/budget"), "title": "💰 Ouvrir Budget"},
+                {"id": "menu_famille", "title": "👶 Menu Famille"},
+            ],
+        )
+        return
+
+    depenses_actuelles = float(getattr(prediction, "depenses_actuelles", 0) or 0)
+    prevision_fin_mois = float(getattr(prediction, "prevision_fin_mois", 0) or 0)
+    budget_mensuel = float(getattr(prediction, "budget_mensuel", 0) or 0)
+    ecart_prevu = float(getattr(prediction, "ecart_prevu", 0) or 0)
+    tendance = html.escape(str(getattr(prediction, "tendance", "stable") or "stable"))
+
+    lignes = [
+        "📈 <b>Projection budget</b>",
+        f"Dépensé à date : <b>{depenses_actuelles:.2f}€</b>",
+        f"Fin de mois estimée : <b>{prevision_fin_mois:.2f}€</b>",
+    ]
+    if budget_mensuel > 0:
+        lignes.append(f"🎯 Budget mensuel : <b>{budget_mensuel:.2f}€</b>")
+        lignes.append(f"Écart prévu : <b>{ecart_prevu:+.2f}€</b> • tendance {tendance}")
+
+    postes_vigilance = getattr(prediction, "postes_vigilance", []) or []
+    if postes_vigilance:
+        lignes.append("")
+        lignes.append("Postes à surveiller :")
+        for poste in postes_vigilance[:3]:
+            if isinstance(poste, dict):
+                nom = html.escape(str(poste.get("categorie") or poste.get("poste") or "Catégorie"))
+                montant = poste.get("montant") or poste.get("prevision")
+                if isinstance(montant, int | float):
+                    lignes.append(f"• {nom} : {float(montant):.2f}€")
+                else:
+                    lignes.append(f"• {nom}")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/ia-avancee/prevision-depenses"), "title": "📊 Voir le détail"},
+            {"id": "menu_famille", "title": "👶 Menu Famille"},
+        ],
+    )
+
+
+async def _envoyer_recap_journee(chat_id: str) -> None:
+    from sqlalchemy import func
+
+    from src.core.db import obtenir_contexte_db
+    from src.core.models.courses import ArticleCourses, ListeCourses
+    from src.core.models.famille import ActiviteFamille
+    from src.core.models.maison import TacheProjet
+    from src.core.models.planning import Repas
+    from src.services.integrations.telegram import envoyer_message_interactif
+
+    aujourd_hui = date.today()
+    repas_du_jour: list[str] = []
+    activites_du_jour: list[str] = []
+    courses_restantes = 0
+    taches_a_suivre = 0
+
+    try:
+        with obtenir_contexte_db() as session:
+            repas = (
+                session.query(Repas)
+                .filter(Repas.date_repas == aujourd_hui)
+                .order_by(Repas.type_repas.asc())
+                .all()
+            )
+            for item in repas[:3]:
+                recette = getattr(item, "recette", None)
+                nom = getattr(recette, "nom", None) or getattr(item, "notes", None) or "Repas prévu"
+                repas_du_jour.append(f"{item.type_repas}: {nom}")
+
+            activites = (
+                session.query(ActiviteFamille)
+                .filter(
+                    ActiviteFamille.date_prevue == aujourd_hui,
+                    ActiviteFamille.statut.in_(["planifié", "planifie", "à venir", "a venir"]),
+                )
+                .order_by(ActiviteFamille.heure_debut.asc())
+                .limit(3)
+                .all()
+            )
+            for activite in activites:
+                heure = activite.heure_debut.strftime("%H:%M") if activite.heure_debut else "libre"
+                activites_du_jour.append(f"{heure} — {activite.titre}")
+
+            courses_restantes = int(
+                (
+                    session.query(func.count(ArticleCourses.id))
+                    .join(ListeCourses, ListeCourses.id == ArticleCourses.liste_id)
+                    .filter(
+                        ArticleCourses.achete.is_(False),
+                        ListeCourses.statut.in_(["active", "en_cours", "brouillon"]),
+                    )
+                    .scalar()
+                )
+                or 0
+            )
+            taches_a_suivre = int(
+                (
+                    session.query(func.count(TacheProjet.id))
+                    .filter(
+                        TacheProjet.statut.notin_(["termine", "terminé", "done"]),
+                        TacheProjet.date_echeance.isnot(None),
+                        TacheProjet.date_echeance <= aujourd_hui,
+                    )
+                    .scalar()
+                )
+                or 0
+            )
+    except Exception as exc:
+        logger.warning("Récap journée Telegram partiel: %s", exc)
+
+    lignes = [f"🗓️ <b>Récap du {aujourd_hui.strftime('%d/%m')}</b>"]
+    if repas_du_jour:
+        lignes.append("")
+        lignes.append("🍽️ Repas du jour :")
+        lignes.extend(f"• {html.escape(str(repas))}" for repas in repas_du_jour)
+    if activites_du_jour:
+        lignes.append("")
+        lignes.append("🎯 Activités :")
+        lignes.extend(f"• {html.escape(str(activite))}" for activite in activites_du_jour)
+
+    lignes.append("")
+    lignes.append(f"🛒 {courses_restantes} article(s) encore en attente")
+    lignes.append(f"🧰 {taches_a_suivre} tâche(s) à surveiller")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/ma-journee"), "title": "📋 Ouvrir Ma journée"},
+            {"url": _obtenir_url_app("/cuisine/courses"), "title": "🛒 Voir les courses"},
+            {"id": "menu_principal", "title": "🏠 Menu principal"},
+        ],
+    )
+
+
 async def _envoyer_meteo_telegram(chat_id: str) -> None:
     from src.services.famille.inter_module_meteo_activites import obtenir_service_meteo_activites_interaction
     from src.services.integrations.telegram import envoyer_message_interactif

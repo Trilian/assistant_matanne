@@ -373,6 +373,7 @@ export default function PageAdmin() {
           { href: "/admin/events", icon: Activity, label: "Event Bus", desc: "Historique + trigger" },
           { href: "/admin/automations", icon: Bot, label: "Automations", desc: "Exécutions manuelles" },
           { href: "/admin/ia-metrics", icon: Sparkles, label: "Métriques IA", desc: "Coût + tokens" },
+          { href: "/admin/historique-ia", icon: Eye, label: "Historique IA", desc: "Logs + audit IA" },
           { href: "/admin/notifications-queue", icon: Inbox, label: "Queue Notifs", desc: "Flush digest" },
           { href: "/admin/feature-flags", icon: Flag, label: "Feature Flags", desc: "Runtime toggles" },
           { href: "/admin/cache", icon: DatabaseZap, label: "Cache dédié", desc: "Purge sélective" },

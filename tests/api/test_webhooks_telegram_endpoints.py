@@ -42,6 +42,7 @@ class TestEndpointsTelegramEnvoi:
         mock_envoyer.assert_awaited_once_with(
             "Lundi: Pâtes\nMardi: Poisson",
             planning_id=42,
+            resume_ia="",
         )
 
     def test_envoyer_courses_telegram_ok(self, client: TestClient):
@@ -183,7 +184,7 @@ class TestTelegramCommandes:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_planning_commande",
+            "src.api.routes.telegram._dispatcher._envoyer_planning_commande",
             new_callable=AsyncMock,
         ) as mock_planning:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -203,7 +204,7 @@ class TestTelegramCommandes:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._traiter_reponse_rapide_ok",
+            "src.api.routes.telegram._routes._traiter_reponse_rapide_ok",
             new_callable=AsyncMock,
         ) as mock_ok:
             mock_ok.return_value = True
@@ -224,7 +225,7 @@ class TestTelegramCommandes:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_planning_commande",
+            "src.api.routes.telegram._dispatcher._envoyer_planning_commande",
             new_callable=AsyncMock,
         ) as mock_planning:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -249,7 +250,7 @@ class TestTelegramCommandes:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._traiter_callback_menu",
+            "src.api.routes.telegram._routes._traiter_callback_menu",
             new_callable=AsyncMock,
         ) as mock_menu:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -274,7 +275,7 @@ class TestTelegramCommandes:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._traiter_callback_toggle_article",
+            "src.api.routes.telegram._routes._traiter_callback_toggle_article",
             new_callable=AsyncMock,
         ) as mock_toggle:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -302,7 +303,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_inventaire_commande",
+            "src.api.routes.telegram._dispatcher._envoyer_inventaire_commande",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -322,7 +323,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_recette_commande",
+            "src.api.routes.telegram._dispatcher._envoyer_recette_commande",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -342,7 +343,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_rappels_groupes",
+            "src.api.routes.telegram._dispatcher._envoyer_rappels_groupes",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -362,7 +363,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_resume_batch_cooking",
+            "src.api.routes.telegram._dispatcher._envoyer_resume_batch_cooking",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -382,7 +383,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_resume_jardin",
+            "src.api.routes.telegram._dispatcher._envoyer_resume_jardin",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -402,7 +403,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_resume_energie",
+            "src.api.routes.telegram._dispatcher._envoyer_resume_energie",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -422,7 +423,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._lancer_minuteur_telegram",
+            "src.api.routes.telegram._dispatcher._lancer_minuteur_telegram",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -442,7 +443,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._creer_note_rapide_telegram",
+            "src.api.routes.telegram._dispatcher._creer_note_rapide_telegram",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -467,7 +468,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._traiter_callback_action_article",
+            "src.api.routes.telegram._routes._traiter_callback_action_article",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -492,7 +493,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._traiter_callback_sondage_repas",
+            "src.api.routes.telegram._routes._traiter_callback_sondage_repas",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -512,7 +513,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_courses_commande",
+            "src.api.routes.telegram._dispatcher._envoyer_courses_commande",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -532,13 +533,73 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._ajouter_article_liste",
+            "src.api.routes.telegram._dispatcher._ajouter_article_liste",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
 
         assert response.status_code == 200
         mock_handler.assert_awaited_once_with("123456", "fraises")
+
+    def test_commande_acheter_declenche_le_handler_ajout(self, client: TestClient):
+        payload = {
+            "update_id": 31091,
+            "message": {
+                "message_id": 2191,
+                "date": 12345679081,
+                "chat": {"id": 123456},
+                "text": "/acheter tomates",
+            },
+        }
+
+        with patch(
+            "src.api.routes.telegram._dispatcher._ajouter_article_liste",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456", "tomates")
+
+    def test_commande_recap_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 31092,
+            "message": {
+                "message_id": 2192,
+                "date": 12345679082,
+                "chat": {"id": 123456},
+                "text": "/recap",
+            },
+        }
+
+        with patch(
+            "src.api.routes.telegram._dispatcher._envoyer_recap_journee",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456")
+
+    def test_commande_projection_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 31093,
+            "message": {
+                "message_id": 2193,
+                "date": 12345679083,
+                "chat": {"id": 123456},
+                "text": "/projection",
+            },
+        }
+
+        with patch(
+            "src.api.routes.telegram._dispatcher._envoyer_projection_budget_telegram",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456")
 
     def test_commande_weekend_declenche_le_handler(self, client: TestClient):
         payload = {
@@ -552,7 +613,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_resume_weekend",
+            "src.api.routes.telegram._dispatcher._envoyer_resume_weekend",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -572,7 +633,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_rapport_hebdo",
+            "src.api.routes.telegram._dispatcher._envoyer_rapport_hebdo",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -592,7 +653,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._envoyer_aide_photo_telegram",
+            "src.api.routes.telegram._dispatcher._envoyer_aide_photo_telegram",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)
@@ -615,7 +676,7 @@ class TestTelegramCommandesEnrichies:
         }
 
         with patch(
-            "src.api.routes.webhooks_telegram._traiter_photo_frigo_telegram",
+            "src.api.routes.telegram._routes._traiter_photo_frigo_telegram",
             new_callable=AsyncMock,
         ) as mock_handler:
             response = client.post("/api/v1/telegram/webhook", json=payload)

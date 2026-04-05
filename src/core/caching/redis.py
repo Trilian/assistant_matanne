@@ -22,7 +22,7 @@ from .base import EntreeCache
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["CacheRedis", "est_redis_disponible", "is_redis_available", "obtenir_cache_redis"]
+__all__ = ["CacheRedis", "est_redis_disponible", "obtenir_cache_redis"]
 
 # Singleton instance (thread-safe)
 import threading as _threading
@@ -59,10 +59,6 @@ def est_redis_disponible() -> bool:
     except Exception as e:
         logger.warning(f"Redis non disponible: {e}")
         return False
-
-
-# Alias rétrocompatibilité
-is_redis_available = est_redis_disponible
 
 
 class CacheRedis:

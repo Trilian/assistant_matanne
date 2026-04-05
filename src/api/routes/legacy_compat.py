@@ -1,8 +1,8 @@
-"""Routes d'innovations historiques consolidées dans un routeur unique.
+"""Routes legacy de compatibilité pour les endpoints `/api/v1/innovations`.
 
-Le point d'entrée `/api/v1/innovations` est conservé pour la rétrocompatibilité,
-mais les implémentations métier vivent désormais dans les routeurs de domaine
-et le service `src.services.ia_avancee`.
+Le point d'entrée HTTP historique est conservé pour éviter une rupture d'API,
+mais le code de façade vit désormais dans `legacy_compat.py` et délègue aux
+routeurs de domaine et au service `src.services.ia_avancee`.
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ from src.api.utils import gerer_exception_api
 
 RESPONSES_IA_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_IA)
 
-router = APIRouter(prefix="/api/v1/innovations", tags=["Innovations"])
+router = APIRouter(prefix="/api/v1/innovations", tags=["Legacy compat"])
 
 
 def get_innovations_service():

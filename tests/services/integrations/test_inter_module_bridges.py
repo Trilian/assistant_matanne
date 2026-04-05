@@ -247,7 +247,19 @@ class TestDiagnosticsIAInteraction:
 
 
 class TestBridgesConsolides:
-    """Tests ciblés pour le service bridges consolidé."""
+    """Tests ciblÃ©s pour le service bridges consolidÃ©."""
+
+    def test_catalogue_consolidation_couvre_les_wrappers_detectes(self):
+        from src.services.ia.inter_modules import BridgesInterModulesService
+
+        catalogue = BridgesInterModulesService().obtenir_catalogue_consolidation()
+
+        assert catalogue["resume"]["total_legacy"] >= 34
+        assert catalogue["resume"]["consolides"] == catalogue["resume"]["total_legacy"]
+        assert any(
+            str(item["module"]).endswith("inter_module_inventaire_budget")
+            for item in catalogue["items"]
+        )
 
     def test_anniversaire_vers_menu_festif_retourne_dict(self, engine, db):
         from src.core.models.famille import AnniversaireFamille
@@ -271,9 +283,9 @@ class TestBridgesConsolides:
         from src.services.ia.inter_modules import BridgesInterModulesService
 
         tache = TacheEntretien(
-            nom="Réparer fuite évier",
+            nom="Rï¿½parer fuite ï¿½vier",
             categorie="reparation",
-            description="Fuite sous l'évier de cuisine",
+            description="Fuite sous l'ï¿½vier de cuisine",
             piece="cuisine",
         )
         artisan = Artisan(nom="Plomberie Martin", metier="plombier", recommande=True, note=5)

@@ -3,6 +3,7 @@
 > Guide opérationnel unifié du module administration : 51 endpoints, jobs, cache, notifications, santé des services, feature flags, simulations et gestion des utilisateurs.
 >
 > **Fusionné depuis** : ADMIN_GUIDE.md + ADMIN_QUICK_REFERENCE.md + ADMIN_RUNBOOK.md
+> **Remplace aussi** l'ancien `docs/ADMIN_MODE.md`, désormais absorbé dans ce guide unique.
 
 ---
 
@@ -354,7 +355,7 @@ Simule le flux inter-module sans effets de bord (utile pour valider le wiring).
 
 ## Références associées
 
-- `docs/ADMIN_MODE.md` — Guide opérationnel du mode admin
+- `docs/ADMIN.md` — Référence unique pour l'exploitation admin et le mode runtime
 - `docs/CRON_JOBS.md` — Référence complète des 68 jobs
 - `docs/AUTOMATIONS.md` — Moteur Si→Alors et exploitation runtime
 - `docs/NOTIFICATIONS.md` — Système de notifications

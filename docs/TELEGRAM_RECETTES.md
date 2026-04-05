@@ -18,7 +18,7 @@ Avant de lancer la recette :
 
 Fichiers utiles :
 
-- `src/api/routes/webhooks_telegram.py`
+- `src/api/routes/telegram/`
 - `src/services/integrations/telegram.py`
 - `src/services/utilitaires/briefing_matinal.py`
 

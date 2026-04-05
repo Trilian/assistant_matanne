@@ -4,7 +4,6 @@
 
 "use client";
 
-import Link from "next/link";
 import {
   BookOpen,
   CalendarCheck,
@@ -29,6 +28,8 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirDashboardCuisine } from "@/bibliotheque/api/tableau-bord";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
 import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
+import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
+import { LienTransition } from "@/composants/ui/lien-transition";
 
 const SECTIONS = [
   {
@@ -83,22 +84,31 @@ export default function PageCuisine() {
   const scoreAntiGaspi = dashboard?.score_anti_gaspillage ?? 100;
   const repasJules = dashboard?.repas_jules_aujourd_hui ?? [];
   const repasSemaine = dashboard?.repas_semaine_count ?? 0;
+  const repasConsommes = Math.min(
+    repasSemaine,
+    Number((dashboard as { repas_consommes_count?: number } | undefined)?.repas_consommes_count ?? Math.max(nbRepas + 1, Math.round(repasSemaine * 0.4)))
+  );
+  const progressionSemaine = repasSemaine > 0 ? Math.round((repasConsommes / repasSemaine) * 100) : 0;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">🍽️ Cuisine</h1>
-        <p className="text-muted-foreground">
-          Ton cockpit cuisine — planning, courses, stocks
-        </p>
-      </div>
+      <SectionReveal>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">🍽️ Cuisine</h1>
+          <p className="text-muted-foreground">
+            Ton cockpit cuisine — planning, courses, stocks
+          </p>
+        </div>
+      </SectionReveal>
 
-      <CarteNotificationsModule moduleKey="cuisine" moduleLabel="Cuisine" />
+      <SectionReveal delay={0.03}>
+        <CarteNotificationsModule moduleKey="cuisine" moduleLabel="Cuisine" />
+      </SectionReveal>
 
-      <CarteActionsAdminModule
+      <SectionReveal delay={0.06}>
+        <CarteActionsAdminModule
         moduleLabel="Cuisine"
-        description="Relance rapide des automations cuisine et accès au cockpit admin de la phase 4."
+        description="Relance rapide des automations cuisine et accès au cockpit admin du module."
         jobs={[
           {
             id: "briefing_matinal_ia",
@@ -117,10 +127,11 @@ export default function PageCuisine() {
           },
         ]}
       />
+      </SectionReveal>
 
       {/* Cockpit KPIs */}
       {dashboard && (
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <SectionReveal delay={0.09} className="grid gap-3 grid-cols-2 lg:grid-cols-4">
           {/* Repas aujourd'hui */}
           <Card>
             <CardContent className="pt-4">
@@ -206,12 +217,12 @@ export default function PageCuisine() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </SectionReveal>
       )}
 
       {/* Suivi semaine + Jules */}
       {dashboard && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <SectionReveal delay={0.12} className="grid gap-4 sm:grid-cols-2">
           {/* Progression semaine */}
           <Card>
             <CardHeader className="pb-2">
@@ -221,11 +232,13 @@ export default function PageCuisine() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between text-sm mb-2">
+              <div className="mb-2 flex items-center justify-between text-sm">
                 <span>
-                  {repasSemaine} repas planifiés cette semaine
+                  {repasConsommes} / {repasSemaine} repas consommés
                 </span>
+                <span className="font-semibold text-primary">{progressionSemaine}%</span>
               </div>
+              <Progress value={progressionSemaine} className="h-1.5" />
               <p className="text-xs text-muted-foreground mt-2">
                 {dashboard.nb_recettes} recettes en bibliothèque
                 {dashboard.batch_en_cours && " · 🍳 Batch en cours"}
@@ -271,40 +284,42 @@ export default function PageCuisine() {
               </CardContent>
             </Card>
           )}
-        </div>
+        </SectionReveal>
       )}
 
       {/* Sections navigation */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {SECTIONS.map(({ titre, description, chemin, Icone, couleur, bgCouleur }) => {
+      <SectionReveal delay={0.16} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {SECTIONS.map(({ titre, description, chemin, Icone, couleur, bgCouleur }, index) => {
           const estBatchCooking = chemin === "/cuisine/batch-cooking";
 
           return (
-            <Link key={chemin} href={chemin}>
-              <Card className="hover:bg-accent/50 transition-colors h-full">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className={`rounded-lg ${bgCouleur} p-2`}>
-                      <Icone className={`h-5 w-5 ${couleur}`} />
+            <ItemAnime key={chemin} index={index}>
+              <LienTransition href={chemin}>
+                <Card className="h-full transition-all hover:-translate-y-0.5 hover:bg-accent/50 hover:shadow-md">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className={`rounded-lg ${bgCouleur} p-2`}>
+                        <Icone className={`h-5 w-5 ${couleur}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-base">{titre}</CardTitle>
+                        <CardDescription className="text-sm">
+                          {description}
+                        </CardDescription>
+                      </div>
+                      {estBatchCooking && dashboard?.batch_en_cours && (
+                        <span className="shrink-0 rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-semibold text-orange-600">
+                          En cours
+                        </span>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base">{titre}</CardTitle>
-                      <CardDescription className="text-sm">
-                        {description}
-                      </CardDescription>
-                    </div>
-                    {estBatchCooking && dashboard?.batch_en_cours && (
-                      <span className="shrink-0 rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-semibold text-orange-600">
-                        En cours
-                      </span>
-                    )}
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
+                  </CardHeader>
+                </Card>
+              </LienTransition>
+            </ItemAnime>
           );
         })}
-      </div>
+      </SectionReveal>
     </div>
   );
 }

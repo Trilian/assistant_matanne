@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Plus,
   ListChecks,
@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/composants/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/composants/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -48,6 +49,9 @@ import {
 } from "@/crochets/utiliser-api";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 import { SwipeableItem } from "@/composants/swipeable-item";
+import { SectionReveal } from "@/composants/ui/motion-utils";
+import { HeatmapRoutines } from "@/composants/famille/heatmap-routines";
+import { useIsMobile } from "@/crochets/use-mobile";
 import {
   listerRoutines,
   creerRoutine,
@@ -61,6 +65,45 @@ const TYPES_ROUTINE = [
   { valeur: "soir", label: "Soir", Icone: Moon },
   { valeur: "journee", label: "Journée", Icone: CalendarDays },
 ] as const;
+
+function ResponsiveCreationOverlay({
+  open,
+  onOpenChange,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: ReactNode;
+}) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[92vh] overflow-y-auto rounded-t-3xl border-x-0 border-b-0 px-0"
+        >
+          <SheetHeader className="px-4 pb-2">
+            <SheetTitle>Nouvelle routine</SheetTitle>
+          </SheetHeader>
+          <div className="px-4 pb-4">{children}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Nouvelle routine</DialogTitle>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function PageRoutines() {
   const [dialogueCreation, setDialogueCreation] = useState(false);
@@ -123,21 +166,28 @@ export default function PageRoutines() {
     { type: "soir" as const, label: "Soir", Icone: Moon, items: routinesSoir },
     { type: "journee" as const, label: "Journée", Icone: CalendarDays, items: routinesJournee },
   ];
+  const totalEtapes = (routines ?? []).reduce(
+    (total, routine) => total + routine.etapes.length,
+    0
+  );
+  const creneauPrincipal = [...groupes].sort((a, b) => b.items.length - a.items.length)[0]?.label ?? "Matin";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">📋 Routines</h1>
-          <p className="text-muted-foreground">
-            Routines quotidiennes familiales
-          </p>
+      <SectionReveal>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">📋 Routines</h1>
+            <p className="text-muted-foreground">
+              Routines quotidiennes familiales
+            </p>
+          </div>
+          <Button onClick={() => setDialogueCreation(true)}>
+            <Plus className="mr-1 h-4 w-4" />
+            Nouvelle routine
+          </Button>
         </div>
-        <Button onClick={() => setDialogueCreation(true)}>
-          <Plus className="mr-1 h-4 w-4" />
-          Nouvelle routine
-        </Button>
-      </div>
+      </SectionReveal>
 
       {isLoading ? (
         <SkeletonPage
@@ -157,64 +207,86 @@ export default function PageRoutines() {
           }
         />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
-          {groupes.map(({ type: t, label, Icone, items }) => (
-            <div key={t} className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Icone className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold">{label}</h2>
-                <Badge variant="secondary" className="text-xs">
-                  {items.length}
-                </Badge>
-              </div>
-              {items.length === 0 ? (
-                <EtatVide
-                  Icone={Icone}
-                  titre={`Aucune routine ${label.toLowerCase()}`}
-                  description="Cette plage est libre pour le moment. Vous pouvez ajouter une routine adaptée à ce moment de la journée."
-                  className="p-6"
-                />
-              ) : (
-                items.map((r) => (
-                  <RoutineCard
-                    key={r.id}
-                    routine={r}
-                    onSupprimer={() => supprimerAvecUndo(r)}
+        <>
+          <SectionReveal delay={0.04} className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardContent className="py-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Routines actives</p>
+                <p className="mt-1 text-2xl font-bold">{routines.length}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Étapes cumulées</p>
+                <p className="mt-1 text-2xl font-bold">{totalEtapes}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Créneau prioritaire</p>
+                <p className="mt-1 text-2xl font-bold">{creneauPrincipal}</p>
+              </CardContent>
+            </Card>
+          </SectionReveal>
+
+          <SectionReveal delay={0.08}>
+            <HeatmapRoutines routines={routines ?? []} />
+          </SectionReveal>
+
+          <SectionReveal delay={0.12} className="grid gap-6 lg:grid-cols-3">
+            {groupes.map(({ type: t, label, Icone, items }) => (
+              <div key={t} className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Icone className="h-5 w-5 text-primary" />
+                  <h2 className="text-lg font-semibold">{label}</h2>
+                  <Badge variant="secondary" className="text-xs">
+                    {items.length}
+                  </Badge>
+                </div>
+                {items.length === 0 ? (
+                  <EtatVide
+                    Icone={Icone}
+                    titre={`Aucune routine ${label.toLowerCase()}`}
+                    description="Cette plage est libre pour le moment. Vous pouvez ajouter une routine adaptée à ce moment de la journée."
+                    className="p-6"
                   />
-                ))
-              )}
-            </div>
-          ))}
-        </div>
+                ) : (
+                  items.map((r) => (
+                    <RoutineCard
+                      key={r.id}
+                      routine={r}
+                      onSupprimer={() => supprimerAvecUndo(r)}
+                    />
+                  ))
+                )}
+              </div>
+            ))}
+          </SectionReveal>
+        </>
       )}
 
-      {/* Dialogue création */}
-      <Dialog open={dialogueCreation} onOpenChange={setDialogueCreation}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Nouvelle routine</DialogTitle>
-          </DialogHeader>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!nom.trim() || etapes.every((s) => !s.titre.trim())) return;
-              creer({
-                nom: nom.trim(),
-                type,
-                est_active: true,
-                etapes: etapes
-                  .filter((s) => s.titre.trim())
-                  .map((s, i) => ({
-                    id: 0,
-                    titre: s.titre.trim(),
-                    duree_minutes: s.duree_minutes,
-                    ordre: i + 1,
-                    est_terminee: false,
-                  })),
-              });
-            }}
-          >
+      <ResponsiveCreationOverlay open={dialogueCreation} onOpenChange={setDialogueCreation}>
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!nom.trim() || etapes.every((s) => !s.titre.trim())) return;
+            creer({
+              nom: nom.trim(),
+              type,
+              est_active: true,
+              etapes: etapes
+                .filter((s) => s.titre.trim())
+                .map((s, i) => ({
+                  id: 0,
+                  titre: s.titre.trim(),
+                  duree_minutes: s.duree_minutes,
+                  ordre: i + 1,
+                  est_terminee: false,
+                })),
+            });
+          }}
+        >
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="routine-nom">Nom *</Label>
@@ -305,9 +377,8 @@ export default function PageRoutines() {
                 Creer
               </Button>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+        </form>
+      </ResponsiveCreationOverlay>
     </div>
   );
 }

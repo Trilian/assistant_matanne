@@ -21,6 +21,7 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
+import { BoutonExportCsv } from "@/composants/ui/bouton-export-csv";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Skeleton } from "@/composants/ui/skeleton";
@@ -175,6 +176,18 @@ export default function PageBudget() {
       .slice(0, 6);
   }, [predictionBudget?.predictions?.par_categorie, categoriesTriees]);
 
+  const donneesExportDepenses = useMemo(
+    () =>
+      (depenses ?? []).map((depense) => ({
+        date: depense.date ?? "",
+        categorie: depense.categorie,
+        libelle: depense.libelle,
+        montant: depense.montant,
+        notes: depense.notes ?? "",
+      })),
+    [depenses]
+  );
+
   const celebrationEffectuee = useRef(false);
   useEffect(() => {
     const totalPrevu = predictionBudget?.predictions?.total_prevu ?? 0;
@@ -196,13 +209,18 @@ export default function PageBudget() {
             Suivi des dépenses familiales
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link href="/famille/achats">
             <Button variant="outline" size="sm">Voir achats</Button>
           </Link>
           <Link href="/famille/activites">
             <Button variant="outline" size="sm">Voir activités</Button>
           </Link>
+          <BoutonExportCsv
+            data={donneesExportDepenses}
+            filename="budget-famille.csv"
+            label="Exporter CSV"
+          />
           <Button size="sm" onClick={() => setDialogOuvert(true)}>
             <Plus className="h-4 w-4 mr-1" />
             Ajouter une dépense

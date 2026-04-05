@@ -32,6 +32,7 @@ class AdminJobResultat(BaseModel):
     status: str
     duration_ms: float = 0.0
     message: str = ""
+    dry_run: bool = False
 
 
 class AdminJobsRunAllResponse(BaseModel):

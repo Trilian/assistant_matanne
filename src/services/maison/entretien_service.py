@@ -1,758 +1,758 @@
-"""
-Service Entretien - Gestion intelligente des routines ménage.
-
-Features:
-- Création de routines IA avec tâches suggérées
-- Optimisation de la semaine (équilibrage charge)
-- Détection de patterns (périodicité automatique)
-- Sync calendrier Google/Apple
-- Adaptation météo (vitres si beau temps, etc.)
-"""
-
-import logging
-from datetime import date, timedelta
-
-from sqlalchemy.orm import Session, selectinload
-
-from src.core.ai import ClientIA, obtenir_client_ia
-from src.core.decorators import avec_cache, avec_session_db
-from src.core.models import Routine, TacheRoutine, TacheEntretien
-from src.core.monitoring import chronometre
-from src.services.core.base import BaseAIService
-from src.services.core.events import obtenir_bus
-from src.services.core.registry import service_factory
-
-from .entretien_taches_mixin import EntretienTachesMixin
-from .schemas import (
-    RoutineSuggestionIA,
-)
-
-logger = logging.getLogger(__name__)
-
-# ═══════════════════════════════════════════════════════════
-# CONSTANTES
-# ═══════════════════════════════════════════════════════════
-
-JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
-
-CATEGORIES_ENTRETIEN = [
-    "menage",
-    "cuisine",
-    "salle_de_bain",
-    "chambres",
-    "linge",
-    "jardin",
-    "administratif",
-]
-
-FREQUENCES = {
-    "quotidien": 1,
-    "tous_2_jours": 2,
-    "hebdo": 7,
-    "bi_mensuel": 14,
-    "mensuel": 30,
-    "trimestriel": 90,
-    "saisonnier": 120,
-    "annuel": 365,
-}
-
-# Note: JOURS_SEMAINE importé de src.core.constants si nécessaire
-
-
-# ═══════════════════════════════════════════════════════════
-# SERVICE ENTRETIEN
-# ═══════════════════════════════════════════════════════════
-
-
-class EntretienService(EntretienTachesMixin, BaseAIService):
-    """Service IA pour la gestion des routines ménage.
-
-    Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
-    sont gérées via @avec_session_db plutôt que BaseService[Routine] car :
-    - Les méthodes CRUD sont spécifiques au domaine (pas de CRUD générique)
-    - BaseAIService et BaseService[T] ont des constructeurs incompatibles
-    - Le pattern @avec_session_db est cohérent avec le reste du service
-
-    Fonctionnalités:
-    - Création routines avec suggestions IA
-    - Optimisation répartition hebdomadaire
-    - Détection automatique de périodicité
-    - Adaptation aux contraintes météo
-    - Score de propreté dynamique
-    - Génération automatique des tâches d'entretien
-
-    Example:
-        >>> service = get_entretien_service()
-        >>> taches = service.generer_taches(mes_objets, historique)
-        >>> stats = service.calculer_stats_globales(objets, historique)
-    """
-
-    def __init__(self, client: ClientIA | None = None):
-        """Initialise le service entretien.
-
-        Args:
-            client: Client IA optionnel
-        """
-        if client is None:
-            client = obtenir_client_ia()
-        super().__init__(
-            client=client,
-            cache_prefix="entretien",
-            default_ttl=3600,
-            service_name="entretien",
-        )
-
-    # ─────────────────────────────────────────────────────────
-    # CRÉATION ROUTINES IA
-    # ─────────────────────────────────────────────────────────
-
-    async def creer_routine_ia(
-        self, nom: str, description: str = "", categorie: str = "menage"
-    ) -> RoutineSuggestionIA:
-        """Crée une routine avec tâches suggérées par l'IA.
-
-        Args:
-            nom: Nom de la routine
-            description: Description/contexte (taille logement, etc.)
-            categorie: Catégorie de la routine
-
-        Returns:
-            RoutineSuggestionIA avec tâches et durées estimées
-        """
-        context = f" ({description})" if description else ""
-
-        prompt = f"""Pour la routine "{nom}"{context}, catégorie {categorie}:
-1. Suggère 5-8 tâches pratiques dans un ordre logique
-2. Estime le temps pour chaque tâche (en minutes)
-3. Recommande une fréquence (quotidien/hebdo/mensuel)
-
-Format JSON:
-{{"taches": ["Tâche 1 (10min)", ...], "duree_totale": 60, "frequence": "hebdo"}}"""
-
-        try:
-            response = await self.call_with_cache(
-                prompt=prompt,
-                system_prompt="Tu es expert en organisation domestique et productivité",
-                max_tokens=700,
-            )
-            import json
-
-            data = json.loads(response)
-            return RoutineSuggestionIA(
-                nom=nom,
-                description=description or f"Routine {categorie}",
-                taches_suggerees=data.get("taches", []),
-                frequence_recommandee=data.get("frequence", "hebdo"),
-                duree_totale_estimee_min=data.get("duree_totale", 60),
-            )
-        except Exception as e:
-            logger.warning(f"Création routine IA échouée: {e}")
-            # Fallback avec tâches par défaut
-            return RoutineSuggestionIA(
-                nom=nom,
-                description=description or f"Routine {categorie}",
-                taches_suggerees=self._get_taches_defaut(categorie),
-                frequence_recommandee="hebdo",
-                duree_totale_estimee_min=60,
-            )
-        finally:
-            # Émettre événement domaine (succès ou fallback)
-            obtenir_bus().emettre(
-                "entretien.routine_creee",
-                {"nom": nom, "categorie": categorie},
-                source="entretien",
-            )
-
-    async def suggerer_taches(self, nom_routine: str, contexte: str = "") -> str:
-        """Suggère des tâches pour une routine existante.
-
-        Args:
-            nom_routine: Nom de la routine
-            contexte: Contexte additionnel
-
-        Returns:
-            Texte avec tâches suggérées
-        """
-        prompt = f"""Pour la routine "{nom_routine}" {contexte},
-suggère 5-8 tâches pratiques et dans un ordre logique.
-Format: "- Tâche : description courte (X min)"."""
-
-        return await self.call_with_cache(
-            prompt=prompt,
-            system_prompt="Tu es expert en organisation domestique",
-            max_tokens=600,
-        )
-
-    # ─────────────────────────────────────────────────────────
-    # OPTIMISATION SEMAINE
-    # ─────────────────────────────────────────────────────────
-
-    async def optimiser_semaine(
-        self, taches: list[str], contraintes: dict | None = None
-    ) -> dict[str, list[str]]:
-        """Optimise la répartition des tâches sur la semaine.
-
-        Args:
-            taches: Liste des tâches à répartir
-            contraintes: Contraintes (jours indisponibles, etc.)
-
-        Returns:
-            Dict {jour: [tâches]}
-        """
-        contraintes_txt = ""
-        if contraintes:
-            if contraintes.get("jours_off"):
-                contraintes_txt = f" Éviter: {', '.join(contraintes['jours_off'])}."
-
-        taches_txt = "\n".join(f"- {t}" for t in taches)
-
-        prompt = f"""Répartis ces tâches ménagères sur la semaine de façon équilibrée:
-{taches_txt}
-{contraintes_txt}
-
-Critères:
-- Équilibrer la charge par jour
-- Regrouper les tâches similaires
-- Éviter de surcharger un seul jour
-
-Format JSON: {{"Lundi": [...], "Mardi": [...], ...}}"""
-
-        try:
-            response = await self.call_with_cache(
-                prompt=prompt,
-                system_prompt="Tu es expert en planification et organisation du temps",
-                max_tokens=800,
-            )
-            import json
-
-            result = json.loads(response)
-        except Exception as e:
-            logger.warning(f"Optimisation semaine échouée: {e}")
-            # Répartition simple par défaut
-            result = self._repartition_simple(taches)
-
-        # Émettre événement domaine
-        obtenir_bus().emettre(
-            "entretien.semaine_optimisee",
-            {"nb_taches": len(taches), "nb_jours": len(result)},
-            source="entretien",
-        )
-
-        return result
-
-    async def conseil_efficacite(self) -> str:
-        """Donne des astuces pour un ménage plus efficace.
-
-        Returns:
-            Texte avec conseils d'efficacité
-        """
-        prompt = """Donne 5 astuces pratiques pour rendre le ménage plus efficace et moins chronophage.
-Sois spécifique et actionnable. Inclus des techniques de pros."""
-
-        return await self.call_with_cache(
-            prompt=prompt,
-            system_prompt="Tu es expert en organisation domestique et efficacité",
-            max_tokens=500,
-        )
-
-    # ─────────────────────────────────────────────────────────
-    # DÉTECTION PATTERNS
-    # ─────────────────────────────────────────────────────────
-
-    def detecter_periodicite(self, historique: list[date]) -> tuple[int, float]:
-        """Détecte la périodicité dans un historique de dates.
-
-        Args:
-            historique: Liste de dates d'exécution
-
-        Returns:
-            Tuple (période en jours, confiance 0-1)
-        """
-        if len(historique) < 3:
-            return 7, 0.3  # Défaut hebdo avec faible confiance
-
-        # Calculer les intervalles
-        sorted_dates = sorted(historique)
-        intervalles = [
-            (sorted_dates[i + 1] - sorted_dates[i]).days for i in range(len(sorted_dates) - 1)
-        ]
-
-        if not intervalles:
-            return 7, 0.3
-
-        # Moyenne et écart-type
-        moyenne = sum(intervalles) / len(intervalles)
-        variance = sum((x - moyenne) ** 2 for x in intervalles) / len(intervalles)
-        ecart_type = variance**0.5
-
-        # Confiance basée sur la régularité
-        confiance = max(0.3, 1 - (ecart_type / moyenne)) if moyenne > 0 else 0.3
-
-        # Arrondir à la période standard la plus proche
-        periode = self._arrondir_periode(int(moyenne))
-
-        return periode, confiance
-
-    def suggerer_prochaine_date(self, derniere_execution: date, periode_jours: int) -> date:
-        """Suggère la prochaine date d'exécution.
-
-        Args:
-            derniere_execution: Date de dernière exécution
-            periode_jours: Période en jours
-
-        Returns:
-            Prochaine date suggérée
-        """
-        prochaine = derniere_execution + timedelta(days=periode_jours)
-        # Si dans le passé, proposer aujourd'hui ou demain
-        if prochaine < date.today():
-            return date.today()
-        return prochaine
-
-    # ─────────────────────────────────────────────────────────
-    # ADAPTATION MÉTÉO
-    # ─────────────────────────────────────────────────────────
-
-    async def adapter_planning_meteo(self, taches_jour: list[str], meteo: dict) -> list[str]:
-        """Adapte le planning du jour selon la météo.
-
-        Args:
-            taches_jour: Tâches prévues
-            meteo: Données météo (pluie, soleil, etc.)
-
-        Returns:
-            Tâches réordonnées/modifiées
-        """
-        taches_modifiees = []
-        pluie = meteo.get("pluie_mm", 0) > 5
-        soleil = meteo.get("ensoleillement", "partiel") == "fort"
-
-        for tache in taches_jour:
-            tache_lower = tache.lower()
-
-            # Reporter vitres si pluie prévue
-            if "vitre" in tache_lower and pluie:
-                taches_modifiees.append(f"⏸️ {tache} (reporté - pluie)")
-                continue
-
-            # Prioriser si beau temps
-            if "vitre" in tache_lower and soleil:
-                taches_modifiees.insert(0, f"☀️ {tache} (idéal aujourd'hui!)")
-                continue
-
-            taches_modifiees.append(tache)
-
-        return taches_modifiees
-
-    # ─────────────────────────────────────────────────────────
-    # CRUD HELPERS
-    # ─────────────────────────────────────────────────────────
-
-    @chronometre(nom="entretien.obtenir_routines", seuil_alerte_ms=1500)
-    @avec_cache(ttl=300)
-    @avec_session_db
-    def obtenir_routines(self, db: Session | None = None) -> list[Routine]:
-        """Récupère toutes les routines actives.
-
-        Args:
-            db: Session DB (injectée automatiquement par @avec_session_db)
-
-        Returns:
-            Liste des routines
-        """
-        return db.query(Routine).filter(Routine.actif.is_(True)).all()
-
-    def get_routines(self, db: Session | None = None) -> list[Routine]:
-        """Alias anglais pour obtenir_routines (rétrocompatibilité)."""
-        return self.obtenir_routines(db)
-
-    @chronometre(nom="entretien.taches_du_jour", seuil_alerte_ms=1500)
-    @avec_cache(ttl=300)
-    @avec_session_db
-    def obtenir_taches_du_jour(self, db: Session | None = None) -> list[TacheRoutine]:
-        """Récupère les tâches à faire aujourd'hui.
-
-        Args:
-            db: Session DB (injectée automatiquement par @avec_session_db)
-
-        Returns:
-            Liste des tâches du jour
-        """
-        jour_semaine = date.today().weekday()
-        return self._query_taches_jour(db, jour_semaine)
-
-    def get_taches_du_jour(self, db: Session | None = None) -> list[TacheRoutine]:
-        """Alias anglais pour obtenir_taches_du_jour (rétrocompatibilité)."""
-        return self.obtenir_taches_du_jour(db)
-
-    def _query_taches_jour(self, db: Session, jour_semaine: int) -> list[TacheRoutine]:
-        """Query interne pour tâches du jour (routines maison uniquement)."""
-        # Catégories réservées aux routines famille — exclues du briefing maison
-        _CATEGORIES_FAMILLE = ("matin", "soir", "journee", "famille")
-
-        routines = (
-            db.query(Routine)
-            .options(selectinload(Routine.tasks))
-            .filter(
-                Routine.actif.is_(True),
-                ~Routine.categorie.in_(_CATEGORIES_FAMILLE),
-            )
-            .all()
-        )
-        taches = []
-        for routine in routines:
-            taches.extend(routine.tasks)
-        return taches
-
-    @chronometre(nom="entretien.stats", seuil_alerte_ms=2000)
-    @avec_cache(ttl=300)
-    @avec_session_db
-    def obtenir_stats_entretien(self, db: Session | None = None) -> dict:
-        """Calcule les statistiques d'entretien.
-
-        Args:
-            db: Session DB (injectée automatiquement par @avec_session_db)
-
-        Returns:
-            Dict avec routines_actives, total_taches, taches_today, completion_today.
-        """
-        routines_actives = db.query(Routine).filter(Routine.actif.is_(True)).count()
-        total_taches = db.query(TacheRoutine).count()
-        taches_today = db.query(TacheRoutine).filter(TacheRoutine.fait_le == date.today()).count()
-
-        completion = (taches_today / total_taches * 100) if total_taches > 0 else 0
-
-        return {
-            "routines_actives": routines_actives,
-            "total_taches": total_taches,
-            "taches_today": taches_today,
-            "completion_today": completion,
-        }
-
-    def get_stats_entretien(self, db: Session | None = None) -> dict:
-        """Alias anglais pour obtenir_stats_entretien (rétrocompatibilité)."""
-        return self.obtenir_stats_entretien(db)
-
-    # ─────────────────────────────────────────────────────────
-    # HELPERS PRIVÉS
-    # ─────────────────────────────────────────────────────────
-
-    def _get_taches_defaut(self, categorie: str) -> list[str]:
-        """Retourne des tâches par défaut pour une catégorie."""
-        taches_defaut = {
-            "menage": [
-                "Aspirateur salon (15min)",
-                "Serpillère (15min)",
-                "Poussières meubles (10min)",
-                "Nettoyage cuisine (20min)",
-            ],
-            "salle_de_bain": [
-                "Nettoyage lavabo (5min)",
-                "Nettoyage WC (5min)",
-                "Nettoyage douche (10min)",
-                "Miroirs (5min)",
-            ],
-            "cuisine": [
-                "Vaisselle/lave-vaisselle (10min)",
-                "Plan de travail (5min)",
-                "Poubelles (5min)",
-                "Frigo (15min)",
-            ],
-        }
-        return taches_defaut.get(categorie, taches_defaut["menage"])
-
-    def _repartition_simple(self, taches: list[str]) -> dict[str, list[str]]:
-        """Répartition simple des tâches sur la semaine."""
-        planning = {jour: [] for jour in JOURS_SEMAINE}
-        for i, tache in enumerate(taches):
-            jour = JOURS_SEMAINE[i % 7]
-            planning[jour].append(tache)
-        return planning
-
-    def _arrondir_periode(self, jours: int) -> int:
-        """Arrondit à la période standard la plus proche."""
-        periodes_std = [1, 2, 7, 14, 30, 90, 365]
-        return min(periodes_std, key=lambda x: abs(x - jours))
-
-    # ─────────────────────────────────────────────────────────
-    # CRUD ROUTINES (non-IA)
-    # ─────────────────────────────────────────────────────────
-
-    @avec_session_db
-    def creer_routine(
-        self,
-        nom: str,
-        frequence: str = "quotidien",
-        db: Session | None = None,
-        **kwargs,
-    ) -> Routine | None:
-        """Crée une nouvelle routine d'entretien.
-
-        Args:
-            nom: Nom de la routine
-            frequence: Fréquence (quotidien, hebdo, mensuel, etc.)
-            db: Session DB (injectée par @avec_session_db)
-            **kwargs: Champs additionnels (description, categorie, etc.)
-
-        Returns:
-            La Routine créée, ou None en cas d'erreur.
-        """
-        try:
-            routine = Routine(nom=nom, frequence=frequence, **kwargs)
-            db.add(routine)
-            db.commit()
-            db.refresh(routine)
-            logger.info(f"✅ Routine créée: {nom}")
-            return routine
-        except Exception as e:
-            logger.error(f"Erreur création routine: {e}")
-            db.rollback()
-            return None
-
-    @avec_session_db
-    def ajouter_tache_routine(
-        self,
-        routine_id: int,
-        nom: str,
-        db: Session | None = None,
-        **kwargs,
-    ) -> TacheRoutine | None:
-        """Ajoute une tâche à une routine.
-
-        Args:
-            routine_id: ID de la routine parente
-            nom: Nom de la tâche
-            db: Session DB (injectée par @avec_session_db)
-            **kwargs: Champs additionnels (duree_min, ordre, etc.)
-
-        Returns:
-            La TacheRoutine créée, ou None en cas d'erreur.
-        """
-        try:
-            tache = TacheRoutine(routine_id=routine_id, nom=nom, **kwargs)
-            db.add(tache)
-            db.commit()
-            db.refresh(tache)
-            logger.info(f"✅ Tâche ajoutée à routine {routine_id}: {nom}")
-            return tache
-        except Exception as e:
-            logger.error(f"Erreur ajout tâche: {e}")
-            db.rollback()
-            return None
-
-    @avec_session_db
-    def marquer_tache_faite(self, tache_id: int, db: Session | None = None) -> bool:
-        """Marque une tâche de routine comme faite.
-
-        Args:
-            tache_id: ID de la tâche
-            db: Session DB (injectée par @avec_session_db)
-
-        Returns:
-            True si la tâche a été mise à jour.
-        """
-        try:
-            tache = db.get(TacheRoutine, tache_id)
-            if tache is None:
-                logger.warning(f"Tâche {tache_id} non trouvée")
-                return False
-            tache.fait = True
-            db.commit()
-            logger.info(f"✅ Tâche {tache_id} marquée comme faite")
-            return True
-        except Exception as e:
-            logger.error(f"Erreur marquage tâche: {e}")
-            db.rollback()
-            return False
-
-    @avec_session_db
-    def desactiver_routine(self, routine_id: int, db: Session | None = None) -> bool:
-        """Désactive une routine.
-
-        Args:
-            routine_id: ID de la routine
-            db: Session DB (injectée par @avec_session_db)
-
-        Returns:
-            True si la routine a été désactivée.
-        """
-        try:
-            routine = db.get(Routine, routine_id)
-            if routine is None:
-                logger.warning(f"Routine {routine_id} non trouvée")
-                return False
-            routine.actif = False
-            db.commit()
-            logger.info(f"✅ Routine {routine_id} désactivée")
-            return True
-        except Exception as e:
-            logger.error(f"Erreur désactivation routine: {e}")
-            db.rollback()
-            return False
-
-    # ─────────────────────────────────────────────────────────
-    # PLANNING SEMAINE
-    # ─────────────────────────────────────────────────────────
-
-    @avec_cache(ttl=86400)  # 24h
-    @avec_session_db
-    def generer_planning_semaine(
-        self,
-        preferences: dict | None = None,
-        db: Session | None = None,
-    ) -> dict[str, list[dict]]:
-        """Génère un planning ménage équilibré pour la semaine.
-
-        Args:
-            preferences: Préférences utilisateur (jours_off, intensite, créneau)
-            db: Session DB (injectée par @avec_session_db)
-
-        Returns:
-            Dict {jour: [{"nom": str, "duree_min": int, "categorie": str}]}
-        """
-        preferences = preferences or {}
-        jours_off = set(preferences.get("jours_off", []))
-
-        # Collecter tâches récurrentes dues cette semaine
-        today = date.today()
-        taches_db = (
-            db.query(TacheEntretien)
-            .filter(
-                TacheEntretien.fait.is_(False),
-            TacheEntretien.prochaine_fois <= today + timedelta(days=7),
-            )
-            .order_by(TacheEntretien.prochaine_fois)
-            .limit(30)
-            .all()
-        )
-
-        noms_taches = [
-            f"{t.nom} ({t.duree_minutes or 15}min)" for t in taches_db
-        ]
-
-        contraintes = {"jours_off": list(jours_off)} if jours_off else None
-
-        # Optimisation via IA (async → fallback sync)
-        import asyncio
-
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                planning_str = self._repartition_simple(noms_taches)
-            else:
-                planning_str = loop.run_until_complete(
-                    self.optimiser_semaine(noms_taches, contraintes)
-                )
-        except Exception:
-            planning_str = self._repartition_simple(noms_taches)
-
-        # Convertir en format structuré
-        tache_map = {f"{t.nom} ({t.duree_minutes or 15}min)": t for t in taches_db}
-        planning: dict[str, list[dict]] = {}
-
-        for jour, noms in planning_str.items():
-            if jour in jours_off:
-                continue
-            planning[jour] = []
-            for nom in noms:
-                if nom in tache_map:
-                    t = tache_map[nom]
-                    planning[jour].append({
-                        "id": t.id,
-                        "nom": t.nom,
-                        "duree_min": t.duree_minutes or 15,
-                        "categorie": t.categorie or "ménage",
-                        "priorite": t.priorite or "BASSE",
-                    })
-                else:
-                    planning[jour].append({
-                        "id": None,
-                        "nom": nom,
-                        "duree_min": 15,
-                        "categorie": "ménage",
-                        "priorite": "BASSE",
-                    })
-
-        return planning
-
-    @avec_session_db
-    def initialiser_routines_defaut(self, db: Session | None = None) -> int:
-        """Crée les 3 routines par défaut depuis routines_defaut.json.
-
-        Returns:
-            Nombre de routines créées
-        """
-        import json
-        from pathlib import Path
-
-        json_path = Path(__file__).parents[3] / "data" / "reference" / "routines_defaut.json"
-        if not json_path.exists():
-            logger.warning("routines_defaut.json introuvable")
-            return 0
-
-        with open(json_path, encoding="utf-8") as f:
-            donnees = json.load(f)
-
-        crees = 0
-        for r in donnees.get("routines", []):
-            # Vérifier si routine avec même nom existe déjà
-            existante = db.query(Routine).filter(Routine.nom == r["nom"]).first()
-            if existante:
-                continue
-
-            routine = Routine(
-                nom=r["nom"],
-                frequence=r.get("frequence", "quotidien"),
-                categorie=r.get("categorie"),
-                actif=True,
-            )
-            db.add(routine)
-            db.flush()
-
-            for tache_data in r.get("taches", []):
-                tache = TacheRoutine(
-                    routine_id=routine.id,
-                    nom=tache_data["nom"],
-                    duree_min=tache_data.get("duree_min", 5),
-                    ordre=tache_data.get("ordre", 0),
-                )
-                db.add(tache)
-
-            crees += 1
-
-        try:
-            db.commit()
-            logger.info(f"✅ {crees} routines par défaut créées")
-        except Exception as e:
-            logger.error(f"Erreur init routines: {e}")
-            db.rollback()
-            crees = 0
-
-        return crees
-
-
-# ═══════════════════════════════════════════════════════════
-# FACTORY
-# ═══════════════════════════════════════════════════════════
-
-
-def obtenir_service_entretien(client: ClientIA | None = None) -> EntretienService:
-    """Factory pour obtenir le service entretien (convention française).
-
-    Args:
-        client: Client IA optionnel
-
-    Returns:
-        Instance de EntretienService
-    """
-    return EntretienService(client=client)
-
-
-@service_factory("entretien", tags={"maison", "crud", "entretien"})
-def obtenir_entretien_service(client: ClientIA | None = None) -> EntretienService:
-    """Factory pour obtenir le service entretien (alias anglais)."""
-    return obtenir_service_entretien(client)
-
-
-# ─── Aliases rétrocompatibilité  ───────────────────────────────
-get_entretien_service = obtenir_entretien_service  # alias rétrocompatibilité 
+"""
+Service Entretien - Gestion intelligente des routines ménage.
+
+Features:
+- Création de routines IA avec tâches suggérées
+- Optimisation de la semaine (équilibrage charge)
+- Détection de patterns (périodicité automatique)
+- Sync calendrier Google/Apple
+- Adaptation météo (vitres si beau temps, etc.)
+"""
+
+import logging
+from datetime import date, timedelta
+
+from sqlalchemy.orm import Session, selectinload
+
+from src.core.ai import ClientIA, obtenir_client_ia
+from src.core.decorators import avec_cache, avec_session_db
+from src.core.models import Routine, TacheRoutine, TacheEntretien
+from src.core.monitoring import chronometre
+from src.services.core.base import BaseAIService
+from src.services.core.events import obtenir_bus
+from src.services.core.registry import service_factory
+
+from .entretien_taches_mixin import EntretienTachesMixin
+from .schemas import (
+    RoutineSuggestionIA,
+)
+
+logger = logging.getLogger(__name__)
+
+# ═══════════════════════════════════════════════════════════
+# CONSTANTES
+# ═══════════════════════════════════════════════════════════
+
+JOURS_SEMAINE = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+
+CATEGORIES_ENTRETIEN = [
+    "menage",
+    "cuisine",
+    "salle_de_bain",
+    "chambres",
+    "linge",
+    "jardin",
+    "administratif",
+]
+
+FREQUENCES = {
+    "quotidien": 1,
+    "tous_2_jours": 2,
+    "hebdo": 7,
+    "bi_mensuel": 14,
+    "mensuel": 30,
+    "trimestriel": 90,
+    "saisonnier": 120,
+    "annuel": 365,
+}
+
+# Note: JOURS_SEMAINE importé de src.core.constants si nécessaire
+
+
+# ═══════════════════════════════════════════════════════════
+# SERVICE ENTRETIEN
+# ═══════════════════════════════════════════════════════════
+
+
+class EntretienService(EntretienTachesMixin, BaseAIService):
+    """Service IA pour la gestion des routines ménage.
+
+    Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
+    sont gérées via @avec_session_db plutôt que BaseService[Routine] car :
+    - Les méthodes CRUD sont spécifiques au domaine (pas de CRUD générique)
+    - BaseAIService et BaseService[T] ont des constructeurs incompatibles
+    - Le pattern @avec_session_db est cohérent avec le reste du service
+
+    Fonctionnalités:
+    - Création routines avec suggestions IA
+    - Optimisation répartition hebdomadaire
+    - Détection automatique de périodicité
+    - Adaptation aux contraintes météo
+    - Score de propreté dynamique
+    - Génération automatique des tâches d'entretien
+
+    Example:
+        >>> service = obtenir_entretien_service()
+        >>> taches = service.generer_taches(mes_objets, historique)
+        >>> stats = service.calculer_stats_globales(objets, historique)
+    """
+
+    def __init__(self, client: ClientIA | None = None):
+        """Initialise le service entretien.
+
+        Args:
+            client: Client IA optionnel
+        """
+        if client is None:
+            client = obtenir_client_ia()
+        super().__init__(
+            client=client,
+            cache_prefix="entretien",
+            default_ttl=3600,
+            service_name="entretien",
+        )
+
+    # ─────────────────────────────────────────────────────────
+    # CRÉATION ROUTINES IA
+    # ─────────────────────────────────────────────────────────
+
+    async def creer_routine_ia(
+        self, nom: str, description: str = "", categorie: str = "menage"
+    ) -> RoutineSuggestionIA:
+        """Crée une routine avec tâches suggérées par l'IA.
+
+        Args:
+            nom: Nom de la routine
+            description: Description/contexte (taille logement, etc.)
+            categorie: Catégorie de la routine
+
+        Returns:
+            RoutineSuggestionIA avec tâches et durées estimées
+        """
+        context = f" ({description})" if description else ""
+
+        prompt = f"""Pour la routine "{nom}"{context}, catégorie {categorie}:
+1. Suggère 5-8 tâches pratiques dans un ordre logique
+2. Estime le temps pour chaque tâche (en minutes)
+3. Recommande une fréquence (quotidien/hebdo/mensuel)
+
+Format JSON:
+{{"taches": ["Tâche 1 (10min)", ...], "duree_totale": 60, "frequence": "hebdo"}}"""
+
+        try:
+            response = await self.call_with_cache(
+                prompt=prompt,
+                system_prompt="Tu es expert en organisation domestique et productivité",
+                max_tokens=700,
+            )
+            import json
+
+            data = json.loads(response)
+            return RoutineSuggestionIA(
+                nom=nom,
+                description=description or f"Routine {categorie}",
+                taches_suggerees=data.get("taches", []),
+                frequence_recommandee=data.get("frequence", "hebdo"),
+                duree_totale_estimee_min=data.get("duree_totale", 60),
+            )
+        except Exception as e:
+            logger.warning(f"Création routine IA échouée: {e}")
+            # Fallback avec tâches par défaut
+            return RoutineSuggestionIA(
+                nom=nom,
+                description=description or f"Routine {categorie}",
+                taches_suggerees=self._get_taches_defaut(categorie),
+                frequence_recommandee="hebdo",
+                duree_totale_estimee_min=60,
+            )
+        finally:
+            # Émettre événement domaine (succès ou fallback)
+            obtenir_bus().emettre(
+                "entretien.routine_creee",
+                {"nom": nom, "categorie": categorie},
+                source="entretien",
+            )
+
+    async def suggerer_taches(self, nom_routine: str, contexte: str = "") -> str:
+        """Suggère des tâches pour une routine existante.
+
+        Args:
+            nom_routine: Nom de la routine
+            contexte: Contexte additionnel
+
+        Returns:
+            Texte avec tâches suggérées
+        """
+        prompt = f"""Pour la routine "{nom_routine}" {contexte},
+suggère 5-8 tâches pratiques et dans un ordre logique.
+Format: "- Tâche : description courte (X min)"."""
+
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en organisation domestique",
+            max_tokens=600,
+        )
+
+    # ─────────────────────────────────────────────────────────
+    # OPTIMISATION SEMAINE
+    # ─────────────────────────────────────────────────────────
+
+    async def optimiser_semaine(
+        self, taches: list[str], contraintes: dict | None = None
+    ) -> dict[str, list[str]]:
+        """Optimise la répartition des tâches sur la semaine.
+
+        Args:
+            taches: Liste des tâches à répartir
+            contraintes: Contraintes (jours indisponibles, etc.)
+
+        Returns:
+            Dict {jour: [tâches]}
+        """
+        contraintes_txt = ""
+        if contraintes:
+            if contraintes.get("jours_off"):
+                contraintes_txt = f" Éviter: {', '.join(contraintes['jours_off'])}."
+
+        taches_txt = "\n".join(f"- {t}" for t in taches)
+
+        prompt = f"""Répartis ces tâches ménagères sur la semaine de façon équilibrée:
+{taches_txt}
+{contraintes_txt}
+
+Critères:
+- Équilibrer la charge par jour
+- Regrouper les tâches similaires
+- Éviter de surcharger un seul jour
+
+Format JSON: {{"Lundi": [...], "Mardi": [...], ...}}"""
+
+        try:
+            response = await self.call_with_cache(
+                prompt=prompt,
+                system_prompt="Tu es expert en planification et organisation du temps",
+                max_tokens=800,
+            )
+            import json
+
+            result = json.loads(response)
+        except Exception as e:
+            logger.warning(f"Optimisation semaine échouée: {e}")
+            # Répartition simple par défaut
+            result = self._repartition_simple(taches)
+
+        # Émettre événement domaine
+        obtenir_bus().emettre(
+            "entretien.semaine_optimisee",
+            {"nb_taches": len(taches), "nb_jours": len(result)},
+            source="entretien",
+        )
+
+        return result
+
+    async def conseil_efficacite(self) -> str:
+        """Donne des astuces pour un ménage plus efficace.
+
+        Returns:
+            Texte avec conseils d'efficacité
+        """
+        prompt = """Donne 5 astuces pratiques pour rendre le ménage plus efficace et moins chronophage.
+Sois spécifique et actionnable. Inclus des techniques de pros."""
+
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en organisation domestique et efficacité",
+            max_tokens=500,
+        )
+
+    # ─────────────────────────────────────────────────────────
+    # DÉTECTION PATTERNS
+    # ─────────────────────────────────────────────────────────
+
+    def detecter_periodicite(self, historique: list[date]) -> tuple[int, float]:
+        """Détecte la périodicité dans un historique de dates.
+
+        Args:
+            historique: Liste de dates d'exécution
+
+        Returns:
+            Tuple (période en jours, confiance 0-1)
+        """
+        if len(historique) < 3:
+            return 7, 0.3  # Défaut hebdo avec faible confiance
+
+        # Calculer les intervalles
+        sorted_dates = sorted(historique)
+        intervalles = [
+            (sorted_dates[i + 1] - sorted_dates[i]).days for i in range(len(sorted_dates) - 1)
+        ]
+
+        if not intervalles:
+            return 7, 0.3
+
+        # Moyenne et écart-type
+        moyenne = sum(intervalles) / len(intervalles)
+        variance = sum((x - moyenne) ** 2 for x in intervalles) / len(intervalles)
+        ecart_type = variance**0.5
+
+        # Confiance basée sur la régularité
+        confiance = max(0.3, 1 - (ecart_type / moyenne)) if moyenne > 0 else 0.3
+
+        # Arrondir à la période standard la plus proche
+        periode = self._arrondir_periode(int(moyenne))
+
+        return periode, confiance
+
+    def suggerer_prochaine_date(self, derniere_execution: date, periode_jours: int) -> date:
+        """Suggère la prochaine date d'exécution.
+
+        Args:
+            derniere_execution: Date de dernière exécution
+            periode_jours: Période en jours
+
+        Returns:
+            Prochaine date suggérée
+        """
+        prochaine = derniere_execution + timedelta(days=periode_jours)
+        # Si dans le passé, proposer aujourd'hui ou demain
+        if prochaine < date.today():
+            return date.today()
+        return prochaine
+
+    # ─────────────────────────────────────────────────────────
+    # ADAPTATION MÉTÉO
+    # ─────────────────────────────────────────────────────────
+
+    async def adapter_planning_meteo(self, taches_jour: list[str], meteo: dict) -> list[str]:
+        """Adapte le planning du jour selon la météo.
+
+        Args:
+            taches_jour: Tâches prévues
+            meteo: Données météo (pluie, soleil, etc.)
+
+        Returns:
+            Tâches réordonnées/modifiées
+        """
+        taches_modifiees = []
+        pluie = meteo.get("pluie_mm", 0) > 5
+        soleil = meteo.get("ensoleillement", "partiel") == "fort"
+
+        for tache in taches_jour:
+            tache_lower = tache.lower()
+
+            # Reporter vitres si pluie prévue
+            if "vitre" in tache_lower and pluie:
+                taches_modifiees.append(f"⏸️ {tache} (reporté - pluie)")
+                continue
+
+            # Prioriser si beau temps
+            if "vitre" in tache_lower and soleil:
+                taches_modifiees.insert(0, f"☀️ {tache} (idéal aujourd'hui!)")
+                continue
+
+            taches_modifiees.append(tache)
+
+        return taches_modifiees
+
+    # ─────────────────────────────────────────────────────────
+    # CRUD HELPERS
+    # ─────────────────────────────────────────────────────────
+
+    @chronometre(nom="entretien.obtenir_routines", seuil_alerte_ms=1500)
+    @avec_cache(ttl=300)
+    @avec_session_db
+    def obtenir_routines(self, db: Session | None = None) -> list[Routine]:
+        """Récupère toutes les routines actives.
+
+        Args:
+            db: Session DB (injectée automatiquement par @avec_session_db)
+
+        Returns:
+            Liste des routines
+        """
+        return db.query(Routine).filter(Routine.actif.is_(True)).all()
+
+    def get_routines(self, db: Session | None = None) -> list[Routine]:
+        """Alias anglais pour obtenir_routines (rétrocompatibilité)."""
+        return self.obtenir_routines(db)
+
+    @chronometre(nom="entretien.taches_du_jour", seuil_alerte_ms=1500)
+    @avec_cache(ttl=300)
+    @avec_session_db
+    def obtenir_taches_du_jour(self, db: Session | None = None) -> list[TacheRoutine]:
+        """Récupère les tâches à faire aujourd'hui.
+
+        Args:
+            db: Session DB (injectée automatiquement par @avec_session_db)
+
+        Returns:
+            Liste des tâches du jour
+        """
+        jour_semaine = date.today().weekday()
+        return self._query_taches_jour(db, jour_semaine)
+
+    def get_taches_du_jour(self, db: Session | None = None) -> list[TacheRoutine]:
+        """Alias anglais pour obtenir_taches_du_jour (rétrocompatibilité)."""
+        return self.obtenir_taches_du_jour(db)
+
+    def _query_taches_jour(self, db: Session, jour_semaine: int) -> list[TacheRoutine]:
+        """Query interne pour tâches du jour (routines maison uniquement)."""
+        # Catégories réservées aux routines famille — exclues du briefing maison
+        _CATEGORIES_FAMILLE = ("matin", "soir", "journee", "famille")
+
+        routines = (
+            db.query(Routine)
+            .options(selectinload(Routine.tasks))
+            .filter(
+                Routine.actif.is_(True),
+                ~Routine.categorie.in_(_CATEGORIES_FAMILLE),
+            )
+            .all()
+        )
+        taches = []
+        for routine in routines:
+            taches.extend(routine.tasks)
+        return taches
+
+    @chronometre(nom="entretien.stats", seuil_alerte_ms=2000)
+    @avec_cache(ttl=300)
+    @avec_session_db
+    def obtenir_stats_entretien(self, db: Session | None = None) -> dict:
+        """Calcule les statistiques d'entretien.
+
+        Args:
+            db: Session DB (injectée automatiquement par @avec_session_db)
+
+        Returns:
+            Dict avec routines_actives, total_taches, taches_today, completion_today.
+        """
+        routines_actives = db.query(Routine).filter(Routine.actif.is_(True)).count()
+        total_taches = db.query(TacheRoutine).count()
+        taches_today = db.query(TacheRoutine).filter(TacheRoutine.fait_le == date.today()).count()
+
+        completion = (taches_today / total_taches * 100) if total_taches > 0 else 0
+
+        return {
+            "routines_actives": routines_actives,
+            "total_taches": total_taches,
+            "taches_today": taches_today,
+            "completion_today": completion,
+        }
+
+    def get_stats_entretien(self, db: Session | None = None) -> dict:
+        """Alias anglais pour obtenir_stats_entretien (rétrocompatibilité)."""
+        return self.obtenir_stats_entretien(db)
+
+    # ─────────────────────────────────────────────────────────
+    # HELPERS PRIVÉS
+    # ─────────────────────────────────────────────────────────
+
+    def _get_taches_defaut(self, categorie: str) -> list[str]:
+        """Retourne des tâches par défaut pour une catégorie."""
+        taches_defaut = {
+            "menage": [
+                "Aspirateur salon (15min)",
+                "Serpillère (15min)",
+                "Poussières meubles (10min)",
+                "Nettoyage cuisine (20min)",
+            ],
+            "salle_de_bain": [
+                "Nettoyage lavabo (5min)",
+                "Nettoyage WC (5min)",
+                "Nettoyage douche (10min)",
+                "Miroirs (5min)",
+            ],
+            "cuisine": [
+                "Vaisselle/lave-vaisselle (10min)",
+                "Plan de travail (5min)",
+                "Poubelles (5min)",
+                "Frigo (15min)",
+            ],
+        }
+        return taches_defaut.get(categorie, taches_defaut["menage"])
+
+    def _repartition_simple(self, taches: list[str]) -> dict[str, list[str]]:
+        """Répartition simple des tâches sur la semaine."""
+        planning = {jour: [] for jour in JOURS_SEMAINE}
+        for i, tache in enumerate(taches):
+            jour = JOURS_SEMAINE[i % 7]
+            planning[jour].append(tache)
+        return planning
+
+    def _arrondir_periode(self, jours: int) -> int:
+        """Arrondit à la période standard la plus proche."""
+        periodes_std = [1, 2, 7, 14, 30, 90, 365]
+        return min(periodes_std, key=lambda x: abs(x - jours))
+
+    # ─────────────────────────────────────────────────────────
+    # CRUD ROUTINES (non-IA)
+    # ─────────────────────────────────────────────────────────
+
+    @avec_session_db
+    def creer_routine(
+        self,
+        nom: str,
+        frequence: str = "quotidien",
+        db: Session | None = None,
+        **kwargs,
+    ) -> Routine | None:
+        """Crée une nouvelle routine d'entretien.
+
+        Args:
+            nom: Nom de la routine
+            frequence: Fréquence (quotidien, hebdo, mensuel, etc.)
+            db: Session DB (injectée par @avec_session_db)
+            **kwargs: Champs additionnels (description, categorie, etc.)
+
+        Returns:
+            La Routine créée, ou None en cas d'erreur.
+        """
+        try:
+            routine = Routine(nom=nom, frequence=frequence, **kwargs)
+            db.add(routine)
+            db.commit()
+            db.refresh(routine)
+            logger.info(f"✅ Routine créée: {nom}")
+            return routine
+        except Exception as e:
+            logger.error(f"Erreur création routine: {e}")
+            db.rollback()
+            return None
+
+    @avec_session_db
+    def ajouter_tache_routine(
+        self,
+        routine_id: int,
+        nom: str,
+        db: Session | None = None,
+        **kwargs,
+    ) -> TacheRoutine | None:
+        """Ajoute une tâche à une routine.
+
+        Args:
+            routine_id: ID de la routine parente
+            nom: Nom de la tâche
+            db: Session DB (injectée par @avec_session_db)
+            **kwargs: Champs additionnels (duree_min, ordre, etc.)
+
+        Returns:
+            La TacheRoutine créée, ou None en cas d'erreur.
+        """
+        try:
+            tache = TacheRoutine(routine_id=routine_id, nom=nom, **kwargs)
+            db.add(tache)
+            db.commit()
+            db.refresh(tache)
+            logger.info(f"✅ Tâche ajoutée à routine {routine_id}: {nom}")
+            return tache
+        except Exception as e:
+            logger.error(f"Erreur ajout tâche: {e}")
+            db.rollback()
+            return None
+
+    @avec_session_db
+    def marquer_tache_faite(self, tache_id: int, db: Session | None = None) -> bool:
+        """Marque une tâche de routine comme faite.
+
+        Args:
+            tache_id: ID de la tâche
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si la tâche a été mise à jour.
+        """
+        try:
+            tache = db.get(TacheRoutine, tache_id)
+            if tache is None:
+                logger.warning(f"Tâche {tache_id} non trouvée")
+                return False
+            tache.fait = True
+            db.commit()
+            logger.info(f"✅ Tâche {tache_id} marquée comme faite")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur marquage tâche: {e}")
+            db.rollback()
+            return False
+
+    @avec_session_db
+    def desactiver_routine(self, routine_id: int, db: Session | None = None) -> bool:
+        """Désactive une routine.
+
+        Args:
+            routine_id: ID de la routine
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            True si la routine a été désactivée.
+        """
+        try:
+            routine = db.get(Routine, routine_id)
+            if routine is None:
+                logger.warning(f"Routine {routine_id} non trouvée")
+                return False
+            routine.actif = False
+            db.commit()
+            logger.info(f"✅ Routine {routine_id} désactivée")
+            return True
+        except Exception as e:
+            logger.error(f"Erreur désactivation routine: {e}")
+            db.rollback()
+            return False
+
+    # ─────────────────────────────────────────────────────────
+    # PLANNING SEMAINE
+    # ─────────────────────────────────────────────────────────
+
+    @avec_cache(ttl=86400)  # 24h
+    @avec_session_db
+    def generer_planning_semaine(
+        self,
+        preferences: dict | None = None,
+        db: Session | None = None,
+    ) -> dict[str, list[dict]]:
+        """Génère un planning ménage équilibré pour la semaine.
+
+        Args:
+            preferences: Préférences utilisateur (jours_off, intensite, créneau)
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            Dict {jour: [{"nom": str, "duree_min": int, "categorie": str}]}
+        """
+        preferences = preferences or {}
+        jours_off = set(preferences.get("jours_off", []))
+
+        # Collecter tâches récurrentes dues cette semaine
+        today = date.today()
+        taches_db = (
+            db.query(TacheEntretien)
+            .filter(
+                TacheEntretien.fait.is_(False),
+            TacheEntretien.prochaine_fois <= today + timedelta(days=7),
+            )
+            .order_by(TacheEntretien.prochaine_fois)
+            .limit(30)
+            .all()
+        )
+
+        noms_taches = [
+            f"{t.nom} ({t.duree_minutes or 15}min)" for t in taches_db
+        ]
+
+        contraintes = {"jours_off": list(jours_off)} if jours_off else None
+
+        # Optimisation via IA (async → fallback sync)
+        import asyncio
+
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                planning_str = self._repartition_simple(noms_taches)
+            else:
+                planning_str = loop.run_until_complete(
+                    self.optimiser_semaine(noms_taches, contraintes)
+                )
+        except Exception:
+            planning_str = self._repartition_simple(noms_taches)
+
+        # Convertir en format structuré
+        tache_map = {f"{t.nom} ({t.duree_minutes or 15}min)": t for t in taches_db}
+        planning: dict[str, list[dict]] = {}
+
+        for jour, noms in planning_str.items():
+            if jour in jours_off:
+                continue
+            planning[jour] = []
+            for nom in noms:
+                if nom in tache_map:
+                    t = tache_map[nom]
+                    planning[jour].append({
+                        "id": t.id,
+                        "nom": t.nom,
+                        "duree_min": t.duree_minutes or 15,
+                        "categorie": t.categorie or "ménage",
+                        "priorite": t.priorite or "BASSE",
+                    })
+                else:
+                    planning[jour].append({
+                        "id": None,
+                        "nom": nom,
+                        "duree_min": 15,
+                        "categorie": "ménage",
+                        "priorite": "BASSE",
+                    })
+
+        return planning
+
+    @avec_session_db
+    def initialiser_routines_defaut(self, db: Session | None = None) -> int:
+        """Crée les 3 routines par défaut depuis routines_defaut.json.
+
+        Returns:
+            Nombre de routines créées
+        """
+        import json
+        from pathlib import Path
+
+        json_path = Path(__file__).parents[3] / "data" / "reference" / "routines_defaut.json"
+        if not json_path.exists():
+            logger.warning("routines_defaut.json introuvable")
+            return 0
+
+        with open(json_path, encoding="utf-8") as f:
+            donnees = json.load(f)
+
+        crees = 0
+        for r in donnees.get("routines", []):
+            # Vérifier si routine avec même nom existe déjà
+            existante = db.query(Routine).filter(Routine.nom == r["nom"]).first()
+            if existante:
+                continue
+
+            routine = Routine(
+                nom=r["nom"],
+                frequence=r.get("frequence", "quotidien"),
+                categorie=r.get("categorie"),
+                actif=True,
+            )
+            db.add(routine)
+            db.flush()
+
+            for tache_data in r.get("taches", []):
+                tache = TacheRoutine(
+                    routine_id=routine.id,
+                    nom=tache_data["nom"],
+                    duree_min=tache_data.get("duree_min", 5),
+                    ordre=tache_data.get("ordre", 0),
+                )
+                db.add(tache)
+
+            crees += 1
+
+        try:
+            db.commit()
+            logger.info(f"✅ {crees} routines par défaut créées")
+        except Exception as e:
+            logger.error(f"Erreur init routines: {e}")
+            db.rollback()
+            crees = 0
+
+        return crees
+
+
+# ═══════════════════════════════════════════════════════════
+# FACTORY
+# ═══════════════════════════════════════════════════════════
+
+
+def obtenir_service_entretien(client: ClientIA | None = None) -> EntretienService:
+    """Factory pour obtenir le service entretien (convention française).
+
+    Args:
+        client: Client IA optionnel
+
+    Returns:
+        Instance de EntretienService
+    """
+    return EntretienService(client=client)
+
+
+@service_factory("entretien", tags={"maison", "crud", "entretien"})
+def obtenir_entretien_service(client: ClientIA | None = None) -> EntretienService:
+    """Factory pour obtenir le service entretien (alias anglais)."""
+    return obtenir_service_entretien(client)
+
+
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+obtenir_entretien_service = obtenir_entretien_service  # alias rétrocompatibilité 

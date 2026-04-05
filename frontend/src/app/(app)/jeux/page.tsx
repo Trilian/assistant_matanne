@@ -4,7 +4,6 @@
 
 "use client";
 
-import Link from "next/link";
 import { Trophy, Ticket, Star, TrendingUp, AlertTriangle } from "lucide-react";
 import {
   Card,
@@ -21,6 +20,8 @@ import { obtenirDashboardJeux } from "@/bibliotheque/api/jeux";
 import type { DashboardJeux, ValueBet, SerieJeux, NumeroRetard } from "@/types/jeux";
 import { useRouter } from "next/navigation";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
+import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
+import { LienTransition } from "@/composants/ui/lien-transition";
 
 function SectionOpportunites({
   valueBets,
@@ -46,37 +47,41 @@ function SectionOpportunites({
     <div className="space-y-3">
       <h2 className="text-lg font-semibold">🎯 Opportunités du jour</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {valueBets.slice(0, 3).map((vb) => (
-          <Link key={vb.match_id} href="/jeux/paris">
-            <Card className="hover:bg-accent/50 transition-colors cursor-pointer h-full">
-              <CardContent className="pt-4 space-y-1">
-                <p className="font-medium text-sm truncate">
-                  {vb.equipe_domicile} vs {vb.equipe_exterieur}
-                </p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="default">💰 Value +{vb.edge_pct.toFixed(0)}%</Badge>
-                  <span className="text-xs text-muted-foreground">cote {vb.cote_bookmaker.toFixed(2)}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+        {valueBets.slice(0, 3).map((vb, index) => (
+          <ItemAnime key={vb.match_id} index={index}>
+            <LienTransition href="/jeux/paris" className="block h-full">
+              <Card className="h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:bg-accent/50">
+                <CardContent className="pt-4 space-y-1">
+                  <p className="font-medium text-sm truncate">
+                    {vb.equipe_domicile} vs {vb.equipe_exterieur}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="default">💰 Value +{vb.edge_pct.toFixed(0)}%</Badge>
+                    <span className="text-xs text-muted-foreground">cote {vb.cote_bookmaker.toFixed(2)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </LienTransition>
+          </ItemAnime>
         ))}
-        {series.slice(0, 2).map((s) => (
-          <Link key={s.id} href={s.type_jeu === "paris" ? "/jeux/paris" : "/jeux/loto"}>
-            <Card className="hover:bg-accent/50 transition-colors cursor-pointer h-full">
-              <CardContent className="pt-4 space-y-1">
-                <p className="font-medium text-sm truncate">
-                  🔥 {s.marche} {s.championnat ? `(${s.championnat})` : ""}
-                </p>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">Série {s.serie_actuelle}</Badge>
-                  <span className="text-xs text-muted-foreground">
-                    value {s.value.toFixed(1)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+        {series.slice(0, 2).map((s, index) => (
+          <ItemAnime key={s.id} index={index + valueBets.slice(0, 3).length}>
+            <LienTransition href={s.type_jeu === "paris" ? "/jeux/paris" : "/jeux/loto"} className="block h-full">
+              <Card className="h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:bg-accent/50">
+                <CardContent className="pt-4 space-y-1">
+                  <p className="font-medium text-sm truncate">
+                    🔥 {s.marche} {s.championnat ? `(${s.championnat})` : ""}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">Série {s.serie_actuelle}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      value {s.value.toFixed(1)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </LienTransition>
+          </ItemAnime>
         ))}
       </div>
     </div>
@@ -149,106 +154,112 @@ export default function PageJeux() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">🎮 Jeux</h1>
-          <p className="text-muted-foreground">
-            Paris sportifs, tirages et analyse IA
-          </p>
+      <SectionReveal>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">🎮 Jeux</h1>
+            <p className="text-muted-foreground">
+              Paris sportifs, tirages et analyse IA
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <LienTransition href="/jeux/performance">
+              <Badge variant="outline" className="cursor-pointer gap-1">
+                <TrendingUp className="h-3 w-3" /> Performance
+              </Badge>
+            </LienTransition>
+            <LienTransition href="/jeux/bankroll">
+              <Badge variant="outline" className="cursor-pointer gap-1">
+                <TrendingUp className="h-3 w-3" /> Bankroll
+              </Badge>
+            </LienTransition>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Link href="/jeux/performance">
-            <Badge variant="outline" className="cursor-pointer gap-1">
-              <TrendingUp className="h-3 w-3" /> Performance
-            </Badge>
-          </Link>
-          <Link href="/jeux/bankroll">
-            <Badge variant="outline" className="cursor-pointer gap-1">
-              <TrendingUp className="h-3 w-3" /> Bankroll
-            </Badge>
-          </Link>
-        </div>
-      </div>
+      </SectionReveal>
 
-      <GrilleWidgets
-        stockageCle="widgets:hub:jeux"
-        titre="Widgets"
-        items={widgets}
-        classeGrille="grid gap-4 md:grid-cols-2"
-        renderItem={(item) => {
-          if (item.id === "opportunites") {
-            return dashboard ? (
-              <SectionOpportunites
-                valueBets={dashboard.value_bets ?? []}
-                series={dashboard.opportunites ?? []}
-                lotoRetard={dashboard.loto_retard ?? []}
-              />
-            ) : (
-              <EtatVide
-                Icone={Trophy}
-                titre="Données opportunités indisponibles"
-                description="Le tableau de bord jeux n'a pas encore remonté de signaux exploitables."
-                className="bg-muted/20 py-6"
-              />
-            );
-          }
-          if (item.id === "ia") {
-            return <SectionIA analyse={dashboard?.analyse_ia} />;
-          }
-          if (item.id === "kpis") {
-            return dashboard?.kpis ? (
-              <div className="grid gap-3 grid-cols-2 md:grid-cols-2">
-                <Card>
-                  <CardContent className="pt-4 text-center">
-                    <p className={`text-2xl font-bold ${dashboard.kpis.roi_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
-                      {dashboard.kpis.roi_mois >= 0 ? "+" : ""}
-                      {dashboard.kpis.roi_mois.toFixed(1)}%
-                    </p>
-                    <p className="text-xs text-muted-foreground">ROI ce mois</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-4 text-center">
-                    <p className="text-2xl font-bold">{(dashboard.kpis.taux_reussite_mois * 100).toFixed(0)}%</p>
-                    <p className="text-xs text-muted-foreground">Taux réussite</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-4 text-center">
-                    <p className={`text-2xl font-bold ${dashboard.kpis.benefice_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
-                      {dashboard.kpis.benefice_mois >= 0 ? "+" : ""}
-                      {dashboard.kpis.benefice_mois.toFixed(0)}€
-                    </p>
-                    <p className="text-xs text-muted-foreground">Bénéfice</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-4 text-center">
-                    <p className="text-2xl font-bold">{dashboard.kpis.paris_actifs}</p>
-                    <p className="text-xs text-muted-foreground">Paris actifs</p>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : <Card><CardContent className="py-6 text-sm text-muted-foreground">KPIs indisponibles</CardContent></Card>;
-          }
-          return null;
-        }}
-      />
+      <SectionReveal delay={0.04}>
+        <GrilleWidgets
+          stockageCle="widgets:hub:jeux"
+          titre="Widgets"
+          items={widgets}
+          classeGrille="grid gap-4 md:grid-cols-2"
+          renderItem={(item) => {
+            if (item.id === "opportunites") {
+              return dashboard ? (
+                <SectionOpportunites
+                  valueBets={dashboard.value_bets ?? []}
+                  series={dashboard.opportunites ?? []}
+                  lotoRetard={dashboard.loto_retard ?? []}
+                />
+              ) : (
+                <EtatVide
+                  Icone={Trophy}
+                  titre="Données opportunités indisponibles"
+                  description="Le tableau de bord jeux n'a pas encore remonté de signaux exploitables."
+                  className="bg-muted/20 py-6"
+                />
+              );
+            }
+            if (item.id === "ia") {
+              return <SectionIA analyse={dashboard?.analyse_ia} />;
+            }
+            if (item.id === "kpis") {
+              return dashboard?.kpis ? (
+                <div className="grid gap-3 grid-cols-2 md:grid-cols-2">
+                  <Card>
+                    <CardContent className="pt-4 text-center">
+                      <p className={`text-2xl font-bold ${dashboard.kpis.roi_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {dashboard.kpis.roi_mois >= 0 ? "+" : ""}
+                        {dashboard.kpis.roi_mois.toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">ROI ce mois</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 text-center">
+                      <p className="text-2xl font-bold">{(dashboard.kpis.taux_reussite_mois * 100).toFixed(0)}%</p>
+                      <p className="text-xs text-muted-foreground">Taux réussite</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 text-center">
+                      <p className={`text-2xl font-bold ${dashboard.kpis.benefice_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {dashboard.kpis.benefice_mois >= 0 ? "+" : ""}
+                        {dashboard.kpis.benefice_mois.toFixed(0)}€
+                      </p>
+                      <p className="text-xs text-muted-foreground">Bénéfice</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 text-center">
+                      <p className="text-2xl font-bold">{dashboard.kpis.paris_actifs}</p>
+                      <p className="text-xs text-muted-foreground">Paris actifs</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : <Card><CardContent className="py-6 text-sm text-muted-foreground">KPIs indisponibles</CardContent></Card>;
+            }
+            return null;
+          }}
+        />
+      </SectionReveal>
 
       {/* Navigation par onglets */}
-      <Tabs defaultValue="paris" onValueChange={(v) => router.push(`/jeux/${v}`)}>
-        <TabsList className="w-full grid grid-cols-3">
-          <TabsTrigger value="paris" className="gap-1">
-            <Trophy className="h-4 w-4" /> Paris
-          </TabsTrigger>
-          <TabsTrigger value="loto" className="gap-1">
-            <Ticket className="h-4 w-4" /> Loto
-          </TabsTrigger>
-          <TabsTrigger value="euromillions" className="gap-1">
-            <Star className="h-4 w-4" /> Euromillions
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <SectionReveal delay={0.08}>
+        <Tabs defaultValue="paris" onValueChange={(v) => router.push(`/jeux/${v}`)}>
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger value="paris" className="gap-1">
+              <Trophy className="h-4 w-4" /> Paris
+            </TabsTrigger>
+            <TabsTrigger value="loto" className="gap-1">
+              <Ticket className="h-4 w-4" /> Loto
+            </TabsTrigger>
+            <TabsTrigger value="euromillions" className="gap-1">
+              <Star className="h-4 w-4" /> Euromillions
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </SectionReveal>
     </div>
   );
 }

@@ -16,7 +16,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from src.core.db import obtenir_contexte_db
-from src.core.exceptions import ErreurService
+from src.core.exceptions import ErreurServiceIA
 from src.core.models import Match, PariSportif
 
 logger = logging.getLogger(__name__)
@@ -131,7 +131,7 @@ def scraper_cotes_sportives():
     
     except Exception as e:
         logger.error(f"❌ Erreur scraping cotes: {e}", exc_info=True)
-        raise ErreurService(f"Échec scraping cotes: {e}")
+        raise ErreurServiceIA(f"Échec scraping cotes: {e}")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -249,7 +249,7 @@ def scraper_resultats_matchs():
     
     except Exception as e:
         logger.error(f"❌ Erreur scraping résultats: {e}", exc_info=True)
-        raise ErreurService(f"Échec scraping résultats: {e}")
+        raise ErreurServiceIA(f"Échec scraping résultats: {e}")
 
 
 # ═══════════════════════════════════════════════════════════

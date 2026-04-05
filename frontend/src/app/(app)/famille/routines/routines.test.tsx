@@ -60,4 +60,10 @@ describe("PageRoutines", () => {
     expect(screen.getByText("Routine matin")).toBeInTheDocument();
     expect(screen.getByText("Routine soir")).toBeInTheDocument();
   });
+
+  it("affiche une heatmap de régularité pour les routines", () => {
+    renderWithQuery(<PageRoutines />);
+    expect(screen.getByText("Régularité des routines")).toBeInTheDocument();
+    expect(screen.getByText(/12 dernières semaines/i)).toBeInTheDocument();
+  });
 });

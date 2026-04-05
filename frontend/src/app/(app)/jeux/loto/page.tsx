@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
+import { BoutonExportCsv } from "@/composants/ui/bouton-export-csv";
 import {
   Table,
   TableBody,
@@ -93,12 +94,29 @@ export default function LotoPage() {
     { enabled: showBacktest }
   );
 
+  const donneesExportTirages = useMemo(
+    () =>
+      tirages.map((tirage) => ({
+        date: formaterDate(tirage.date_tirage),
+        numeros: tirage.numeros.join(" - "),
+        numero_chance: tirage.numero_chance ?? "",
+        jackpot_euros: tirage.jackpot_euros ?? "",
+        gagnants_rang1: tirage.gagnants_rang1 ?? "",
+      })),
+    [tirages]
+  );
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">🎱 Loto</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <BoutonExportCsv
+              data={donneesExportTirages}
+              filename="loto-tirages.csv"
+              label="Exporter CSV"
+            />
             <Button
               variant={modeVue === "simple" ? "default" : "outline"}
               size="sm"

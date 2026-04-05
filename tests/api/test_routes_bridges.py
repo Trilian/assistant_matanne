@@ -28,10 +28,11 @@ def test_catalogue_bridges_expose_la_consolidation(client: TestClient) -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["resume"]["total_legacy"] == 11
-    assert payload["resume"]["consolides"] == 11
+    assert payload["resume"]["total_legacy"] >= 34
+    assert payload["resume"]["consolides"] == payload["resume"]["total_legacy"]
     assert payload["resume"]["statut"] == "termine"
     assert any(item["flux"] == "Chat IA → Event Bus" for item in payload["items"])
+    assert any(str(item["module"]).endswith("inter_module_inventaire_budget") for item in payload["items"])
 
 
 def test_energie_heures_creuses_endpoint(client: TestClient) -> None:

@@ -351,7 +351,7 @@ frontend/src/
 
 La vague de finition est désormais documentée autour de quatre axes visibles en production :
 
-- **Routeur d'innovations consolidé** : `src/api/routes/innovations.py` centralise les alias historiques liés aux rapports IA, au mode pilote, aux préférences apprises et aux fonctionnalités transverses, tout en gardant la rétrocompatibilité des endpoints `/api/v1/innovations/...`.
+- **Routeur legacy consolidé** : `src/api/routes/legacy_compat.py` centralise les alias historiques liés aux rapports IA, au mode pilote, aux préférences apprises et aux fonctionnalités transverses, tout en gardant la rétrocompatibilité des endpoints `/api/v1/innovations/...`.
 - **Préférences apprises & pilotage IA** : `src/api/routes/preferences.py` expose les endpoints métier `apprentissage-habitudes`, `preferences-apprises` et `mode-pilote`, utilisés côté frontend dans `Paramètres > Cuisine`.
 - **Offline/PWA visible côté UI** : `frontend/public/sw.js` gère la file IndexedDB, la synchronisation différée et les messages `GET_SYNC_QUEUE_STATUS` / `REPLAY_SYNC_QUEUE`, maintenant exposés dans `Paramètres > Données`.
 - **Polish UX final** : le planning repas tactile (`frontend/src/app/(app)/cuisine/planning/page.tsx`), le mode tablette cuisine (`frontend/src/app/(app)/cuisine/tablette/page.tsx`) et l'aperçu temps réel du thème (`frontend/src/app/(app)/parametres/_composants/onglet-affichage.tsx`) matérialisent les finitions produit livrées.

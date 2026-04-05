@@ -33,6 +33,7 @@ import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { exporterRecettePdf, genererVersionJules, obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
+import { RadarNutritionFamille } from "@/composants/graphiques/radar-nutrition-famille";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -108,6 +109,12 @@ export default function PageDetailRecette({
 
   const tempsTotal =
     (recette.temps_preparation ?? 0) + (recette.temps_cuisson ?? 0);
+  const nutritionDisponible = [
+    recette.calories,
+    recette.proteines,
+    recette.lipides,
+    recette.glucides,
+  ].some((valeur) => (valeur ?? 0) > 0);
 
   return (
     <div className="space-y-6 print:space-y-3">
@@ -274,6 +281,40 @@ export default function PageDetailRecette({
         )}
 
       </div>
+
+      {nutritionDisponible && (
+        <Card className="overflow-hidden border-sky-200/70 bg-sky-50/40 dark:border-sky-900/50 dark:bg-sky-950/10">
+          <CardHeader>
+            <CardTitle className="text-lg">Radar nutritionnel</CardTitle>
+            <CardDescription>
+              Projection par portion comparée à une journée type pour mieux équilibrer la semaine.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-center">
+            <RadarNutritionFamille
+              nbJours={1}
+              totaux={{
+                calories: recette.calories ?? 0,
+                proteines: recette.proteines ?? 0,
+                lipides: recette.lipides ?? 0,
+                glucides: recette.glucides ?? 0,
+              }}
+            />
+            <div className="space-y-2 text-sm">
+              <p className="font-medium">Repères par portion</p>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>Calories : <span className="font-medium text-foreground">{recette.calories ?? 0}</span></li>
+                <li>Protéines : <span className="font-medium text-foreground">{recette.proteines ?? 0} g</span></li>
+                <li>Lipides : <span className="font-medium text-foreground">{recette.lipides ?? 0} g</span></li>
+                <li>Glucides : <span className="font-medium text-foreground">{recette.glucides ?? 0} g</span></li>
+              </ul>
+              <p className="text-xs text-muted-foreground">
+                Pratique pour comparer rapidement une recette riche, légère ou adaptée à la semaine de Jules et de la famille.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Ingrédients */}

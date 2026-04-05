@@ -12,7 +12,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.core.exceptions import ErreurService
+from src.core.exceptions import ErreurServiceIA
 from src.core.models.jeux import PariSportif, GrilleLoto, GrilleEuromillions
 from src.services.core.analytics import obtenir_analytics
 from src.services.jeux.bankroll_manager import get_bankroll_manager
@@ -140,7 +140,7 @@ class StatsPersonnellesService:
         
         except Exception as e:
             logger.error(f"❌ Erreur calcul ROI: {e}", exc_info=True)
-            raise ErreurService(f"Échec calcul ROI: {e}")
+            raise ErreurServiceIA(f"Échec calcul ROI: {e}")
     
     @avec_session_db
     def calculer_win_rate(self, user_id: int, jours: int = 30, session: Session | None = None) -> dict[str, Any]:
@@ -272,7 +272,7 @@ class StatsPersonnellesService:
         
         except Exception as e:
             logger.error(f"❌ Erreur calcul win rate: {e}", exc_info=True)
-            raise ErreurService(f"Échec calcul win rate: {e}")
+            raise ErreurServiceIA(f"Échec calcul win rate: {e}")
     
     @avec_session_db
     def analyser_patterns_gagnants(self, user_id: int, jours: int = 90, session: Session | None = None) -> dict[str, Any]:
@@ -408,7 +408,7 @@ class StatsPersonnellesService:
         
         except Exception as e:
             logger.error(f"❌ Erreur analyse patterns: {e}", exc_info=True)
-            raise ErreurService(f"Échec analyse patterns: {e}")
+            raise ErreurServiceIA(f"Échec analyse patterns: {e}")
     
     @avec_session_db
     def obtenir_evolution_mensuelle(self, user_id: int, mois: int = 6, session: Session | None = None) -> dict[str, Any]:
@@ -529,4 +529,4 @@ class StatsPersonnellesService:
         
         except Exception as e:
             logger.error(f"❌ Erreur calcul évolution: {e}", exc_info=True)
-            raise ErreurService(f"Échec calcul évolution: {e}")
+            raise ErreurServiceIA(f"Échec calcul évolution: {e}")

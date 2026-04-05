@@ -105,7 +105,7 @@ assistant_matanne/
 
 - `docs/CHANGELOG.md` : historique synthétique des jalons du projet
 - `docs/DEPRECATED.md` : fonctionnalités retirées ou refusées et leurs raisons
-- `docs/ADMIN_MODE.md` : guide complet du mode admin et de l'exploitation runtime
+- `docs/ADMIN.md` : guide complet du module admin et de l'exploitation runtime
 - `docs/ADMIN_QUICK_REFERENCE.md` : aide-mémoire admin pour les endpoints et procédures fréquentes
 - `docs/AUTOMATIONS.md` : référence consolidée des jobs planifiés et du moteur Si→Alors
 - `docs/CRON_JOBS.md` : inventaire détaillé des IDs de jobs, horaires et checklist d'ajout

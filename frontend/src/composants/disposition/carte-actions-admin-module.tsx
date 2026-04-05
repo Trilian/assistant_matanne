@@ -67,7 +67,7 @@ export function CarteActionsAdminModule({
               Actions admin — {moduleLabel}
             </CardTitle>
             <CardDescription>
-              {description ?? "Déclenchement manuel des jobs critiques du module et accès rapides Phase 4."}
+              {description ?? "Déclenchement manuel des jobs critiques du module et accès rapides admin."}
             </CardDescription>
           </div>
           <Badge variant="secondary">Admin</Badge>

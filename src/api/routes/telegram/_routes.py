@@ -91,10 +91,14 @@ async def envoyer_planning_telegram(payload: EnvoyerPlanningTelegramRequest) -> 
             }
 
     resultat = await executer_async(_charger_planning)
+    kwargs_envoi: dict[str, object] = {
+        "planning_id": int(resultat["planning_id"]),
+        "resume_ia": str(resultat.get("resume_ia") or ""),
+    }
+
     succes = await envoyer_planning_semaine(
         str(resultat["contenu"]),
-        planning_id=int(resultat["planning_id"]),
-        resume_ia=str(resultat.get("resume_ia") or ""),
+        **kwargs_envoi,
     )
     if not succes:
         raise HTTPException(status_code=502, detail="Envoi Telegram impossible")
