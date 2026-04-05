@@ -53,6 +53,19 @@ export async function validerPlanning(planningId: number): Promise<{ message: st
   return data;
 }
 
+/** Copier un planning vers une nouvelle semaine */
+export async function copierPlanning(
+  planningId: number,
+  semaineDebut: string
+): Promise<{ message: string; id: number; data?: { semaine_debut?: string; nb_repas?: number } }> {
+  const { data } = await clientApi.post<{
+    message: string;
+    id: number;
+    data?: { semaine_debut?: string; nb_repas?: number };
+  }>(`/planning/${planningId}/copier?semaine_debut=${semaineDebut}`);
+  return data;
+}
+
 /** Régénérer un planning (archive l'ancien et crée un nouveau brouillon) */
 export async function regenererPlanning(
   planningId: number

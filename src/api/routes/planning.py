@@ -552,6 +552,104 @@ async def valider_planning(
 
 
 @router.post(
+    "/{planning_id}/copier",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def copier_planning(
+    planning_id: int,
+    semaine_debut: date = Query(..., description="Date du lundi de la semaine cible (YYYY-MM-DD)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Copie un planning existant vers une nouvelle semaine.
+
+    Duplique tous les repas du planning source en recalculant les dates
+    pour la semaine cible. Le nouveau planning est créé en état brouillon.
+    """
+    from src.core.models import Planning, Repas
+
+    def _copier():
+        with executer_avec_session() as session:
+            source = session.query(Planning).filter(Planning.id == planning_id).first()
+            if not source:
+                raise HTTPException(status_code=404, detail="Planning source non trouvé")
+
+            semaine_fin = semaine_debut + timedelta(days=6)
+
+            # Vérifier qu'il n'existe pas déjà un planning pour cette semaine
+            existant = (
+                session.query(Planning)
+                .filter(Planning.semaine_debut == semaine_debut)
+                .first()
+            )
+            if existant:
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Un planning existe déjà pour la semaine du {semaine_debut.isoformat()}",
+                )
+
+            nouveau = Planning(
+                nom=f"Copie — semaine du {semaine_debut.strftime('%d/%m')}",
+                semaine_debut=semaine_debut,
+                semaine_fin=semaine_fin,
+                etat="brouillon",
+                genere_par_ia=False,
+                notes=f"Copié depuis le planning #{planning_id}",
+            )
+            session.add(nouveau)
+            session.flush()
+
+            # Calculer le décalage entre les deux semaines
+            if source.semaine_debut:
+                delta_jours = (semaine_debut - source.semaine_debut).days
+            else:
+                delta_jours = 0
+
+            repas_source = (
+                session.query(Repas)
+                .filter(Repas.planning_id == planning_id)
+                .all()
+            )
+
+            nb_copies = 0
+            for repas in repas_source:
+                nouvelle_date = repas.date_repas + timedelta(days=delta_jours) if repas.date_repas else semaine_debut
+                nouveau_repas = Repas(
+                    planning_id=nouveau.id,
+                    recette_id=repas.recette_id,
+                    date_repas=nouvelle_date,
+                    type_repas=repas.type_repas,
+                    portion_ajustee=repas.portion_ajustee,
+                    notes=repas.notes,
+                    entree=repas.entree,
+                    entree_recette_id=repas.entree_recette_id,
+                    dessert=repas.dessert,
+                    dessert_recette_id=repas.dessert_recette_id,
+                    dessert_jules=repas.dessert_jules,
+                    dessert_jules_recette_id=repas.dessert_jules_recette_id,
+                    plat_jules=repas.plat_jules,
+                    notes_jules=repas.notes_jules,
+                    adaptation_auto=repas.adaptation_auto,
+                )
+                session.add(nouveau_repas)
+                nb_copies += 1
+
+            session.commit()
+            return MessageResponse(
+                message=f"Planning copié avec {nb_copies} repas",
+                id=nouveau.id,
+                data={
+                    "semaine_debut": semaine_debut.isoformat(),
+                    "semaine_fin": semaine_fin.isoformat(),
+                    "nb_repas": nb_copies,
+                },
+            )
+
+    return await executer_async(_copier)
+
+
+@router.post(
     "/{planning_id}/regenerer",
     response_model=MessageResponse,
     responses=REPONSES_CRUD_ECRITURE,

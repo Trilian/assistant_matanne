@@ -216,12 +216,12 @@ class TestHistoriqueRecette:
         result = service.enregistrer_cuisson(
             recette_id=recette_in_db.id,
             portions=2,
-            note=4,
-            avis="TrÃ¨s bon",
+            avis="Très bon",
+            feedback="like",
         )
         assert result is True
 
-        # VÃ©rifier en base
+        # Vérifier en base
         historique = (
             db.query(HistoriqueRecette)
             .filter(HistoriqueRecette.recette_id == recette_in_db.id)
@@ -229,7 +229,7 @@ class TestHistoriqueRecette:
         )
         assert historique is not None
         assert historique.portions_cuisinees == 2
-        assert historique.note == 4
+        assert historique.feedback == "like"
 
     def test_enregistrer_cuisson_minimal(self, service, db, recette_in_db, patch_db_context):
         """Test enregistrement minimal."""

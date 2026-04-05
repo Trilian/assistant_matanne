@@ -275,6 +275,7 @@ class ActionPiloteAutomatique(BaseModel):
     action: str = ""
     statut: str = "proposee"
     details: str = ""
+    risque: str = "faible"  # faible, moyen, eleve
 
 
 class ModePiloteAutomatiqueResponse(BaseModel):

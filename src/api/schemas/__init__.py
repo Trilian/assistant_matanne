@@ -284,6 +284,67 @@ from .maison import (
     TraitementNuisibleResponse,
 )
 
+# Admin
+from .admin import (
+    AdminAuditLogsResponse,
+    AdminAuditStatsResponse,
+    AdminBridgesStatusResponse,
+    AdminConfigExportResponse,
+    AdminCoherenceDBResponse,
+    AdminDryRunCompareResponse,
+    AdminEventResponse,
+    AdminEventsListResponse,
+    AdminExportDBResponse,
+    AdminHistoriqueNotificationsResponse,
+    AdminImportDBResponse,
+    AdminJobHealthResponse,
+    AdminJobHistoriqueResponse,
+    AdminJobLogsResponse,
+    AdminJobResume,
+    AdminJobScheduleModifie,
+    AdminJobsRunAllResponse,
+    AdminNotificationTestAllResponse,
+    AdminNotificationTestResponse,
+    AdminPreviewTemplateResponse,
+    AdminQueueNotificationsResponse,
+    AdminSanteServicesResponse,
+    AdminSchemaDiffResponse,
+    AdminSimulerNotificationResponse,
+    AdminSimulationJourneeResponse,
+    AdminTemplatesNotificationsResponse,
+)
+
+# Voyages
+from .voyages import (
+    VoyageCreateResponse,
+    VoyageDetailResponse,
+    VoyageGenererCoursesResponse,
+    VoyagePlanifieIAResponse,
+    VoyageResume,
+    VoyageTemplateItem,
+    VoyageToggleChecklistResponse,
+)
+
+# Garmin
+from .garmin import (
+    GarminConnectCompleteResponse,
+    GarminConnectUrlResponse,
+    GarminDisconnectResponse,
+    GarminRecommandationDinerResponse,
+    GarminStatsResponse,
+    GarminStatusResponse,
+    GarminSyncResponse,
+)
+
+# Assistant
+from .assistant import (
+    ChatIAResponse,
+    CommandeVocaleResponse,
+    ExecIntentGoogleAssistantResponse,
+    ExemplesCommandeVocaleResponse,
+    IntentsGoogleAssistantResponse,
+)
+
 __all__ = [
     # Base
     "NomValidatorMixin",
@@ -494,4 +555,53 @@ __all__ = [
     "StatistiquesParis",
     "TirageLotoResponse",
     "GrilleLotoResponse",
+    # Admin
+    "AdminJobResume",
+    "AdminJobsRunAllResponse",
+    "AdminJobScheduleModifie",
+    "AdminJobLogsResponse",
+    "AdminJobHistoriqueResponse",
+    "AdminDryRunCompareResponse",
+    "AdminSimulationJourneeResponse",
+    "AdminBridgesStatusResponse",
+    "AdminSanteServicesResponse",
+    "AdminSchemaDiffResponse",
+    "AdminNotificationTestResponse",
+    "AdminNotificationTestAllResponse",
+    "AdminTemplatesNotificationsResponse",
+    "AdminPreviewTemplateResponse",
+    "AdminSimulerNotificationResponse",
+    "AdminHistoriqueNotificationsResponse",
+    "AdminQueueNotificationsResponse",
+    "AdminConfigExportResponse",
+    "AdminAuditLogsResponse",
+    "AdminAuditStatsResponse",
+    "AdminEventResponse",
+    "AdminEventsListResponse",
+    "AdminCoherenceDBResponse",
+    "AdminExportDBResponse",
+    "AdminImportDBResponse",
+    "AdminJobHealthResponse",
+    # Voyages
+    "VoyageResume",
+    "VoyageDetailResponse",
+    "VoyageCreateResponse",
+    "VoyageTemplateItem",
+    "VoyagePlanifieIAResponse",
+    "VoyageGenererCoursesResponse",
+    "VoyageToggleChecklistResponse",
+    # Garmin
+    "GarminStatusResponse",
+    "GarminConnectUrlResponse",
+    "GarminConnectCompleteResponse",
+    "GarminSyncResponse",
+    "GarminStatsResponse",
+    "GarminDisconnectResponse",
+    "GarminRecommandationDinerResponse",
+    # Assistant
+    "CommandeVocaleResponse",
+    "IntentsGoogleAssistantResponse",
+    "ExecIntentGoogleAssistantResponse",
+    "ChatIAResponse",
+    "ExemplesCommandeVocaleResponse",
 ]

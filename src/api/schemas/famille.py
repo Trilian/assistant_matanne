@@ -664,3 +664,74 @@ class ResumeBudgetMoisResponse(BaseModel):
             }
         }
     }
+
+
+# ═══════════════════════════════════════════════════════════
+# ROUTINES
+# ═══════════════════════════════════════════════════════════
+
+
+class EtapeRoutineResponse(BaseModel):
+    id: int
+    titre: str
+    duree_minutes: int | None = None
+    ordre: int = 0
+    est_terminee: bool = False
+
+
+class RoutineResponse(BaseModel):
+    id: int
+    nom: str
+    type: str = ""
+    est_active: bool = True
+    etapes: list[EtapeRoutineResponse] = Field(default_factory=list)
+
+
+class RoutineCompletionResponse(BaseModel):
+    id: int
+    nom: str
+    derniere_completion: str | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# SHOPPING FAMILLE
+# ═══════════════════════════════════════════════════════════
+
+
+class ShoppingItemResponse(BaseModel):
+    id: int
+    titre: str
+    categorie: str = ""
+    quantite: float = 1.0
+    prix_estime: float | None = None
+    liste: str = ""
+    actif: bool = True
+    date_ajout: str | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# RÉSUMÉ HEBDO
+# ═══════════════════════════════════════════════════════════
+
+
+class ResumeHebdoResponse(BaseModel):
+    synthese: str = ""
+    semaine: str = ""
+    recommandations: list[str] = Field(default_factory=list)
+    metriques: dict[str, Any] = Field(default_factory=dict)
+
+
+# ═══════════════════════════════════════════════════════════
+# JOURS SANS CRÈCHE
+# ═══════════════════════════════════════════════════════════
+
+
+class JourSansCrecheItem(BaseModel):
+    date: str
+    label: str = ""
+
+
+class PlanningJoursSansCrecheResponse(BaseModel):
+    mois: str
+    jours: list[JourSansCrecheItem] = Field(default_factory=list)
+    total: int = 0

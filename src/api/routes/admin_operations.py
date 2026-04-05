@@ -14,6 +14,18 @@ from pydantic import BaseModel
 from sqlalchemy import text
 
 from src.api.dependencies import require_auth, require_role
+from src.api.schemas.admin import (
+    AdminHistoriqueNotificationsResponse,
+    AdminNotificationTestAllResponse,
+    AdminNotificationTestResponse,
+    AdminPreviewTemplateResponse,
+    AdminQueueNotificationsResponse,
+    AdminSanteServicesResponse,
+    AdminSchemaDiffResponse,
+    AdminSimulerNotificationResponse,
+    AdminTemplatesNotificationsResponse,
+)
+from src.api.schemas.common import MessageResponse
 from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
@@ -42,6 +54,7 @@ logger = logging.getLogger(__name__)
 
 @router.get(
     "/services/health",
+    response_model=AdminSanteServicesResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Health check registre services",
     description="Vérifie l'état de santé de tous les services instanciés. Nécessite le rôle admin.",
@@ -84,6 +97,7 @@ async def sante_services(
 
 @router.get(
     "/schema-diff",
+    response_model=AdminSchemaDiffResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Comparer le schéma SQL attendu et la base active",
     description="Retourne un diff synthétique entre les fichiers SQL, la metadata ORM et la base configurée.",
@@ -122,6 +136,7 @@ async def obtenir_schema_diff_admin(
 
 @router.post(
     "/notifications/test",
+    response_model=AdminNotificationTestResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Envoyer une notification de test",
     description="Envoie une notification sur le canal spécifié (ntfy/push/email/telegram). Nécessite le rôle admin.",
@@ -175,6 +190,7 @@ async def envoyer_notification_test(
 
 @router.post(
     "/notifications/test-all",
+    response_model=AdminNotificationTestAllResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Tester tous les canaux notifications",
     description="Envoie un test sur l'ensemble des canaux admin configurés.",
@@ -228,6 +244,7 @@ async def envoyer_notification_test_all(
 
 @router.get(
     "/notifications/templates",
+    response_model=AdminTemplatesNotificationsResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Lister les templates notifications admin",
     description="Retourne les templates disponibles (Telegram + Email).",
@@ -245,6 +262,7 @@ async def lister_templates_notifications(
 
 @router.get(
     "/notifications/templates/{canal}/{template_id}/preview",
+    response_model=AdminPreviewTemplateResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Prévisualiser un template de notification",
     description="Construit un rendu texte simple d'un template avec variables de démonstration.",
@@ -285,6 +303,7 @@ async def previsualiser_template_notification(
 
 @router.post(
     "/notifications/simulate",
+    response_model=AdminSimulerNotificationResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Simuler une notification",
     description="Simule l'envoi d'une notification template (dry-run par défaut).",
@@ -347,6 +366,7 @@ async def simuler_notification(
 
 @router.get(
     "/notifications/history",
+    response_model=AdminHistoriqueNotificationsResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Historique livraison notifications",
     description="Retourne les dernières actions notifications admin (audit).",
@@ -389,6 +409,7 @@ async def historique_notifications(
 
 @router.get(
     "/notifications/queue",
+    response_model=AdminQueueNotificationsResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Lister la file digest notifications",
     description="Expose les éléments en attente de digest notifications par utilisateur.",
@@ -430,6 +451,7 @@ async def lister_queue_notifications(
 
 @router.post(
     "/notifications/queue/{user_id}/retry",
+    response_model=MessageResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Relancer une queue digest",
     description="Force l'envoi du digest d'un utilisateur et vide la file si succès.",
@@ -455,6 +477,7 @@ async def relancer_queue_notifications(
 
 @router.delete(
     "/notifications/queue/{user_id}",
+    response_model=MessageResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Supprimer la queue digest d'un utilisateur",
     description="Vide les notifications digest en attente pour un utilisateur.",
@@ -562,6 +585,7 @@ async def console_ia_admin(
 
 @router.post(
     "/cache/purge",
+    response_model=MessageResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Purger le cache",
     description="Invalide les entrées de cache correspondant au pattern. Nécessite le rôle admin.",
@@ -596,6 +620,7 @@ async def purger_cache(
 
 @router.post(
     "/cache/clear",
+    response_model=MessageResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Vider entièrement le cache L1 + L3",
     description="Supprime toutes les entrées cache (L1 mémoire + L3 fichier). Nécessite le rôle admin.",
@@ -711,6 +736,7 @@ async def lister_utilisateurs(
 
 @router.post(
     "/users/{user_id}/disable",
+    response_model=MessageResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Désactiver un compte utilisateur",
     description="Marque le compte comme désactivé. Nécessite le rôle admin.",

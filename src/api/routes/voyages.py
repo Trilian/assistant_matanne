@@ -9,12 +9,21 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE, REPONSES_LISTE
+from src.api.schemas.voyages import (
+    VoyageCreateResponse,
+    VoyageDetailResponse,
+    VoyageGenererCoursesResponse,
+    VoyagePlanifieIAResponse,
+    VoyageResume,
+    VoyageTemplateItem,
+    VoyageToggleChecklistResponse,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/famille/voyages", tags=["Voyages"])
 
 
-@router.get("", responses=REPONSES_LISTE)
+@router.get("", response_model=list[VoyageResume], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_voyages(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
@@ -27,7 +36,7 @@ async def lister_voyages(user: dict[str, Any] = Depends(require_auth)) -> dict[s
     return await executer_async(_query)
 
 
-@router.get("/templates", responses=REPONSES_LISTE)
+@router.get("/templates", response_model=list[VoyageTemplateItem], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_templates_voyage(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
@@ -54,7 +63,7 @@ async def lister_templates_voyage(user: dict[str, Any] = Depends(require_auth)) 
     return await executer_async(_query)
 
 
-@router.post("", responses=REPONSES_CRUD_CREATION)
+@router.post("", response_model=VoyageCreateResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_voyage(payload: dict[str, Any], user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
@@ -69,7 +78,7 @@ async def creer_voyage(payload: dict[str, Any], user: dict[str, Any] = Depends(r
     return await executer_async(_query)
 
 
-@router.get("/{voyage_id}", responses=REPONSES_CRUD_LECTURE)
+@router.get("/{voyage_id}", response_model=VoyageDetailResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def detail_voyage(voyage_id: int, user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
@@ -107,7 +116,7 @@ async def detail_voyage(voyage_id: int, user: dict[str, Any] = Depends(require_a
     return await executer_async(_query)
 
 
-@router.post("/planifier-ia", responses=REPONSES_CRUD_CREATION)
+@router.post("/planifier-ia", response_model=VoyagePlanifieIAResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def planifier_voyage_ia(
     payload: dict[str, Any],
@@ -208,7 +217,7 @@ async def planifier_voyage_ia(
     return await executer_async(_query)
 
 
-@router.post("/{voyage_id}/generer-courses", responses=REPONSES_CRUD_CREATION)
+@router.post("/{voyage_id}/generer-courses", response_model=VoyageGenererCoursesResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def generer_courses_depuis_voyage(
     voyage_id: int,
@@ -233,7 +242,7 @@ async def generer_courses_depuis_voyage(
     return await executer_async(_query)
 
 
-@router.post("/{voyage_id}/checklists/{checklist_id}/toggle", responses=REPONSES_CRUD_CREATION)
+@router.post("/{voyage_id}/checklists/{checklist_id}/toggle", response_model=VoyageToggleChecklistResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def cocher_article_checklist(
     voyage_id: int,

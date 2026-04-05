@@ -98,34 +98,29 @@ export interface ResultatOCRFrigo {
   message?: string;
 }
 
-/** Analyse une photo de frigo via IA et importe les aliments dans l'inventaire */
-export async function ocrPhotoFrigo(
-  file: File,
-  emplacement = "frigo"
-): Promise<ResultatOCRFrigo> {
-  const fd = new FormData();
-  fd.append("photo", file);
-  const { data } = await clientApi.post<ResultatOCRFrigo>(
-    `/inventaire/ocr-photo-frigo?emplacement=${encodeURIComponent(emplacement)}`,
-    fd,
-    { headers: { "Content-Type": "multipart/form-data" } }
-  );
-  return data;
-}
-
-/** Détecte les aliments dans une photo de frigo SANS importer (mode preview pour checkboxes) */
+/** Détecte les aliments dans une photo de frigo via le endpoint unifié photo-frigo (mode preview pour checkboxes) */
 export async function detecterPhotoFrigoSansImport(
   file: File,
-  emplacement = "frigo"
+  _emplacement = "frigo"
 ): Promise<ResultatOCRFrigo> {
   const fd = new FormData();
-  fd.append("photo", file);
-  const { data } = await clientApi.post<ResultatOCRFrigo>(
-    `/inventaire/ocr-photo-frigo?emplacement=${encodeURIComponent(emplacement)}&import=false`,
-    fd,
-    { headers: { "Content-Type": "multipart/form-data" } }
-  );
-  return data;
+  fd.append("file", file);
+  const { data } = await clientApi.post<{
+    ingredients_detectes: { nom: string; quantite_estimee?: string; confiance: number }[];
+  }>(`/suggestions/photo-frigo`, fd, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  const articles: ArticleBulk[] = (data.ingredients_detectes ?? []).map((ing) => ({
+    nom: ing.nom,
+    quantite: ing.quantite_estimee ? parseFloat(ing.quantite_estimee) || 1 : 1,
+  }));
+  return {
+    articles,
+    total: articles.length,
+    crees: 0,
+    mis_a_jour: 0,
+    message: `${articles.length} aliment(s) détecté(s)`,
+  };
 }
 
 // ─── Scan multi-codes ─────────────────────────────────────────────────

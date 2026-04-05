@@ -14,6 +14,14 @@ from sqlalchemy import func
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA, REPONSES_LISTE
+from src.api.schemas.dashboard import (
+    DashboardBudgetUnifieResponse,
+    DashboardConfigResponse,
+    DashboardCuisineResponse,
+    DashboardMainResponse,
+    DashboardScoreEcologiqueResponse,
+    ScoreFoyerResponse,
+)
 from src.api.schemas.ia_transverses import (
     AlertesContextuellesResponse,
     InsightsQuotidiensResponse,
@@ -290,7 +298,7 @@ class DashboardConfigRequest(BaseModel):
     config_dashboard: dict[str, Any] = Field(default_factory=dict)
 
 
-@router.get("", responses=REPONSES_LISTE)
+@router.get("", response_model=DashboardMainResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def obtenir_tableau_bord(
     user: dict[str, Any] = Depends(require_auth),
@@ -535,7 +543,7 @@ async def obtenir_tableau_bord(
     return await executer_async(_query)
 
 
-@router.get("/budget-unifie", responses=REPONSES_LISTE)
+@router.get("/budget-unifie", response_model=DashboardBudgetUnifieResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def obtenir_budget_unifie(
     user: dict[str, Any] = Depends(require_auth),
@@ -554,7 +562,7 @@ async def obtenir_budget_unifie(
     return await executer_async(_query)
 
 
-@router.get("/cuisine", responses=REPONSES_LISTE)
+@router.get("/cuisine", response_model=DashboardCuisineResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def obtenir_dashboard_cuisine(
     user: dict[str, Any] = Depends(require_auth),
@@ -661,7 +669,10 @@ async def obtenir_dashboard_cuisine(
                 if r.plat_jules
             ]
 
-            return {\n                \"repas_aujourd_hui\": repas_aujourd_hui,\n                \"repas_semaine_count\": int(repas_semaine_count),\n                \"nb_recettes\": int(nb_recettes),
+            return {
+                "repas_aujourd_hui": repas_aujourd_hui,
+                "repas_semaine_count": int(repas_semaine_count),
+                "nb_recettes": int(nb_recettes),
                 "articles_courses_restants": int(articles_courses_restants),
                 "alertes_inventaire": int(alertes_inventaire),
                 "score_anti_gaspillage": score_anti_gaspillage,
@@ -743,6 +754,7 @@ async def obtenir_score_foyer(
 
 @router.get(
     "/score-ecologique",
+    response_model=DashboardScoreEcologiqueResponse,
     responses=REPONSES_LISTE,
     summary="Score écologique transversal",
 )
@@ -761,6 +773,7 @@ async def obtenir_score_ecologique(
 
 @router.get(
     "/config",
+    response_model=DashboardConfigResponse,
     responses=REPONSES_LISTE,
     summary="Lire la config dashboard",
 )
@@ -785,6 +798,7 @@ async def lire_config_dashboard(
 @router.put(
     "/config",
     responses=REPONSES_LISTE,
+    response_model=DashboardConfigResponse,
     summary="Mettre Ã  jour la config dashboard",
 )
 @gerer_exception_api

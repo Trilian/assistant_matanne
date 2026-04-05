@@ -21,7 +21,7 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
 )
-from src.api.schemas.jeux import AnalyseIARequest, GenererGrilleRequest
+from src.api.schemas.jeux import AnalyseIARequest, AnalyseGrilleLotoResponse, GenererGrilleRequest, GrilleGenereeResponse, GrilleIAPondereeResponse, GrilleLotoResponse, NumeroRetardResponse, StatsLotoResponse, TirageLotoResponse
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 import logging
 
@@ -38,7 +38,7 @@ router = APIRouter()
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.get("/loto/tirages", responses=REPONSES_LISTE)
+@router.get("/loto/tirages", response_model=list[TirageLotoResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_tirages_loto(
     page: int = Query(1, ge=1),
@@ -82,7 +82,7 @@ async def lister_tirages_loto(
     return await executer_async(_query)
 
 
-@router.get("/loto/grilles", responses=REPONSES_LISTE)
+@router.get("/loto/grilles", response_model=list[GrilleLotoResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_grilles_loto(
     est_virtuelle: bool | None = Query(None, description="Grilles virtuelles ou rÃ©elles"),
@@ -123,7 +123,7 @@ async def lister_grilles_loto(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.get("/loto/stats", responses=REPONSES_LISTE)
+@router.get("/loto/stats", response_model=StatsLotoResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def stats_loto(
     user: dict[str, Any] = Depends(require_auth),
@@ -170,7 +170,7 @@ async def stats_loto(
     return await executer_async(_query)
 
 
-@router.get("/loto/numeros-retard", responses=REPONSES_LISTE)
+@router.get("/loto/numeros-retard", response_model=list[NumeroRetardResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def numeros_retard_loto(
     seuil: float = Query(2.0, ge=0),
@@ -208,7 +208,7 @@ async def numeros_retard_loto(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.post("/loto/generer-grille", responses=REPONSES_CRUD_CREATION)
+@router.post("/loto/generer-grille", response_model=GrilleGenereeResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def generer_grille_loto(
     payload: GenererGrilleRequest,
@@ -282,7 +282,7 @@ async def generer_grille_loto(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.post("/loto/generer-grille-ia-ponderee", responses=REPONSES_CRUD_CREATION)
+@router.post("/loto/generer-grille-ia-ponderee", response_model=GrilleIAPondereeResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def generer_grille_ia_ponderee(
     mode: str = Query("equilibre", pattern="^(chauds|froids|equilibre)$"),
@@ -344,7 +344,7 @@ async def generer_grille_ia_ponderee(
     return await executer_async(_query)
 
 
-@router.post("/loto/analyser-grille", responses=REPONSES_CRUD_CREATION)
+@router.post("/loto/analyser-grille", response_model=AnalyseGrilleLotoResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def analyser_grille_joueur(
     numeros: list[int] = Query(..., description="5 numÃ©ros de 1 Ã  49"),

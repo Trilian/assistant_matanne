@@ -8,6 +8,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE
+from src.api.schemas.garmin import (
+    GarminConnectCompleteResponse,
+    GarminConnectUrlResponse,
+    GarminDisconnectResponse,
+    GarminRecommandationDinerResponse,
+    GarminStatsResponse,
+    GarminStatusResponse,
+    GarminSyncResponse,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/garmin", tags=["Garmin"])
@@ -26,7 +35,7 @@ def _resoudre_user_id(session, user: dict[str, Any]) -> int:
     return profil.id
 
 
-@router.get("/status", responses=REPONSES_CRUD_LECTURE)
+@router.get("/status", response_model=GarminStatusResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_statut_garmin(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.core.models.users import ProfilUtilisateur
@@ -45,7 +54,7 @@ async def obtenir_statut_garmin(user: dict[str, Any] = Depends(require_auth)) ->
     return await executer_async(_query)
 
 
-@router.post("/connect-url", responses=REPONSES_CRUD_CREATION)
+@router.post("/connect-url", response_model=GarminConnectUrlResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_url_connexion_garmin(
     callback_url: str = Query("oob"),
@@ -60,7 +69,7 @@ async def creer_url_connexion_garmin(
     return {"authorization_url": authorization_url, "request_token": request_token}
 
 
-@router.post("/complete", responses=REPONSES_CRUD_CREATION)
+@router.post("/complete", response_model=GarminConnectCompleteResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def terminer_connexion_garmin(
     payload: dict[str, str],
@@ -84,7 +93,7 @@ async def terminer_connexion_garmin(
     return await executer_async(_query)
 
 
-@router.post("/sync", responses=REPONSES_CRUD_CREATION)
+@router.post("/sync", response_model=GarminSyncResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def synchroniser_garmin(
     days_back: int = Query(7, ge=1, le=30),
@@ -101,7 +110,7 @@ async def synchroniser_garmin(
     return await executer_async(_query)
 
 
-@router.get("/stats", responses=REPONSES_CRUD_LECTURE)
+@router.get("/stats", response_model=GarminStatsResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_stats_garmin(
     days: int = Query(7, ge=1, le=60),
@@ -118,7 +127,7 @@ async def obtenir_stats_garmin(
     return await executer_async(_query)
 
 
-@router.post("/disconnect", responses=REPONSES_CRUD_CREATION)
+@router.post("/disconnect", response_model=GarminDisconnectResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def deconnecter_garmin(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.integrations.garmin.service import obtenir_garmin_service
@@ -133,7 +142,7 @@ async def deconnecter_garmin(user: dict[str, Any] = Depends(require_auth)) -> di
     return await executer_async(_query)
 
 
-@router.get("/recommandation-diner", responses=REPONSES_CRUD_LECTURE)
+@router.get("/recommandation-diner", response_model=GarminRecommandationDinerResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def recommander_diner_selon_activite(
     calories_brulees: int = Query(0, ge=0, le=3000),

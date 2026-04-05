@@ -13,6 +13,16 @@ from pydantic import BaseModel
 from sqlalchemy import text
 
 from src.api.dependencies import require_role
+from src.api.schemas.admin import (
+    AdminBridgesStatusResponse,
+    AdminDryRunCompareResponse,
+    AdminJobHistoriqueResponse,
+    AdminJobLogsResponse,
+    AdminJobResultat,
+    AdminJobScheduleModifie,
+    AdminJobsRunAllResponse,
+    AdminSimulationJourneeResponse,
+)
 from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
@@ -37,6 +47,7 @@ logger = logging.getLogger(__name__)
 
 @router.get(
     "/bridges/status",
+    response_model=AdminBridgesStatusResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Statut opérationnel des bridges inter-modules",
     description=(
@@ -478,6 +489,7 @@ async def lister_jobs(
 
 @router.post(
     "/jobs/{job_id}/run",
+    response_model=AdminJobResultat,
     responses=REPONSES_AUTH_ADMIN,
     summary="Déclencher un job manuellement",
     description="Exécute immédiatement le job indiqué. Nécessite le rôle admin. Rate-limited: 5 req/min.",
@@ -532,6 +544,7 @@ async def executer_job(
 
 @router.post(
     "/jobs/run-all",
+    response_model=AdminJobsRunAllResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Exécuter tous les jobs",
     description="Exécute séquentiellement tous les jobs enregistrés (dry-run possible).",
@@ -613,6 +626,7 @@ async def executer_tous_les_jobs(
 
 @router.put(
     "/jobs/{job_id}/schedule",
+    response_model=AdminJobScheduleModifie,
     responses=REPONSES_AUTH_ADMIN,
     summary="Modifier le schedule d'un job",
     description="Met à jour dynamiquement le CronTrigger d'un job existant.",
@@ -666,6 +680,7 @@ async def modifier_schedule_job(
 
 @router.post(
     "/jobs/run-morning-batch",
+    response_model=AdminJobsRunAllResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary='Lancer tous les jobs du matin',
     description="Exécute en séquence les jobs planifiés entre 06:00 et 09:00.",
@@ -732,6 +747,7 @@ async def executer_jobs_matin(
 
 @router.post(
     "/jobs/simulate-day",
+    response_model=AdminSimulationJourneeResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary='Simuler une journée de jobs',
     description="Exécute séquentiellement les jobs disponibles d'une journée type en mode dry-run.",
@@ -835,6 +851,7 @@ async def simuler_journee_jobs(
 
 @router.get(
     "/jobs/{job_id}/logs",
+    response_model=AdminJobLogsResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Logs dernière exécution d'un job",
     description="Retourne l'historique des déclenchements manuels du job. Nécessite le rôle admin.",
@@ -888,6 +905,7 @@ async def logs_job(
 
 @router.get(
     "/jobs/history",
+    response_model=AdminJobHistoriqueResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Historique des exécutions jobs",
     description="Retourne l'historique paginé des exécutions de jobs avec filtres.",
@@ -985,6 +1003,7 @@ async def historique_jobs(
 
 @router.post(
     "/jobs/history/{execution_id}/retry",
+    response_model=AdminJobResultat,
     responses=REPONSES_AUTH_ADMIN,
     summary="Relancer un job depuis l'historique",
     description="Récupère le job_id d'une exécution historique puis relance ce job.",
@@ -1023,6 +1042,7 @@ async def relancer_job_depuis_historique(
 
 @router.get(
     "/jobs/compare-dry-run",
+    response_model=AdminDryRunCompareResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Comparer dry-run et exécution réelle",
     description="Compare les dernières exécutions dry-run et réelles par job.",

@@ -15,6 +15,13 @@ from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE
+from src.api.schemas.assistant import (
+    ChatIAResponse,
+    CommandeVocaleResponse,
+    ExecIntentGoogleAssistantResponse,
+    ExemplesCommandeVocaleResponse,
+    IntentsGoogleAssistantResponse,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 logger = logging.getLogger(__name__)
@@ -374,6 +381,7 @@ def _executer_commande_assistant(texte: str, source: str = "assistant_api") -> d
 
 @router.post(
     "/commande-vocale",
+    response_model=CommandeVocaleResponse,
     responses=REPONSES_CRUD_CREATION,
     summary="Interpréter une commande vocale",
 )
@@ -402,6 +410,7 @@ async def interpreter_commande_vocale(
 
 @router.get(
     "/google-assistant/intents",
+    response_model=IntentsGoogleAssistantResponse,
     summary="Lister les intents Google Assistant supportés",
 )
 @gerer_exception_api
@@ -424,6 +433,7 @@ async def lister_intents_google_assistant(
 
 @router.post(
     "/google-assistant/executer",
+    response_model=ExecIntentGoogleAssistantResponse,
     summary="Exécuter un intent Google Assistant",
 )
 @gerer_exception_api
@@ -527,6 +537,7 @@ async def obtenir_dernieres_suggestions_proactives(
 
 @router.post(
     "/chat",
+    response_model=ChatIAResponse,
     responses=REPONSES_CRUD_LECTURE,
     summary="Chat IA contextuel enrichi",
 )
@@ -631,6 +642,7 @@ async def chat_assistant_contextuel_stream(
 
 @router.get(
     "/commande-vocale/exemples",
+    response_model=ExemplesCommandeVocaleResponse,
     responses=REPONSES_CRUD_LECTURE,
     summary="Exemples de commandes vocales",
 )

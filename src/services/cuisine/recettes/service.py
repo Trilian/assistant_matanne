@@ -346,6 +346,7 @@ class ServiceRecettes(
         portions: int = 1,
         note: int | None = None,
         avis: str | None = None,
+        feedback: str | None = None,
         db: Session | None = None,
     ) -> bool:
         """Enregistre qu'une recette a été cuisinée.
@@ -353,8 +354,9 @@ class ServiceRecettes(
         Args:
             recette_id: ID de la recette
             portions: Nombre de portions cuisinées
-            note: Note de 0-5 (optionnel)
+            note: Déprécié, ignoré (conservé pour compatibilité)
             avis: Avis personnel (optionnel)
+            feedback: Appréciation rapide like/dislike/neutral (optionnel)
             db: Session DB injectée
 
         Returns:
@@ -369,8 +371,8 @@ class ServiceRecettes(
                 recette_id=recette_id,
                 date_preparation=date.today(),
                 portions_cuisinees=portions,
-                note=note,
                 avis=avis,
+                feedback=feedback or "neutral",
             )
             db.add(historique)
             db.commit()
@@ -484,18 +486,15 @@ class ServiceRecettes(
                 return {
                     "nb_cuissons": 0,
                     "derniere_cuisson": None,
-                    "note_moyenne": None,
                     "total_portions": 0,
                     "jours_depuis_derniere": None,
                 }
 
-            notes = [h.note for h in historique if h.note is not None]
             derniere = historique[0]
 
             return {
                 "nb_cuissons": len(historique),
                 "derniere_cuisson": derniere.date_preparation,
-                "note_moyenne": sum(notes) / len(notes) if notes else None,
                 "total_portions": sum(h.portions_cuisinees for h in historique),
                 "jours_depuis_derniere": (date.today() - derniere.date_preparation).days,
             }

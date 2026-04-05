@@ -432,3 +432,45 @@ class DashboardJeuxResponse(BaseModel):
     budget: BudgetResponsableResponse = Field(default_factory=BudgetResponsableResponse)
     kpis: KPIsJeuxResponse = Field(default_factory=KPIsJeuxResponse)
     analyse_ia: AnalyseIAResponse | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# LOTO GÉNÉRATION IA
+# ═══════════════════════════════════════════════════════════
+
+
+class GrilleIAPondereeResponse(BaseModel):
+    """Grille loto générée par IA pondérée."""
+
+    numeros: list[int] = Field(default_factory=list)
+    numero_chance: int = 0
+    mode: str = "equilibre"
+    analyse: str = ""
+    confiance: float = 0.0
+    sauvegardee: bool = False
+
+
+class AnalyseGrilleLotoResponse(BaseModel):
+    """Analyse qualitative d'une grille loto."""
+
+    grille: dict[str, Any] = Field(default_factory=dict)
+    note: int = 0
+    points_forts: list[str] = Field(default_factory=list)
+    points_faibles: list[str] = Field(default_factory=list)
+    recommandations: list[str] = Field(default_factory=list)
+    appreciation: str = ""
+
+
+class GrilleExpertEuromillionsResponse(BaseModel):
+    """Grille euromillions experte."""
+
+    id: int
+    numeros: list[int] = Field(default_factory=list)
+    etoiles: list[int] = Field(default_factory=list)
+    date_tirage: str | None = None
+    strategie: str = ""
+    qualite: float = 0.0
+    explication: str = ""
+    distribution: dict[str, Any] = Field(default_factory=dict)
+    backtest: dict[str, Any] | None = None
+    statut: str = ""

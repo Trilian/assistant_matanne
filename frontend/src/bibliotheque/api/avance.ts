@@ -5,6 +5,7 @@ export interface ActionPiloteAuto {
   action: string;
   statut: string;
   details: string;
+  risque: string;
 }
 
 export interface ModePiloteAutoResponse {

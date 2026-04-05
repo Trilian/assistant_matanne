@@ -394,34 +394,3 @@ async def statut_predictions(
     service = obtenir_ml_predictions()
     return {"modeles": service.statut_modeles()}
 
-
-@router.get("/saison")
-@gerer_exception_api
-async def produits_de_saison(
-    mois: int = Query(0, ge=0, le=12, description="Mois (1-12). 0 = mois courant"),
-    user: dict = Depends(require_auth),
-):
-    """Retourne les fruits et lÃ©gumes de saison pour le mois donnÃ©."""
-    import json
-    from datetime import date
-    from pathlib import Path
-
-    mois_cible = mois if mois > 0 else date.today().month
-    fichier = Path(__file__).resolve().parents[3] / "data" / "reference" / "produits_de_saison.json"
-
-    if not fichier.exists():
-        raise HTTPException(status_code=404, detail="Catalogue saisonnier introuvable")
-
-    data = json.loads(fichier.read_text(encoding="utf-8"))
-    produits = data.get("produits", [])
-
-    fruits = [p["nom"] for p in produits if mois_cible in p.get("mois", []) and p.get("categorie") == "fruit"]
-    legumes = [p["nom"] for p in produits if mois_cible in p.get("mois", []) and p.get("categorie") == "legume"]
-
-    return {
-        "mois": mois_cible,
-        "fruits": sorted(fruits),
-        "legumes": sorted(legumes),
-        "total": len(fruits) + len(legumes),
-    }
-

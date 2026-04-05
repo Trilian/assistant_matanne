@@ -13,6 +13,12 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import text
 
 from src.api.dependencies import require_role
+from src.api.schemas.admin import (
+    AdminAuditLogsResponse,
+    AdminAuditStatsResponse,
+    AdminEventsListResponse,
+)
+from src.api.schemas.common import MessageResponse
 from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
@@ -29,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 @router.get(
     "/audit-logs",
+    response_model=AdminAuditLogsResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Lister les logs d'audit",
     description="Retourne les logs d'audit paginés avec filtres optionnels. Nécessite le rôle admin.",
@@ -67,6 +74,7 @@ async def lister_audit_logs(
 
 @router.get(
     "/security-logs",
+    response_model=AdminAuditLogsResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Lister les événements de sécurité",
     description="Retourne les logs de sécurité (auth, rate limiting, admin) avec filtres.",
@@ -151,6 +159,7 @@ async def lister_logs_securite(
 
 @router.get(
     "/audit-stats",
+    response_model=AdminAuditStatsResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Statistiques d'audit",
     description="Statistiques agrégées du journal d'audit.",
@@ -261,6 +270,7 @@ async def exporter_audit_pdf(
 
 @router.get(
     "/events",
+    response_model=AdminEventsListResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Consulter le bus d'événements",
     description="Expose les métriques et l'historique récent du bus d'événements domaine.",
@@ -294,6 +304,7 @@ async def lire_evenements_admin(
 
 @router.post(
     "/events/trigger",
+    response_model=MessageResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Déclencher un événement domaine",
     description="Émet manuellement un événement sur le bus pour tester les subscribers.",
@@ -330,6 +341,7 @@ async def declencher_evenement_admin(
 
 @router.post(
     "/events/replay",
+    response_model=MessageResponse,
     responses=REPONSES_AUTH_ADMIN,
     summary="Rejouer un événement passé",
     description="Recharge l'historique DB du bus puis ré-émet un ou plusieurs événements.",

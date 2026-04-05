@@ -22,8 +22,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/composants/ui/card";
-import { Switch } from "@/composants/ui/switch";
 import { Badge } from "@/composants/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/composants/ui/select";
 import { toast } from "sonner";
 import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
@@ -47,15 +53,22 @@ export default function PageOutils() {
     { staleTime: 60 * 1000 }
   );
 
-  const { mutate: basculerModePilote, isPending: basculeModePiloteEnCours } = utiliserMutation(
-    (actif: boolean) =>
+  const { mutate: changerNiveau, isPending: changementEnCours } = utiliserMutation(
+    (niveau: string) =>
       configurerModePiloteAuto({
-        actif,
-        niveau_autonomie: actif ? modePilote?.niveau_autonomie ?? "validation_requise" : "off",
+        actif: niveau !== "off",
+        niveau_autonomie: niveau,
       }),
     {
       onSuccess: (data) => {
-        toast.success(data.actif ? "Mode pilote activé" : "Mode pilote désactivé");
+        const labels: Record<string, string> = {
+          off: "Mode pilote désactivé",
+          proposee: "Mode propositions activé",
+          validation_requise: "Mode validation activé",
+          semi_auto: "Mode semi-auto activé",
+          auto: "Mode automatique activé",
+        };
+        toast.success(labels[data.niveau_autonomie] ?? "Mode pilote mis à jour");
         void rechargerModePilote();
       },
       onError: () => {
@@ -86,19 +99,43 @@ export default function PageOutils() {
               Pilotage IA centralisé côté outils.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">Niveau: {modePilote?.niveau_autonomie ?? "validation_requise"}</Badge>
-              <span className="text-xs text-muted-foreground">Actions: {modePilote?.actions?.length ?? 0}</span>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Select
+                value={modePilote?.niveau_autonomie ?? "validation_requise"}
+                disabled={changementEnCours}
+                onValueChange={(v) => changerNiveau(v)}
+              >
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="off">⏹️ Désactivé</SelectItem>
+                  <SelectItem value="proposee">💡 Propositions seules</SelectItem>
+                  <SelectItem value="validation_requise">✅ Validation requise</SelectItem>
+                  <SelectItem value="semi_auto">⚡ Semi-auto (faible risque)</SelectItem>
+                  <SelectItem value="auto">🤖 Tout automatique</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-xs text-muted-foreground">
+                {modePilote?.actions?.length ?? 0} action(s) en attente
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm">Actif</span>
-              <Switch
-                checked={Boolean(modePilote?.actif)}
-                disabled={basculeModePiloteEnCours}
-                onCheckedChange={(actif) => basculerModePilote(actif)}
-              />
-            </div>
+            {(modePilote?.actions?.length ?? 0) > 0 && (
+              <div className="space-y-1.5">
+                {modePilote!.actions.map((a, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <Badge
+                      variant={a.statut === "auto" ? "default" : "outline"}
+                      className="text-[10px] px-1.5"
+                    >
+                      {a.statut}
+                    </Badge>
+                    <span className="text-muted-foreground">{a.details}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </SectionReveal>

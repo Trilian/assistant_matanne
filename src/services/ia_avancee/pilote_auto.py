@@ -120,6 +120,7 @@ def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) ->
                         action="proposer_generation_planning",
                         statut="validation_requise",
                         details="Planning incomplet : generation d'une semaine equilibree proposee.",
+                        risque="moyen",
                     )
                 )
 
@@ -142,6 +143,7 @@ def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) ->
                             action="proposer_complement_liste",
                             statut="validation_requise",
                             details="Liste de courses courte : suggestion de complement depuis historique.",
+                            risque="faible",
                         )
                     )
 
@@ -153,10 +155,23 @@ def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) ->
                         action="activer_routines_defaut",
                         statut="proposee",
                         details="Aucune routine active detectee.",
+                        risque="faible",
                     )
                 )
     except Exception:
         logger.warning("Mode pilote automatique partiel", exc_info=True)
+
+    # Ajuster le statut des actions selon le niveau d'autonomie
+    for action in actions:
+        if niveau_autonomie == "proposee":
+            action.statut = "proposee"
+        elif niveau_autonomie == "validation_requise":
+            action.statut = "validation_requise"
+        elif niveau_autonomie == "semi_auto":
+            # Semi-auto : exécution auto pour risque faible, validation pour le reste
+            action.statut = "auto" if action.risque == "faible" else "validation_requise"
+        elif niveau_autonomie == "auto":
+            action.statut = "auto"
 
     return ModePiloteAutomatiqueResponse(
         actif=True,

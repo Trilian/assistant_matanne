@@ -21,7 +21,7 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
 )
-from src.api.schemas.jeux import AnalyseIARequest, GenererGrilleRequest
+from src.api.schemas.jeux import AnalyseIARequest, GenererGrilleRequest, GrilleEuromillionsResponse, GrilleExpertEuromillionsResponse, GrilleGenereeResponse, StatsEuromillionsResponse, TirageEuromillionsResponse
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 import logging
 
@@ -38,7 +38,7 @@ router = APIRouter()
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.get("/euromillions/tirages", responses=REPONSES_LISTE)
+@router.get("/euromillions/tirages", response_model=list[TirageEuromillionsResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_tirages_euromillions(
     page: int = Query(1, ge=1),
@@ -56,7 +56,7 @@ async def lister_tirages_euromillions(
     return await executer_async(_query)
 
 
-@router.get("/euromillions/grilles", responses=REPONSES_LISTE)
+@router.get("/euromillions/grilles", response_model=list[GrilleEuromillionsResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_grilles_euromillions(
     user: dict[str, Any] = Depends(require_auth),
@@ -72,7 +72,7 @@ async def lister_grilles_euromillions(
     return await executer_async(_query)
 
 
-@router.post("/euromillions/grilles", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/euromillions/grilles", status_code=201, response_model=GrilleEuromillionsResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_grille_euromillions(
     payload: dict[str, Any],
@@ -105,7 +105,7 @@ async def creer_grille_euromillions(
     return await executer_async(_query)
 
 
-@router.get("/euromillions/stats", responses=REPONSES_LISTE)
+@router.get("/euromillions/stats", response_model=StatsEuromillionsResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def stats_euromillions(
     user: dict[str, Any] = Depends(require_auth),
@@ -145,7 +145,7 @@ async def stats_euromillions(
     return await executer_async(_query)
 
 
-@router.get("/euromillions/grilles-expert", responses=REPONSES_LISTE)
+@router.get("/euromillions/grilles-expert", response_model=list[GrilleExpertEuromillionsResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_grilles_expert_euromillions(
     strategie: str | None = Query(None, description="equilibree, frequences, retards, ia_creative"),
@@ -272,7 +272,7 @@ async def generer_grille_ia_euromillions(
     
 
 
-@router.post("/euromillions/generer-grille", responses=REPONSES_CRUD_CREATION)
+@router.post("/euromillions/generer-grille", response_model=GrilleGenereeResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def generer_grille_euromillions(
     payload: GenererGrilleRequest,

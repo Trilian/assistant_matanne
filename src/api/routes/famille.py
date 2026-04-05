@@ -47,20 +47,29 @@ from src.api.schemas.errors import (
 from src.api.schemas.famille import (
     AchatCreate,
     AchatPatch,
+    AchatResponse,
     AnnonceIBCRequest,
+    AnnonceIBCResponse,
     AnniversaireCreate,
+    AnniversaireResponse,
     ChecklistAnniversaireItemCreate,
     ChecklistAnniversaireItemPatch,
     ChecklistAnniversaireSyncRequest,
     AnniversairePatch,
     ConfigGardeRequest,
+    ConfigGardeResponse,
     ContexteFamilialResponse,
     EvenementFamilialCreate,
     EvenementFamilialPatch,
+    EvenementFamilialResponse,
     MarquerAchetePayload,
+    PlanningJoursSansCrecheResponse,
     PreferencesFamilleRequest,
     PreferencesFamilleResponse,
     PrefillReventeResponse,
+    ResumeHebdoResponse,
+    RoutineCompletionResponse,
+    RoutineResponse,
     SuggestionAchatResponse,
     SuggestionsActivitesSimpleRequest,
     SuggestionsAchatsEnrichiesRequest,
@@ -266,7 +275,7 @@ def _serialiser_routine(routine) -> dict[str, Any]:
     }
 
 
-@router.get("/routines", responses=REPONSES_LISTE)
+@router.get("/routines", response_model=list[RoutineResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_routines(
     actif: bool | None = Query(None, description="Filtrer par statut actif"),
@@ -291,7 +300,7 @@ async def lister_routines(
     return await executer_async(_query)
 
 
-@router.get("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
+@router.get("/routines/{routine_id}", response_model=RoutineResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_routine(
     routine_id: int,
@@ -310,7 +319,7 @@ async def obtenir_routine(
     return await executer_async(_query)
 
 
-@router.post("/routines", status_code=201, responses=REPONSES_LISTE)
+@router.post("/routines", status_code=201, response_model=RoutineResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def creer_routine(
     payload: dict[str, Any],
@@ -344,7 +353,7 @@ async def creer_routine(
     return await executer_async(_query)
 
 
-@router.patch("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
+@router.patch("/routines/{routine_id}", response_model=RoutineResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def modifier_routine(
     routine_id: int,
@@ -418,7 +427,7 @@ def _serialiser_anniversaire(a) -> dict:  # noqa: ANN001
     }
 
 
-@router.get("/anniversaires", responses=REPONSES_LISTE)
+@router.get("/anniversaires", response_model=list[AnniversaireResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_anniversaires(
     relation: str | None = Query(None),
@@ -444,7 +453,7 @@ async def lister_anniversaires(
     return await executer_async(_query)
 
 
-@router.get("/anniversaires/{anniversaire_id}", responses=REPONSES_CRUD_LECTURE)
+@router.get("/anniversaires/{anniversaire_id}", response_model=AnniversaireResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_anniversaire(
     anniversaire_id: int,
@@ -465,7 +474,7 @@ async def obtenir_anniversaire(
     return await executer_async(_query)
 
 
-@router.post("/anniversaires", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/anniversaires", status_code=201, response_model=AnniversaireResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_anniversaire(
     donnees: AnniversaireCreate,
@@ -492,7 +501,7 @@ async def creer_anniversaire(
     return await executer_async(_query)
 
 
-@router.patch("/anniversaires/{anniversaire_id}", responses=REPONSES_CRUD_ECRITURE)
+@router.patch("/anniversaires/{anniversaire_id}", response_model=AnniversaireResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_anniversaire(
     anniversaire_id: int,
@@ -721,7 +730,7 @@ def _serialiser_evenement(e) -> dict:  # noqa: ANN001
     }
 
 
-@router.get("/evenements", responses=REPONSES_LISTE)
+@router.get("/evenements", response_model=list[EvenementFamilialResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_evenements_familiaux(
     type_evenement: str | None = Query(None),
@@ -745,7 +754,7 @@ async def lister_evenements_familiaux(
     return await executer_async(_query)
 
 
-@router.post("/evenements", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/evenements", status_code=201, response_model=EvenementFamilialResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_evenement_familial(
     donnees: EvenementFamilialCreate,
@@ -773,7 +782,7 @@ async def creer_evenement_familial(
     return await executer_async(_query)
 
 
-@router.patch("/evenements/{evenement_id}", responses=REPONSES_CRUD_ECRITURE)
+@router.patch("/evenements/{evenement_id}", response_model=EvenementFamilialResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_evenement_familial(
     evenement_id: int,
@@ -833,7 +842,7 @@ async def supprimer_evenement_familial(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/resume-hebdo", responses=REPONSES_CRUD_LECTURE)
+@router.get("/resume-hebdo", response_model=ResumeHebdoResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_resume_hebdomadaire(
     user: dict[str, Any] = Depends(require_auth),
@@ -900,7 +909,7 @@ def _serialiser_achat(a) -> dict:  # noqa: ANN001
     }
 
 
-@router.get("/achats", responses=REPONSES_LISTE)
+@router.get("/achats", response_model=list[AchatResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_achats_famille(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),
@@ -937,7 +946,7 @@ async def lister_achats_famille(
     return await executer_async(_query)
 
 
-@router.post("/achats", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/achats", status_code=201, response_model=AchatResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_achat(
     payload: AchatCreate,
@@ -970,7 +979,7 @@ async def creer_achat(
     return await executer_async(_query)
 
 
-@router.patch("/achats/{achat_id}", responses=REPONSES_CRUD_ECRITURE)
+@router.patch("/achats/{achat_id}", response_model=AchatResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_achat(
     achat_id: int,
@@ -1086,7 +1095,7 @@ async def suggestions_achats_enrichies(
     return await executer_async(_query)
 
 
-@router.post("/achats/{achat_id}/annonce-lbc", responses=REPONSES_CRUD_LECTURE)
+@router.post("/achats/{achat_id}/annonce-lbc", response_model=AnnonceIBCResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def generer_annonce_lbc(
     achat_id: int,
@@ -1216,7 +1225,7 @@ async def prefill_revente_achat(
 
 
 
-@router.patch("/routines/{routine_id}/completer", responses=REPONSES_CRUD_ECRITURE)
+@router.patch("/routines/{routine_id}/completer", response_model=RoutineCompletionResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def completer_routine(
     routine_id: int,
@@ -1243,7 +1252,7 @@ async def completer_routine(
 
 
 
-@router.get("/config/garde", responses=REPONSES_CRUD_LECTURE)
+@router.get("/config/garde", response_model=ConfigGardeResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def lire_config_garde(
     user: dict[str, Any] = Depends(require_auth),
@@ -1361,7 +1370,7 @@ async def sauvegarder_preferences_famille(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/planning/jours-sans-creche", responses=REPONSES_LISTE)
+@router.get("/planning/jours-sans-creche", response_model=PlanningJoursSansCrecheResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def jours_sans_creche(
     mois: str | None = Query(None, description="Mois YYYY-MM. Par défaut: mois courant"),

@@ -22,6 +22,7 @@ import {
   UtensilsCrossed,
   Wind,
   Check,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -38,6 +39,7 @@ import {
   obtenirPlanningSemaine,
   genererPlanningSemaine,
   obtenirNutritionHebdo,
+  copierPlanning,
 } from "@/bibliotheque/api/planning";
 import { listerInventaire, obtenirAlertes } from "@/bibliotheque/api/inventaire";
 import { genererCoursesDepuisPlanning } from "@/bibliotheque/api/courses";
@@ -201,6 +203,20 @@ export default function MaSemainePage() {
         toast.success(`Session batch créée avec ${result.nb_recettes} recettes !`);
       },
       onError: () => toast.error("Erreur lors de la création de la session batch"),
+    }
+  );
+
+  const { mutate: copier, isPending: enCopie } = utiliserMutation(
+    (semaineCible: string) => {
+      if (!planning?.planning_id) throw new Error("Pas de planning à copier");
+      return copierPlanning(planning.planning_id, semaineCible);
+    },
+    {
+      onSuccess: (result) => {
+        toast.success(result.message);
+        invalider(["planning"]);
+      },
+      onError: () => toast.error("Erreur lors de la copie du planning"),
     }
   );
 
@@ -388,9 +404,25 @@ export default function MaSemainePage() {
                         {nbRepas} repas planifiés
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => router.push("/cuisine/planning")}>
-                      Modifier
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={enCopie || !planning?.planning_id}
+                        onClick={() => {
+                          const lundi = new Date(dateDebut);
+                          lundi.setDate(lundi.getDate() + 7);
+                          const cible = lundi.toISOString().split("T")[0];
+                          copier(cible);
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-1" />
+                        {enCopie ? "Copie…" : "Copier semaine +1"}
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => router.push("/cuisine/planning")}>
+                        Modifier
+                      </Button>
+                    </div>
                   </div>
                   {nutrition && (
                     <div className="grid grid-cols-3 gap-2 text-sm">
