@@ -37,7 +37,7 @@ from src.services.habitat.dvf_service import obtenir_service_dvf_habitat
 from src.services.integrations.habitudes_ia import AnalyseHabitude
 from src.services.integrations.meteo_impact_ai import MeteoContexte
 from src.services.inventaire.ia_service import PredictionConsommation
-from src.services.maison.projets_ia_service import EstimationProjet
+from src.services.maison.ia.projets_ia_service import EstimationProjet
 from src.services.planning.ia_service import AnalyseVariete, OptimisationNutrition, SimplificationSemaine
 from src.services.utilitaires.meteo_service import MeteoService
 
@@ -69,7 +69,7 @@ def _get_habitudes_ai_service():
 
 
 def _get_projets_maison_ai_service():
-    from src.services.maison.projets_ia_service import get_projets_maison_ai_service
+    from src.services.maison.ia.projets_ia_service import get_projets_maison_ai_service
 
     return get_projets_maison_ai_service()
 
@@ -322,7 +322,7 @@ async def predire_consommation_energie(
 ) -> PredictionEnergieResponse:
     from datetime import date
 
-    from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
+    from src.services.maison.ia.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
 
     service = obtenir_service_energie_anomalies_ia()
     types_compteurs = ("electricite", "gaz", "eau")

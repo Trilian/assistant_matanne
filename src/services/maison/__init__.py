@@ -12,6 +12,9 @@ Architecture:
     +-- jardin_service.py       # JardinService + JardinierIA
     +-- entretien_service.py    # EntretienService + CalendrierIA
     +-- projets_service.py      # ProjetsService + EstimateurIA
+    +-- crud/                   # Services CRUD autonomes
+    +-- ia/                     # Services IA spécialisés
+    +-- bridges/                # Bridges inter-modules
 """
 
 from typing import TYPE_CHECKING
@@ -33,49 +36,49 @@ _SERVICES = {
     "obtenir_service_jardin": "jardin_service",
     "obtenir_service_entretien": "entretien_service",
     "obtenir_service_projets": "projets_service",
-    # CRUD services
-    "DepensesCrudService": "depenses_crud_service",
-    "get_depenses_crud_service": "depenses_crud_service",
-    "obtenir_depenses_crud_service": "depenses_crud_service",
-    "obtenir_service_depenses_crud": "depenses_crud_service",
+    # CRUD services → crud/
+    "DepensesCrudService": "crud.depenses_crud_service",
+    "get_depenses_crud_service": "crud.depenses_crud_service",
+    "obtenir_depenses_crud_service": "crud.depenses_crud_service",
+    "obtenir_service_depenses_crud": "crud.depenses_crud_service",
     "HubDataService": "hub_data_service",
     "get_hub_data_service": "hub_data_service",
     "obtenir_service_hub_data": "hub_data_service",
-    # NEW: Meubles CRUD service
-    "MeublesCrudService": "meubles_crud_service",
-    "get_meubles_crud_service": "meubles_crud_service",
-    "obtenir_service_meubles_crud": "meubles_crud_service",
-    # NEW: Eco Tips CRUD service
-    "EcoTipsCrudService": "eco_tips_crud_service",
-    "get_eco_tips_crud_service": "eco_tips_crud_service",
-    "obtenir_service_eco_tips_crud": "eco_tips_crud_service",
-    # Artisans CRUD service
-    "ArtisansCrudService": "artisans_crud_service",
-    "get_artisans_crud_service": "artisans_crud_service",
-    "obtenir_service_artisans_crud": "artisans_crud_service",
-    # Cellier CRUD service
-    "CellierCrudService": "cellier_crud_service",
-    "get_cellier_crud_service": "cellier_crud_service",
-    "obtenir_service_cellier_crud": "cellier_crud_service",
-    # Checklists CRUD service
-    "ChecklistsCrudService": "checklists_crud_service",
-    "get_checklists_service": "checklists_crud_service",
-    # Diagnostics & Estimations CRUD services
-    "DiagnosticsCrudService": "diagnostics_crud_service",
-    "get_diagnostics_crud_service": "diagnostics_crud_service",
-    "obtenir_service_diagnostics_crud": "diagnostics_crud_service",
-    "EstimationsCrudService": "diagnostics_crud_service",
-    "get_estimations_crud_service": "diagnostics_crud_service",
-    "obtenir_service_estimations_crud": "diagnostics_crud_service",
-    # Extensions CRUD services (nuisibles, devis, entretien saisonnier, relevés)
-    "NuisiblesCrudService": "extensions_crud_service",
-    "get_nuisibles_crud_service": "extensions_crud_service",
-    "DevisCrudService": "extensions_crud_service",
-    "get_devis_crud_service": "extensions_crud_service",
-    "EntretienSaisonnierCrudService": "extensions_crud_service",
-    "get_entretien_saisonnier_crud_service": "extensions_crud_service",
-    "RelevesCrudService": "extensions_crud_service",
-    "get_releves_crud_service": "extensions_crud_service",
+    # Meubles CRUD service → crud/
+    "MeublesCrudService": "crud.meubles_crud_service",
+    "get_meubles_crud_service": "crud.meubles_crud_service",
+    "obtenir_service_meubles_crud": "crud.meubles_crud_service",
+    # Eco Tips CRUD service → crud/
+    "EcoTipsCrudService": "crud.eco_tips_crud_service",
+    "get_eco_tips_crud_service": "crud.eco_tips_crud_service",
+    "obtenir_service_eco_tips_crud": "crud.eco_tips_crud_service",
+    # Artisans CRUD service → crud/
+    "ArtisansCrudService": "crud.artisans_crud_service",
+    "get_artisans_crud_service": "crud.artisans_crud_service",
+    "obtenir_service_artisans_crud": "crud.artisans_crud_service",
+    # Cellier CRUD service → crud/
+    "CellierCrudService": "crud.cellier_crud_service",
+    "get_cellier_crud_service": "crud.cellier_crud_service",
+    "obtenir_service_cellier_crud": "crud.cellier_crud_service",
+    # Checklists CRUD service → crud/
+    "ChecklistsCrudService": "crud.checklists_crud_service",
+    "get_checklists_service": "crud.checklists_crud_service",
+    # Diagnostics & Estimations CRUD services → crud/
+    "DiagnosticsCrudService": "crud.diagnostics_crud_service",
+    "get_diagnostics_crud_service": "crud.diagnostics_crud_service",
+    "obtenir_service_diagnostics_crud": "crud.diagnostics_crud_service",
+    "EstimationsCrudService": "crud.diagnostics_crud_service",
+    "get_estimations_crud_service": "crud.diagnostics_crud_service",
+    "obtenir_service_estimations_crud": "crud.diagnostics_crud_service",
+    # Extensions CRUD services (nuisibles, devis, entretien saisonnier, relevés) → crud/
+    "NuisiblesCrudService": "crud.extensions_crud_service",
+    "get_nuisibles_crud_service": "crud.extensions_crud_service",
+    "DevisCrudService": "crud.extensions_crud_service",
+    "get_devis_crud_service": "crud.extensions_crud_service",
+    "EntretienSaisonnierCrudService": "crud.extensions_crud_service",
+    "get_entretien_saisonnier_crud_service": "crud.extensions_crud_service",
+    "RelevesCrudService": "crud.extensions_crud_service",
+    "get_releves_crud_service": "crud.extensions_crud_service",
     # Visualisation service
     "VisualisationService": "visualisation_service",
     "get_visualisation_service": "visualisation_service",
@@ -84,7 +87,7 @@ _SERVICES = {
     "ContexteMaisonService": "contexte_maison_service",
     "get_contexte_maison_service": "contexte_maison_service",
     "obtenir_service_contexte_maison": "contexte_maison_service",
-    # Catalogue Entretien service (sync JSON ? tâches DB)
+    # Catalogue Entretien service (sync JSON → tâches DB)
     "CatalogueEntretienService": "catalogue_entretien_service",
     "get_catalogue_entretien_service": "catalogue_entretien_service",
     "obtenir_service_catalogue_entretien": "catalogue_entretien_service",
@@ -92,25 +95,25 @@ _SERVICES = {
     "NotificationsMaisonService": "notifications_maison",
     "get_notifications_maison_service": "notifications_maison",
     "obtenir_service_notifications_maison": "notifications_maison",
-    # Innovations maison / énergie consolidées
-    "ServiceInnovationsMaison": "service_ia",
-    "obtenir_service_innovations_maison": "service_ia",
+    # Innovations maison / énergie consolidées → ia/
+    "ServiceInnovationsMaison": "ia.service_ia",
+    "obtenir_service_innovations_maison": "ia.service_ia",
     # Fiche Tâche service (catalogue + IA fallback)
     "FicheTacheService": "fiche_tache_service",
     "get_fiche_tache_service": "fiche_tache_service",
     "obtenir_service_fiche_tache": "fiche_tache_service",
-    # Catalogue Enrichissement service (IA enrichissement JSON)
-    "CatalogueEnrichissementService": "catalogue_enrichissement_service",
-    "get_catalogue_enrichissement_service": "catalogue_enrichissement_service",
-    # Bridges inter-modules
-    "ChargesEnergieInteractionService": "inter_module_charges_energie",
-    "obtenir_service_charges_energie_interaction": "inter_module_charges_energie",
-    "EntretienCoursesInteractionService": "inter_module_entretien_courses",
-    "obtenir_service_entretien_courses_interaction": "inter_module_entretien_courses",
-    "JardinEntretienInteractionService": "inter_module_jardin_entretien",
-    "obtenir_service_jardin_entretien_interaction": "inter_module_jardin_entretien",
-    "GarantiesDocumentsInteractionService": "inter_module_garanties_documents",
-    "obtenir_service_garanties_documents_interaction": "inter_module_garanties_documents",
+    # Catalogue Enrichissement service (IA enrichissement JSON) → ia/
+    "CatalogueEnrichissementService": "ia.catalogue_enrichissement_service",
+    "get_catalogue_enrichissement_service": "ia.catalogue_enrichissement_service",
+    # Bridges inter-modules → bridges/
+    "ChargesEnergieInteractionService": "bridges.inter_module_charges_energie",
+    "obtenir_service_charges_energie_interaction": "bridges.inter_module_charges_energie",
+    "EntretienCoursesInteractionService": "bridges.inter_module_entretien_courses",
+    "obtenir_service_entretien_courses_interaction": "bridges.inter_module_entretien_courses",
+    "JardinEntretienInteractionService": "bridges.inter_module_jardin_entretien",
+    "obtenir_service_jardin_entretien_interaction": "bridges.inter_module_jardin_entretien",
+    "GarantiesDocumentsInteractionService": "bridges.inter_module_garanties_documents",
+    "obtenir_service_garanties_documents_interaction": "bridges.inter_module_garanties_documents",
 }
 
 _SCHEMAS = {
@@ -151,16 +154,16 @@ def __dir__():
 
 # Type hints pour IDE sans charger les modules
 if TYPE_CHECKING:
-    from .artisans_crud_service import ArtisansCrudService, get_artisans_crud_service
-    from .cellier_crud_service import CellierCrudService, get_cellier_crud_service
-    from .depenses_crud_service import obtenir_depenses_crud_service
-    from .diagnostics_crud_service import (
+    from .crud.artisans_crud_service import ArtisansCrudService, get_artisans_crud_service
+    from .crud.cellier_crud_service import CellierCrudService, get_cellier_crud_service
+    from .crud.depenses_crud_service import obtenir_depenses_crud_service
+    from .crud.diagnostics_crud_service import (
         DiagnosticsCrudService,
         EstimationsCrudService,
         get_diagnostics_crud_service,
         get_estimations_crud_service,
     )
-    from .eco_tips_crud_service import (
+    from .crud.eco_tips_crud_service import (
         EcoTipsCrudService,
         get_eco_tips_crud_service,
         obtenir_service_eco_tips_crud,
@@ -170,7 +173,7 @@ if TYPE_CHECKING:
         get_entretien_service,
         obtenir_service_entretien,
     )
-    from .extensions_crud_service import (
+    from .crud.extensions_crud_service import (
         DevisCrudService,
         EntretienSaisonnierCrudService,
         NuisiblesCrudService,
@@ -181,14 +184,14 @@ if TYPE_CHECKING:
         get_releves_crud_service,
     )
     from .jardin_service import JardinService, get_jardin_service, obtenir_service_jardin
-    from .meubles_crud_service import (
+    from .crud.meubles_crud_service import (
         MeublesCrudService,
         get_meubles_crud_service,
         obtenir_service_meubles_crud,
     )
     from .projets_service import ProjetsService, get_projets_service, obtenir_service_projets
     from .visualisation_service import VisualisationService, get_visualisation_service
-    from .catalogue_enrichissement_service import (
+    from .ia.catalogue_enrichissement_service import (
         CatalogueEnrichissementService,
         get_catalogue_enrichissement_service,
     )

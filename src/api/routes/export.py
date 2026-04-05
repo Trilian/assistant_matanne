@@ -146,7 +146,7 @@ async def exporter_json(
     from datetime import datetime
 
     def _export():
-        from src.services.utilitaires.export_service import ExportService
+        from src.services.utilitaires.export.export_service import ExportService
         service = ExportService()
         if mot_de_passe:
             return service.exporter_json_chiffre(domaines_list, mot_de_passe)
@@ -216,7 +216,7 @@ async def restaurer_depuis_json(
     # Déchiffrer si nécessaire
     if mot_de_passe:
         def _dechiffrer():
-            from src.services.utilitaires.export_service import ExportService
+            from src.services.utilitaires.export.export_service import ExportService
             try:
                 return ExportService.dechiffrer_json(contenu, mot_de_passe).encode("utf-8")
             except ValueError as exc:

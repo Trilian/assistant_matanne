@@ -29,17 +29,17 @@ CATALOGUE_BRIDGES_CONSOLIDES: list[dict[str, str]] = [
     {
         "groupe": "utilitaires",
         "flux": "Dashboard → Actions rapides",
-        "module": "src.services.utilitaires.inter_module_dashboard_actions",
+        "module": "src.services.utilitaires.bridges.inter_module_dashboard_actions",
     },
     {
         "groupe": "utilitaires",
         "flux": "Chat IA → Event Bus",
-        "module": "src.services.utilitaires.inter_module_chat_event_bus",
+        "module": "src.services.utilitaires.bridges.inter_module_chat_event_bus",
     },
     {
         "groupe": "utilitaires",
         "flux": "Chat → Contexte multi-modules",
-        "module": "src.services.utilitaires.inter_module_chat_contexte",
+        "module": "src.services.utilitaires.bridges.inter_module_chat_contexte",
     },
     {
         "groupe": "famille",
@@ -69,17 +69,17 @@ CATALOGUE_BRIDGES_CONSOLIDES: list[dict[str, str]] = [
     {
         "groupe": "maison",
         "flux": "Jardin → Entretien",
-        "module": "src.services.maison.inter_module_jardin_entretien",
+        "module": "src.services.maison.bridges.inter_module_jardin_entretien",
     },
     {
         "groupe": "maison",
         "flux": "Entretien → Courses",
-        "module": "src.services.maison.inter_module_entretien_courses",
+        "module": "src.services.maison.bridges.inter_module_entretien_courses",
     },
     {
         "groupe": "maison",
         "flux": "Charges → Énergie",
-        "module": "src.services.maison.inter_module_charges_energie",
+        "module": "src.services.maison.bridges.inter_module_charges_energie",
     },
 ]
 
@@ -520,7 +520,7 @@ class BridgesInterModulesService:
     @avec_gestion_erreurs(default_return={})
     def energie_hc_hp_vers_planning_machines(self) -> dict:
         """IM-5: Propose la meilleure fenêtre HC/HP pour lancer les machines."""
-        from src.services.maison.inter_module_energie_cuisine import (
+        from src.services.maison.bridges.inter_module_energie_cuisine import (
             obtenir_service_energie_cuisine_interaction,
         )
 

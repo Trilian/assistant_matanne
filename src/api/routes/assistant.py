@@ -516,7 +516,7 @@ async def obtenir_dernieres_suggestions_proactives(
     """Expose les suggestions proactives les plus récentes produites par I.15."""
 
     def _query() -> dict[str, Any]:
-        from src.services.utilitaires.assistant_proactif import (
+        from src.services.utilitaires.chat.assistant_proactif import (
             obtenir_service_assistant_proactif,
         )
 
@@ -538,7 +538,7 @@ async def chat_assistant_contextuel(
     """Chat IA avec contexte cross-module (planning, inventaire, budget, score Jules, evenements)."""
 
     def _query() -> dict[str, Any]:
-        from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+        from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service
 
         contexte_metier = _collecter_contexte_metier_chat()
         historique = _normaliser_historique_chat(payload.historique)
@@ -580,7 +580,7 @@ async def chat_assistant_contextuel_stream(
     user: dict[str, Any] = Depends(require_auth),
 ) -> StreamingResponse:
     """Diffuse la réponse IA au fil de l'eau via Server-Sent Events."""
-    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+    from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service
 
     contexte_metier = _collecter_contexte_metier_chat()
     historique = _normaliser_historique_chat(payload.historique)

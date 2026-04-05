@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 def detecter_anomalies_energie(service) -> AnomaliesEnergieResponse | None:
     """Anomalies énergie : détecte des anomalies eau/gaz/électricité."""
-    from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
+    from src.services.maison.ia.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
 
     service = obtenir_service_energie_anomalies_ia()
     details: list[AnomalieEnergieDetail] = []

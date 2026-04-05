@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from src.services.ia_avancee.types import PlanningAdaptatif
-from src.services.utilitaires.assistant_proactif import AssistantProactifService
+from src.services.utilitaires.chat.assistant_proactif import AssistantProactifService
 
 
 def test_traiter_evenement_repas_saute_declenche_un_reajustement_de_planning():

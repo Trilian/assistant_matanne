@@ -15,7 +15,7 @@ class TestBridgeEntretienBudget:
     def test_enregistrer_depense_entretien_success(self, test_db: Session):
         """Test l'enregistrement d'une dépense d'entretien."""
         from src.core.models.habitat import TacheEntretien
-        from src.services.maison.inter_module_entretien_budget import (
+        from src.services.maison.bridges.inter_module_entretien_budget import (
             obtenir_entretien_budget_bridge,
         )
 
@@ -47,7 +47,7 @@ class TestBridgeEntretienBudget:
     def test_obtenir_depenses_par_entretien(self, test_db: Session):
         """Test la récupération des dépenses d'entretien."""
         from src.core.models.finances import DepenseMaison
-        from src.services.maison.inter_module_entretien_budget import (
+        from src.services.maison.bridges.inter_module_entretien_budget import (
             obtenir_entretien_budget_bridge,
         )
 
@@ -334,7 +334,7 @@ class TestBridgesIntegration:
 
     def test_tous_les_bridges_importent(self):
         """Vérifie que tous les bridges s'importent correctement."""
-        from src.services.maison.inter_module_entretien_budget import (
+        from src.services.maison.bridges.inter_module_entretien_budget import (
             obtenir_entretien_budget_bridge,
         )
         from src.services.cuisine.inter_module_courses_validation import (
@@ -361,7 +361,7 @@ class TestBridgesIntegration:
     def test_enregistrement_subscribers_sans_erreur(self):
         """Vérifie que les subscribers s'enregistrent sans erreur."""
         try:
-            from src.services.maison.inter_module_entretien_budget import (
+            from src.services.maison.bridges.inter_module_entretien_budget import (
                 enregistrer_entretien_budget_subscribers,
             )
             from src.services.cuisine.inter_module_courses_validation import (

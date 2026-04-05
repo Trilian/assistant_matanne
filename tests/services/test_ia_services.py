@@ -11,7 +11,7 @@ from src.services.inventaire.ia_service import InventaireAIService, PredictionCo
 from src.services.planning.ia_service import PlanningAIService, AnalyseVariete
 from src.services.integrations.meteo_impact_ai import MeteoImpactAIService, MeteoContexte
 from src.services.integrations.habitudes_ia import HabitudesAIService, AnalyseHabitude
-from src.services.maison.projets_ia_service import ProjetsMaisonAIService, EstimationProjet
+from src.services.maison.ia.projets_ia_service import ProjetsMaisonAIService, EstimationProjet
 from src.services.cuisine.nutrition_famille_ia import (
     NutritionFamilleAIService,
     DonneesNutritionnelles,
@@ -192,7 +192,7 @@ class TestProjetsMaisonAIService:
 
     @pytest.fixture
     def service(self):
-        with patch("src.services.maison.projets_ia_service.obtenir_client_ia"):
+        with patch("src.services.maison.ia.projets_ia_service.obtenir_client_ia"):
             return ProjetsMaisonAIService()
 
     @pytest.mark.asyncio
@@ -273,7 +273,7 @@ def test_services_registered_in_registry():
     from src.services.planning.ia_service import get_planning_ai_service
     from src.services.integrations.meteo_impact_ai import get_meteo_impact_ai_service
     from src.services.integrations.habitudes_ia import get_habitudes_ai_service
-    from src.services.maison.projets_ia_service import get_projets_maison_ai_service
+    from src.services.maison.ia.projets_ia_service import get_projets_maison_ai_service
     from src.services.cuisine.nutrition_famille_ia import get_nutrition_famille_ai_service
 
     # Vérifier que les fonctions retournent des instances correct

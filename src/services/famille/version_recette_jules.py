@@ -2,8 +2,9 @@
 Service pour générer une version Jules d'une recette via Mistral.
 
 Adapte une recette pour Jules en tenant compte de son âge et ses aliments exclus :
-- Recommandations nutritionnelles basées sur l'âge (portions_age.json)
-- Liste configurable d'aliments interdits (via préférences utilisateur)
+- Recommandations nutritionnelles basées sur l'âge (recommandations_age.json)
+- Aliments interdits et limités par tranche d'âge
+- Liste configurable d'aliments exclus (via préférences utilisateur)
 - Gestion stricte des aliments crus (viande, poisson, œuf, lait cru)
 - Propositions automatiques de substitution par l'IA
 """
@@ -18,20 +19,20 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-# Chargement des recommandations de portions par âge
-_PORTIONS_AGE_PATH = Path(__file__).resolve().parents[3] / "data" / "reference" / "portions_age.json"
-_PORTIONS_AGE: dict = {}
+# Chargement des recommandations par âge (portions + restrictions)
+_RECOMMANDATIONS_PATH = Path(__file__).resolve().parents[3] / "data" / "reference" / "recommandations_age.json"
+_RECOMMANDATIONS_AGE: dict = {}
 
 try:
-    with open(_PORTIONS_AGE_PATH, encoding="utf-8") as f:
-        _PORTIONS_AGE = json.load(f)
+    with open(_RECOMMANDATIONS_PATH, encoding="utf-8") as f:
+        _RECOMMANDATIONS_AGE = json.load(f)
 except Exception:
-    logger.warning("Impossible de charger portions_age.json — recommandations par défaut utilisées")
+    logger.warning("Impossible de charger recommandations_age.json — recommandations par défaut utilisées")
 
 
 def _tranche_age_pour(age_mois: int) -> dict:
-    """Retourne la tranche d'âge correspondante depuis portions_age.json."""
-    for tranche in _PORTIONS_AGE.get("tranches_age", []):
+    """Retourne la tranche d'âge correspondante depuis recommandations_age.json."""
+    for tranche in _RECOMMANDATIONS_AGE.get("tranches_age", []):
         age_max = tranche.get("age_max_mois") or 999
         if tranche.get("age_min_mois", 0) <= age_mois < age_max:
             return tranche
@@ -42,7 +43,7 @@ def _facteur_adaptation(age_mois: int) -> float:
     """Retourne le facteur multiplicateur de portions pour l'âge donné."""
     tranche = _tranche_age_pour(age_mois)
     tranche_id = tranche.get("id", "")
-    return _PORTIONS_AGE.get("facteur_adaptation", {}).get(tranche_id, 0.35)
+    return _RECOMMANDATIONS_AGE.get("facteur_adaptation", {}).get(tranche_id, 0.35)
 
 
 def _construire_contexte_portions(age_mois: int) -> str:
@@ -66,6 +67,31 @@ def _construire_contexte_portions(age_mois: int) -> str:
     return "\n".join(lignes)
 
 
+def _construire_contexte_restrictions(age_mois: int) -> str:
+    """Construit le texte des aliments interdits et limités pour le prompt IA."""
+    tranche = _tranche_age_pour(age_mois)
+    if not tranche:
+        return "Pas de données de restrictions disponibles pour cet âge."
+
+    lignes = [f"Restrictions pour {tranche.get('label', '?')} :"]
+
+    interdits = tranche.get("aliments_interdits", [])
+    if interdits:
+        lignes.append("")
+        lignes.append("ALIMENTS STRICTEMENT INTERDITS à cet âge :")
+        for aliment in interdits:
+            lignes.append(f"  ❌ {aliment}")
+
+    limites = tranche.get("aliments_limites", [])
+    if limites:
+        lignes.append("")
+        lignes.append("ALIMENTS À LIMITER à cet âge :")
+        for item in limites:
+            lignes.append(f"  ⚠️ {item.get('aliment', '?')} — {item.get('limite', '')}")
+
+    return "\n".join(lignes)
+
+
 # Liste par défaut des aliments crus interdits pour les enfants
 ALIMENTS_CRUS_INTERDITS = [
     "tartare", "carpaccio", "sushi", "sashimi", "ceviche",
@@ -81,7 +107,10 @@ Adapte la recette pour un enfant de {age_mois} mois.
 ═══ RECOMMANDATIONS NUTRITIONNELLES POUR CET ÂGE ═══
 {contexte_portions}
 
-═══ ALIMENTS INTERDITS (configurés par les parents) ═══
+═══ RESTRICTIONS PAR ÂGE (données médicales PNNS/OMS/Anses) ═══
+{contexte_restrictions}
+
+═══ ALIMENTS EXCLUS SUPPLÉMENTAIRES (configurés par les parents) ═══
 {aliments_exclus}
 
 ═══ RÈGLES ABSOLUES — à appliquer systématiquement ═══
@@ -148,12 +177,17 @@ class ServiceVersionRecetteJules(BaseAIService):
         if not aliments_exclus:
             aliments_exclus = ["sel ajouté", "alcool", "saumon fumé", "épices fortes"]
 
-        # Ajouter automatiquement les aliments crus interdits
-        aliments_complets = list(set(aliments_exclus + ALIMENTS_CRUS_INTERDITS))
+        # Fusionner : exclusions parents + crus interdits + interdits par âge
+        aliments_complets = list(set(aliments_exclus + ALIMENTS_CRUS_INTERDITS + interdits_age))
 
-        # Contexte nutritionnel basé sur l'âge
+        # Contexte nutritionnel et restrictions basés sur l'âge
         contexte_portions = _construire_contexte_portions(age_mois)
+        contexte_restrictions = _construire_contexte_restrictions(age_mois)
         facteur = _facteur_adaptation(age_mois)
+
+        # Ajouter les aliments interdits du JSON aux aliments crus interdits
+        tranche = _tranche_age_pour(age_mois)
+        interdits_age = tranche.get("aliments_interdits", [])
 
         # Conseil texture adapté à l'âge
         if age_mois < 12:
@@ -205,7 +239,8 @@ Adapte cette recette pour Jules."""
             system = PROMPT_SYSTEM.format(
                 age_mois=age_mois,
                 contexte_portions=contexte_portions,
-                aliments_exclus=", ".join(aliments_complets) if aliments_complets else "aucun",
+                contexte_restrictions=contexte_restrictions,
+                aliments_exclus=", ".join(aliments_exclus) if aliments_exclus else "aucun spécifiquement ajouté par les parents",
                 facteur_adaptation=facteur,
                 texture_conseil=texture_conseil,
             )

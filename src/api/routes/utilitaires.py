@@ -76,7 +76,7 @@ async def envoyer_message_chat(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Envoie un message au chat IA et retourne la rÃ©ponse."""
-    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+    from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service
 
     def _query():
         service = obtenir_chat_ai_service()
@@ -102,7 +102,7 @@ async def streamer_message_chat(
     user: dict[str, Any] = Depends(require_auth),
 ) -> StreamingResponse:
     """Diffuse la réponse du chat IA via SSE pour un rendu progressif."""
-    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+    from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service
 
     def _format_sse(data: dict[str, Any]) -> str:
         return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
@@ -174,7 +174,7 @@ async def obtenir_actions_rapides_chat(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne les suggestions d'actions rapides pour un contexte."""
-    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+    from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service
 
     service = obtenir_chat_ai_service()
     actions = service.obtenir_actions_rapides(contexte)

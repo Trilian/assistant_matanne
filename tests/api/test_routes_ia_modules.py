@@ -344,7 +344,7 @@ def test_prediction_consommation_energie_endpoint(client: TestClient) -> None:
         },
     ]
 
-    with patch("src.services.maison.energie_anomalies_ia.obtenir_service_energie_anomalies_ia", return_value=service):
+    with patch("src.services.maison.ia.energie_anomalies_ia.obtenir_service_energie_anomalies_ia", return_value=service):
         response = client.get("/api/v1/ia/modules/energie/prediction-consommation?nb_mois=12")
 
     assert response.status_code == 200

@@ -1035,7 +1035,7 @@ class TestExpirationJobsDetailed:
 
         with (
 
-            patch("src.services.maison.energie_anomalies_ia.obtenir_service_energie_anomalies_ia", return_value=mock_service),
+            patch("src.services.maison.ia.energie_anomalies_ia.obtenir_service_energie_anomalies_ia", return_value=mock_service),
 
             patch(
 

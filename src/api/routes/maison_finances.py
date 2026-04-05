@@ -741,7 +741,7 @@ async def anomalies_energie_ia(
     """Detecte les anomalies energie avec scoring et explications IA."""
 
     def _query() -> dict[str, Any]:
-        from src.services.maison.energie_anomalies_ia import (
+        from src.services.maison.ia.energie_anomalies_ia import (
             obtenir_service_energie_anomalies_ia,
         )
 

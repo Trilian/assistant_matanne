@@ -22,7 +22,7 @@ from src.services.integrations.habitudes_ia import (
     get_habitudes_ai_service,
     HabitudesAIService,
 )
-from src.services.maison.projets_ia_service import (
+from src.services.maison.ia.projets_ia_service import (
     get_projets_maison_ai_service,
     ProjetsMaisonAIService,
 )

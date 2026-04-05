@@ -5,7 +5,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from src.services.maison.energie_anomalies_ia import EnergieAnomaliesIAService
+from src.services.maison.ia.energie_anomalies_ia import EnergieAnomaliesIAService
 
 
 class TestEnergieAnomaliesScoring:

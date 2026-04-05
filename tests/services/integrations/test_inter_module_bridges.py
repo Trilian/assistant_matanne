@@ -106,7 +106,7 @@ class TestChatContexteMultiModule:
 
     def test_collecter_contexte_complet(self, engine):
         """Collecte le contexte de tous les modules disponibles."""
-        from src.services.utilitaires.inter_module_chat_contexte import (
+        from src.services.utilitaires.bridges.inter_module_chat_contexte import (
             ChatContexteMultiModuleService,
         )
 
@@ -116,7 +116,7 @@ class TestChatContexteMultiModule:
 
     def test_contexte_resilient_aux_erreurs(self, engine):
         """Le collecteur ne bloque pas si un module Ã©choue."""
-        from src.services.utilitaires.inter_module_chat_contexte import (
+        from src.services.utilitaires.bridges.inter_module_chat_contexte import (
             ChatContexteMultiModuleService,
         )
 
@@ -232,7 +232,7 @@ class TestDiagnosticsIAInteraction:
 
     def test_diagnostiquer_panne_retourne_dict(self):
         """Le diagnostic retourne un dictionnaire structurÃ©."""
-        from src.services.maison.inter_module_diagnostics_ia import (
+        from src.services.maison.bridges.inter_module_diagnostics_ia import (
             DiagnosticsIAArtisansService,
         )
 
@@ -371,7 +371,7 @@ class TestMaisonInterModuleBridges:
     """Tests des bridges maison bridges inter-modules."""
 
     def test_entretien_courses_retourne_dict(self, engine, db):
-        from src.services.maison.inter_module_entretien_courses import (
+        from src.services.maison.bridges.inter_module_entretien_courses import (
             EntretienCoursesInteractionService,
         )
 
@@ -380,7 +380,7 @@ class TestMaisonInterModuleBridges:
         assert isinstance(result, dict)
 
     def test_charges_energie_retourne_dict(self, engine, db):
-        from src.services.maison.inter_module_charges_energie import (
+        from src.services.maison.bridges.inter_module_charges_energie import (
             ChargesEnergieInteractionService,
         )
 
@@ -389,7 +389,7 @@ class TestMaisonInterModuleBridges:
         assert isinstance(result, dict)
 
     def test_jardin_entretien_retourne_dict(self, engine, db):
-        from src.services.maison.inter_module_jardin_entretien import (
+        from src.services.maison.bridges.inter_module_jardin_entretien import (
             JardinEntretienInteractionService,
         )
 

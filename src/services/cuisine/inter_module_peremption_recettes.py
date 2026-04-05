@@ -149,7 +149,7 @@ class PeremptionRecettesInteractionService:
     ) -> list[dict[str, Any]]:
         """Utilise l'IA pour suggérer des recettes avec les ingrédients expirants."""
         try:
-            from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+            from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service
 
             chat = obtenir_chat_ai_service()
             ingredients_str = ", ".join(noms_ingredients[:10])

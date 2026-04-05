@@ -215,7 +215,7 @@ async def lier_document_garantie(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Lie un document/facture à un équipement maison pour la garantie."""
-    from src.services.maison.inter_module_garanties_documents import (
+    from src.services.maison.bridges.inter_module_garanties_documents import (
         obtenir_service_garanties_documents_interaction,
     )
 
@@ -240,7 +240,7 @@ async def obtenir_documents_garantie_objet(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne les documents déjà associés à un équipement via la garantie."""
-    from src.services.maison.inter_module_garanties_documents import (
+    from src.services.maison.bridges.inter_module_garanties_documents import (
         obtenir_service_garanties_documents_interaction,
     )
 

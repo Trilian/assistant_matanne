@@ -300,7 +300,7 @@ class ChatContexteMultiModuleService:
         Returns:
             Réponse de l'IA
         """
-        from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+        from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service
 
         contexte_metier = self.collecter_contexte_complet()
         chat = obtenir_chat_ai_service()

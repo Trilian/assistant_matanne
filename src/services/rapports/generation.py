@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.exceptions import ErreurValidation
 from src.core.models import ArticleInventaire
-from src.services.maison.checklists_crud_service import obtenir_service_checklists_crud
+from src.services.maison.crud.checklists_crud_service import obtenir_service_checklists_crud
 from src.services.rapports.planning_pdf import PlanningReportMixin
 from src.services.rapports.rapports_budget import BudgetReportMixin
 from src.services.rapports.rapports_gaspillage import GaspillageReportMixin

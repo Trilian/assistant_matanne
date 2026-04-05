@@ -819,7 +819,7 @@ def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
 def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
     """I.15: déclenche l'agent proactif selon météo/planning/contexte EventBus."""
     try:
-        from src.services.utilitaires.assistant_proactif import (
+        from src.services.utilitaires.chat.assistant_proactif import (
             obtenir_service_assistant_proactif,
         )
 
@@ -1657,7 +1657,7 @@ def enregistrer_subscribers() -> int:
 
     # -- Bridges inter-modules moyenne priorité (NIM5-NIM8) --
     try:
-        from src.services.maison.inter_module_entretien_budget import (
+        from src.services.maison.bridges.inter_module_entretien_budget import (
             enregistrer_entretien_budget_subscribers,
         )
 
@@ -1687,7 +1687,7 @@ def enregistrer_subscribers() -> int:
         logger.warning("Échec enregistrement bridge NIM7 Inventaire?FIFO: %s", e)
 
     try:
-        from src.services.utilitaires.inter_module_chat_event_bus import (
+        from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
             enregistrer_chat_event_bus_subscribers,
         )
 

@@ -1,12 +1,12 @@
 {
   "meta": {
     "source": "Recommandations PNNS / OMS / Anses — adaptations pédiatriques",
-    "description": "Portions recommandées par tranche d'âge pour adapter les recettes",
+    "description": "Recommandations par tranche d'âge : portions, aliments interdits et aliments limités",
     "unites": {
       "portion_g": "grammes par repas",
       "calories_jour": "kcal/jour (estimation moyenne)"
     },
-    "derniere_mise_a_jour": "2026-03-31"
+    "derniere_mise_a_jour": "2026-04-05"
   },
   "tranches_age": [
     {
@@ -24,7 +24,39 @@
         "oeuf": {"portion_g": 10, "repas_par_jour": 1, "notes": "1/4 d'oeuf dur"},
         "lait_maternel_ou_infantile_ml": {"portion_g": 500, "repas_par_jour": 4, "notes": "500-800ml/jour"},
         "matiere_grasse": {"portion_g": 5, "repas_par_jour": 2, "notes": "1 cc huile ou beurre par repas"}
-      }
+      },
+      "aliments_interdits": [
+        "sel",
+        "sucre ajouté",
+        "miel",
+        "lait de vache entier (en boisson)",
+        "fruits à coque entiers",
+        "cacahuètes",
+        "noix entières",
+        "amandes entières",
+        "viande crue",
+        "poisson cru",
+        "oeuf cru",
+        "fromage au lait cru",
+        "lait cru",
+        "charcuterie",
+        "soja (boisson, tofu)",
+        "édulcorants",
+        "fruits de mer",
+        "crustacés",
+        "thé",
+        "café",
+        "sodas",
+        "jus de fruits industriels",
+        "alcool"
+      ],
+      "aliments_limites": [
+        {"aliment": "épices douces", "limite": "Très petites quantités, introduire une à une"},
+        {"aliment": "agrumes", "limite": "Petites quantités, surveiller réactions"},
+        {"aliment": "kiwi", "limite": "Petites quantités, allergène potentiel"},
+        {"aliment": "poisson gras", "limite": "Max 1x/semaine, éviter espadon/thon/requin (mercure)"},
+        {"aliment": "beurre", "limite": "1 noisette par repas max"}
+      ]
     },
     {
       "id": "bebe_12_18m",
@@ -42,7 +74,33 @@
         "lait_ou_yaourt_ml": {"portion_g": 500, "repas_par_jour": 3, "notes": "Lait de croissance ou entier"},
         "fromage": {"portion_g": 15, "repas_par_jour": 1, "notes": "Pasteurisé uniquement"},
         "matiere_grasse": {"portion_g": 5, "repas_par_jour": 2, "notes": "1 cc par repas"}
-      }
+      },
+      "aliments_interdits": [
+        "sel ajouté",
+        "viande crue",
+        "poisson cru",
+        "oeuf cru",
+        "fromage au lait cru",
+        "lait cru",
+        "fruits à coque entiers",
+        "cacahuètes entières",
+        "noix entières",
+        "charcuterie crue (saucisson, jambon cru)",
+        "édulcorants",
+        "sodas",
+        "thé",
+        "café",
+        "alcool"
+      ],
+      "aliments_limites": [
+        {"aliment": "sel", "limite": "Aucun ajouté, seulement celui naturellement présent"},
+        {"aliment": "sucre", "limite": "Très limité, pas de bonbons ni gâteaux industriels"},
+        {"aliment": "miel", "limite": "Autorisé après 12 mois mais en petite quantité"},
+        {"aliment": "fruits à coque en poudre", "limite": "Ok en poudre/purée, jamais entiers"},
+        {"aliment": "poisson gras", "limite": "Max 1x/semaine, éviter espadon/thon/requin (mercure)"},
+        {"aliment": "charcuterie cuite (jambon blanc)", "limite": "Occasionnel, sans nitrites de préférence"},
+        {"aliment": "épices", "limite": "Douces uniquement (cumin, cannelle), pas de piment"}
+      ]
     },
     {
       "id": "enfant_18_36m",
@@ -60,7 +118,34 @@
         "lait_ou_yaourt_ml": {"portion_g": 500, "repas_par_jour": 2, "notes": "Lait entier ou demi-écrémé"},
         "fromage": {"portion_g": 20, "repas_par_jour": 1, "notes": "20g/jour"},
         "matiere_grasse": {"portion_g": 8, "repas_par_jour": 2, "notes": "Varier huiles"}
-      }
+      },
+      "aliments_interdits": [
+        "viande crue",
+        "poisson cru",
+        "oeuf cru",
+        "fromage au lait cru",
+        "lait cru",
+        "fruits à coque entiers (risque étouffement)",
+        "cacahuètes entières",
+        "bonbons durs",
+        "chewing-gum",
+        "édulcorants",
+        "sodas",
+        "café",
+        "thé",
+        "alcool"
+      ],
+      "aliments_limites": [
+        {"aliment": "sel", "limite": "Très peu, max 2g/jour"},
+        {"aliment": "sucre ajouté", "limite": "Limiter, pas de produits très sucrés"},
+        {"aliment": "fruits à coque", "limite": "En morceaux concassés ou poudre, jamais entiers"},
+        {"aliment": "poisson gras", "limite": "2x/semaine max, éviter espadon/thon (mercure)"},
+        {"aliment": "charcuterie", "limite": "Occasionnel, préférer jambon blanc sans nitrites"},
+        {"aliment": "épices fortes", "limite": "Éviter piment fort, poivre abondant"},
+        {"aliment": "saucisses/knacks", "limite": "Couper en longueur puis en petits morceaux (étouffement)"},
+        {"aliment": "raisins entiers", "limite": "Couper en 4 dans la longueur (étouffement)"},
+        {"aliment": "tomates cerises", "limite": "Couper en 4 (étouffement)"}
+      ]
     },
     {
       "id": "enfant_3_6ans",
@@ -78,7 +163,24 @@
         "lait_ou_yaourt_ml": {"portion_g": 400, "repas_par_jour": 2, "notes": "3-4 produits laitiers/jour"},
         "fromage": {"portion_g": 25, "repas_par_jour": 1, "notes": "25g/jour"},
         "matiere_grasse": {"portion_g": 10, "repas_par_jour": 2, "notes": "Beurre matin, huile repas"}
-      }
+      },
+      "aliments_interdits": [
+        "viande crue",
+        "poisson cru",
+        "oeuf cru",
+        "fromage au lait cru",
+        "alcool",
+        "café",
+        "édulcorants artificiels"
+      ],
+      "aliments_limites": [
+        {"aliment": "sel", "limite": "Max 3g/jour"},
+        {"aliment": "sucre ajouté", "limite": "Limiter bonbons et gâteaux industriels"},
+        {"aliment": "poisson gras", "limite": "2x/semaine, éviter espadon (mercure)"},
+        {"aliment": "charcuterie", "limite": "1-2x/semaine max, sans nitrites de préférence"},
+        {"aliment": "sodas / jus industriels", "limite": "Éviter, préférer eau et fruits frais"},
+        {"aliment": "fruits à coque", "limite": "Ok si bien mâchés, surveiller les plus jeunes"}
+      ]
     },
     {
       "id": "enfant_6_10ans",
@@ -95,7 +197,20 @@
         "oeuf": {"portion_g": 50, "repas_par_jour": 1, "notes": "1 oeuf"},
         "produits_laitiers": {"portion_g": 150, "repas_par_jour": 3, "notes": "3 par jour"},
         "matiere_grasse": {"portion_g": 12, "repas_par_jour": 2, "notes": "Varier sources"}
-      }
+      },
+      "aliments_interdits": [
+        "alcool",
+        "café",
+        "édulcorants artificiels"
+      ],
+      "aliments_limites": [
+        {"aliment": "sel", "limite": "Max 4g/jour"},
+        {"aliment": "sucre ajouté", "limite": "Limiter, pas plus de 25g/jour"},
+        {"aliment": "poisson à risque mercure", "limite": "Éviter espadon, requin, marlin"},
+        {"aliment": "charcuterie", "limite": "2x/semaine max"},
+        {"aliment": "sodas", "limite": "Exceptionnel uniquement"},
+        {"aliment": "viande crue / poisson cru", "limite": "Déconseillé avant 10 ans"}
+      ]
     },
     {
       "id": "adulte",
@@ -112,7 +227,15 @@
         "oeuf": {"portion_g": 60, "repas_par_jour": 1, "notes": "1-2 oeufs"},
         "produits_laitiers": {"portion_g": 150, "repas_par_jour": 2, "notes": "2 par jour"},
         "matiere_grasse": {"portion_g": 15, "repas_par_jour": 2, "notes": "Huile olive/colza"}
-      }
+      },
+      "aliments_interdits": [],
+      "aliments_limites": [
+        {"aliment": "sel", "limite": "Max 5g/jour (OMS)"},
+        {"aliment": "sucre ajouté", "limite": "Max 50g/jour"},
+        {"aliment": "alcool", "limite": "Max 2 verres/jour"},
+        {"aliment": "charcuterie", "limite": "Max 150g/semaine"},
+        {"aliment": "viande rouge", "limite": "Max 500g/semaine"}
+      ]
     }
   ],
   "facteur_adaptation": {

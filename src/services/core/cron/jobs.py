@@ -458,7 +458,7 @@ def _job_entretien_saisonnier() -> None:
 def _job_enrichissement_catalogues() -> None:
     """Enrichit les catalogues de référence via l'IA (1er du mois à 3h00)."""
     try:
-        from src.services.maison.catalogue_enrichissement_service import (
+        from src.services.maison.ia.catalogue_enrichissement_service import (
             get_catalogue_enrichissement_service,
         )
 
@@ -2879,7 +2879,7 @@ def _job_energie_peak_detection() -> None:
     """Pics énergie — Détecte les pics de consommation énergie du jour."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
-        from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
+        from src.services.maison.ia.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
 
         service = obtenir_service_energie_anomalies_ia()
         details = []
