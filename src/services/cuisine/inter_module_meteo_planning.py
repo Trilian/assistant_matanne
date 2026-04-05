@@ -1,7 +1,7 @@
 """
 Service inter-modules : Météo → Planning repas.
 
-Phase 4.4 : prioriser les idées de repas selon les conditions météo
+Prioriser les idées de repas selon les conditions météo
 (ex. BBQ / plancha s'il fait beau, soupe si le temps est froid ou pluvieux).
 """
 

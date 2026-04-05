@@ -1,8 +1,8 @@
-﻿# Admin Runbook
+# Admin — Guide complet
 
-> Guide opérationnel complet du mode administration : 51 endpoints, jobs, cache, notifications, santé des services, feature flags, simulations et gestion des utilisateurs.
+> Guide opérationnel unifié du module administration : 51 endpoints, jobs, cache, notifications, santé des services, feature flags, simulations et gestion des utilisateurs.
 >
-> **Dernière mise à jour** : 1er avril 2026
+> **Fusionné depuis** : ADMIN_GUIDE.md + ADMIN_QUICK_REFERENCE.md + ADMIN_RUNBOOK.md
 
 ---
 
@@ -14,10 +14,9 @@ Le module admin centralise les opérations sensibles exposées par l'API et l'in
 - **Frontend** : `frontend/src/app/(app)/admin/`
 - **Accès** : rôle `admin` obligatoire (`require_role("admin")`)
 - **Rate limiting** : 10 req/min standard, 5 req/min pour triggers jobs
+- **Réflexe sécurité** : lancer un `dry_run` dès qu'une action modifie des données
 
----
-
-## Pré-requis
+### Pré-requis
 
 - Être authentifié avec un utilisateur ayant le rôle `admin`
 - Backend démarré avec le scheduler actif
@@ -29,12 +28,10 @@ python manage.py run
 cd frontend && npm run dev
 ```
 
----
-
-## Navigation admin
+### Navigation admin
 
 | Page | URL | Fonctionnalités |
-| ------ | ----- | ----------------- |
+| --- | --- | --- |
 | Tableau de bord | `/admin` | Vue globale, alertes, anomalies |
 | Jobs planifiés | `/admin/jobs` | Liste, exécution manuelle, logs |
 | Services | `/admin/services` | Santé, cache, resync |
@@ -45,12 +42,59 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 
 ---
 
+## Référence rapide
+
+### Quick commands
+
+La console rapide (`POST /api/v1/admin/quick-command`) supporte :
+
+- `list jobs`
+- `run job <job_id> --dry-run`
+- `health`
+- `clear cache [pattern]`
+- `stats cache`
+- `maintenance on|off`
+
+### Feature flags fréquents
+
+| Flag | Rôle |
+| --- | --- |
+| `admin.service_actions_enabled` | autorise les actions admin whitelistées |
+| `admin.resync_enabled` | active les endpoints de resynchronisation |
+| `admin.seed_dev_enabled` | autorise les seeds et jeux de données dev |
+| `admin.mode_test` | rend l'admin plus verbeux pour les diagnostics |
+| `admin.maintenance_mode` | drapeau de maintenance global |
+
+### Séquences recommandées
+
+**Vérifier un incident de production** :
+
+1. `GET /api/v1/admin/cockpit`
+2. `GET /api/v1/admin/services/health`
+3. `GET /api/v1/admin/jobs/history`
+4. `GET /api/v1/admin/audit-logs?limit=50`
+
+**Rejouer un job sans risque** :
+
+1. `GET /api/v1/admin/jobs`
+2. `POST /api/v1/admin/jobs/{job_id}/run?dry_run=true`
+3. Contrôler la sortie et les logs
+4. Relancer sans `dry_run` si tout est conforme
+
+**Tester un flux inter-module** :
+
+1. `GET /api/v1/admin/bridges/status?inclure_smoke=true`
+2. `POST /api/v1/admin/events/trigger`
+3. `GET /api/v1/admin/events?limite=30`
+
+---
+
 ## Référence complète des endpoints (51)
 
 ### Audit et sécurité (6 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/audit-logs` | Logs d'audit paginés avec filtres (action, entité, période) |
 | `GET` | `/api/v1/admin/audit-stats` | Statistiques agrégées (comptages par action/entité/source) |
 | `GET` | `/api/v1/admin/audit-export` | Export CSV des logs d'audit (max 10k lignes) |
@@ -61,7 +105,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Jobs et planification (5 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/jobs` | Liste tous les 68 jobs avec prochain run |
 | `POST` | `/api/v1/admin/jobs/{job_id}/run` | Déclencher un job manuellement (dry-run optionnel, rate-limited 5/min) |
 | `GET` | `/api/v1/admin/jobs/{job_id}/logs` | Historique des 50 dernières exécutions |
@@ -71,7 +115,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Notifications (4 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `POST` | `/api/v1/admin/notifications/test` | Test sur un canal (ntfy/push/email/Telegram) |
 | `POST` | `/api/v1/admin/notifications/test-all` | Test multi-canal avec failover |
 | `GET` | `/api/v1/admin/notifications/channels` | Canaux configurés + statut |
@@ -80,7 +124,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Cache et performance (4 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/cache/stats` | Hit/miss ratio, taille mémoire/fichier, entrées par pattern |
 | `POST` | `/api/v1/admin/cache/clear` | Vider tout le cache (L1 + L3) |
 | `POST` | `/api/v1/admin/cache/purge` | Purge par motif (`planning_*`, `recettes_*`, `suggestions_*`) |
@@ -89,7 +133,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Services et santé (5 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/services/health` | Santé globale du registre de services |
 | `GET` | `/api/v1/admin/services/actions` | Catalogue d'actions service exécutables |
 | `POST` | `/api/v1/admin/services/{action}/run` | Exécuter une action service (dry-run possible) |
@@ -99,7 +143,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Utilisateurs et impersonation (4 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/users` | Liste utilisateurs avec rôle/statut/created_at |
 | `POST` | `/api/v1/admin/users/{id}/disable` | Désactiver un compte |
 | `POST` | `/api/v1/admin/users/{id}/impersonate` | Token d'impersonation 1h (audit logged) |
@@ -108,7 +152,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Base de données (5 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/db/coherence` | Vérification cohérence DB (FK, RLS) |
 | `GET` | `/api/v1/admin/db/views` | Liste vues SQL read-only autorisées |
 | `POST` | `/api/v1/admin/db/query` | Exécuter SQL read-only (whitelist enforced) |
@@ -118,7 +162,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Feature flags et configuration (6 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/feature-flags` | Liste feature flags (admin, jeux, outils) |
 | `PUT` | `/api/v1/admin/feature-flags` | Modifier feature flags (persistant) |
 | `GET` | `/api/v1/admin/runtime-config` | Configuration runtime (db.refresh_seconds, etc.) |
@@ -129,7 +173,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Tests et simulation (5 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `POST` | `/api/v1/admin/simulate/flow` | Simuler flux inter-modules sans effets de bord |
 | `POST` | `/api/v1/admin/seed/data` | Seed données de référence |
 | `PUT` | `/api/v1/admin/mode/maintenance` | Activer/désactiver mode maintenance |
@@ -139,7 +183,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 ### Métriques et cockpit (2 endpoints)
 
 | Méthode | Route | Usage |
-| --------- | ------- | ------- |
+| --- | --- | --- |
 | `GET` | `/api/v1/admin/metrics/api` | Requêtes HTTP total, top endpoints, latence (avg/p95) |
 | `GET` | `/api/v1/admin/cockpit` | Dashboard exécutif (uptimes, alertes, anomalies) |
 
@@ -268,12 +312,51 @@ Simule le flux inter-module sans effets de bord (utile pour valider le wiring).
 3. Lancer un trigger manuel pour distinguer problème scheduler vs métier
 4. Si nécessaire, redémarrer l'API pour recréer le scheduler
 
+### Jobs ne s'exécutent plus
+
+- Vérifier scheduler actif
+- Vérifier logs job
+- Tester déclenchement manuel
+- Inspecter exceptions DB/externes
+
+### Notifications absentes
+
+- Lancer un test unitaire via route admin
+- Vérifier configuration canal
+- Vérifier quotas/rate limits
+- Vérifier logs webhooks (Telegram)
+
+### Incohérence de données
+
+- Exécuter `/db/coherence`
+- Recouper avec `scripts/audit_orm_sql.py`
+- Valider les dernières migrations SQL
+
+---
+
+## Bonnes pratiques exploitation
+
+- Privilégier le test manuel d'un job avant activation massive
+- Garder une traçabilité des actions admin sensibles
+- Ne pas vider le cache pendant des opérations critiques
+- Confirmer les permissions avant désactivation d'utilisateurs
+
+---
+
+## Roadmap admin
+
+- Persistance DB de l'historique jobs
+- Mode dry-run des jobs
+- Simulateur de flux inter-modules
+- Dashboard admin temps réel (latence, req/s, cache)
+
 ---
 
 ## Références associées
 
+- `docs/ADMIN_MODE.md` — Guide opérationnel du mode admin
 - `docs/CRON_JOBS.md` — Référence complète des 68 jobs
+- `docs/AUTOMATIONS.md` — Moteur Si→Alors et exploitation runtime
 - `docs/NOTIFICATIONS.md` — Système de notifications
 - `docs/TROUBLESHOOTING.md` — Guide de dépannage
 - `docs/DEVELOPER_SETUP.md` — Setup développeur
-

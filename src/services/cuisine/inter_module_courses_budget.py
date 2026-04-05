@@ -1,7 +1,7 @@
 """
 Service inter-modules : Courses total → Budget catégorie alimentation.
 
-IM-P2-2: Quand une liste de courses est validée/complétée,
+Quand une liste de courses est validée/complétée,
 synchroniser le total comme dépense dans la catégorie alimentation du budget.
 """
 

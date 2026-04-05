@@ -10,7 +10,7 @@ from typing import Any
 from src.core.db import obtenir_contexte_db
 from src.core.validation.sanitizer import NettoyeurEntrees
 
-from .innovations_types import (
+from .types_transverses import (
     BatchCookingIntelligentResponse,
     BlocPlanificationAuto,
     CarteMagazineTablette,

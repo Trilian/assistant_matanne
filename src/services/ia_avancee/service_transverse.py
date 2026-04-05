@@ -34,23 +34,23 @@ from src.core.validation.sanitizer import NettoyeurEntrees
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
-from .innovations_famille_score import calculer_score_famille_hebdo as calculer_score_famille_hebdo_module
-from .innovations_journal import (
+from .famille_score import calculer_score_famille_hebdo as calculer_score_famille_hebdo_module
+from .journal_ia import (
     generer_journal_familial_auto as generer_journal_familial_auto_module,
     generer_journal_familial_pdf as generer_journal_familial_pdf_module,
     generer_rapport_mensuel_pdf as generer_rapport_mensuel_pdf_module,
 )
-from .innovations_mode_pilote import (
+from .pilote_auto import (
     configurer_mode_pilote_automatique as configurer_mode_pilote_automatique_module,
     lire_config_mode_pilote as lire_config_mode_pilote_module,
     normaliser_niveau_autonomie as normaliser_niveau_autonomie_module,
     obtenir_mode_pilote_automatique as obtenir_mode_pilote_automatique_module,
     proposer_repas_adapte_garmin as proposer_repas_adapte_garmin_module,
 )
-from . import innovations_bien_etre as bien_etre
-from . import innovations_cuisine as cuisine_ia
-from . import innovations_energie as energie_ia
-from .innovations_types import (
+from . import bien_etre
+from . import cuisine_ia
+from . import energie_ia
+from .types_transverses import (
     AlertesContextuellesResponse,
     JournalFamilialAutoResponse,
     ModePiloteAutomatiqueResponse,

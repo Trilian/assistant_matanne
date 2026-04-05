@@ -1,7 +1,7 @@
 """
 Service inter-modules : Voyages → Budget.
 
-IM-P2-8: Intégrer automatiquement les dépenses voyage dans le budget.
+Intégrer automatiquement les dépenses voyage dans le budget.
 """
 
 import logging

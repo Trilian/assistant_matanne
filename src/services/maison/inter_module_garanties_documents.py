@@ -1,7 +1,7 @@
 """
 Service inter-modules : Garanties → Documents.
 
-Phase 4.2 : lier une facture ou un document de garantie à un équipement
+Lier une facture ou un document de garantie à un équipement
 maison afin de retrouver rapidement la preuve d'achat depuis la fiche objet.
 """
 

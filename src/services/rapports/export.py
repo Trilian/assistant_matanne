@@ -23,7 +23,7 @@ from src.core.models import ArticleCourses, Planning, Recette, RecetteIngredient
 from src.services.rapports.types import (
     DonneesCoursesPDF,
     DonneesPlanningPDF,
-    DonneesRecettePDF,  # Alias compat
+    DonneesRecettePDF,
     RapportBudget,
 )
 from src.services.rapports._couleurs import Couleur
@@ -709,12 +709,7 @@ class ServiceExportPDF:
         buffer.seek(0)
         return buffer
 
-    # ═══════════════════════════════════════════════════════════
-    # ALIAS MÉTHODES RÉTROCOMPATIBILITÉ
-    # ═══════════════════════════════════════════════════════════
-
-    # Alias méthode privée anglais
-    _setup_custom_styles = _configurer_styles
+    # (était: alias méthodes rétrocompatibilité — supprimés)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -730,17 +725,8 @@ def obtenir_service_export_pdf() -> ServiceExportPDF:
     return ServiceExportPDF()
 
 
-def obtenir_pdf_export_service() -> ServiceExportPDF:
-    """Factory for PDF export service (English alias)."""
-    return obtenir_service_export_pdf()
-
-
 __all__ = [
     "ServiceExportPDF",
     "obtenir_service_export_pdf",
-    "get_pdf_export_service",
 ]
 
-
-# ─── Aliases rétrocompatibilité  ───────────────────────────────
-get_pdf_export_service = obtenir_pdf_export_service  # alias rétrocompatibilité 

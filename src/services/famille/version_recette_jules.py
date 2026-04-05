@@ -1,5 +1,5 @@
 """
-Service pour générer une version Jules d'une recette via Mistral (CT-09).
+Service pour générer une version Jules d'une recette via Mistral.
 
 Adapte une recette pour Jules en tenant compte de son âge et ses aliments exclus :
 - Suppression du sel ajouté

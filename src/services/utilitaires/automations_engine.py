@@ -677,6 +677,3 @@ class MoteurAutomationsService:
 def obtenir_moteur_automations_service() -> MoteurAutomationsService:
     return MoteurAutomationsService()
 
-
-# ─── Aliases rétrocompatibilité  ───────────────────────────────
-get_moteur_automations_service = obtenir_moteur_automations_service  # alias rétrocompatibilité 

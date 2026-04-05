@@ -45,12 +45,6 @@ class TestServiceExportPDFInit:
         service = ServiceExportPDF()
         assert "Etape" in [s.name for s in service.styles.byName.values()]
 
-    def test_configurer_styles_alias(self):
-        """Vérifie l'alias _setup_custom_styles."""
-        service = ServiceExportPDF()
-        assert hasattr(service, "_setup_custom_styles")
-        assert service._setup_custom_styles == service._configurer_styles
-
 
 class TestDonneesRecettePDF:
     """Tests pour le schéma DonneesRecettePDF."""

@@ -1,7 +1,7 @@
 """
 Service inter-modules : Chat IA → Contexte multi-module.
 
-IM-P2-4: Le chat IA connaît le contenu du frigo, le planning repas,
+Le chat IA connaît le contenu du frigo, le planning repas,
 les courses en cours, le budget, la météo, les infos de Jules,
 et les événements à venir pour fournir des réponses contextuelles.
 """

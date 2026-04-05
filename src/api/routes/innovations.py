@@ -399,7 +399,7 @@ async def veille_emploi(
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
-    from src.services.ia_avancee.innovations_types import CriteresVeilleEmploi
+    from src.services.ia_avancee.types_transverses import CriteresVeilleEmploi
 
     criteres = CriteresVeilleEmploi(
         domaine=body.domaine,

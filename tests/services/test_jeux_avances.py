@@ -8,7 +8,7 @@ from decimal import Decimal
 
 
 # -----------------------------------------------------------------------------
-# PHASE T: Heatmap cotes bookmakers
+# Heatmap cotes bookmakers
 # -----------------------------------------------------------------------------
 
 
@@ -58,7 +58,7 @@ def test_cote_historique_model():
 
 
 # -----------------------------------------------------------------------------
-# PHASE U: Generateur grilles IA & Analyse
+# Generateur grilles IA & Analyse
 # -----------------------------------------------------------------------------
 
 
@@ -144,7 +144,7 @@ def test_valider_grille():
 
 
 # -----------------------------------------------------------------------------
-# PHASE W: Notifications Web Push resultats
+# Notifications Web Push resultats
 # -----------------------------------------------------------------------------
 
 

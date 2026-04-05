@@ -254,7 +254,7 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
 
 
 class VersionRecetteResponse(BaseModel):
-    """Réponse pour une version Jules d'une recette (CT-09)."""
+    """Réponse pour une version Jules d'une recette."""
 
     id: int
     recette_base_id: int

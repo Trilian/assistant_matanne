@@ -1,7 +1,7 @@
 """
 Service Briefing Matinal IA — Digest quotidien personnalisé.
 
-IM-P2-5: Chaque matin à 7h → digest personnalisé résumant :
+Chaque matin à 7h → digest personnalisé résumant :
 - Météo du jour
 - Repas planifiés
 - Tâches maison

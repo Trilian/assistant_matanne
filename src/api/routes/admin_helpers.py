@@ -214,9 +214,9 @@ def _executer_action_service(
         return {"status": "ok", "action_id": action_id, "result": result, "dry_run": False}
 
     if action_id == "automations.executer":
-        from src.services.utilitaires.automations_engine import get_moteur_automations_service
+        from src.services.utilitaires.automations_engine import obtenir_moteur_automations_service
 
-        service = get_moteur_automations_service()
+        service = obtenir_moteur_automations_service()
         result = (
             service.executer_automations_actives_dry_run()
             if dry_run

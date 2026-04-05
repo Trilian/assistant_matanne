@@ -1,7 +1,7 @@
 """
 Service inter-modules : Anniversaires → Budget cadeaux.
 
-IM-P2-7: Provisionner automatiquement une dépense "cadeau" dans le budget
+Provisionner automatiquement une dépense "cadeau" dans le budget
 quand un anniversaire approche.
 """
 

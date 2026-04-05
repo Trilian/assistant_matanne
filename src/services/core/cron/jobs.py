@@ -1256,9 +1256,9 @@ def _job_garmin_sync_matinal() -> None:
 def _job_automations() -> None:
     """Exécute périodiquement les règles d'automation actives (LT-04)."""
     try:
-        from src.services.utilitaires.automations_engine import get_moteur_automations_service
+        from src.services.utilitaires.automations_engine import obtenir_moteur_automations_service
 
-        result = get_moteur_automations_service().executer_automations_actives()
+        result = obtenir_moteur_automations_service().executer_automations_actives()
         logger.info(
             "Automations exécutées: %s sur %s règle(s)",
             result.get("executed", 0),

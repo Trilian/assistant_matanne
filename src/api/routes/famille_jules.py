@@ -472,7 +472,7 @@ async def suggestions_activites_jules_contextuelles(
     return await executer_async(_query)
 
 # ═══════════════════════════════════════════════════════════
-# JULES — ALIMENTS EXCLUS (CT-09)
+# JULES — ALIMENTS EXCLUS
 # ═══════════════════════════════════════════════════════════
 
 
@@ -589,7 +589,7 @@ async def obtenir_nutrition_jules(
 
 
 # ═══════════════════════════════════════════════════════════
-# JULES — COACHING HEBDOMADAIRE (CT-05)
+# JULES — COACHING HEBDOMADAIRE
 # ═══════════════════════════════════════════════════════════
 
 

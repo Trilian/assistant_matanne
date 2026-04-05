@@ -1,4 +1,4 @@
-"""Tests service AssistantProactif — régressions Phase 5."""
+"""Tests service AssistantProactif."""
 
 from __future__ import annotations
 

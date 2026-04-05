@@ -54,7 +54,7 @@ def test_bridge_6_4_inventaire_vers_planning(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_5_saison_vers_menu():
-    from src.services.cuisine.inter_module_saison_menu import SaisonMenuInteractionService
+    from src.services.cuisine.bridges_saison_menu import SaisonMenuInteractionService
 
     service = SaisonMenuInteractionService()
     result = service.obtenir_contexte_saisonnier_planning()
@@ -104,7 +104,7 @@ def test_bridge_6_8_jules_vers_nutrition(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_9_weekend_vers_courses(test_db):
-    from src.services.famille.inter_module_weekend_courses import WeekendCoursesInteractionService
+    from src.services.famille.bridges_weekend_courses import WeekendCoursesInteractionService
 
     service = WeekendCoursesInteractionService()
     result = service.suggerer_fournitures_weekend(db=test_db)
@@ -124,7 +124,7 @@ def test_bridge_6_10_budget_vers_anomalie(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_11_voyages_vers_budget(test_db):
-    from src.services.famille.inter_module_voyages_budget import VoyagesBudgetInteractionService
+    from src.services.famille.bridges_voyages_budget import VoyagesBudgetInteractionService
 
     service = VoyagesBudgetInteractionService()
     result = service.synchroniser_voyages_vers_budget(db=test_db)
@@ -134,7 +134,7 @@ def test_bridge_6_11_voyages_vers_budget(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_12_meteo_vers_activites(test_db):
-    from src.services.famille.inter_module_meteo_activites import MeteoActivitesInteractionService
+    from src.services.famille.bridges_meteo_activites import MeteoActivitesInteractionService
 
     service = MeteoActivitesInteractionService()
 
@@ -180,7 +180,7 @@ def test_bridge_6_14_documents_vers_notifications(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_15_entretien_vers_courses(test_db):
-    from src.services.maison.inter_module_entretien_courses import EntretienCoursesInteractionService
+    from src.services.maison.bridges_entretien_courses import EntretienCoursesInteractionService
 
     service = EntretienCoursesInteractionService()
     result = service.suggerer_produits_entretien_pour_courses(db=test_db)
@@ -190,7 +190,7 @@ def test_bridge_6_15_entretien_vers_courses(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_16_jardin_vers_entretien(test_db):
-    from src.services.maison.inter_module_jardin_entretien import JardinEntretienInteractionService
+    from src.services.maison.bridges_jardin_entretien import JardinEntretienInteractionService
 
     service = JardinEntretienInteractionService()
     result = service.generer_taches_saisonnieres_depuis_plantes(db=test_db)
@@ -200,7 +200,7 @@ def test_bridge_6_16_jardin_vers_entretien(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_17_charges_vers_energie(test_db):
-    from src.services.maison.inter_module_charges_energie import ChargesEnergieInteractionService
+    from src.services.maison.bridges_charges_energie import ChargesEnergieInteractionService
 
     service = ChargesEnergieInteractionService()
     result = service.detecter_hausse_et_declencher_analyse(db=test_db)
@@ -233,7 +233,7 @@ def test_bridge_6_19_diagnostics_vers_ia():
 
 @pytest.mark.integration
 def test_bridge_6_20_chat_vers_contexte_tous_modules():
-    from src.services.utilitaires.inter_module_chat_contexte import ChatContexteMultiModuleService
+    from src.services.utilitaires.bridges_chat_contexte import ChatContexteMultiModuleService
 
     service = ChatContexteMultiModuleService()
     result = service.collecter_contexte_complet()
@@ -242,7 +242,7 @@ def test_bridge_6_20_chat_vers_contexte_tous_modules():
 
 @pytest.mark.integration
 def test_bridge_6_21_documents_vers_calendrier(test_db):
-    from src.services.famille.inter_module_documents_calendrier import DocumentsCalendrierInteractionService
+    from src.services.famille.bridges_documents_calendrier import DocumentsCalendrierInteractionService
 
     service = DocumentsCalendrierInteractionService()
     result = service.synchroniser_documents_vers_calendrier(db=test_db)

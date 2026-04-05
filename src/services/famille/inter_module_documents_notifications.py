@@ -1,7 +1,7 @@
 """
 Service inter-modules : Documents expiration → Notifications multi-canal.
 
-IM-P2-3: Alertes automatiques quand des documents famille expirent
+Alertes automatiques quand des documents famille expirent
 (passeport, carte identité, assurance, etc.) à J-30, J-15, J-7.
 """
 

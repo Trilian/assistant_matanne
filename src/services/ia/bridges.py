@@ -29,68 +29,57 @@ CATALOGUE_BRIDGES_CONSOLIDES: list[dict[str, str]] = [
     {
         "groupe": "utilitaires",
         "flux": "Dashboard → Actions rapides",
-        "module_legacy": "src.services.utilitaires.inter_module_dashboard_actions",
-        "module_canonique": "src.services.utilitaires.bridges_dashboard_actions",
+        "module": "src.services.utilitaires.bridges_dashboard_actions",
     },
     {
         "groupe": "utilitaires",
         "flux": "Chat IA → Event Bus",
-        "module_legacy": "src.services.utilitaires.inter_module_chat_event_bus",
-        "module_canonique": "src.services.utilitaires.bridges_chat_event_bus",
+        "module": "src.services.utilitaires.bridges_chat_event_bus",
     },
     {
         "groupe": "utilitaires",
         "flux": "Chat → Contexte multi-modules",
-        "module_legacy": "src.services.utilitaires.inter_module_chat_contexte",
-        "module_canonique": "src.services.utilitaires.bridges_chat_contexte",
+        "module": "src.services.utilitaires.bridges_chat_contexte",
     },
     {
         "groupe": "famille",
         "flux": "Weekend → Courses",
-        "module_legacy": "src.services.famille.inter_module_weekend_courses",
-        "module_canonique": "src.services.famille.bridges_weekend_courses",
+        "module": "src.services.famille.bridges_weekend_courses",
     },
     {
         "groupe": "famille",
         "flux": "Voyages → Budget",
-        "module_legacy": "src.services.famille.inter_module_voyages_budget",
-        "module_canonique": "src.services.famille.bridges_voyages_budget",
+        "module": "src.services.famille.bridges_voyages_budget",
     },
     {
         "groupe": "famille",
         "flux": "Météo → Activités",
-        "module_legacy": "src.services.famille.inter_module_meteo_activites",
-        "module_canonique": "src.services.famille.bridges_meteo_activites",
+        "module": "src.services.famille.bridges_meteo_activites",
     },
     {
         "groupe": "famille",
         "flux": "Documents → Calendrier",
-        "module_legacy": "src.services.famille.inter_module_documents_calendrier",
-        "module_canonique": "src.services.famille.bridges_documents_calendrier",
+        "module": "src.services.famille.bridges_documents_calendrier",
     },
     {
         "groupe": "cuisine",
         "flux": "Saison → Menu",
-        "module_legacy": "src.services.cuisine.inter_module_saison_menu",
-        "module_canonique": "src.services.cuisine.bridges_saison_menu",
+        "module": "src.services.cuisine.bridges_saison_menu",
     },
     {
         "groupe": "maison",
         "flux": "Jardin → Entretien",
-        "module_legacy": "src.services.maison.inter_module_jardin_entretien",
-        "module_canonique": "src.services.maison.bridges_jardin_entretien",
+        "module": "src.services.maison.bridges_jardin_entretien",
     },
     {
         "groupe": "maison",
         "flux": "Entretien → Courses",
-        "module_legacy": "src.services.maison.inter_module_entretien_courses",
-        "module_canonique": "src.services.maison.bridges_entretien_courses",
+        "module": "src.services.maison.bridges_entretien_courses",
     },
     {
         "groupe": "maison",
         "flux": "Charges → Énergie",
-        "module_legacy": "src.services.maison.inter_module_charges_energie",
-        "module_canonique": "src.services.maison.bridges_charges_energie",
+        "module": "src.services.maison.bridges_charges_energie",
     },
 ]
 
@@ -140,8 +129,7 @@ class BridgesInterModulesService:
         for definition in CATALOGUE_BRIDGES_CONSOLIDES:
             disponible = True
             try:
-                importlib.import_module(str(definition["module_legacy"]))
-                importlib.import_module(str(definition["module_canonique"]))
+                importlib.import_module(str(definition["module"]))
             except Exception:
                 disponible = False
 

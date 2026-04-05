@@ -145,7 +145,7 @@ class CarteVisuelleRequest(BaseModel):
 
 # ── Responses (re-exports depuis types) ──
 
-from src.services.ia_avancee.innovations_types import (  # noqa: E402
+from src.services.ia_avancee.types_transverses import (  # noqa: E402
     ModePiloteAutomatiqueResponse,
     ScoreFamilleHebdoResponse,
     JournalFamilialAutoResponse,

@@ -1,5 +1,5 @@
 """
-CT-12 — Test de cohérence ORM ↔ INIT_COMPLET.sql
+Test de cohérence ORM ↔ INIT_COMPLET.sql
 
 Vérifie que chaque modèle SQLAlchemy déclaré dans src/core/models/ possède
 un CREATE TABLE correspondant dans sql/INIT_COMPLET.sql.

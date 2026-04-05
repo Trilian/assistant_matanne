@@ -1,7 +1,7 @@
 """
 Service inter-modules : Batch cooking → Inventaire.
 
-IM-P2-6: Session batch cooking terminée → déduire automatiquement
+Session batch cooking terminée → déduire automatiquement
 les ingrédients consommés de l'inventaire.
 """
 

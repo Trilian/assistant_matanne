@@ -1,7 +1,7 @@
 """
 Service inter-modules : Inventaire péremption → Suggestions recettes.
 
-IM-P2-1: Produits expirant sous 48h → proposer automatiquement
+Produits expirant sous 48h → proposer automatiquement
 des recettes les utilisant pour éviter le gaspillage.
 """
 

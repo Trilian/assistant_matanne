@@ -1,5 +1,5 @@
 """
-Tests pour les callbacks Telegram — Phase 5.2
+Tests pour les callbacks Telegram.
 
 Tests unitaires et d'intégration pour les handlers de callbacks Telegram
 (planning_valider, planning_modifier, planning_regenerer, courses_confirmer, courses_ajouter, courses_refaire).

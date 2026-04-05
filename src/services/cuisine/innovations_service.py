@@ -1,4 +1,4 @@
-"""Façade cuisine pour les fonctionnalités IA issues de la phase 1."""
+"""Façade cuisine pour les fonctionnalités IA transverses."""
 
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 """
 Service inter-modules : Jardin → Inventaire.
 
-Phase 4.1 : synchroniser automatiquement les récoltes validées
+Synchroniser automatiquement les récoltes validées
 vers l'inventaire cuisine, avec création d'ingrédient si besoin.
 """
 

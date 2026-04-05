@@ -8,7 +8,7 @@ from typing import Any
 
 from src.core.db import obtenir_contexte_db
 
-from .innovations_types import ActionPiloteAutomatique, ModePiloteAutomatiqueResponse, SuggestionRepasSoirResponse
+from .types_transverses import ActionPiloteAutomatique, ModePiloteAutomatiqueResponse, SuggestionRepasSoirResponse
 
 logger = logging.getLogger(__name__)
 

@@ -2,11 +2,11 @@
 Tests IA AvancÃ©e â€” Services IA, Routes, Bridges, Intra-modules.
 
 Couvre :
-- B4: Services IA (prÃ©diction courses, rÃ©sumÃ© hebdo, budget, etc.)
-- B5: Bridges inter-modules
-- B6: Intra-modules (streak routines, Ã©nergie N/N-1, entretien)
-- B7: Flux utilisateur simplifiÃ©s
-- B8: CRON jobs Phase B
+- Services IA (prédiction courses, résumé hebdo, budget, etc.)
+- Bridges inter-modules
+- Intra-modules (streak routines, énergie N/N-1, entretien)
+- Flux utilisateur simplifiés
+- CRON jobs
 """
 
 import pytest
