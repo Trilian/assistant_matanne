@@ -146,7 +146,7 @@ def test_nim3_recommander_recettes_selon_activite(test_db):
 @pytest.mark.integration
 def test_nim4_generer_deeplinks_anomalies():
     """NIM4: Génération de deep links pour anomalies dashboard."""
-    from src.services.utilitaires.inter_module_dashboard_actions import (
+    from src.services.utilitaires.bridges.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
