@@ -1391,8 +1391,8 @@ def ma_fonction(db: Session):
 <!-- PHASE 2 -->
 <h3>Phase 2 &mdash; Consolidation <span class="badge badge-yellow" style="font-size:13px;margin-left:8px">Semaine 3-5</span></h3>
 <p>Eliminer les doublons structurels, completer les features mineures manquantes. Impact sur <strong>Proprete Code</strong> (7.0 &rarr; 8.0), <strong>Organisation Fichiers</strong> (7.0 &rarr; 8.0) et <strong>Documentation</strong> (6.5 &rarr; 8.0).</p>
-<div class="alert alert-warn">
-  <strong>Statut sprint Phase 2 :</strong> relance effectuee et verifiee. <strong>5 actions livrees</strong> (<code>2.1</code>, <code>2.4</code>, <code>2.5</code>, <code>2.6</code>, <code>2.7</code>) et <strong>2 nettoyages legacy encore en cours</strong> (<code>2.2</code>, <code>2.3</code>) car des imports actifs restent a migrer progressivement. Verification realisee : <code>68 tests backend OK</code> et <code>eslint frontend sans erreur</code> (2 warnings existants hors scope).</div>
+<div class="alert alert-success">
+  <strong>Statut sprint Phase 2 :</strong> sprint boucle et verifie. <strong>7 actions livrees</strong> sur 7, avec migration des alias legacy <code>get_*</code> vers les factories canoniques <code>obtenir_*</code> et nettoyage des alias core (<code>exceptions</code>, <code>caching</code>, <code>date_utils</code>). Verification realisee : <code>168 tests backend OK</code> et <code>eslint frontend sans erreur</code> (2 warnings existants hors scope).</div>
 
 <div class="timeline">
   <div class="timeline-item">
@@ -1411,18 +1411,18 @@ def ma_fonction(db: Session):
         <tr>
           <td>2.2</td>
           <td>Supprimer 18+ alias retrocompat <code>get_xxx = obtenir_xxx</code></td>
-          <td>Audit relance : 103 alias detectes encore importes. Nettoyage a faire par migration progressive pour eviter les regressions</td>
+          <td>Migration interne executee sur les imports et factories services ; definitions legacy retirees des modules concernes puis verifiees par la suite de tests Phase 2</td>
           <td><span class="badge prio-p1">P1</span></td>
           <td>Proprete code, API francaise consistante</td>
-          <td><span class="badge status-wip">En cours</span></td>
+          <td><span class="badge status-done">Fait</span></td>
         </tr>
         <tr>
           <td>2.3</td>
           <td>Supprimer alias exceptions + caching + date_utils</td>
-          <td>Audit confirme mais suppression differee : alias core encore references dans <code>src/</code>, <code>tests/</code> et la doc. Migration par etapes requise</td>
+          <td>Nettoyage core realise : suppression des alias legacy <code>ErreurService</code>, <code>is_redis_available</code>, <code>get_weekday_*</code> et <code>format_week_label</code>, avec usages migres vers les helpers canoniques</td>
           <td><span class="badge prio-p2">P2</span></td>
-          <td>~19 alias legacy en moins a terme</td>
-          <td><span class="badge status-wip">En cours</span></td>
+          <td>~19 alias legacy retires</td>
+          <td><span class="badge status-done">Fait</span></td>
         </tr>
         <tr>
           <td>2.4</td>
@@ -1559,7 +1559,7 @@ def ma_fonction(db: Session):
           <td>Mistral Vision + Telegram Bot API (photo handler) + detection contexte auto</td>
           <td><span class="badge prio-p1">P1</span></td>
           <td>IA + Telegram</td>
-          <td><span class="badge status-wip">En cours</span></td>
+          <td><span class="badge status-done">Termine</span></td>
         </tr>
         <tr>
           <td>4.2</td>
@@ -1599,7 +1599,7 @@ def ma_fonction(db: Session):
           <td>Event bus <code>projet.termine</code> &rarr; update table <code>scenarios_immobiliers</code></td>
           <td><span class="badge prio-p2">P2</span></td>
           <td>Inter-modules</td>
-          <td><span class="badge status-wip">En cours</span></td>
+          <td><span class="badge status-done">Termine</span></td>
         </tr>
         <tr>
           <td>4.7</td>
@@ -1623,7 +1623,7 @@ def ma_fonction(db: Session):
           <td>Scraping/API prix + comparaison DB charges + Telegram alerte</td>
           <td><span class="badge prio-p3">P3</span></td>
           <td>Automatisation + Maison</td>
-          <td><span class="badge status-wip">En cours</span></td>
+          <td><span class="badge status-done">Termine</span></td>
         </tr>
         <tr>
           <td>4.10</td>
@@ -1631,7 +1631,7 @@ def ma_fonction(db: Session):
           <td>Mistral + ReportLab + agregation maison (projets, entretien, jardin, energie)</td>
           <td><span class="badge prio-p3">P3</span></td>
           <td>IA + PDF</td>
-          <td><span class="badge status-wip">En cours</span></td>
+          <td><span class="badge status-done">Termine</span></td>
         </tr>
       </table>
     </div>
@@ -1639,7 +1639,7 @@ def ma_fonction(db: Session):
 </div>
 
 <div class="alert alert-success" style="margin-top:16px">
-  <strong>Mise a jour Avril 2026 :</strong> la Phase 4 n'est plus un bloc <em>"tout a faire"</em>. Le repo couvre deja une grande partie du scope, avec un <strong>Sprint 4A Telegram &amp; CRON livre</strong> et un <strong>Sprint 4B Habitat / rapports</strong> encore partiellement a finaliser.
+  <strong>Mise a jour Avril 2026 :</strong> la Phase 4 est maintenant <strong>alignee avec le repo</strong> : <strong>Sprint 4A Telegram &amp; CRON livre</strong> et <strong>Sprint 4B Habitat / rapports consolide</strong> (photo multi-usage, bridge habitat, comparateur hebdo et rapports maison exposes).
 </div>
 
 <div class="grid grid-2" style="margin-top:16px">
@@ -1649,16 +1649,16 @@ def ma_fonction(db: Session):
       <li><span class="badge status-done">Termine</span> <code>/acheter</code>, <code>/recap</code>, <code>/note</code>, <code>/projection</code></li>
       <li><span class="badge status-done">Termine</span> CRON <code>recap_journee</code> (20:00) et catalogue scheduler synchronise</li>
       <li><span class="badge status-done">Termine</span> CRON <code>suggestion_soiree</code> (base IA + notification Telegram/push)</li>
-      <li><span class="badge status-wip">En cours</span> enrichissement <code>/photo</code> vers une vraie analyse multi-usage de bout en bout</li>
+      <li><span class="badge status-done">Termine</span> <code>/photo</code> exploite maintenant l'analyse IA multi-usage (plante, maison, document, cuisine)</li>
     </ul>
   </div>
   <div class="card">
     <h4 style="margin-top:0">Sprint 4B &mdash; Habitat &amp; rapports</h4>
     <ul>
       <li><span class="badge status-done">Termine</span> vue <code>Jardin 2D</code> deja presente cote frontend</li>
-      <li><span class="badge status-wip">En cours</span> bridge projets termines &rarr; scenarios habitat</li>
-      <li><span class="badge status-wip">En cours</span> rapport mensuel maison visuel / PDF IA a consolider</li>
-      <li><span class="badge status-wip">En cours</span> comparateur abonnements deja actif, rythme et profondeur a affiner si besoin</li>
+      <li><span class="badge status-done">Termine</span> bridge projets termines &rarr; scenarios habitat via Event Bus</li>
+      <li><span class="badge status-done">Termine</span> rapport mensuel maison / PDF expose depuis le hub maison admin</li>
+      <li><span class="badge status-done">Termine</span> comparateur abonnements synchronise en cadence hebdo (lun 08:00)</li>
     </ul>
   </div>
 </div>
@@ -1673,7 +1673,7 @@ def ma_fonction(db: Session):
     <tr><td>CRON &mdash; <code>recap_journee</code></td><td><span class="badge status-done">Termine</span></td><td>Planifie a 20:00 dans <code>jobs_schedule.py</code></td></tr>
     <tr><td>CRON &mdash; <code>suggestion_soiree</code></td><td><span class="badge status-done">Termine</span></td><td>Planifie le vendredi 18:00 + notif Telegram/push</td></tr>
     <tr><td>Frontend &mdash; Jardin 2D</td><td><span class="badge status-done">Termine</span></td><td><code>vue-jardin-interactive.tsx</code> deja en place</td></tr>
-    <tr><td>Habitat / rapports avances</td><td><span class="badge status-wip">En cours</span></td><td>Finalisation restante sur bridge scenarios + rapport visuel</td></tr>
+    <tr><td>Habitat / rapports avances</td><td><span class="badge status-done">Termine</span></td><td>Bridge scenarios + rapport maison + comparateur hebdo synchronises</td></tr>
   </table>
 </div>
 

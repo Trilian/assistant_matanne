@@ -28,7 +28,7 @@ COMMANDES_TELEGRAM: tuple[tuple[str, str], ...] = (
     ("/projection", "Projection budgetaire rapide de fin de mois"),
     ("/recap", "Récapitulatif rapide de la journée"),
     ("/rapport", "Résumé hebdomadaire de la famille"),
-    ("/photo", "Recevoir l'aide pour analyser une photo du frigo ou de la maison"),
+    ("/photo", "Recevoir l'aide pour analyser une photo (frigo, plante, pièce, document)"),
     ("/meteo", "Météo du jour et impact sur les activités"),
     ("/menu", "Ouvrir le menu principal Telegram"),
     ("/aide", "Lister toutes les commandes disponibles"),

@@ -54,7 +54,7 @@ _LABELS_JOBS: dict[str, str] = {
     "job_briefing_matinal_push": "Briefing matinal IA (07h00)",
     "job_jardin_feedback_planning": "Feedback jardin → planning (dim 18h30)",
     "briefing_matinal_ia": "Résumé matinal IA (07h00)",
-    "comparateur_abonnements": "Comparateur abonnements (1er/mois 09h00)",
+    "comparateur_abonnements": "Comparateur abonnements (lun 08h00)",
     "rapport_nutritionnel_jules": "Rapport nutritionnel Jules (dim 19h00)",
     "nettoyage_notifications_30j": "Nettoyage notifications 30 jours (1er/mois 02h30)",
     "prediction_depenses": "Prédiction dépenses (15 du mois 08h30)",

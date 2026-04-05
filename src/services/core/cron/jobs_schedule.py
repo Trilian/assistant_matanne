@@ -110,7 +110,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
 
     # Jobs IA et automatisations avancées
     planifier_job("briefing_matinal_ia", CronTrigger(hour=7, minute=0), replace_existing=True)
-    planifier_job("comparateur_abonnements", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
+    planifier_job("comparateur_abonnements", CronTrigger(day_of_week="mon", hour=8, minute=0), replace_existing=True)
     planifier_job("rapport_nutritionnel_jules", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)
     planifier_job("nettoyage_notifications_30j", CronTrigger(day=1, hour=2, minute=30), replace_existing=True)
     planifier_job("prediction_depenses", CronTrigger(day=15, hour=8, minute=30), replace_existing=True)

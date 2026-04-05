@@ -230,6 +230,16 @@ export default function PageMaison() {
               hint: "Opportunités d'économies maison",
             },
             {
+              id: "rapport_maison_mensuel",
+              label: "Rapport maison mensuel",
+              hint: "Synthèse visuelle des projets et dépenses",
+            },
+            {
+              id: "s16_rapport_maison_trimestriel",
+              label: "Rapport maison PDF",
+              hint: "Export email/PDF trimestriel",
+            },
+            {
               id: "alerte_plantes_arrosage",
               label: "Alerte arrosage",
               hint: "Rappels jardin / entretien",
