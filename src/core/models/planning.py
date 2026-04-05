@@ -138,8 +138,6 @@ class Repas(Base):
 
     # Contexte apprentissage
     contexte_meteo: Mapped[str | None] = mapped_column(String(50))
-    consomme: Mapped[bool] = mapped_column(Boolean, default=False)
-    consomme_le: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Relations
     planning: Mapped["Planning"] = relationship(back_populates="repas")

@@ -25,7 +25,6 @@ export async function obtenirTableauBord(): Promise<DonneesTableauBord> {
 export interface DonneesTableauBordCuisine {
   repas_aujourd_hui: { type_repas: string; recette_nom?: string | null }[];
   repas_semaine_count: number;
-  repas_consommes_semaine: number;
   nb_recettes: number;
   articles_courses_restants: number;
   alertes_inventaire: number;

@@ -18,7 +18,6 @@ vi.mock("@/crochets/utiliser-api", () => ({
     data: {
       repas_aujourd_hui: [{ type_repas: "dejeuner", recette_nom: "Pâtes" }],
       repas_semaine_count: 5,
-      repas_consommes_semaine: 2,
       nb_recettes: 42,
       articles_courses_restants: 3,
       score_anti_gaspillage: 88,

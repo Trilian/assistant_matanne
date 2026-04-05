@@ -311,31 +311,6 @@ def generer_rapport_mensuel_cuisine():
             debut_mois_prec = (aujourd_hui.replace(day=1) - timedelta(days=1)).replace(day=1)
             fin_mois_prec = aujourd_hui.replace(day=1) - timedelta(days=1)
 
-            # Repas consommés le mois dernier
-            repas_consommes = (
-                session.query(func.count(Repas.id))
-                .filter(
-                    Repas.date_repas >= debut_mois_prec,
-                    Repas.date_repas <= fin_mois_prec,
-                    Repas.consomme == True,  # noqa: E712
-                )
-                .scalar()
-                or 0
-            )
-
-            # Repas planifiés non consommés (= gaspillage potentiel)
-            repas_non_consommes = (
-                session.query(func.count(Repas.id))
-                .filter(
-                    Repas.date_repas >= debut_mois_prec,
-                    Repas.date_repas <= fin_mois_prec,
-                    Repas.consomme == False,  # noqa: E712
-                    Repas.recette_id.isnot(None),
-                )
-                .scalar()
-                or 0
-            )
-
             # Articles expirés jetés
             articles_expires = (
                 session.query(func.count(ArticleInventaire.id))
@@ -349,8 +324,6 @@ def generer_rapport_mensuel_cuisine():
 
             logger.info(
                 f"📊 Rapport cuisine {debut_mois_prec.strftime('%B %Y')} : "
-                f"{repas_consommes} repas consommés, "
-                f"{repas_non_consommes} non consommés, "
                 f"{articles_expires} articles expirés"
             )
 

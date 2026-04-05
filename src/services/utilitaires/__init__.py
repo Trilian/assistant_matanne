@@ -5,7 +5,7 @@ Architecture:
     +-- service.py              # CRUD services (notes, journal, contacts, etc.)
     +-- chat/                   # Services chat IA
     +-- export/                 # Services export/import
-    +-- bridges/                # Bridges inter-modules
+    +-- inter_modules/          # Bridges inter-modules
 """
 
 from src.services.utilitaires.service import (
@@ -28,7 +28,7 @@ from src.services.utilitaires.briefing_matinal import (
     BriefingMatinalService,
     obtenir_service_briefing_matinal,
 )
-from src.services.utilitaires.bridges.inter_module_chat_contexte import (
+from src.services.utilitaires.inter_modules.inter_module_chat_contexte import (
     ChatContexteMultiModuleService,
     obtenir_service_chat_contexte,
 )
@@ -36,11 +36,11 @@ from src.services.utilitaires.chat.assistant_proactif import (
     AssistantProactifService,
     obtenir_service_assistant_proactif,
 )
-from src.services.utilitaires.bridges.inter_module_dashboard_actions import (
+from src.services.utilitaires.inter_modules.inter_module_dashboard_actions import (
     DashboardActionsRapidesInteractionService,
     get_dashboard_actions_rapides_service,
 )
-from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
+from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
     ChatEventBusBridgeService,
     enregistrer_chat_event_bus_subscribers,
     obtenir_chat_event_bus_bridge,

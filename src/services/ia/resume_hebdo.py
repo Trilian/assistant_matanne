@@ -51,7 +51,6 @@ class ResumeHebdoService(BaseAIService):
             .all()
         )
         repas_prepares = sum(1 for r in repas if r.prepare)
-        repas_consommes = sum(1 for r in repas if r.consomme)
 
         # Tâches entretien terminées cette semaine
         taches_faites = (
@@ -79,7 +78,6 @@ class ResumeHebdoService(BaseAIService):
             "repas": {
                 "planifies": len(repas),
                 "prepares": repas_prepares,
-                "consommes": repas_consommes,
             },
             "taches_entretien_faites": taches_faites,
             "budget": {
@@ -109,7 +107,7 @@ class ResumeHebdoService(BaseAIService):
         prompt = f"""Génère un résumé familial de la semaine en français.
 
 Données de la semaine ({donnees.get('periode', 'cette semaine')}):
-- Repas planifiés: {donnees['repas']['planifies']}, préparés: {donnees['repas']['prepares']}, consommés: {donnees['repas']['consommes']}
+- Repas planifiés: {donnees['repas']['planifies']}, préparés: {donnees['repas']['prepares']}
 - Tâches entretien terminées: {donnees['taches_entretien_faites']}
 - Dépenses semaine: {donnees['budget']['depenses_semaine']:.2f}€
 

@@ -1,4 +1,4 @@
-ï»¿"""
+"""
 Tests pour les bridges inter-modules bridges inter-modules (NIM5-NIM8).
 """
 
@@ -10,18 +10,18 @@ from sqlalchemy.orm import Session
 
 
 class TestBridgeEntretienBudget:
-    """Tests pour NIM5: Entretien â†’ Budget maison."""
+    """Tests pour NIM5: Entretien ? Budget maison."""
 
     def test_enregistrer_depense_entretien_success(self, test_db: Session):
-        """Test l'enregistrement d'une dÃ©pense d'entretien."""
+        """Test l'enregistrement d'une dépense d'entretien."""
         from src.core.models.habitat import TacheEntretien
-        from src.services.maison.bridges.inter_module_entretien_budget import (
+        from src.services.maison.inter_modules.inter_module_entretien_budget import (
             obtenir_entretien_budget_bridge,
         )
 
-        # CrÃ©er une tÃ¢che entretien terminÃ©e
+        # Créer une tâche entretien terminée
         tache = TacheEntretien(
-            nom="RÃ©paration robinet",
+            nom="Réparation robinet",
             categorie="maintenance",
             priorite="haute",
             fait=True,
@@ -29,29 +29,29 @@ class TestBridgeEntretienBudget:
         test_db.add(tache)
         test_db.commit()
 
-        # Enregistrer la dÃ©pense via le bridge
+        # Enregistrer la dépense via le bridge
         service = obtenir_entretien_budget_bridge()
         result = service.enregistrer_depense_entretien(
             tache_id=tache.id,
             montant_reel=Decimal("150.00"),
-            description="Plombier appelÃ©",
+            description="Plombier appelé",
             db=test_db,
         )
 
-        # VÃ©rifier le rÃ©sultat
+        # Vérifier le résultat
         assert result is not None
         assert result["montant"] == 150.0
         assert result["categorie"] == "entretien_maintenance"
         assert result["tache_id"] == tache.id
 
     def test_obtenir_depenses_par_entretien(self, test_db: Session):
-        """Test la rÃ©cupÃ©ration des dÃ©penses d'entretien."""
+        """Test la récupération des dépenses d'entretien."""
         from src.core.models.finances import DepenseMaison
-        from src.services.maison.bridges.inter_module_entretien_budget import (
+        from src.services.maison.inter_modules.inter_module_entretien_budget import (
             obtenir_entretien_budget_bridge,
         )
 
-        # CrÃ©er quelques dÃ©penses
+        # Créer quelques dépenses
         today = date.today()
         for i in range(3):
             depense = DepenseMaison(
@@ -64,7 +64,7 @@ class TestBridgeEntretienBudget:
             test_db.add(depense)
         test_db.commit()
 
-        # RÃ©cupÃ©rer les dÃ©penses
+        # Récupérer les dépenses
         service = obtenir_entretien_budget_bridge()
         resultat = service.obtenir_depenses_par_entretien(limite=10, db=test_db)
 
@@ -73,10 +73,10 @@ class TestBridgeEntretienBudget:
 
 
 class TestBridgeCoursesValidation:
-    """Tests pour NIM6: Courses â†’ Planning validation post-achat."""
+    """Tests pour NIM6: Courses ? Planning validation post-achat."""
 
     def test_analyser_substitutions_post_achat(self, test_db: Session):
-        """Test l'analyse des substitutions aprÃ¨s achat."""
+        """Test l'analyse des substitutions après achat."""
         from datetime import datetime
         from src.core.models.courses import ArticleCourses, ListeCourses
         from src.core.models.recettes import Ingredient
@@ -84,12 +84,12 @@ class TestBridgeCoursesValidation:
             obtenir_courses_validation_bridge,
         )
 
-        # CrÃ©er une liste et des articles achetÃ©s
+        # Créer une liste et des articles achetés
         liste = ListeCourses(nom="Courses lundi")
         test_db.add(liste)
         test_db.commit()
 
-        ingredient = Ingredient(nom="Tomate", categorie="lÃ©gume", unite="kg")
+        ingredient = Ingredient(nom="Tomate", categorie="légume", unite="kg")
         test_db.add(ingredient)
         test_db.commit()
 
@@ -107,7 +107,7 @@ class TestBridgeCoursesValidation:
         service = obtenir_courses_validation_bridge()
         substitutions = service.analyser_substitutions_post_achat(db=test_db)
 
-        # VÃ©rifier le rÃ©sultat (peut Ãªtre vide si pas de substitution dÃ©tectÃ©e)
+        # Vérifier le résultat (peut être vide si pas de substitution détectée)
         assert isinstance(substitutions, list)
 
     def test_valider_achete_vs_planifie(self, test_db: Session):
@@ -118,7 +118,7 @@ class TestBridgeCoursesValidation:
             obtenir_courses_validation_bridge,
         )
 
-        # CrÃ©er une liste avec articles
+        # Créer une liste avec articles
         liste = ListeCourses(nom="Courses test")
         test_db.add(liste)
         test_db.commit()
@@ -127,7 +127,7 @@ class TestBridgeCoursesValidation:
         test_db.add(ingredient)
         test_db.commit()
 
-        # Ajouter 5 articles, 3 achetÃ©s
+        # Ajouter 5 articles, 3 achetés
         for i in range(5):
             article = ArticleCourses(
                 liste_id=liste.id,
@@ -149,7 +149,7 @@ class TestBridgeCoursesValidation:
 
 
 class TestBridgeInventaireFIFO:
-    """Tests pour NIM7: Inventaire â†’ Rotation FIFO."""
+    """Tests pour NIM7: Inventaire ? Rotation FIFO."""
 
     def test_valider_consommation_fifo(self, test_db: Session):
         """Test la validation FIFO."""
@@ -159,12 +159,12 @@ class TestBridgeInventaireFIFO:
             obtenir_inventaire_fifo_bridge,
         )
 
-        # CrÃ©er un ingrÃ©dient
+        # Créer un ingrédient
         ingredient = Ingredient(nom="Farine", categorie="poudre", unite="kg")
         test_db.add(ingredient)
         test_db.commit()
 
-        # Ajouter 3 articles du mÃªme ingrÃ©dient Ã  des dates diffÃ©rentes
+        # Ajouter 3 articles du même ingrédient à des dates différentes
         for i in range(3):
             article = ArticleInventaire(
                 ingredient_id=ingredient.id,
@@ -194,12 +194,12 @@ class TestBridgeInventaireFIFO:
             obtenir_inventaire_fifo_bridge,
         )
 
-        # CrÃ©er un ingrÃ©dient
+        # Créer un ingrédient
         ingredient = Ingredient(nom="Sucre", categorie="poudre", unite="kg")
         test_db.add(ingredient)
         test_db.commit()
 
-        # Ajouter 2 articles du mÃªme ingrÃ©dient
+        # Ajouter 2 articles du même ingrédient
         for i in range(2):
             article = ArticleInventaire(
                 ingredient_id=ingredient.id,
@@ -211,7 +211,7 @@ class TestBridgeInventaireFIFO:
             test_db.add(article)
         test_db.commit()
 
-        # Chercher les problÃ¨mes FIFO
+        # Chercher les problèmes FIFO
         service = obtenir_inventaire_fifo_bridge()
         problemes = service.obtenir_articles_hors_ordre(limite=10, db=test_db)
 
@@ -222,11 +222,11 @@ class TestBridgeInventaireFIFO:
 
 
 class TestBridgeChatEventBus:
-    """Tests pour NIM8: Chat IA â†’ Event Bus."""
+    """Tests pour NIM8: Chat IA ? Event Bus."""
 
     def test_initialisation_cache(self):
         """Test l'initialisation du cache."""
-        from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
+        from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
@@ -236,15 +236,15 @@ class TestBridgeChatEventBus:
         assert isinstance(cache, dict)
 
     def test_rafraichir_contexte_inventaire(self, test_db: Session):
-        """Test le rafraÃ®chissement du contexte inventaire."""
+        """Test le rafraîchissement du contexte inventaire."""
         from src.core.models.inventaire import ArticleInventaire
         from src.core.models.recettes import Ingredient
-        from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
+        from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
-        # CrÃ©er un ingrÃ©dient et un article
-        ingredient = Ingredient(nom="Ail", categorie="lÃ©gume", unite="g")
+        # Créer un ingrédient et un article
+        ingredient = Ingredient(nom="Ail", categorie="légume", unite="g")
         test_db.add(ingredient)
         test_db.commit()
 
@@ -258,7 +258,7 @@ class TestBridgeChatEventBus:
         test_db.add(article)
         test_db.commit()
 
-        # RafraÃ®chir le contexte
+        # Rafraîchir le contexte
         service = obtenir_chat_event_bus_bridge()
         contexte = service.rafraichir_contexte_inventaire(db=test_db)
 
@@ -266,19 +266,19 @@ class TestBridgeChatEventBus:
         assert "expirant_bientot" in contexte
 
     def test_rafraichir_contexte_courses(self, test_db: Session):
-        """Test le rafraÃ®chissement du contexte courses."""
+        """Test le rafraîchissement du contexte courses."""
         from src.core.models.courses import ArticleCourses, ListeCourses
         from src.core.models.recettes import Ingredient
-        from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
+        from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
-        # CrÃ©er une liste avec articles
+        # Créer une liste avec articles
         liste = ListeCourses(nom="Courses samedi")
         test_db.add(liste)
         test_db.commit()
 
-        ingredient = Ingredient(nom="Oeufs", categorie="produits laitiers", unite="piÃ¨ce")
+        ingredient = Ingredient(nom="Oeufs", categorie="produits laitiers", unite="pièce")
         test_db.add(ingredient)
         test_db.commit()
 
@@ -293,7 +293,7 @@ class TestBridgeChatEventBus:
             test_db.add(article)
         test_db.commit()
 
-        # RafraÃ®chir le contexte
+        # Rafraîchir le contexte
         service = obtenir_chat_event_bus_bridge()
         contexte = service.rafraichir_contexte_courses(db=test_db)
 
@@ -302,17 +302,17 @@ class TestBridgeChatEventBus:
         assert "taux_completion" in contexte
 
     def test_rafraichir_contexte_budget(self, test_db: Session):
-        """Test le rafraÃ®chissement du contexte budget."""
+        """Test le rafraîchissement du contexte budget."""
         from src.core.models.finances import DepenseMaison
-        from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
+        from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
-        # CrÃ©er des dÃ©penses
+        # Créer des dépenses
         today = date.today()
         for i in range(5):
             depense = DepenseMaison(
-                categorie="alimentation" if i % 2 == 0 else "Ã©nergie",
+                categorie="alimentation" if i % 2 == 0 else "énergie",
                 mois=today.month,
                 annee=today.year,
                 montant=Decimal(f"{50 + i * 10}"),
@@ -320,7 +320,7 @@ class TestBridgeChatEventBus:
             test_db.add(depense)
         test_db.commit()
 
-        # RafraÃ®chir le contexte
+        # Rafraîchir le contexte
         service = obtenir_chat_event_bus_bridge()
         contexte = service.rafraichir_contexte_budget(db=test_db)
 
@@ -330,11 +330,11 @@ class TestBridgeChatEventBus:
 
 @pytest.mark.unit
 class TestBridgesIntegration:
-    """Tests d'intÃ©gration entre les bridges."""
+    """Tests d'intégration entre les bridges."""
 
     def test_tous_les_bridges_importent(self):
-        """VÃ©rifie que tous les bridges s'importent correctement."""
-        from src.services.maison.bridges.inter_module_entretien_budget import (
+        """Vérifie que tous les bridges s'importent correctement."""
+        from src.services.maison.inter_modules.inter_module_entretien_budget import (
             obtenir_entretien_budget_bridge,
         )
         from src.services.cuisine.inter_module_courses_validation import (
@@ -343,11 +343,11 @@ class TestBridgesIntegration:
         from src.services.cuisine.inter_module_inventaire_fifo import (
             obtenir_inventaire_fifo_bridge,
         )
-        from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
+        from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
-        # S'assurer qu'on peut crÃ©er les singletons
+        # S'assurer qu'on peut créer les singletons
         bridge1 = obtenir_entretien_budget_bridge()
         bridge2 = obtenir_courses_validation_bridge()
         bridge3 = obtenir_inventaire_fifo_bridge()
@@ -359,9 +359,9 @@ class TestBridgesIntegration:
         assert bridge4 is not None
 
     def test_enregistrement_subscribers_sans_erreur(self):
-        """VÃ©rifie que les subscribers s'enregistrent sans erreur."""
+        """Vérifie que les subscribers s'enregistrent sans erreur."""
         try:
-            from src.services.maison.bridges.inter_module_entretien_budget import (
+            from src.services.maison.inter_modules.inter_module_entretien_budget import (
                 enregistrer_entretien_budget_subscribers,
             )
             from src.services.cuisine.inter_module_courses_validation import (
@@ -370,7 +370,7 @@ class TestBridgesIntegration:
             from src.services.cuisine.inter_module_inventaire_fifo import (
                 enregistrer_inventaire_fifo_subscribers,
             )
-            from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
+            from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
                 enregistrer_chat_event_bus_subscribers,
             )
 

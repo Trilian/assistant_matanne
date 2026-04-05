@@ -661,23 +661,7 @@ async def obtenir_dashboard_cuisine(
                 if r.plat_jules
             ]
 
-            # Repas consommÃ©s cette semaine
-            repas_consommes = (
-                session.query(func.count(Repas.id))
-                .filter(
-                    Repas.date_repas >= debut_semaine,
-                    Repas.date_repas <= fin_semaine,
-                    Repas.consomme == True,  # noqa: E712
-                )
-                .scalar()
-                or 0
-            )
-
-            return {
-                "repas_aujourd_hui": repas_aujourd_hui,
-                "repas_semaine_count": int(repas_semaine_count),
-                "repas_consommes_semaine": int(repas_consommes),
-                "nb_recettes": int(nb_recettes),
+            return {\n                \"repas_aujourd_hui\": repas_aujourd_hui,\n                \"repas_semaine_count\": int(repas_semaine_count),\n                \"nb_recettes\": int(nb_recettes),
                 "articles_courses_restants": int(articles_courses_restants),
                 "alertes_inventaire": int(alertes_inventaire),
                 "score_anti_gaspillage": score_anti_gaspillage,

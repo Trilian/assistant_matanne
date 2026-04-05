@@ -14,7 +14,7 @@ Architecture:
     +-- projets_service.py      # ProjetsService + EstimateurIA
     +-- crud/                   # Services CRUD autonomes
     +-- ia/                     # Services IA spécialisés
-    +-- bridges/                # Bridges inter-modules
+    +-- inter_modules/          # Bridges inter-modules
 """
 
 from typing import TYPE_CHECKING
@@ -106,14 +106,14 @@ _SERVICES = {
     "CatalogueEnrichissementService": "ia.catalogue_enrichissement_service",
     "get_catalogue_enrichissement_service": "ia.catalogue_enrichissement_service",
     # Bridges inter-modules → bridges/
-    "ChargesEnergieInteractionService": "bridges.inter_module_charges_energie",
-    "obtenir_service_charges_energie_interaction": "bridges.inter_module_charges_energie",
-    "EntretienCoursesInteractionService": "bridges.inter_module_entretien_courses",
-    "obtenir_service_entretien_courses_interaction": "bridges.inter_module_entretien_courses",
-    "JardinEntretienInteractionService": "bridges.inter_module_jardin_entretien",
-    "obtenir_service_jardin_entretien_interaction": "bridges.inter_module_jardin_entretien",
-    "GarantiesDocumentsInteractionService": "bridges.inter_module_garanties_documents",
-    "obtenir_service_garanties_documents_interaction": "bridges.inter_module_garanties_documents",
+    "ChargesEnergieInteractionService": "inter_modules.inter_module_charges_energie",
+    "obtenir_service_charges_energie_interaction": "inter_modules.inter_module_charges_energie",
+    "EntretienCoursesInteractionService": "inter_modules.inter_module_entretien_courses",
+    "obtenir_service_entretien_courses_interaction": "inter_modules.inter_module_entretien_courses",
+    "JardinEntretienInteractionService": "inter_modules.inter_module_jardin_entretien",
+    "obtenir_service_jardin_entretien_interaction": "inter_modules.inter_module_jardin_entretien",
+    "GarantiesDocumentsInteractionService": "inter_modules.inter_module_garanties_documents",
+    "obtenir_service_garanties_documents_interaction": "inter_modules.inter_module_garanties_documents",
 }
 
 _SCHEMAS = {

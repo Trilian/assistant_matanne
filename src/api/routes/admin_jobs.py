@@ -98,14 +98,14 @@ async def statut_bridges(
                 ),
                 "P5-05": lambda: hasattr(
                     __import__(
-                        "src.services.maison.bridges.inter_module_entretien_courses",
+                        "src.services.maison.inter_modules.inter_module_entretien_courses",
                         fromlist=["obtenir_service_entretien_courses_interaction"],
                     ).obtenir_service_entretien_courses_interaction(),
                     "suggerer_produits_entretien_pour_courses",
                 ),
                 "P5-06": lambda: hasattr(
                     __import__(
-                        "src.services.maison.bridges.inter_module_charges_energie",
+                        "src.services.maison.inter_modules.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     ).obtenir_service_charges_energie_interaction(),
                     "detecter_hausse_et_declencher_analyse",
@@ -154,7 +154,7 @@ async def statut_bridges(
                 ),
                 "P5-17": lambda: hasattr(
                     __import__(
-                        "src.services.maison.bridges.inter_module_charges_energie",
+                        "src.services.maison.inter_modules.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     ).obtenir_service_charges_energie_interaction(),
                     "detecter_hausse_et_declencher_analyse",
@@ -216,7 +216,7 @@ async def statut_bridges(
                     "intitule": "Entretien -> Courses",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.maison.bridges.inter_module_entretien_courses",
+                        "src.services.maison.inter_modules.inter_module_entretien_courses",
                         fromlist=["obtenir_service_entretien_courses_interaction"],
                     )
                     .obtenir_service_entretien_courses_interaction()
@@ -228,7 +228,7 @@ async def statut_bridges(
                     "intitule": "Charges facture -> Analyse énergie",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.maison.bridges.inter_module_charges_energie",
+                        "src.services.maison.inter_modules.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     )
                     .obtenir_service_charges_energie_interaction()
@@ -352,7 +352,7 @@ async def statut_bridges(
                     "type_check": "presence",
                     "callable": lambda: hasattr(
                         __import__(
-                            "src.services.maison.bridges.inter_module_jardin_entretien",
+                            "src.services.maison.inter_modules.inter_module_jardin_entretien",
                             fromlist=["obtenir_service_jardin_entretien_interaction"],
                         ).obtenir_service_jardin_entretien_interaction(),
                         "generer_taches_saisonnieres_depuis_plantes",
@@ -364,7 +364,7 @@ async def statut_bridges(
                     "intitule": "Charges augmentation -> Diagnostic énergie",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.maison.bridges.inter_module_charges_energie",
+                        "src.services.maison.inter_modules.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     )
                     .obtenir_service_charges_energie_interaction()

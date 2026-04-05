@@ -1,10 +1,10 @@
-ï»¿"""Tests bridges inter-modules haute prioritÃ© (NIM1-NIM4). bridges inter-modules haute prioritÃ© (NIM1-NIM4).
+"""Tests bridges inter-modules haute priorité (NIM1-NIM4). bridges inter-modules haute priorité (NIM1-NIM4).
 
 Objectif: tester les 4 nouveaux bridges:
-- NIM1: Inventaire â†’ Budget alimentation prÃ©visionnel
-- NIM2: Planning â†’ Jardin feedback loop
-- NIM3: Garmin/SantÃ© â†’ Cuisine adultes (nutrition)
-- NIM4: Dashboard â†’ Actions rapides (deep links)
+- NIM1: Inventaire ? Budget alimentation prévisionnel
+- NIM2: Planning ? Jardin feedback loop
+- NIM3: Garmin/Santé ? Cuisine adultes (nutrition)
+- NIM4: Dashboard ? Actions rapides (deep links)
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import pytest
 
 @pytest.mark.integration
 def test_nim1_inventaire_budget_previsionnel(test_db):
-    """NIM1: Calcul du budget prÃ©visionnel basÃ© sur l'inventaire."""
+    """NIM1: Calcul du budget prévisionnel basé sur l'inventaire."""
     from src.services.cuisine.inter_module_inventaire_budget import (
         InventaireBudgetInteractionService,
     )
@@ -37,13 +37,13 @@ def test_nim1_inventaire_budget_previsionnel(test_db):
 
 @pytest.mark.integration
 def test_nim1_agreger_achats_par_categorie(test_db):
-    """NIM1: AgrÃ©gation des achats rÃ©els par catÃ©gorie."""
+    """NIM1: Agrégation des achats réels par catégorie."""
     from src.services.cuisine.inter_module_inventaire_budget import (
         InventaireBudgetInteractionService,
     )
 
     service = InventaireBudgetInteractionService()
-    result = service.agrÃ©ger_achats_par_categorie(
+    result = service.agréger_achats_par_categorie(
         jours_lookback=30,
         db=test_db,
     )
@@ -58,7 +58,7 @@ def test_nim1_agreger_achats_par_categorie(test_db):
 
 @pytest.mark.integration
 def test_nim2_planning_jardin_recoltes_non_utilisees(test_db):
-    """NIM2: DÃ©tection des rÃ©coltes non utilisÃ©es dans le planning."""
+    """NIM2: Détection des récoltes non utilisées dans le planning."""
     from src.services.cuisine.inter_module_planning_jardin import (
         PlanningJardinInteractionService,
     )
@@ -96,19 +96,19 @@ def test_nim2_modifier_production_jardin(test_db):
     )
 
     assert isinstance(result, dict)
-    # Peut retourner error ou success, dÃ©pend de la prÃ©sence des donnÃ©es
+    # Peut retourner error ou success, dépend de la présence des données
 
 
 @pytest.mark.integration
 def test_nim3_besoins_nutritionnels_selon_activite(test_db):
-    """NIM3: Calcul des besoins nutritionnels basÃ© sur l'activitÃ© Garmin."""
+    """NIM3: Calcul des besoins nutritionnels basé sur l'activité Garmin."""
     from src.services.cuisine.inter_module_garmin_nutrition_adultes import (
         GarminNutritionAdultesInteractionService,
     )
 
     service = GarminNutritionAdultesInteractionService()
     result = service.calculer_besoins_nutritionnels_selon_activite(
-        profil_id=None,  # Prendra le premier adulte par dÃ©faut
+        profil_id=None,  # Prendra le premier adulte par défaut
         db=test_db,
     )
 
@@ -125,7 +125,7 @@ def test_nim3_besoins_nutritionnels_selon_activite(test_db):
 
 @pytest.mark.integration
 def test_nim3_recommander_recettes_selon_activite(test_db):
-    """NIM3: Recommandations de recettes adaptÃ©es Ã  l'activitÃ©."""
+    """NIM3: Recommandations de recettes adaptées à l'activité."""
     from src.services.cuisine.inter_module_garmin_nutrition_adultes import (
         GarminNutritionAdultesInteractionService,
     )
@@ -145,8 +145,8 @@ def test_nim3_recommander_recettes_selon_activite(test_db):
 
 @pytest.mark.integration
 def test_nim4_generer_deeplinks_anomalies():
-    """NIM4: GÃ©nÃ©ration de deep links pour anomalies dashboard."""
-    from src.services.utilitaires.bridges.inter_module_dashboard_actions import (
+    """NIM4: Génération de deep links pour anomalies dashboard."""
+    from src.services.utilitaires.inter_modules.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
@@ -192,8 +192,8 @@ def test_nim4_generer_deeplinks_anomalies():
 
 @pytest.mark.integration
 def test_nim4_executer_action_rapide(test_db):
-    """NIM4: ExÃ©cution d'une action rapide depuis le dashboard."""
-    from src.services.utilitaires.bridges.inter_module_dashboard_actions import (
+    """NIM4: Exécution d'une action rapide depuis le dashboard."""
+    from src.services.utilitaires.inter_modules.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
@@ -209,13 +209,13 @@ def test_nim4_executer_action_rapide(test_db):
     assert isinstance(result, dict)
     assert "action_id" in result
     assert result["action_id"] == "unknown_action"
-    # Peut retourner success ou error selon les donnÃ©es
+    # Peut retourner success ou error selon les données
 
 
 @pytest.mark.integration
 def test_nim4_action_budget_anomaly(test_db):
     """NIM4: Action rapide budget anomaly."""
-    from src.services.utilitaires.bridges.inter_module_dashboard_actions import (
+    from src.services.utilitaires.inter_modules.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
@@ -238,7 +238,7 @@ def test_nim4_action_budget_anomaly(test_db):
 @pytest.mark.integration
 def test_nim4_action_stock_alert(test_db):
     """NIM4: Action rapide stock alert."""
-    from src.services.utilitaires.bridges.inter_module_dashboard_actions import (
+    from src.services.utilitaires.inter_modules.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
@@ -258,7 +258,7 @@ def test_nim4_action_stock_alert(test_db):
 
 @pytest.mark.integration
 def test_all_nim_services_registered():
-    """Tous les NIM1-NIM4 services sont enregistrÃ©s dans la factory."""
+    """Tous les NIM1-NIM4 services sont enregistrés dans la factory."""
     from src.services.core.registry import registre
 
     # NIM1

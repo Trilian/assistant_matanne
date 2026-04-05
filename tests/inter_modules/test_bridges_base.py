@@ -1,4 +1,4 @@
-ï»¿"""Tests bridges inter-modules de base. bridges inter-modules.
+"""Tests bridges inter-modules de base. bridges inter-modules.
 
 Objectif: couvrir 23 bridges existants avec des tests integration legers
 et stables (retour structurel, comportement de base).
@@ -180,7 +180,7 @@ def test_bridge_6_14_documents_vers_notifications(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_15_entretien_vers_courses(test_db):
-    from src.services.maison.bridges.inter_module_entretien_courses import EntretienCoursesInteractionService
+    from src.services.maison.inter_modules.inter_module_entretien_courses import EntretienCoursesInteractionService
 
     service = EntretienCoursesInteractionService()
     result = service.suggerer_produits_entretien_pour_courses(db=test_db)
@@ -190,7 +190,7 @@ def test_bridge_6_15_entretien_vers_courses(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_16_jardin_vers_entretien(test_db):
-    from src.services.maison.bridges.inter_module_jardin_entretien import JardinEntretienInteractionService
+    from src.services.maison.inter_modules.inter_module_jardin_entretien import JardinEntretienInteractionService
 
     service = JardinEntretienInteractionService()
     result = service.generer_taches_saisonnieres_depuis_plantes(db=test_db)
@@ -200,7 +200,7 @@ def test_bridge_6_16_jardin_vers_entretien(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_17_charges_vers_energie(test_db):
-    from src.services.maison.bridges.inter_module_charges_energie import ChargesEnergieInteractionService
+    from src.services.maison.inter_modules.inter_module_charges_energie import ChargesEnergieInteractionService
 
     service = ChargesEnergieInteractionService()
     result = service.detecter_hausse_et_declencher_analyse(db=test_db)
@@ -210,7 +210,7 @@ def test_bridge_6_17_charges_vers_energie(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_18_energie_vers_cuisine(test_db):
-    from src.services.maison.bridges.inter_module_energie_cuisine import EnergiecuisineInteractionService
+    from src.services.maison.inter_modules.inter_module_energie_cuisine import EnergiecuisineInteractionService
 
     service = EnergiecuisineInteractionService()
     result = service.obtenir_suggestions_heures_creuses(db=test_db)
@@ -220,7 +220,7 @@ def test_bridge_6_18_energie_vers_cuisine(test_db):
 
 @pytest.mark.integration
 def test_bridge_6_19_diagnostics_vers_ia():
-    from src.services.maison.bridges.inter_module_diagnostics_ia import DiagnosticsIAArtisansService
+    from src.services.maison.inter_modules.inter_module_diagnostics_ia import DiagnosticsIAArtisansService
 
     service = DiagnosticsIAArtisansService()
     result = service.diagnostiquer_panne_photo(
@@ -233,7 +233,7 @@ def test_bridge_6_19_diagnostics_vers_ia():
 
 @pytest.mark.integration
 def test_bridge_6_20_chat_vers_contexte_tous_modules():
-    from src.services.utilitaires.bridges.inter_module_chat_contexte import ChatContexteMultiModuleService
+    from src.services.utilitaires.inter_modules.inter_module_chat_contexte import ChatContexteMultiModuleService
 
     service = ChatContexteMultiModuleService()
     result = service.collecter_contexte_complet()
@@ -303,7 +303,7 @@ def test_bridge_jardin_vers_inventaire_sync_recolte(test_db):
 @pytest.mark.integration
 def test_bridge_garanties_vers_documents_lie_facture_a_objet(test_db):
     from src.core.models import DocumentFamille, ObjetMaison, PieceMaison
-    from src.services.maison.bridges.inter_module_garanties_documents import (
+    from src.services.maison.inter_modules.inter_module_garanties_documents import (
         GarantiesDocumentsInteractionService,
     )
 
@@ -355,17 +355,17 @@ def test_bridge_meteo_vers_planning_priorise_selon_temperature():
     service = MeteoPlanningInteractionService()
 
     chaud = service.prioriser_suggestions_selon_meteo(
-        ["Soupe de lÃ©gumes", "BBQ poulet", "Salade grecque"],
+        ["Soupe de légumes", "BBQ poulet", "Salade grecque"],
         temperature=30,
         description="grand soleil",
     )
     froid = service.prioriser_suggestions_selon_meteo(
-        ["BBQ poulet", "Soupe de lÃ©gumes", "Salade grecque"],
+        ["BBQ poulet", "Soupe de légumes", "Salade grecque"],
         temperature=4,
         description="pluie froide",
     )
 
     assert chaud["suggestions_priorisees"][0] in {"BBQ poulet", "Salade grecque"}
     assert "grillade" in chaud["types_recommandes"] or "salade" in chaud["types_recommandes"]
-    assert froid["suggestions_priorisees"][0] == "Soupe de lÃ©gumes"
+    assert froid["suggestions_priorisees"][0] == "Soupe de légumes"
     assert "soupe" in froid["types_recommandes"]

@@ -77,19 +77,6 @@ export async function adapterPlanningJules(
   return data;
 }
 
-/** Marquer un repas comme consommé (décrémenter l'inventaire) */
-export async function marquerRepasConsomme(
-  repasId: number,
-  portions = 1
-): Promise<{ message: string; id: number }> {
-  const { data } = await clientApi.post<{ message: string; id: number }>(
-    `/planning/repas/${repasId}/consomme`,
-    null,
-    { params: { portions } }
-  );
-  return data;
-}
-
 /** Obtenir des alternatives pour un repas */
 export async function obtenirAlternativesRepas(
   repasId: number,

@@ -22,7 +22,6 @@ export interface RepasPlanning {
   compatible_cookeo?: boolean;
   compatible_monsieur_cuisine?: boolean;
   compatible_airfryer?: boolean;
-  consomme?: boolean;
 }
 
 export interface PlanningSemaine {

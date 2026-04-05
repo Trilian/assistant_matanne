@@ -38,7 +38,6 @@ import {
   obtenirPlanningSemaine,
   genererPlanningSemaine,
   obtenirNutritionHebdo,
-  marquerRepasConsomme,
 } from "@/bibliotheque/api/planning";
 import { listerInventaire, obtenirAlertes } from "@/bibliotheque/api/inventaire";
 import { genererCoursesDepuisPlanning } from "@/bibliotheque/api/courses";
@@ -202,17 +201,6 @@ export default function MaSemainePage() {
         toast.success(`Session batch créée avec ${result.nb_recettes} recettes !`);
       },
       onError: () => toast.error("Erreur lors de la création de la session batch"),
-    }
-  );
-
-  const { mutate: consommerRepas } = utiliserMutation(
-    (repasId: number) => marquerRepasConsomme(repasId, 1),
-    {
-      onSuccess: () => {
-        invalider(["planning"]);
-        toast.success("Repas marqué comme consommé !");
-      },
-      onError: () => toast.error("Erreur lors de la mise à jour"),
     }
   );
 
@@ -451,24 +439,12 @@ export default function MaSemainePage() {
                         {repasJour.map((r) => (
                           <div key={r.id}>
                             <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent/50 transition-colors">
-                              <button
-                                type="button"
-                                onClick={() => !r.consomme && consommerRepas(r.id)}
-                                className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
-                                  r.consomme
-                                    ? "bg-green-500 border-green-500 text-white"
-                                    : "border-muted-foreground/30 hover:border-green-400"
-                                }`}
-                                title={r.consomme ? "Consommé" : "Marquer consommé"}
-                              >
-                                {r.consomme && <Check className="h-3 w-3" />}
-                              </button>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-xs text-muted-foreground">
                                     {TYPE_REPAS_LABEL[r.type_repas] ?? r.type_repas}
                                   </span>
-                                  <span className={`text-sm font-medium truncate ${r.consomme ? "line-through opacity-60" : ""}`}>
+                                  <span className="text-sm font-medium truncate">
                                     {r.recette_nom ?? r.notes ?? "—"}
                                   </span>
                                 </div>

@@ -52,6 +52,7 @@ pytest-asyncio = "^0.23.2"
 ruff = "^0.1.9"
 mutmut = "^2.5.1"
 schemathesis = "^3.39.16"
+syrupy = "^4.8.0"
 
 [build-system]
 requires = ["poetry-core"]

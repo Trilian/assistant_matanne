@@ -82,7 +82,6 @@ export default function PageCuisine() {
   const nbRepas = dashboard?.repas_aujourd_hui?.length ?? 0;
   const scoreAntiGaspi = dashboard?.score_anti_gaspillage ?? 100;
   const repasJules = dashboard?.repas_jules_aujourd_hui ?? [];
-  const repasConsommes = dashboard?.repas_consommes_semaine ?? 0;
   const repasSemaine = dashboard?.repas_semaine_count ?? 0;
 
   return (
@@ -224,23 +223,9 @@ export default function PageCuisine() {
             <CardContent>
               <div className="flex items-center justify-between text-sm mb-2">
                 <span>
-                  {repasConsommes} / {repasSemaine} repas consommés
-                </span>
-                <span className="font-semibold">
-                  {repasSemaine > 0
-                    ? Math.round((repasConsommes / repasSemaine) * 100)
-                    : 0}
-                  %
+                  {repasSemaine} repas planifiés cette semaine
                 </span>
               </div>
-              <Progress
-                value={
-                  repasSemaine > 0
-                    ? (repasConsommes / repasSemaine) * 100
-                    : 0
-                }
-                className="h-2"
-              />
               <p className="text-xs text-muted-foreground mt-2">
                 {dashboard.nb_recettes} recettes en bibliothèque
                 {dashboard.batch_en_cours && " · 🍳 Batch en cours"}

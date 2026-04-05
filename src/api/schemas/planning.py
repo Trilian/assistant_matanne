@@ -51,7 +51,6 @@ class RepasResponse(RepasBase, IdentifiedResponse):
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False
     compatible_airfryer: bool = False
-    consomme: bool = False
 
 
 class PlanningSemaineResponse(BaseModel):

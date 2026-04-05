@@ -10,6 +10,7 @@
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:visual": "playwright test e2e/visual-regression.spec.ts --project=chromium",
     "test:visual:update": "playwright test e2e/visual-regression.spec.ts --project=chromium --update-snapshots",
