@@ -1,0 +1,42 @@
+{
+  "profils_famille": [
+    {
+      "prenom": "Jules",
+      "role": "enfant",
+      "date_naissance": "2022-06-14",
+      "preferences_alimentaires": ["compotes", "purées", "pâtes"],
+      "contraintes": ["sans_sel", "morceaux_limites"]
+    },
+    {
+      "prenom": "Parent 1",
+      "role": "parent",
+      "preferences_alimentaires": ["cuisine_maison", "plats_saison"]
+    }
+  ],
+  "activites_famille": [
+    {
+      "titre": "Sortie au parc",
+      "categorie": "plein_air",
+      "duree_minutes": 90,
+      "adaptée_jules": true
+    },
+    {
+      "titre": "Lecture du soir",
+      "categorie": "routine",
+      "duree_minutes": 20,
+      "adaptée_jules": true
+    }
+  ],
+  "routines_famille": [
+    {
+      "nom": "Routine du matin",
+      "moment": "matin",
+      "jours": ["lundi", "mardi", "mercredi", "jeudi", "vendredi"]
+    },
+    {
+      "nom": "Préparation du dîner",
+      "moment": "soir",
+      "jours": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"]
+    }
+  ]
+}

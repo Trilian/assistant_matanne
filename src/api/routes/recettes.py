@@ -1537,3 +1537,49 @@ async def recette_surprise(
     return await executer_async(_query)
 
 
+# ═══════════════════════════════════════════════════════════
+# P3 — HISTORIQUE MODIFICATIONS
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/{recette_id}/historique", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def historique_recette(
+    recette_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """P3-B2: Historique des modifications d'une recette."""
+    from src.core.models.systeme import HistoriqueAction
+
+    def _query():
+        with executer_avec_session() as session:
+            items = (
+                session.query(HistoriqueAction)
+                .filter(
+                    HistoriqueAction.entity_type == "recette",
+                    HistoriqueAction.entity_id == recette_id,
+                )
+                .order_by(HistoriqueAction.cree_le.desc())
+                .limit(50)
+                .all()
+            )
+            return {
+                "items": [
+                    {
+                        "id": item.id,
+                        "entity_type": item.entity_type,
+                        "entity_id": item.entity_id,
+                        "champ_modifie": item.action_type,
+                        "ancienne_valeur": (item.old_value or {}).get("valeur"),
+                        "nouvelle_valeur": (item.new_value or {}).get("valeur"),
+                        "modifie_par": item.user_name,
+                        "modifie_le": item.cree_le.isoformat() if item.cree_le else "",
+                    }
+                    for item in items
+                ],
+                "nb_total": len(items),
+            }
+
+    return await executer_async(_query)
+
+

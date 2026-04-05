@@ -394,3 +394,33 @@ async def statut_predictions(
     service = obtenir_ml_predictions()
     return {"modeles": service.statut_modeles()}
 
+
+class FeedbackRecetteRequest(BaseModel):
+    """Payload pour enregistrer un feedback sur une recette."""
+
+    recette_id: int = Field(..., ge=1)
+    feedback: str = Field(..., pattern="^(like|dislike|neutral)$")
+    note: int | None = Field(None, ge=1, le=5)
+    commentaire: str | None = Field(None, max_length=1000)
+
+
+@router.post("/feedback")
+@gerer_exception_api
+async def enregistrer_feedback_recette(
+    payload: FeedbackRecetteRequest,
+    user: dict = Depends(require_auth),
+):
+    """P3-B1: Enregistre un feedback sur une recette pour apprentissage IA."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    user_id = user.get("sub", user.get("id", "anonymous"))
+    result = service.appliquer_feedback_recette_sur_suggestions(
+        recette_id=payload.recette_id,
+        feedback=payload.feedback,
+        note=payload.note,
+        user_id=user_id,
+        commentaire=payload.commentaire,
+    )
+    return result
+

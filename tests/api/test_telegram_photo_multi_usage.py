@@ -1,4 +1,4 @@
-"""Régressions Telegram — analyse photo multi-usage Phase 4."""
+"""Régressions Telegram — analyse photo multi-usage."""
 
 from __future__ import annotations
 

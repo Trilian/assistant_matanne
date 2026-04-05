@@ -1,17 +1,15 @@
 -- ============================================================================
--- ASSISTANT MATANNE — Migrations absorbées (V005-V007)
+-- ASSISTANT MATANNE — Historique SQL absorbé
 -- ============================================================================
--- Ce fichier contient les changements des migrations V005, V006, V007
--- qui ont été absorbés dans le script principal.
--- Contexte : stratégie SQL-first (pas d'Alembic auto).
+-- Référence d'audit des suppressions et nettoyages issus des vagues V005-V007.
+-- Stratégie du projet : SQL-first, sans migrations Alembic générées automatiquement.
 -- ============================================================================
 
 -- V005 : index composites + contraintes CHECK
 -- -> absorbés dans `14_indexes.sql` pour conserver un point d'entrée unique.
 
--- V006 : nettoyage des tables legacy maison / santé
--- Ces suppressions sont idempotentes afin de pouvoir réappliquer le script
--- sur une base existante sans erreur.
+-- V006 : nettoyage des anciennes tables maison / santé.
+-- Les suppressions restent idempotentes pour permettre une réexécution sûre.
 DROP VIEW IF EXISTS v_taches_jour CASCADE;
 DROP VIEW IF EXISTS v_charge_semaine CASCADE;
 

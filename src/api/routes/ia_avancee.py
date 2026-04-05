@@ -476,3 +476,81 @@ async def adaptations_meteo(
         return AdaptationsMeteoResponse()
     _historiser_suggestion(user.get("sub", ""), "adaptations_meteo", "planning", result.model_dump() if hasattr(result, "model_dump") else None)
     return result
+
+
+# ═══════════════════════════════════════════════════════════
+# P6 — MODE PILOTE AUTOMATIQUE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/pilote-auto/status",
+    responses=REPONSES_IA,
+    summary="Statut du mode pilote automatique",
+)
+@gerer_exception_api
+async def pilote_auto_status(
+    user: dict = Depends(require_auth),
+):
+    """Retourne l'état actuel du mode pilote automatique (actif/inactif, actions proposées)."""
+    service = _get_service()
+    user_id = user.get("user_id") or user.get("sub")
+    result = service.obtenir_mode_pilote_automatique(user_id=user_id)
+    if result is None:
+        return {"actif": False, "niveau_autonomie": "off", "actions": [], "recommandations": []}
+    return result.model_dump() if hasattr(result, "model_dump") else result
+
+
+class PiloteAutoToggleRequest(BaseModel):
+    """Requête d'activation/désactivation du pilote automatique."""
+    actif: bool = True
+    niveau_autonomie: str = "validation_requise"
+
+
+@router.post(
+    "/pilote-auto/toggle",
+    responses=REPONSES_IA,
+    summary="Activer/désactiver le mode pilote automatique",
+)
+@gerer_exception_api
+async def pilote_auto_toggle(
+    body: PiloteAutoToggleRequest,
+    user: dict = Depends(require_auth),
+):
+    """Active ou désactive le mode pilote automatique avec le niveau d'autonomie choisi."""
+    from src.services.ia_avancee.pilote_auto import configurer_mode_pilote_automatique
+
+    service = _get_service()
+    user_id = user.get("user_id") or user.get("sub")
+    result = configurer_mode_pilote_automatique(
+        service=service,
+        user_id=user_id,
+        actif=body.actif,
+        niveau_autonomie=body.niveau_autonomie,
+    )
+    if result is None:
+        return {"actif": False, "niveau_autonomie": "off", "actions": [], "recommandations": []}
+    return result.model_dump() if hasattr(result, "model_dump") else result
+
+
+@router.get(
+    "/pilote-auto/actions-recentes",
+    responses=REPONSES_IA,
+    summary="Historique des actions récentes du pilote automatique",
+)
+@gerer_exception_api
+async def pilote_auto_actions_recentes(
+    limite: int = Query(10, ge=1, le=50),
+    user: dict = Depends(require_auth),
+):
+    """Retourne les dernières actions proposées/exécutées par le pilote automatique."""
+    service = _get_service()
+    user_id = user.get("user_id") or user.get("sub")
+    result = service.obtenir_mode_pilote_automatique(user_id=user_id)
+    if result is None:
+        return {"actions": [], "total": 0}
+    actions = result.actions[:limite] if hasattr(result, "actions") else []
+    return {
+        "actions": [a.model_dump() if hasattr(a, "model_dump") else a for a in actions],
+        "total": len(actions),
+    }

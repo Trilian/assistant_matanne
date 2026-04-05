@@ -9,6 +9,11 @@ import { obtenirTachesJourMaison } from "@/bibliotheque/api/maison";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import type { RappelFamille } from "@/types/famille";
 
+/**
+ * Hook de compteurs badge par module (cuisine, famille, maison, jeux).
+ * Interroge les alertes/rappels de chaque domaine et retourne les compteurs à afficher dans la sidebar.
+ * @returns Objet avec compteurs par module et total global
+ */
 export function utiliserBadgesModules() {
   const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
     ["famille", "rappels", "badge"],

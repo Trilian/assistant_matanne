@@ -1029,6 +1029,386 @@ class BridgesInterModulesService:
             "statut": voyage.statut,
         }
 
+    # ═══════════════════════════════════════════════════════════
+    # P3 — BRIDGES INTER-MODULES ENRICHIS
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def terroir_vers_recettes(self, localisation: str | None = None, db: Session | None = None) -> dict:
+        """P3-A1: Suggère des recettes régionales basées sur la localisation du foyer."""
+        from src.core.models.habitat_projet import CritereImmoHabitat
+        from src.core.models.recettes import Recette
+
+        # Déterminer la localisation
+        region = localisation
+        if not region:
+            critere = db.query(CritereImmoHabitat).filter(CritereImmoHabitat.actif.is_(True)).first()
+            if critere and critere.villes:
+                region = critere.villes[0] if isinstance(critere.villes, list) else str(critere.villes)
+            elif critere and critere.departements:
+                dep = critere.departements[0] if isinstance(critere.departements, list) else str(critere.departements)
+                region = dep
+
+        if not region:
+            region = "France"
+
+        # Chercher des recettes avec catégorie/nom/description régionale
+        recettes = (
+            db.query(Recette)
+            .filter(
+                Recette.categorie.ilike(f"%{region}%")
+                | Recette.nom.ilike(f"%{region}%")
+                | Recette.description.ilike(f"%{region}%")
+            )
+            .limit(10)
+            .all()
+        )
+
+        recettes_liste = [
+            {
+                "id": r.id,
+                "nom": r.nom,
+                "categorie": r.categorie or "",
+                "temps_preparation": r.temps_preparation,
+            }
+            for r in recettes
+        ]
+
+        return {
+            "localisation": region,
+            "region": region,
+            "recettes_suggerees": recettes_liste,
+            "nb_recettes": len(recettes_liste),
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def budget_unifie(self, mois: int | None = None, annee: int | None = None, db: Session | None = None) -> dict:
+        """P3-A2: Agrège budget famille + charges maison en vue unifiée."""
+        from src.core.models.famille import BudgetFamille
+        from src.core.models.finances import DepenseMaison
+
+        aujourd_hui = date.today()
+        mois_cible = mois or aujourd_hui.month
+        annee_cible = annee or aujourd_hui.year
+
+        # Budget famille
+        lignes_famille = (
+            db.query(BudgetFamille)
+            .filter(
+                func.extract("month", BudgetFamille.date) == mois_cible,
+                func.extract("year", BudgetFamille.date) == annee_cible,
+            )
+            .all()
+        )
+        details_famille: dict[str, float] = {}
+        for ligne in lignes_famille:
+            cat = ligne.categorie or "autre"
+            details_famille[cat] = round(details_famille.get(cat, 0.0) + float(ligne.montant or 0), 2)
+        total_famille = round(sum(details_famille.values()), 2)
+
+        # Charges maison
+        lignes_maison = (
+            db.query(DepenseMaison)
+            .filter(
+                DepenseMaison.mois == mois_cible,
+                DepenseMaison.annee == annee_cible,
+            )
+            .all()
+        )
+        details_maison: dict[str, float] = {}
+        for ligne in lignes_maison:
+            cat = ligne.categorie or "autre"
+            details_maison[cat] = round(details_maison.get(cat, 0.0) + float(ligne.montant or 0), 2)
+        total_maison = round(sum(details_maison.values()), 2)
+
+        # Évolution vs mois précédent
+        mois_prec = mois_cible - 1 if mois_cible > 1 else 12
+        annee_prec = annee_cible if mois_cible > 1 else annee_cible - 1
+        total_prec_famille = float(
+            db.query(func.coalesce(func.sum(BudgetFamille.montant), 0))
+            .filter(
+                func.extract("month", BudgetFamille.date) == mois_prec,
+                func.extract("year", BudgetFamille.date) == annee_prec,
+            )
+            .scalar()
+        )
+        total_prec_maison = float(
+            db.query(func.coalesce(func.sum(DepenseMaison.montant), 0))
+            .filter(DepenseMaison.mois == mois_prec, DepenseMaison.annee == annee_prec)
+            .scalar()
+        )
+        total_prec = total_prec_famille + total_prec_maison
+        total_unifie = round(total_famille + total_maison, 2)
+        evolution_pct = round(((total_unifie - total_prec) / total_prec) * 100, 1) if total_prec > 0 else None
+
+        return {
+            "mois": mois_cible,
+            "annee": annee_cible,
+            "total_famille": total_famille,
+            "total_maison": total_maison,
+            "total_unifie": total_unifie,
+            "details_famille": [{"categorie": k, "montant": v} for k, v in sorted(details_famille.items())],
+            "details_maison": [{"categorie": k, "montant": v} for k, v in sorted(details_maison.items())],
+            "evolution_pct": evolution_pct,
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def impact_demenagement(self, scenario_id: int, db: Session | None = None) -> dict:
+        """P3-A3: Évalue l'impact familial d'un scénario de déménagement."""
+        from src.core.models.famille import ActiviteFamille, ProfilEnfant
+        from src.core.models.habitat_projet import CritereScenarioHabitat, ScenarioHabitat
+
+        scenario = db.query(ScenarioHabitat).filter(ScenarioHabitat.id == scenario_id).first()
+        if not scenario:
+            return {"erreur": "Scénario introuvable"}
+
+        # Charger les données famille
+        enfants = db.query(ProfilEnfant).filter(ProfilEnfant.actif.is_(True)).all()
+        activites = db.query(ActiviteFamille).limit(20).all()
+        criteres = (
+            db.query(CritereScenarioHabitat)
+            .filter(CritereScenarioHabitat.scenario_id == scenario_id)
+            .all()
+        )
+
+        impacts = []
+        # Impact sur les enfants
+        for enfant in enfants:
+            age_mois = None
+            if enfant.date_of_birth:
+                delta = date.today() - enfant.date_of_birth
+                age_mois = delta.days // 30
+            impacts.append({
+                "domaine": "enfant",
+                "sujet": enfant.name,
+                "detail": f"Changement d'environnement pour {enfant.name}"
+                + (f" ({age_mois} mois)" if age_mois else ""),
+                "severite": "moyenne",
+            })
+
+        # Impact sur les activités
+        for act in activites:
+            impacts.append({
+                "domaine": "activite",
+                "sujet": act.titre if hasattr(act, "titre") else str(act),
+                "detail": "Activité potentiellement à réorganiser après déménagement",
+                "severite": "faible",
+            })
+
+        # Score global basé sur les critères
+        notes = [float(c.note) for c in criteres if c.note is not None]
+        score_global = round(sum(notes) / len(notes), 1) if notes else None
+
+        return {
+            "scenario_nom": scenario.nom,
+            "impacts": impacts,
+            "score_global": score_global,
+            "recommandation": "Scénario favorable" if score_global and score_global >= 7 else "À évaluer en détail",
+            "details": {
+                "budget_estime": float(scenario.budget_estime) if scenario.budget_estime else None,
+                "surface_m2": float(scenario.surface_finale_m2) if scenario.surface_finale_m2 else None,
+                "nb_chambres": scenario.nb_chambres,
+                "avantages": scenario.avantages or [],
+                "inconvenients": scenario.inconvenients or [],
+            },
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def widget_veille_immo(self, db: Session | None = None) -> dict:
+        """P3-A4: Données pour le widget veille immobilière du dashboard."""
+        from src.core.models.habitat_projet import AnnonceHabitat
+
+        # 5 dernières annonces
+        annonces = (
+            db.query(AnnonceHabitat)
+            .order_by(AnnonceHabitat.id.desc())
+            .limit(5)
+            .all()
+        )
+        nb_total = db.query(func.count(AnnonceHabitat.id)).scalar() or 0
+
+        annonces_liste = [
+            {
+                "id": a.id,
+                "titre": a.titre or "",
+                "prix": float(a.prix) if a.prix else 0,
+                "surface_m2": float(a.surface_m2) if a.surface_m2 else None,
+                "ville": a.ville or "",
+                "score_pertinence": float(a.score_pertinence) if a.score_pertinence else None,
+                "url_source": a.url_source,
+            }
+            for a in annonces
+        ]
+
+        # Prix moyen
+        prix_moyen_val = db.query(func.avg(AnnonceHabitat.prix)).scalar()
+        prix_moyen = round(float(prix_moyen_val), 0) if prix_moyen_val else None
+
+        return {
+            "dernieres_annonces": annonces_liste,
+            "nb_annonces_total": nb_total,
+            "prix_moyen": prix_moyen,
+            "tendance_prix_pct": None,
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def widget_saison_jardin(self, db: Session | None = None) -> dict:
+        """P3-A5: Données saisonnières du jardin pour le widget dashboard."""
+        from src.core.models.maison import ElementJardin
+
+        aujourd_hui = date.today()
+        mois = aujourd_hui.month
+        saison_map = {1: "hiver", 2: "hiver", 3: "printemps", 4: "printemps", 5: "printemps",
+                      6: "été", 7: "été", 8: "été", 9: "automne", 10: "automne",
+                      11: "automne", 12: "hiver"}
+        saison = saison_map[mois]
+
+        # Éléments actifs du jardin
+        plantes = (
+            db.query(ElementJardin)
+            .filter(ElementJardin.statut != "retire")
+            .all()
+        )
+
+        activites = []
+        prochaines_recoltes = []
+
+        for plante in plantes:
+            # Déterminer le type d'activité selon la saison et le statut
+            if plante.statut == "plante" or plante.statut == "actif":
+                activites.append({
+                    "element": plante.nom,
+                    "type_activite": "arrosage",
+                    "priorite": "haute" if saison in ("été", "printemps") else "normale",
+                    "conseil": f"Arroser {plante.nom} régulièrement" if saison == "été" else "",
+                })
+
+            # Récolte prévue
+            if plante.date_recolte_prevue and plante.date_recolte_prevue >= aujourd_hui:
+                jours_restants = (plante.date_recolte_prevue - aujourd_hui).days
+                prochaines_recoltes.append({
+                    "element": plante.nom,
+                    "date_recolte": plante.date_recolte_prevue.isoformat(),
+                    "jours_restants": jours_restants,
+                })
+
+        prochaines_recoltes.sort(key=lambda x: x["jours_restants"])
+
+        return {
+            "saison": saison,
+            "activites": activites,
+            "nb_plantes_actives": len(plantes),
+            "prochaines_recoltes": prochaines_recoltes[:5],
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def activites_jules_potager(self, db: Session | None = None) -> dict:
+        """P3-A6: Suggère des activités jardinage adaptées à Jules."""
+        from src.core.models.famille import ProfilEnfant
+        from src.core.models.maison import ElementJardin
+
+        # Trouver Jules
+        jules = db.query(ProfilEnfant).filter(ProfilEnfant.actif.is_(True)).first()
+        age_mois = None
+        if jules and jules.date_of_birth:
+            delta = date.today() - jules.date_of_birth
+            age_mois = delta.days // 30
+
+        # Plantes actives du jardin
+        plantes = (
+            db.query(ElementJardin)
+            .filter(ElementJardin.statut != "retire")
+            .all()
+        )
+        plantes_noms = [p.nom for p in plantes]
+
+        # Générer des activités adaptées à l'âge
+        activites = []
+        for plante in plantes:
+            if plante.statut in ("plante", "actif"):
+                activites.append({
+                    "activite": f"Arroser {plante.nom}",
+                    "difficulte": "facile",
+                    "duree_minutes": 10,
+                    "description": f"Arroser doucement {plante.nom} avec un petit arrosoir",
+                })
+            if plante.date_recolte_prevue and plante.date_recolte_prevue <= date.today() + timedelta(days=7):
+                activites.append({
+                    "activite": f"Récolter {plante.nom}",
+                    "difficulte": "facile",
+                    "duree_minutes": 15,
+                    "description": f"Cueillir {plante.nom} ensemble — montrer les couleurs et les formes",
+                })
+
+        # Activités génériques adaptées
+        activites.append({
+            "activite": "Observer les insectes",
+            "difficulte": "facile",
+            "duree_minutes": 10,
+            "description": "Chercher et observer les insectes dans le jardin",
+        })
+
+        return {
+            "activites": activites,
+            "plantes_disponibles": plantes_noms,
+            "age_jules_mois": age_mois,
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def verifier_stock_recette(self, recette_id: int, db: Session | None = None) -> dict:
+        """P3-B3: Vérifie le stock pour une recette et retourne les manquants."""
+        from src.core.models.inventaire import ArticleInventaire
+        from src.core.models.recettes import Ingredient, Recette, RecetteIngredient
+
+        recette = db.query(Recette).filter(Recette.id == recette_id).first()
+        if not recette:
+            return {"recette_id": recette_id, "erreur": "Recette introuvable"}
+
+        liens = (
+            db.query(RecetteIngredient, Ingredient)
+            .join(Ingredient, RecetteIngredient.ingredient_id == Ingredient.id)
+            .filter(RecetteIngredient.recette_id == recette_id)
+            .all()
+        )
+
+        ingredients_ok = []
+        ingredients_manquants = []
+
+        for lien, ing in liens:
+            nom_normalise = (ing.nom or "").strip().lower()
+            stock = (
+                db.query(ArticleInventaire)
+                .filter(ArticleInventaire.ingredient_id == ing.id)
+                .first()
+            )
+            item = {"nom": ing.nom, "quantite_requise": lien.quantite, "unite": lien.unite}
+            if stock and stock.quantite > 0:
+                item["en_stock"] = True
+                item["quantite_stock"] = float(stock.quantite)
+                ingredients_ok.append(item)
+            else:
+                item["en_stock"] = False
+                ingredients_manquants.append(item)
+
+        nb_total = len(liens)
+        nb_ok = len(ingredients_ok)
+        taux = round((nb_ok / nb_total) * 100, 1) if nb_total > 0 else 0
+
+        return {
+            "recette_id": recette_id,
+            "recette_nom": recette.nom,
+            "ingredients_ok": ingredients_ok,
+            "ingredients_manquants": ingredients_manquants,
+            "taux_couverture": taux,
+        }
+
 
 # ═══════════════════════════════════════════════════════════
 # EVENT HANDLERS (subscribers)

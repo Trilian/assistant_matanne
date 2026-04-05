@@ -1,0 +1,31 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/composants/ui/*.tsx",
+    "src/crochets/*.ts",
+    "src/magasins/*.ts",
+    "src/bibliotheque/api/*.ts",
+    "src/bibliotheque/utils.ts",
+    "src/bibliotheque/validateurs.ts",
+    "src/fournisseurs/*.tsx",
+    "src/types/*.ts"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "docs-generated",
+  "plugin": ["typedoc-plugin-markdown"],
+  "exclude": [
+    "**/*.stories.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/node_modules/**"
+  ],
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "skipErrorChecking": true,
+  "tsconfig": "tsconfig.json",
+  "readme": "none",
+  "name": "Assistant Matanne — Frontend",
+  "githubPages": false
+}

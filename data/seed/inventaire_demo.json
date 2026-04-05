@@ -1,0 +1,36 @@
+{
+  "inventaire_cuisine": [
+    {
+      "nom": "Lait demi-écrémé",
+      "categorie": "frais",
+      "quantite": 2,
+      "unite": "bouteilles",
+      "lieu": "frigo",
+      "date_peremption": "2026-04-10"
+    },
+    {
+      "nom": "Œufs",
+      "categorie": "frais",
+      "quantite": 6,
+      "unite": "pieces",
+      "lieu": "frigo",
+      "date_peremption": "2026-04-12"
+    }
+  ],
+  "inventaire_cellier": [
+    {
+      "nom": "Pâtes complètes",
+      "categorie": "épicerie",
+      "quantite": 3,
+      "unite": "paquets",
+      "lieu": "cellier"
+    },
+    {
+      "nom": "Tomates concassées",
+      "categorie": "conserve",
+      "quantite": 4,
+      "unite": "boites",
+      "lieu": "cellier"
+    }
+  ]
+}

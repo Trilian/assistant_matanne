@@ -2,6 +2,10 @@ import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
 
+/**
+ * Hook de détection du mode mobile via media query (breakpoint 768px).
+ * @returns `true` si la largeur de la fenêtre est inférieure à 768px
+ */
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 

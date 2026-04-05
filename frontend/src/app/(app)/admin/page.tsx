@@ -15,6 +15,7 @@ import {
   ServerCrash,
   ArrowRight,
   Eye,
+  Gauge,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -381,6 +382,7 @@ export default function PageAdmin() {
           { href: "/admin/console", icon: Play, label: "Console rapide", desc: "Commandes admin" },
           { href: "/admin/scheduler", icon: Clock, label: "Scheduler visuel", desc: "Timeline CRON" },
           { href: "/admin/logs", icon: Activity, label: "Logs live", desc: "WebSocket temps réel" },
+          { href: "/admin/monitoring", icon: Gauge, label: "Monitoring", desc: "Dashboard Grafana-like" },
         ].map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href}>
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">

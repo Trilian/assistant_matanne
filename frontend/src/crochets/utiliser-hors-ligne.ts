@@ -2,9 +2,14 @@
 
 import { useEffect, useState, useCallback } from 'react'
 
+const CACHE_PREFIX = 'matanne-offline-'
+const CLES_CACHE = ['recette-du-jour', 'courses-actives', 'taches-jour'] as const
+type CleCacheHorsLigne = (typeof CLES_CACHE)[number]
+
 /**
  * Hook pour détecter le statut hors-ligne et gérer la synchronisation.
- * Utilisé principalement pour le mode courses en magasin.
+ * Cache les données essentielles (recette du jour, courses, tâches) dans localStorage
+ * pour consultation hors-ligne en magasin.
  */
 export function utiliserHorsLigne() {
   const [estHorsLigne, setEstHorsLigne] = useState(false)
@@ -82,5 +87,54 @@ export function utiliserHorsLigne() {
     }
   }, [])
 
-  return { estHorsLigne, nbEnAttente, forcerSync }
+  /**
+   * Sauvegarde des données en cache localStorage pour consultation hors-ligne.
+   */
+  const cacherDonnees = useCallback(<T,>(cle: CleCacheHorsLigne, donnees: T) => {
+    try {
+      localStorage.setItem(
+        `${CACHE_PREFIX}${cle}`,
+        JSON.stringify({ donnees, timestamp: Date.now() })
+      )
+    } catch {
+      // localStorage plein — on ignore silencieusement
+    }
+  }, [])
+
+  /**
+   * Récupère les données depuis le cache localStorage.
+   * Retourne null si absent ou expiré (TTL = 24h par défaut).
+   */
+  const lireCacheDonnees = useCallback(<T,>(cle: CleCacheHorsLigne, ttlMs = 24 * 60 * 60 * 1000): T | null => {
+    try {
+      const brut = localStorage.getItem(`${CACHE_PREFIX}${cle}`)
+      if (!brut) return null
+      const { donnees, timestamp } = JSON.parse(brut) as { donnees: T; timestamp: number }
+      if (Date.now() - timestamp > ttlMs) return null
+      return donnees
+    } catch {
+      return null
+    }
+  }, [])
+
+  /**
+   * Supprime les entrées expirées du cache hors-ligne.
+   */
+  const nettoyerCache = useCallback(() => {
+    for (const cle of CLES_CACHE) {
+      lireCacheDonnees(cle) // side-effect: retourne null si expiré mais ne supprime pas
+      try {
+        const brut = localStorage.getItem(`${CACHE_PREFIX}${cle}`)
+        if (!brut) continue
+        const { timestamp } = JSON.parse(brut) as { timestamp: number }
+        if (Date.now() - timestamp > 24 * 60 * 60 * 1000) {
+          localStorage.removeItem(`${CACHE_PREFIX}${cle}`)
+        }
+      } catch {
+        localStorage.removeItem(`${CACHE_PREFIX}${cle}`)
+      }
+    }
+  }, [lireCacheDonnees])
+
+  return { estHorsLigne, nbEnAttente, forcerSync, cacherDonnees, lireCacheDonnees, nettoyerCache }
 }

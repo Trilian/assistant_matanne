@@ -474,7 +474,7 @@ class TestAvecCacheDecorator:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS CACHE EDGE CASES (Phase A - A5.4)
+# TESTS CACHE EDGE CASES
 # ═══════════════════════════════════════════════════════════
 
 

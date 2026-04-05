@@ -48,7 +48,7 @@ export default function DiagnosticPlantePage() {
           {file && (
             <div className="space-y-2 rounded-md border p-3">
               <p className="text-sm text-muted-foreground">Fichier sélectionné: {file.name}</p>
-              {apercu && <img src={apercu} alt="Aperçu plante" className="max-h-64 w-full rounded-md object-cover" />}
+              {apercu && <img src={apercu} alt="Aperçu plante" className="max-h-64 w-full rounded-md object-cover" loading="lazy" />}
             </div>
           )}
           <Button onClick={analyser} disabled={!file || chargement}>{chargement ? 'Analyse...' : 'Analyser'}</Button>

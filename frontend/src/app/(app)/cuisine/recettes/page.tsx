@@ -6,6 +6,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Plus,
   Search,
@@ -377,10 +378,13 @@ export default function PageRecettes() {
                   {/* Photo placeholder */}
                   <div className="relative h-40 bg-gradient-to-br from-orange-100 to-amber-50 dark:from-orange-950 dark:to-amber-950 flex items-center justify-center">
                     {recette.image_url ? (
-                      <img
+                      <Image
                         src={recette.image_url}
                         alt={recette.nom}
-                        className="object-cover w-full h-full"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                        loading="lazy"
                       />
                     ) : (
                       <ChefHat className="h-12 w-12 text-orange-300 dark:text-orange-700" />

@@ -128,7 +128,7 @@ export function PanneauAdminFlottant() {
                 <Shield className="h-4 w-4" />
                 Panneau Admin
               </CardTitle>
-              <Button size="icon" variant="ghost" onClick={() => setOuvert(false)}>
+              <Button size="icon" variant="ghost" onClick={() => setOuvert(false)} aria-label="Fermer le panneau admin">
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>

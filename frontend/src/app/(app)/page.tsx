@@ -101,6 +101,22 @@ const JaugeScoreFoyerLazy = dynamic(
   }
 );
 
+const WidgetVeilleImmoLazy = dynamic(
+  () => import("@/composants/dashboard/widget-veille-immo").then((m) => m.WidgetVeilleImmo),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-48 w-full" />,
+  }
+);
+
+const WidgetSaisonJardinLazy = dynamic(
+  () => import("@/composants/dashboard/widget-saison-jardin").then((m) => m.WidgetSaisonJardin),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-48 w-full" />,
+  }
+);
+
 const WIDGETS_DEFAUT = {
   metriques: true,
   actions_rapides: true,
@@ -117,6 +133,8 @@ const WIDGETS_DEFAUT = {
   score_foyer: true,
   score_bienetre: true,
   score_ecologique: true,
+  veille_immo: true,
+  saison_jardin: true,
   journal_actions_dashboard: true,
 };
 
@@ -667,6 +685,18 @@ export default function PageAccueil() {
             ))}
           </CardContent>
         </Card>
+        </WidgetSortable>
+      )}
+
+      {widgets.veille_immo && (
+        <WidgetSortable key="veille_immo" id="veille_immo">
+          <WidgetVeilleImmoLazy />
+        </WidgetSortable>
+      )}
+
+      {widgets.saison_jardin && (
+        <WidgetSortable key="saison_jardin" id="saison_jardin">
+          <WidgetSaisonJardinLazy />
         </WidgetSortable>
       )}
 

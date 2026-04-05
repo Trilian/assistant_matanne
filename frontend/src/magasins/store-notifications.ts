@@ -53,6 +53,7 @@ function chargerPrefs() {
 
 const prefsParDefaut = chargerPrefs();
 
+/** Store Zustand des notifications toast — ajout, suppression, préférences auto-dismiss. */
 export const utiliserStoreNotifications = create<EtatNotifications>((set) => ({
   notifications: [],
   autoDismissMs: prefsParDefaut.autoDismissMs,

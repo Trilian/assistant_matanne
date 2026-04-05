@@ -1,0 +1,44 @@
+{
+  "projets_maison": [
+    {
+      "titre": "Optimiser le coin repas",
+      "statut": "en_cours",
+      "priorite": "moyenne",
+      "budget_estime": 180
+    },
+    {
+      "titre": "Révision chaudière",
+      "statut": "a_planifier",
+      "priorite": "haute",
+      "budget_estime": 120
+    }
+  ],
+  "equipements": [
+    {
+      "nom": "Lave-vaisselle",
+      "piece": "cuisine",
+      "etat": "bon",
+      "date_achat": "2024-03-01",
+      "duree_garantie_mois": 24
+    },
+    {
+      "nom": "Aspirateur",
+      "piece": "cellier",
+      "etat": "a_verifier",
+      "date_achat": "2023-11-15",
+      "duree_garantie_mois": 24
+    }
+  ],
+  "artisans": [
+    {
+      "nom": "Plomberie Martin",
+      "specialite": "plomberie",
+      "telephone": "0102030405"
+    },
+    {
+      "nom": "Élec Habitat",
+      "specialite": "électricité",
+      "telephone": "0607080910"
+    }
+  ]
+}

@@ -276,13 +276,13 @@ class TestCronJobsBridges:
         assert expected_ids.issubset(job_ids), f"IDs manquants: {expected_ids - job_ids}"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# EVENTS â€” Phase B
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# EVENTS
+# ═══════════════════════════════════════════════════════════
 
 
 class TestEventsIAPredictions:
-    """Tests des Ã©vÃ©nements Phase B."""
+    """Tests des événements métier liés à l'IA et aux prédictions."""
 
     def test_event_prediction_courses(self):
         from src.services.core.events.events import EvenementPredictionCourses
@@ -316,13 +316,13 @@ class TestEventsIAPredictions:
         assert evt.TYPE == "bridge.meteo_entretien"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ROUTES â€” Phase B (smoke tests via import)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# ROUTES (SMOKE TESTS VIA IMPORT)
+# ═══════════════════════════════════════════════════════════
 
 
 class TestRoutesImport:
-    """Smoke tests: tous les modules de routes Phase B s'importent."""
+    """Smoke tests: tous les modules de routes ciblés s'importent."""
 
     def test_import_predictions_route(self):
         from src.api.routes.predictions import router
@@ -342,7 +342,7 @@ class TestRoutesImport:
 
 
 class TestSchemasIABridges:
-    """Tests des schÃ©mas Pydantic Phase B."""
+    """Tests des schémas Pydantic des bridges IA."""
 
     def test_import_schemas(self):
         from src.api.schemas.ia_bridges import (

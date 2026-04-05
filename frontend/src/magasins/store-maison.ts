@@ -30,6 +30,7 @@ interface EtatMaison {
   reinitialiserTachesJour: () => void;
 }
 
+/** Store Zustand Maison — timers appareils (lave-linge, etc.) et tâches ménage du jour. Persisté en localStorage. */
 export const utiliserStoreMaison = create<EtatMaison>()(
   persist(
     (set, get) => ({

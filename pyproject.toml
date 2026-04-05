@@ -21,6 +21,7 @@ mistralai = "^1.0.0"
 # API REST
 fastapi = "^0.109.0"
 uvicorn = {extras = ["standard"], version = "^0.27.0"}
+vobject = "^0.9.8"
 python-multipart = ">=0.0.6"
 # Authentication
 supabase = "^2.3.0"

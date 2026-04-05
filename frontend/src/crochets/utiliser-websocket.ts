@@ -56,6 +56,11 @@ interface RetourWebSocket {
 // HOOK
 // ═══════════════════════════════════════════════════════════
 
+/**
+ * Hook WebSocket générique avec reconnexion automatique et heartbeat.
+ * @param options - URL, gestionnaires par type, délai reconnexion, max tentatives
+ * @returns {estConnecte, utilisateursConnectes, envoyer, fermer}
+ */
 export function utiliserWebSocket({
   url,
   gestionnaires = {},

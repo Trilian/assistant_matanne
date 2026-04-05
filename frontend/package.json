@@ -15,7 +15,10 @@
     "test:visual": "playwright test e2e/visual-regression.spec.ts --project=chromium",
     "test:visual:update": "playwright test e2e/visual-regression.spec.ts --project=chromium --update-snapshots",
     "analyze": "ANALYZE=true next build --env-file ../.env.local",
-    "generate-types": "openapi-typescript http://localhost:8000/openapi.json -o src/types/api-generated.ts"
+    "generate-types": "openapi-typescript http://localhost:8000/openapi.json -o src/types/api-generated.ts",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "docs:generate": "typedoc"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -60,6 +63,11 @@
     "@axe-core/playwright": "^4.11.0",
     "@next/bundle-analyzer": "^16.2.1",
     "@playwright/test": "^1.58.2",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/nextjs": "^10.3.4",
+    "@storybook/react": "^10.3.4",
+    "@storybook/test": "^8.6.15",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -74,7 +82,10 @@
     "eslint-config-next": "16.2.1",
     "jsdom": "^29.0.1",
     "openapi-typescript": "^7.13.0",
+    "storybook": "^10.3.4",
     "tailwindcss": "^4",
+    "typedoc": "^0.28.18",
+    "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "^5",
     "vitest": "^4.1.0"
   }

@@ -121,7 +121,7 @@ class TestRoutesWebhooksAvecMock:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS WEBHOOKS EDGE CASES (Phase A - A5.2)
+# TESTS WEBHOOKS EDGE CASES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -161,12 +161,12 @@ class TestRoutesWebhooksEdgeCases:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS WHATSAPP (Phase A - A5.2)
+# TESTS D'ÉTAT DE CONVERSATION TELEGRAM
 # ═══════════════════════════════════════════════════════════
 
 
 class TestTelegramStateMachine:
-    """Tests pour la gestion d'état conversation WhatsApp."""
+    """Tests pour la gestion d'état conversation Telegram."""
 
     def test_charger_etat_inexistant_retourne_vide(self):
         """Charger un état pour un destinataire inconnu retourne un dict vide ou None."""

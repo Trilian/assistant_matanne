@@ -21,6 +21,11 @@ function nettoyerTexte(valeur: string): string {
   return valeur.trim().replace(/\s+/g, " ");
 }
 
+/**
+ * Normalise et valide un contexte de mode invités (nb invités 0-20, occasion, événements uniques max 6).
+ * @param contexte - Contexte partiel à normaliser
+ * @returns Contexte normalisé complet
+ */
 export function normaliserContexteModeInvites(
   contexte?: Partial<ContexteModeInvites>
 ): ContexteModeInvites {
@@ -34,6 +39,10 @@ export function normaliserContexteModeInvites(
   };
 }
 
+/**
+ * Hook de gestion du mode invités pour les courses — persiste dans localStorage.
+ * @returns {contexte, mettreAJour, reinitialiser}
+ */
 export function utiliserModeInvites() {
   const [valeur, setValeur, reinitialiserStockage] = utiliserStockageLocal<ContexteModeInvites>(
     "cuisine-mode-invites",

@@ -81,6 +81,7 @@ function CarteProjetSortable({
               className="h-7 w-7 text-muted-foreground hover:text-destructive"
               onClick={() => onSupprimer(projet.id)}
               disabled={enCours}
+              aria-label={`Supprimer le projet ${projet.nom}`}
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>

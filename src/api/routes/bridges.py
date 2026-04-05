@@ -12,8 +12,14 @@ from fastapi import APIRouter, Depends, Query
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_LISTE
 from src.api.schemas.ia_bridges import (
+    BudgetUnifieResponse,
     DocumentsExpiresResponse,
+    ImpactDemenagementResponse,
     PlanningUnifieResponse,
+    TerroirRecettesResponse,
+    VerificationStockRecetteResponse,
+    WidgetSaisonJardinResponse,
+    WidgetVeilleImmoResponse,
 )
 from src.api.utils import gerer_exception_api
 
@@ -134,3 +140,97 @@ async def meteo_entretien(
     alertes = service.meteo_vers_entretien(conditions)
 
     return {"alertes": alertes, "nb_alertes": len(alertes)}
+
+
+# ═══════════════════════════════════════════════════════════
+# P3 — BRIDGES INTER-MODULES ENRICHIS
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/terroir-recettes", response_model=TerroirRecettesResponse, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def terroir_recettes(
+    localisation: str | None = Query(None, description="Localisation ou région"),
+    user: dict = Depends(require_auth),
+):
+    """P3-A1: Suggère des recettes régionales basées sur la localisation."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.terroir_vers_recettes(localisation=localisation)
+
+
+@router.get("/budget-unifie", response_model=BudgetUnifieResponse, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def budget_unifie(
+    mois: int | None = Query(None, ge=1, le=12, description="Mois (1-12)"),
+    annee: int | None = Query(None, ge=2020, le=2100, description="Année"),
+    user: dict = Depends(require_auth),
+):
+    """P3-A2: Budget unifié charges maison + dépenses famille."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.budget_unifie(mois=mois, annee=annee)
+
+
+@router.get("/impact-demenagement/{scenario_id}", response_model=ImpactDemenagementResponse, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def impact_demenagement(
+    scenario_id: int,
+    user: dict = Depends(require_auth),
+):
+    """P3-A3: Évalue l'impact familial d'un scénario de déménagement."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.impact_demenagement(scenario_id=scenario_id)
+
+
+@router.get("/widget-veille-immo", response_model=WidgetVeilleImmoResponse, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def widget_veille_immo(
+    user: dict = Depends(require_auth),
+):
+    """P3-A4: Données pour le widget veille immobilière du dashboard."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.widget_veille_immo()
+
+
+@router.get("/widget-saison-jardin", response_model=WidgetSaisonJardinResponse, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def widget_saison_jardin(
+    user: dict = Depends(require_auth),
+):
+    """P3-A5: Données saisonnières du jardin pour le widget dashboard."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.widget_saison_jardin()
+
+
+@router.get("/activites-jules-potager", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def activites_jules_potager(
+    user: dict = Depends(require_auth),
+):
+    """P3-A6: Activités jardinage adaptées à Jules."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.activites_jules_potager()
+
+
+@router.get("/verification-stock-recette/{recette_id}", response_model=VerificationStockRecetteResponse, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def verification_stock_recette(
+    recette_id: int,
+    user: dict = Depends(require_auth),
+):
+    """P3-B3: Vérifie le stock pour une recette planifiée."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.verifier_stock_recette(recette_id=recette_id)

@@ -42,6 +42,10 @@ function grouperParCategorie(articles: ArticleCourses[]): Record<string, Article
   return groupes;
 }
 
+/**
+ * Hook principal de la page courses — orchestre formulaire, listes, prédictions, mode invités et Telegram.
+ * @returns État complet de la page courses (formulaire, listes, articles, actions CRUD)
+ */
 export function utiliserPageCourses() {
   const {
     contexte: modeInvites,

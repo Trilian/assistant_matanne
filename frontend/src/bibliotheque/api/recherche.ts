@@ -17,6 +17,11 @@ export type TypeResultatRecherche =
   | 'document'
   | 'abonnement'
   | 'entretien'
+  | 'annonce'
+  | 'scenario'
+  | 'pari'
+  | 'loto'
+  | 'routine'
 
 export interface ResultatRecherche {
   /** Type d'entité (recette, projet, activite, note, contact, plante, document, abonnement, entretien) */

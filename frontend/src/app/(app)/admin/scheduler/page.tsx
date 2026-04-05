@@ -327,9 +327,10 @@ export default function PageAdminScheduler() {
                         <Badge
                           variant="outline"
                           style={{
-                            borderColor: COULEURS_CATEGORIES[job.categorie],
-                            color: COULEURS_CATEGORIES[job.categorie],
-                          }}
+                            "--cat-color": COULEURS_CATEGORIES[job.categorie],
+                            borderColor: "var(--cat-color)",
+                            color: "var(--cat-color)",
+                          } as React.CSSProperties}
                         >
                           {job.categorie}
                         </Badge>

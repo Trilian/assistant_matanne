@@ -9,6 +9,11 @@ interface OptionsSynthese {
   volume?: number;
 }
 
+/**
+ * Hook d'interface avec l'API Web Speech Synthesis pour la lecture vocale.
+ * @param options - Langue (défaut fr-FR), débit, hauteur, volume
+ * @returns {lire, arreter, enLecture, estSupporte}
+ */
 export function utiliserSyntheseVocale(options: OptionsSynthese = {}) {
   const [enLecture, setEnLecture] = useState(false);
 

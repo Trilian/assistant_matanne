@@ -377,7 +377,7 @@ class TestAdminRouterExiste:
 
 
 class TestAdminNotificationsQueueEndpoints:
-    """Couverture des endpoints ajoutÃ©s pour le Sprint F."""
+    """Couverture des endpoints de queue de notifications et de maintenance."""
 
     @pytest.mark.asyncio
     async def test_notifications_queue_listing(self, async_client: httpx.AsyncClient):

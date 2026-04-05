@@ -7,7 +7,13 @@ Bienvenue dans la documentation utilisateur d'**Assistant Matanne**, votre hub f
 - [Premiers pas](./getting-started.md) � Installation, inscription et tour rapide
 - [FAQ � Questions fr�quentes](./FAQ.md) � R�ponses aux questions courantes
 - [Modules](#modules) � Vue d'ensemble des fonctionnalit�s
+### Guides par module
 
+- [🍽️ Cuisine](./Cuisine.md) — Recettes, planning repas, courses, inventaire, batch cooking
+- [👨‍👩‍👧 Famille](./Famille.md) — Jules, activités, routines, budget, voyages, contacts
+- [🏠 Maison](./Maison.md) — Projets, entretien, jardin, énergie, équipements, finances
+- [🎮 Jeux](./Jeux.md) — Paris sportifs, Loto, EuroMillions, bankroll
+- [🔧 Outils](./Outils.md) — Chat IA, convertisseur, météo, minuteur, notes
 ---
 
 ## ?? Qu'est-ce qu'Assistant Matanne ?

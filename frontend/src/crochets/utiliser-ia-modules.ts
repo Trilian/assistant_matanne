@@ -33,6 +33,7 @@ function notifier(type: "succes" | "erreur", message: string): void {
   utiliserStoreNotifications.getState().ajouter({ type, message });
 }
 
+/** Hook mutation IA — prédiction de consommation inventaire. */
 export function utilisePredictionConsommation() {
   const queryClient = useQueryClient();
 
@@ -48,6 +49,7 @@ export function utilisePredictionConsommation() {
   });
 }
 
+/** Hook mutation IA — analyse de variété du planning repas. */
 export function utiliseAnalyseVarietePlanning() {
   const queryClient = useQueryClient();
 
@@ -63,6 +65,7 @@ export function utiliseAnalyseVarietePlanning() {
   });
 }
 
+/** Hook mutation IA — optimisation nutritionnelle du planning. */
 export function utiliseOptimisationNutritionPlanning() {
   const queryClient = useQueryClient();
 
@@ -85,6 +88,7 @@ export function utiliseOptimisationNutritionPlanning() {
   });
 }
 
+/** Hook mutation IA — simplification du planning repas. */
 export function utiliseSimplificationPlanning() {
   const queryClient = useQueryClient();
 
@@ -100,6 +104,7 @@ export function utiliseSimplificationPlanning() {
   });
 }
 
+/** Hook mutation IA — analyse des impacts météo sur les activités. */
 export function utiliseAnalyseImpactsMeteo() {
   const queryClient = useQueryClient();
 
@@ -115,6 +120,7 @@ export function utiliseAnalyseImpactsMeteo() {
   });
 }
 
+/** Hook mutation IA — analyse des habitudes familiales. */
 export function utiliseAnalyseHabitudes() {
   const queryClient = useQueryClient();
 
@@ -130,6 +136,7 @@ export function utiliseAnalyseHabitudes() {
   });
 }
 
+/** Hook mutation IA — estimation coût/durée d'un projet maison. */
 export function utiliseEstimationProjet() {
   const queryClient = useQueryClient();
 
@@ -145,6 +152,7 @@ export function utiliseEstimationProjet() {
   });
 }
 
+/** Hook mutation IA — analyse nutritionnelle personnalisée. */
 export function utiliseAnalyseNutrition() {
   const queryClient = useQueryClient();
 

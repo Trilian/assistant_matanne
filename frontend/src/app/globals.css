@@ -273,6 +273,10 @@
   html {
     @apply font-sans;
   }
+  /* Focus visible pour la navigation clavier */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
 }
 
 @layer components {
@@ -325,15 +329,36 @@
   }
 
   .module-accent-bg {
-    background-color: color-mix(in oklch, var(--module-accent, var(--primary)) 20%, transparent);
+    background-color: var(--module-accent, var(--primary));
+    opacity: 1;
+    background-color: oklch(from var(--module-accent, var(--primary)) l c h / 0.2);
+  }
+
+  @supports (background-color: color-mix(in oklch, red 20%, transparent)) {
+    .module-accent-bg {
+      background-color: color-mix(in oklch, var(--module-accent, var(--primary)) 20%, transparent);
+    }
   }
 
   .module-accent-border {
-    border-color: color-mix(in oklch, var(--module-accent, var(--primary)) 45%, transparent);
+    border-color: var(--module-accent, var(--primary));
+    border-color: oklch(from var(--module-accent, var(--primary)) l c h / 0.45);
+  }
+
+  @supports (border-color: color-mix(in oklch, red 45%, transparent)) {
+    .module-accent-border {
+      border-color: color-mix(in oklch, var(--module-accent, var(--primary)) 45%, transparent);
+    }
   }
 
   .module-header-accent {
-    border-bottom-color: color-mix(in oklch, var(--module-accent, var(--primary)) 35%, var(--border));
+    border-bottom-color: var(--border);
+  }
+
+  @supports (border-bottom-color: color-mix(in oklch, red 35%, blue)) {
+    .module-header-accent {
+      border-bottom-color: color-mix(in oklch, var(--module-accent, var(--primary)) 35%, var(--border));
+    }
   }
 
   .module-top-strip {
@@ -352,10 +377,17 @@
     right: 0;
     bottom: 0;
     height: 2px;
-    background: color-mix(in oklch, var(--primary) 70%, white);
+    background: var(--primary);
     transform-origin: left;
     animation: toast-progress 5s linear forwards;
-    opacity: 0.9;
+    opacity: 0.7;
+  }
+
+  @supports (background: color-mix(in oklch, red 70%, white)) {
+    .cn-toast::after {
+      background: color-mix(in oklch, var(--primary) 70%, white);
+      opacity: 0.9;
+    }
   }
 
   .cn-toast-action,

@@ -2961,10 +2961,101 @@ def _envoyer_rappel_entretien_push(event: EvenementDomaine) -> None:
 
 # -----------------------------------------------------------
 
-# ENREGISTREMENT — Appelé au bootstrap
+# P3 — NOUVEAUX SUBSCRIBERS
 
 # -----------------------------------------------------------
 
+
+def _enregistrer_historique_modification(event: "EvenementDomaine") -> None:
+    """P3-B2: Enregistre une modification d'entité dans l'historique."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.systeme import HistoriqueAction
+
+        data = event.data if hasattr(event, "data") else {}
+        entity_type = data.get("entity_type", "inconnu")
+        entity_id = data.get("entity_id", 0)
+
+        with obtenir_contexte_db() as session:
+            action = HistoriqueAction(
+                user_id=data.get("modifie_par", "system"),
+                user_name=data.get("modifie_par", "system"),
+                action_type=f"{entity_type}.modifie",
+                entity_type=entity_type,
+                entity_id=entity_id,
+                entity_name=data.get("entity_name", ""),
+                description=f"Modification de {entity_type} #{entity_id}: {data.get('champ_modifie', '')}",
+                old_value={"valeur": data.get("ancienne_valeur", "")},
+                new_value={"valeur": data.get("nouvelle_valeur", "")},
+            )
+            session.add(action)
+            session.commit()
+            logger.info("📝 Historique modification enregistré: %s #%s", entity_type, entity_id)
+    except Exception as e:
+        logger.warning("Erreur enregistrement historique modification: %s", e)
+
+
+def _verifier_stock_sur_recette_planifiee(event: "EvenementDomaine") -> None:
+    """P3-B3: Vérifie le stock quand une recette est planifiée."""
+    try:
+        data = event.data if hasattr(event, "data") else {}
+        recette_id = data.get("recette_id", 0)
+        if not recette_id:
+            return
+
+        from src.services.ia.inter_modules import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        result = service.verifier_stock_recette(recette_id)
+
+        manquants = result.get("ingredients_manquants", [])
+        if manquants:
+            logger.info(
+                "🛒 Recette #%s planifiée — %d ingrédient(s) manquant(s): %s",
+                recette_id,
+                len(manquants),
+                ", ".join(m["nom"] for m in manquants[:5]),
+            )
+            from src.services.core.events import obtenir_bus
+            obtenir_bus().emettre("stock.alerte_manquants", {
+                "recette_id": recette_id,
+                "recette_nom": result.get("recette_nom", ""),
+                "ingredients_manquants": manquants,
+            })
+    except Exception as e:
+        logger.warning("Erreur vérification stock recette planifiée: %s", e)
+
+
+def _suggerer_artisan_sur_panne(event: "EvenementDomaine") -> None:
+    """P3-B5: Suggère un artisan quand un équipement tombe en panne."""
+    try:
+        data = event.data if hasattr(event, "data") else {}
+        equipement_id = data.get("equipement_id", 0)
+        nom = data.get("nom", "")
+
+        if not equipement_id:
+            return
+
+        from src.services.ia.inter_modules import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        result = service.entretien_echoue_vers_artisans(tache_id=equipement_id)
+
+        if result and result.get("artisans"):
+            logger.info(
+                "🔧 Équipement '%s' en panne → %d artisan(s) suggéré(s)",
+                nom,
+                len(result["artisans"]),
+            )
+    except Exception as e:
+        logger.warning("Erreur suggestion artisan sur panne: %s", e)
+
+
+# -----------------------------------------------------------
+
+# ENREGISTREMENT — Appelé au bootstrap
+
+# -----------------------------------------------------------
 
 
 _subscribers_enregistres = False
@@ -3388,6 +3479,20 @@ def enregistrer_subscribers() -> int:
     compteur += 1
 
 
+
+    # -- P3 — Nouveaux bridges --
+
+    # P3-B2: Historique modifications d'entités
+    bus.souscrire("entite.modifiee", _enregistrer_historique_modification, priority=80)
+    compteur += 1
+
+    # P3-B3: Vérification stock quand recette planifiée
+    bus.souscrire("recette.planifiee", _verifier_stock_sur_recette_planifiee, priority=78)
+    compteur += 1
+
+    # P3-B5: Suggestion artisan quand équipement en panne
+    bus.souscrire("equipement.panne", _suggerer_artisan_sur_panne, priority=80)
+    compteur += 1
 
     # -- Métriques (priorité moyenne) --
 

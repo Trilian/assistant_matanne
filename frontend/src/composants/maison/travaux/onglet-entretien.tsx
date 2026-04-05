@@ -139,7 +139,7 @@ export function OngletEntretien() {
                     <p className="text-sm font-medium">{tache.nom}</p>
                     <p className="text-xs text-muted-foreground">{tache.categorie}{tache.piece ? ` · ${tache.piece}` : ""}</p>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => supprimer(tache.id)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => supprimer(tache.id)} aria-label={`Supprimer la tâche ${tache.nom}`}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </CardContent>
@@ -165,7 +165,7 @@ export function OngletEntretien() {
                     {tache.frequence_jours ? ` · tous les ${tache.frequence_jours}j` : ""}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => supprimer(tache.id)}>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => supprimer(tache.id)} aria-label={`Supprimer la tâche ${tache.nom}`}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </CardContent>

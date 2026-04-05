@@ -27,6 +27,12 @@ const WS_BASE = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000";
 const RECONNECT_DELAY = 3000;
 const MAX_RECONNECT = 5;
 
+/**
+ * Hook WebSocket pour la collaboration temps réel sur les listes de courses.
+ * Gère la connexion, la reconnexion automatique et les événements (cocher, ajouter, supprimer).
+ * @param options - ID de liste, userId, callbacks de messages et utilisateurs connectés
+ * @returns {connected, users, send, cocherArticle, ajouterArticle, supprimerArticle}
+ */
 export function useWebSocketCourses({
   listeId,
   userId = "user-1",

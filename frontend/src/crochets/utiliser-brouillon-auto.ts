@@ -21,6 +21,12 @@ interface EnveloppeBrouillon<T> {
   horodatage: string;
 }
 
+/**
+ * Hook de sauvegarde automatique de brouillon dans localStorage.
+ * Persiste la valeur après un délai configurable et restaure au montage.
+ * @param options - Clé localStorage, valeur à sauvegarder, délai debounce
+ * @returns Valeur initiale restaurée et fonction d'effacement
+ */
 export function utiliserBrouillonAuto<T>({
   cle,
   valeur,

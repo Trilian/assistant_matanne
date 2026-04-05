@@ -32,6 +32,14 @@ import {
   FolderOpen,
   Receipt,
   Wrench,
+  Home,
+  Map,
+  Dices,
+  Ticket,
+  RotateCw,
+  CalendarDays,
+  ShoppingCart,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -48,6 +56,11 @@ const ICONES_PAR_TYPE: Record<string, LucideIcon> = {
   document: FolderOpen,
   abonnement: Receipt,
   entretien: Wrench,
+  annonce: Home,
+  scenario: Map,
+  pari: Dices,
+  loto: Ticket,
+  routine: RotateCw,
 }
 
 /**
@@ -63,6 +76,11 @@ const LABELS_PAR_TYPE: Record<string, string> = {
   document: 'Documents',
   abonnement: 'Abonnements',
   entretien: 'Entretien',
+  annonce: 'Annonces immo',
+  scenario: 'Scénarios habitat',
+  pari: 'Paris sportifs',
+  loto: 'Loto',
+  routine: 'Routines',
 }
 
 const FILTRES_RECHERCHE: Array<{
@@ -72,9 +90,17 @@ const FILTRES_RECHERCHE: Array<{
 }> = [
   { id: 'all', label: 'Tout' },
   { id: 'cuisine', label: 'Cuisine', types: ['recette'] },
-  { id: 'famille', label: 'Famille', types: ['activite', 'contact', 'document'] },
+  { id: 'famille', label: 'Famille', types: ['activite', 'contact', 'document', 'routine'] },
   { id: 'maison', label: 'Maison', types: ['projet', 'plante', 'abonnement', 'entretien'] },
+  { id: 'habitat', label: 'Habitat', types: ['annonce', 'scenario'] },
+  { id: 'jeux', label: 'Jeux', types: ['pari', 'loto'] },
   { id: 'outils', label: 'Outils', types: ['note'] },
+]
+
+const ACTIONS_RAPIDES = [
+  { id: 'planifier', label: 'Planifier ma semaine', icone: CalendarDays, url: '/cuisine/ma-semaine' },
+  { id: 'courses', label: 'Ajouter aux courses', icone: ShoppingCart, url: '/cuisine/courses' },
+  { id: 'quoi-manger', label: 'Quoi manger ce soir ?', icone: Sparkles, url: '/outils/chat-ia' },
 ]
 
 export function RechercheGlobale() {
@@ -232,6 +258,24 @@ export function RechercheGlobale() {
               <span>Aucun résultat trouvé</span>
             )}
           </CommandEmpty>
+
+          {query.length < 2 && (
+            <CommandGroup heading="Actions rapides">
+              {ACTIONS_RAPIDES.map((action) => (
+                <CommandItem
+                  key={action.id}
+                  onSelect={() => {
+                    definirRecherche(false)
+                    router.push(action.url)
+                  }}
+                  className="cursor-pointer"
+                >
+                  <action.icone className="mr-2 size-4" />
+                  <span>{action.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
 
           {Object.entries(resultatsGroupes).map(([type, items]) => {
             const Icone = ICONES_PAR_TYPE[type] || StickyNote

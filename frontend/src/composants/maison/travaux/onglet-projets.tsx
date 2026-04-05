@@ -349,7 +349,7 @@ export function OngletProjets() {
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-sm">{projet.nom}</CardTitle>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => supprimer(projet.id)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => supprimer(projet.id)} aria-label={`Supprimer le projet ${projet.nom}`}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>

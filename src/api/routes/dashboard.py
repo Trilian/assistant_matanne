@@ -1262,3 +1262,30 @@ async def obtenir_historique_actions_widgets(
 
     return await executer_async(_query)
 
+
+# ═══════════════════════════════════════════════════════════
+# P6 — INSIGHTS & ANALYTICS FAMILLE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/insights-analytics",
+    responses=REPONSES_IA,
+    summary="Insights analytiques familiaux avec tendances IA",
+)
+@gerer_exception_api
+async def obtenir_insights_analytics(
+    periode_mois: int = Query(1, ge=1, le=12, description="Période d'analyse en mois"),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> dict[str, Any]:
+    """Page 'Ma famille en chiffres' : tendances, comparaisons et narrative IA."""
+    from src.services.dashboard.insights_analytics import get_insights_analytics_service
+
+    def _query():
+        service = get_insights_analytics_service()
+        result = service.generer_insights_famille(periode_mois=periode_mois)
+        return result.model_dump()
+
+    return await executer_async(_query)
+

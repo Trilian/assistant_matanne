@@ -578,3 +578,70 @@ async def comparer_devis_artisans(
             "strategie": "Comparer prix, délai et qualité artisan avant validation finale.",
         },
     )
+
+
+# ═══════════════════════════════════════════════════════════
+# P6 — SCORE ÉCOLOGIQUE RECETTE & ANOMALIES JARDIN
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/recette/score-ecologique",
+    responses=REPONSES_IA,
+    summary="Score écologique d'une recette (empreinte carbone, saisonnalité)",
+)
+@gerer_exception_api
+async def score_ecologique_recette(
+    body: dict,
+    user: dict = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> dict:
+    """Calcule le score écologique d'une recette basé sur saisonnalité et provenance."""
+    from src.services.ia_avancee.service import get_ia_avancee_service
+
+    service = get_ia_avancee_service()
+    result = service.calculer_score_eco_responsable()
+    if result is None:
+        return {"score_global": None, "details": {}, "recommandations": []}
+    return result.model_dump() if hasattr(result, "model_dump") else result
+
+
+@router.get(
+    "/jardin/anomalies",
+    responses=REPONSES_IA,
+    summary="Détection d'anomalies au jardin via IA",
+)
+@gerer_exception_api
+async def detecter_anomalies_jardin(
+    user: dict = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> dict:
+    """Analyse l'état du jardin et détecte les anomalies potentielles."""
+    from src.services.maison.ia.jardin_anomalies_ia import get_jardin_anomalies_ia_service
+
+    def _query():
+        from src.core.models.jardin import Plante
+
+        with executer_avec_session() as session:
+            plantes_db = session.query(Plante).filter(Plante.actif.is_(True)).all()
+            plantes = [
+                {
+                    "nom": p.nom,
+                    "date_plantation": str(getattr(p, "date_plantation", "")),
+                    "etat": getattr(p, "etat", "normal"),
+                    "frequence_arrosage": getattr(p, "frequence_arrosage", ""),
+                }
+                for p in plantes_db
+            ]
+
+        service = get_jardin_anomalies_ia_service()
+        from datetime import date as date_type
+        mois_saisons = {1: "hiver", 2: "hiver", 3: "printemps", 4: "printemps",
+                        5: "printemps", 6: "ete", 7: "ete", 8: "ete",
+                        9: "automne", 10: "automne", 11: "automne", 12: "hiver"}
+        saison = mois_saisons.get(date_type.today().month, "")
+        result = service.detecter_anomalies(plantes=plantes, saison=saison)
+        return result.model_dump()
+
+    from src.api.utils import executer_async
+    return await executer_async(_query)

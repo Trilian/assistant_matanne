@@ -18,6 +18,11 @@ function cibleEditable(target: EventTarget | null): boolean {
   return tag === "input" || tag === "textarea" || target.isContentEditable || tag === "select";
 }
 
+/**
+ * Hook d'enregistrement de raccourcis clavier pour une page.
+ * Ignore les touches dans les champs de saisie et les combinaisons avec modificateurs.
+ * @param raccourcis - Liste des raccourcis {touche, action, actif?, description?}
+ */
 export function utiliserRaccourcisPage(raccourcis: RaccourcisPage[]) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

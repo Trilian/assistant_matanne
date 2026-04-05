@@ -259,6 +259,7 @@ export default function PageAnniversaires() {
                     id="relation"
                     name="relation"
                     required
+                    aria-label="Sélectionner la relation"
                     defaultValue={edition?.relation ?? "ami"}
                     className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                   >
@@ -402,7 +403,7 @@ export default function PageAnniversaires() {
                     <div className="h-2 rounded-full bg-muted overflow-hidden">
                       <div
                         className="h-full bg-primary rounded-full transition-all"
-                        style={{ width: `${checklistActive.taux_completion}%` }}
+                        style={{ "--progress": `${checklistActive.taux_completion}%`, width: "var(--progress)" } as React.CSSProperties}
                       />
                     </div>
                   </div>
@@ -422,7 +423,7 @@ export default function PageAnniversaires() {
                       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                         <div
                           className="h-full bg-primary/70 rounded-full transition-all"
-                          style={{ width: `${pctCat}%` }}
+                          style={{ "--progress": `${pctCat}%`, width: "var(--progress)" } as React.CSSProperties}
                         />
                       </div>
                       {/* Liste des items */}

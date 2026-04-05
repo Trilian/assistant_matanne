@@ -528,18 +528,33 @@ def reset_maintenance_mode():
 
 @pytest.fixture(autouse=True)
 def mock_mistral_api(monkeypatch):
-    """Mock Mistral AI API for all tests."""
+    """Mock Mistral AI API for all tests.
+
+    Filet de sécurité global : empêche tout appel réel à l'API Mistral.
+    Pour des mocks plus fins (spec=ClientIA, AsyncMock, etc.), utiliser
+    les fixtures dédiées dans les conftest.py de chaque sous-package.
+    """
 
     # Set fake API key to prevent initialization errors
     monkeypatch.setenv("MISTRAL_API_KEY", "test-key-12345")
 
-    # Mock the ClientIA class to avoid actual API calls
-    from unittest.mock import MagicMock, patch
+    from unittest.mock import AsyncMock, MagicMock, patch
 
-    mock_client = MagicMock()
+    try:
+        from src.core.ai.client import ClientIA
+
+        mock_client = MagicMock(spec=ClientIA)
+    except Exception:
+        mock_client = MagicMock()
+
+    # Méthodes synchrones courantes
     mock_client.generer_recettes = MagicMock(return_value=[])
     mock_client.generer_planning = MagicMock(return_value=None)
     mock_client.generer_suggestions_courses = MagicMock(return_value=[])
+    # Méthodes async courantes (BaseAIService)
+    mock_client.appeler = AsyncMock(return_value="{}")
+    mock_client.generer = AsyncMock(return_value="Réponse simulée")
+    mock_client.generer_json = AsyncMock(return_value={"result": "ok"})
 
     with patch("src.core.ai.client.ClientIA", return_value=mock_client):
         with patch("src.core.ai.client.obtenir_client_ia", return_value=mock_client):

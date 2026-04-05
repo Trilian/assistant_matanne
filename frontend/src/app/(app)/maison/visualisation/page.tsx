@@ -332,7 +332,7 @@ export default function PageVisualisation() {
               <Skeleton className="h-[400px] w-full rounded-lg" />
             ) : mode3D && pieces && pieces.length > 0 ? (
               /* ── Vue 3D ── */
-              <div className="rounded-lg overflow-hidden" style={{ height: 480 }}>
+              <div className="rounded-lg overflow-hidden h-[480px]">
                 <Plan3D
                   pieces={pieces}
                   pieceSelectionnee={pieceSelectionnee}
@@ -349,8 +349,8 @@ export default function PageVisualisation() {
                 /* ── Mode 2D absolu ── */
                 <div
                   ref={planRef}
-                  className={`relative bg-muted/30 rounded-lg border-2 ${modeEdition ? "border-primary/40 border-dashed" : "border-dashed border-muted"} overflow-hidden`}
-                  style={{ width: "100%", aspectRatio: `${PLAN_W}/${PLAN_H}`, maxWidth: PLAN_W }}
+                  className={`relative bg-muted/30 rounded-lg border-2 ${modeEdition ? "border-primary/40 border-dashed" : "border-dashed border-muted"} overflow-hidden w-full`}
+                  style={{ aspectRatio: `${PLAN_W}/${PLAN_H}`, maxWidth: PLAN_W }}
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
                 >
@@ -387,9 +387,11 @@ export default function PageVisualisation() {
                         `}
                         style={{
                           left, top, width, height,
-                          backgroundColor: couleurPiece(piece),
-                          borderColor: couleurBord(piece),
-                        }}
+                          "--room-bg": couleurPiece(piece),
+                          "--room-border": couleurBord(piece),
+                          backgroundColor: "var(--room-bg)",
+                          borderColor: "var(--room-border)",
+                        } as React.CSSProperties}
                       >
                         {modeEdition && <GripVertical className="h-3 w-3 opacity-50 absolute top-1 right-1" />}
                         <p className="font-semibold text-[11px] leading-tight truncate">{piece.nom}</p>
@@ -414,11 +416,16 @@ export default function PageVisualisation() {
                       <button
                         key={piece.id}
                         className={`relative rounded-lg border-2 p-3 text-left transition-all cursor-pointer hover:shadow-md hover:scale-[1.02] ${pieceSelectionnee?.id === piece.id ? "border-primary ring-2 ring-primary/30 shadow-lg" : "border-border hover:border-primary/50"}`}
-                        style={{ backgroundColor: couleurPiece(piece), borderColor: pieceSelectionnee?.id === piece.id ? undefined : couleurBord(piece) }}
+                        style={{
+                          "--room-bg": couleurPiece(piece),
+                          "--room-border": pieceSelectionnee?.id === piece.id ? undefined : couleurBord(piece),
+                          backgroundColor: "var(--room-bg)",
+                          borderColor: "var(--room-border)",
+                        } as React.CSSProperties}
                         onClick={() => { setPieceSelectionnee(piece); setSheetPieceOuverte(true); setMenageOuvert(false); }}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <Square className="h-3 w-3" style={{ color: couleurBord(piece) }} fill={couleurBord(piece)} /> {/* calculated color */}
+                          <Square className="h-3 w-3" style={{ "--sq-color": couleurBord(piece), color: "var(--sq-color)" } as React.CSSProperties} fill={couleurBord(piece)} /> {/* calculated color */}
                           <span className="font-medium text-sm truncate">{piece.nom}</span>
                         </div>
                         {piece.surface_m2 && <span className="text-xs text-muted-foreground">{piece.surface_m2} m²</span>}
@@ -510,7 +517,15 @@ export default function PageVisualisation() {
                     className={`flex items-center gap-2 text-xs w-full text-left rounded px-1 py-0.5 hover:bg-accent transition-colors ${pieceSelectionnee?.id === piece.id ? "bg-accent font-medium" : ""}`}
                     onClick={() => { setPieceSelectionnee(piece); setSheetPieceOuverte(true); setMenageOuvert(false); }}
                   >
-                    <div className="h-3 w-3 rounded-sm border shrink-0" style={{ backgroundColor: couleurPiece(piece), borderColor: couleurBord(piece) }} />
+                    <div
+                      className="h-3 w-3 rounded-sm border shrink-0"
+                      style={{
+                        "--room-bg": couleurPiece(piece),
+                        "--room-border": couleurBord(piece),
+                        backgroundColor: "var(--room-bg)",
+                        borderColor: "var(--room-border)",
+                      } as React.CSSProperties}
+                    />
                     <span>{piece.nom}</span>
                   </button>
                 ))}
@@ -545,7 +560,7 @@ export default function PageVisualisation() {
             <>
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <Square className="h-4 w-4" style={{ color: couleurBord(pieceSelectionnee) }} fill={couleurBord(pieceSelectionnee)} />
+                  <Square className="h-4 w-4" style={{ "--sq-color": couleurBord(pieceSelectionnee), color: "var(--sq-color)" } as React.CSSProperties} fill={couleurBord(pieceSelectionnee)} />
                   {pieceSelectionnee.nom}
                 </SheetTitle>
                 <div className="flex gap-3 text-xs text-muted-foreground">

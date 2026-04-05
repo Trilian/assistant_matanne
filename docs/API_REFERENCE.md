@@ -708,6 +708,364 @@ Upload vers Supabase Storage.
 
 ---
 
+## 🏠 Habitat — `/api/v1/habitat` (33 endpoints)
+
+Module complet de gestion de l'habitat : veille immobilière, scénarios d'achat, plans de maison, déco IA, jardin paysager, énergie.
+
+### Hub & Énergie (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/habitat/hub` | — | Résumé consolidé du module Habitat |
+| GET | `/habitat/anomalies-energie` | — | Détection d'anomalies énergie |
+| POST | `/habitat/comparateur-energie` | Body: `ComparateurEnergieRequest` | Comparateur de fournisseurs énergie (rate limited) |
+| GET | `/habitat/energie-temps-reel` | — | Tableau énergie temps réel |
+
+### Veille immobilière (3)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/habitat/veille/synchroniser` | Body: `SynchronisationVeilleHabitatCreate` | Synchronisation des sources immobilières |
+| GET | `/habitat/veille/alertes` | — | Meilleures opportunités détectées |
+| GET | `/habitat/veille/carte` | — | Agrégation par ville avec coordonnées pour carte |
+
+### Marché DVF (1)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/habitat/marche/dvf` | `departement`, `code_postal?`, `commune?`, `type_local?`, `nb_pieces_min?`, `surface_min_m2?`, `limite?` | Historique transactions DVF publiques |
+
+### Scénarios (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/habitat/scenarios` | — | Liste les scénarios avec score global |
+| POST | `/habitat/scenarios` | Body: `ScenarioHabitatCreate` | Crée un scénario (201) |
+| PATCH | `/habitat/scenarios/{scenario_id}` | Body: `ScenarioHabitatPatch` | Met à jour un scénario |
+| DELETE | `/habitat/scenarios/{scenario_id}` | — | Supprime un scénario |
+| GET | `/habitat/scenarios/comparaison` | — | Scénarios ordonnés par score |
+
+### Critères scénarios & immobilier (3)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/habitat/scenarios/{scenario_id}/criteres` | Body: `CritereScenarioCreate` | Ajoute un critère + recalcule le score |
+| GET | `/habitat/criteres-immo` | — | Liste les critères de recherche immobilière |
+| POST | `/habitat/criteres-immo` | Body: `CritereImmoCreate` | Crée un critère de veille immobilière |
+
+### Annonces (3)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/habitat/annonces` | `statut?`, `source?` | Liste les annonces immobilières |
+| POST | `/habitat/annonces` | Body: `AnnonceHabitatCreate` | Crée une annonce (import ou manuelle) |
+| PATCH | `/habitat/annonces/{annonce_id}/statut` | `statut` | Met à jour le statut d'une annonce |
+
+### Plans & Pièces (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/habitat/plans` | — | Liste les plans Habitat |
+| POST | `/habitat/plans` | Body: `PlanHabitatCreate` | Crée un plan (201) |
+| POST | `/habitat/plans/{plan_id}/analyser` | Body: `PlanHabitatAnalyseCreate` | Analyse IA d'un plan |
+| GET | `/habitat/plans/{plan_id}/historique-ia` | — | Historique des analyses IA |
+| GET | `/habitat/plans/{plan_id}/pieces` | — | Liste les pièces d'un plan |
+| POST | `/habitat/plans/{plan_id}/pieces` | Body: `PieceHabitatCreate` | Ajoute une pièce (201) |
+
+### Déco (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/habitat/deco/projets` | — | Liste les projets déco |
+| POST | `/habitat/deco/projets` | Body: `ProjetDecoHabitatCreate` | Crée un projet déco (201) |
+| POST | `/habitat/deco/projets/{projet_id}/suggestions` | Body: `ProjetDecoSuggestionCreate` | Concept déco IA avec option image |
+| POST | `/habitat/deco/projets/{projet_id}/depenses` | Body: `ProjetDecoDepenseCreate` | Synchronise dépense déco → dépenses maison |
+| POST | `/habitat/deco/images` | Body: `GenerationImageHabitatCreate` | Génération image déco IA (Hugging Face) |
+
+### Jardin paysager (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/habitat/jardin/zones` | `plan_id?` | Zones de paysagisme |
+| POST | `/habitat/jardin/zones` | Body: `ZoneJardinHabitatCreate` | Crée une zone paysagère (201) |
+| PATCH | `/habitat/jardin/zones/{zone_id}` | Body: `ZoneJardinHabitatPatch` | Met à jour coordonnées/canvas d'une zone |
+| GET | `/habitat/jardin/resume` | `plan_id?` | Résumé budgétaire et surfacique |
+
+---
+
+## 🔗 Bridges — `/api/v1/bridges` (7 endpoints)
+
+Ponts inter-modules : connexions automatiques entre cuisine, famille, maison, énergie.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/bridges/catalogue` | — | Catalogue consolidé des bridges |
+| GET | `/bridges/documents-expires` | `jours_avant?` (défaut: 30) | Documents expirés ou expirant bientôt (B5.3) |
+| GET | `/bridges/planning-unifie` | `nb_jours?` (défaut: 7) | Planning unifié entretien + activités (B5.5) |
+| GET | `/bridges/recolte-recettes` | `ingredient` | Recettes utilisant un ingrédient récolté au jardin (B5.1) |
+| GET | `/bridges/anniversaire-menu-festif` | `jours_horizon?` (défaut: 14) | Menu festif pour l'anniversaire le plus proche |
+| GET | `/bridges/energie-heures-creuses` | — | Créneaux HC/HP pour machines énergivores (IM-5) |
+| POST | `/bridges/meteo-entretien` | Body: conditions météo `dict` | Alertes entretien basées sur la météo (B5.8) |
+
+---
+
+## 🔄 Flux intra-modules — `/api/v1/intra` & `/api/v1/flux` (7 endpoints)
+
+Flux de données internes entre modules, streaks, digests et actions rapides.
+
+### Intra-modules (3)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/intra/routines-streak` | — | Streak tracking pour routines actives (B6.5) |
+| GET | `/intra/energie-comparaison` | `type_energie?` (défaut: "electricite") | Comparaison énergie N vs N-1 (B6.6) |
+| GET | `/intra/suggestions-entretien-age` | — | Suggestions entretien basées sur l'âge des équipements (B6.7) |
+
+### Flux (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/flux/cuisine-3-clics` | `planning_id` | État du flux cuisine simplifié (B7.1) |
+| GET | `/flux/digest-quotidien` | — | Digest famille du jour (B7.2) |
+| POST | `/flux/marquer-fait/{tache_id}` | — | Marquer tâche faite + auto prochaine date (B7.3) |
+| POST | `/flux/feedback-semaine` | Body: `FeedbackSemaineRequest` | Feedbacks de fin de semaine (B7.5) |
+
+---
+
+## 🧠 IA Bridges — `/api/v1/ia` (13 endpoints)
+
+Services IA avancés inter-modules : budget, nutrition, diagnostic, batch cooking, voyage.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/ia/budget/prevision` | `mois`, `annee` | Prévision dépenses fin de mois (B1.3) |
+| GET | `/ia/budget/anomalies` | `seuil?` (défaut: 80) | Catégories budgétaires dépassant un seuil |
+| POST | `/ia/budget/categoriser` | Body: `CategoriserDepenseRequest` | Catégorisation automatique de dépenses |
+| GET | `/ia/resume-hebdo` | — | Résumé narratif de la semaine (B4.3) |
+| GET | `/ia/planning-adapte` | `nb_jours?` (défaut: 7) | Planning repas adapté au contexte (B4.2) |
+| POST | `/ia/diagnostic/photo` | Body: `DiagnosticPhotoRequest` | Diagnostic maison via photo (B4.5) |
+| POST | `/ia/diagnostic/texte` | Body: `DiagnosticTexteRequest` | Diagnostic maison via description |
+| POST | `/ia/batch-cooking-plan` | Body: `BatchCookingPlanRequest` | Plan batch cooking optimisé (B4.4) |
+| POST | `/ia/conseil-jules` | Body: `ConseilJulesRequest` | Conseils développement Jules (B4.8) |
+| POST | `/ia/checklist-voyage` | Body: `ChecklistVoyageRequest` | Checklist voyage personnalisée (B4.10) |
+| POST | `/ia/score-ecologique` | Body: `ScoreEcologiqueRequest` | Score écologique d'un repas (B4.11) |
+| POST | `/ia/analyse-nutritionnelle` | Body: `AnalyseNutritionnelleRequest` | Analyse nutritionnelle d'un repas (B4.7) |
+| POST | `/ia/optimisation-energie` | Body: `OptimisationEnergieRequest` | Analyse énergie + prédiction facture (B4.6) |
+
+---
+
+## 🚀 IA Avancée — `/api/v1/ia-avancee` (14 endpoints)
+
+Fonctionnalités IA de nouvelle génération : diagnostic photo, planning adaptatif, prédictions.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/ia-avancee/suggestions-achats` | `jours?` (défaut: 90) | Suggestions achats basées sur l'historique |
+| POST | `/ia-avancee/planning-adaptatif` | Body: `PlanningAdaptatifRequest` | Planning adapté météo/énergie/budget |
+| POST | `/ia-avancee/diagnostic-plante` | Body: `UploadFile` (multipart) | Diagnostic plante via photo Pixtral |
+| GET | `/ia-avancee/prevision-depenses` | — | Prévision dépenses jusqu'à fin de mois |
+| POST | `/ia-avancee/idees-cadeaux` | Body: `IdeesCadeauxRequest` | Idées cadeaux personnalisées |
+| POST | `/ia-avancee/analyse-photo` | Body: `UploadFile` (multipart) | Analyse photo multi-contexte |
+| GET | `/ia-avancee/optimisation-routines` | — | Optimisation des routines familiales |
+| POST | `/ia-avancee/analyse-document` | Body: `UploadFile` (multipart) | Analyse + classement document |
+| POST | `/ia-avancee/estimation-travaux` | Body: `UploadFile` + `description` | Estimation travaux via photo |
+| POST | `/ia-avancee/planning-voyage` | Body: `PlanningVoyageRequest` | Planning voyage complet avec budget |
+| GET | `/ia-avancee/recommandations-energie` | — | Économies énergie recommandées |
+| GET | `/ia-avancee/prediction-pannes` | — | Prédiction risques de panne équipements |
+| GET | `/ia-avancee/suggestions-proactives` | — | Suggestions proactives basées sur l'état général |
+| POST | `/ia-avancee/adaptations-meteo` | Body: `AdaptationsMeteoRequest` | Adaptations planning selon météo |
+
+---
+
+## 🧩 IA Modules — `/api/v1/ia/modules` (14 endpoints)
+
+Services IA spécialisés par domaine : inventaire, planning, météo, habitudes, jardin, énergie.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/ia/modules/inventaire/prediction-consommation` | Body: `PredictionConsommationRequest` | Prédiction consommation article |
+| POST | `/ia/modules/planning/analyse-variete` | Body: `AnalyseVarietePlanningRequest` | Analyse variété du planning |
+| POST | `/ia/modules/planning/optimisation-nutrition` | Body: `OptimisationNutritionPlanningRequest` | Optimisation nutritionnelle planning |
+| POST | `/ia/modules/planning/suggestions-simplification` | Body: `SuggestionSimplificationPlanningRequest` | Simplification semaine chargée |
+| POST | `/ia/modules/meteo/impacts` | Body: `AnalyseImpactsMeteoRequest` | Impacts météo cross-modules |
+| POST | `/ia/modules/habitudes/analyse` | Body: `AnalyseHabitueRequest` | Analyse routine familiale |
+| POST | `/ia/modules/maison/projets/estimation` | Body: `EstimationProjetMaisonRequest` | Estimation projet maison |
+| POST | `/ia/modules/nutrition/personne` | Body: `AnalyseNutritionPersonneRequest` | Nutrition personnalisée |
+| POST | `/ia/modules/jardin/diagnostic-plante` | Body: `DiagnosticPlanteJardinRequest` | Diagnostic plante du jardin |
+| GET | `/ia/modules/rapports/bilan-mensuel` | `mois` | Bilan mensuel narratif multi-modules |
+| GET | `/ia/modules/energie/prediction-consommation` | `nb_mois?` (défaut: 12) | Prédiction consommation énergie |
+| GET | `/ia/modules/jardin/calendrier-personnalise` | `region?`, `mois?`, `latitude?`, `longitude?` | Calendrier semis/récolte personnalisé (IA-2) |
+| GET | `/ia/modules/habitat/estimation-roi` | `surface_m2`, `code_postal`, `commune`, `budget_travaux`, `type_local` | Estimation prix + ROI rénovation (IA-4) |
+| GET | `/ia/modules/artisans/comparaison-devis` | `projet_id` | Estimation devis + comparaison artisans (IA-7) |
+
+---
+
+## 📈 Prédictions courses — `/api/v1/predictions/courses` (3 endpoints)
+
+Prédiction de listes de courses basée sur l'historique d'achats.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/predictions/courses` | `limite?` (défaut: 30) | Prédiction prochaine liste (B4.1/B5.4) |
+| GET | `/predictions/courses/habitudes` | — | Habitudes d'achat (fréquences, catégories) |
+| POST | `/predictions/courses/enregistrer-achat` | Body: `EnregistrerAchatRequest` | Enregistre un achat + met à jour l'historique |
+
+---
+
+## 🔍 Recherche — `/api/v1/recherche` (1 endpoint)
+
+Recherche globale multi-entités.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/recherche/global` | `q` (min 2 chars), `limit?` (défaut: 20), `types?` | Recherche multi-entités (recettes, projets, activités, notes, contacts, plantes, documents, abonnements, entretien) |
+
+---
+
+## ✈️ Voyages — `/api/v1/famille/voyages` (7 endpoints)
+
+Gestion des voyages familiaux avec checklists IA.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/voyages` | — | Liste les voyages |
+| GET | `/famille/voyages/templates` | — | Templates de voyage disponibles |
+| POST | `/famille/voyages` | Body: voyage `dict` | Crée un voyage (201) |
+| GET | `/famille/voyages/{voyage_id}` | — | Détail d'un voyage |
+| POST | `/famille/voyages/planifier-ia` | Body: contexte séjour `dict` | Crée un voyage + checklists IA par templates |
+| POST | `/famille/voyages/{voyage_id}/generer-courses` | — | Génère articles de courses depuis checklists (LT-03) |
+| POST | `/famille/voyages/{voyage_id}/checklists/{checklist_id}/toggle` | Body: `dict` | Coche/décoche un article de checklist |
+
+---
+
+## 🔔 Notifications enrichies — `/api/v1/notifications` (6 endpoints)
+
+Préférences et historique des notifications avec gestion granulaire.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/notifications/preferences` | — | Préférences notifications granulaires (E.4) |
+| PUT | `/notifications/preferences` | Body: préférences `dict` | Met à jour les préférences (E.4) |
+| GET | `/notifications/historique` | `page?`, `page_size?`, `non_lu_seulement?` | Historique paginé des notifications (E.5) |
+| POST | `/notifications/historique/{notif_id}/marquer-lu` | — | Marquer notification comme lue (E.5) |
+| POST | `/notifications/historique/marquer-tous-lus` | — | Marquer toutes comme lues (E.5) |
+| GET | `/notifications/historique/stats` | — | Statistiques des notifications (E.5) |
+
+---
+
+## ⚙️ Automations — `/api/v1/automations` (7 endpoints)
+
+Règles d'automatisation Si→Alors avec génération IA.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/automations` | — | Liste les automations |
+| POST | `/automations/init` | — | Initialise depuis les préférences legacy (idempotent) |
+| POST | `/automations` | Body: automation `dict` | Crée une automation (201) |
+| PUT | `/automations/{automation_id}` | Body: automation `dict` | Modifie une automation |
+| POST | `/automations/{automation_id}/simuler` | — | Simule l'exécution |
+| POST | `/automations/{automation_id}/executer-maintenant` | `dry_run?` | Déclenche manuellement (LT-04) |
+| POST | `/automations/generer-ia` | Body: `GenerationAutomationIARequest` | Génère une règle depuis un prompt libre (IA6) |
+
+---
+
+## ⌚ Garmin — `/api/v1/garmin` (7 endpoints)
+
+Intégration Garmin pour le suivi sportif et les recommandations nutritionnelles.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/garmin/status` | — | Statut de la connexion Garmin |
+| POST | `/garmin/connect-url` | `callback_url?` (défaut: "oob") | URL d'authentification Garmin OAuth |
+| POST | `/garmin/complete` | Body: verifier OAuth `dict` | Termine la connexion Garmin |
+| POST | `/garmin/sync` | `days_back?` (défaut: 7) | Synchronise les données Garmin |
+| GET | `/garmin/stats` | `days?` (défaut: 7) | Statistiques Garmin |
+| POST | `/garmin/disconnect` | — | Déconnecte le compte Garmin |
+| GET | `/garmin/recommandation-diner` | `calories_brulees?` | Dîner adapté à la dépense Garmin |
+
+---
+
+## 🧪 Innovations — `/api/v1/innovations` (39 endpoints)
+
+Fonctionnalités innovantes : modes pilote/vacances, scores, rapports, cartes visuelles, apprentissage.
+
+### Cuisine IA (8)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/innovations/idee-repas` | Body: `IdeeRepasSoirRequest` | Suggestion dîner express |
+| GET | `/innovations/patterns-alimentaires` | `periode_jours?` (défaut: 90) | Détection patterns alimentaires |
+| GET | `/innovations/saisonnalite-intelligente` | — | Saisonnalité intelligente |
+| GET | `/innovations/garmin-repas-adaptatif` | — | Repas adapté à la dépense Garmin |
+| GET | `/innovations/planification-auto` | — | Planification hebdo automatique |
+| GET | `/innovations/batch-cooking-intelligent` | — | Batch cooking intelligent |
+| POST | `/innovations/parcours-magasin` | Body: `ParcoursOptimiseRequest` | Optimisation parcours magasin |
+| GET | `/innovations/comparateur-prix-auto` | `top_n?` (défaut: 20) | Comparateur prix automatique |
+
+### Énergie & Maison (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/innovations/anomalies-energie` | — | Détection anomalies eau/gaz/élec |
+| POST | `/innovations/comparateur-energie` | Body: `ComparateurEnergieRequest` | Comparateur fournisseurs énergie |
+| GET | `/innovations/energie-temps-reel` | — | Tableau énergie temps réel |
+| GET | `/innovations/enrichissement-contacts` | — | Enrichissement contacts IA |
+| GET | `/innovations/tendances-loto` | `jeu?` (défaut: "loto") | Analyse tendances Loto/EuroMillions |
+
+### Famille & Routines (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/innovations/coach-routines` | — | Coach routines IA |
+| GET | `/innovations/planning-jules-adaptatif` | — | Planning Jules adaptatif |
+| GET | `/innovations/score-famille-hebdo` | — | Score famille hebdomadaire |
+| POST | `/innovations/veille-emploi` | Body: `VeilleEmploiRequest` | Veille emploi multi-sites |
+
+### Modes & Pilotage (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/innovations/mode-vacances` | — | Lecture mode vacances |
+| POST | `/innovations/mode-vacances/config` | Body: `ModeVacancesConfigurationRequest` | Configuration mode vacances |
+| GET | `/innovations/mode-pilote` | — | Mode pilote automatique |
+| POST | `/innovations/mode-pilote/config` | Body: `ModePiloteConfigurationRequest` | Configuration mode pilote |
+| GET | `/innovations/mode-tablette-magazine` | — | Mode tablette magazine |
+
+### Scores & Rapports (10)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/innovations/tableau-sante-foyer` | — | Tableau de bord santé foyer |
+| GET | `/innovations/score-bien-etre` | — | Score bien-être familial composite |
+| GET | `/innovations/score-eco-responsable` | — | Score éco-responsable |
+| GET | `/innovations/resume-mensuel` | — | Résumé mensuel IA |
+| GET | `/innovations/retrospective-annuelle` | `annee` | Rétrospective annuelle IA |
+| GET | `/innovations/journal-familial` | — | Journal familial automatique |
+| GET | `/innovations/journal-familial/pdf` | — | Export PDF journal familial |
+| GET | `/innovations/rapport-mensuel/pdf` | `mois` | Rapport mensuel PDF |
+| POST | `/innovations/bilan-annuel` | Body: `BilanAnnuelRequest` | Bilan annuel complet IA |
+| POST | `/innovations/carte-visuelle` | Body: `CarteVisuelleRequest` | Carte visuelle partageable |
+
+### Intelligence & Apprentissage (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/innovations/apprentissage-habitudes` | — | Apprentissage continu habitudes |
+| GET | `/innovations/alertes-contextuelles` | — | Alertes intelligentes contextuelles |
+| GET | `/innovations/insights-quotidiens` | `limite?` (défaut: 2) | Insights IA proactifs quotidiens |
+| GET | `/innovations/meteo-contextuelle` | — | Météo contextuelle cross-module |
+| GET | `/innovations/preferences-apprises` | — | Apprentissage des préférences |
+| GET | `/innovations/telegram-conversationnel` | — | Telegram conversationnel |
+
+### Invités (2)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/innovations/invite/creer` | Body: `LienInviteRequest` | Créer un lien invite partageable |
+| GET | `/innovations/invite/{token}` | — | Accès données invité (sans auth) |
+
+---
+
 ## Résumé par module
 
 | Module | Préfixe | Endpoints |
@@ -732,7 +1090,20 @@ Upload vers Supabase Storage.
 | Push | `/api/v1/push` | 3 |
 | Webhooks | `/api/v1/webhooks` | 6 |
 | Upload | `/api/v1/upload` | 3 |
-| **Total** | | **242** |
+| Habitat | `/api/v1/habitat` | 33 |
+| Bridges | `/api/v1/bridges` | 7 |
+| Flux intra-modules | `/api/v1/intra` & `/api/v1/flux` | 7 |
+| IA Bridges | `/api/v1/ia` | 13 |
+| IA Avancée | `/api/v1/ia-avancee` | 14 |
+| IA Modules | `/api/v1/ia/modules` | 14 |
+| Prédictions courses | `/api/v1/predictions/courses` | 3 |
+| Recherche | `/api/v1/recherche` | 1 |
+| Voyages | `/api/v1/famille/voyages` | 7 |
+| Notifications enrichies | `/api/v1/notifications` | 6 |
+| Automations | `/api/v1/automations` | 7 |
+| Garmin | `/api/v1/garmin` | 7 |
+| Innovations | `/api/v1/innovations` | 39 |
+| **Total** | | **400+** |
 
 
 ---

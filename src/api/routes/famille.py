@@ -29,7 +29,7 @@ from datetime import date
 from inspect import isawaitable
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
@@ -1693,6 +1693,157 @@ async def lister_depenses_compat(
             }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# P3 — IMPORT/EXPORT CONTACTS VCARD/CSV
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/contacts/import")
+@gerer_exception_api
+async def importer_contacts(
+    fichier: UploadFile = File(..., description="Fichier vCard (.vcf) ou CSV (.csv)"),
+    user: dict = Depends(require_auth),
+):
+    """P3-B4: Importe des contacts depuis un fichier vCard ou CSV."""
+    import csv
+    import io
+
+    from src.core.models.utilitaires import ContactUtile
+
+    contenu = await fichier.read()
+    nom_fichier = (fichier.filename or "").lower()
+
+    if not nom_fichier.endswith((".vcf", ".csv")):
+        raise HTTPException(status_code=400, detail="Format supporté: .vcf ou .csv")
+
+    contacts_importes: list[str] = []
+
+    def _import():
+        with executer_avec_session() as session:
+            if nom_fichier.endswith(".vcf"):
+                try:
+                    import vobject
+                except ImportError:
+                    raise HTTPException(status_code=500, detail="Librairie vobject non installée")
+
+                texte = contenu.decode("utf-8", errors="replace")
+                for vcard in vobject.readComponents(texte):
+                    nom = str(vcard.fn.value) if hasattr(vcard, "fn") else ""
+                    if not nom:
+                        continue
+                    telephone = ""
+                    if hasattr(vcard, "tel"):
+                        telephone = str(vcard.tel.value)
+                    email = ""
+                    if hasattr(vcard, "email"):
+                        email = str(vcard.email.value)
+                    adresse = ""
+                    if hasattr(vcard, "adr"):
+                        adr = vcard.adr.value
+                        parts = []
+                        if hasattr(adr, "street") and adr.street:
+                            parts.append(str(adr.street))
+                        if hasattr(adr, "city") and adr.city:
+                            parts.append(str(adr.city))
+                        if hasattr(adr, "code") and adr.code:
+                            parts.append(str(adr.code))
+                        adresse = " ".join(parts)
+                    contact = ContactUtile(
+                        nom=nom[:200],
+                        telephone=telephone[:20] if telephone else None,
+                        email=email[:200] if email else None,
+                        adresse=adresse[:500] if adresse else None,
+                        categorie="importé",
+                    )
+                    session.add(contact)
+                    contacts_importes.append(nom)
+
+            elif nom_fichier.endswith(".csv"):
+                texte = contenu.decode("utf-8", errors="replace")
+                lecteur = csv.DictReader(io.StringIO(texte))
+                for ligne in lecteur:
+                    nom = (ligne.get("nom") or ligne.get("name") or ligne.get("Nom") or "").strip()
+                    if not nom:
+                        continue
+                    contact = ContactUtile(
+                        nom=nom[:200],
+                        telephone=(ligne.get("telephone") or ligne.get("phone") or "")[:20] or None,
+                        email=(ligne.get("email") or ligne.get("Email") or "")[:200] or None,
+                        adresse=(ligne.get("adresse") or ligne.get("address") or "")[:500] or None,
+                        categorie=(ligne.get("categorie") or ligne.get("category") or "importé")[:50],
+                    )
+                    session.add(contact)
+                    contacts_importes.append(nom)
+
+            session.commit()
+            return {
+                "contacts_importes": len(contacts_importes),
+                "noms": contacts_importes[:20],
+            }
+
+    return await executer_async(_import)
+
+
+@router.get("/contacts/export")
+@gerer_exception_api
+async def exporter_contacts(
+    format: str = Query("vcard", pattern="^(vcard|csv)$", description="Format d'export"),
+    user: dict = Depends(require_auth),
+):
+    """P3-B4: Exporte les contacts en vCard ou CSV."""
+    import csv
+    import io
+
+    from fastapi.responses import Response
+
+    from src.core.models.utilitaires import ContactUtile
+
+    def _export():
+        with executer_avec_session() as session:
+            contacts = session.query(ContactUtile).order_by(ContactUtile.nom).all()
+
+            if format == "csv":
+                output = io.StringIO()
+                writer = csv.writer(output)
+                writer.writerow(["nom", "categorie", "telephone", "email", "adresse", "notes"])
+                for c in contacts:
+                    writer.writerow([c.nom, c.categorie, c.telephone or "", c.email or "", c.adresse or "", c.notes or ""])
+                return Response(
+                    content=output.getvalue(),
+                    media_type="text/csv",
+                    headers={"Content-Disposition": "attachment; filename=contacts.csv"},
+                )
+
+            else:  # vcard
+                try:
+                    import vobject
+                except ImportError:
+                    raise HTTPException(status_code=500, detail="Librairie vobject non installée")
+
+                vcards = []
+                for c in contacts:
+                    v = vobject.vCard()
+                    v.add("fn").value = c.nom
+                    v.add("n").value = vobject.vcard.Name(family=c.nom)
+                    if c.telephone:
+                        v.add("tel").value = c.telephone
+                    if c.email:
+                        v.add("email").value = c.email
+                    if c.adresse:
+                        v.add("adr").value = vobject.vcard.Address(street=c.adresse)
+                    if c.notes:
+                        v.add("note").value = c.notes
+                    vcards.append(v.serialize())
+
+                return Response(
+                    content="\r\n".join(vcards),
+                    media_type="text/vcard",
+                    headers={"Content-Disposition": "attachment; filename=contacts.vcf"},
+                )
+
+    return await executer_async(_export)
 
 
 # ═══════════════════════════════════════════════════════════

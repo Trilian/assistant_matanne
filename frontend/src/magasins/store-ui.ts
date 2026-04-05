@@ -17,6 +17,7 @@ interface EtatUI {
   definirTitrePage: (titre: string | null) => void;
 }
 
+/** Store Zustand de l'état UI global — sidebar, recherche, titre de page. Persisté en localStorage. */
 export const utiliserStoreUI = create<EtatUI>()(
   persist(
     (set) => ({

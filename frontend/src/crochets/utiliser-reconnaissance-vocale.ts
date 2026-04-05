@@ -44,6 +44,11 @@ interface RetourReconnaissanceVocale {
   reinitialiser: () => void;
 }
 
+/**
+ * Hook de reconnaissance vocale via Web Speech API.
+ * @param options - Langue, mode continu, résultats intermédiaires, callback résultat
+ * @returns {transcription, enEcoute, demarrerEcoute, arreterEcoute, estSupporte, erreur, reinitialiser}
+ */
 export function utiliserReconnaissanceVocale(
   options: OptionsReconnaissanceVocale = {}
 ): RetourReconnaissanceVocale {

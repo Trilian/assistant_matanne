@@ -602,8 +602,8 @@ async def envoyer_liste_courses_partagee(
     )
 
 
-async def envoyer_rapport_hebdo_whatsapp(texte_resume: str) -> bool:
-    """Envoie le rapport hebdomadaire compact (nom gardé pour compatibilité imports)."""
+async def envoyer_rapport_hebdo_telegram(texte_resume: str) -> bool:
+    """Envoie le rapport hebdomadaire compact via Telegram."""
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
 

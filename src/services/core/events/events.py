@@ -490,6 +490,33 @@ class EvenementBridgeMeteoEntretien:
 # REGISTRY — Pour auto-discovery des types d'événements
 # ═══════════════════════════════════════════════════════════
 
+
+@dataclass(frozen=True, slots=True)
+class EvenementEntiteModifiee:
+    """P3-B2: Émis quand une entité est modifiée (historique)."""
+
+    TYPE: str = "entite.modifiee"
+
+    entity_type: str = ""  # "recette", "planning", etc.
+    entity_id: int = 0
+    entity_name: str = ""
+    champ_modifie: str = ""
+    ancienne_valeur: str = ""
+    nouvelle_valeur: str = ""
+    modifie_par: str = "system"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementEquipementPanne:
+    """P3-B5: Émis quand un équipement passe en statut panne."""
+
+    TYPE: str = "equipement.panne"
+
+    equipement_id: int = 0
+    nom: str = ""
+    type_equipement: str = ""
+
+
 REGISTRE_EVENEMENTS: dict[str, type] = {
     "recette.planifiee": EvenementRecettePlanifiee,
     "recette.importee": EvenementRecetteImportee,
@@ -522,6 +549,8 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "inventaire.modification_importante": EvenementInventaireModificationImportante,
     "jeux.sync_terminee": EvenementJeuxSyncTerminee,
     "service.error": EvenementErreurService,
+    "entite.modifiee": EvenementEntiteModifiee,
+    "equipement.panne": EvenementEquipementPanne,
 }
 
 
@@ -558,6 +587,8 @@ __all__ = [
     "EvenementInventaireModificationImportante",
     "EvenementJeuxSyncTerminee",
     "EvenementErreurService",
+    "EvenementEntiteModifiee",
+    "EvenementEquipementPanne",
     # Registry
     "REGISTRE_EVENEMENTS",
 ]

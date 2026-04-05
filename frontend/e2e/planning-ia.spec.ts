@@ -241,3 +241,103 @@ test.describe("Planning activités", () => {
     }
   });
 });
+
+// ═══════════════════════════════════════════════════════════
+// E2E — Flux planning → courses (workflow complet)
+// ═══════════════════════════════════════════════════════════
+
+test.describe("Planning → Courses — Flux bout en bout", () => {
+  test.beforeEach(async ({ page }) => {
+    await preparerContextePlanning(page);
+
+    // Mock supplémentaire pour les courses
+    await page.route("**/api/v1/courses/listes**", async (route) => {
+      const method = route.request().method();
+      if (method === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            items: [
+              { id: 100, nom: "Courses semaine 15", statut: "en_cours", nb_articles: 5, date_creation: "2026-04-06" },
+            ],
+            total: 1,
+          }),
+        });
+      } else if (method === "POST") {
+        await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ id: 101, nom: "Nouvelle liste", statut: "en_cours", nb_articles: 0 }) });
+      } else {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+      }
+    });
+
+    await page.route("**/api/v1/courses/generer-depuis-planning**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          liste_id: 101,
+          articles: [
+            { id: 1, nom: "Laitue", quantite: 1, unite: "pièce", categorie: "Fruits et légumes", coche: false },
+            { id: 2, nom: "Tomates", quantite: 4, unite: "pièce", categorie: "Fruits et légumes", coche: false },
+            { id: 3, nom: "Bouillon cube", quantite: 2, unite: "pièce", categorie: "Épicerie", coche: false },
+          ],
+        }),
+      });
+    });
+
+    await page.route("**/api/v1/courses/articles**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          items: [
+            { id: 1, nom: "Laitue", quantite: 1, unite: "pièce", categorie: "Fruits et légumes", coche: false },
+            { id: 2, nom: "Tomates", quantite: 4, unite: "pièce", categorie: "Fruits et légumes", coche: false },
+            { id: 3, nom: "Bouillon cube", quantite: 2, unite: "pièce", categorie: "Épicerie", coche: false },
+          ],
+          total: 3,
+        }),
+      });
+    });
+  });
+
+  test("accéder au planning puis naviguer vers les courses", async ({ page }) => {
+    await page.goto("/cuisine/planning");
+    await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });
+
+    // Le planning doit afficher des repas
+    await expect(page.getByText("Salade tiede").first()).toBeVisible();
+    await expect(page.getByText("Soupe maison").first()).toBeVisible();
+
+    // Naviguer vers les courses
+    await page.goto("/cuisine/courses");
+    await expect(page.locator("body")).toBeVisible({ timeout: 10000 });
+
+    // La page courses doit charger
+    const heading = page.locator("h1, h2").first();
+    await expect(heading).toBeVisible({ timeout: 5000 });
+  });
+
+  test("planning affiche les recettes et le nutri-score", async ({ page }) => {
+    await page.goto("/cuisine/planning");
+    await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });
+
+    // Vérifier que les recettes mockées sont affichées
+    await expect(page.getByText("Salade tiede").first()).toBeVisible();
+    await expect(page.getByText("Soupe maison").first()).toBeVisible();
+
+    // Vérifier la navigation semaine
+    const boutonSuiv = page.getByRole("button", { name: /semaine suivante/i });
+    await expect(boutonSuiv).toBeVisible();
+  });
+
+  test("page courses affiche les listes existantes", async ({ page }) => {
+    await page.goto("/cuisine/courses");
+    await expect(page.locator("body")).toBeVisible({ timeout: 10000 });
+
+    // Doit afficher le contenu de la page courses
+    const heading = page.locator("h1, h2").first();
+    await expect(heading).toBeVisible({ timeout: 5000 });
+  });
+});

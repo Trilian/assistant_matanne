@@ -297,3 +297,106 @@ class FeedbackSemaineRequest(BaseModel):
     repas_consommes: list[dict] = []
     commentaires: str = ""
     note_globale: int = Field(5, ge=1, le=10)
+
+
+# ═══════════════════════════════════════════════════════════
+# P3 — BRIDGES INTER-MODULES ENRICHIS
+# ═══════════════════════════════════════════════════════════
+
+
+class BudgetUnifieResponse(BaseModel):
+    """Budget unifié charges maison + dépenses famille."""
+    mois: int
+    annee: int
+    total_famille: float = 0
+    total_maison: float = 0
+    total_unifie: float = 0
+    details_famille: list[dict] = []
+    details_maison: list[dict] = []
+    evolution_pct: float | None = None
+
+
+class AnnonceImmoResume(BaseModel):
+    """Annonce immobilière résumée pour le widget."""
+    id: int
+    titre: str
+    prix: float
+    surface_m2: float | None = None
+    ville: str
+    score_pertinence: float | None = None
+    url_source: str | None = None
+
+
+class WidgetVeilleImmoResponse(BaseModel):
+    """Réponse widget veille immobilière."""
+    dernieres_annonces: list[AnnonceImmoResume] = []
+    nb_annonces_total: int = 0
+    prix_moyen: float | None = None
+    tendance_prix_pct: float | None = None
+
+
+class ActiviteJardinSaison(BaseModel):
+    """Activité jardin saisonnière."""
+    element: str
+    type_activite: str
+    priorite: str = "normale"
+    conseil: str = ""
+
+
+class WidgetSaisonJardinResponse(BaseModel):
+    """Réponse widget saison jardin."""
+    saison: str
+    activites: list[ActiviteJardinSaison] = []
+    nb_plantes_actives: int = 0
+    prochaines_recoltes: list[dict] = []
+
+
+class ImpactDemenagementResponse(BaseModel):
+    """Réponse évaluation impact déménagement."""
+    scenario_nom: str
+    impacts: list[dict] = []
+    score_global: float | None = None
+    recommandation: str = ""
+    details: dict = {}
+
+
+class TerroirRecettesResponse(BaseModel):
+    """Réponse recettes terroir local."""
+    localisation: str
+    region: str = ""
+    recettes_suggerees: list[dict] = []
+    nb_recettes: int = 0
+
+
+class ActiviteJulesPotagerResponse(BaseModel):
+    """Réponse activités Jules au potager."""
+    activites: list[dict] = []
+    plantes_disponibles: list[str] = []
+    age_jules_mois: int | None = None
+
+
+class VerificationStockRecetteResponse(BaseModel):
+    """Réponse vérification stock pour une recette."""
+    recette_id: int
+    recette_nom: str = ""
+    ingredients_ok: list[dict] = []
+    ingredients_manquants: list[dict] = []
+    taux_couverture: float = 0
+
+
+class HistoriqueModificationItem(BaseModel):
+    """Élément de l'historique des modifications."""
+    id: int
+    entity_type: str
+    entity_id: int
+    champ_modifie: str
+    ancienne_valeur: str | None = None
+    nouvelle_valeur: str | None = None
+    modifie_par: str = "system"
+    modifie_le: str
+
+
+class HistoriqueModificationsResponse(BaseModel):
+    """Réponse historique des modifications."""
+    items: list[HistoriqueModificationItem] = []
+    nb_total: int = 0

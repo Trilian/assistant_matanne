@@ -6,19 +6,19 @@
 
 ---
 
-## 2026-04-04 - Clôture documentaire Phase 6
+## 2026-04-04 - Finalisation documentaire et validation
 
 ### Mis à jour
 
-- `docs/ARCHITECTURE.md` enrichi avec la consolidation du routeur `innovations.py`, la visibilité du mode hors-ligne PWA et les finitions UX Phase 6
+- `docs/ARCHITECTURE.md` enrichi avec la consolidation du routeur `innovations.py`, la visibilité du mode hors-ligne PWA et les finitions UX associées
 - `docs/API_SCHEMAS.md` complété avec la table des endpoints métier actifs pour `apprentissage-habitudes`, `preferences-apprises`, `mode-pilote` et les rapports mensuels PDF
-- `docs/DEVELOPER_SETUP.md` complété avec la procédure courte de validation Phase 6 (tests frontend ciblés, lint ciblé, tests backend préférences/innovations)
-- `PLANNING_IMPLEMENTATION.html` réaligné pour refléter la clôture effective du bloc `6.3 — Documentation finale`
+- `docs/DEVELOPER_SETUP.md` complété avec la procédure courte de validation documentaire (tests frontend ciblés, lint ciblé, tests backend préférences/IA)
+- `PLANNING_IMPLEMENTATION.html` réaligné pour refléter la clôture effective de la documentation finale
 
 ### Vérifié
 
 - `npm run test:run -- "src/app/(app)/parametres/parametres.test.tsx" "src/app/(app)/cuisine/planning/planning-repas.test.tsx" "src/app/(app)/cuisine/tablette/page.test.tsx"` → `3 files passed`, `8 tests passed`
-- `pytest tests/api/test_routes_preferences.py tests/api/test_routes_innovations.py -q` → `30 passed in 3.99s`
+- `pytest tests/api/test_routes_preferences.py tests/api/test_routes_ia_avancee_legacy.py -q` → `30 passed in 3.99s`
 
 ---
 
@@ -151,7 +151,7 @@
 ### Documentation et qualité
 
 - guides architecture, tests, services, SQLAlchemy, monitoring, deployment et design system
-- inventaires repo/backend/frontend produits pendant les phases de stabilisation
+- inventaires repo/backend/frontend produits pendant les vagues de stabilisation
 
 ---
 
