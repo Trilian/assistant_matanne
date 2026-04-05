@@ -252,7 +252,7 @@ async def lister_inventaire(
 @router.post("", response_model=InventaireItemResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_article_inventaire(
-    item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
+    donnees: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
     CrÃ©e un nouvel article d'inventaire.
@@ -294,22 +294,22 @@ async def creer_article_inventaire(
         with executer_avec_session() as session:
             # VÃ©rifier que l'ingrÃ©dient existe
             ingredient = (
-                session.query(Ingredient).filter(Ingredient.id == item.ingredient_id).first()
+                session.query(Ingredient).filter(Ingredient.id == donnees.ingredient_id).first()
             )
             if not ingredient:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"IngrÃ©dient #{item.ingredient_id} non trouvÃ©",
+                    detail=f"IngrÃ©dient #{donnees.ingredient_id} non trouvÃ©",
                 )
 
             db_item = ArticleInventaire(
-                ingredient_id=item.ingredient_id,
-                quantite=item.quantite,
-                quantite_min=item.quantite_min,
-                emplacement=item.emplacement,
-                date_peremption=item.date_peremption,
-                code_barres=item.code_barres,
-                prix_unitaire=item.prix_unitaire,
+                ingredient_id=donnees.ingredient_id,
+                quantite=donnees.quantite,
+                quantite_min=donnees.quantite_min,
+                emplacement=donnees.emplacement,
+                date_peremption=donnees.date_peremption,
+                code_barres=donnees.code_barres,
+                prix_unitaire=donnees.prix_unitaire,
             )
             session.add(db_item)
             session.commit()
@@ -606,7 +606,7 @@ async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depend
 @router.put("/{item_id}", response_model=InventaireItemResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_article_inventaire(
-    item_id: int, item: InventaireItemUpdate, user: dict[str, Any] = Depends(require_auth)
+    item_id: int, maj: InventaireItemUpdate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
     Met Ã  jour un article d'inventaire (PATCH partiel).
@@ -654,7 +654,7 @@ async def modifier_article_inventaire(
                 raise HTTPException(status_code=404, detail="Article non trouvÃ©")
 
             # Appliquer uniquement les champs fournis (exclude_unset)
-            update_data = item.model_dump(exclude_unset=True)
+            update_data = maj.model_dump(exclude_unset=True)
 
             # Si ingredient_id est modifiÃ©, vÃ©rifier qu'il existe
             if "ingredient_id" in update_data:

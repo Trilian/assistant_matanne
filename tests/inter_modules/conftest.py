@@ -14,7 +14,7 @@ def register_inter_module_services():
     from src.services.cuisine.inter_module_inventaire_budget import get_inventaire_budget_service
     from src.services.cuisine.inter_module_planning_jardin import get_planning_jardin_service
     from src.services.cuisine.inter_module_garmin_nutrition_adultes import get_garmin_nutrition_adultes_service
-    from src.services.utilitaires.bridges_dashboard_actions import get_dashboard_actions_rapides_service
+    from src.services.utilitaires.inter_module_dashboard_actions import get_dashboard_actions_rapides_service
     
     # L'import des modules a exécuté les décorateurs @service_factory
     # Les services sont maintenant enregistrés dans le registre

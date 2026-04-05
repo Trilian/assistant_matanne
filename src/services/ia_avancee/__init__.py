@@ -22,7 +22,7 @@ from .service import (
     IAAvanceeService,
     get_ia_avancee_service,
 )
-from .service_transverse import InnovationsService, get_innovations_service
+from .service_central import InnovationsService, get_innovations_service
 
 __all__ = [
     "IAAvanceeService",

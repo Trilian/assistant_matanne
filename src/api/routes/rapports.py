@@ -25,7 +25,7 @@ from src.api.schemas.ia_transverses import (
     ScoreEcoResponsableResponse,
 )
 from src.api.utils import executer_async, gerer_exception_api
-from src.services.rapports.innovations_service import obtenir_service_innovations_rapports
+from src.services.rapports.service_ia import obtenir_service_innovations_rapports
 
 logger = logging.getLogger(__name__)
 

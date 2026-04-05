@@ -24,7 +24,7 @@ from src.api.schemas.ia_transverses import (
     ModePiloteConfigurationRequest,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-from src.services.core.innovations_service import obtenir_service_innovations_core
+from src.services.core.service_ia import obtenir_service_innovations_core
 
 router = APIRouter(prefix="/api/v1/preferences", tags=["Préférences"])
 
@@ -190,7 +190,7 @@ async def creer_ou_modifier_preferences(
 @router.patch("", responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_preferences(
-    patch: PreferencesPatch,
+    maj: PreferencesPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met à jour partiellement les préférences."""
@@ -210,7 +210,7 @@ async def modifier_preferences(
                     detail="Préférences non trouvées. Utilisez PUT pour créer.",
                 )
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
 

@@ -313,7 +313,7 @@ async def creer_document(
 @gerer_exception_api
 async def modifier_document(
     document_id: int,
-    donnees: DocumentPatch,
+    maj: DocumentPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Modifie un document familial existant."""
@@ -329,7 +329,7 @@ async def modifier_document(
             if not doc:
                 raise HTTPException(status_code=404, detail="Document non trouvé")
 
-            for key, value in donnees.model_dump(exclude_unset=True).items():
+            for key, value in maj.model_dump(exclude_unset=True).items():
                 setattr(doc, key, value)
 
             session.commit()

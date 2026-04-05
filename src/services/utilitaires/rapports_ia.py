@@ -86,8 +86,8 @@ class RapportsService:
 
                 # 2. Repas préparés (via HistoriqueRecette)
                 historique = session.query(HistoriqueRecette).filter(
-                    HistoriqueRecette.date_cuisson >= date_debut,
-                    HistoriqueRecette.date_cuisson <= date_fin,
+                    HistoriqueRecette.date_preparation >= date_debut,
+                    HistoriqueRecette.date_preparation <= date_fin,
                     HistoriqueRecette.user_id == user_id,
                 ).all()
                 stats.repas_complets = len(historique)
@@ -168,14 +168,14 @@ class RapportsService:
                 # Repas cette semaine
                 repas_this = len(session.query(HistoriqueRecette).filter(
                     HistoriqueRecette.user_id == user_id,
-                    HistoriqueRecette.date_cuisson >= semaine_debut,
+                    HistoriqueRecette.date_preparation >= semaine_debut,
                 ))
 
                 # Repas semaine passée
                 repas_prev = len(session.query(HistoriqueRecette).filter(
                     HistoriqueRecette.user_id == user_id,
-                    HistoriqueRecette.date_cuisson >= semaine_prev_debut,
-                    HistoriqueRecette.date_cuisson <= semaine_prev_fin,
+                    HistoriqueRecette.date_preparation >= semaine_prev_debut,
+                    HistoriqueRecette.date_preparation <= semaine_prev_fin,
                 ))
 
                 return {

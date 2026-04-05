@@ -14,7 +14,7 @@ __all__ = [
     "courses",
     "suggestions",
     "batch_cooking",
-    "innovations_service",
+    "service_ia",
 ]
 
 
@@ -49,7 +49,7 @@ def __getattr__(name: str):
 
         return obtenir_service_batch_cooking
     if name == "obtenir_service_innovations_cuisine":
-        from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
+        from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 
         return obtenir_service_innovations_cuisine
     if name == "obtenir_service_prediction_courses":
@@ -103,7 +103,7 @@ def __getattr__(name: str):
 
         return obtenir_service_jules_nutrition_interaction
     if name == "obtenir_service_saison_menu_interaction":
-        from src.services.cuisine.bridges_saison_menu import (
+        from src.services.cuisine.inter_module_saison_menu import (
             obtenir_service_saison_menu_interaction,
         )
 

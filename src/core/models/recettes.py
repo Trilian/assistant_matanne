@@ -376,12 +376,13 @@ class VersionRecette(CreeLeMixin, Base):
 
 
 class HistoriqueRecette(CreeLeMixin, Base):
-    """Historique d'utilisation d'une recette.
+    """Historique de préparation d'une recette.
 
     Attributes:
         recette_id: ID de la recette
-        date_cuisson: Date de préparation
+        date_preparation: Date de préparation
         portions_cuisinees: Nombre de portions préparées
+        feedback: Appréciation rapide (like/dislike/neutral)
     """
 
     __tablename__ = "historique_recettes"
@@ -390,10 +391,11 @@ class HistoriqueRecette(CreeLeMixin, Base):
     recette_id: Mapped[int] = mapped_column(
         ForeignKey("recettes.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    date_cuisson: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    date_preparation: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     portions_cuisinees: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     note: Mapped[int | None] = mapped_column(Integer)
     avis: Mapped[str | None] = mapped_column(Text)
+    feedback: Mapped[str | None] = mapped_column(String(20), default="neutral")
 
     # Relations
     recette: Mapped["Recette"] = relationship(back_populates="historique")
@@ -401,17 +403,21 @@ class HistoriqueRecette(CreeLeMixin, Base):
     __table_args__ = (
         CheckConstraint("portions_cuisinees > 0", name="ck_portions_cuisinees_positive"),
         CheckConstraint("note IS NULL OR (note >= 0 AND note <= 5)", name="ck_historique_note_valide"),
+        CheckConstraint(
+            "feedback IS NULL OR feedback IN ('like', 'dislike', 'neutral')",
+            name="ck_historique_feedback_valide",
+        ),
     )
 
     @property
     def nb_jours_depuis(self) -> int:
-        """Nombre de jours depuis la dernière cuisson."""
+        """Nombre de jours depuis la dernière préparation."""
         from datetime import date as dt_date
 
-        return (dt_date.today() - self.date_cuisson).days
+        return (dt_date.today() - self.date_preparation).days
 
     def __repr__(self) -> str:
-        return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_cuisson})>"
+        return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_preparation})>"
 
 
 class RepasBatch(CreeLeMixin, Base):

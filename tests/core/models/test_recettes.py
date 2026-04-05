@@ -327,11 +327,11 @@ class TestHistoriqueRecette:
         hist = HistoriqueRecette(
             id=1,
             recette_id=1,
-            date_cuisson=date(2024, 1, 15),
+            date_preparation=date(2024, 1, 15),
             portions_cuisinees=4,
         )
 
-        assert hist.date_cuisson == date(2024, 1, 15)
+        assert hist.date_preparation == date(2024, 1, 15)
         assert hist.portions_cuisinees == 4
 
     def test_historiquerecette_repr(self):
@@ -339,7 +339,7 @@ class TestHistoriqueRecette:
         hist = HistoriqueRecette(
             id=1,
             recette_id=1,
-            date_cuisson=date(2024, 1, 15),
+            date_preparation=date(2024, 1, 15),
         )
 
         repr_str = repr(hist)
@@ -352,7 +352,7 @@ class TestHistoriqueRecette:
         hist = HistoriqueRecette(
             id=1,
             recette_id=1,
-            date_cuisson=yesterday,
+            date_preparation=yesterday,
         )
 
         assert hist.nb_jours_depuis == 1
@@ -363,7 +363,7 @@ class TestHistoriqueRecette:
         hist = HistoriqueRecette(
             id=1,
             recette_id=1,
-            date_cuisson=today,
+            date_preparation=today,
         )
 
         assert hist.nb_jours_depuis == 0
@@ -374,7 +374,7 @@ class TestHistoriqueRecette:
         hist = HistoriqueRecette(
             id=1,
             recette_id=1,
-            date_cuisson=week_ago,
+            date_preparation=week_ago,
         )
 
         assert hist.nb_jours_depuis == 7

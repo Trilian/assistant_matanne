@@ -148,12 +148,12 @@ class TestBridgesInterModules:
     """Tests du service bridges inter-modules."""
 
     def test_import_service(self):
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
         service = obtenir_service_bridges()
         assert service is not None
 
     def test_methodes_bridges_existent(self):
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
         service = obtenir_service_bridges()
         for method_name in [
             "recolte_vers_recettes",
@@ -165,7 +165,7 @@ class TestBridgesInterModules:
             assert hasattr(service, method_name), f"Bridge {method_name} manquant"
 
     def test_registration_function_exists(self):
-        from src.services.ia.bridges import enregistrer_bridges_subscribers
+        from src.services.ia.inter_modules import enregistrer_bridges_subscribers
         assert callable(enregistrer_bridges_subscribers)
 
 

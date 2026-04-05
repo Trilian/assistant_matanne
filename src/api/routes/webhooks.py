@@ -57,16 +57,16 @@ router = APIRouter(
 )
 @gerer_exception_api
 async def creer_webhook(
-    data: WebhookCreate,
+    donnees: WebhookCreate,
     current_user: dict = Depends(require_auth),
 ):
-    """CrÃ©e un webhook et retourne les donnÃ©es incluant le secret."""
+    """Crée un webhook et retourne les données incluant le secret."""
     service = obtenir_webhook_service()
     result = service.creer_webhook(
-        url=str(data.url),
-        evenements=data.evenements,
+        url=str(donnees.url),
+        evenements=donnees.evenements,
         user_id=current_user.get("id"),
-        description=data.description,
+        description=donnees.description,
     )
 
     return result
@@ -122,11 +122,11 @@ async def obtenir_webhook(
 @gerer_exception_api
 async def modifier_webhook(
     webhook_id: int,
-    data: WebhookUpdate,
+    maj: WebhookUpdate,
     current_user: dict = Depends(require_auth),
 ):
     """Modifie un webhook existant."""
-    update_data = data.model_dump(exclude_unset=True)
+    update_data = maj.model_dump(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour fourni")
 

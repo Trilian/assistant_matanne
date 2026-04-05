@@ -270,7 +270,7 @@ async def modifier_tache_entretien(
 
             suggestion_artisans = None
             if payload.get("echec") is True or payload.get("statut_resolution") == "echec":
-                from src.services.ia.bridges import obtenir_service_bridges
+                from src.services.ia.inter_modules import obtenir_service_bridges
 
                 suggestion_artisans = obtenir_service_bridges().entretien_echoue_vers_artisans(
                     tache_id=tache.id

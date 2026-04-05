@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
-from .types_transverses import JournalFamilialAutoResponse, RapportMensuelPdfResponse
+from .types_central import JournalFamilialAutoResponse, RapportMensuelPdfResponse
 
 
 def generer_journal_familial_auto(service: Any) -> JournalFamilialAutoResponse | None:

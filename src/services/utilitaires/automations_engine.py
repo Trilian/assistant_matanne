@@ -369,7 +369,7 @@ class MoteurAutomationsService:
         items: list[Any],
         db: Session,
     ) -> int:
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         executions = 0
@@ -396,7 +396,7 @@ class MoteurAutomationsService:
         items: list[Any],
         db: Session,
     ) -> int:
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         executions = 0
@@ -417,7 +417,7 @@ class MoteurAutomationsService:
         items: list[Any],
         db: Session,
     ) -> int:
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         executions = 0

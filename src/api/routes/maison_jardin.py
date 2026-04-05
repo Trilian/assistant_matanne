@@ -167,7 +167,7 @@ async def modifier_element_jardin(
             action = str(payload.get("action", "")).lower()
             statut = str(payload.get("statut", element.statut or "")).lower()
             if action == "recolte" or statut == "recolte":
-                from src.services.ia.bridges import obtenir_service_bridges
+                from src.services.ia.inter_modules import obtenir_service_bridges
 
                 bridge_inventaire = obtenir_service_bridges().recolte_vers_stock_inventaire(
                     element_id=element.id,

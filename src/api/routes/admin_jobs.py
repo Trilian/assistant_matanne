@@ -62,7 +62,7 @@ async def statut_bridges(
         debut_global = time.perf_counter()
         resultats: list[dict[str, Any]] = []
 
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         catalogue_bridges = obtenir_service_bridges().obtenir_catalogue_consolidation()
 
@@ -84,35 +84,35 @@ async def statut_bridges(
                 ),
                 "P5-03": lambda: hasattr(
                     __import__(
-                        "src.services.cuisine.bridges_saison_menu",
+                        "src.services.cuisine.inter_module_saison_menu",
                         fromlist=["obtenir_service_saison_menu_interaction"],
                     ).obtenir_service_saison_menu_interaction(),
                     "obtenir_contexte_saisonnier_planning",
                 ),
                 "P5-04": lambda: hasattr(
                     __import__(
-                        "src.services.famille.bridges_meteo_activites",
+                        "src.services.famille.inter_module_meteo_activites",
                         fromlist=["obtenir_service_meteo_activites_interaction"],
                     ).obtenir_service_meteo_activites_interaction(),
                     "suggerer_activites_selon_meteo",
                 ),
                 "P5-05": lambda: hasattr(
                     __import__(
-                        "src.services.maison.bridges_entretien_courses",
+                        "src.services.maison.inter_module_entretien_courses",
                         fromlist=["obtenir_service_entretien_courses_interaction"],
                     ).obtenir_service_entretien_courses_interaction(),
                     "suggerer_produits_entretien_pour_courses",
                 ),
                 "P5-06": lambda: hasattr(
                     __import__(
-                        "src.services.maison.bridges_charges_energie",
+                        "src.services.maison.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     ).obtenir_service_charges_energie_interaction(),
                     "detecter_hausse_et_declencher_analyse",
                 ),
                 "P5-07": lambda: hasattr(
                     __import__(
-                        "src.services.famille.bridges_weekend_courses",
+                        "src.services.famille.inter_module_weekend_courses",
                         fromlist=["obtenir_service_weekend_courses_interaction"],
                     ).obtenir_service_weekend_courses_interaction(),
                     "suggerer_fournitures_weekend",
@@ -154,7 +154,7 @@ async def statut_bridges(
                 ),
                 "P5-17": lambda: hasattr(
                     __import__(
-                        "src.services.maison.bridges_charges_energie",
+                        "src.services.maison.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     ).obtenir_service_charges_energie_interaction(),
                     "detecter_hausse_et_declencher_analyse",
@@ -188,11 +188,11 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-03",
-                    "bridge": "bridges_saison_menu.py",
+                    "bridge": "inter_module_saison_menu.py",
                     "intitule": "Produits de saison -> Planning IA",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.cuisine.bridges_saison_menu",
+                        "src.services.cuisine.inter_module_saison_menu",
                         fromlist=["obtenir_service_saison_menu_interaction"],
                     )
                     .obtenir_service_saison_menu_interaction()
@@ -200,11 +200,11 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-04",
-                    "bridge": "bridges_meteo_activites.py",
+                    "bridge": "inter_module_meteo_activites.py",
                     "intitule": "Météo -> Activités famille",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.famille.bridges_meteo_activites",
+                        "src.services.famille.inter_module_meteo_activites",
                         fromlist=["obtenir_service_meteo_activites_interaction"],
                     )
                     .obtenir_service_meteo_activites_interaction()
@@ -212,11 +212,11 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-05",
-                    "bridge": "bridges_entretien_courses.py",
+                    "bridge": "inter_module_entretien_courses.py",
                     "intitule": "Entretien -> Courses",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.maison.bridges_entretien_courses",
+                        "src.services.maison.inter_module_entretien_courses",
                         fromlist=["obtenir_service_entretien_courses_interaction"],
                     )
                     .obtenir_service_entretien_courses_interaction()
@@ -224,11 +224,11 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-06",
-                    "bridge": "bridges_charges_energie.py",
+                    "bridge": "inter_module_charges_energie.py",
                     "intitule": "Charges facture -> Analyse énergie",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.maison.bridges_charges_energie",
+                        "src.services.maison.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     )
                     .obtenir_service_charges_energie_interaction()
@@ -236,11 +236,11 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-07",
-                    "bridge": "bridges_weekend_courses.py",
+                    "bridge": "inter_module_weekend_courses.py",
                     "intitule": "Weekend activités -> Courses",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.famille.bridges_weekend_courses",
+                        "src.services.famille.inter_module_weekend_courses",
                         fromlist=["obtenir_service_weekend_courses_interaction"],
                     )
                     .obtenir_service_weekend_courses_interaction()
@@ -248,12 +248,12 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-08",
-                    "bridge": "bridges_documents_calendrier.py",
+                    "bridge": "inter_module_documents_calendrier.py",
                     "intitule": "Documents expirants -> Calendrier",
                     "type_check": "presence",
                     "callable": lambda: hasattr(
                         __import__(
-                            "src.services.famille.bridges_documents_calendrier",
+                            "src.services.famille.inter_module_documents_calendrier",
                             fromlist=["obtenir_service_documents_calendrier_interaction"],
                         ).obtenir_service_documents_calendrier_interaction(),
                         "synchroniser_documents_vers_calendrier",
@@ -347,12 +347,12 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-16",
-                    "bridge": "bridges_jardin_entretien.py",
+                    "bridge": "inter_module_jardin_entretien.py",
                     "intitule": "Jardin saison -> Entretien auto",
                     "type_check": "presence",
                     "callable": lambda: hasattr(
                         __import__(
-                            "src.services.maison.bridges_jardin_entretien",
+                            "src.services.maison.inter_module_jardin_entretien",
                             fromlist=["obtenir_service_jardin_entretien_interaction"],
                         ).obtenir_service_jardin_entretien_interaction(),
                         "generer_taches_saisonnieres_depuis_plantes",
@@ -360,11 +360,11 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-17",
-                    "bridge": "bridges_charges_energie.py",
+                    "bridge": "inter_module_charges_energie.py",
                     "intitule": "Charges augmentation -> Diagnostic énergie",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
-                        "src.services.maison.bridges_charges_energie",
+                        "src.services.maison.inter_module_charges_energie",
                         fromlist=["obtenir_service_charges_energie_interaction"],
                     )
                     .obtenir_service_charges_energie_interaction()

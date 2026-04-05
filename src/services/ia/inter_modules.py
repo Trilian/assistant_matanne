@@ -9,7 +9,7 @@ Connecte les modules via l'event bus et des helpers métier pour :
 - B5.6: Voyages → Inventaire (déstockage)
 - B5.7: Anniversaire proche → Suggestions cadeaux IA
 - B5.8: Météo → Entretien maison
-- Consolidation bridges: entretien → artisans, récolte → stock, anniversaire → menu, jalon → journal
+- Consolidation inter_modules: entretien → artisans, récolte → stock, anniversaire → menu, jalon → journal
 """
 
 import importlib
@@ -29,63 +29,63 @@ CATALOGUE_BRIDGES_CONSOLIDES: list[dict[str, str]] = [
     {
         "groupe": "utilitaires",
         "flux": "Dashboard → Actions rapides",
-        "module": "src.services.utilitaires.bridges_dashboard_actions",
+        "module": "src.services.utilitaires.inter_module_dashboard_actions",
     },
     {
         "groupe": "utilitaires",
         "flux": "Chat IA → Event Bus",
-        "module": "src.services.utilitaires.bridges_chat_event_bus",
+        "module": "src.services.utilitaires.inter_module_chat_event_bus",
     },
     {
         "groupe": "utilitaires",
         "flux": "Chat → Contexte multi-modules",
-        "module": "src.services.utilitaires.bridges_chat_contexte",
+        "module": "src.services.utilitaires.inter_module_chat_contexte",
     },
     {
         "groupe": "famille",
         "flux": "Weekend → Courses",
-        "module": "src.services.famille.bridges_weekend_courses",
+        "module": "src.services.famille.inter_module_weekend_courses",
     },
     {
         "groupe": "famille",
         "flux": "Voyages → Budget",
-        "module": "src.services.famille.bridges_voyages_budget",
+        "module": "src.services.famille.inter_module_voyages_budget",
     },
     {
         "groupe": "famille",
         "flux": "Météo → Activités",
-        "module": "src.services.famille.bridges_meteo_activites",
+        "module": "src.services.famille.inter_module_meteo_activites",
     },
     {
         "groupe": "famille",
         "flux": "Documents → Calendrier",
-        "module": "src.services.famille.bridges_documents_calendrier",
+        "module": "src.services.famille.inter_module_documents_calendrier",
     },
     {
         "groupe": "cuisine",
         "flux": "Saison → Menu",
-        "module": "src.services.cuisine.bridges_saison_menu",
+        "module": "src.services.cuisine.inter_module_saison_menu",
     },
     {
         "groupe": "maison",
         "flux": "Jardin → Entretien",
-        "module": "src.services.maison.bridges_jardin_entretien",
+        "module": "src.services.maison.inter_module_jardin_entretien",
     },
     {
         "groupe": "maison",
         "flux": "Entretien → Courses",
-        "module": "src.services.maison.bridges_entretien_courses",
+        "module": "src.services.maison.inter_module_entretien_courses",
     },
     {
         "groupe": "maison",
         "flux": "Charges → Énergie",
-        "module": "src.services.maison.bridges_charges_energie",
+        "module": "src.services.maison.inter_module_charges_energie",
     },
 ]
 
 
 class BridgesInterModulesService:
-    """Service de bridges inter-modules."""
+    """Service de inter_modules inter-modules."""
 
     def _detecter_metiers_depuis_tache(self, tache: object) -> list[str]:
         """Déduit les métiers d'artisans à partir d'une tâche d'entretien."""
@@ -124,7 +124,7 @@ class BridgesInterModulesService:
         )
 
     def obtenir_catalogue_consolidation(self) -> dict[str, object]:
-        """Expose l'état consolidé des bridges legacy et canoniques."""
+        """Expose l'état consolidé des inter_modules legacy et canoniques."""
         items: list[dict[str, object]] = []
         for definition in CATALOGUE_BRIDGES_CONSOLIDES:
             disponible = True
@@ -1037,7 +1037,7 @@ def _on_budget_modifie(event: EvenementDomaine) -> None:
 # ═══════════════════════════════════════════════════════════
 
 
-@service_factory("bridges_inter_modules", tags={"bridges"})
+@service_factory("bridges_inter_modules", tags={"inter_modules"})
 def obtenir_service_bridges() -> BridgesInterModulesService:
     """Factory singleton."""
     return BridgesInterModulesService()
@@ -1045,7 +1045,7 @@ def obtenir_service_bridges() -> BridgesInterModulesService:
 
 
 def enregistrer_bridges_subscribers() -> None:
-    """Enregistre tous les subscribers de bridges inter-modules dans le bus."""
+    """Enregistre tous les subscribers de inter_modules inter-modules dans le bus."""
     from src.services.core.events import obtenir_bus
 
     bus = obtenir_bus()

@@ -796,7 +796,7 @@ def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
     """D.5 / I10: feedback recette -> ajuster le signal de suggestion et invalider le cache."""
     try:
         from src.core.caching import obtenir_cache
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         service.appliquer_feedback_recette_sur_suggestions(
@@ -900,7 +900,7 @@ def _invalider_cache_bridges(event: EvenementDomaine) -> None:
 def _bridge_recolte_vers_recettes(event: EvenementDomaine) -> None:
     """Récolte jardin ? suggestion recettes via bridge IA."""
     try:
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         nom = event.data.get("nom", "")
@@ -915,7 +915,7 @@ def _bridge_recolte_vers_recettes(event: EvenementDomaine) -> None:
 def _bridge_verifier_anomalies_budget(event: EvenementDomaine) -> None:
     """Budget modifié ? vérification anomalies proactive."""
     try:
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         service.verifier_anomalies_budget_et_notifier()
@@ -956,7 +956,7 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
         if not planning_id:
             return
 
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         resultat = service.generer_courses_auto_depuis_planning(
@@ -1031,7 +1031,7 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
 def _pre_remplir_planning_depuis_batch_termine(event: EvenementDomaine) -> None:
     """I6: session batch terminée -> marquer les repas du planning comme préparés."""
     try:
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         resultat = service.pre_remplir_planning_depuis_batch(
@@ -1049,7 +1049,7 @@ def _pre_remplir_planning_depuis_batch_termine(event: EvenementDomaine) -> None:
 def _synchroniser_entretien_termine_vers_fiche(event: EvenementDomaine) -> None:
     """I5: tâche d'entretien terminée -> mise à jour de la fiche associée."""
     try:
-        from src.services.ia.bridges import obtenir_service_bridges
+        from src.services.ia.inter_modules import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         resultat = service.synchroniser_entretien_termine_vers_fiche(
@@ -1687,7 +1687,7 @@ def enregistrer_subscribers() -> int:
         logger.warning("Échec enregistrement bridge NIM7 Inventaire?FIFO: %s", e)
 
     try:
-        from src.services.utilitaires.bridges_chat_event_bus import (
+        from src.services.utilitaires.inter_module_chat_event_bus import (
             enregistrer_chat_event_bus_subscribers,
         )
 

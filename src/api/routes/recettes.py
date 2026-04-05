@@ -31,7 +31,7 @@ from src.api.schemas.errors import (
     REPONSES_IA,
 )
 from src.api.schemas.ia_transverses import (
-    MangeCeSoirRequest,
+    IdeeRepasSoirRequest,
     PatternsAlimentairesResponse,
     SaisonnaliteIntelligenteResponse,
     SuggestionRepasSoirResponse,
@@ -42,15 +42,15 @@ from src.api.utils import (
     executer_avec_session,
     gerer_exception_api,
 )
-from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
+from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
 
 
-@router.post("/mange-ce-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
+@router.post("/idee-repas", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
 @gerer_exception_api
-async def manger_ce_soir(
-    body: MangeCeSoirRequest,
+async def idee_repas_soir(
+    body: IdeeRepasSoirRequest,
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ) -> SuggestionRepasSoirResponse:
@@ -173,33 +173,6 @@ async def detecter_doublons_recettes(
     return await executer_async(_query)
 
 
-@router.post("/{recette_id}/partager", responses=REPONSES_CRUD_CREATION)
-@gerer_exception_api
-async def partager_recette(
-    recette_id: int,
-    duree_heures: int = Query(48, ge=24, le=72),
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Crée un lien public temporaire pour partager une recette."""
-    from src.core.models import Recette
-    from src.services.cuisine.partage_recettes import creer_lien_partage_recette
-
-    def _create() -> dict[str, Any]:
-        with executer_avec_session() as session:
-            recette = session.query(Recette).filter(Recette.id == recette_id).first()
-            if not recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
-
-            token, expires_at = creer_lien_partage_recette(recette_id=recette_id, duree_heures=duree_heures)
-            return {
-                "token": token,
-                "url": f"/share/recette/{token}",
-                "expires_at": expires_at.isoformat(),
-            }
-
-    return await executer_async(_create)
-
-
 @router.get("/{recette_id}/export-pdf", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def exporter_recette_pdf(
@@ -314,7 +287,7 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
     est_favori = retour.feedback == "like" if retour else False
 
     derniere_cuisson = (
-        session.query(sql_func.max(HistoriqueRecette.date_cuisson))
+        session.query(sql_func.max(HistoriqueRecette.date_preparation))
         .filter(HistoriqueRecette.recette_id == db_recette.id)
         .scalar()
     )
@@ -408,7 +381,7 @@ async def lister_recettes(
             historiques = (
                 session.query(
                     HistoriqueRecette.recette_id,
-                    func.max(HistoriqueRecette.date_cuisson).label("derniere_cuisson"),
+                    func.max(HistoriqueRecette.date_preparation).label("derniere_cuisson"),
                 )
                 .group_by(HistoriqueRecette.recette_id)
                 .all()
@@ -500,7 +473,7 @@ async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(requir
 
 @router.post("", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
-async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)):
+async def creer_recette(donnees: RecetteCreate, user: dict[str, Any] = Depends(require_auth)):
     """
     CrÃ©e une nouvelle recette avec ses ingrÃ©dients et Ã©tapes.
 
@@ -535,19 +508,19 @@ async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(r
     def _create():
         with executer_avec_session() as session:
             db_recette = Recette(
-                nom=recette.nom,
-                description=recette.description,
-                temps_preparation=recette.temps_preparation,
-                temps_cuisson=recette.temps_cuisson,
-                portions=recette.portions,
-                difficulte=recette.difficulte,
-                categorie=recette.categorie,
+                nom=donnees.nom,
+                description=donnees.description,
+                temps_preparation=donnees.temps_preparation,
+                temps_cuisson=donnees.temps_cuisson,
+                portions=donnees.portions,
+                difficulte=donnees.difficulte,
+                categorie=donnees.categorie,
             )
             session.add(db_recette)
             session.flush()
 
-            _sauvegarder_ingredients(session, db_recette.id, recette.ingredients)
-            _sauvegarder_etapes(session, db_recette.id, recette.instructions)
+            _sauvegarder_ingredients(session, db_recette.id, donnees.ingredients)
+            _sauvegarder_etapes(session, db_recette.id, donnees.instructions)
 
             session.commit()
             session.refresh(db_recette)
@@ -560,7 +533,7 @@ async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(r
 @router.put("/{recette_id}", response_model=RecetteResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_recette(
-    recette_id: int, recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)
+    recette_id: int, donnees: RecetteCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """Met Ã  jour une recette complÃ¨tement (remplacement total).
 
@@ -599,7 +572,7 @@ async def modifier_recette(
             if not db_recette:
                 raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
-            for key, value in recette.model_dump(
+            for key, value in donnees.model_dump(
                 exclude={"ingredients", "instructions", "tags"}
             ).items():
                 if hasattr(db_recette, key):
@@ -613,8 +586,8 @@ async def modifier_recette(
                 EtapeRecette.recette_id == recette_id
             ).delete()
 
-            _sauvegarder_ingredients(session, recette_id, recette.ingredients)
-            _sauvegarder_etapes(session, recette_id, recette.instructions)
+            _sauvegarder_ingredients(session, recette_id, donnees.ingredients)
+            _sauvegarder_etapes(session, recette_id, donnees.instructions)
 
             session.commit()
             session.refresh(db_recette)
@@ -627,7 +600,7 @@ async def modifier_recette(
 @router.patch("/{recette_id}", response_model=RecetteResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_partiellement_recette(
-    recette_id: int, patch: RecettePatch, user: dict[str, Any] = Depends(require_auth)
+    recette_id: int, maj: RecettePatch, user: dict[str, Any] = Depends(require_auth)
 ):
     """Mise Ã  jour partielle d'une recette.
 
@@ -666,7 +639,7 @@ async def modifier_partiellement_recette(
             if not db_recette:
                 raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
-            donnees = patch.model_dump(exclude_unset=True)
+            donnees = maj.model_dump(exclude_unset=True)
             if not donnees:
                 raise HTTPException(
                     status_code=422,

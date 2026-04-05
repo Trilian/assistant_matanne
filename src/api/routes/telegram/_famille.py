@@ -94,7 +94,7 @@ async def _envoyer_resume_budget(chat_id: str) -> None:
 
 
 async def _envoyer_meteo_telegram(chat_id: str) -> None:
-    from src.services.famille.bridges_meteo_activites import obtenir_service_meteo_activites_interaction
+    from src.services.famille.inter_module_meteo_activites import obtenir_service_meteo_activites_interaction
     from src.services.integrations.telegram import envoyer_message_interactif
     from src.services.utilitaires.meteo_service import obtenir_meteo_service
 

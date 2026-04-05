@@ -43,7 +43,7 @@ def test_energie_heures_creuses_endpoint(client: TestClient) -> None:
         "appareils_recommandes": [{"nom": "Lave-linge"}],
     }
 
-    with patch("src.services.ia.bridges.obtenir_service_bridges", return_value=service):
+    with patch("src.services.ia.inter_modules.obtenir_service_bridges", return_value=service):
         response = client.get("/api/v1/bridges/energie-heures-creuses")
 
     assert response.status_code == 200

@@ -226,7 +226,7 @@ class TestBridgeChatEventBus:
 
     def test_initialisation_cache(self):
         """Test l'initialisation du cache."""
-        from src.services.utilitaires.bridges_chat_event_bus import (
+        from src.services.utilitaires.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
@@ -239,7 +239,7 @@ class TestBridgeChatEventBus:
         """Test le rafraîchissement du contexte inventaire."""
         from src.core.models.inventaire import ArticleInventaire
         from src.core.models.recettes import Ingredient
-        from src.services.utilitaires.bridges_chat_event_bus import (
+        from src.services.utilitaires.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
@@ -269,7 +269,7 @@ class TestBridgeChatEventBus:
         """Test le rafraîchissement du contexte courses."""
         from src.core.models.courses import ArticleCourses, ListeCourses
         from src.core.models.recettes import Ingredient
-        from src.services.utilitaires.bridges_chat_event_bus import (
+        from src.services.utilitaires.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
@@ -304,7 +304,7 @@ class TestBridgeChatEventBus:
     def test_rafraichir_contexte_budget(self, test_db: Session):
         """Test le rafraîchissement du contexte budget."""
         from src.core.models.finances import DepenseMaison
-        from src.services.utilitaires.bridges_chat_event_bus import (
+        from src.services.utilitaires.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
@@ -343,7 +343,7 @@ class TestBridgesIntegration:
         from src.services.cuisine.inter_module_inventaire_fifo import (
             obtenir_inventaire_fifo_bridge,
         )
-        from src.services.utilitaires.bridges_chat_event_bus import (
+        from src.services.utilitaires.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
@@ -370,7 +370,7 @@ class TestBridgesIntegration:
             from src.services.cuisine.inter_module_inventaire_fifo import (
                 enregistrer_inventaire_fifo_subscribers,
             )
-            from src.services.utilitaires.bridges_chat_event_bus import (
+            from src.services.utilitaires.inter_module_chat_event_bus import (
                 enregistrer_chat_event_bus_subscribers,
             )
 

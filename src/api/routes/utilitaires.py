@@ -313,7 +313,7 @@ async def creer_note(
 @gerer_exception_api
 async def modifier_note(
     note_id: int,
-    patch: NotePatch,
+    maj: NotePatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met Ã  jour partiellement une note."""
@@ -325,7 +325,7 @@ async def modifier_note(
             if not note:
                 raise HTTPException(status_code=404, detail="Note non trouvÃ©e")
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
@@ -450,7 +450,7 @@ async def creer_entree_journal(
 @gerer_exception_api
 async def modifier_entree_journal(
     entree_id: int,
-    patch: JournalPatch,
+    maj: JournalPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met Ã  jour partiellement une entrÃ©e journal."""
@@ -462,7 +462,7 @@ async def modifier_entree_journal(
             if not entree:
                 raise HTTPException(status_code=404, detail="EntrÃ©e non trouvÃ©e")
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
@@ -587,7 +587,7 @@ async def creer_contact(
 @gerer_exception_api
 async def modifier_contact(
     contact_id: int,
-    patch: ContactPatch,
+    maj: ContactPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met Ã  jour partiellement un contact."""
@@ -599,7 +599,7 @@ async def modifier_contact(
             if not contact:
                 raise HTTPException(status_code=404, detail="Contact non trouvÃ©")
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
@@ -717,7 +717,7 @@ async def creer_lien(
 @gerer_exception_api
 async def modifier_lien(
     lien_id: int,
-    patch: LienPatch,
+    maj: LienPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met Ã  jour partiellement un lien."""
@@ -729,7 +729,7 @@ async def modifier_lien(
             if not lien:
                 raise HTTPException(status_code=404, detail="Lien non trouvÃ©")
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
@@ -846,7 +846,7 @@ async def creer_mot_de_passe(
 @gerer_exception_api
 async def modifier_mot_de_passe(
     mdp_id: int,
-    patch: MotDePassePatch,
+    maj: MotDePassePatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met Ã  jour un mot de passe maison."""
@@ -858,7 +858,7 @@ async def modifier_mot_de_passe(
             if not mdp:
                 raise HTTPException(status_code=404, detail="Mot de passe non trouvÃ©")
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
@@ -984,7 +984,7 @@ async def creer_releve_energie(
 @gerer_exception_api
 async def modifier_releve_energie(
     releve_id: int,
-    patch: EnergiePatch,
+    maj: EnergiePatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met Ã  jour un relevÃ© Ã©nergie."""
@@ -996,7 +996,7 @@ async def modifier_releve_energie(
             if not releve:
                 raise HTTPException(status_code=404, detail="RelevÃ© non trouvÃ©")
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 

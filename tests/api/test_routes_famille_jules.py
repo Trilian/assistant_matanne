@@ -106,7 +106,7 @@ class TestRoutesFamilleJules:
 
         monkeypatch.setattr("src.api.routes.famille_jules.executer_avec_session", _session_fausse)
         monkeypatch.setattr("src.services.core.events.obtenir_bus", lambda: _Bus())
-        monkeypatch.setattr("src.services.ia.bridges.obtenir_service_bridges", lambda: _Bridge())
+        monkeypatch.setattr("src.services.ia.inter_modules.obtenir_service_bridges", lambda: _Bridge())
 
         response = await client.post(
             "/api/v1/famille/enfants/1/jalons",

@@ -146,7 +146,7 @@ def test_nim3_recommander_recettes_selon_activite(test_db):
 @pytest.mark.integration
 def test_nim4_generer_deeplinks_anomalies():
     """NIM4: Génération de deep links pour anomalies dashboard."""
-    from src.services.utilitaires.bridges_dashboard_actions import (
+    from src.services.utilitaires.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
@@ -193,7 +193,7 @@ def test_nim4_generer_deeplinks_anomalies():
 @pytest.mark.integration
 def test_nim4_executer_action_rapide(test_db):
     """NIM4: Exécution d'une action rapide depuis le dashboard."""
-    from src.services.utilitaires.bridges_dashboard_actions import (
+    from src.services.utilitaires.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
@@ -215,7 +215,7 @@ def test_nim4_executer_action_rapide(test_db):
 @pytest.mark.integration
 def test_nim4_action_budget_anomaly(test_db):
     """NIM4: Action rapide budget anomaly."""
-    from src.services.utilitaires.bridges_dashboard_actions import (
+    from src.services.utilitaires.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 
@@ -238,7 +238,7 @@ def test_nim4_action_budget_anomaly(test_db):
 @pytest.mark.integration
 def test_nim4_action_stock_alert(test_db):
     """NIM4: Action rapide stock alert."""
-    from src.services.utilitaires.bridges_dashboard_actions import (
+    from src.services.utilitaires.inter_module_dashboard_actions import (
         DashboardActionsRapidesInteractionService,
     )
 

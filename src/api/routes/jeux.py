@@ -22,7 +22,7 @@ from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_IA
 from src.api.schemas.ia_transverses import AnalyseTendancesLotoResponse
 from src.api.utils import gerer_exception_api
-from src.services.jeux.innovations_service import obtenir_service_innovations_jeux
+from src.services.jeux.service_ia import obtenir_service_innovations_jeux
 
 from .jeux_paris import router as paris_router
 from .jeux_loto import router as loto_router

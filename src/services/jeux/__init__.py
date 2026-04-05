@@ -32,8 +32,8 @@ _LAZY_IMPORTS: dict[str, str] = {
     # ── IA ──
     "JeuxAIService": "ai_service",
     "AnalyseIA": "ai_service",
-    "ServiceInnovationsJeux": "innovations_service",
-    "obtenir_service_innovations_jeux": "innovations_service",
+    "ServiceInnovationsJeux": "service_ia",
+    "obtenir_service_innovations_jeux": "service_ia",
     "OpportuniteAnalysee": "ai_service",
     "get_jeux_ai_service": "ai_service",
     "obtenir_jeux_ai_service": "ai_service",

@@ -251,10 +251,10 @@ def _executer_action_service(
             from src.services.cuisine.inter_module_inventaire_planning import (
                 obtenir_service_inventaire_planning_interaction,
             )
-            from src.services.famille.bridges_meteo_activites import (
+            from src.services.famille.inter_module_meteo_activites import (
                 obtenir_service_meteo_activites_interaction,
             )
-            from src.services.famille.bridges_weekend_courses import (
+            from src.services.famille.inter_module_weekend_courses import (
                 obtenir_service_weekend_courses_interaction,
             )
 

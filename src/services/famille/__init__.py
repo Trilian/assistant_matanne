@@ -46,7 +46,7 @@ __all__ = [
     "rappels",
     "achats_ia",
     "checklists_anniversaire",
-    "innovations_service",
+    "service_ia",
 ]
 
 
@@ -123,7 +123,7 @@ def __getattr__(name: str):
 
         return obtenir_service_soiree_ai
     if name == "obtenir_service_innovations_famille":
-        from src.services.famille.innovations_service import obtenir_service_innovations_famille
+        from src.services.famille.service_ia import obtenir_service_innovations_famille
 
         return obtenir_service_innovations_famille
     if name in ("obtenir_service_contexte_familial", "get_contexte_familial_service"):
@@ -157,25 +157,25 @@ def __getattr__(name: str):
 
         return obtenir_service_anniversaires_budget_interaction
     if name == "obtenir_service_voyages_budget_interaction":
-        from src.services.famille.bridges_voyages_budget import (
+        from src.services.famille.inter_module_voyages_budget import (
             obtenir_service_voyages_budget_interaction,
         )
 
         return obtenir_service_voyages_budget_interaction
     if name == "obtenir_service_meteo_activites_interaction":
-        from src.services.famille.bridges_meteo_activites import (
+        from src.services.famille.inter_module_meteo_activites import (
             obtenir_service_meteo_activites_interaction,
         )
 
         return obtenir_service_meteo_activites_interaction
     if name == "obtenir_service_weekend_courses_interaction":
-        from src.services.famille.bridges_weekend_courses import (
+        from src.services.famille.inter_module_weekend_courses import (
             obtenir_service_weekend_courses_interaction,
         )
 
         return obtenir_service_weekend_courses_interaction
     if name == "obtenir_service_documents_calendrier_interaction":
-        from src.services.famille.bridges_documents_calendrier import (
+        from src.services.famille.inter_module_documents_calendrier import (
             obtenir_service_documents_calendrier_interaction,
         )
 

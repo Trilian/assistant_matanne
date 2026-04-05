@@ -9,22 +9,22 @@ class TestInnovationsServiceUnit:
     """Tests unitaires pour InnovationsService."""
 
     def test_evaluer_niveau_excellent(self):
-        from src.services.ia_avancee.service_transverse import InnovationsService
+        from src.services.ia_avancee.service_central import InnovationsService
 
         with patch.object(InnovationsService, "__init__", lambda x: None):
             service = InnovationsService()
             assert service._evaluer_niveau(85) == "excellent"
 
     def test_evaluer_niveau_attention(self):
-        from src.services.ia_avancee.service_transverse import InnovationsService
+        from src.services.ia_avancee.service_central import InnovationsService
 
         with patch.object(InnovationsService, "__init__", lambda x: None):
             service = InnovationsService()
             assert service._evaluer_niveau(30) == "attention"
 
     def test_generer_conseils_score_faible(self):
-        from src.services.ia_avancee.service_transverse import InnovationsService
-        from src.services.ia_avancee.types_transverses import DimensionBienEtre
+        from src.services.ia_avancee.service_central import InnovationsService
+        from src.services.ia_avancee.types_central import DimensionBienEtre
 
         with patch.object(InnovationsService, "__init__", lambda x: None):
             service = InnovationsService()

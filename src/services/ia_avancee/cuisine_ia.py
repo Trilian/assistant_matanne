@@ -10,7 +10,7 @@ from typing import Any
 from src.core.db import obtenir_contexte_db
 from src.core.validation.sanitizer import NettoyeurEntrees
 
-from .types_transverses import (
+from .types_central import (
     BatchCookingIntelligentResponse,
     BlocPlanificationAuto,
     CarteMagazineTablette,
@@ -341,7 +341,7 @@ def _patterns_recettes(service, periode_jours: int) -> tuple[list[str], float]:
             rows = (
                 session.query(Recette.nom, func.count(HistoriqueRecette.id).label("cnt"))
                 .join(HistoriqueRecette, HistoriqueRecette.recette_id == Recette.id)
-                .filter(HistoriqueRecette.date_cuisson >= debut)
+                .filter(HistoriqueRecette.date_preparation >= debut)
                 .group_by(Recette.nom)
                 .order_by(func.count(HistoriqueRecette.id).desc())
                 .limit(5)

@@ -367,7 +367,7 @@ class ServiceRecettes(
 
             historique = HistoriqueRecette(
                 recette_id=recette_id,
-                date_cuisson=date.today(),
+                date_preparation=date.today(),
                 portions_cuisinees=portions,
                 note=note,
                 avis=avis,
@@ -403,7 +403,7 @@ class ServiceRecettes(
             return (
                 db.query(HistoriqueRecette)
                 .filter(HistoriqueRecette.recette_id == recette_id)
-                .order_by(HistoriqueRecette.date_cuisson.desc())
+                .order_by(HistoriqueRecette.date_preparation.desc())
                 .limit(nb_dernieres)
                 .all()
             )
@@ -494,10 +494,10 @@ class ServiceRecettes(
 
             return {
                 "nb_cuissons": len(historique),
-                "derniere_cuisson": derniere.date_cuisson,
+                "derniere_cuisson": derniere.date_preparation,
                 "note_moyenne": sum(notes) / len(notes) if notes else None,
                 "total_portions": sum(h.portions_cuisinees for h in historique),
-                "jours_depuis_derniere": (date.today() - derniere.date_cuisson).days,
+                "jours_depuis_derniere": (date.today() - derniere.date_preparation).days,
             }
         except Exception as e:
             logger.error(f"Erreur stats recette: {e}")

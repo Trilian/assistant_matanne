@@ -78,7 +78,7 @@ from src.api.schemas.ia_transverses import (
     ScoreFamilleHebdoResponse,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-from src.services.famille.innovations_service import obtenir_service_innovations_famille
+from src.services.famille.service_ia import obtenir_service_innovations_famille
 
 import logging
 logger = logging.getLogger(__name__)
@@ -496,7 +496,7 @@ async def creer_anniversaire(
 @gerer_exception_api
 async def modifier_anniversaire(
     anniversaire_id: int,
-    donnees: AnniversairePatch,
+    maj: AnniversairePatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met à jour un anniversaire."""
@@ -510,7 +510,7 @@ async def modifier_anniversaire(
             if not a:
                 raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
 
-            for champ, valeur in donnees.model_dump(exclude_unset=True).items():
+            for champ, valeur in maj.model_dump(exclude_unset=True).items():
                 if champ == "date_naissance" and valeur:
                     setattr(a, champ, date.fromisoformat(valeur))
                 else:
@@ -685,7 +685,7 @@ async def modifier_item_checklist_anniversaire(
     anniversaire_id: int,
     checklist_id: int,
     item_id: int,
-    payload: ChecklistAnniversaireItemPatch,
+    maj: ChecklistAnniversaireItemPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Modifie un item de checklist (fait, budget réel, contenu)."""
@@ -693,7 +693,7 @@ async def modifier_item_checklist_anniversaire(
 
     def _query():
         service = obtenir_service_checklists_anniversaire()
-        data = service.modifier_item(item_id=item_id, patch=payload.model_dump(exclude_unset=True))
+        data = service.modifier_item(item_id=item_id, patch=maj.model_dump(exclude_unset=True))
         if not data:
             raise HTTPException(status_code=404, detail="Item non trouvé")
         return data
@@ -777,7 +777,7 @@ async def creer_evenement_familial(
 @gerer_exception_api
 async def modifier_evenement_familial(
     evenement_id: int,
-    donnees: EvenementFamilialPatch,
+    maj: EvenementFamilialPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met à jour un événement familial."""
@@ -791,7 +791,7 @@ async def modifier_evenement_familial(
             if not e:
                 raise HTTPException(status_code=404, detail="Événement non trouvé")
 
-            for champ, valeur in donnees.model_dump(exclude_unset=True).items():
+            for champ, valeur in maj.model_dump(exclude_unset=True).items():
                 if champ == "date_evenement" and valeur:
                     setattr(e, champ, date.fromisoformat(valeur))
                 else:
@@ -974,7 +974,7 @@ async def creer_achat(
 @gerer_exception_api
 async def modifier_achat(
     achat_id: int,
-    payload: AchatPatch,
+    maj: AchatPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Modifie un achat familial existant."""
@@ -986,7 +986,7 @@ async def modifier_achat(
             if not achat:
                 raise HTTPException(status_code=404, detail="Achat non trouvé")
 
-            updates = payload.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             for field, value in updates.items():
                 setattr(achat, field, value)
 

@@ -128,7 +128,7 @@ def days_since_last_preparation(
 
     Args:
         recette_id: ID de la recette
-        historique: Historique avec 'recette_id' et 'date' ou 'date_cuisson'
+        historique: Historique avec 'recette_id' et 'date' ou 'date_preparation'
         reference_date: Date de référence (par défaut: aujourd'hui)
 
     Returns:
@@ -142,7 +142,7 @@ def days_since_last_preparation(
     dates_preparation = []
     for h in historique:
         if h.get("recette_id") == recette_id:
-            d = h.get("date") or h.get("date_cuisson")
+            d = h.get("date") or h.get("date_preparation")
             if d:
                 if isinstance(d, datetime):
                     d = d.date()

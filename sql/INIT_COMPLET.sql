@@ -1383,10 +1383,11 @@ CREATE INDEX IF NOT EXISTS ix_versions_recette_type ON versions_recette(type_ver
 CREATE TABLE historique_recettes (
     id SERIAL PRIMARY KEY,
     recette_id INTEGER NOT NULL,
-    date_cuisson DATE NOT NULL,
+    date_preparation DATE NOT NULL,
     portions_cuisinees INTEGER NOT NULL DEFAULT 1,
     note INTEGER,
     avis TEXT,
+    feedback VARCHAR(20) DEFAULT 'neutral',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_historique_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT ck_note_valide CHECK (
@@ -1399,7 +1400,7 @@ CREATE TABLE historique_recettes (
     CONSTRAINT ck_portions_cuisinees_positive CHECK (portions_cuisinees > 0)
 );
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_recette ON historique_recettes(recette_id);
-CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_cuisson);
+CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_preparation);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

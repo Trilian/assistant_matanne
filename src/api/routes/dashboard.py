@@ -21,7 +21,7 @@ from src.api.schemas.ia_transverses import (
     TelegramConversationnelResponse,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-from src.services.core.innovations_service import obtenir_service_innovations_core
+from src.services.core.service_ia import obtenir_service_innovations_core
 
 import logging
 logger = logging.getLogger(__name__)

@@ -51,7 +51,7 @@ def _creer_recette_avec_ingredient(test_db: Session, nom: str = "Recette bridge"
 @pytest.mark.integration
 def test_generer_courses_auto_depuis_planning_cree_une_liste(test_db: Session) -> None:
     from src.core.models import ListeCourses, Planning, Repas
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     recette, ingredient = _creer_recette_avec_ingredient(test_db, nom="Chili express")
     lundi = date.today() - timedelta(days=date.today().weekday())
@@ -94,7 +94,7 @@ def test_generer_courses_auto_depuis_planning_cree_une_liste(test_db: Session) -
 def test_entretien_termine_met_a_jour_la_fiche_associee(test_db: Session) -> None:
     from src.core.models.habitat import TacheEntretien
     from src.core.models.maison_extensions import EntretienSaisonnier
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     fiche = EntretienSaisonnier(
         nom="Révision chaudière",
@@ -125,7 +125,7 @@ def test_entretien_termine_met_a_jour_la_fiche_associee(test_db: Session) -> Non
 @pytest.mark.integration
 def test_batch_termine_pre_remplit_les_repas_du_planning(test_db: Session) -> None:
     from src.core.models import Planning, Repas, SessionBatchCooking
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     recette, _ = _creer_recette_avec_ingredient(test_db, nom="Lasagnes batch")
     lundi = date.today() - timedelta(days=date.today().weekday())

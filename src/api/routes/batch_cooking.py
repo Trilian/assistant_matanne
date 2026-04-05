@@ -35,7 +35,7 @@ from src.api.utils import (
     executer_avec_session,
     gerer_exception_api,
 )
-from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
+from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 
 router = APIRouter(prefix="/api/v1/batch-cooking", tags=["Batch Cooking"])
 
@@ -287,7 +287,7 @@ async def creer_session(
 @gerer_exception_api
 async def modifier_session(
     session_id: int,
-    patch: SessionBatchPatch,
+    maj: SessionBatchPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Met à jour partiellement une session batch cooking."""
@@ -301,7 +301,7 @@ async def modifier_session(
             if not s:
                 raise HTTPException(status_code=404, detail="Session non trouvée")
 
-            updates = patch.model_dump(exclude_unset=True)
+            updates = maj.model_dump(exclude_unset=True)
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
 

@@ -87,7 +87,7 @@ class ServiceSuggestions(BaseAIService):
                 .selectinload(Recette.ingredients)
                 .selectinload(RecetteIngredient.ingredient)
             )
-            .filter(HistoriqueRecette.date_cuisson >= date_limite)
+            .filter(HistoriqueRecette.date_preparation >= date_limite)
             .all()
         )
 
@@ -150,11 +150,11 @@ class ServiceSuggestions(BaseAIService):
             dernier = (
                 session.query(HistoriqueRecette)
                 .filter_by(recette_id=rid)
-                .order_by(HistoriqueRecette.date_cuisson.desc())
+                .order_by(HistoriqueRecette.date_preparation.desc())
                 .first()
             )
             if dernier:
-                jours = (datetime.now().date() - dernier.date_cuisson).days
+                jours = (datetime.now().date() - dernier.date_preparation).days
                 profil.jours_depuis_derniere_recette[rid] = jours
 
         logger.info(

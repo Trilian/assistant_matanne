@@ -71,7 +71,7 @@ from src.api.schemas.ia_transverses import (
     ParcoursOptimiseResponse,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
+from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
@@ -203,7 +203,7 @@ async def lister_courses(
 
 @router.post("", response_model=MessageResponse, status_code=201, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
-async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)):
+async def creer_liste(donnees: CourseListCreate, user: dict[str, Any] = Depends(require_auth)):
     """
     Crée une nouvelle liste de courses.
 
@@ -235,7 +235,7 @@ async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(req
 
     def _create():
         with executer_avec_session() as session:
-            liste = ListeCourses(nom=data.nom, archivee=False)
+            liste = ListeCourses(nom=donnees.nom, archivee=False)
             session.add(liste)
             session.commit()
             session.refresh(liste)
@@ -252,7 +252,7 @@ async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(req
 )
 @gerer_exception_api
 async def ajouter_article(
-    liste_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
+    liste_id: int, donnees: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
 ):
     """
     Ajoute un article à une liste de courses.
@@ -292,24 +292,24 @@ async def ajouter_article(
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             # Trouver ou créer l'ingrédient
-            ingredient = session.query(Ingredient).filter(Ingredient.nom == item.nom).first()
+            ingredient = session.query(Ingredient).filter(Ingredient.nom == donnees.nom).first()
             if not ingredient:
-                ingredient = Ingredient(nom=item.nom, unite=item.unite or "pcs")
+                ingredient = Ingredient(nom=donnees.nom, unite=donnees.unite or "pcs")
                 session.add(ingredient)
                 session.flush()
 
             # Auto-assignation magasin si non spécifié
-            magasin = item.magasin_cible
-            if not magasin and item.categorie:
+            magasin = donnees.magasin_cible
+            if not magasin and donnees.categorie:
                 from src.core.constants import CATEGORIE_VERS_MAGASIN
-                magasin = CATEGORIE_VERS_MAGASIN.get(item.categorie.lower())
+                magasin = CATEGORIE_VERS_MAGASIN.get(donnees.categorie.lower())
 
             article = ArticleCourses(
                 liste_id=liste_id,
                 ingredient_id=ingredient.id,
-                quantite_necessaire=item.quantite or 1.0,
+                quantite_necessaire=donnees.quantite or 1.0,
                 priorite="moyenne",
-                rayon_magasin=item.categorie,
+                rayon_magasin=donnees.categorie,
                 magasin_cible=magasin,
             )
             session.add(article)
@@ -488,7 +488,7 @@ async def generer_qr_partage_liste(
 @router.put("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_liste(
-    liste_id: int, data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)
+    liste_id: int, maj: CourseListCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
     Met à jour le nom d'une liste de courses.
@@ -524,7 +524,7 @@ async def modifier_liste(
             if not liste:
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            liste.nom = data.nom
+            liste.nom = maj.nom
             session.commit()
             session.refresh(liste)
 
@@ -538,7 +538,7 @@ async def modifier_liste(
 )
 @gerer_exception_api
 async def modifier_article(
-    liste_id: int, item_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
+    liste_id: int, item_id: int, maj: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
 ):
     """
     Met à jour un article d'une liste de courses.
@@ -581,12 +581,12 @@ async def modifier_article(
             if not article:
                 raise HTTPException(status_code=404, detail="Article non trouvé")
 
-            article.quantite_necessaire = item.quantite or 1.0
-            article.achete = item.coche
-            if item.categorie:
-                article.rayon_magasin = item.categorie
-            if item.magasin_cible is not None:
-                article.magasin_cible = item.magasin_cible
+            article.quantite_necessaire = maj.quantite or 1.0
+            article.achete = maj.coche
+            if maj.categorie:
+                article.rayon_magasin = maj.categorie
+            if maj.magasin_cible is not None:
+                article.magasin_cible = maj.magasin_cible
             session.commit()
 
             return MessageResponse(message="Article mis à jour", id=item_id)
@@ -871,7 +871,7 @@ async def scan_barcode_checkout(
 )
 @gerer_exception_api
 async def generer_depuis_planning(
-    data: GenererCoursesRequest,
+    donnees: GenererCoursesRequest,
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Génère une liste de courses depuis le planning de la semaine.
@@ -899,10 +899,10 @@ async def generer_depuis_planning(
         sort_ingredients_by_rayon,
     )
 
-    semaine_debut = data.semaine_debut
+    semaine_debut = donnees.semaine_debut
     semaine_fin = semaine_debut + timedelta(days=6)
-    multiplicateur_quantites = _calculer_multiplicateur_invites(data.nb_invites)
-    evenements = [item.strip() for item in data.evenements if item.strip()][:6]
+    multiplicateur_quantites = _calculer_multiplicateur_invites(donnees.nb_invites)
+    evenements = [item.strip() for item in donnees.evenements if item.strip()][:6]
 
     def _generate():
         with executer_avec_session() as session:
@@ -972,7 +972,7 @@ async def generer_depuis_planning(
                 besoin = float(ing["quantite"]) * multiplicateur_quantites
                 en_stock = 0.0
 
-                if data.soustraire_stock:
+                if donnees.soustraire_stock:
                     inv = (
                         session.query(ArticleInventaire)
                         .join(Ingredient, Ingredient.id == ArticleInventaire.ingredient_id)
@@ -994,7 +994,7 @@ async def generer_depuis_planning(
                 })
 
             # 5) Créer la ListeCourses + ArticleCourses
-            liste = ListeCourses(nom=data.nom_liste, archivee=False, etat="brouillon")
+            liste = ListeCourses(nom=donnees.nom_liste, archivee=False, etat="brouillon")
             session.add(liste)
             session.flush()
 
@@ -1038,7 +1038,7 @@ async def generer_depuis_planning(
                 "total_articles": len(articles_a_acheter),
                 "articles_en_stock": articles_en_stock,
                 "contexte": {
-                    "nb_invites": data.nb_invites,
+                    "nb_invites": donnees.nb_invites,
                     "evenements": evenements,
                     "multiplicateur_quantites": multiplicateur_quantites,
                 },

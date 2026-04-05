@@ -28,7 +28,7 @@ async def catalogue_bridges(
     user: dict = Depends(require_auth),
 ):
     """Expose le catalogue consolidé des bridges legacy et stables."""
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     service = obtenir_service_bridges()
     return service.obtenir_catalogue_consolidation()
@@ -41,7 +41,7 @@ async def documents_expires(
     user: dict = Depends(require_auth),
 ):
     """Liste les documents expirés ou expirant bientôt (B5.3)."""
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     service = obtenir_service_bridges()
     alertes = service.documents_expires_alertes(jours_avant=jours_avant)
@@ -63,7 +63,7 @@ async def planning_unifie(
     user: dict = Depends(require_auth),
 ):
     """Planning unifié multi-modules: entretien + activités (B5.5 / B2.8)."""
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     service = obtenir_service_bridges()
     taches = service.entretien_planning_unifie(nb_jours=nb_jours)
@@ -84,7 +84,7 @@ async def recolte_recettes(
     user: dict = Depends(require_auth),
 ):
     """Trouve des recettes utilisant un ingrédient récolté au jardin (B5.1)."""
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     service = obtenir_service_bridges()
     recettes = service.recolte_vers_recettes(ingredient)
@@ -103,7 +103,7 @@ async def anniversaire_menu_festif(
     user: dict = Depends(require_auth),
 ):
     """Suggère un menu festif pour l'anniversaire le plus proche."""
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     service = obtenir_service_bridges()
     return service.anniversaire_vers_menu_festif(jours_horizon=jours_horizon)
@@ -115,7 +115,7 @@ async def energie_heures_creuses(
     user: dict = Depends(require_auth),
 ):
     """IM-5: Recommande les créneaux HC/HP pour les machines énergivores."""
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     service = obtenir_service_bridges()
     return service.energie_hc_hp_vers_planning_machines()
@@ -128,7 +128,7 @@ async def meteo_entretien(
     user: dict = Depends(require_auth),
 ):
     """Génère des alertes entretien basées sur les conditions météo (B5.8)."""
-    from src.services.ia.bridges import obtenir_service_bridges
+    from src.services.ia.inter_modules import obtenir_service_bridges
 
     service = obtenir_service_bridges()
     alertes = service.meteo_vers_entretien(conditions)

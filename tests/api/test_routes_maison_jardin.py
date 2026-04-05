@@ -77,7 +77,7 @@ class TestRoutesMaisonJardin:
                 return {"article_inventaire_id": 12, "action": "creation"}
 
         monkeypatch.setattr("src.api.routes.maison_jardin.executer_avec_session", _session_fausse)
-        monkeypatch.setattr("src.services.ia.bridges.obtenir_service_bridges", lambda: _Bridge())
+        monkeypatch.setattr("src.services.ia.inter_modules.obtenir_service_bridges", lambda: _Bridge())
 
         response = await client.patch(
             "/api/v1/maison/jardin/7",

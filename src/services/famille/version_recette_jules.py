@@ -2,14 +2,15 @@
 Service pour générer une version Jules d'une recette via Mistral.
 
 Adapte une recette pour Jules en tenant compte de son âge et ses aliments exclus :
-- Suppression du sel ajouté
-- Alcool → fond de volaille
-- Saumon fumé → saumon cuit
-- Viande/poisson cru → cuisson complète
-- Épices fortes → herbes douces
+- Recommandations nutritionnelles basées sur l'âge (portions_age.json)
+- Liste configurable d'aliments interdits (via préférences utilisateur)
+- Gestion stricte des aliments crus (viande, poisson, œuf, lait cru)
+- Propositions automatiques de substitution par l'IA
 """
 
+import json
 import logging
+from pathlib import Path
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
@@ -17,28 +18,99 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-PROMPT_SYSTEM = """Tu es spécialiste nutrition pédiatrique.
-Adapte la recette pour un enfant de {age_mois} mois.
-Aliments exclus pour cet enfant : {aliments_exclus}
+# Chargement des recommandations de portions par âge
+_PORTIONS_AGE_PATH = Path(__file__).resolve().parents[3] / "data" / "reference" / "portions_age.json"
+_PORTIONS_AGE: dict = {}
 
-Règles absolues :
-- Supprimer le sel ajouté (pas de sel)
-- Alcool → fond de volaille ou bouillon sans sel
-- Saumon fumé → saumon cuit vapeur
-- Viande/poisson cru → cuisson complète obligatoire
-- Épices fortes (piment, curry fort) → supprimer ou remplacer par herbes douces
-- Miel (moins de 12 mois) → sirop d'agave ou rien
-- Noix entières → poudre de noisette ou supprimer
+try:
+    with open(_PORTIONS_AGE_PATH, encoding="utf-8") as f:
+        _PORTIONS_AGE = json.load(f)
+except Exception:
+    logger.warning("Impossible de charger portions_age.json — recommandations par défaut utilisées")
+
+
+def _tranche_age_pour(age_mois: int) -> dict:
+    """Retourne la tranche d'âge correspondante depuis portions_age.json."""
+    for tranche in _PORTIONS_AGE.get("tranches_age", []):
+        age_max = tranche.get("age_max_mois") or 999
+        if tranche.get("age_min_mois", 0) <= age_mois < age_max:
+            return tranche
+    return {}
+
+
+def _facteur_adaptation(age_mois: int) -> float:
+    """Retourne le facteur multiplicateur de portions pour l'âge donné."""
+    tranche = _tranche_age_pour(age_mois)
+    tranche_id = tranche.get("id", "")
+    return _PORTIONS_AGE.get("facteur_adaptation", {}).get(tranche_id, 0.35)
+
+
+def _construire_contexte_portions(age_mois: int) -> str:
+    """Construit le texte de recommandations nutritionnelles pour le prompt IA."""
+    tranche = _tranche_age_pour(age_mois)
+    if not tranche:
+        return "Pas de données de portions disponibles pour cet âge."
+
+    facteur = _facteur_adaptation(age_mois)
+    lignes = [
+        f"Tranche d'âge : {tranche.get('label', '?')} ({tranche.get('age_min_mois', '?')}-{tranche.get('age_max_mois', '?')} mois)",
+        f"Calories/jour recommandées : {tranche.get('calories_jour', '?')} kcal",
+        f"Facteur de portion vs adulte : x{facteur}",
+        "",
+        "Portions recommandées par repas :",
+    ]
+    for groupe, info in tranche.get("portions", {}).items():
+        nom = groupe.replace("_", " ").capitalize()
+        lignes.append(f"  - {nom} : {info.get('portion_g', '?')}g/repas ({info.get('notes', '')})")
+
+    return "\n".join(lignes)
+
+
+# Liste par défaut des aliments crus interdits pour les enfants
+ALIMENTS_CRUS_INTERDITS = [
+    "tartare", "carpaccio", "sushi", "sashimi", "ceviche",
+    "steak tartare", "viande crue", "poisson cru", "œuf cru",
+    "oeuf cru", "lait cru", "fromage au lait cru",
+    "mayonnaise maison", "mousse au chocolat crue",
+    "tiramisu", "sabayon",
+]
+
+PROMPT_SYSTEM = """Tu es spécialiste en nutrition pédiatrique.
+Adapte la recette pour un enfant de {age_mois} mois.
+
+═══ RECOMMANDATIONS NUTRITIONNELLES POUR CET ÂGE ═══
+{contexte_portions}
+
+═══ ALIMENTS INTERDITS (configurés par les parents) ═══
+{aliments_exclus}
+
+═══ RÈGLES ABSOLUES — à appliquer systématiquement ═══
+1. ZÉRO SEL AJOUTÉ — supprimer tout sel, réduire les condiments salés
+2. ZÉRO ALCOOL — remplacer vin/bière/alcool par du bouillon sans sel ou fond de volaille
+3. ZÉRO CRU — tout doit être CUIT :
+   - Viande/poisson cru (tartare, sushi, carpaccio) → cuisson complète
+   - Œuf cru (mayonnaise maison, mousse, tiramisu) → œuf dur ou supprimer
+   - Lait/fromage au lait cru → version pasteurisée
+4. MIEL interdit avant 12 mois → sirop d'agave ou supprimer
+5. NOIX ENTIÈRES → poudre (risque étouffement) ou supprimer
+6. ÉPICES FORTES (piment, curry fort, poivre abondant) → herbes douces (persil, ciboulette, basilic)
+7. Adapter les PORTIONS selon le facteur x{facteur_adaptation} par rapport à l'adulte
+8. Adapter la TEXTURE selon l'âge : {texture_conseil}
+
+═══ SUBSTITUTIONS AUTOMATIQUES ═══
+Pour CHAQUE ingrédient interdit ou inadapté, tu DOIS proposer une alternative concrète.
+Ne te contente jamais de "supprimer" — propose un remplacement quand c'est possible.
 
 Réponds en JSON avec ce format exact :
 {{
   "ingredients_modifies": {{
-    "ingredient_original": "substitution pour Jules",
+    "ingredient_original": "substitution pour Jules (avec quantité adaptée)",
     ...
   }},
-  "instructions_modifiees": "Instructions complètes adaptées à Jules...",
-  "notes_bebe": "Conseils spécifiques pour servir à Jules (texture, température, portion)...",
-  "modifications_resume": ["Liste des principales modifications effectuées"]
+  "instructions_modifiees": "Instructions complètes adaptées...",
+  "notes_bebe": "Conseils : texture, température, portion recommandée en grammes...",
+  "modifications_resume": ["Liste des principales modifications effectuées"],
+  "alertes": ["Alerte si un ingrédient est potentiellement allergène ou à surveiller"]
 }}
 """
 
@@ -75,6 +147,23 @@ class ServiceVersionRecetteJules(BaseAIService):
         aliments_exclus = profil_jules.get("aliments_exclus_jules", [])
         if not aliments_exclus:
             aliments_exclus = ["sel ajouté", "alcool", "saumon fumé", "épices fortes"]
+
+        # Ajouter automatiquement les aliments crus interdits
+        aliments_complets = list(set(aliments_exclus + ALIMENTS_CRUS_INTERDITS))
+
+        # Contexte nutritionnel basé sur l'âge
+        contexte_portions = _construire_contexte_portions(age_mois)
+        facteur = _facteur_adaptation(age_mois)
+
+        # Conseil texture adapté à l'âge
+        if age_mois < 12:
+            texture_conseil = "Purée lisse obligatoire, pas de morceaux"
+        elif age_mois < 18:
+            texture_conseil = "Écrasé ou petits morceaux fondants, pas de morceaux durs"
+        elif age_mois < 36:
+            texture_conseil = "Morceaux tendres, bien cuits, taille adaptée (risque étouffement)"
+        else:
+            texture_conseil = "Morceaux normaux, surveiller les aliments ronds/durs (raisins, noix, saucisses)"
 
         with obtenir_contexte_db() as session:
             recette = session.query(Recette).filter(Recette.id == recette_id).first()
@@ -115,7 +204,10 @@ Adapte cette recette pour Jules."""
 
             system = PROMPT_SYSTEM.format(
                 age_mois=age_mois,
-                aliments_exclus=", ".join(aliments_exclus) if aliments_exclus else "aucun",
+                contexte_portions=contexte_portions,
+                aliments_exclus=", ".join(aliments_complets) if aliments_complets else "aucun",
+                facteur_adaptation=facteur,
+                texture_conseil=texture_conseil,
             )
 
             result = self.call_with_json_parsing_sync(
@@ -128,8 +220,9 @@ Adapte cette recette pour Jules."""
                 result = {
                     "ingredients_modifies": {},
                     "instructions_modifiees": instructions_txt,
-                    "notes_bebe": "Servir à température tiède, en petites bouchées.",
+                    "notes_bebe": f"Servir à température tiède, en petites bouchées. Portion : facteur x{facteur} vs adulte.",
                     "modifications_resume": ["Sel supprimé"],
+                    "alertes": [],
                 }
 
             # Créer ou mettre à jour la VersionRecette en DB
@@ -160,8 +253,10 @@ Adapte cette recette pour Jules."""
                 "ingredients_modifies": version.ingredients_modifies,
                 "notes_bebe": version.notes_bebe,
                 "modifications_resume": result.get("modifications_resume", []),
+                "alertes": result.get("alertes", []),
                 "recette_nom": recette.nom,
                 "age_mois_jules": age_mois,
+                "facteur_portions": facteur,
             }
 
     def adapter_planning(self, planning_id: int) -> dict:

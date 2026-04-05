@@ -173,20 +173,6 @@ export async function obtenirRecetteSurprise(): Promise<Recette> {
   return data;
 }
 
-export interface LienPartageRecette {
-  token: string;
-  url: string;
-  expires_at: string;
-}
-
-/** Générer un lien de partage public temporaire pour une recette */
-export async function partagerRecette(recetteId: number, dureeHeures = 48): Promise<LienPartageRecette> {
-  const { data } = await clientApi.post<LienPartageRecette>(
-    `/recettes/${recetteId}/partager?duree_heures=${dureeHeures}`
-  );
-  return data;
-}
-
 /** Exporter la recette en PDF */
 export async function exporterRecettePdf(recetteId: number): Promise<void> {
   // Endpoint dédié dédié: /api/v1/recettes/{id}/export-pdf

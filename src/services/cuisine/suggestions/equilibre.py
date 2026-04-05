@@ -145,7 +145,7 @@ def calculate_variety_score(
     recettes_recentes = set()
 
     for h in historique:
-        d = h.get("date") or h.get("date_cuisson")
+        d = h.get("date") or h.get("date_preparation")
         if d:
             if isinstance(d, datetime):
                 d = d.date()

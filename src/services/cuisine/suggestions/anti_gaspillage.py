@@ -255,8 +255,8 @@ def calculer_score_mensuel(*, mois: date | None = None, db) -> ScoreMensuelAntiG
     nb_recettes = (
         db.query(HistoriqueRecette)
         .filter(
-            HistoriqueRecette.date_cuisson >= debut_mois,
-            HistoriqueRecette.date_cuisson < fin_mois,
+            HistoriqueRecette.date_preparation >= debut_mois,
+            HistoriqueRecette.date_preparation < fin_mois,
         )
         .count()
     )

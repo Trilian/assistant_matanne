@@ -50,7 +50,7 @@ from .pilote_auto import (
 from . import bien_etre
 from . import cuisine_ia
 from . import energie_ia
-from .types_transverses import (
+from .types_central import (
     AlertesContextuellesResponse,
     JournalFamilialAutoResponse,
     ModePiloteAutomatiqueResponse,

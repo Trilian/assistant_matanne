@@ -199,7 +199,7 @@ async def creer_jalon(
 
             journal_evenement = None
             try:
-                from src.services.ia.bridges import obtenir_service_bridges
+                from src.services.ia.inter_modules import obtenir_service_bridges
 
                 journal_evenement = obtenir_service_bridges().jalon_vers_evenement_familial(
                     jalon_id=jalon.id

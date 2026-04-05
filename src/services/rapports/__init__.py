@@ -23,7 +23,7 @@ from src.services.rapports.generation import (
     ServiceRapportsPDF,
     obtenir_service_rapports_pdf,
 )
-from src.services.rapports.innovations_service import (
+from src.services.rapports.service_ia import (
     ServiceInnovationsRapports,
     obtenir_service_innovations_rapports,
 )

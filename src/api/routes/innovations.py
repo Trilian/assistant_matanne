@@ -36,7 +36,7 @@ from src.api.schemas.ia_transverses import (
     JournalFamilialAutoResponse,
     LienInviteRequest,
     LienInviteResponse,
-    MangeCeSoirRequest,
+    IdeeRepasSoirRequest,
     MeteoContextuelleResponse,
     ModePiloteAutomatiqueResponse,
     ModePiloteConfigurationRequest,
@@ -74,14 +74,14 @@ def get_innovations_service():
 
 
 @router.post(
-    "/mange-ce-soir",
+    "/idee-repas",
     response_model=SuggestionRepasSoirResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="Suggestion diner express",
+    summary="Suggestion dîner express",
 )
 @gerer_exception_api
-async def mange_ce_soir(
-    body: MangeCeSoirRequest,
+async def idee_repas_soir(
+    body: IdeeRepasSoirRequest,
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
@@ -399,7 +399,7 @@ async def veille_emploi(
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
-    from src.services.ia_avancee.types_transverses import CriteresVeilleEmploi
+    from src.services.ia_avancee.types_central import CriteresVeilleEmploi
 
     criteres = CriteresVeilleEmploi(
         domaine=body.domaine,

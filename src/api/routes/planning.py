@@ -27,7 +27,7 @@ from src.api.schemas.errors import (
 )
 from src.api.schemas.ia_transverses import PlanificationHebdoCompleteResponse
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
+from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 
 import logging
 logger = logging.getLogger(__name__)
@@ -229,7 +229,7 @@ async def obtenir_planning_semaine(
 
 @router.post("/repas", response_model=MessageResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
-async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)):
+async def creer_repas(donnees: RepasCreate, user: dict[str, Any] = Depends(require_auth)):
     """
     Planifie un repas pour une date et un type donnés.
 
@@ -269,8 +269,8 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
     def _create():
         with executer_avec_session() as session:
             # Récupérer ou créer un planning par défaut
-            # repas.date est un objet date (plus datetime) depuis le schéma corrigé
-            date_repas = repas.date
+            # donnees.date est un objet date (plus datetime) depuis le schéma corrigé
+            date_repas = donnees.date
 
             # Chercher un planning existant pour cette date
             planning = (
@@ -297,7 +297,7 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
                 session.query(Repas)
                 .filter(
                     Repas.date_repas == date_repas,
-                    Repas.type_repas == repas.type_repas,
+                    Repas.type_repas == donnees.type_repas,
                     Repas.planning_id == planning.id,
                 )
                 .first()
@@ -305,9 +305,9 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
 
             if existing:
                 # Mettre à jour
-                existing.recette_id = repas.recette_id
+                existing.recette_id = donnees.recette_id
                 if hasattr(existing, "notes"):
-                    existing.notes = repas.notes
+                    existing.notes = donnees.notes
                 session.commit()
                 return MessageResponse(message="Repas mis à jour", id=existing.id)
 
@@ -315,8 +315,8 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
             db_repas = Repas(
                 planning_id=planning.id,
                 date_repas=date_repas,
-                type_repas=repas.type_repas,
-                recette_id=repas.recette_id,
+                type_repas=donnees.type_repas,
+                recette_id=donnees.recette_id,
             )
             session.add(db_repas)
             session.commit()
@@ -329,7 +329,7 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
 @router.put("/repas/{repas_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_repas(
-    repas_id: int, repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)
+    repas_id: int, maj: RepasCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
     Met à jour un repas planifié.
@@ -374,10 +374,10 @@ async def modifier_repas(
             if not db_repas:
                 raise HTTPException(status_code=404, detail="Repas non trouvé")
 
-            db_repas.type_repas = repas.type_repas
-            db_repas.recette_id = repas.recette_id
-            if hasattr(db_repas, "notes") and repas.notes:
-                db_repas.notes = repas.notes
+            db_repas.type_repas = maj.type_repas
+            db_repas.recette_id = maj.recette_id
+            if hasattr(db_repas, "notes") and maj.notes:
+                db_repas.notes = maj.notes
 
             session.commit()
             session.refresh(db_repas)

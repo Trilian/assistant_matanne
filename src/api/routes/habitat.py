@@ -52,7 +52,7 @@ from src.core.models.habitat_projet import (
 )
 from src.services.habitat.deco_service import obtenir_service_deco_habitat
 from src.services.habitat.dvf_service import obtenir_service_dvf_habitat
-from src.services.habitat.innovations_service import obtenir_service_innovations_habitat
+from src.services.habitat.service_ia import obtenir_service_innovations_habitat
 from src.services.habitat.plans_ai_service import obtenir_service_plans_habitat
 from src.services.habitat.scenarios_service import obtenir_service_scenarios_habitat
 from src.services.habitat.veille_service import obtenir_service_veille_habitat

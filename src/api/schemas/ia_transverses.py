@@ -71,7 +71,7 @@ class ParcoursOptimiseRequest(BaseModel):
     liste_id: int | None = Field(None, description="ID de la liste de courses (défaut: dernière active)")
 
 
-class MangeCeSoirRequest(BaseModel):
+class IdeeRepasSoirRequest(BaseModel):
     """Contexte utilisateur pour la suggestion dîner express."""
 
     temps_disponible_min: int = Field(30, ge=10, le=180)
@@ -145,7 +145,7 @@ class CarteVisuelleRequest(BaseModel):
 
 # ── Responses (re-exports depuis types) ──
 
-from src.services.ia_avancee.types_transverses import (  # noqa: E402
+from src.services.ia_avancee.types_central import (  # noqa: E402
     ModePiloteAutomatiqueResponse,
     ScoreFamilleHebdoResponse,
     JournalFamilialAutoResponse,
@@ -199,7 +199,7 @@ __all__ = [
     "AnalyseTendancesLotoResponse",
     "ParcoursOptimiseRequest",
     "ParcoursOptimiseResponse",
-    "MangeCeSoirRequest",
+    "IdeeRepasSoirRequest",
     "SuggestionRepasSoirResponse",
     "PatternsAlimentairesResponse",
     "CoachRoutinesResponse",

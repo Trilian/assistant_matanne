@@ -11,7 +11,7 @@ from typing import Any
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_cache, avec_gestion_erreurs
 
-from .types_transverses import (
+from .types_central import (
     AnomalieEnergieDetail,
     AnomaliesEnergieResponse,
     ComparateurEnergieResponse,
