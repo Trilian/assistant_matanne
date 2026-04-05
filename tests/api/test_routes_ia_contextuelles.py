@@ -229,6 +229,7 @@ class TestAnomaliesJardinRoute:
         )
 
         mock_session = Mock()
+        mock_session.query.return_value.all.return_value = []
         mock_session.query.return_value.filter.return_value.all.return_value = []
 
         @contextmanager
