@@ -63,6 +63,8 @@ export function GanttProjets({ projets }: { projets: ProjetMaison[] }) {
         fin: Date;
         left: number;
         width: number;
+        startIndex: number;
+        spanIndex: number;
         statutNormalise: string;
       }>;
     }

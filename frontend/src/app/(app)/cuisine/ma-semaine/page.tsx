@@ -21,7 +21,6 @@ import {
   Flame,
   UtensilsCrossed,
   Wind,
-  Check,
   Copy,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";

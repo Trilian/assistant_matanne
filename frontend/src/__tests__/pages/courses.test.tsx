@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import PageCourses from "@/app/(app)/cuisine/courses/page";
 
 // ─── Mocks ────────────────────────────────────────────────
 
@@ -138,8 +139,6 @@ vi.mock("@/composants/scanneur-multi-codes", () => ({
 
 function renderCourses() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  // Lazy import pour que les mocks soient actifs
-  const { default: PageCourses } = require("@/app/(app)/cuisine/courses/page");
   return render(
     <QueryClientProvider client={client}>
       <PageCourses />

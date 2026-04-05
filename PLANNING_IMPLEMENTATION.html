@@ -596,7 +596,7 @@
         <li class="done"><strong>Anti-gaspillage</strong> — Score, recettes restes, recommandations IA</li>
         <li class="done"><strong>Suggestions IA</strong> — Menu du jour, idées rapides, photo frigo, adaptation recette</li>
         <li class="done"><strong>Nutrition</strong> — Analyse nutritionnelle, NutriScore, EcoScore</li>
-        <li class="todo"><strong>→ Manque</strong> : Calendrier mosaïque coloré, pré-remplissage intelligent courses, scoring éco automatique</li>
+        <li class="todo"><strong>→ Manque</strong> : Pré-remplissage intelligent courses, scoring éco automatique</li>
       </ul>
       <div style="margin-top:0.5rem;font-size:0.76rem;color:var(--text-muted)">25+ endpoints recettes, 18 courses, 8 inventaire, 6 suggestions — 13 pages</div>
     </div>
@@ -614,7 +614,7 @@
         <li class="done"><strong>Voyages</strong> — CRUD, templates, planification IA, checklists, courses voyage</li>
         <li class="done"><strong>Documents</strong> — Vaccinations, santé, alertes expiration</li>
         <li class="done"><strong>Contacts, Garmin, Achats</strong> — Intégrés</li>
-        <li class="todo"><strong>→ Manque</strong> : Heatmap annuel routines style GitHub, résumé semaine IA, guide utilisateur</li>
+        <li class="todo"><strong>→ Manque</strong> : Résumé semaine IA, guide utilisateur</li>
       </ul>
       <div style="margin-top:0.5rem;font-size:0.76rem;color:var(--text-muted)">15+ endpoints + sous-routeurs — 15 pages</div>
     </div>
@@ -950,13 +950,13 @@
       <p>Supprimer le legacy, renommer les fichiers, nettoyer les commentaires, purger les fichiers temporaires</p>
     </div>
     <div class="phase-meta">
-      <strong>Sprint P1.1 — 13/19 tâches clôturées</strong><br>
+      <strong>Sprints P1.1 + P1.2 — 15/19 tâches clôturées</strong><br>
       Impact : Nettoyage code 7→9.5
     </div>
   </div>
 
   <div class="card" style="margin-bottom:1.5rem;">
-    <h3>🏁 Statut du sprint P1.1 <span class="badge badge-yellow">En cours</span></h3>
+    <h3>🏁 Statut des sprints P1.1 / P1.2 <span class="badge badge-yellow">En cours</span></h3>
     <ul class="checklist">
       <li class="done"><span class="check"></span><span>Renommages techniques réalisés et validés (`composants-ui.test.tsx`, `test_routes_ia_avancee_admin.py`, `test_ia_avancee_service.py`).</span></li>
       <li class="done"><span class="check"></span><span>Le wrapper `legacy_compat.py` a été renommé en <code>innovations.py</code> et les imports FastAPI ont été mis à jour sans casser `/api/v1/innovations`.</span></li>
@@ -964,9 +964,10 @@
       <li class="done"><span class="check"></span><span>Les commentaires `Phase/Sprint` et les mentions WhatsApp résiduelles ont été nettoyés dans les tests et les services.</span></li>
       <li class="done"><span class="check"></span><span>Le fichier `17_migrations_absorbees.sql` a été allégé et 3 nouveaux jeux de seed ont été ajoutés (`famille_demo.json`, `maison_demo.json`, `inventaire_demo.json`).</span></li>
       <li class="done"><span class="check"></span><span>Audit SQL validé : aucune nouvelle table orpheline inattendue ; les 5 tables SQL-only restantes (`schema_migrations`, `job_executions`, `objectifs_autonomie`, `plantes_catalogue`, `recoltes`) sont documentées et couvertes par les tests.</span></li>
-      <li><span class="check"></span><span>Redistribution complète des endpoints `/api/v1/innovations` vers les routes domaine (refactor plus large).</span></li>
+      <li class="done"><span class="check"></span><span>Le reliquat `/api/v1/innovations` est désormais <strong>reclassé en refactor API séparé</strong>, hors scope du nettoyage P1.</span></li>
+      <li class="done"><span class="check"></span><span><strong>Sprint P1.2 réalisé</strong> : les <strong>19 appels frontend internes</strong> ont été migrés vers les routes métier natives (<code>/preferences</code>, <code>/famille</code>, <code>/dashboard</code>, <code>/planning</code>, <code>/courses</code>, <code>/habitat</code>, <code>/rapports</code>, <code>/batch-cooking</code>) et le parcours invité utilise désormais <code>/api/v1/rapports/invite/{token}</code>.</span></li>
     </ul>
-    <p style="margin-top:0.8rem; color:var(--text-muted); font-size:0.82rem;">Vérification du sprint : <code>pytest …</code> → <strong style="color:var(--green)">132 tests backend passés</strong> ; <code>npx vitest run src/__tests__/components/composants-ui.test.tsx</code> → <strong style="color:var(--green)">2 tests passés</strong> ; <code>pytest tests/sql/test_schema_coherence.py -q</code> → <strong style="color:var(--green)">147 tests passés</strong>.</p>
+    <p style="margin-top:0.8rem; color:var(--text-muted); font-size:0.82rem;">Vérification du sprint : <code>pytest …</code> → <strong style="color:var(--green)">132 tests backend passés</strong> ; <code>npx vitest run src/__tests__/components/composants-ui.test.tsx</code> → <strong style="color:var(--green)">2 tests passés</strong> ; <code>pytest tests/sql/test_schema_coherence.py -q</code> → <strong style="color:var(--green)">147 tests passés</strong> ; audit compatibilité frontend → <strong style="color:var(--green)">0 appel interne restant vers `/api/v1/innovations`</strong>.</p>
   </div>
   
   <div class="section-subtitle">Fichiers à renommer</div>
@@ -996,8 +997,8 @@
   <div class="section-subtitle">Legacy à supprimer</div>
   <div class="task-list">
     <div class="task-item critical">
-      <h4>Supprimer legacy_compat.py (750 lignes) <span class="tag tag-clean">Nettoyage</span> <span class="tag tag-api">API</span> <span class="badge badge-yellow">partiel</span></h4>
-      <p>🟡 Étape réalisée : le fichier a été renommé en <code>src/api/routes/innovations.py</code> et le routage FastAPI a été stabilisé. La redistribution complète des endpoints dans les routes natives reste planifiée.</p>
+      <h4>Supprimer legacy_compat.py (750 lignes) <span class="tag tag-clean">Nettoyage</span> <span class="tag tag-api">API</span> <span class="badge badge-blue">refactor séparé</span></h4>
+      <p>🔵 Le renommage et la stabilisation du routage sont faits via <code>src/api/routes/innovations.py</code>. Après le sprint P1.2, le <strong>frontend interne n'utilise plus</strong> ce préfixe legacy ; le shim conserve encore <strong>40 endpoints</strong> uniquement pour la compatibilité externe et la dépréciation progressive.</p>
       <div class="files">📁 src/api/routes/innovations.py</div>
     </div>
     <div class="task-item critical">
@@ -1068,7 +1069,7 @@
       <p>Corriger les bugs CSS/accessibilité identifiés, combler les gaps de tests, renforcer la couverture E2E</p>
     </div>
     <div class="phase-meta">
-      <strong>Sprint P2 — 17/18 tâches clôturées</strong><br>
+      <strong>Sprint P2 — 18/18 tâches clôturées</strong><br>
       Impact : Tests 7.5→9, Sécurité 9→9.5
     </div>
   </div>
@@ -1089,6 +1090,7 @@
       <li class="done"><span class="check"></span><span>Tests pages critiques : 3 nouveaux fichiers (courses.test.tsx, planning.test.tsx, dashboard.test.tsx).</span></li>
       <li class="done"><span class="check"></span><span>TanStack Query hooks : +5 tests (utiliserInvalidation, utiliserRequetePaginee, onError, onSuccess custom).</span></li>
       <li class="done"><span class="check"></span><span>Zustand stores : 20 tests existants vérifiés (notifications 8, auth 5, UI 7) — complets.</span></li>
+      <li class="done"><span class="check"></span><span>Mutation testing régulier : workflow CI dédié <code>.github/workflows/mutation-tests.yml</code> + script <code>scripts/test/run_mutation_ci.py</code> + commandes <code>python manage.py mutation [dashboard|planning|cuisine]</code> / <code>mutation-ci</code> sur les 3 modules critiques.</span></li>
     </ul>
   </div>
 
@@ -1151,8 +1153,8 @@
       <p>Certains tests IA dépendent du service réel vs mock. Unifier les mocks pour reproductibilité.</p>
     </div>
     <div class="task-item low">
-      <h4>Mutation testing régulier <span class="tag tag-test">Tests</span></h4>
-      <p>mutmut configuré mais peu utilisé. Intégrer dans la CI pour les modules critiques.</p>
+      <h4>Mutation testing régulier <span class="tag tag-test">Tests</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ mutmut branché en CI via un workflow dédié hebdomadaire / manuel / path-sensitive sur les modules critiques <code>dashboard</code>, <code>planning</code> et <code>cuisine</code>.</p>
     </div>
   </div>
   
@@ -1385,80 +1387,93 @@
       <p>Amener l'interface de 7 à 9/10 avec des visualisations avancées, animations et UX polish</p>
     </div>
     <div class="phase-meta">
-      <strong>18 tâches</strong><br>
+      <strong>Sprint P5.1 — 14/18 tâches clôturées ou validées</strong><br>
       Impact : UI/UX 7→9, Dataviz 6→8.5
     </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <h3>🏁 Statut du sprint P5.1 <span class="badge badge-green">En forte progression</span></h3>
+    <ul class="checklist">
+      <li class="done"><span class="check"></span><span>Le calendrier mosaïque repas a été enrichi avec une vue <strong>"Équilibre"</strong> et des codes couleur nutritionnels (viande, poisson, végétal, féculent).</span></li>
+      <li class="done"><span class="check"></span><span>Le module routines propose désormais une <strong>heatmap annuelle 365 jours</strong> en plus de la vue 12 semaines, via des onglets dédiés.</span></li>
+      <li class="done"><span class="check"></span><span>La page budget affiche une <strong>jauge radiale animée</strong> et la visualisation nutrition a été enrichie avec <strong>fibres</strong> et <strong>vitamines</strong>.</span></li>
+      <li class="done"><span class="check"></span><span>La timeline planning est devenue <strong>multi-module</strong> : repas + activités famille + tâches maison sur un même axe temporel.</span></li>
+      <li class="done"><span class="check"></span><span>Les micro-animations et confettis de progression sont actifs sur les routines, et les briques UX déjà présentes (skeletons, onboarding, mode tablette, dark mode auto, FABs) ont été revérifiées.</span></li>
+      <li><span class="check"></span><span>Reste du polish P5 : finitions visuelles supplémentaires sur certains écrans et dernière passe de cohérence globale.</span></li>
+    </ul>
+    <p style="margin-top:0.8rem; color:var(--text-muted); font-size:0.82rem;">Vérification fraîche : <code>npm run build</code> ✅ et <code>npm run lint</code> ✅ passent désormais sur le frontend après nettoyage des derniers blocages TypeScript/ESLint legacy.</p>
   </div>
   
   <div class="section-subtitle">📊 Nouvelles visualisations (Dataviz)</div>
   <div class="task-list">
     <div class="task-item feature">
-      <h4>Calendrier mosaïque repas avec codes couleur <span class="tag tag-ui">UI</span></h4>
-      <p>Calendrier visuel coloré : rouge = viande, bleu = poisson, vert = végé, orange = féculent. Vue rapide de l'équilibre alimentaire.</p>
-      <div class="files">📁 frontend/src/app/(app)/cuisine/ma-semaine/</div>
+      <h4>Calendrier mosaïque repas avec codes couleur <span class="tag tag-ui">UI</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Réalisé : ajout d'un mode <code>Équilibre</code> avec colorisation nutritionnelle (rouge = viande, bleu = poisson, vert = végétal, orange = féculent) et légende visuelle.</p>
+      <div class="files">📁 frontend/src/composants/planning/calendrier-mosaique-repas.tsx</div>
     </div>
     <div class="task-item feature">
-      <h4>Heatmap annuel routines (style GitHub) <span class="tag tag-ui">UI</span></h4>
-      <p>365 cases colorées par intensité de complétion. Motivation visuelle pour les routines familiales. Bibliothèque : cal-heatmap ou custom SVG.</p>
-      <div class="files">📁 frontend/src/app/(app)/famille/routines/</div>
+      <h4>Heatmap annuel routines (style GitHub) <span class="tag tag-ui">UI</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Réalisé : nouvelle vue annuelle <strong>365 jours</strong> en custom SVG, en complément de la vue 12 semaines déjà présente, avec bascule par onglets.</p>
+      <div class="files">📁 frontend/src/composants/famille/heatmap-routines-annuel.tsx, frontend/src/app/(app)/famille/routines/</div>
     </div>
     <div class="task-item feature">
-      <h4>Jauge radiale budget animée <span class="tag tag-ui">UI</span></h4>
-      <p>Jauge circulaire type speedomètre avec animation pour le budget mois en cours. Remplacer la barre de progression basique.</p>
-      <div class="files">📁 frontend/src/composants/</div>
+      <h4>Jauge radiale budget animée <span class="tag tag-ui">UI</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Réalisé : ajout d'une <strong>jauge budget mensuel</strong> basée sur le score radial existant, branchée sur les dépenses du mois et la projection budgétaire.</p>
+      <div class="files">📁 frontend/src/composants/graphiques/jauge-budget.tsx, frontend/src/app/(app)/famille/budget/page.tsx</div>
     </div>
     <div class="task-item feature">
-      <h4>Radar chart nutrition hebdomadaire <span class="tag tag-ui">UI</span></h4>
-      <p>Graphe radar : protéines, glucides, lipides, fibres, vitamines. Vue rapide de l'équilibre nutritionnel de la semaine.</p>
-      <div class="files">📁 frontend/src/app/(app)/cuisine/nutrition/</div>
+      <h4>Radar chart nutrition hebdomadaire <span class="tag tag-ui">UI</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Enrichi : le radar nutrition hebdomadaire couvre désormais <strong>calories, protéines, lipides, glucides, fibres et vitamines</strong>.</p>
+      <div class="files">📁 frontend/src/composants/graphiques/radar-nutrition-famille.tsx, frontend/src/app/(app)/cuisine/nutrition/</div>
     </div>
     <div class="task-item feature">
-      <h4>Vue jardin 2D interactive (top-down) <span class="tag tag-ui">UI</span></h4>
-      <p>Plan du jardin vu du dessus avec zones cliquables, état des plantes, dates de semis, alertes arrosage. Canvas ou SVG interactif.</p>
-      <div class="files">📁 frontend/src/app/(app)/maison/jardin/</div>
+      <h4>Vue jardin 2D interactive (top-down) <span class="tag tag-ui">UI</span> <span class="badge badge-green">déjà OK</span></h4>
+      <p>✅ Vérifié : la vue jardin 2D interactive avec zones cliquables et états visuels est déjà en place.</p>
+      <div class="files">📁 frontend/src/composants/maison/vue-jardin-interactive.tsx</div>
     </div>
     <div class="task-item feature">
-      <h4>Floorplan interactif enrichi <span class="tag tag-ui">UI</span></h4>
-      <p>Plan maison cliquable : voir équipements, conso énergie par pièce, meubles. Enrichir le plan 3D react-three-fiber existant.</p>
-      <div class="files">📁 frontend/src/app/(app)/maison/visualisation/</div>
+      <h4>Floorplan interactif enrichi <span class="tag tag-ui">UI</span> <span class="badge badge-green">déjà OK</span></h4>
+      <p>✅ Vérifié : la page de visualisation maison propose déjà une vue 2D éditable et un plan 3D dynamique enrichi.</p>
+      <div class="files">📁 frontend/src/app/(app)/maison/visualisation/page.tsx, frontend/src/composants/maison/plan-3d.tsx</div>
     </div>
     <div class="task-item feature">
-      <h4>Timeline interactive multi-module <span class="tag tag-ui">UI</span></h4>
-      <p>Timeline familiale drag-and-drop (repas + activités + tâches sur un même axe temporel). Vue "Ma Journée" enrichie.</p>
-      <div class="files">📁 frontend/src/app/(app)/planning/timeline/</div>
+      <h4>Timeline interactive multi-module <span class="tag tag-ui">UI</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Réalisé : la timeline planning agrège désormais <strong>repas + activités famille + tâches maison</strong> sur un même flux chronologique.</p>
+      <div class="files">📁 frontend/src/composants/planning/timeline-semaine.tsx, frontend/src/app/(app)/planning/timeline/page.tsx</div>
     </div>
     <div class="task-item feature">
-      <h4>Graphe radar nutrition <span class="tag tag-ui">UI</span></h4>
-      <p>Profil nutritionnel radar : protéines, glucides, lipides, fibres, vitamines — vue rapide de l'équilibre hebdo.</p>
+      <h4>Graphe radar nutrition <span class="tag tag-ui">UI</span> <span class="badge badge-blue">absorbé</span></h4>
+      <p>✅ Couvert par le radar nutrition hebdomadaire enrichi ci-dessus (doublon fonctionnel consolidé).</p>
     </div>
   </div>
   
   <div class="section-subtitle">✨ Améliorations UX</div>
   <div class="task-list">
     <div class="task-item feature">
-      <h4>Micro-animations & confetti <span class="tag tag-ui">UI</span></h4>
-      <p>Confetti sur complétion de streak (routines), animation compteur sur scores, transitions page fluides avec Framer Motion.</p>
+      <h4>Micro-animations & confetti <span class="tag tag-ui">UI</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Validé et complété : Framer Motion est déjà en place, et les confettis se déclenchent maintenant aussi sur les paliers de progression routines.</p>
     </div>
     <div class="task-item feature">
-      <h4>Skeleton loading uniformisé <span class="tag tag-ui">UI</span></h4>
-      <p>Skeletons cohérents sur toutes les pages. Actuellement inconsistant — créer un composant skeleton réutilisable par type de contenu.</p>
+      <h4>Skeleton loading uniformisé <span class="tag tag-ui">UI</span> <span class="badge badge-green">déjà OK</span></h4>
+      <p>✅ Vérifié : les composants <code>skeleton.tsx</code> et <code>skeleton-page.tsx</code> sont déjà mutualisés et utilisés sur les pages clés.</p>
     </div>
     <div class="task-item feature">
-      <h4>Onboarding tour interactif <span class="tag tag-ui">UI</span></h4>
-      <p>Le composant <code>tour-onboarding.tsx</code> existe mais n'est pas activé. L'activer au premier lancement pour guider les nouveaux utilisateurs.</p>
+      <h4>Onboarding tour interactif <span class="tag tag-ui">UI</span> <span class="badge badge-green">déjà actif</span></h4>
+      <p>✅ Vérifié : <code>TourOnboarding</code> s'ouvre automatiquement si l'état n'est pas marqué comme complété, et peut être rejoué depuis les paramètres d'affichage.</p>
     </div>
     <div class="task-item feature">
-      <h4>Mode tablette optimisé Google <span class="tag tag-ui">UI</span></h4>
-      <p>Grille de widgets gros boutons, optimisée pour la tablette dans la cuisine. Timer visible permanent, recette du jour, bouton "Version Jules".</p>
-      <div class="files">📁 frontend/src/app/(app)/cuisine/tablette/</div>
+      <h4>Mode tablette optimisé Google <span class="tag tag-ui">UI</span> <span class="badge badge-green">déjà OK</span></h4>
+      <p>✅ Vérifié : la page tablette cuisine gère déjà le focus recette, le timer, la synthèse vocale et les onglets utiles pour l'usage en cuisine.</p>
+      <div class="files">📁 frontend/src/app/(app)/cuisine/tablette/page.tsx</div>
     </div>
     <div class="task-item feature">
-      <h4>Dark mode avancé dynamique <span class="tag tag-ui">UI</span></h4>
-      <p>Thème dynamique selon l'heure du jour (déjà partiellement en place avec next-themes). Ajouter transition automatique ou manuelle.</p>
+      <h4>Dark mode avancé dynamique <span class="tag tag-ui">UI</span> <span class="badge badge-green">déjà actif</span></h4>
+      <p>✅ Vérifié : le provider thème active déjà le basculement horaire automatique et le thème saisonnier via <code>next-themes</code>.</p>
     </div>
     <div class="task-item low">
-      <h4>Schéma de l'interface — Vue cible <span class="tag tag-ui">UI</span></h4>
-      <p>Implémenter la vue telle que décrite dans le rapport : sidebar complète, floating FAB, bandeau suggestion proactive, nav mobile bottom bar.</p>
+      <h4>Schéma de l'interface — Vue cible <span class="tag tag-ui">UI</span> <span class="badge badge-green">largement OK</span></h4>
+      <p>✅ Vérifié : sidebar complète, FAB flottants, bandeau suggestion proactive, recherche globale et nav mobile sont déjà en place ; il reste surtout du polish visuel.</p>
     </div>
   </div>
   

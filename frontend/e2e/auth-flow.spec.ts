@@ -185,6 +185,7 @@ test.describe("Authentification — Flux complet", () => {
 
     await page.goto("/");
     await expect(page.locator("body")).toBeVisible({ timeout: 10000 });
+    expect(refreshCalled).toBe(true);
   });
 
   test("logout supprime le token et redirige vers connexion", async ({ page }) => {

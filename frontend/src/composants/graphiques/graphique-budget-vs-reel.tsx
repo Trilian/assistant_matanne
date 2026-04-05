@@ -86,13 +86,17 @@ export function GraphiqueBudgetVsReel({
               dataKey="prevu"
               fill={COULEURS_GRAPHIQUES.muted}
               radius={[6, 6, 0, 0]}
-              onClick={(entry) => setCategorieSelectionnee(entry.categorie)}
+              onClick={(entry: { payload?: DonneeBudgetVsReel }) =>
+                setCategorieSelectionnee(entry.payload?.categorie ?? null)
+              }
             />
             <Bar
               dataKey="reel"
               fill={COULEURS_GRAPHIQUES.accent1}
               radius={[6, 6, 0, 0]}
-              onClick={(entry) => setCategorieSelectionnee(entry.categorie)}
+              onClick={(entry: { payload?: DonneeBudgetVsReel }) =>
+                setCategorieSelectionnee(entry.payload?.categorie ?? null)
+              }
             />
             <Brush dataKey="categorie" height={22} stroke={COULEURS_GRAPHIQUES.accent2} travellerWidth={10} />
           </BarChart>

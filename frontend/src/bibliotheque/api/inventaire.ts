@@ -103,6 +103,7 @@ export async function detecterPhotoFrigoSansImport(
   file: File,
   _emplacement = "frigo"
 ): Promise<ResultatOCRFrigo> {
+  void _emplacement;
   const fd = new FormData();
   fd.append("file", file);
   const { data } = await clientApi.post<{

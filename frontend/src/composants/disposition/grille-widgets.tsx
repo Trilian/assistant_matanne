@@ -14,7 +14,7 @@ interface GrilleWidgetsProps<T extends WidgetDraggable> {
   items: T[];
   classeGrille: string;
   titre?: string;
-  renderItem: (item: T) => React.ReactNode;
+  renderItem: (item: T, index: number) => React.ReactNode;
 }
 
 function reordonner<T>(liste: T[], source: number, destination: number): T[] {
@@ -91,7 +91,7 @@ export function GrilleWidgets<T extends WidgetDraggable>({
         </Button>
       </div>
       <div className={classeGrille}>
-        {itemsOrdonnes.map((item) => (
+        {itemsOrdonnes.map((item, index) => (
           <div
             key={item.id}
             draggable
@@ -107,7 +107,7 @@ export function GrilleWidgets<T extends WidgetDraggable>({
               <GripVertical className="h-3.5 w-3.5" />
               Glisser pour reordonner
             </div>
-            {renderItem(item)}
+            {renderItem(item, index)}
           </div>
         ))}
       </div>

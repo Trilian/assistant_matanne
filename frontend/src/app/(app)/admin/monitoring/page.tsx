@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Activity,
@@ -37,11 +37,6 @@ import {
   lireMetriquesIAAdmin,
   obtenirLiveSnapshotAdmin,
   obtenirDashboardAdmin,
-  type ServiceHealthResponse,
-  type AiMetricsResponse,
-  type LiveSnapshotResponse,
-  type AdminDashboardResponse,
-  type CacheStatsResponse,
 } from "@/bibliotheque/api/admin";
 import type { ObjetDonnees } from "@/types/commun";
 
@@ -114,7 +109,7 @@ export default function PageMonitoring() {
     { refetchInterval: autoRefresh ? 30000 : false }
   );
 
-  const { data: cache, isLoading: chargCache } = utiliserRequete(
+  const { data: cache } = utiliserRequete(
     ["admin", "monitoring", "cache"],
     obtenirStatsCache,
     { refetchInterval: autoRefresh ? 30000 : false }

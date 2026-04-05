@@ -68,7 +68,13 @@ function OngletDiagnostics() {
   };
 
   const soumettre = () => {
-    const payload: Parameters<typeof creerDiagnostic>[0] = { type_diagnostic: form.type_diagnostic, date_realisation: form.date_realisation || undefined, date_expiration: form.date_expiration || undefined, resultat: form.resultat || undefined, diagnostiqueur: form.diagnostiqueur || undefined };
+    const payload: Parameters<typeof creerDiagnostic>[0] = {
+      type_diagnostic: form.type_diagnostic,
+      date_realisation: form.date_realisation || new Date().toISOString().slice(0, 10),
+      date_expiration: form.date_expiration || undefined,
+      resultat: form.resultat || undefined,
+      diagnostiqueur: form.diagnostiqueur || undefined,
+    };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
     else creer(payload);
   };

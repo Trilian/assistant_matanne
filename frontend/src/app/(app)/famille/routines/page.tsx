@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Plus,
   ListChecks,
@@ -51,12 +51,15 @@ import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-an
 import { SwipeableItem } from "@/composants/swipeable-item";
 import { SectionReveal } from "@/composants/ui/motion-utils";
 import { HeatmapRoutines } from "@/composants/famille/heatmap-routines";
+import { HeatmapRoutinesAnnuel } from "@/composants/famille/heatmap-routines-annuel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { useIsMobile } from "@/crochets/use-mobile";
 import {
   listerRoutines,
   creerRoutine,
   supprimerRoutine,
 } from "@/bibliotheque/api/famille";
+import { lancerConfettis } from "@/bibliotheque/confettis";
 import type { Routine } from "@/types/famille";
 import { toast } from "sonner";
 
@@ -171,6 +174,18 @@ export default function PageRoutines() {
     0
   );
   const creneauPrincipal = [...groupes].sort((a, b) => b.items.length - a.items.length)[0]?.label ?? "Matin";
+  const celebrationRef = useRef(false);
+
+  useEffect(() => {
+    if (celebrationRef.current || !routines?.length) {
+      return;
+    }
+
+    if (routines.length >= 3 || totalEtapes >= 8) {
+      lancerConfettis({ particules: 28 });
+      celebrationRef.current = true;
+    }
+  }, [routines, totalEtapes]);
 
   return (
     <div className="space-y-6">
@@ -230,7 +245,28 @@ export default function PageRoutines() {
           </SectionReveal>
 
           <SectionReveal delay={0.08}>
-            <HeatmapRoutines routines={routines ?? []} />
+            <Tabs defaultValue="recentes" className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold">Suivi visuel des habitudes</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Vue récente détaillée ou aperçu annuel style GitHub.
+                  </p>
+                </div>
+                <TabsList>
+                  <TabsTrigger value="recentes">12 semaines</TabsTrigger>
+                  <TabsTrigger value="annuel">Annuel</TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="recentes" className="mt-0">
+                <HeatmapRoutines routines={routines ?? []} />
+              </TabsContent>
+
+              <TabsContent value="annuel" className="mt-0">
+                <HeatmapRoutinesAnnuel routines={routines ?? []} />
+              </TabsContent>
+            </Tabs>
           </SectionReveal>
 
           <SectionReveal delay={0.12} className="grid gap-6 lg:grid-cols-3">

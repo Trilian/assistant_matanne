@@ -88,6 +88,7 @@ export function PanneauDetailCourses({
   groupesNonCoches,
   articlesSelectionnes,
   inputAjoutRef,
+  erreursArticle,
   regArticle,
   submitArticle,
   onAjouterArticle,

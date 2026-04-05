@@ -7,7 +7,7 @@ Génération de rapports narratifs IA personnalisés par domaine.
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
@@ -17,7 +17,10 @@ from src.api.schemas.ia_transverses import (
     BilanAnnuelResponse,
     CarteVisuellePartageableResponse,
     CarteVisuelleRequest,
+    DonneesInviteResponse,
     JournalFamilialAutoResponse,
+    LienInviteRequest,
+    LienInviteResponse,
     ModeTabletteMagazineResponse,
     RapportMensuelPdfResponse,
     ResumeMensuelIAResponse,
@@ -30,6 +33,13 @@ from src.services.rapports.service_ia import obtenir_service_innovations_rapport
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/rapports", tags=["Rapports IA"])
+
+
+def _obtenir_service_partage_invite():
+    """Expose le service historique de partage invité via un alias métier stable."""
+    from src.services.ia_avancee import get_innovations_service
+
+    return get_innovations_service()
 
 
 @router.get("/resume-mensuel", response_model=ResumeMensuelIAResponse, responses=REPONSES_IA)
@@ -90,6 +100,37 @@ async def rapport_mensuel_pdf_ia(
     service = obtenir_service_innovations_rapports()
     result = service.generer_rapport_mensuel_pdf(mois=mois)
     return result or RapportMensuelPdfResponse()
+
+
+@router.post("/invite/creer", response_model=LienInviteResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def creer_lien_invite_rapports(
+    body: LienInviteRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Alias métier du lien invité partageable sans dépendre du préfixe legacy `/innovations`."""
+    modules_valides = {"repas", "routines", "contacts_urgence"}
+    modules_demandes = [module for module in body.modules if module in modules_valides]
+    if not modules_demandes:
+        raise HTTPException(status_code=400, detail="Au moins un module valide requis.")
+
+    service = _obtenir_service_partage_invite()
+    return service.creer_lien_invite(
+        nom_invite=body.nom_invite,
+        modules=modules_demandes,
+        duree_heures=body.duree_heures,
+    )
+
+
+@router.get("/invite/{token}", response_model=DonneesInviteResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def acceder_donnees_invite_rapports(token: str):
+    """Accès invité via le namespace rapports, sans authentification."""
+    service = _obtenir_service_partage_invite()
+    result = service.obtenir_donnees_invite(token=token)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Lien invite invalide ou expire.")
+    return result
 
 
 @router.post("/bilan-annuel", response_model=BilanAnnuelResponse, responses=REPONSES_IA)

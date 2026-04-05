@@ -392,7 +392,7 @@ export default function PageAdminServices() {
         message: simulationMessage || undefined,
         dry_run: true,
       });
-      setSimulationResultat(data as ObjetDonnees);
+      setSimulationResultat(data as unknown as ObjetDonnees);
     } catch {
       setSimulationResultat(null);
     } finally {
@@ -408,7 +408,7 @@ export default function PageAdminServices() {
         continuer_sur_erreur: true,
         date_reference: dateSimulationReference ? new Date(dateSimulationReference).toISOString() : undefined,
       });
-      setSimulationResultat(data as ObjetDonnees);
+      setSimulationResultat(data as unknown as ObjetDonnees);
     } catch {
       setSimulationResultat(null);
     } finally {

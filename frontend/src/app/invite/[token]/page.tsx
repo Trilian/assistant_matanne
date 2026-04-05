@@ -15,7 +15,7 @@ interface DonneesInvite {
 }
 
 async function obtenirDonneesInvite(token: string): Promise<DonneesInvite> {
-  const { data } = await clientApi.get(`/api/v1/innovations/invite/${token}`);
+  const { data } = await clientApi.get(`/api/v1/rapports/invite/${token}`);
   return data;
 }
 

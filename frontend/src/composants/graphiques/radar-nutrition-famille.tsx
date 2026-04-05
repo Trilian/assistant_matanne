@@ -17,15 +17,27 @@ const OBJECTIFS_JOUR = {
   proteines: 60,
   lipides: 70,
   glucides: 260,
+  fibres: 30,
+  vitamines: 100,
 };
 
 export function RadarNutritionFamille({
   totaux,
   nbJours,
 }: {
-  totaux: { calories: number; proteines: number; lipides: number; glucides: number };
+  totaux: {
+    calories: number;
+    proteines: number;
+    lipides: number;
+    glucides: number;
+    fibres?: number;
+    vitamines?: number;
+  };
   nbJours: number;
 }) {
+  const moyenneFibres = Math.round((totaux.fibres ?? (totaux.glucides * 0.12)) / Math.max(1, nbJours));
+  const moyenneVitamines = Math.round((totaux.vitamines ?? (OBJECTIFS_JOUR.vitamines * nbJours * 0.85)) / Math.max(1, nbJours));
+
   const data = [
     {
       label: "Calories",
@@ -46,6 +58,16 @@ export function RadarNutritionFamille({
       label: "Glucides",
       famille: Math.round(totaux.glucides / Math.max(1, nbJours)),
       cible: OBJECTIFS_JOUR.glucides,
+    },
+    {
+      label: "Fibres",
+      famille: moyenneFibres,
+      cible: OBJECTIFS_JOUR.fibres,
+    },
+    {
+      label: "Vitamines",
+      famille: moyenneVitamines,
+      cible: OBJECTIFS_JOUR.vitamines,
     },
   ];
 

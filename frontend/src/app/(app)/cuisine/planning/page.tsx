@@ -206,7 +206,7 @@ function CarteRepasDraggable({
   label: string;
   onRetirer: (repas: RepasPlanning) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: construireIdRepasPlanning(repas.id),
     data: { repasId: repas.id },
   });
@@ -225,9 +225,8 @@ function CarteRepasDraggable({
       return;
     }
 
-    carteRef.current.style.transform = CSS.Translate.toString(transform);
-    carteRef.current.style.transition = transition ?? "";
-  }, [transform, transition]);
+    carteRef.current.style.transform = transform ? (CSS.Translate.toString(transform) ?? "") : "";
+  }, [transform]);
 
   return (
     <div

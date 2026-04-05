@@ -1,6 +1,6 @@
 "use client";
 
-import { Utensils } from "lucide-react";
+import { Home, Sparkles, Utensils, Users } from "lucide-react";
 import { Badge } from "@/composants/ui/badge";
 import { Card, CardContent } from "@/composants/ui/card";
 import type { RepasPlanning, TypeRepas } from "@/types/planning";
@@ -16,51 +16,114 @@ const JOURS_SEMAINE = [
   "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi",
 ];
 
+type ActiviteTimeline = {
+  id: number;
+  date: string | null;
+  titre: string;
+  type: string | null;
+};
+
+type TacheMaisonTimeline = {
+  nom: string;
+  categorie: string | null;
+  duree_estimee_min: number | null;
+};
+
+type EvenementTimeline = {
+  cle: string;
+  date: string;
+  ordre: number;
+  module: "repas" | "activite" | "maison";
+  titre: string;
+  sousTitre: string;
+  badge?: string;
+};
+
 interface TimelineSemaineProps {
   repas: RepasPlanning[];
+  activites?: ActiviteTimeline[];
+  tachesMaison?: TacheMaisonTimeline[];
 }
 
-export function TimelineSemaine({ repas }: TimelineSemaineProps) {
+export function TimelineSemaine({ repas, activites = [], tachesMaison = [] }: TimelineSemaineProps) {
   const repasOrdre: TypeRepas[] = ["petit_dejeuner", "dejeuner", "gouter", "diner"];
-  const repasTries = [...repas].sort((a, b) => {
-    const dateCompare = (a.date ?? a.date_repas ?? "").localeCompare(b.date ?? b.date_repas ?? "");
+  const aujourdHui = new Date().toISOString().split("T")[0];
+
+  const evenements: EvenementTimeline[] = [
+    ...repas.map((item) => ({
+      cle: `repas-${item.id}`,
+      date: (item.date ?? item.date_repas ?? "").split("T")[0],
+      ordre: repasOrdre.indexOf(item.type_repas),
+      module: "repas" as const,
+      titre: item.recette_nom || item.notes || "Repas planifié",
+      sousTitre: LABELS_REPAS[item.type_repas] ?? item.type_repas,
+      badge: item.portions ? `${item.portions} pers.` : undefined,
+    })),
+    ...activites
+      .filter((item) => item.date)
+      .map((item) => ({
+        cle: `activite-${item.id}`,
+        date: (item.date ?? aujourdHui).split("T")[0],
+        ordre: 10,
+        module: "activite" as const,
+        titre: item.titre,
+        sousTitre: item.type ?? "Activité famille",
+      })),
+    ...tachesMaison.map((item, index) => ({
+      cle: `maison-${index}-${item.nom}`,
+      date: aujourdHui,
+      ordre: 20 + index,
+      module: "maison" as const,
+      titre: item.nom,
+      sousTitre: item.categorie ?? "Tâche maison",
+      badge: item.duree_estimee_min ? `~${item.duree_estimee_min} min` : undefined,
+    })),
+  ].sort((a, b) => {
+    const dateCompare = a.date.localeCompare(b.date);
     if (dateCompare !== 0) return dateCompare;
-    return repasOrdre.indexOf(a.type_repas) - repasOrdre.indexOf(b.type_repas);
+    return a.ordre - b.ordre;
   });
 
-  const parDate: Record<string, RepasPlanning[]> = {};
-  for (const repasItem of repasTries) {
-    const key = (repasItem.date ?? repasItem.date_repas ?? "").split("T")[0];
-    if (!parDate[key]) parDate[key] = [];
-    parDate[key].push(repasItem);
+  const parDate: Record<string, EvenementTimeline[]> = {};
+  for (const evenement of evenements) {
+    if (!parDate[evenement.date]) parDate[evenement.date] = [];
+    parDate[evenement.date].push(evenement);
   }
+
+  const iconeParModule = {
+    repas: <Utensils className="h-4 w-4 shrink-0 text-orange-500" />,
+    activite: <Users className="h-4 w-4 shrink-0 text-blue-500" />,
+    maison: <Home className="h-4 w-4 shrink-0 text-emerald-500" />,
+  };
+
+  const badgeModule = {
+    repas: "Repas",
+    activite: "Famille",
+    maison: "Maison",
+  };
 
   return (
     <div className="relative space-y-6">
-      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
+      <div className="absolute bottom-0 left-4 top-0 w-0.5 bg-border" />
 
-      {Object.entries(parDate).map(([dateStr, repasDate]) => {
+      {Object.entries(parDate).map(([dateStr, evenementsDate]) => {
         const d = new Date(dateStr);
         const jourNom = JOURS_SEMAINE[d.getDay()];
-        const estAujourdhui = dateStr === new Date().toISOString().split("T")[0];
+        const estAujourdhui = dateStr === aujourdHui;
 
         return (
           <div key={dateStr} className="relative pl-10">
             <div
               className={`absolute left-2.5 top-1 h-3 w-3 rounded-full border-2 ${
                 estAujourdhui
-                  ? "bg-primary border-primary"
-                  : "bg-background border-muted-foreground"
+                  ? "border-primary bg-primary"
+                  : "border-muted-foreground bg-background"
               }`}
             />
 
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <h2
-                  className={`text-sm font-semibold ${
-                    estAujourdhui ? "text-primary" : ""
-                  }`}
-                >
+                <h2 className={`text-sm font-semibold ${estAujourdhui ? "text-primary" : ""}`}>
                   {jourNom}
                 </h2>
                 <span className="text-xs text-muted-foreground">
@@ -77,21 +140,22 @@ export function TimelineSemaine({ repas }: TimelineSemaineProps) {
               </div>
 
               <div className="space-y-2">
-                {repasDate.map((item) => (
-                  <Card key={item.id} className="ml-2">
+                {evenementsDate.map((item) => (
+                  <Card key={item.cle} className="ml-2">
                     <CardContent className="flex items-center gap-3 py-3">
-                      <Utensils className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground">
-                          {LABELS_REPAS[item.type_repas] ?? item.type_repas}
-                        </p>
-                        <p className="text-sm font-medium truncate">
-                          {item.recette_nom || item.notes || "—"}
-                        </p>
+                      {iconeParModule[item.module]}
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px]">
+                            {badgeModule[item.module]}
+                          </Badge>
+                          <p className="text-xs text-muted-foreground">{item.sousTitre}</p>
+                        </div>
+                        <p className="truncate text-sm font-medium">{item.titre}</p>
                       </div>
-                      {item.portions && (
-                        <Badge variant="secondary" className="text-xs shrink-0">
-                          {item.portions} pers.
+                      {item.badge && (
+                        <Badge variant="secondary" className="shrink-0 text-xs">
+                          {item.badge}
                         </Badge>
                       )}
                     </CardContent>
@@ -102,6 +166,13 @@ export function TimelineSemaine({ repas }: TimelineSemaineProps) {
           </div>
         );
       })}
+
+      {evenements.length === 0 && (
+        <div className="flex items-center gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+          <Sparkles className="h-4 w-4" />
+          Rien de planifié pour le moment sur la semaine.
+        </div>
+      )}
     </div>
   );
 }

@@ -74,7 +74,7 @@ function OngletStocks() {
       nom: form.nom,
       categorie: form.categorie || undefined,
       quantite: form.quantite ? Number(form.quantite) : 0,
-      seuil_alerte: form.seuil_alerte ? Number(form.seuil_alerte) : undefined,
+      seuil_alerte: form.seuil_alerte ? Number(form.seuil_alerte) : 0,
       emplacement: form.emplacement || undefined,
       unite: form.unite || undefined,
     };
@@ -185,7 +185,7 @@ function OngletCellier() {
   const { mutate: supprimer } = utiliserMutation(supprimerArticleCellier, { onSuccess: () => { invalider(); toast.success("Article supprimé"); } });
 
   const soumettre = () => {
-    const payload: Parameters<typeof creerArticleCellier>[0] = { nom: form.nom, categorie: form.categorie || undefined, quantite: form.quantite ? Number(form.quantite) : undefined, date_achat: form.date_achat || undefined, date_peremption: form.date_peremption || undefined, emplacement: form.emplacement || undefined, prix_unitaire: form.prix_unitaire ? Number(form.prix_unitaire) : undefined, notes: form.notes || undefined };
+    const payload: Parameters<typeof creerArticleCellier>[0] = { nom: form.nom, categorie: form.categorie || undefined, quantite: form.quantite ? Number(form.quantite) : 0, date_achat: form.date_achat || undefined, date_peremption: form.date_peremption || undefined, emplacement: form.emplacement || undefined, prix_unitaire: form.prix_unitaire ? Number(form.prix_unitaire) : undefined, notes: form.notes || undefined };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
     else creer(payload);
   };

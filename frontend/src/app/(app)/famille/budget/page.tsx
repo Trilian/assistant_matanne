@@ -51,6 +51,7 @@ import {
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import { BudgetInsightsIA } from "@/composants/famille/budget-insights";
+import { JaugeBudget } from "@/composants/graphiques/jauge-budget";
 import { TreemapBudget } from "@/composants/graphiques/treemap-budget";
 import { SankeyFluxFinanciers } from "@/composants/graphiques/sankey-flux-financiers";
 import { GraphiqueBudgetVsReel } from "@/composants/graphiques/graphique-budget-vs-reel";
@@ -229,25 +230,34 @@ export default function PageBudget() {
       </div>
 
       {/* Résumé mensuel */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <Wallet className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total du mois</p>
-                {chargementStats ? (
-                  <Skeleton className="h-8 w-24" />
-                ) : (
-                  <p className="text-2xl font-bold">
-                    {totalMois.toFixed(2)} €
-                  </p>
-                )}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <Wallet className="h-8 w-8 text-primary" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Total du mois</p>
+                  {chargementStats ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    <p className="text-2xl font-bold">
+                      {totalMois.toFixed(2)} €
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="sm:col-span-1 lg:col-span-2">
+            </CardContent>
+          </Card>
+
+          {!chargementStats && (
+            <JaugeBudget
+              totalMois={totalMois}
+              budgetCible={predictionBudget?.predictions?.total_prevu ?? 2500}
+            />
+          )}
+        </div>
+        <Card className="lg:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />

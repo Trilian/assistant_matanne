@@ -1,0 +1,82 @@
+name: Mutation Testing
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 4 * * 1' # chaque lundi matin
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/services/dashboard/**'
+      - 'src/services/planning/**'
+      - 'src/services/cuisine/**'
+      - 'tests/services/dashboard/**'
+      - 'tests/services/planning/**'
+      - 'tests/services/recettes/**'
+      - 'tests/services/courses/**'
+      - 'tests/services/batch_cooking/**'
+      - 'tests/services/inventaire/**'
+      - 'scripts/test/run_mutation_ci.py'
+      - 'scripts/qualite/patch_mutmut_src_prefix.py'
+      - 'pyproject.toml'
+      - '.github/workflows/mutation-tests.yml'
+  pull_request:
+    paths:
+      - 'src/services/dashboard/**'
+      - 'src/services/planning/**'
+      - 'src/services/cuisine/**'
+      - 'tests/services/dashboard/**'
+      - 'tests/services/planning/**'
+      - 'tests/services/recettes/**'
+      - 'tests/services/courses/**'
+      - 'tests/services/batch_cooking/**'
+      - 'tests/services/inventaire/**'
+      - 'scripts/test/run_mutation_ci.py'
+      - 'scripts/qualite/patch_mutmut_src_prefix.py'
+      - 'pyproject.toml'
+      - '.github/workflows/mutation-tests.yml'
+
+jobs:
+  mutmut-services:
+    name: mutmut (${{ matrix.profile }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [dashboard, planning, cuisine]
+    env:
+      ENVIRONMENT: test
+      JWT_SECRET: test_secret_key_for_ci
+      MISTRAL_API_KEY: test-key-12345
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio mutmut
+
+      - name: Run focused mutation testing
+        run: |
+          python scripts/test/run_mutation_ci.py --profile ${{ matrix.profile }}
+
+      - name: Upload mutation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutmut-${{ matrix.profile }}-stats
+          path: |
+            mutants/mutmut-cicd-stats.json
+            mutants/mutmut-cicd-stats-${{ matrix.profile }}.json
+            mutants/mutmut-stats.json
+            mutants/

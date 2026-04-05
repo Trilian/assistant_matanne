@@ -456,8 +456,10 @@ export default function PageMaison() {
           items={SECTIONS}
           classeGrille="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           titre="Modules"
-          renderItem={({ titre, description, chemin, Icone, statKey }, index) => (
-            <ItemAnime key={chemin} index={index}>
+          renderItem={({ titre, description, chemin, Icone, statKey }) => {
+            const index = SECTIONS.findIndex((item) => item.chemin === chemin);
+            return (
+              <ItemAnime key={chemin} index={index}>
               <LienTransition href={chemin} className="block h-full">
                 <Card className="h-full transition-all hover:-translate-y-0.5 hover:bg-accent/50">
                   <CardHeader>
@@ -481,7 +483,8 @@ export default function PageMaison() {
                 </Card>
               </LienTransition>
             </ItemAnime>
-          )}
+            );
+          }}
         />
       </SectionReveal>
     </div>

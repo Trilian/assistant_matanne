@@ -21,6 +21,7 @@ Routes API pour l'IA avancée — routing IA avancée.
 import logging
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from pydantic import BaseModel
 
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia

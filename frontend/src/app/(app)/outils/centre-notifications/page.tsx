@@ -33,6 +33,7 @@ interface Notification {
 export default function CentreNotificationsPage() {
   const [page, setPage] = useState(1)
   const [nonLuSeulement, setNonLuSeulement] = useState(false)
+  const [selectedNotif, setSelectedNotif] = useState<number | null>(null)
 
   // Recuperer l'historique
   const { data: historique, isLoading, refetch } = useQuery({
@@ -186,7 +187,13 @@ export default function CentreNotificationsPage() {
           historique?.data?.map((notif: Notification) => (
             <Card
               key={notif.id}
-              className={`cursor-pointer transition ${notif.lu ? 'opacity-60' : 'border-blue-200 bg-blue-50/20'}`}
+              className={`cursor-pointer transition ${
+                selectedNotif === notif.id
+                  ? 'ring-2 ring-blue-500 border-blue-300'
+                  : notif.lu
+                    ? 'opacity-60'
+                    : 'border-blue-200 bg-blue-50/20'
+              }`}
               onClick={() => setSelectedNotif(notif.id)}
             >
               <CardContent className="p-4">

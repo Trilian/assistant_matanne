@@ -189,7 +189,7 @@ export function MenuCommandes() {
         icone: ChefHat,
         executer: async () => {
           const nom = terme.length >= 3 ? terme.slice(0, 120) : "Nouvelle recette";
-          const recette = await creerRecette({ nom, description: "" });
+          const recette = await creerRecette({ nom, description: "", ingredients: [] });
           toast.success(`Recette créée: ${recette.nom}`);
           router.push(`/cuisine/recettes/${recette.id}`);
         },
@@ -322,7 +322,7 @@ export function MenuCommandes() {
         motCle: `recette ${nomRecette} creer ajouter`,
         icone: ChefHat,
         executer: async () => {
-          const recette = await creerRecette({ nom: nomRecette, description: "" });
+          const recette = await creerRecette({ nom: nomRecette, description: "", ingredients: [] });
           toast.success(`Recette créée: ${recette.nom}`);
           router.push(`/cuisine/recettes/${recette.id}`);
         },

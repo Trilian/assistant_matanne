@@ -11,6 +11,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+for flux in (sys.stdout, sys.stderr):
+    if hasattr(flux, "reconfigure"):
+        flux.reconfigure(encoding="utf-8", errors="replace")
+
 
 def run_cmd(cmd: str, shell: bool = False):
     """ExÃ©cute une commande"""
@@ -262,6 +266,36 @@ def audit_tests():
     run_cmd("python scripts/test/audit_tests_fast.py")
 
 
+def mutation():
+    """Lance un mutation testing focalisé sur un module critique (dashboard/planning/cuisine)."""
+    profil = sys.argv[2] if len(sys.argv) >= 3 else "dashboard"
+    print(f"[DNA] Mutation testing ciblé ({profil})...")
+    if sys.platform.startswith("win"):
+        print("[WARN] mutmut nécessite WSL sous Windows pour une exécution locale.")
+        print(f"       Utiliser: wsl python3 scripts/test/run_mutation_ci.py --profile {profil}")
+        print("       Ou lancer le workflow GitHub Actions 'Mutation Testing'.")
+        sys.exit(1)
+    return run_cmd(
+        f'"{sys.executable}" scripts/test/run_mutation_ci.py --profile {profil}',
+        shell=True,
+    )
+
+
+def mutation_ci():
+    """Alias explicite pour la commande CI de mutation testing."""
+    profil = sys.argv[2] if len(sys.argv) >= 3 else "dashboard"
+    print(f"[DNA] Mutation testing — mode CI ({profil})...")
+    if sys.platform.startswith("win"):
+        print("[WARN] mutmut nécessite WSL sous Windows pour une exécution locale.")
+        print(f"       Utiliser: wsl python3 scripts/test/run_mutation_ci.py --profile {profil}")
+        print("       Ou lancer le workflow GitHub Actions 'Mutation Testing'.")
+        sys.exit(1)
+    return run_cmd(
+        f'"{sys.executable}" scripts/test/run_mutation_ci.py --profile {profil}',
+        shell=True,
+    )
+
+
 def staging():
     """Gère l'environnement staging Docker Compose"""
     if len(sys.argv) < 3:
@@ -301,7 +335,7 @@ def help_cmd():
     """Affiche l'aide"""
     print(
         """
-🤖 Assistant MaTanne v2 - Commandes disponibles
+Assistant MaTanne v2 - Commandes disponibles
 
 Développement:
   run                  Lance le serveur FastAPI (uvicorn)
@@ -328,6 +362,8 @@ Tests avancés:
   test-quick           Tests rapides sans couverture
   test-core            Tests du core uniquement
   audit-tests          Audit de couverture des tests
+  mutation [profil]    Mutation testing focalisé (dashboard/planning/cuisine)
+  mutation-ci [profil] Mutation testing avec seuils CI
 
 Staging:
   staging start        Démarre l'environnement staging Docker
@@ -365,6 +401,8 @@ COMMANDS = {
     "test-quick": test_quick,
     "test-core": test_core,
     "audit-tests": audit_tests,
+    "mutation": mutation,
+    "mutation-ci": mutation_ci,
     "requirements": generate_requirements,
     "staging": staging,
     "clean": clean,

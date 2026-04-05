@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import PagePlanning from "@/app/(app)/cuisine/planning/page";
 
 // ─── Mocks ────────────────────────────────────────────────
 
@@ -108,7 +109,6 @@ vi.mock("@/composants/cuisine/convertisseur-inline", () => ({
 
 function renderPlanning() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const { default: PagePlanning } = require("@/app/(app)/cuisine/planning/page");
   return render(
     <QueryClientProvider client={client}>
       <PagePlanning />

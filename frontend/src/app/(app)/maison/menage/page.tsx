@@ -481,7 +481,7 @@ function OngletRoutines() {
         onFermer={dialog.fermer}
         titre={dialog.elementEnEdition ? "Modifier la routine" : "Nouvelle routine"}
         champs={champsCrud}
-        valeurInitiale={dialog.elementEnEdition ?? {}}
+        valeurInitiale={(dialog.elementEnEdition ?? {}) as ObjetDonnees}
         onSoumettre={handleSubmit}
         enChargement={creer.isPending || modifier.isPending}
       />

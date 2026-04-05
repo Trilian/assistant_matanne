@@ -52,6 +52,35 @@ interface RetourWebSocket {
   mode: 'websocket' | 'polling' | 'deconnecte'
 }
 
+function normaliserUtilisateursConnectes(valeur: ValeurDonnee): UtilisateurConnecte[] {
+  if (!Array.isArray(valeur)) {
+    return []
+  }
+
+  return valeur
+    .map((entree) => {
+      if (!entree || typeof entree !== 'object' || Array.isArray(entree)) {
+        return null
+      }
+
+      const utilisateur = entree as Record<string, ValeurDonnee>
+      const userId = utilisateur.user_id
+      const username = utilisateur.username
+      const connectedAt = utilisateur.connected_at ?? utilisateur.timestamp
+
+      if (typeof userId !== 'string' || typeof username !== 'string') {
+        return null
+      }
+
+      return {
+        user_id: userId,
+        username,
+        connected_at: typeof connectedAt === 'string' ? connectedAt : '',
+      }
+    })
+    .filter((utilisateur): utilisateur is UtilisateurConnecte => utilisateur !== null)
+}
+
 // ═══════════════════════════════════════════════════════════
 // HOOK
 // ═══════════════════════════════════════════════════════════
@@ -145,7 +174,7 @@ export function utiliserWebSocket({
         // Gestion des types de base
         switch (data.type) {
           case 'users_list':
-            setUtilisateurs((data.users as UtilisateurConnecte[]) ?? [])
+            setUtilisateurs(normaliserUtilisateursConnectes(data.users))
             break
           case 'user_joined':
             setUtilisateurs((prev) => [
@@ -228,7 +257,7 @@ export function utiliserWebSocket({
         if (!res.ok) return
         const data = await res.json()
         if (data.current_seq) lastSeqRef.current = data.current_seq
-        if (data.users) setUtilisateurs(data.users)
+        if (data.users) setUtilisateurs(normaliserUtilisateursConnectes(data.users))
         for (const change of data.changes ?? []) {
           setDernierMessage(change)
           const handler = gestionnairesRef.current[change.type]

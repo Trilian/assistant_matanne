@@ -11,15 +11,25 @@ import { EtatVidePlanning } from "@/composants/planning/etat-vide-planning";
 import { TimelineSemaine } from "@/composants/planning/timeline-semaine";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirPlanningSemaine } from "@/bibliotheque/api/planning";
+import { obtenirSemaineUnifiee } from "@/bibliotheque/api/planning";
 
 export default function PageTimeline() {
   const { data: planning, isLoading } = utiliserRequete(
-    ["planning", "semaine"],
-    () => obtenirPlanningSemaine()
+    ["planning", "semaine-unifiee"],
+    () => obtenirSemaineUnifiee()
   );
 
-  const repas = planning?.repas ?? [];
+  const repas = Object.entries(planning?.repas ?? {}).flatMap(([date, items]) =>
+    items.map((item) => ({
+      id: item.id,
+      date_repas: date,
+      type_repas: item.type as "petit_dejeuner" | "dejeuner" | "gouter" | "diner",
+      recette_id: item.recette_id ?? undefined,
+      recette_nom: item.nom_recette ?? undefined,
+      notes: undefined,
+      portions: undefined,
+    }))
+  );
 
   return (
     <div className="space-y-6">
@@ -44,13 +54,17 @@ export default function PageTimeline() {
             <Skeleton key={i} className="h-32" />
           ))}
         </div>
-      ) : repas.length === 0 ? (
+      ) : repas.length === 0 && !(planning?.activites_famille?.length || planning?.taches_maison?.length) ? (
         <EtatVidePlanning
           icon={<CalendarDays className="h-8 w-8" />}
-          message="Aucun repas planifié cette semaine"
+          message="Aucun événement planifié cette semaine"
         />
       ) : (
-        <TimelineSemaine repas={repas} />
+        <TimelineSemaine
+          repas={repas}
+          activites={planning?.activites_famille ?? []}
+          tachesMaison={planning?.taches_maison ?? []}
+        />
       )}
     </div>
   );

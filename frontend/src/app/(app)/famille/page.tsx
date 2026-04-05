@@ -707,8 +707,9 @@ export default function PageFamille() {
           titre="Modules"
           items={MODULES}
           classeGrille="grid gap-3 grid-cols-2 sm:grid-cols-4"
-          renderItem={({ id, titre, chemin, Icone }, index) => {
+          renderItem={({ id, titre, chemin, Icone }) => {
             const nbUrgences = urgencesPourModule(id);
+            const index = MODULES.findIndex((moduleItem) => moduleItem.id === id);
             return (
               <ItemAnime key={chemin} index={index}>
                 <LienTransition href={chemin} className="block h-full">

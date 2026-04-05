@@ -155,7 +155,15 @@ function OngletDepenses() {
   };
 
   const soumettre = () => {
-    const payload: Parameters<typeof creerDepenseMaison>[0] = { libelle: form.libelle, montant: Number(form.montant), categorie: form.categorie || undefined, date: form.date || undefined, fournisseur: form.fournisseur || undefined, recurrence: form.recurrence || undefined, notes: form.notes || undefined };
+    const payload: Parameters<typeof creerDepenseMaison>[0] = {
+      libelle: form.libelle,
+      montant: Number(form.montant),
+      categorie: form.categorie || "autre",
+      date: form.date || new Date().toISOString().slice(0, 10),
+      fournisseur: form.fournisseur || undefined,
+      recurrence: form.recurrence || undefined,
+      notes: form.notes || undefined,
+    };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
     else creer(payload);
   };

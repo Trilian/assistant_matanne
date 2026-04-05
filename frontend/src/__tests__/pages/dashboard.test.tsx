@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import PageDashboard from "@/app/(app)/page";
 
 // ─── Mocks ────────────────────────────────────────────────
 
@@ -117,7 +118,6 @@ vi.mock("@/crochets/utiliser-api", () => ({
 
 function renderDashboard() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const { default: PageDashboard } = require("@/app/(app)/page");
   return render(
     <QueryClientProvider client={client}>
       <PageDashboard />

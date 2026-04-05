@@ -115,10 +115,10 @@ test.describe("Navigation cross-module", () => {
   });
 
   test("hubs de modules affichent leur contenu", async ({ page }) => {
-    const modules = ["/cuisine", "/famille", "/maison", "/jeux"];
+    const modulePaths = ["/cuisine", "/famille", "/maison", "/jeux"];
 
-    for (const module of modules) {
-      await page.goto(module);
+    for (const modulePath of modulePaths) {
+      await page.goto(modulePath);
       await expect(page.locator("body")).toBeVisible({ timeout: 10000 });
       // Chaque hub doit avoir au moins un heading
       const heading = page.locator("h1, h2").first();

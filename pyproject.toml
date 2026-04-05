@@ -104,10 +104,21 @@ reportOptionalMemberAccess = "warning"
 reportOptionalSubscript = "warning"
 
 [tool.mutmut]
-paths_to_mutate = ["src/services/dashboard"]
-tests_dir = ["tests/services/dashboard"]
-runner = "python -m pytest tests/services/dashboard -q --confcutdir=tests/services/dashboard"
-pytest_add_cli_args_test_selection = ["--confcutdir=tests/services/dashboard"]
+paths_to_mutate = [
+    "src/services/dashboard",
+    "src/services/planning",
+    "src/services/cuisine",
+]
+tests_dir = [
+    "tests/services/dashboard",
+    "tests/services/planning",
+    "tests/services/recettes",
+    "tests/services/courses",
+    "tests/services/batch_cooking",
+    "tests/services/inventaire",
+]
+runner = "python -m pytest tests/services/dashboard tests/services/planning tests/services/recettes tests/services/courses tests/services/batch_cooking tests/services/inventaire -q --confcutdir=tests"
+pytest_add_cli_args_test_selection = ["--confcutdir=tests"]
 also_copy = ["src/core", "src/services/core", "src/services/integrations"]
 max_stack_depth = -1
 do_not_mutate = [
