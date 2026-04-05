@@ -32,7 +32,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { exporterRecettePdf, genererVersionJules, obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
-import { obtenirScoreEcologique } from "@/bibliotheque/api/ia-avancee";
+import { obtenirScoreEcologiqueRecette } from "@/bibliotheque/api/ia-avancee";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { BadgeEcoscore } from "@/composants/cuisine/badge-ecoscore";
 import { RadarNutritionFamille } from "@/composants/graphiques/radar-nutrition-famille";
@@ -58,7 +58,7 @@ export default function PageDetailRecette({
 
   const { data: ecoScore } = utiliserRequete(
     ["recette-ecoscore", id],
-    () => obtenirScoreEcologique(Number(id)),
+    () => obtenirScoreEcologiqueRecette(Number(id)),
     { enabled: !!recette, staleTime: 10 * 60 * 1000, retry: false }
   );
 

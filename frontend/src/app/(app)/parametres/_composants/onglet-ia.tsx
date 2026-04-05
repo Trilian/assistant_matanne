@@ -8,13 +8,6 @@ import { Input } from "@/composants/ui/input";
 import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
 import { Switch } from "@/composants/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/composants/ui/select";
 import { toast } from "sonner";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import {

@@ -193,7 +193,7 @@ export async function obtenirAnomaliesJardin(): Promise<AnomaliesJardinResponse>
   return data
 }
 
-export async function obtenirScoreEcologique(recetteId: number): Promise<ScoreEcologiqueResponse> {
+export async function obtenirScoreEcologiqueRecette(recetteId: number): Promise<ScoreEcologiqueResponse> {
   const { data } = await clientApi.post<ScoreEcologiqueResponse>('/api/v1/ia/modules/recette/score-ecologique', {
     recette_id: recetteId,
   })

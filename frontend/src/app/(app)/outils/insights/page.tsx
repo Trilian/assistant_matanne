@@ -150,7 +150,7 @@ export default function PageInsights() {
       ) : insights?.insights?.length ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {insights.insights.map((insight, i) => (
-            <ItemAnime key={`${insight.categorie}-${i}`} delay={i * 0.04}>
+            <ItemAnime key={`${insight.categorie}-${i}`} index={i}>
               <CarteInsight insight={insight} />
             </ItemAnime>
           ))}

@@ -85,6 +85,8 @@ from src.api.schemas.ia_transverses import (
     PlanningJulesAdaptatifResponse,
     ScoreBienEtreResponse,
     ScoreFamilleHebdoResponse,
+    VeilleEmploiRequest,
+    VeilleEmploiResponse,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.famille.service_ia import obtenir_service_innovations_famille
@@ -178,6 +180,29 @@ async def obtenir_enrichissement_contacts(
     service = obtenir_service_innovations_famille()
     result = service.enrichir_contacts()
     return result or EnrichissementContactsResponse()
+
+
+@router.post("/veille-emploi", response_model=VeilleEmploiResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def veille_emploi_famille(
+    body: VeilleEmploiRequest,
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+) -> VeilleEmploiResponse:
+    """Alias métier stable pour la veille emploi multi-sites."""
+    from src.services.ia_avancee.types_central import CriteresVeilleEmploi
+
+    criteres = CriteresVeilleEmploi(
+        domaine=body.domaine,
+        mots_cles=body.mots_cles,
+        type_contrat=body.type_contrat,
+        mode_travail=body.mode_travail,
+        rayon_km=body.rayon_km,
+        frequence=body.frequence,
+    )
+    service = obtenir_service_innovations_famille()
+    result = service.executer_veille_emploi(criteres=criteres)
+    return result or VeilleEmploiResponse()
 
 
 # ═══════════════════════════════════════════════════════════

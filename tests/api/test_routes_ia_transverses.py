@@ -1,7 +1,8 @@
 """
-Tests API pour les routes transverses IA exposées sous `/api/v1/innovations`.
+Tests API pour les routes IA transverses stabilisées par domaine métier.
 
-Couvre les endpoints de compatibilité qui délèguent au service `src.services.ia_avancee`.
+Couvre les endpoints `recettes`, `famille`, `dashboard`, `rapports`, `courses`,
+`planning`, `habitat` et `jeux` qui délèguent au service `src.services.ia_avancee`.
 """
 
 from __future__ import annotations
@@ -45,7 +46,7 @@ def admin_headers():
 
 @pytest.fixture
 def client(app):
-    """Client sync local pour les endpoints de compatibilité `/innovations`."""
+    """Client sync local pour les routes IA transverses stabilisées."""
     with TestClient(app) as c:
         yield c
 
@@ -54,7 +55,7 @@ def client(app):
 
 
 class TestBilanAnnuel:
-    """Tests pour POST /api/v1/innovations/bilan-annuel."""
+    """Tests pour POST /api/v1/rapports/bilan-annuel."""
 
     def test_bilan_annuel_retourne_sections(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import BilanAnnuelResponse, SectionBilanAnnuel
@@ -68,7 +69,7 @@ class TestBilanAnnuel:
         )
 
         response = client.post(
-            "/api/v1/innovations/bilan-annuel",
+            "/api/v1/rapports/bilan-annuel",
             json={"annee": 2025},
             headers=auth_headers,
         )
@@ -83,7 +84,7 @@ class TestBilanAnnuel:
         mock_innovations_service.generer_bilan_annuel.return_value = BilanAnnuelResponse()
 
         response = client.post(
-            "/api/v1/innovations/bilan-annuel",
+            "/api/v1/rapports/bilan-annuel",
             json={},
             headers=auth_headers,
         )
@@ -93,7 +94,7 @@ class TestBilanAnnuel:
         mock_innovations_service.generer_bilan_annuel.return_value = None
 
         response = client.post(
-            "/api/v1/innovations/bilan-annuel",
+            "/api/v1/rapports/bilan-annuel",
             json={"annee": 2024},
             headers=auth_headers,
         )
@@ -106,7 +107,7 @@ class TestBilanAnnuel:
 
 
 class TestScoreBienEtre:
-    """Tests pour GET /api/v1/innovations/score-bien-etre."""
+    """Tests pour GET /api/v1/rapports/score-bien-etre."""
 
     def test_score_bien_etre_composite(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import DimensionBienEtre, ScoreBienEtreResponse
@@ -121,7 +122,7 @@ class TestScoreBienEtre:
             conseils=["Continuez le sport !"],
         )
 
-        response = client.get("/api/v1/innovations/score-bien-etre", headers=auth_headers)
+        response = client.get("/api/v1/rapports/score-bien-etre", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["score_global"] == 72.5
@@ -131,7 +132,7 @@ class TestScoreBienEtre:
     def test_score_bien_etre_service_none(self, client, auth_headers, mock_innovations_service):
         mock_innovations_service.calculer_score_bien_etre.return_value = None
 
-        response = client.get("/api/v1/innovations/score-bien-etre", headers=auth_headers)
+        response = client.get("/api/v1/rapports/score-bien-etre", headers=auth_headers)
         assert response.status_code == 200
 
 
@@ -139,7 +140,7 @@ class TestScoreBienEtre:
 
 
 class TestEnrichissementContacts:
-    """Tests pour GET /api/v1/innovations/enrichissement-contacts."""
+    """Tests pour GET /api/v1/famille/enrichissement-contacts."""
 
     def test_enrichissement_contacts(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import ContactEnrichi, EnrichissementContactsResponse
@@ -158,7 +159,7 @@ class TestEnrichissementContacts:
         )
 
         response = client.get(
-            "/api/v1/innovations/enrichissement-contacts", headers=auth_headers
+            "/api/v1/famille/enrichissement-contacts", headers=auth_headers
         )
         assert response.status_code == 200
         data = response.json()
@@ -169,7 +170,7 @@ class TestEnrichissementContacts:
 
 
 class TestTendancesLoto:
-    """Tests pour GET /api/v1/innovations/tendances-loto."""
+    """Tests pour GET /api/v1/jeux/tendances-loto."""
 
     def test_tendances_loto(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import AnalyseTendancesLotoResponse, TendanceLoto
@@ -183,7 +184,7 @@ class TestTendancesLoto:
         )
 
         response = client.get(
-            "/api/v1/innovations/tendances-loto?jeu=loto", headers=auth_headers
+            "/api/v1/jeux/tendances-loto?jeu=loto", headers=auth_headers
         )
         assert response.status_code == 200
         data = response.json()
@@ -198,7 +199,7 @@ class TestTendancesLoto:
         )
 
         response = client.get(
-            "/api/v1/innovations/tendances-loto?jeu=euromillions", headers=auth_headers
+            "/api/v1/jeux/tendances-loto?jeu=euromillions", headers=auth_headers
         )
         assert response.status_code == 200
 
@@ -207,7 +208,7 @@ class TestTendancesLoto:
 
 
 class TestParcoursMagasin:
-    """Tests pour POST /api/v1/innovations/parcours-magasin."""
+    """Tests pour POST /api/v1/courses/parcours-magasin."""
 
     def test_parcours_magasin_optimise(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import ParcoursOptimiseResponse
@@ -220,7 +221,7 @@ class TestParcoursMagasin:
         )
 
         response = client.post(
-            "/api/v1/innovations/parcours-magasin",
+            "/api/v1/courses/parcours-magasin",
             json={"liste_id": 1},
             headers=auth_headers,
         )
@@ -233,7 +234,7 @@ class TestParcoursMagasin:
 
 
 class TestVeilleEmploi:
-    """Tests pour POST /api/v1/innovations/veille-emploi."""
+    """Tests pour POST /api/v1/famille/veille-emploi."""
 
     def test_veille_emploi_avec_criteres(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import OffreEmploi, VeilleEmploiResponse
@@ -253,7 +254,7 @@ class TestVeilleEmploi:
         )
 
         response = client.post(
-            "/api/v1/innovations/veille-emploi",
+            "/api/v1/famille/veille-emploi",
             json={
                 "domaine": "RH",
                 "mots_cles": ["RH"],
@@ -287,7 +288,7 @@ class TestModeInvite:
         )
 
         response = client.post(
-            "/api/v1/innovations/invite/creer",
+            "/api/v1/rapports/invite/creer",
             json={"nom_invite": "Mamie Françoise", "modules": ["repas", "routines"]},
             headers=auth_headers,
         )
@@ -298,7 +299,7 @@ class TestModeInvite:
 
     def test_creer_lien_invite_module_invalide(self, client, auth_headers, mock_innovations_service):
         response = client.post(
-            "/api/v1/innovations/invite/creer",
+            "/api/v1/rapports/invite/creer",
             json={"nom_invite": "Test", "modules": ["admin", "secret"]},
             headers=auth_headers,
         )
@@ -315,7 +316,7 @@ class TestModeInvite:
             notes="Accès invité",
         )
 
-        response = client.get("/api/v1/innovations/invite/abc123")
+        response = client.get("/api/v1/rapports/invite/abc123")
         assert response.status_code == 200
         data = response.json()
         assert data["enfant"]["prenom"] == "Jules"
@@ -323,15 +324,15 @@ class TestModeInvite:
     def test_acceder_invite_token_expire(self, client, mock_innovations_service):
         mock_innovations_service.obtenir_donnees_invite.return_value = None
 
-        response = client.get("/api/v1/innovations/invite/expired-token")
+        response = client.get("/api/v1/rapports/invite/expired-token")
         assert response.status_code == 404
 
 
 # Modes famille et météo
 
 
-class TestVacationModeInnovations:
-    """Tests des endpoints de compatibilité pour le mode vacances, les insights et la météo contextuelle."""
+class TestVacationModeTransverse:
+    """Tests des endpoints métier pour le mode vacances, les insights et la météo contextuelle."""
 
     def test_lire_mode_vacances(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import ModeVacancesResponse
@@ -344,7 +345,7 @@ class TestVacationModeInnovations:
             recommandations=["Checklist voyage prête"],
         )
 
-        response = client.get("/api/v1/innovations/mode-vacances", headers=auth_headers)
+        response = client.get("/api/v1/famille/mode-vacances", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["actif"] is True
@@ -362,7 +363,7 @@ class TestVacationModeInnovations:
         )
 
         response = client.post(
-            "/api/v1/innovations/mode-vacances/config",
+            "/api/v1/famille/mode-vacances/config",
             json={"actif": False, "checklist_voyage_auto": False},
             headers=auth_headers,
         )
@@ -385,7 +386,7 @@ class TestVacationModeInnovations:
         )
 
         response = client.get(
-            "/api/v1/innovations/insights-quotidiens?limite=2",
+            "/api/v1/dashboard/insights-quotidiens?limite=2",
             headers=auth_headers,
         )
         assert response.status_code == 200
@@ -407,7 +408,7 @@ class TestVacationModeInnovations:
             ],
         )
 
-        response = client.get("/api/v1/innovations/meteo-contextuelle", headers=auth_headers)
+        response = client.get("/api/v1/dashboard/meteo-contextuelle", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["ville"] == "Paris"
@@ -417,8 +418,8 @@ class TestVacationModeInnovations:
 # Préférences, planification et batch
 
 
-class TestLearningPreferencesInnovations:
-    """Tests des endpoints IA avancée liés aux préférences, à la planification et au batch."""
+class TestLearningPreferencesTransverses:
+    """Tests des endpoints IA transverses liés aux préférences, à la planification et au batch."""
 
     def test_preferences_apprises(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import ApprentissagePreferencesResponse, PreferenceApprise
@@ -432,11 +433,27 @@ class TestLearningPreferencesInnovations:
             ajustements_suggestions=["Prioriser les recettes poisson"],
         )
 
-        response = client.get("/api/v1/innovations/preferences-apprises", headers=auth_headers)
+        response = client.get("/api/v1/preferences/preferences-apprises", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["semaines_analysees"] >= 2
         assert data["influence_active"] is True
+
+    def test_saisonnalite_intelligente(self, client, auth_headers, mock_innovations_service):
+        from src.services.ia_avancee.types_central import SaisonnaliteIntelligenteResponse
+
+        mock_innovations_service.appliquer_saisonnalite_intelligente.return_value = SaisonnaliteIntelligenteResponse(
+            mois_courant="avril",
+            ingredients_saison=["asperges", "radis"],
+            recettes_recommandees=["Salade printanière"],
+            conseils_achat=["Privilégier les légumes locaux"],
+        )
+
+        response = client.get("/api/v1/recettes/saisonnalite-intelligente", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["mois_courant"] == "avril"
+        assert "asperges" in data["ingredients_saison"]
 
     def test_planification_hebdo_complete_auto(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import BlocPlanificationAuto, PlanificationHebdoCompleteResponse
@@ -451,7 +468,7 @@ class TestLearningPreferencesInnovations:
             resume="Planning complet genere automatiquement",
         )
 
-        response = client.get("/api/v1/innovations/planification-auto", headers=auth_headers)
+        response = client.get("/api/v1/planning/planification-auto", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["genere_en_un_clic"] is True
@@ -469,7 +486,7 @@ class TestLearningPreferencesInnovations:
             conseils=["Paralleliser les cuissons"],
         )
 
-        response = client.get("/api/v1/innovations/batch-cooking-intelligent", headers=auth_headers)
+        response = client.get("/api/v1/batch-cooking/intelligent", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["duree_estimee_totale_minutes"] > 0
@@ -487,7 +504,7 @@ class TestLearningPreferencesInnovations:
         )
 
         response = client.post(
-            "/api/v1/innovations/carte-visuelle",
+            "/api/v1/rapports/carte-visuelle",
             json={"type_carte": "planning", "titre": "Semaine famille"},
             headers=auth_headers,
         )
@@ -505,7 +522,7 @@ class TestLearningPreferencesInnovations:
             cartes=[CarteMagazineTablette(titre="Score", valeur="78/100", action_url="/")],
         )
 
-        response = client.get("/api/v1/innovations/mode-tablette-magazine", headers=auth_headers)
+        response = client.get("/api/v1/rapports/mode-tablette-magazine", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["titre"] == "Edition tablette"
@@ -515,8 +532,8 @@ class TestLearningPreferencesInnovations:
 # Fonctions transverses long terme
 
 
-class TestTelegramEnergyInnovations:
-    """Tests des endpoints de compatibilité liés à Telegram, aux prix auto et à l'énergie temps réel."""
+class TestTelegramEnergyTransverses:
+    """Tests des endpoints métier liés à Telegram, aux prix auto et à l'énergie temps réel."""
 
     def test_telegram_conversationnel(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import CommandeTelegram, TelegramConversationnelResponse
@@ -531,7 +548,7 @@ class TestTelegramEnergyInnovations:
         )
 
         response = client.get(
-            "/api/v1/innovations/telegram-conversationnel",
+            "/api/v1/dashboard/telegram-conversationnel",
             headers=auth_headers,
         )
         assert response.status_code == 200
@@ -561,7 +578,7 @@ class TestTelegramEnergyInnovations:
         )
 
         response = client.get(
-            "/api/v1/innovations/comparateur-prix-auto?top_n=20",
+            "/api/v1/courses/comparateur-prix-auto?top_n=20",
             headers=auth_headers,
         )
         assert response.status_code == 200
@@ -584,13 +601,21 @@ class TestTelegramEnergyInnovations:
         )
 
         response = client.get(
-            "/api/v1/innovations/energie-temps-reel",
+            "/api/v1/habitat/energie-temps-reel",
             headers=auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert data["source"] in {"linky", "estimation_releves"}
         assert data["consommation_mois_kwh"] is not None
+
+
+class TestSuppressionPrefixeInnovations:
+    """Vérifie que l'ancien namespace `/api/v1/innovations` n'est plus exposé."""
+
+    def test_prefixe_innovations_retourne_404(self, client, auth_headers):
+        response = client.get("/api/v1/innovations/score-bien-etre", headers=auth_headers)
+        assert response.status_code == 404
 
 
 

@@ -35,12 +35,12 @@ router = APIRouter(prefix="/api/v1/jeux", tags=["Jeux"])
 @router.get("/tendances-loto", response_model=AnalyseTendancesLotoResponse, responses=REPONSES_IA)
 @gerer_exception_api
 async def tendances_loto(
-    type_jeu: str = Query("loto", pattern="^(loto|euromillions)$"),
+    jeu: str = Query("loto", pattern="^(loto|euromillions)$", description="Type de jeu"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> AnalyseTendancesLotoResponse:
     """Alias métier pour l'analyse des tendances Loto / Euromillions."""
     service = obtenir_service_innovations_jeux()
-    result = service.analyser_tendances_loto(type_jeu=type_jeu)
+    result = service.analyser_tendances_loto(type_jeu=jeu)
     return result or AnalyseTendancesLotoResponse()
 
 router.include_router(paris_router, tags=["Jeux — Paris"])

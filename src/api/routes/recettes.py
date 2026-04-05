@@ -33,6 +33,7 @@ from src.api.schemas.errors import (
 from src.api.schemas.ia_transverses import (
     IdeeRepasSoirRequest,
     PatternsAlimentairesResponse,
+    SaisonnaliteIntelligenteResponse,
     SuggestionRepasSoirResponse,
 )
 from src.api.utils import (
@@ -72,6 +73,17 @@ async def obtenir_patterns_alimentaires(
     service = obtenir_service_innovations_cuisine()
     result = service.analyser_patterns_alimentaires(periode_jours=periode_jours)
     return result or PatternsAlimentairesResponse()
+
+
+@router.get("/saisonnalite-intelligente", response_model=SaisonnaliteIntelligenteResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_saisonnalite_intelligente(
+    user: dict[str, Any] = Depends(require_auth),
+) -> SaisonnaliteIntelligenteResponse:
+    """Alias métier pour la saisonnalité intelligente des repas."""
+    service = obtenir_service_innovations_cuisine()
+    result = service.appliquer_saisonnalite_intelligente()
+    return result or SaisonnaliteIntelligenteResponse()
 
 
 @router.get("/garmin-repas-adaptatif", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)

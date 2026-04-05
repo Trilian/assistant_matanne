@@ -6,12 +6,18 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Mic, MicOff, Loader2, ArrowRight, X } from "lucide-react";
+import { Mic, MicOff, Loader2, ArrowRight, X, Captions, Sparkles } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { classifierMemoVocal } from "@/bibliotheque/api/ia-avancee";
 import type { MemoVocalResponse } from "@/types/ia-avancee";
+
+type ReconnaissanceNavigateur = new () => SpeechRecognition;
+type FenetreReconnaissance = Window & {
+  SpeechRecognition?: ReconnaissanceNavigateur;
+  webkitSpeechRecognition?: ReconnaissanceNavigateur;
+};
 
 const LABELS_MODULES: Record<string, string> = {
   courses: "🛒 Courses",
@@ -24,6 +30,8 @@ const LABELS_MODULES: Record<string, string> = {
   rappel: "⏰ Rappel",
 };
 
+const EXEMPLES_MEMOS = ["Ajoute du lait à la liste", "Note : appeler le plombier", "Prévoir un dîner végétal demain"];
+
 export function MemoVocal() {
   const router = useRouter();
   const [enEcoute, setEnEcoute] = useState(false);
@@ -33,9 +41,14 @@ export function MemoVocal() {
   const [erreur, setErreur] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
+  const supportVocal =
+    typeof window !== "undefined" &&
+    Boolean((window as FenetreReconnaissance).SpeechRecognition || (window as FenetreReconnaissance).webkitSpeechRecognition);
+  const confiancePourcent = resultat ? Math.round(resultat.confiance * 100) : 0;
+
   const demarrerEcoute = useCallback(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const fenetre = window as FenetreReconnaissance;
+    const SpeechRecognition = fenetre.SpeechRecognition || fenetre.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       setErreur("La reconnaissance vocale n'est pas supportée par votre navigateur.");
@@ -101,60 +114,83 @@ export function MemoVocal() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Mic className="h-4 w-4" />
-          Mémo vocal
-        </CardTitle>
+    <Card className="w-full max-w-md overflow-hidden border-sky-200/70 bg-[linear-gradient(135deg,rgba(240,249,255,0.96),rgba(255,255,255,0.92))] shadow-sm dark:border-sky-900/60 dark:bg-[linear-gradient(135deg,rgba(8,19,30,0.96),rgba(9,14,22,0.94))]">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Mic className="h-4 w-4" />
+              Mémo vocal
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Capturez une idée à la voix puis laissez l&apos;IA proposer le bon module familial.
+            </p>
+          </div>
+          <Badge variant={supportVocal ? "secondary" : "outline"}>{supportVocal ? "Prêt" : "Limité"}</Badge>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Bouton micro */}
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline">fr-FR</Badge>
+          <Badge variant="outline">Capture rapide</Badge>
+          <Badge variant="outline">Routage IA</Badge>
+        </div>
+
         <div className="flex justify-center">
           <Button
             size="lg"
             variant={enEcoute ? "destructive" : "default"}
-            className="rounded-full h-16 w-16"
+            className="h-20 w-20 rounded-full shadow-lg"
             onClick={enEcoute ? arreterEcoute : demarrerEcoute}
+            aria-pressed={enEcoute}
           >
-            {enEcoute ? (
-              <MicOff className="h-6 w-6 animate-pulse" />
-            ) : (
-              <Mic className="h-6 w-6" />
-            )}
+            {enEcoute ? <MicOff className="h-7 w-7 animate-pulse" /> : <Mic className="h-7 w-7" />}
           </Button>
         </div>
 
-        {enEcoute && (
-          <p className="text-center text-sm text-muted-foreground animate-pulse">
-            🎙️ Parlez maintenant…
-          </p>
-        )}
+        <div className="text-center text-sm text-muted-foreground" role="status" aria-live="polite">
+          {enEcoute ? "🎙️ Écoute active — parlez maintenant…" : "Touchez le micro puis dictez une action ou une note."}
+        </div>
 
-        {/* Transcription */}
+        <div className="rounded-xl border bg-background/70 p-3 text-sm">
+          <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <Captions className="h-3.5 w-3.5" />
+            Exemples rapides
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {EXEMPLES_MEMOS.map((exemple) => (
+              <button
+                key={exemple}
+                type="button"
+                onClick={() => setTranscription(exemple)}
+                className="rounded-full border border-dashed px-2.5 py-1 text-xs transition-colors hover:bg-muted"
+              >
+                {exemple}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {transcription && (
-          <div className="rounded-md bg-muted p-3 text-sm">
-            <p className="text-xs text-muted-foreground mb-1">Transcription :</p>
-            {transcription}
+          <div className="rounded-xl border bg-background/80 p-3 text-sm shadow-sm">
+            <p className="mb-1 text-xs text-muted-foreground">Transcription détectée</p>
+            <p>{transcription}</p>
           </div>
         )}
 
-        {/* Actions post-transcription */}
         {transcription && !resultat && (
           <div className="flex gap-2">
-            <Button
-              onClick={classifier}
-              disabled={chargement}
-              className="flex-1"
-              size="sm"
-            >
+            <Button onClick={classifier} disabled={chargement} className="flex-1" size="sm">
               {chargement ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                   Classification…
                 </>
               ) : (
-                "Classifier avec l'IA"
+                <>
+                  <Sparkles className="mr-1 h-4 w-4" />
+                  Classifier avec l&apos;IA
+                </>
               )}
             </Button>
             <Button variant="ghost" size="sm" onClick={reinitialiser}>
@@ -163,21 +199,24 @@ export function MemoVocal() {
           </div>
         )}
 
-        {/* Résultat */}
         {resultat && (
-          <div className="rounded-md border p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <Badge>{LABELS_MODULES[resultat.module] ?? resultat.module}</Badge>
-              <span className="text-xs text-muted-foreground">
-                Confiance : {Math.round(resultat.confiance * 100)}%
+          <div className="space-y-3 rounded-xl border bg-background/80 p-3 shadow-sm">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge>{LABELS_MODULES[resultat.module] ?? resultat.module}</Badge>
+                <Badge variant="outline">{resultat.action}</Badge>
+              </div>
+              <span
+                className={`text-xs font-medium ${
+                  confiancePourcent >= 80 ? "text-emerald-600" : confiancePourcent >= 60 ? "text-amber-600" : "text-muted-foreground"
+                }`}
+              >
+                Confiance {confiancePourcent}%
               </span>
             </div>
-            <p className="text-sm">
-              <span className="font-medium">Action :</span> {resultat.action}
-            </p>
-            <p className="text-sm">{resultat.contenu}</p>
+            <p className="text-sm leading-6">{resultat.contenu}</p>
             {resultat.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {resultat.tags.map((tag) => (
                   <Badge key={tag} variant="outline" className="text-[10px]">
                     #{tag}
@@ -193,7 +232,8 @@ export function MemoVocal() {
                   onClick={() => router.push(resultat.destination_url)}
                   className="flex-1"
                 >
-                  Aller <ArrowRight className="h-3 w-3 ml-1" />
+                  Aller
+                  <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
               )}
               <Button size="sm" variant="ghost" onClick={reinitialiser}>
@@ -203,10 +243,7 @@ export function MemoVocal() {
           </div>
         )}
 
-        {/* Erreur */}
-        {erreur && (
-          <p className="text-sm text-destructive text-center">{erreur}</p>
-        )}
+        {erreur && <p className="text-center text-sm text-destructive">{erreur}</p>}
       </CardContent>
     </Card>
   );

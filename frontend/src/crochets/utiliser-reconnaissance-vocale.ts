@@ -3,24 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
 // SpeechRecognition types (browser Web Speech API)
-type SpeechRecognitionInstance = {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  onresult: ((event: SpeechRecognitionResultEvent) => void) | null;
-  onerror: ((event: { error: string }) => void) | null;
-  onend: (() => void) | null;
-};
-
-type SpeechRecognitionResultEvent = {
-  resultIndex: number;
-  results: Array<{ isFinal: boolean; 0: { transcript: string } }>;
-};
-
-type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
+type SpeechRecognitionCtor = new () => SpeechRecognition;
 
 type WindowWithSpeech = Window & {
   SpeechRecognition?: SpeechRecognitionCtor;
@@ -63,7 +46,7 @@ export function utiliserReconnaissanceVocale(
   const [enEcoute, setEnEcoute] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
-  const reconnaissanceRef = useRef<SpeechRecognitionInstance | null>(null);
+  const reconnaissanceRef = useRef<SpeechRecognition | null>(null);
   const onResultatRef = useRef(onResultat);
   onResultatRef.current = onResultat;
 
@@ -88,7 +71,7 @@ export function utiliserReconnaissanceVocale(
     reconnaissance.continuous = continu;
     reconnaissance.interimResults = resultatsInterimaires;
 
-    reconnaissance.onresult = (event: SpeechRecognitionResultEvent) => {
+    reconnaissance.onresult = (event: SpeechRecognitionEvent) => {
       let texteInterimaire = "";
       let texteFinal = "";
 
@@ -113,7 +96,7 @@ export function utiliserReconnaissanceVocale(
       }
     };
 
-    reconnaissance.onerror = (event: { error: string }) => {
+    reconnaissance.onerror = (event: SpeechRecognitionErrorEvent) => {
       const messages: Record<string, string> = {
         "not-allowed": "Permission micro refusée. Autorisez l'accès au microphone.",
         "no-speech": "Aucune parole détectée.",
