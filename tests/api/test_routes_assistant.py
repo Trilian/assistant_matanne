@@ -272,7 +272,7 @@ class TestChatAssistantContextuel:
             lambda: _PointsService(),
         )
         monkeypatch.setattr(
-            "src.services.utilitaires.chat_ai.obtenir_chat_ai_service",
+            "src.services.utilitaires.chat.chat_ai.obtenir_chat_ai_service",
             lambda: _ChatService(),
         )
 
@@ -326,13 +326,14 @@ class TestChatAssistantContextuel:
             lambda: _PointsService(),
         )
         monkeypatch.setattr(
-            "src.services.utilitaires.chat_ai.obtenir_chat_ai_service",
+            "src.services.utilitaires.chat.chat_ai.obtenir_chat_ai_service",
             lambda: _ChatService(),
         )
 
         response = await async_client.post(
             "/api/v1/assistant/chat",
             json={"message": "Salut", "contexte": "general", "historique": []},
+
         )
 
         assert response.status_code == 200
@@ -376,7 +377,7 @@ class TestChatAssistantStreaming:
             lambda: _PointsService(),
         )
         monkeypatch.setattr(
-            "src.services.utilitaires.chat_ai.obtenir_chat_ai_service",
+            "src.services.utilitaires.chat.chat_ai.obtenir_chat_ai_service",
             lambda: _ChatService(),
         )
 
@@ -466,7 +467,7 @@ class TestAssistantProactif:
         }
 
         with patch(
-            "src.services.utilitaires.assistant_proactif.obtenir_service_assistant_proactif"
+            "src.services.utilitaires.chat.assistant_proactif.obtenir_service_assistant_proactif"
         ) as mock_service_fn:
             mock_service = MagicMock()
             mock_service.obtenir_derniere_suggestion.return_value = faux_payload

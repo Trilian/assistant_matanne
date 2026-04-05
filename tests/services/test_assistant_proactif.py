@@ -25,7 +25,7 @@ def test_traiter_evenement_repas_saute_declenche_un_reajustement_de_planning():
     )
 
     with patch(
-        "src.services.utilitaires.assistant_proactif.get_ia_avancee_service",
+        "src.services.utilitaires.chat.assistant_proactif.get_ia_avancee_service",
         return_value=faux_service_ia,
     ):
         resultat = service.traiter_evenement(

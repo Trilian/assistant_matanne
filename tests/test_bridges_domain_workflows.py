@@ -343,7 +343,7 @@ class TestBridgesIntegration:
         from src.services.cuisine.inter_module_inventaire_fifo import (
             obtenir_inventaire_fifo_bridge,
         )
-        from src.services.utilitaires.inter_module_chat_event_bus import (
+        from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
             obtenir_chat_event_bus_bridge,
         )
 
@@ -370,7 +370,7 @@ class TestBridgesIntegration:
             from src.services.cuisine.inter_module_inventaire_fifo import (
                 enregistrer_inventaire_fifo_subscribers,
             )
-            from src.services.utilitaires.inter_module_chat_event_bus import (
+            from src.services.utilitaires.bridges.inter_module_chat_event_bus import (
                 enregistrer_chat_event_bus_subscribers,
             )
 
