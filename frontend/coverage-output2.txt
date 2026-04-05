@@ -1,0 +1,625 @@
+﻿
+[1m[46m RUN [49m[22m [36mv4.1.2 [39m[90mC:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32mÔ£ô[39m src/app/(app)/maison/visualisation/visualisation.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 1125[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Plan de la maison [33m 394[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m active le mode ├®dition [33m 316[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m ouvre les d├®tails d'une pi├¿ce et permet la navigation d'action [33m 408[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/maison/maison-hub.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 1237[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre, le briefing et les stats r├®capitulatives [33m 546[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les blocs contextuels du jour et les liens majeurs [33m 427[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/activites/activites.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 1689[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Activit├®s [33m 475[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m appelle obtenirSuggestionsActivitesAuto lors du clic IA [33m 336[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les cards de pr├®-remplissage apr├¿s r├®ponse IA [33m 428[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/famille/pages-famille.test.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 2683[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m rend le hub famille sans erreur [33m 1139[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m rend la page routines sans erreur [33m 744[2mms[22m[39m
+ [31mÔØ»[39m src/__tests__/components/recherche-globale.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2794[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m n'appelle pas l'API si la requete a moins de 2 caracteres [33m 439[2mms[22m[39m
+[31m     [31m├ù[31m effectue la recherche et affiche les resultats groupes[39m[33m 1429[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m navigue vers le resultat selectionne [33m 541[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche un toast en cas d'erreur API [33m 380[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/achats/achats.test.tsx [2m([22m[2m9 tests[22m[2m)[22m[33m 2233[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les triggers de suggestions IA [33m 523[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les suggestions IA apr├¿s g├®n├®ration [33m 322[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/cuisine/formulaire-recette.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 2135[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le mode cr├®ation [33m 395[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m permet d'ajouter puis retirer un ingr├®dient [33m 769[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche une erreur de validation si le nom est trop court [33m 807[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/inventaire/inventaire.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1839[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Inventaire [33m 630[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les articles en stock et l'aide mobile du tableau [33m 327[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m propose un export CSV compatible Excel [33m 356[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/dashboard.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 2500[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les metriques de bienvenue et les actions rapides [33m 1260[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche la suggestion du soir et la navigation associee [33m 758[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/planning/planning-repas.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 3141[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Planning Repas [33m 619[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m bascule entre vue semaine et vue mois [33m 1304[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m planifie une suppression annulable lors du retrait d'un repas [33m 950[2mms[22m[39m
+ [32mÔ£ô[39m src/composants/jeux/stats-personnelles.test.tsx [2m([22m[2m13 tests[22m[2m)[22m[33m 2744[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les 4 cartes m├®triques [33m 494[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les d├®tails financiers dans tab D├®tails [33m 323[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/famille-hub.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 1190[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Famille [33m 553[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m rend les liens corrects [33m 441[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/outils/convertisseur/convertisseur.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 1045[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre [33m 558[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/maison/equipements/page.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 1007[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les documents de garantie li├®s ├á un ├®quipement [33m 343[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m permet de choisir un document existant depuis la fiche ├®quipement [33m 303[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/habitat/veille-immo.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 1046[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m envoie les sources selectionnees lors de la synchronisation [33m 529[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/tablette/page.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 1089[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le mode guid├® et permet la lecture vocale de l'├®tape courante [33m 841[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/recettes/recettes.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 1198[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre principal [33m 335[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/maison/jardin/jardin.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 984[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Jardin [33m 467[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/outils/nutritionniste.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 911[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m appelle envoyerMessageChat lors de l'envoi [33m 458[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/habitat/habitat-hub.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 966[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Habitat et les sections principales [33m 961[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/jeux/paris/paris.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 974[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Paris Sportifs [33m 405[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/outils/outils-hub.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 909[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m rend les liens corrects [33m 426[2mms[22m[39m
+ [32mÔ£ô[39m src/composants/jeux/tableau-matchs-expert.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 792[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche une aide mobile pour balayer le tableau [33m 365[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche un ├®tat vide guid├® quand aucun match ne correspond [33m 423[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/outils/minuteur/minuteur.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 775[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre [33m 402[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/outils/assistant-vocal.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 683[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m envoie une commande via le champ texte [33m 471[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/components/nav-mobile.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 588[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche des indicateurs de badge sur les modules principaux et le drawer plus [33m 584[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/components/phase3-ui.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 726[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les ├®tapes et permet de naviguer dans le flux [33m 711[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/budget/budget.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 638[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/jeux/loto/loto.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 600[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Loto [33m 462[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/jeux/jeux-hub.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 639[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m rend les liens corrects [33m 306[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/batch-cooking/batch-cooking.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 586[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Batch Cooking [33m 431[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/components/en-tete-fil-ariane.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 574[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m ouvre la recherche, bascule le th├¿me, expose le menu profil et affiche le module actif [33m 365[2mms[22m[39m
+ [32mÔ£ô[39m src/composants/dashboard/grille-dashboard-dnd.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 589[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m r├®ordonne les widgets et envoie les d├®tails de reorder [33m 404[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/jeux/euromillions/euromillions.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 510[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le pr├®-remplissage rapide quand des param├¿tres sont pr├®sents [33m 506[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/parametres/integrations/page.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 452[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche la section Google Calendar quand le compte n'est pas connect├® [33m 375[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/outils/chat-ia/chat-ia.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 501[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le bouton Envoyer [33m 326[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/habitat/marche.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 518[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche les indicateurs DVF et les transactions recentes [33m 513[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/cuisine/photo-frigo.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 478[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre de la page [33m 393[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/routines/routines.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 543[2mms[22m[39m
+     [33m[2mÔ£ô[22m[39m affiche le titre Routines [33m 446[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/famille/cartes-famille.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 378[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/famille/timeline.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 413[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/hooks.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 371[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/anniversaires/anniversaires.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 337[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/outils/notes/notes.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 303[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/pages/hubs.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 482[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/contacts/contacts.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 302[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/recettes/[id]/detail.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 267[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/anti-gaspillage/anti-gaspillage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 260[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/components/barre-laterale.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 238[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/documents/documents.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 266[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/planning/timeline/timeline.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 214[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/ma-journee/ma-journee.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 166[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/parametres/parametres.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 223[2mms[22m[39m
+ [32mÔ£ô[39m src/crochets/__tests__/utiliser-auth.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 187[2mms[22m[39m
+ [32mÔ£ô[39m src/crochets/__tests__/hooks-supplementaires.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/outils/meteo/meteo.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 100[2mms[22m[39m
+ [32mÔ£ô[39m src/crochets/__tests__/hooks.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 112[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/garmin/garmin.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 139[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/jeux/heatmap-cotes.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 125[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/famille/weekend/weekend.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 100[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/maison/plan-3d.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 66[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/components/coquille-app.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 96[2mms[22m[39m
+ [32mÔ£ô[39m src/composants/ui/motion-utils.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 118[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/hooks/utiliser-websocket.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 75[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/recettes/[id]/modifier/modifier.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 60[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/hooks/utiliser-websocket-courses.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 65[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/api-clients.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 40[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/cuisine/recettes/nouveau/nouveau.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 42[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/hooks/utiliser-crud-dialog.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/hooks/utiliser-auth.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/client.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+node.exe : Not implemented: navigation to another Document
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Not implemented...nother Document 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/auth.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/validateurs-zod.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/api-clients.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/famille.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/jeux.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/maison.test.ts [2m([22m[2m28 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/magasins/store-notifications.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/magasins/__tests__/stores.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/recettes.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/inventaire.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mÔ£ô[39m src/magasins/store-maison.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/planning.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/courses.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/tableau-bord.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/admin-jobs.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/tableau-bord-widgets-actions.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32mÔ£ô[39m src/magasins/store-ui.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/cuisine/inventaire-treemap.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/hooks/utiliser-api.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m src/bibliotheque/api/__tests__/admin-notifications.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mÔ£ô[39m src/magasins/store-auth.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/budget-utils.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32mÔ£ô[39m src/app/(app)/planning/planning.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 5[2mms[22m[39m
+Failed to parse file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne
+/frontend/src/app/(app)/cuisine/composants/AnalyseNutritionExample.tsx. 
+Excluding it from coverage.
+ Error [RolldownError]: Parse failed with 1 error:
+Unexpected token
+43:   const [niveauActivite, setNiveauActivite] = useState('modere')
+44:   const [objectif, setObjectif] = useState('Croissance saine')
+45:   const [recettes, setRecettes] = useState<string[]>(['P├ótes', 'Poulet', 
+'L├®gumes'])
+                                                      ^
+46:   const [nouvelleRecette, setNouvelleRecette] = useState('')
+    at error (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/f
+rontend/node_modules/rolldown/dist/shared/logs-D80CXhvg.mjs:147:24)
+    at normalizeParseError (file:///C:/Users/menar/Documents/Projet_perso/assis
+tant_matanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:26:9)
+    at wrap (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/fr
+ontend/node_modules/rolldown/dist/parse-ast-index.mjs:6:39)
+    at parseAstAsync (file:///C:/Users/menar/Documents/Projet_perso/assistant_m
+atanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:55:9)
+    at V8CoverageProvider.remapCoverage (file:///C:/Users/menar/Documents/Proje
+t_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/provid
+er.js:133:10)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/@vitest/coverage-v8/dist/provider.js:119:23
+    at async Promise.all (index 2)
+    at V8CoverageProvider.getCoverageMapForUncoveredFiles (file:///C:/Users/men
+ar/Documents/Projet_perso/assistant_matanne/frontend/node_modules/@vitest/cover
+age-v8/dist/provider.js:109:4)
+    at V8CoverageProvider.generateCoverage (file:///C:/Users/menar/Documents/Pr
+ojet_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/pro
+vider.js:56:29)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:13569:23 {
+  code: 'PARSE_ERROR',
+  id: undefined,
+  pos: 1552
+}
+Failed to parse file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne
+/frontend/src/app/(app)/cuisine/composants/PredictionConsommationExample.tsx. 
+Excluding it from coverage.
+ Error [RolldownError]: Parse failed with 1 error:
+Expected a semicolon or an implicit semicolon after a statement, but found none
+21:  */
+22: 
+23: interface HistoriqueAchat {
+             ^
+24:   mois: number
+25:   quantite_kg: number
+    at error (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/f
+rontend/node_modules/rolldown/dist/shared/logs-D80CXhvg.mjs:147:24)
+    at normalizeParseError (file:///C:/Users/menar/Documents/Projet_perso/assis
+tant_matanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:26:9)
+    at wrap (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/fr
+ontend/node_modules/rolldown/dist/parse-ast-index.mjs:6:39)
+    at parseAstAsync (file:///C:/Users/menar/Documents/Projet_perso/assistant_m
+atanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:55:9)
+    at V8CoverageProvider.remapCoverage (file:///C:/Users/menar/Documents/Proje
+t_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/provid
+er.js:133:10)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/@vitest/coverage-v8/dist/provider.js:119:23
+    at async Promise.all (index 3)
+    at V8CoverageProvider.getCoverageMapForUncoveredFiles (file:///C:/Users/men
+ar/Documents/Projet_perso/assistant_matanne/frontend/node_modules/@vitest/cover
+age-v8/dist/provider.js:109:4)
+    at V8CoverageProvider.generateCoverage (file:///C:/Users/menar/Documents/Pr
+ojet_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/pro
+vider.js:56:29)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:13569:23 {
+  code: 'PARSE_ERROR',
+  id: undefined,
+  pos: 846
+}
+Failed to parse file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne
+/frontend/src/app/(app)/famille/composants/AnalyseHabitesExample.tsx. 
+Excluding it from coverage.
+ Error [RolldownError]: Parse failed with 1 error:
+Unexpected token
+24:   const [habitNom, setHabitNom] = useState('')
+25:   const [contexte, setContexte] = useState('')
+26:   const [historique, setHistorique] = useState<number[]>([1, 1, 0, 1, 1, 
+0, 1])
+                                                          ^
+27: 
+28:   const { mutate: analyserHabitude, isPending, data } = 
+utiliseAnalyseHabitudes()
+    at error (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/f
+rontend/node_modules/rolldown/dist/shared/logs-D80CXhvg.mjs:147:24)
+    at normalizeParseError (file:///C:/Users/menar/Documents/Projet_perso/assis
+tant_matanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:26:9)
+    at wrap (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/fr
+ontend/node_modules/rolldown/dist/parse-ast-index.mjs:6:39)
+    at parseAstAsync (file:///C:/Users/menar/Documents/Projet_perso/assistant_m
+atanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:55:9)
+    at V8CoverageProvider.remapCoverage (file:///C:/Users/menar/Documents/Proje
+t_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/provid
+er.js:133:10)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/@vitest/coverage-v8/dist/provider.js:119:23
+    at async Promise.all (index 0)
+    at V8CoverageProvider.getCoverageMapForUncoveredFiles (file:///C:/Users/men
+ar/Documents/Projet_perso/assistant_matanne/frontend/node_modules/@vitest/cover
+age-v8/dist/provider.js:109:4)
+    at V8CoverageProvider.generateCoverage (file:///C:/Users/menar/Documents/Pr
+ojet_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/pro
+vider.js:56:29)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:13569:23 {
+  code: 'PARSE_ERROR',
+  id: undefined,
+  pos: 1045
+}
+Failed to parse file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne
+/frontend/src/app/(app)/maison/composants/EstimationProjetExample.tsx. 
+Excluding it from coverage.
+ Error [RolldownError]: Parse failed with 1 error:
+Unexpected token
+35:   const [surfaceM2, setSurfaceM2] = useState('')
+36:   const [typeHabit, setTypeHabit] = useState('Maison moderne')
+37:   const [contraintes, setContraintes] = useState<string[]>([])
+                                                            ^
+38: 
+39:   const { mutate: estimerProjet, isPending, data } = 
+utiliseEstimationProjet()
+    at error (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/f
+rontend/node_modules/rolldown/dist/shared/logs-D80CXhvg.mjs:147:24)
+    at normalizeParseError (file:///C:/Users/menar/Documents/Projet_perso/assis
+tant_matanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:26:9)
+    at wrap (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/fr
+ontend/node_modules/rolldown/dist/parse-ast-index.mjs:6:39)
+    at parseAstAsync (file:///C:/Users/menar/Documents/Projet_perso/assistant_m
+atanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:55:9)
+    at V8CoverageProvider.remapCoverage (file:///C:/Users/menar/Documents/Proje
+t_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/provid
+er.js:133:10)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/@vitest/coverage-v8/dist/provider.js:119:23
+    at async Promise.all (index 11)
+    at V8CoverageProvider.getCoverageMapForUncoveredFiles (file:///C:/Users/men
+ar/Documents/Projet_perso/assistant_matanne/frontend/node_modules/@vitest/cover
+age-v8/dist/provider.js:109:4)
+    at V8CoverageProvider.generateCoverage (file:///C:/Users/menar/Documents/Pr
+ojet_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/pro
+vider.js:56:29)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:13569:23 {
+  code: 'PARSE_ERROR',
+  id: undefined,
+  pos: 1332
+}
+Failed to parse file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne
+/frontend/src/app/(app)/outils/composants/AnalyseMeteoExample.tsx. Excluding 
+it from coverage.
+ Error [RolldownError]: Parse failed with 1 error:
+Expected `from` but found `{`
+14: import { useNotifications } from '@/src/magasins/store-notifications'
+15: import { utiliseAnalyseImpactsMeteo } from 
+'@/src/crochets/utiliser-ia-modules'
+16: import type { MeteoContexte } from '@/src/bibliotheque/api/ia-modules'
+                ^
+17: 
+18: /**
+    at error (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/f
+rontend/node_modules/rolldown/dist/shared/logs-D80CXhvg.mjs:147:24)
+    at normalizeParseError (file:///C:/Users/menar/Documents/Projet_perso/assis
+tant_matanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:26:9)
+    at wrap (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/fr
+ontend/node_modules/rolldown/dist/parse-ast-index.mjs:6:39)
+    at parseAstAsync (file:///C:/Users/menar/Documents/Projet_perso/assistant_m
+atanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:55:9)
+    at V8CoverageProvider.remapCoverage (file:///C:/Users/menar/Documents/Proje
+t_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/provid
+er.js:133:10)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/@vitest/coverage-v8/dist/provider.js:119:23
+    at async Promise.all (index 4)
+    at V8CoverageProvider.getCoverageMapForUncoveredFiles (file:///C:/Users/men
+ar/Documents/Projet_perso/assistant_matanne/frontend/node_modules/@vitest/cover
+age-v8/dist/provider.js:109:4)
+    at V8CoverageProvider.generateCoverage (file:///C:/Users/menar/Documents/Pr
+ojet_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/pro
+vider.js:56:29)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:13569:23 {
+  code: 'PARSE_ERROR',
+  id: undefined,
+  pos: 493
+}
+Failed to parse file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne
+/frontend/src/app/(app)/planning/composants/AnalyseVarieteExample.tsx. 
+Excluding it from coverage.
+ Error [RolldownError]: Parse failed with 1 error:
+Expected a semicolon or an implicit semicolon after a statement, but found none
+21:  */
+22: 
+23: interface MealDay {
+             ^
+24:   date: string
+25:   petit_dejeuner: string
+    at error (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/f
+rontend/node_modules/rolldown/dist/shared/logs-D80CXhvg.mjs:147:24)
+    at normalizeParseError (file:///C:/Users/menar/Documents/Projet_perso/assis
+tant_matanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:26:9)
+    at wrap (file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/fr
+ontend/node_modules/rolldown/dist/parse-ast-index.mjs:6:39)
+    at parseAstAsync (file:///C:/Users/menar/Documents/Projet_perso/assistant_m
+atanne/frontend/node_modules/rolldown/dist/parse-ast-index.mjs:55:9)
+    at V8CoverageProvider.remapCoverage (file:///C:/Users/menar/Documents/Proje
+t_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/provid
+er.js:133:10)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/@vitest/coverage-v8/dist/provider.js:119:23
+    at async Promise.all (index 1)
+    at V8CoverageProvider.getCoverageMapForUncoveredFiles (file:///C:/Users/men
+ar/Documents/Projet_perso/assistant_matanne/frontend/node_modules/@vitest/cover
+age-v8/dist/provider.js:109:4)
+    at V8CoverageProvider.generateCoverage (file:///C:/Users/menar/Documents/Pr
+ojet_perso/assistant_matanne/frontend/node_modules/@vitest/coverage-v8/dist/pro
+vider.js:56:29)
+    at file:///C:/Users/menar/Documents/Projet_perso/assistant_matanne/frontend
+/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:13569:23 {
+  code: 'PARSE_ERROR',
+  id: undefined,
+  pos: 853
+}
+
+[31mÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[39m[1m[41m Failed Tests 1 
+[49m[22m[31mÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[39m
+
+[41m[1m FAIL [22m[49m 
+src/__tests__/components/recherche-globale.test.tsx[2m > 
+[22mRechercheGlobale[2m > [22meffectue la recherche et affiche les 
+resultats groupes
+[31m[1mAssertionError[22m[39m: expected "vi.fn()" to be called with 
+arguments: [ 'gra', 20 ][90m
+
+Received:
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[2m    "gra",[22m
+[2m    20,[22m
+[31m+   undefined,[90m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<input[39m
+            [33maria-label[39m=[32m"recherche"[39m
+            [33mplaceholder[39m=[32m"Rechercher... (min 2 caract├¿res)"[39m
+            [33mvalue[39m=[32m"gra"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-wrap gap-2 border-b px-3 py-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"rounded-full border px-2.5 py-1 text-xs 
+transition-colors border-primary bg-primary/10 text-primary"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mTout[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"rounded-full border px-2.5 py-1 text-xs 
+transition-colors border-border text-muted-foreground hover:bg-muted"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mCuisine[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"rounded-full border px-2.5 py-1 text-xs 
+transition-colors border-border text-muted-foreground hover:bg-muted"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mFamille[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"rounded-full border px-2.5 py-1 text-xs 
+transition-colors border-border text-muted-foreground hover:bg-muted"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mMaison[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"rounded-full border px-2.5 py-1 text-xs 
+transition-colors border-border text-muted-foreground hover:bg-muted"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0mOutils[0m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<div>[39m
+              [36m<span>[39m
+                [0mAucun r├®sultat trouv├®[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<section>[39m
+              [36m<h3>[39m
+                [0mRecettes[0m
+              [36m</h3>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-chef-hat mr-2 
+size-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M17 21a1 1 0 0 0 
+1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 
+4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M6 17h12"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex min-w-0 flex-1 items-start 
+justify-between gap-2"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex min-w-0 flex-col gap-0.5"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"font-medium truncate"[39m
+                    [36m>[39m
+                      [0mGratin dauphinois[0m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-xs text-muted-foreground 
+line-clamp-2"[39m
+                    [36m>[39m
+                      [0mPommes de terre creme[0m
+                    [36m</span>[39m
+                  [36m</div>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"rounded-full bg-muted px-2 py-0.5 
+text-[10px] text-muted-foreground"[39m
+                  [36m>[39m
+                    [0mRecettes[0m
+                  [36m</span>[39m
+                [36m</div>[39m
+              [36m</button>[39m
+            [36m</section>[39m
+            [36m<section>[39m
+              [36m<h3>[39m
+                [0mProjets[0m
+              [36m</h3>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-hammer mr-2 size-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 
+9"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m18 15 4-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21.5 11.5-1.914-1.914A2 2 0 0 1 19 
+8.172v-.344a2 2 0 0 0-.586-1.414l-1.657-1.657A6 6 0 0 0 12.516 3H9l1.243 
+1.243A6 6 0 0 1 12 8.485V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex min-w-0 flex-1 items-start 
+justify-between gap-2"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex min-w-0 flex-col gap-0.5"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"font-medium truncate"[39m
+                    [36m>[39m
+                      [0mRefaire la terrasse[0m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-xs text-muted-foreground 
+line-clamp-2"[39m
+                    [36m>[39m
+                      [0mPrintemps[0m
+                    [36m</span>[39m
+                  [36m</div>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"rounded-full bg-muted px-2 py-0.5 
+text-[10px] text-muted-foreground"[39m
+                  [36m>[39m
+                    [0mProjets[0m
+                  [36m</span>[39m
+                [36m</div>[39m
+              [36m</button>[39m
+            [36m</section>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+[36m [2mÔØ»[22m 
+src/__tests__/components/recherche-globale.test.tsx:[2m111:36[22m[39m
+    [90m109|[39m
+    [90m110|[39m     [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m111|[39m       [34mexpect[39m(rechercheGlobaleMock)[33m.[39m[34m
+toHaveBeenCalledWith[39m([32m"gra"[39m[33m,[39m [34m20[39m)[33m;[39m
+    [90m   |[39m                                    [31m^[39m
+    [90m112|[39m       [34mexpect[39m(screen[33m.[39m[34mgetByText[39m(
+[32m"Recettes"[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m113|[39m       [34mexpect[39m(screen[33m.[39m[34mgetByText[39m(
+[32m"Projets"[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+[90m [2mÔØ»[22m runWithExpensiveErrorDiagnosticsDisabled 
+node_modules/@testing-library/dom/dist/config.js:[2m47:12[22m[39m
+[90m [2mÔØ»[22m checkCallback 
+node_modules/@testing-library/dom/dist/wait-for.js:[2m124:77[22m[39m
+[90m [2mÔØ»[22m Timeout.checkRealTimersCallback 
+node_modules/@testing-library/dom/dist/wait-for.js:[2m118:16[22m[39m
+
+[31m[2mÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»Ô
+Ä»[1/1]ÔÄ»[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m93 passed[39m[22m[90m (94)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m484 passed[39m[22m[90m (485)[39m
+[2m   Start at [22m 09:54:22
+[2m   Duration [22m 33.32s[2m (transform 6.79s, setup 15.65s, import 69.18s, tests 51.63s, environment 138.04s)[22m
+

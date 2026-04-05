@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">4.25% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/47</span>
+                <span class='fraction'>2/47</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">5.26% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/38</span>
+                <span class='fraction'>2/38</span>
             </div>
         
             
@@ -225,25 +225,12 @@
 <a name='L160'></a><a href='#L160'>160</a>
 <a name='L161'></a><a href='#L161'>161</a>
 <a name='L162'></a><a href='#L162'>162</a>
-<a name='L163'></a><a href='#L163'>163</a>
-<a name='L164'></a><a href='#L164'>164</a>
-<a name='L165'></a><a href='#L165'>165</a>
-<a name='L166'></a><a href='#L166'>166</a>
-<a name='L167'></a><a href='#L167'>167</a>
-<a name='L168'></a><a href='#L168'>168</a>
-<a name='L169'></a><a href='#L169'>169</a>
-<a name='L170'></a><a href='#L170'>170</a>
-<a name='L171'></a><a href='#L171'>171</a>
-<a name='L172'></a><a href='#L172'>172</a>
-<a name='L173'></a><a href='#L173'>173</a>
-<a name='L174'></a><a href='#L174'>174</a>
-<a name='L175'></a><a href='#L175'>175</a>
-<a name='L176'></a><a href='#L176'>176</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L163'></a><a href='#L163'>163</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -262,18 +249,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -346,7 +323,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -365,13 +341,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -418,12 +392,13 @@
 // Cliquable avec drill-down (sous-catégories)
 // ═══════════════════════════════════════════════════════════
 &nbsp;
-<span class="cstat-no" title="statement not covered" >"use client";</span>
+"use client";
 &nbsp;
 import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { cn } from "@/bibliotheque/utils";
+import { PALETTE_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 &nbsp;
 export interface DonneeCategorieTreemap {
   nom: string;
@@ -437,18 +412,7 @@ interface TreemapBudgetProps {
   hauteur?: number;
 }
 &nbsp;
-const COULEURS = <span class="cstat-no" title="statement not covered" >[</span>
-  "hsl(210, 70%, 50%)",
-  "hsl(340, 70%, 50%)",
-  "hsl(150, 60%, 40%)",
-  "hsl(40, 80%, 50%)",
-  "hsl(270, 60%, 55%)",
-  "hsl(20, 75%, 50%)",
-  "hsl(180, 55%, 45%)",
-  "hsl(0, 65%, 50%)",
-  "hsl(120, 50%, 45%)",
-  "hsl(300, 50%, 50%)",
-];
+const COULEURS = PALETTE_GRAPHIQUES;
 &nbsp;
 interface RectTreemap {
   x: number;
@@ -514,7 +478,6 @@ export function <span class="fstat-no" title="function not covered" >TreemapBudg
 <span class="cstat-no" title="statement not covered" >    return (</span>
       &lt;div
         className="flex items-center justify-center text-muted-foreground text-sm"
-        // eslint-disable-next-line react/no-unknown-property
         style={{ height: hauteur }}
       &gt;
         Aucune donnée de budget
@@ -537,7 +500,6 @@ export function <span class="fstat-no" title="function not covered" >TreemapBudg
       )}
       &lt;div
         className="relative rounded-lg overflow-hidden border"
-        // eslint-disable-next-line react/no-unknown-property
         style={{ height: hauteur }}
       &gt;
         {rects.<span class="fstat-no" title="function not covered" >map((r</span>ect) =&gt; {
@@ -554,7 +516,6 @@ export function <span class="fstat-no" title="function not covered" >TreemapBudg
                 "border border-white/20",
                 aEnfants ? "cursor-pointer hover:brightness-110" : "cursor-default"
               )}
-              // eslint-disable-next-line react/no-unknown-property
               style={{
                 left: `${rect.x}%`,
                 top: `${rect.y}%`,
@@ -595,7 +556,7 @@ export function <span class="fstat-no" title="function not covered" >TreemapBudg
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

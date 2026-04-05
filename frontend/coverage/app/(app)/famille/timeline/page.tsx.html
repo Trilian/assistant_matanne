@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">67.64% </span>
+                <span class="strong">69.44% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>23/34</span>
+                <span class='fraction'>25/36</span>
             </div>
         
             
@@ -202,7 +202,25 @@
 <a name='L137'></a><a href='#L137'>137</a>
 <a name='L138'></a><a href='#L138'>138</a>
 <a name='L139'></a><a href='#L139'>139</a>
-<a name='L140'></a><a href='#L140'>140</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -308,6 +326,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -347,10 +379,12 @@ import { useMemo, useState } from "react";
 import { CalendarDays, Download, Filter, Home, Baby, Users, Trophy } from "lucide-react";
 &nbsp;
 import { clientApi } from "@/bibliotheque/api/client";
+import { TimelineInteractive } from "@/composants/famille/timeline-interactive";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { utiliserRequete } from "@/crochets/utiliser-api";
+import type { ObjetDonnees } from "@/types/commun";
 &nbsp;
 interface ItemTimeline {
   id: string;
@@ -358,7 +392,7 @@ interface ItemTimeline {
   date: string;
   titre: string;
   description?: string | null;
-  meta?: Record&lt;string, unknown&gt;;
+  meta?: ObjetDonnees;
 }
 &nbsp;
 const CATEGORIES = ["toutes", "jules", "maison", "famille", "jeux"] as const;
@@ -406,7 +440,7 @@ export default function TimelineFamillePage() {
             Timeline vie familiale
           &lt;/h1&gt;
           &lt;p className="text-muted-foreground"&gt;
-            Jalons Jules, événements famille, projets maison et moments jeux marquants.
+            Jalons Jules, voyages et événements famille, projets maison, jardinage et moments jeux marquants.
           &lt;/p&gt;
         &lt;/div&gt;
         &lt;Button variant="outline" onClick={exporterPDF}&gt;
@@ -438,6 +472,20 @@ export default function TimelineFamillePage() {
           ))}
         &lt;/CardContent&gt;
       &lt;/Card&gt;
+&nbsp;
+      {items.length &gt; 0 ? (
+        &lt;Card&gt;
+          &lt;CardHeader className="pb-2"&gt;
+            &lt;CardTitle className="text-base"&gt;Vue chronologique&lt;/CardTitle&gt;
+            &lt;CardDescription&gt;
+              Lecture condensée des jalons et événements de la famille sur une frise zoomable.
+            &lt;/CardDescription&gt;
+          &lt;/CardHeader&gt;
+          &lt;CardContent&gt;
+            &lt;TimelineInteractive items={items} /&gt;
+          &lt;/CardContent&gt;
+        &lt;/Card&gt;
+      ) : null}
 &nbsp;
       &lt;div className="relative ml-2 border-l pl-6 sm:ml-4 sm:pl-8"&gt;
         {isLoading ? (
@@ -487,7 +535,7 @@ export default function TimelineFamillePage() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

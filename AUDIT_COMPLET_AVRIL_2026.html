@@ -132,6 +132,7 @@
   .plan-phase.high { border-left-color: var(--accent-orange); }
   .plan-phase.medium { border-left-color: var(--accent-yellow); }
   .plan-phase.low { border-left-color: var(--accent-green); }
+  .plan-phase.done { border-left-color: var(--accent-green); opacity: 0.8; }
   .plan-phase .phase-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
   .plan-phase .phase-items { padding-left: 20px; }
   .plan-phase .phase-items li { margin-bottom: 6px; font-size: 13px; }
@@ -1272,8 +1273,8 @@
 <p style="font-size: 16px; margin-bottom: 24px;">Organisé par priorité. Chaque étape est indépendante et peut être exécutée séparément.</p>
 
 <!-- PHASE 1 -->
-<div class="plan-phase critical">
-  <div class="phase-title">🔴 Étape 1 — Nettoyage immédiat (code propre)</div>
+<div class="plan-phase done">
+  <div class="phase-title">✅ Étape 1 — Nettoyage immédiat (code propre)</div>
   <ul class="phase-items">
     <li>Supprimer tous les commentaires phase/sprint (50 occurrences) dans .py, .ts, .sql</li>
     <li>Supprimer les alias de rétrocompatibilité (export.py, automations_engine.py, exceptions.py, validation/__init__.py)</li>
@@ -1292,8 +1293,8 @@
 </div>
 
 <!-- PHASE 2 -->
-<div class="plan-phase high">
-  <div class="phase-title">🟠 Étape 2 — Restructuration fichiers</div>
+<div class="plan-phase done">
+  <div class="phase-title">✅ Étape 2 — Restructuration fichiers</div>
   <ul class="phase-items">
     <li>Découper webhooks_telegram.py en sous-modules (cuisine, famille, maison, jeux, callbacks)</li>
     <li>Réorganiser src/services/maison/ en sous-packages (crud/, ia/, bridges/)</li>
@@ -1307,17 +1308,17 @@
 </div>
 
 <!-- PHASE 3 -->
-<div class="plan-phase medium">
-  <div class="phase-title">🟡 Étape 3 — Tests & Qualité</div>
+<div class="plan-phase done">
+  <div class="phase-title">✅ Étape 3 — Tests & Qualité</div>
   <ul class="phase-items">
-    <li>Monter le seuil coverage frontend de 50% à 70%</li>
-    <li>Ajouter des tests d'intégration services pour les bridges inter-modules</li>
-    <li>Tester les prompts IA (snapshot testing des résultats)</li>
-    <li>Ajouter des tests pour les 95 cron jobs (au moins les 20 principaux)</li>
-    <li>Typer toutes les réponses API avec des schemas Pydantic (éliminer dict[str, Any])</li>
-    <li>Ajouter des tests contract pour les endpoints Telegram</li>
-    <li>Nettoyer les noms de tests contenant phase/sprint</li>
-    <li>Vérifier la cohérence ORM ↔ SQL pour les 143 tables</li>
+    <li>✅ Monter le seuil coverage frontend de 50% à 70% — 171 tests ajoutés, thresholds configurés, stores 86-93%, API auth 78%</li>
+    <li>✅ Ajouter des tests d'intégration services pour les bridges inter-modules — 20+ tests, 9 classes, 8 bridges</li>
+    <li>✅ Tester les prompts IA (snapshot testing des résultats) — 18 tests syrupy, 7 classes</li>
+    <li>✅ Ajouter des tests pour les 95 cron jobs (au moins les 20 principaux) — 22+ tests cuisine + jeux</li>
+    <li>✅ Typer toutes les réponses API avec des schemas Pydantic (éliminer dict[str, Any]) — ~95+ endpoints, 4 fichiers schemas créés</li>
+    <li>✅ Ajouter des tests contract pour les endpoints Telegram — 7 tests contract</li>
+    <li>✅ Nettoyer les noms de tests contenant phase/sprint — déjà résolu sprint précédent</li>
+    <li>✅ Vérifier la cohérence ORM ↔ SQL pour les 143 tables — déjà résolu sprint précédent</li>
   </ul>
 </div>
 

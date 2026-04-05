@@ -25,21 +25,21 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/43</span>
+                <span class='fraction'>0/44</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/22</span>
+                <span class='fraction'>0/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/11</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
@@ -227,9 +227,7 @@
 <a name='L162'></a><a href='#L162'>162</a>
 <a name='L163'></a><a href='#L163'>163</a>
 <a name='L164'></a><a href='#L164'>164</a>
-<a name='L165'></a><a href='#L165'>165</a>
-<a name='L166'></a><a href='#L166'>166</a>
-<a name='L167'></a><a href='#L167'>167</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L165'></a><a href='#L165'>165</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -251,14 +249,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -397,7 +393,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >'use client'</span>
 &nbsp;
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Bot, Play, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/composants/ui/badge'
@@ -417,24 +413,22 @@ export default function <span class="fstat-no" title="function not covered" >Goo
   const [slotsTexte, <span class="cstat-no" title="statement not covered" >setSlotsTexte] = useState&lt;string&gt;('{}')</span>
   const [reponse, <span class="cstat-no" title="statement not covered" >setReponse] = useState&lt;string&gt;('')</span>
 &nbsp;
-  async function <span class="fstat-no" title="function not covered" >chargerIntents() {</span>
+  const <span class="cstat-no" title="statement not covered" >chargerIntents = useCallback(<span class="fstat-no" title="function not covered" >async () =&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >    setChargement(true)</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
       const data = <span class="cstat-no" title="statement not covered" >await listerIntentsGoogleAssistant()</span>
 <span class="cstat-no" title="statement not covered" >      setIntents(data.intents)</span>
-<span class="cstat-no" title="statement not covered" >      if (data.intents.length &gt; 0 &amp;&amp; !intentActif) {</span>
-<span class="cstat-no" title="statement not covered" >        setIntentActif(data.intents[0].intent)</span>
-      }
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >      setIntentActif((c</span>ourant) =&gt; <span class="cstat-no" title="statement not covered" >courant || data.intents[0]?.intent || '')</span></span>
     } catch {
 <span class="cstat-no" title="statement not covered" >      toast.error('Impossible de charger les intents Google Assistant')</span>
     } finally {
 <span class="cstat-no" title="statement not covered" >      setChargement(false)</span>
     }
-  }
+  }, [])
 &nbsp;
 <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  useEffect(() =&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >    void chargerIntents()</span>
-  }, [])
+  }, [chargerIntents])
 &nbsp;
   const <span class="cstat-no" title="statement not covered" >slotsRequis = <span class="fstat-no" title="function not covered" >useMemo(</span></span>
     () =&gt; <span class="cstat-no" title="statement not covered" >intents.<span class="fstat-no" title="function not covered" >find((i</span>) =&gt; <span class="cstat-no" title="statement not covered" >i.intent === intentActif)?</span>.slots ?? [],</span>
@@ -568,7 +562,7 @@ export default function <span class="fstat-no" title="function not covered" >Goo
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.862Z
+                at 2026-04-05T07:55:46.387Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

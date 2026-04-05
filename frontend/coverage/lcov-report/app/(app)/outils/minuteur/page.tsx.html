@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">34.4% </span>
+                <span class="strong">36.63% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>32/93</span>
+                <span class='fraction'>37/101</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">23.33% </span>
+                <span class="strong">22.85% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>14/60</span>
+                <span class='fraction'>16/70</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">31.81% </span>
+                <span class="strong">34.78% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>7/22</span>
+                <span class='fraction'>8/23</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">36.9% </span>
+                <span class="strong">39.13% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>31/84</span>
+                <span class='fraction'>36/92</span>
             </div>
         
             
@@ -322,7 +322,20 @@
 <a name='L257'></a><a href='#L257'>257</a>
 <a name='L258'></a><a href='#L258'>258</a>
 <a name='L259'></a><a href='#L259'>259</a>
-<a name='L260'></a><a href='#L260'>260</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -411,6 +424,7 @@
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
@@ -418,6 +432,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -665,6 +691,7 @@ interface ComposantMinuteurProps {
 }
 &nbsp;
 function ComposantMinuteur({ repasSuggere, dureeSuggeree }: ComposantMinuteurProps) {
+  const searchParams = useSearchParams();
   const [dureeMinutes, setDureeMinutes] = useState(5);
   const [restant, setRestant] = useState(0);
   const [enMarche, setEnMarche] = useState(false);
@@ -680,6 +707,18 @@ function ComposantMinuteur({ repasSuggere, dureeSuggeree }: ComposantMinuteurPro
 <span class="cstat-no" title="statement not covered" >      setDureeMinutes(valeur);</span>
     }
   }, [dureeSuggeree, enMarche, restant]);
+&nbsp;
+  useEffect(() =&gt; {
+    const minutesParam = searchParams.get("minutes");
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (!minutesParam || <span class="branch-1 cbranch-no" title="branch not covered" >enMarche || <span class="branch-2 cbranch-no" title="branch not covered" >r</span>estant &gt; 0) {</span>
+      return;
+    }
+&nbsp;
+    const minutes = <span class="cstat-no" title="statement not covered" >Number(minutesParam);</span>
+<span class="cstat-no" title="statement not covered" >    if (Number.isFinite(minutes) &amp;&amp; minutes &gt;= 1 &amp;&amp; minutes &lt;= 999) {</span>
+<span class="cstat-no" title="statement not covered" >      setDureeMinutes(Math.round(minutes));</span>
+    }
+  }, [enMarche, restant, searchParams]);
 &nbsp;
   const demarrer = <span class="fstat-no" title="function not covered" >useCallback(() =&gt; {</span>
     const msFin = <span class="cstat-no" title="statement not covered" >restant &gt; 0 ? restant : dureeMinutes * 60 * 1000;</span>
@@ -847,7 +886,7 @@ export default function MinuteurPage() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.862Z
+                at 2026-04-05T07:55:46.387Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

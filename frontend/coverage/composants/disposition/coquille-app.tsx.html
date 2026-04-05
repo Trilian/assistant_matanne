@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -145,11 +145,13 @@
 <a name='L80'></a><a href='#L80'>80</a>
 <a name='L81'></a><a href='#L81'>81</a>
 <a name='L82'></a><a href='#L82'>82</a>
-<a name='L83'></a><a href='#L83'>83</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -175,10 +177,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -227,11 +229,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// ═══════════════════════════════════════════════════════════
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">﻿// ═══════════════════════════════════════════════════════════
 // Coquille App — Conteneur principal responsive
 // ═══════════════════════════════════════════════════════════
 &nbsp;
-<span class="cstat-no" title="statement not covered" >"use client";</span>
+"use client";
 &nbsp;
 import { BarreLaterale } from "./barre-laterale";
 import { NavMobile } from "./nav-mobile";
@@ -247,6 +251,7 @@ import { BarreProgression } from "./barre-progression";
 import { ContenuPrincipal } from "./contenu-principal";
 import { BandeauSuggestionProactive } from "./bandeau-suggestion-proactive";
 import { BandeauHorsLigne } from "./bandeau-hors-ligne";
+import { BandeauImpersonation } from "./bandeau-impersonation";
 import { PanneauAdminFlottant } from "./panneau-admin-flottant";
 import { InstallPrompt } from "@/composants/pwa/install-prompt";
 import { useNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
@@ -255,11 +260,11 @@ import { useNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
  * Conteneur principal de l'application — assemble la sidebar desktop, l'en-tête,
  * le fil d'ariane, la zone de contenu scrollable et la navigation mobile.
  */
-export function <span class="fstat-no" title="function not covered" >CoquilleApp({</span> children }: { children: React.ReactNode }) {
-  // Activer les notifications jeux (Phase W)
-<span class="cstat-no" title="statement not covered" >  useNotificationsJeux();</span>
+export function CoquilleApp({ children }: { children: React.ReactNode }) {
+  // Activer les notifications jeux
+  useNotificationsJeux();
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="flex h-screen overflow-hidden"&gt;
       {/* Barre de progression de navigation (Idée B) */}
       &lt;BarreProgression /&gt;
@@ -270,6 +275,7 @@ export function <span class="fstat-no" title="function not covered" >CoquilleApp
       {/* Zone principale */}
       &lt;div className="flex flex-1 flex-col overflow-hidden"&gt;
         &lt;EnTete /&gt;
+        &lt;BandeauImpersonation /&gt;
         &lt;BandeauHorsLigne /&gt;
         &lt;FilAriane /&gt;
         &lt;BandeauSuggestionProactive /&gt;
@@ -289,10 +295,10 @@ export function <span class="fstat-no" title="function not covered" >CoquilleApp
       {/* FAB chat IA flottant (AC2) */}
       &lt;FabChatIA /&gt;
 &nbsp;
-      {/* FAB actions rapides mobiles (Phase 4) */}
+      {/* FAB actions rapides mobiles  */}
       &lt;FabActionsRapides /&gt;
 &nbsp;
-      {/* FAB assistant vocal global (Sprint 8) */}
+      {/* FAB assistant vocal global  */}
       &lt;FabAssistantVocal /&gt;
 &nbsp;
       {/* Minuteur flottant (AC2) */}
@@ -316,7 +322,7 @@ export function <span class="fstat-no" title="function not covered" >CoquilleApp
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

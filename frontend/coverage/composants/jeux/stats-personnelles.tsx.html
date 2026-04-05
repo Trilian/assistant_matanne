@@ -483,7 +483,13 @@
 <a name='L418'></a><a href='#L418'>418</a>
 <a name='L419'></a><a href='#L419'>419</a>
 <a name='L420'></a><a href='#L420'>420</a>
-<a name='L421'></a><a href='#L421'>421</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L421'></a><a href='#L421'>421</a>
+<a name='L422'></a><a href='#L422'>422</a>
+<a name='L423'></a><a href='#L423'>423</a>
+<a name='L424'></a><a href='#L424'>424</a>
+<a name='L425'></a><a href='#L425'>425</a>
+<a name='L426'></a><a href='#L426'>426</a>
+<a name='L427'></a><a href='#L427'>427</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -494,6 +500,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -731,6 +738,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -932,6 +944,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/composants/ui/select'
 import { utiliserRequete } from '@/crochets/utiliser-api'
 import { TrendingUp, TrendingDown, Target, Trophy, AlertCircle } from 'lucide-react'
+import { COULEURS_GRAPHIQUES } from '@/bibliotheque/theme-graphiques'
 &nbsp;
 interface StatsData {
   roi: {
@@ -1133,10 +1146,10 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
             &lt;/CardHeader&gt;
             &lt;CardContent&gt;
               {chartData &amp;&amp; (
-                &lt;div style={{ height: '300px' }}&gt;
+                &lt;div className="h-[300px]"&gt;
                   &lt;ResponsiveContainer width="100%" height="100%"&gt;
                     &lt;LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}&gt;
-                      &lt;CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 85%)" /&gt;
+                      &lt;CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /&gt;
                       &lt;XAxis dataKey="mois" tick={{ fontSize: 11 }} /&gt;
                       &lt;YAxis
                         yAxisId="benef"
@@ -1150,6 +1163,11 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
 <span class="fstat-no" title="function not covered" >                        tickFormatter={(v</span>) =&gt; <span class="cstat-no" title="statement not covered" >`${Number(v).toFixed(0)}%`}</span>
                       /&gt;
                       &lt;Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--background))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px",
+                        }}
 <span class="fstat-no" title="function not covered" >                        formatter={(v</span>alue, name) =&gt; {
 <span class="cstat-no" title="statement not covered" >                          if (name === 'ROI (%)') <span class="cstat-no" title="statement not covered" >return [`${Number(value).toFixed(1)}%`, name]</span></span>
 <span class="cstat-no" title="statement not covered" >                          return [`${Number(value).toFixed(2)}€`, name]</span>
@@ -1161,7 +1179,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                         type="monotone"
                         dataKey="benefice"
                         name="Bénéfice (€)"
-                        stroke="rgb(34, 197, 94)"
+                        stroke={COULEURS_GRAPHIQUES.accent1}
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       /&gt;
@@ -1170,7 +1188,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                         type="monotone"
                         dataKey="roi"
                         name="ROI (%)"
-                        stroke="rgb(59, 130, 246)"
+                        stroke={COULEURS_GRAPHIQUES.accent2}
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       /&gt;
@@ -1330,7 +1348,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

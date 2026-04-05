@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/34</span>
+                <span class='fraction'>0/35</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/29</span>
+                <span class='fraction'>0/30</span>
             </div>
         
             
@@ -152,7 +152,15 @@
 <a name='L87'></a><a href='#L87'>87</a>
 <a name='L88'></a><a href='#L88'>88</a>
 <a name='L89'></a><a href='#L89'>89</a>
-<a name='L90'></a><a href='#L90'>90</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -168,6 +176,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -209,6 +220,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -251,6 +267,8 @@ import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
+import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
+import { cn } from "@/bibliotheque/utils";
 &nbsp;
 /**
  * Enveloppe le contenu de la page avec une animation fade-in à chaque navigation.
@@ -258,6 +276,7 @@ import { useQueryClient } from "@tanstack/react-query";
  */
 export function <span class="fstat-no" title="function not covered" >ContenuPrincipal({</span> children }: { children: React.ReactNode }) {
   const <span class="cstat-no" title="statement not covered" >pathname = usePathname();</span>
+  const <span class="cstat-no" title="statement not covered" >moduleActif = obtenirModuleDepuisPathname(pathname);</span>
   const <span class="cstat-no" title="statement not covered" >queryClient = useQueryClient();</span>
   const <span class="cstat-no" title="statement not covered" >mainRef = useRef&lt;HTMLElement | null&gt;(null);</span>
   const <span class="cstat-no" title="statement not covered" >startYRef = useRef&lt;number | null&gt;(null);</span>
@@ -300,18 +319,23 @@ export function <span class="fstat-no" title="function not covered" >ContenuPrin
 <span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;main
       ref={mainRef}
-      className="relative flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6"
+      className={cn(
+        "relative flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6",
+        getModuleThemeClass(moduleActif)
+      )}
       id="contenu-principal"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     &gt;
+      &lt;div className="module-top-strip pointer-events-none absolute left-0 right-0 top-0 h-0.5" /&gt;
+&nbsp;
       &lt;div
-        className="pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow-sm transition-all"
-        style={{
-          opacity: distanceTirage &gt; 0 || rafraichissementEnCours ? 1 : 0,
-          transform: `translate(-50%, ${Math.min(distanceTirage, 42)}px)`,
-        }}
+        className={`pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow-sm transition-all ${
+          distanceTirage &gt; 0 || rafraichissementEnCours
+            ? "translate-y-8 opacity-100"
+            : "translate-y-0 opacity-0"
+        }`}
       &gt;
         {rafraichissementEnCours ? "Mise a jour..." : "Tirer pour rafraichir"}
       &lt;/div&gt;
@@ -337,7 +361,7 @@ export function <span class="fstat-no" title="function not covered" >ContenuPrin
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

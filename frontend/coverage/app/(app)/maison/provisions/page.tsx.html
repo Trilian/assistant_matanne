@@ -32,7 +32,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/110</span>
+                <span class='fraction'>0/112</span>
             </div>
         
             
@@ -364,7 +364,8 @@
 <a name='L299'></a><a href='#L299'>299</a>
 <a name='L300'></a><a href='#L300'>300</a>
 <a name='L301'></a><a href='#L301'>301</a>
-<a name='L302'></a><a href='#L302'>302</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L302'></a><a href='#L302'>302</a>
+<a name='L303'></a><a href='#L303'>303</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -437,6 +438,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -667,7 +669,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// ═══════════════════════════════════════════════════════════
 // Provisions — Stocks · Cellier (fusionnés en tabs)
-// Phase 2B
+// Page provisions maison
 // ═══════════════════════════════════════════════════════════
 &nbsp;
 <span class="cstat-no" title="statement not covered" >"use client";</span>
@@ -727,7 +729,7 @@ function <span class="fstat-no" title="function not covered" >OngletStocks() {</
   const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >invalider = () =&gt; <span class="cstat-no" title="statement not covered" >q</span>ueryClient.invalidateQueries({ queryKey: ["maison", "stocks"] });</span></span>
 &nbsp;
   const { mutate: creer, isPending: <span class="cstat-no" title="statement not covered" >enCreation } = <span class="fstat-no" title="function not covered" >utiliserMutation(</span></span>
-    (<span class="cstat-no" title="statement not covered" >data: Record&lt;string, unknown&gt;) =&gt; creerStock(data as Omit&lt;StockMaison, "id" | "en_alerte"&gt;),</span>
+    (<span class="cstat-no" title="statement not covered" >data: Parameters&lt;typeof creerStock&gt;[0]) =&gt; creerStock(data),</span>
     { <span class="fstat-no" title="function not covered" >onSuccess: () =&gt; {</span> <span class="cstat-no" title="statement not covered" >invalider(); <span class="cstat-no" title="statement not covered" >f</span>ermerDialog(); <span class="cstat-no" title="statement not covered" >t</span>oast.success("Stock créé"); } }</span>
   );
   const { mutate: modifier, isPending: <span class="cstat-no" title="statement not covered" >enModif } = <span class="fstat-no" title="function not covered" >utiliserMutation(</span></span>
@@ -737,15 +739,16 @@ function <span class="fstat-no" title="function not covered" >OngletStocks() {</
   const { mutate: <span class="cstat-no" title="statement not covered" >supprimer } = utiliserMutation(supprimerStock, { <span class="fstat-no" title="function not covered" >onSuccess: () =&gt; {</span> <span class="cstat-no" title="statement not covered" >invalider(); <span class="cstat-no" title="statement not covered" >t</span>oast.success("Stock supprimé"); } })</span>;</span>
 &nbsp;
   const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >soumettre = () =&gt; {</span></span>
-    const payload = <span class="cstat-no" title="statement not covered" >{</span>
+    const payload: Parameters&lt;typeof creerStock&gt;[0] = <span class="cstat-no" title="statement not covered" >{</span>
       nom: form.nom,
       categorie: form.categorie || undefined,
       quantite: form.quantite ? Number(form.quantite) : 0,
       seuil_alerte: form.seuil_alerte ? Number(form.seuil_alerte) : undefined,
       emplacement: form.emplacement || undefined,
+      unite: form.unite || undefined,
     };
 <span class="cstat-no" title="statement not covered" >    if (enEdition) <span class="cstat-no" title="statement not covered" >modifier({ id: enEdition.id, data: payload });</span></span>
-    else <span class="cstat-no" title="statement not covered" >creer(payload as Record&lt;string, unknown&gt;);</span>
+    else <span class="cstat-no" title="statement not covered" >creer(payload);</span>
   };
 &nbsp;
   const champs = <span class="cstat-no" title="statement not covered" >[</span>
@@ -841,7 +844,7 @@ function <span class="fstat-no" title="function not covered" >OngletCellier() {<
   const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >invalider = () =&gt; <span class="cstat-no" title="statement not covered" >q</span>ueryClient.invalidateQueries({ queryKey: ["maison", "cellier"] });</span></span>
 &nbsp;
   const { mutate: creer, isPending: <span class="cstat-no" title="statement not covered" >enCreation } = <span class="fstat-no" title="function not covered" >utiliserMutation(</span></span>
-    (<span class="cstat-no" title="statement not covered" >data: Record&lt;string, unknown&gt;) =&gt; creerArticleCellier(data as Omit&lt;ArticleCellier, "id"&gt;),</span>
+    (<span class="cstat-no" title="statement not covered" >data: Parameters&lt;typeof creerArticleCellier&gt;[0]) =&gt; creerArticleCellier(data),</span>
     { <span class="fstat-no" title="function not covered" >onSuccess: () =&gt; {</span> <span class="cstat-no" title="statement not covered" >invalider(); <span class="cstat-no" title="statement not covered" >f</span>ermerDialog(); <span class="cstat-no" title="statement not covered" >t</span>oast.success("Article créé"); } }</span>
   );
   const { mutate: modifier, isPending: <span class="cstat-no" title="statement not covered" >enModif } = <span class="fstat-no" title="function not covered" >utiliserMutation(</span></span>
@@ -851,9 +854,9 @@ function <span class="fstat-no" title="function not covered" >OngletCellier() {<
   const { mutate: <span class="cstat-no" title="statement not covered" >supprimer } = utiliserMutation(supprimerArticleCellier, { <span class="fstat-no" title="function not covered" >onSuccess: () =&gt; {</span> <span class="cstat-no" title="statement not covered" >invalider(); <span class="cstat-no" title="statement not covered" >t</span>oast.success("Article supprimé"); } })</span>;</span>
 &nbsp;
   const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >soumettre = () =&gt; {</span></span>
-    const payload = <span class="cstat-no" title="statement not covered" >{ nom: form.nom, categorie: form.categorie || undefined, quantite: form.quantite ? Number(form.quantite) : undefined, date_achat: form.date_achat || undefined, date_peremption: form.date_peremption || undefined, emplacement: form.emplacement || undefined, prix_unitaire: form.prix_unitaire ? Number(form.prix_unitaire) : undefined, notes: form.notes || undefined };</span>
+    const payload: Parameters&lt;typeof creerArticleCellier&gt;[0] = <span class="cstat-no" title="statement not covered" >{ nom: form.nom, categorie: form.categorie || undefined, quantite: form.quantite ? Number(form.quantite) : undefined, date_achat: form.date_achat || undefined, date_peremption: form.date_peremption || undefined, emplacement: form.emplacement || undefined, prix_unitaire: form.prix_unitaire ? Number(form.prix_unitaire) : undefined, notes: form.notes || undefined };</span>
 <span class="cstat-no" title="statement not covered" >    if (enEdition) <span class="cstat-no" title="statement not covered" >modifier({ id: enEdition.id, data: payload });</span></span>
-    else <span class="cstat-no" title="statement not covered" >creer(payload as Record&lt;string, unknown&gt;);</span>
+    else <span class="cstat-no" title="statement not covered" >creer(payload);</span>
   };
 &nbsp;
   const champs = <span class="cstat-no" title="statement not covered" >[</span>
@@ -973,7 +976,7 @@ export default function <span class="fstat-no" title="function not covered" >Pag
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

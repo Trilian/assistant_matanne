@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">41.98% </span>
+                <span class="strong">42.62% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>76/181</span>
+                <span class='fraction'>78/183</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">48.61% </span>
+                <span class="strong">48.96% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>70/144</span>
+                <span class='fraction'>71/145</span>
             </div>
         
             
@@ -810,7 +810,17 @@
 <a name='L745'></a><a href='#L745'>745</a>
 <a name='L746'></a><a href='#L746'>746</a>
 <a name='L747'></a><a href='#L747'>747</a>
-<a name='L748'></a><a href='#L748'>748</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L748'></a><a href='#L748'>748</a>
+<a name='L749'></a><a href='#L749'>749</a>
+<a name='L750'></a><a href='#L750'>750</a>
+<a name='L751'></a><a href='#L751'>751</a>
+<a name='L752'></a><a href='#L752'>752</a>
+<a name='L753'></a><a href='#L753'>753</a>
+<a name='L754'></a><a href='#L754'>754</a>
+<a name='L755'></a><a href='#L755'>755</a>
+<a name='L756'></a><a href='#L756'>756</a>
+<a name='L757'></a><a href='#L757'>757</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1064,6 +1074,9 @@
 <span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1440,6 +1453,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">20x</span>
 <span class="cline-any cline-yes">20x</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1621,6 +1639,7 @@ import { BankrollWidget } from "@/composants/jeux/bankroll-widget";
 import { DetectionPatternModal } from "@/composants/jeux/detection-pattern-modal";
 import { StatsPersonnelles } from "@/composants/jeux/stats-personnelles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 &nbsp;
 const GraphiqueROI = dynamic(
@@ -1771,7 +1790,7 @@ function DrawerMatchDetail({
           &lt;/div&gt;
         ) : null}
 &nbsp;
-        {/* Évolution des cotes (Phase T) */}
+        {/* Évolution des cotes */}
         {chCotes ? (
 <span class="branch-0 cbranch-no" title="branch not covered" >          &lt;Skeleton className="h-40 mt-4" /&gt;</span>
         ) : historiqueCotes &amp;&amp; historiqueCotes.nb_points &gt; 0 ? (
@@ -1810,7 +1829,10 @@ export default function ParisPage() {
   const [seuilBacktest, setSeuilBacktest] = useState("2");
   const [nbBacktest, setNbBacktest] = useState("120");
 &nbsp;
-  const sourceOCR = useMemo(() =&gt; searchParams.get("source_ocr") === "1", [searchParams]);
+  const sourcePrefill = useMemo(
+    () =&gt; searchParams.get("prefill") === "1" || searchParams.get("source_ocr") === "1",
+    [searchParams]
+  );
 &nbsp;
   const queryClient = useQueryClient();
 &nbsp;
@@ -1897,7 +1919,7 @@ export default function ParisPage() {
   );
 &nbsp;
   useEffect(() =&gt; {
-    <span class="missing-if-branch" title="else path not taken" >E</span>if (!sourceOCR) return;
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (!sourcePrefill) return;
 &nbsp;
     const typePariParam = <span class="cstat-no" title="statement not covered" >searchParams.get("type_pari");</span>
     const predictionParam = <span class="cstat-no" title="statement not covered" >searchParams.get("prediction");</span>
@@ -1912,7 +1934,7 @@ export default function ParisPage() {
 <span class="cstat-no" title="statement not covered" >    if (matchParam) <span class="cstat-no" title="statement not covered" >setMatchId(matchParam);</span></span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    setDialogOuvert(true);</span>
-  }, [sourceOCR, searchParams]);
+  }, [sourcePrefill, searchParams]);
 &nbsp;
   const matchParId = new Map(matchs.map((m) =&gt; [m.id, m]));
 &nbsp;
@@ -1951,9 +1973,9 @@ export default function ParisPage() {
           &lt;/DialogTrigger&gt;
           &lt;DialogContent&gt;
             &lt;DialogHeader&gt;&lt;DialogTitle&gt;Nouveau pari&lt;/DialogTitle&gt;&lt;/DialogHeader&gt;
-            {sourceOCR &amp;&amp; (
+            {sourcePrefill &amp;&amp; (
 <span class="branch-1 cbranch-no" title="branch not covered" >              &lt;div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-700"&gt;</span>
-                Pré-remplissage OCR appliqué. Vérifiez le match, la cote et la mise avant validation.
+                Pré-remplissage automatique appliqué. Vérifiez le match, la cote et la mise avant validation.
               &lt;/div&gt;
             )}
             &lt;form
@@ -2170,7 +2192,12 @@ export default function ParisPage() {
               {Array.from({ length: 5 }).<span class="fstat-no" title="function not covered" >map((_</span>, i) =&gt; <span class="cstat-no" title="statement not covered" >&lt;Skeleton key={i} className="h-10 w-full" /&gt;)}</span>
             &lt;/div&gt;
           ) : paris.length === 0 ? (
-<span class="branch-0 cbranch-no" title="branch not covered" >            &lt;p className="text-center py-8 text-muted-foreground"&gt;Aucun pari trouvé&lt;/p&gt;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >            &lt;EtatVide</span>
+              Icone={TrendingUp}
+              titre="Aucun pari trouvé"
+              description="Crée un premier pari depuis le tableau expert ou ajuste le filtre de statut."
+              className="border-0 bg-muted/20 py-8"
+            /&gt;
           ) : (
             &lt;Table&gt;
               &lt;TableHeader&gt;
@@ -2311,7 +2338,7 @@ export default function ParisPage() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

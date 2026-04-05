@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">46.8% </span>
+                <span class="strong">48.93% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>66/141</span>
+                <span class='fraction'>69/141</span>
             </div>
         
             
@@ -742,11 +742,35 @@
 <a name='L677'></a><a href='#L677'>677</a>
 <a name='L678'></a><a href='#L678'>678</a>
 <a name='L679'></a><a href='#L679'>679</a>
-<a name='L680'></a><a href='#L680'>680</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L680'></a><a href='#L680'>680</a>
+<a name='L681'></a><a href='#L681'>681</a>
+<a name='L682'></a><a href='#L682'>682</a>
+<a name='L683'></a><a href='#L683'>683</a>
+<a name='L684'></a><a href='#L684'>684</a>
+<a name='L685'></a><a href='#L685'>685</a>
+<a name='L686'></a><a href='#L686'>686</a>
+<a name='L687'></a><a href='#L687'>687</a>
+<a name='L688'></a><a href='#L688'>688</a>
+<a name='L689'></a><a href='#L689'>689</a>
+<a name='L690'></a><a href='#L690'>690</a>
+<a name='L691'></a><a href='#L691'>691</a>
+<a name='L692'></a><a href='#L692'>692</a>
+<a name='L693'></a><a href='#L693'>693</a>
+<a name='L694'></a><a href='#L694'>694</a>
+<a name='L695'></a><a href='#L695'>695</a>
+<a name='L696'></a><a href='#L696'>696</a>
+<a name='L697'></a><a href='#L697'>697</a>
+<a name='L698'></a><a href='#L698'>698</a>
+<a name='L699'></a><a href='#L699'>699</a>
+<a name='L700'></a><a href='#L700'>700</a>
+<a name='L701'></a><a href='#L701'>701</a>
+<a name='L702'></a><a href='#L702'>702</a>
+<a name='L703'></a><a href='#L703'>703</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1007,6 +1031,28 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1422,7 +1468,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">﻿// ═══════════════════════════════════════════════════════════
-// Hub Famille Intelligent — Phase Refonte
+// Hub famille intelligent
 // ═══════════════════════════════════════════════════════════
 &nbsp;
 "use client";
@@ -1490,6 +1536,7 @@ import {
 import { toast } from "sonner";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
+import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
 import type { ContexteFamilial, RappelFamille } from "@/types/famille";
 &nbsp;
 const MODULES = [
@@ -1601,7 +1648,7 @@ export default function PageFamille() {
   };
 &nbsp;
   const [hasShownToast, setHasShownToast] = useState(false);
-  // PHASE B2 — Suggestions IA Achats (nouveau hook)
+  // Suggestions IA pour les achats
   const mutationSuggestionsAchats = useMutation({
 <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >    mutationFn: () =&gt; o</span>btenirSuggestionsAchatsEnrichies({ triggers: ['hub_rapide'] }),</span>
   });
@@ -1628,7 +1675,7 @@ export default function PageFamille() {
 &nbsp;
   // Détection des contextes IA
   const dayOfWeek = new Date().getDay(); // 0=dim, 4=jeu, 5=ven, 6=sam
-  const isWeekendApproaching = dayOfWeek === 4 || <span class="branch-1 cbranch-no" title="branch not covered" >dayOfWeek === 5;</span>
+  const isWeekendApproaching = dayOfWeek === 4 || dayOfWeek === 5;
   const isSoireeContext = dayOfWeek === 5 || dayOfWeek === 6;
 &nbsp;
   // Achats top 3 par personne (priorité urgents non achetés)
@@ -1688,6 +1735,28 @@ export default function PageFamille() {
   return (
     &lt;div className="space-y-8"&gt;
       &lt;CarteNotificationsModule moduleKey="famille" moduleLabel="Famille" /&gt;
+&nbsp;
+      &lt;CarteActionsAdminModule
+        moduleLabel="Famille"
+        description="Lancement manuel des jobs Jules, weekend et résumé hebdo depuis le hub."
+        jobs={[
+          {
+            id: "rapport_nutritionnel_jules",
+            label: "Rapport nutrition Jules",
+            hint: "Bilan hebdo Jules",
+          },
+          {
+            id: "score_weekend",
+            label: "Score weekend",
+            hint: "Suggestions activités / météo",
+          },
+          {
+            id: "s16_resume_weekend_telegram",
+            label: "Résumé weekend Telegram",
+            hint: "Digest du vendredi 18h",
+          },
+        ]}
+      /&gt;
 &nbsp;
       {/* En-tête */}
       &lt;div&gt;
@@ -1959,11 +2028,11 @@ export default function PageFamille() {
         &lt;div className="space-y-2"&gt;
           {/* Weekend (jeudi/vendredi) */}
           {isWeekendApproaching &amp;&amp; (
-            &lt;CarteSuggestionIA
+<span class="branch-1 cbranch-no" title="branch not covered" >            &lt;CarteSuggestionIA</span>
               titre="Idées pour le weekend"
               description="Activités adaptées à Jules, avec la météo du weekend"
               source="weekend"
-              actionLabel={mutationSuggestionsWeekend.isPending ? <span class="branch-0 cbranch-no" title="branch not covered" >"Chargement…" : "</span>Suggestions weekend IA"}
+              actionLabel={mutationSuggestionsWeekend.isPending ? "Chargement…" : "Suggestions weekend IA"}
 <span class="fstat-no" title="function not covered" >              onAction={() =&gt; <span class="cstat-no" title="statement not covered" >m</span>utationSuggestionsWeekend.mutate()}</span>
             /&gt;
           )}
@@ -2030,10 +2099,10 @@ export default function PageFamille() {
 &nbsp;
           {/* Fallback */}
           {!isWeekendApproaching &amp;&amp;
-<span class="branch-1 cbranch-no" title="branch not covered" >            !isSoireeContext &amp;&amp;</span>
-<span class="branch-2 cbranch-no" title="branch not covered" >            !contexte?.anniversaires_proches?.length &amp;&amp;</span>
-<span class="branch-3 cbranch-no" title="branch not covered" >            !contexte?.achats_urgents?.length &amp;&amp; (</span>
-<span class="branch-4 cbranch-no" title="branch not covered" >              &lt;p className="text-sm text-muted-foreground text-center py-4"&gt;</span>
+            !isSoireeContext &amp;&amp;
+            !contexte?.anniversaires_proches?.length &amp;&amp;
+            !contexte?.achats_urgents?.length &amp;&amp; (
+              &lt;p className="text-sm text-muted-foreground text-center py-4"&gt;
                 Aucune suggestion pour le moment. Revenez jeudi pour les idées weekend !
               &lt;/p&gt;
             )}
@@ -2107,7 +2176,7 @@ export default function PageFamille() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

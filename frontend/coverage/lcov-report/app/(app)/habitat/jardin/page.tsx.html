@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/25</span>
+                <span class='fraction'>0/30</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/50</span>
+                <span class='fraction'>0/58</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/23</span>
+                <span class='fraction'>0/28</span>
             </div>
         
             
@@ -197,7 +197,28 @@
 <a name='L132'></a><a href='#L132'>132</a>
 <a name='L133'></a><a href='#L133'>133</a>
 <a name='L134'></a><a href='#L134'>134</a>
-<a name='L135'></a><a href='#L135'>135</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -268,10 +289,31 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -396,21 +438,42 @@ export default function <span class="fstat-no" title="function not covered" >Jar
       &lt;div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]"&gt;
         &lt;Card&gt;
           &lt;CardHeader&gt;
-            &lt;CardTitle className="text-base"&gt;Canvas paysager&lt;/CardTitle&gt;
-            &lt;CardDescription&gt;Les positions viennent des coordonnées enregistrées dans Habitat.&lt;/CardDescription&gt;
+            &lt;CardTitle className="text-base"&gt;Canvas paysager 2.5D&lt;/CardTitle&gt;
+            &lt;CardDescription&gt;Vue isométrique légère pour lire les volumes des zones de jardin.&lt;/CardDescription&gt;
           &lt;/CardHeader&gt;
           &lt;CardContent&gt;
-            &lt;div className="relative h-[420px] overflow-hidden rounded-xl border bg-[linear-gradient(180deg,#f6fff6_0%,#ebf7ef_100%)]"&gt;
-              {(zones ?? []).<span class="fstat-no" title="function not covered" >map((z</span>one) =&gt; (
-<span class="cstat-no" title="statement not covered" >                &lt;button</span>
-                  key={zone.id}
-                  type="button"
-<span class="fstat-no" title="function not covered" >                  onClick={() =&gt; <span class="cstat-no" title="statement not covered" >s</span>etSelection(zone)}</span>
-                  className={`absolute rounded-xl border border-emerald-700/30 bg-emerald-500/20 text-left shadow-sm transition hover:bg-emerald-500/30 ${classePourValeur(zone.position_x ?? 5, "left")} ${classePourValeur(zone.position_y ?? 5, "top")} ${classePourValeur(zone.largeur ?? 18, "width")} ${classePourValeur(zone.longueur ?? 16, "height")}`}
-                &gt;
-                  &lt;span className="block p-2 text-xs font-medium text-emerald-950"&gt;{zone.nom}&lt;/span&gt;
-                &lt;/button&gt;
-              ))}
+            &lt;div className="relative h-[420px] overflow-hidden rounded-xl border bg-[radial-gradient(circle_at_20%_10%,#f8fff6_0%,#e7f5e9_52%,#d9ead9_100%)] [perspective:1200px]"&gt;
+              &lt;div className="absolute inset-0 [transform:rotateX(58deg)_rotateZ(-42deg)_scale(1.04)] [transform-origin:center_58%]"&gt;
+                {(zones ?? []).<span class="fstat-no" title="function not covered" >map((z</span>one) =&gt; {
+                  const left = <span class="cstat-no" title="statement not covered" >classePourValeur(zone.position_x ?? 10, "left");</span>
+                  const top = <span class="cstat-no" title="statement not covered" >classePourValeur(zone.position_y ?? 10, "top");</span>
+                  const width = <span class="cstat-no" title="statement not covered" >classePourValeur(zone.largeur ?? 18, "width");</span>
+                  const height = <span class="cstat-no" title="statement not covered" >classePourValeur(zone.longueur ?? 16, "height");</span>
+                  const active = <span class="cstat-no" title="statement not covered" >zone.id === zoneActive?.id;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                  return (</span>
+                    &lt;button
+                      key={zone.id}
+                      type="button"
+<span class="fstat-no" title="function not covered" >                      onClick={() =&gt; <span class="cstat-no" title="statement not covered" >s</span>etSelection(zone)}</span>
+                      className={`absolute z-20 text-left transition-transform hover:scale-[1.02] focus-visible:outline-none ${left} ${top} ${width} ${height}`}
+                    &gt;
+                      &lt;span
+                        className={`absolute inset-0 rounded-lg border ${active ? "border-emerald-900/70" : "border-emerald-700/35"} ${active ? "bg-emerald-500/50" : "bg-emerald-400/30"}`}
+                      /&gt;
+                      &lt;span
+                        className={`absolute left-[4%] top-[100%] h-[16%] w-[96%] origin-top-left skew-x-[-40deg] rounded-b-md ${active ? "bg-emerald-900/45" : "bg-emerald-900/30"}`}
+                      /&gt;
+                      &lt;span
+                        className={`absolute left-[100%] top-[4%] h-[96%] w-[14%] origin-top-left skew-y-[-40deg] rounded-r-md ${active ? "bg-emerald-800/45" : "bg-emerald-800/30"}`}
+                      /&gt;
+                      &lt;span className="relative z-30 block p-2 text-xs font-semibold text-emerald-950 drop-shadow-sm"&gt;
+                        {zone.nom}
+                      &lt;/span&gt;
+                    &lt;/button&gt;
+                  );
+                })}
+              &lt;/div&gt;
               {(zones ?? []).length === 0 &amp;&amp; (
                 &lt;div className="flex h-full items-center justify-center text-sm text-muted-foreground"&gt;
                   Aucune zone jardin disponible.
@@ -472,7 +535,7 @@ export default function <span class="fstat-no" title="function not covered" >Jar
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.862Z
+                at 2026-04-05T07:55:46.387Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

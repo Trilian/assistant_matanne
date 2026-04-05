@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>8/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>6/6</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -89,7 +89,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -98,20 +98,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// ═══════════════════════════════════════════════════════════
 // Hook useDebounce — Délai de saisie
 // ═══════════════════════════════════════════════════════════
 &nbsp;
-<span class="cstat-no" title="statement not covered" >"use client";</span>
+"use client";
 &nbsp;
 import { useState, useEffect } from "react";
 &nbsp;
@@ -119,15 +119,15 @@ import { useState, useEffect } from "react";
  * Retourne la valeur après un délai (debounce).
  * Usage: `const termeRecherche = utiliserDelai(saisie, 300)`
  */
-export function <span class="fstat-no" title="function not covered" >utiliserDelai&lt;T&gt;(v</span>aleur: T, delaiMs = <span class="branch-0 cbranch-no" title="branch not covered" >300): T {</span>
-  const [valeurRetardee, <span class="cstat-no" title="statement not covered" >setValeurRetardee] = useState(valeur);</span>
+export function utiliserDelai&lt;T&gt;(valeur: T, delaiMs = 300): T {
+  const [valeurRetardee, setValeurRetardee] = useState(valeur);
 &nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  useEffect(() =&gt; {</span></span>
-    const timer = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >setTimeout(() =&gt; <span class="cstat-no" title="statement not covered" >s</span>etValeurRetardee(valeur),</span> delaiMs);</span>
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >    return () =&gt; <span class="cstat-no" title="statement not covered" >c</span>learTimeout(timer);</span></span>
+  useEffect(() =&gt; {
+    const timer = setTimeout(() =&gt; setValeurRetardee(valeur), delaiMs);
+    return () =&gt; clearTimeout(timer);
   }, [valeur, delaiMs]);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return valeurRetardee;</span>
+  return valeurRetardee;
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -136,7 +136,7 @@ export function <span class="fstat-no" title="function not covered" >utiliserDel
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.862Z
+                at 2026-04-05T07:55:46.387Z
             </div>
         <script src="../prettify.js"></script>
         <script>

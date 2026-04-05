@@ -569,21 +569,21 @@ export default function <span class="fstat-no" title="function not covered" >Pag
   const tachePrioritaire = (<span class="cstat-no" title="statement not covered" >taches as TacheTablette[] | undefined)?.<span class="fstat-no" title="function not covered" >filter((t</span>) =&gt; <span class="cstat-no" title="statement not covered" >!t.fait)?</span>.[0]</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
-    &lt;div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4 flex flex-col gap-4"&gt;
+    &lt;div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4 md:p-6 lg:p-8 flex flex-col gap-4"&gt;
       {/* Heure actuelle — Grande affichage */}
-      &lt;div className="text-center py-6"&gt;
-        &lt;p className="text-6xl font-bold text-primary"&gt;
+      &lt;div className="text-center py-4 md:py-6"&gt;
+        &lt;p className="text-6xl font-bold text-primary md:text-7xl"&gt;
           {formatterHeure(heureActuelle)}
         &lt;/p&gt;
-        &lt;p className="text-xl text-muted-foreground mt-2"&gt;
+        &lt;p className="text-xl text-muted-foreground mt-2 md:text-2xl"&gt;
           {heureActuelle.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         &lt;/p&gt;
       &lt;/div&gt;
 &nbsp;
-      {/* Grille 2x2 responsive */}
-      &lt;div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1"&gt;
+      {/* Grille optimisée tablette */}
+      &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 auto-rows-fr"&gt;
         {/* Repas du jour */}
-        &lt;Card className="h-full border-2 shadow-lg"&gt;
+        &lt;Card className="h-full border-2 shadow-lg md:row-span-2"&gt;
           &lt;CardHeader className="pb-2 sm:pb-3"&gt;
             &lt;CardTitle className="flex items-center gap-3 text-xl sm:text-2xl"&gt;
               &lt;Utensils className="h-8 w-8 sm:h-10 sm:w-10" /&gt;
@@ -595,7 +595,7 @@ export default function <span class="fstat-no" title="function not covered" >Pag
               &lt;p className="text-lg text-muted-foreground"&gt;Chargement...&lt;/p&gt;
             ) : repasAujourdhui.length &gt; 0 ? (
               repasAujourdhui.<span class="fstat-no" title="function not covered" >map((r</span>epas) =&gt; (
-<span class="cstat-no" title="statement not covered" >                &lt;div key={repas.id} className="p-3 rounded-lg bg-primary/10 border border-primary/20"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div key={repas.id} className="p-4 rounded-lg bg-primary/10 border border-primary/20"&gt;</span>
                   &lt;p className="text-sm font-semibold text-muted-foreground"&gt;{repas.type}&lt;/p&gt;
                   &lt;p className="text-xl sm:text-2xl font-bold mt-1"&gt;{repas.nom}&lt;/p&gt;
                   {repas.heure &amp;&amp; (
@@ -630,7 +630,7 @@ export default function <span class="fstat-no" title="function not covered" >Pag
                 )}
                 {tachePrioritaire.priorite &amp;&amp; (
                   &lt;div className="mt-3 inline-block px-3 py-1 rounded-full bg-destructive/20 text-sm font-semibold"&gt;
-                    Priority: {tachePrioritaire.priorite}
+                    Priorité: {tachePrioritaire.priorite}
                   &lt;/div&gt;
                 )}
               &lt;/div&gt;
@@ -662,7 +662,7 @@ export default function <span class="fstat-no" title="function not covered" >Pag
         &lt;/Card&gt;
 &nbsp;
         {/* Minuteur */}
-        &lt;Card className="h-full border-2 shadow-lg"&gt;
+        &lt;Card className="h-full border-2 shadow-lg md:row-span-2"&gt;
           &lt;CardHeader className="pb-2 sm:pb-3"&gt;
             &lt;CardTitle className="text-xl sm:text-2xl flex items-center gap-3"&gt;
               &lt;Clock className="h-8 w-8 sm:h-10 sm:w-10" /&gt;
@@ -678,14 +678,14 @@ export default function <span class="fstat-no" title="function not covered" >Pag
 <span class="fstat-no" title="function not covered" >              onChange={(e</span>) =&gt; <span class="cstat-no" title="statement not covered" >setSecondesRestantes(parseInt(e.target.value || '0') * 60)}</span>
               disabled={minuteurActif}
               placeholder="Minutes"
-              className="w-full text-center text-2xl sm:text-3xl rounded-lg border-2 border-primary p-3 font-bold"
+              className="w-full text-center text-2xl sm:text-3xl rounded-lg border-2 border-primary p-4 font-bold min-h-14"
             /&gt;
             &lt;p className="text-4xl sm:text-5xl font-bold text-primary"&gt;
               {formatterMinuteur(secondesRestantes)}
             &lt;/p&gt;
             &lt;button
 <span class="fstat-no" title="function not covered" >              onClick={() =&gt; <span class="cstat-no" title="statement not covered" >s</span>etMinuteurActif(!minuteurActif)}</span>
-              className={`w-full px-6 py-3 rounded-lg text-lg font-bold transition ${
+              className={`w-full px-6 py-4 rounded-lg text-lg font-bold transition min-h-14 ${
                 minuteurActif
                   ? 'bg-destructive text-white hover:bg-destructive/90'
                   : 'bg-primary text-white hover:bg-primary/90'
@@ -706,7 +706,7 @@ export default function <span class="fstat-no" title="function not covered" >Pag
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.372Z
+                at 2026-04-05T07:55:45.925Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

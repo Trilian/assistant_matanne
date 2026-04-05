@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">38.23% </span>
+                <span class="strong">38.35% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>26/68</span>
+                <span class='fraction'>28/73</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">17.14% </span>
+                <span class="strong">15.38% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>6/35</span>
+                <span class='fraction'>6/39</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">40.62% </span>
+                <span class="strong">40.57% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>26/64</span>
+                <span class='fraction'>28/69</span>
             </div>
         
             
@@ -518,11 +518,25 @@
 <a name='L453'></a><a href='#L453'>453</a>
 <a name='L454'></a><a href='#L454'>454</a>
 <a name='L455'></a><a href='#L455'>455</a>
-<a name='L456'></a><a href='#L456'>456</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L456'></a><a href='#L456'>456</a>
+<a name='L457'></a><a href='#L457'>457</a>
+<a name='L458'></a><a href='#L458'>458</a>
+<a name='L459'></a><a href='#L459'>459</a>
+<a name='L460'></a><a href='#L460'>460</a>
+<a name='L461'></a><a href='#L461'>461</a>
+<a name='L462'></a><a href='#L462'>462</a>
+<a name='L463'></a><a href='#L463'>463</a>
+<a name='L464'></a><a href='#L464'>464</a>
+<a name='L465'></a><a href='#L465'>465</a>
+<a name='L466'></a><a href='#L466'>466</a>
+<a name='L467'></a><a href='#L467'>467</a>
+<a name='L468'></a><a href='#L468'>468</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -802,10 +816,16 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -867,6 +887,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -879,6 +902,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1010,6 +1034,8 @@ import {
   SelectValue,
 } from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { SwipeableItem } from "@/composants/swipeable-item";
 import {
   activerCalendrierScolaireAuto,
   listerCalendriers,
@@ -1257,13 +1283,19 @@ function CarteCalendrierIcal() {
   const { mutate: supprimer } = <span class="fstat-no" title="function not covered" >utiliserMutation(</span>
     (<span class="cstat-no" title="statement not covered" >id: number) =&gt; supprimerCalendrier(id),</span>
     {
-<span class="fstat-no" title="function not covered" >      onSuccess: () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        invalider(["calendriers"]);</span>
-<span class="cstat-no" title="statement not covered" >        toast.success("Calendrier supprimé");</span>
-      },
+<span class="fstat-no" title="function not covered" >      onSuccess: () =&gt; {</span> <span class="cstat-no" title="statement not covered" >invalider(["calendriers"]); },</span>
 <span class="fstat-no" title="function not covered" >      onError: () =&gt; <span class="cstat-no" title="statement not covered" >t</span>oast.error("Erreur lors de la suppression"),</span>
     }
   );
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
+&nbsp;
+  const <span class="fstat-no" title="function not covered" >supprimerAvecUndo = (c</span>al: { id: number; nom: string }) =&gt; {
+<span class="cstat-no" title="statement not covered" >    planifierSuppression(`calendrier-${cal.id}`, {</span>
+      libelle: cal.nom,
+<span class="fstat-no" title="function not covered" >      onConfirmer: () =&gt; <span class="cstat-no" title="statement not covered" >s</span>upprimer(cal.id),</span>
+<span class="fstat-no" title="function not covered" >      onErreur: () =&gt; <span class="cstat-no" title="statement not covered" >t</span>oast.error("Erreur lors de la suppression"),</span>
+    });
+  };
 &nbsp;
   return (
     &lt;Card&gt;
@@ -1318,27 +1350,31 @@ function CarteCalendrierIcal() {
         ) : calendriers &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >calendriers.length &gt; 0 ? (</span>
 <span class="branch-0 cbranch-no" title="branch not covered" >          &lt;ul className="space-y-2"&gt;</span>
             {calendriers.<span class="fstat-no" title="function not covered" >map((c</span>al) =&gt; (
-<span class="cstat-no" title="statement not covered" >              &lt;li</span>
+<span class="cstat-no" title="statement not covered" >              &lt;SwipeableItem</span>
                 key={cal.id}
-                className="flex items-center justify-between rounded-lg border px-3 py-2"
+                labelGauche="Supprimer"
+                desactiverDroit
+<span class="fstat-no" title="function not covered" >                onSwipeLeft={() =&gt; <span class="cstat-no" title="statement not covered" >s</span>upprimerAvecUndo(cal)}</span>
               &gt;
-                &lt;div&gt;
-                  &lt;p className="text-sm font-medium"&gt;{cal.nom}&lt;/p&gt;
-                  {cal.url &amp;&amp; (
-                    &lt;p className="text-xs text-muted-foreground truncate max-w-xs"&gt;
-                      {cal.url}
-                    &lt;/p&gt;
-                  )}
-                &lt;/div&gt;
-                &lt;Button
-                  variant="ghost"
-                  size="icon"
-<span class="fstat-no" title="function not covered" >                  onClick={() =&gt; <span class="cstat-no" title="statement not covered" >s</span>upprimer(cal.id)}</span>
-                  aria-label="Supprimer ce calendrier"
-                &gt;
-                  &lt;Trash2 className="h-4 w-4 text-destructive" /&gt;
-                &lt;/Button&gt;
-              &lt;/li&gt;
+                &lt;li className="flex items-center justify-between rounded-lg border px-3 py-2 bg-background"&gt;
+                  &lt;div&gt;
+                    &lt;p className="text-sm font-medium"&gt;{cal.nom}&lt;/p&gt;
+                    {cal.url &amp;&amp; (
+                      &lt;p className="text-xs text-muted-foreground truncate max-w-xs"&gt;
+                        {cal.url}
+                      &lt;/p&gt;
+                    )}
+                  &lt;/div&gt;
+                  &lt;Button
+                    variant="ghost"
+                    size="icon"
+<span class="fstat-no" title="function not covered" >                    onClick={() =&gt; <span class="cstat-no" title="statement not covered" >s</span>upprimerAvecUndo(cal)}</span>
+                    aria-label="Supprimer ce calendrier"
+                  &gt;
+                    &lt;Trash2 className="h-4 w-4 text-destructive" /&gt;
+                  &lt;/Button&gt;
+                &lt;/li&gt;
+              &lt;/SwipeableItem&gt;
             ))}
           &lt;/ul&gt;
         ) : (
@@ -1435,7 +1471,7 @@ function <span class="fstat-no" title="function not covered" >EvenementItem({</s
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-02T16:13:33.862Z
+                at 2026-04-05T07:55:46.387Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>
