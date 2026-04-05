@@ -959,15 +959,15 @@
     <h3>🏁 Statut des sprints P1.1 / P1.2 <span class="badge badge-yellow">En cours</span></h3>
     <ul class="checklist">
       <li class="done"><span class="check"></span><span>Renommages techniques réalisés et validés (`composants-ui.test.tsx`, `test_routes_ia_avancee_admin.py`, `test_ia_avancee_service.py`).</span></li>
-      <li class="done"><span class="check"></span><span>Le wrapper `legacy_compat.py` a été renommé en <code>innovations.py</code> et les imports FastAPI ont été mis à jour sans casser `/api/v1/innovations`.</span></li>
+      <li class="done"><span class="check"></span><span>Le wrapper `legacy_compat.py` a d’abord été absorbé dans <code>innovations.py</code>, puis entièrement retiré du runtime après stabilisation des routes métier IA.</span></li>
       <li class="done"><span class="check"></span><span>Les fichiers temporaires `frontend/coverage-output*.txt` ont été supprimés.</span></li>
       <li class="done"><span class="check"></span><span>Les commentaires `Phase/Sprint` et les mentions WhatsApp résiduelles ont été nettoyés dans les tests et les services.</span></li>
       <li class="done"><span class="check"></span><span>Le fichier `17_migrations_absorbees.sql` a été allégé et 3 nouveaux jeux de seed ont été ajoutés (`famille_demo.json`, `maison_demo.json`, `inventaire_demo.json`).</span></li>
       <li class="done"><span class="check"></span><span>Audit SQL validé : aucune nouvelle table orpheline inattendue ; les 5 tables SQL-only restantes (`schema_migrations`, `job_executions`, `objectifs_autonomie`, `plantes_catalogue`, `recoltes`) sont documentées et couvertes par les tests.</span></li>
-      <li class="done"><span class="check"></span><span>Le reliquat `/api/v1/innovations` est désormais <strong>reclassé en refactor API séparé</strong>, hors scope du nettoyage P1.</span></li>
+      <li class="done"><span class="check"></span><span>Le namespace legacy <code>/api/v1/innovations</code> a été retiré du runtime ; les endpoints restants sont désormais absorbés par les routeurs métier stables.</span></li>
       <li class="done"><span class="check"></span><span><strong>Sprint P1.2 réalisé</strong> : les <strong>19 appels frontend internes</strong> ont été migrés vers les routes métier natives (<code>/preferences</code>, <code>/famille</code>, <code>/dashboard</code>, <code>/planning</code>, <code>/courses</code>, <code>/habitat</code>, <code>/rapports</code>, <code>/batch-cooking</code>) et le parcours invité utilise désormais <code>/api/v1/rapports/invite/{token}</code>.</span></li>
     </ul>
-    <p style="margin-top:0.8rem; color:var(--text-muted); font-size:0.82rem;">Vérification du sprint : <code>pytest …</code> → <strong style="color:var(--green)">132 tests backend passés</strong> ; <code>npx vitest run src/__tests__/components/composants-ui.test.tsx</code> → <strong style="color:var(--green)">2 tests passés</strong> ; <code>pytest tests/sql/test_schema_coherence.py -q</code> → <strong style="color:var(--green)">147 tests passés</strong> ; audit compatibilité frontend → <strong style="color:var(--green)">0 appel interne restant vers `/api/v1/innovations`</strong>.</p>
+    <p style="margin-top:0.8rem; color:var(--text-muted); font-size:0.82rem;">Vérification du sprint : <code>pytest …</code> → <strong style="color:var(--green)">132 tests backend passés</strong> ; <code>npx vitest run src/__tests__/components/composants-ui.test.tsx</code> → <strong style="color:var(--green)">2 tests passés</strong> ; <code>pytest tests/sql/test_schema_coherence.py -q</code> → <strong style="color:var(--green)">147 tests passés</strong> ; audit compatibilité frontend → <strong style="color:var(--green)">0 appel interne restant vers `/api/v1/innovations`</strong> ; <code>pytest tests/api/test_routes_ia_transverses.py -q</code> → <strong style="color:var(--green)">28 tests passés</strong>.</p>
   </div>
   
   <div class="section-subtitle">Fichiers à renommer</div>
@@ -979,7 +979,7 @@
     </div>
     <div class="task-item critical">
       <h4>Renommer test_routes_innovations.py <span class="tag tag-clean">Nettoyage</span> <span class="badge badge-green">fait</span></h4>
-      <p>✅ Réalisé avec adaptation : le fichier legacy a été renommé en <code>test_routes_ia_avancee_legacy.py</code> pour éviter le conflit avec <code>test_routes_ia_avancee.py</code>, déjà utilisé pour les routes canoniques.</p>
+      <p>✅ Réalisé avec adaptation : la couverture API a été migrée vers <code>test_routes_ia_transverses.py</code> afin de valider directement les routes métier canoniques et la suppression du préfixe legacy.</p>
       <div class="files">📁 tests/api/</div>
     </div>
     <div class="task-item critical">
@@ -998,8 +998,8 @@
   <div class="task-list">
     <div class="task-item critical">
       <h4>Supprimer legacy_compat.py (750 lignes) <span class="tag tag-clean">Nettoyage</span> <span class="tag tag-api">API</span> <span class="badge badge-green">fait</span></h4>
-      <p>✅ Vérifié : <code>legacy_compat.py</code> n'existe plus dans le dépôt. Le reliquat est désormais le shim <code>src/api/routes/innovations.py</code>, conservé uniquement pour la compatibilité externe (<strong>40 endpoints dépréciés</strong>) ; le frontend interne n'utilise plus ce préfixe et le sujet reste suivi comme refactor API séparé.</p>
-      <div class="files">📁 src/api/routes/innovations.py</div>
+      <p>✅ Réalisé : <code>legacy_compat.py</code> n'existe plus et le shim <code>src/api/routes/innovations.py</code> a été supprimé. Les endpoints IA transverses sont désormais servis uniquement via les routes métier stables (<code>/recettes</code>, <code>/planning</code>, <code>/famille</code>, <code>/dashboard</code>, <code>/rapports</code>, <code>/courses</code>, <code>/habitat</code>, <code>/jeux</code>, <code>/preferences</code>, <code>/batch-cooking</code>).</p>
+      <div class="files">📁 src/api/routes/</div>
     </div>
     <div class="task-item critical">
       <h4>Supprimer fichiers temporaires <span class="tag tag-clean">Nettoyage</span> <span class="badge badge-green">fait</span></h4>

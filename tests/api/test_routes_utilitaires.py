@@ -447,3 +447,42 @@ class TestFormatsReponses:
             MotsDePasseService().dechiffrer(data["valeur_chiffree"], _obtenir_api_secret())
             == "nouveau-secret"
         )
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS — MÉMO VOCAL
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.asyncio(loop_scope="function")
+class TestMemoVocalRoute:
+    """Tests POST /api/v1/utilitaires/memos/vocal"""
+
+    @pytest.mark.asyncio
+    async def test_memo_vocal_success(self, client):
+        """Classification mémo vocal → 200."""
+        from src.services.utilitaires.memo_vocal import MemoClassifie
+
+        mock_svc = MagicMock()
+        mock_svc.transcrire_et_classer.return_value = MemoClassifie(
+            module="courses",
+            action="ajouter",
+            contenu="lait, pain",
+            tags=["alimentation"],
+            destination_url="/cuisine/courses",
+            confiance=0.92,
+        )
+
+        with patch(
+            "src.services.utilitaires.memo_vocal.get_memo_vocal_service",
+            return_value=mock_svc,
+        ):
+            response = await client.post(
+                "/api/v1/utilitaires/memos/vocal",
+                json={"texte": "Acheter du lait et du pain"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["module"] == "courses"
+        assert data["destination_url"] == "/cuisine/courses"

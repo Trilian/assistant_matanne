@@ -1,12 +1,13 @@
 """
-Tests unitaires pour les services IA de la Phase 6.
+Tests unitaires pour les services IA contextuels.
 
-Couvre: NotesIAService, MemoVocalService, JardinAnomaliesIAService,
-InsightsAnalyticsService, GroupeurNotifications, ChatAIService (contexte).
+Couvre : `NotesIAService`, `MemoVocalService`, `JardinAnomaliesIAService`,
+`InsightsAnalyticsService`, `GroupeurNotifications` et `ChatAIService`.
 """
 
 import pytest
 from unittest.mock import Mock, patch
+from contextlib import contextmanager
 
 # ──────────────────────────────────────────────
 # NotesIAService
@@ -24,8 +25,7 @@ class TestNotesIAService:
 
     @pytest.fixture
     def service(self):
-        with patch("src.services.utilitaires.notes_ia.obtenir_client_ia", return_value=Mock()):
-            return NotesIAService()
+        return NotesIAService()
 
     def test_auto_etiqueter_contenu_vide(self, service):
         """Contenu et titre vides → tags vides."""
@@ -98,8 +98,7 @@ class TestMemoVocalService:
 
     @pytest.fixture
     def service(self):
-        with patch("src.services.utilitaires.memo_vocal.obtenir_client_ia", return_value=Mock()):
-            return MemoVocalService()
+        return MemoVocalService()
 
     def test_texte_vide(self, service):
         """Texte vide → module note, confiance 0."""
@@ -213,8 +212,7 @@ class TestJardinAnomaliesIAService:
 
     @pytest.fixture
     def service(self):
-        with patch("src.services.maison.ia.jardin_anomalies_ia.obtenir_client_ia", return_value=Mock()):
-            return JardinAnomaliesIAService()
+        return JardinAnomaliesIAService()
 
     def test_aucune_plante(self, service):
         """Liste de plantes vide → score 100, message informatif."""
@@ -415,8 +413,7 @@ class TestInsightsAnalyticsService:
 
     @pytest.fixture
     def service(self):
-        with patch("src.services.dashboard.insights_analytics.obtenir_client_ia", return_value=Mock()):
-            return InsightsAnalyticsService()
+        return InsightsAnalyticsService()
 
     @patch("src.services.dashboard.insights_analytics.obtenir_contexte_db")
     def test_generer_insights_basique(self, mock_db, service):
@@ -475,7 +472,7 @@ class TestInsightsAnalyticsService:
 
 
 # ──────────────────────────────────────────────
-# ChatAIService — Contexte enrichi P6
+# ChatAIService — Contexte enrichi métier
 # ──────────────────────────────────────────────
 
 from src.services.utilitaires.chat.chat_ai import (
@@ -485,13 +482,12 @@ from src.services.utilitaires.chat.chat_ai import (
 )
 
 
-class TestChatAIContexteP6:
-    """Tests pour l'enrichissement contextuel du ChatAIService (P6)."""
+class TestChatAIContexteMetier:
+    """Tests pour l'enrichissement contextuel du `ChatAIService`."""
 
     @pytest.fixture
     def service(self):
-        with patch("src.services.utilitaires.chat.chat_ai.obtenir_client_ia", return_value=Mock()):
-            return ChatAIService()
+        return ChatAIService()
 
     # — _resoudre_contexte —
 
@@ -508,8 +504,12 @@ class TestChatAIContexteP6:
         assert service._resoudre_contexte("general", "/cuisine/recettes") == "cuisine"
 
     def test_contexte_general_page_jardin(self, service):
-        """Contexte general + page /maison/jardin → résolu en jardin."""
-        assert service._resoudre_contexte("general", "/maison/jardin") == "jardin"
+        """Contexte general + page /jardin → résolu en jardin."""
+        assert service._resoudre_contexte("general", "/jardin") == "jardin"
+
+    def test_contexte_general_page_maison_jardin(self, service):
+        """Contexte general + page /maison/jardin → résolu en maison (premier segment)."""
+        assert service._resoudre_contexte("general", "/maison/jardin") == "maison"
 
     def test_contexte_general_page_jeux(self, service):
         """Contexte general + page /jeux/paris → résolu en jeux."""
@@ -533,8 +533,8 @@ class TestChatAIContexteP6:
 
     # — MAPPING_PAGE_CONTEXTE —
 
-    def test_mapping_couvre_modules_p6(self):
-        """Le mapping inclut les nouveaux contextes P6."""
+    def test_mapping_couvre_modules_metier(self):
+        """Le mapping inclut les contextes métier attendus."""
         assert "jardin" in MAPPING_PAGE_CONTEXTE
         assert "jeux" in MAPPING_PAGE_CONTEXTE
         assert "paris" in MAPPING_PAGE_CONTEXTE
@@ -544,12 +544,12 @@ class TestChatAIContexteP6:
     # — SYSTEM_PROMPTS —
 
     def test_prompts_nouveaux_contextes(self):
-        """Des system prompts existent pour les contextes P6."""
+        """Des system prompts existent pour les contextes métier."""
         for ctx in ("jardin", "jeux", "planning", "inventaire"):
             assert ctx in SYSTEM_PROMPTS, f"System prompt manquant pour '{ctx}'"
 
     def test_prompts_contenu_pertinent(self):
-        """Les prompts P6 mentionnent le bon sujet."""
+        """Les prompts mentionnent bien leur domaine fonctionnel."""
         assert "jardin" in SYSTEM_PROMPTS["jardin"].lower()
         assert "paris" in SYSTEM_PROMPTS["jeux"].lower() or "jeux" in SYSTEM_PROMPTS["jeux"].lower()
         assert "repas" in SYSTEM_PROMPTS["planning"].lower() or "menu" in SYSTEM_PROMPTS["planning"].lower()

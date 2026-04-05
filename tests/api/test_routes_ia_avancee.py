@@ -540,3 +540,55 @@ class TestRoutesIAAvancee:
 
         assert response.status_code == 200
         assert response.json() == expected_json
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS — PILOTE AUTOMATIQUE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestPiloteAutoRoutes:
+    """Tests des endpoints pilote automatique."""
+
+    def test_status(self, client: TestClient, mock_service: MagicMock):
+        """GET /pilote-auto/status → 200."""
+        mock_service.obtenir_mode_pilote_automatique.return_value = None
+
+        with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
+            response = client.get("/api/v1/ia-avancee/pilote-auto/status")
+        assert response.status_code == 200
+        data = response.json()
+        assert "actif" in data
+
+    def test_toggle_activation(self, client: TestClient, mock_service: MagicMock):
+        """POST /pilote-auto/toggle → 200."""
+        with patch(
+            "src.services.ia_avancee.pilote_auto.configurer_mode_pilote_automatique",
+            return_value=None,
+        ):
+            with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
+                response = client.post(
+                    "/api/v1/ia-avancee/pilote-auto/toggle",
+                    json={"actif": True},
+                )
+        assert response.status_code == 200
+        data = response.json()
+        assert "actif" in data
+
+    def test_actions_recentes(self, client: TestClient, mock_service: MagicMock):
+        """GET /pilote-auto/actions-recentes → 200."""
+        mock_service.obtenir_mode_pilote_automatique.return_value = None
+
+        with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
+            response = client.get("/api/v1/ia-avancee/pilote-auto/actions-recentes")
+        assert response.status_code == 200
+        data = response.json()
+        assert "actions" in data
+
+    def test_actions_recentes_limite(self, client: TestClient, mock_service: MagicMock):
+        """GET /actions-recentes?limite=5 → paramètre accepté."""
+        mock_service.obtenir_mode_pilote_automatique.return_value = None
+
+        with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
+            response = client.get("/api/v1/ia-avancee/pilote-auto/actions-recentes?limite=5")
+        assert response.status_code == 200

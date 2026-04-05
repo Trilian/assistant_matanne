@@ -215,17 +215,20 @@ class InsightsAnalyticsService(BaseAIService):
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
 
-            from src.core.models.jardin import Plante, Recolte
+            from src.core.models.temps_entretien import ActionPlante, PlanteJardin
 
             insights.plantes_actives = int(
-                session.query(func.count(Plante.id))
-                .filter(Plante.actif.is_(True))
-                .scalar() or 0
+                session.query(func.count(PlanteJardin.id)).scalar() or 0
             )
             insights.recoltes_count = int(
-                session.query(func.count(Recolte.id))
-                .filter(Recolte.date_recolte >= date_debut, Recolte.date_recolte <= date_fin)
-                .scalar() or 0
+                session.query(func.count(ActionPlante.id))
+                .filter(
+                    ActionPlante.type_action == "recolte",
+                    ActionPlante.date_action >= date_debut,
+                    ActionPlante.date_action <= date_fin,
+                )
+                .scalar()
+                or 0
             )
 
     def _generer_narrative(self, insights: InsightsFamille) -> str:

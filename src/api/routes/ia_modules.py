@@ -29,7 +29,7 @@ from src.api.schemas.ia_modules import (
     PredictionConsommationRequest,
     SuggestionSimplificationPlanningRequest,
 )
-from src.api.utils import gerer_exception_api
+from src.api.utils import executer_avec_session, gerer_exception_api
 from src.core.models.abonnements import Artisan
 from src.core.models.maison_extensions import DevisComparatif
 from src.services.cuisine.nutrition_famille_ia import DonneesNutritionnelles
@@ -620,16 +620,16 @@ async def detecter_anomalies_jardin(
     from src.services.maison.ia.jardin_anomalies_ia import get_jardin_anomalies_ia_service
 
     def _query():
-        from src.core.models.jardin import Plante
+        from src.core.models.temps_entretien import PlanteJardin
 
         with executer_avec_session() as session:
-            plantes_db = session.query(Plante).filter(Plante.actif.is_(True)).all()
+            plantes_db = session.query(PlanteJardin).all()
             plantes = [
                 {
                     "nom": p.nom,
                     "date_plantation": str(getattr(p, "date_plantation", "")),
                     "etat": getattr(p, "etat", "normal"),
-                    "frequence_arrosage": getattr(p, "frequence_arrosage", ""),
+                    "frequence_arrosage": getattr(p, "arrosage", ""),
                 }
                 for p in plantes_db
             ]

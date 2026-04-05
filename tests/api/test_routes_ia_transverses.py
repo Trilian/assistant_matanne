@@ -18,10 +18,37 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def mock_innovations_service():
-    """Mock du service InnovationsService via la factory actuelle."""
-    with patch("src.services.ia_avancee.get_innovations_service") as mock:
+    """Mock partagé du service IA transverse, injecté dans tous les routeurs métier."""
+    with (
+        patch("src.api.routes.recettes.obtenir_service_innovations_cuisine") as mock_recettes,
+        patch("src.api.routes.planning.obtenir_service_innovations_cuisine") as mock_planning,
+        patch("src.api.routes.batch_cooking.obtenir_service_innovations_cuisine") as mock_batch,
+        patch("src.api.routes.courses.obtenir_service_innovations_cuisine") as mock_courses,
+        patch("src.api.routes.famille.obtenir_service_innovations_famille") as mock_famille,
+        patch("src.api.routes.dashboard.obtenir_service_innovations_core") as mock_dashboard,
+        patch("src.api.routes.preferences.obtenir_service_innovations_core") as mock_preferences,
+        patch("src.api.routes.rapports.obtenir_service_innovations_rapports") as mock_rapports,
+        patch("src.api.routes.rapports._obtenir_service_partage_invite") as mock_invites,
+        patch("src.api.routes.habitat.obtenir_service_innovations_habitat") as mock_habitat,
+        patch("src.api.routes.jeux.obtenir_service_innovations_jeux") as mock_jeux,
+        patch("src.services.ia_avancee.get_innovations_service") as mock_base,
+    ):
         service = MagicMock()
-        mock.return_value = service
+        for mock in (
+            mock_recettes,
+            mock_planning,
+            mock_batch,
+            mock_courses,
+            mock_famille,
+            mock_dashboard,
+            mock_preferences,
+            mock_rapports,
+            mock_invites,
+            mock_habitat,
+            mock_jeux,
+            mock_base,
+        ):
+            mock.return_value = service
         yield service
 
 
@@ -443,17 +470,18 @@ class TestLearningPreferencesTransverses:
         from src.services.ia_avancee.types_central import SaisonnaliteIntelligenteResponse
 
         mock_innovations_service.appliquer_saisonnalite_intelligente.return_value = SaisonnaliteIntelligenteResponse(
-            mois_courant="avril",
-            ingredients_saison=["asperges", "radis"],
-            recettes_recommandees=["Salade printanière"],
-            conseils_achat=["Privilégier les légumes locaux"],
+            saison="printemps",
+            recettes_de_saison=["Salade printanière"],
+            actions_jardin=["Planter les herbes aromatiques"],
+            actions_entretien=["Aérer la maison"],
+            ajustements_energie=["Réduire le chauffage en journée"],
         )
 
         response = client.get("/api/v1/recettes/saisonnalite-intelligente", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
-        assert data["mois_courant"] == "avril"
-        assert "asperges" in data["ingredients_saison"]
+        assert data["saison"] == "printemps"
+        assert "Salade printanière" in data["recettes_de_saison"]
 
     def test_planification_hebdo_complete_auto(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import BlocPlanificationAuto, PlanificationHebdoCompleteResponse

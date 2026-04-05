@@ -136,7 +136,7 @@ npx eslint "src/app/(app)/parametres/_composants/onglet-affichage.tsx" "src/app/
 
 # Backend : endpoints préférences / IA transverses / rapports
 cd ..
-pytest tests/api/test_routes_preferences.py tests/api/test_routes_ia_avancee_legacy.py -q
+pytest tests/api/test_routes_preferences.py tests/api/test_routes_ia_transverses.py -q
 ```
 
 Pour les scénarios PWA/hors-ligne, voir aussi `docs/guides/PWA_OFFLINE.md` et vérifier depuis le navigateur que `Paramètres > Données` remonte bien l'état de la file de synchronisation.

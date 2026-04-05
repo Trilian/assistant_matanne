@@ -57,7 +57,7 @@ frontend/src/app/(app)/habitat/
 
 Le module Habitat intègre désormais la **veille emploi** :
 
-- **Endpoint** : `POST /api/v1/innovations/veille-emploi`
+- **Endpoint** : `POST /api/v1/famille/veille-emploi`
 - **CRON** : `veille_emploi` — scan quotidien à 7h00
 - **Critères configurables** : domaine, mots-clés, type contrat, mode travail, rayon géographique
 - **Alertes** : Push + Email si nouvelles offres détectées

@@ -985,104 +985,23 @@ Intégration Garmin pour le suivi sportif et les recommandations nutritionnelles
 
 ---
 
-## 🧪 Innovations — `/api/v1/innovations` (40 endpoints dépréciés)
-
-Shim de compatibilité externe maintenu pendant la dépréciation progressive : modes pilote/vacances, scores, rapports, cartes visuelles, apprentissage.
-
-### Cuisine IA (8)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| POST | `/innovations/idee-repas` | Body: `IdeeRepasSoirRequest` | Suggestion dîner express |
-| GET | `/innovations/patterns-alimentaires` | `periode_jours?` (défaut: 90) | Détection patterns alimentaires |
-| GET | `/innovations/saisonnalite-intelligente` | — | Saisonnalité intelligente |
-| GET | `/innovations/garmin-repas-adaptatif` | — | Repas adapté à la dépense Garmin |
-| GET | `/innovations/planification-auto` | — | Planification hebdo automatique |
-| GET | `/innovations/batch-cooking-intelligent` | — | Batch cooking intelligent |
-| POST | `/innovations/parcours-magasin` | Body: `ParcoursOptimiseRequest` | Optimisation parcours magasin |
-| GET | `/innovations/comparateur-prix-auto` | `top_n?` (défaut: 20) | Comparateur prix automatique |
-
-### Énergie & Maison (5)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| GET | `/innovations/anomalies-energie` | — | Détection anomalies eau/gaz/élec |
-| POST | `/innovations/comparateur-energie` | Body: `ComparateurEnergieRequest` | Comparateur fournisseurs énergie |
-| GET | `/innovations/energie-temps-reel` | — | Tableau énergie temps réel |
-| GET | `/innovations/enrichissement-contacts` | — | Enrichissement contacts IA |
-| GET | `/innovations/tendances-loto` | `jeu?` (défaut: "loto") | Analyse tendances Loto/EuroMillions |
-
-### Famille & Routines (4)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| GET | `/innovations/coach-routines` | — | Coach routines IA |
-| GET | `/innovations/planning-jules-adaptatif` | — | Planning Jules adaptatif |
-| GET | `/innovations/score-famille-hebdo` | — | Score famille hebdomadaire |
-| POST | `/innovations/veille-emploi` | Body: `VeilleEmploiRequest` | Veille emploi multi-sites |
-
-### Modes & Pilotage (5)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| GET | `/innovations/mode-vacances` | — | Lecture mode vacances |
-| POST | `/innovations/mode-vacances/config` | Body: `ModeVacancesConfigurationRequest` | Configuration mode vacances |
-| GET | `/innovations/mode-pilote` | — | Mode pilote automatique |
-| POST | `/innovations/mode-pilote/config` | Body: `ModePiloteConfigurationRequest` | Configuration mode pilote |
-| GET | `/innovations/mode-tablette-magazine` | — | Mode tablette magazine |
-
-### Scores & Rapports (10)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| GET | `/innovations/tableau-sante-foyer` | — | Tableau de bord santé foyer |
-| GET | `/innovations/score-bien-etre` | — | Score bien-être familial composite |
-| GET | `/innovations/score-eco-responsable` | — | Score éco-responsable |
-| GET | `/innovations/resume-mensuel` | — | Résumé mensuel IA |
-| GET | `/innovations/retrospective-annuelle` | `annee` | Rétrospective annuelle IA |
-| GET | `/innovations/journal-familial` | — | Journal familial automatique |
-| GET | `/innovations/journal-familial/pdf` | — | Export PDF journal familial |
-| GET | `/innovations/rapport-mensuel/pdf` | `mois` | Rapport mensuel PDF |
-| POST | `/innovations/bilan-annuel` | Body: `BilanAnnuelRequest` | Bilan annuel complet IA |
-| POST | `/innovations/carte-visuelle` | Body: `CarteVisuelleRequest` | Carte visuelle partageable |
-
-### Intelligence & Apprentissage (6)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| GET | `/innovations/apprentissage-habitudes` | — | Apprentissage continu habitudes |
-| GET | `/innovations/alertes-contextuelles` | — | Alertes intelligentes contextuelles |
-| GET | `/innovations/insights-quotidiens` | `limite?` (défaut: 2) | Insights IA proactifs quotidiens |
-| GET | `/innovations/meteo-contextuelle` | — | Météo contextuelle cross-module |
-| GET | `/innovations/preferences-apprises` | — | Apprentissage des préférences |
-| GET | `/innovations/telegram-conversationnel` | — | Telegram conversationnel |
-
-### Invités (2)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| POST | `/innovations/invite/creer` | Body: `LienInviteRequest` | Créer un lien invite partageable |
-| GET | `/innovations/invite/{token}` | — | Accès données invité (sans auth) |
-
----
-
 ## Résumé par module
 
 | Module | Préfixe | Endpoints |
 |--------|---------|-----------|
 | Auth | `/api/v1/auth` | 4 |
-| Recettes | `/api/v1/recettes` | 6 |
+| Recettes | `/api/v1/recettes` | 7 |
 | Courses | `/api/v1/courses` | 11 |
 | Inventaire | `/api/v1/inventaire` | 6 |
 | Planning | `/api/v1/planning` | 4 |
 | Suggestions IA | `/api/v1/suggestions` | 2 |
-| Famille | `/api/v1/famille` | 29 |
+| Famille | `/api/v1/famille` | 30 |
 | Maison | `/api/v1/maison` | 111 |
 | Jeux | `/api/v1/jeux` | 11 |
-| Dashboard | `/api/v1/dashboard` | 1 |
-| Batch Cooking | `/api/v1/batch-cooking` | 7 |
+| Dashboard | `/api/v1/dashboard` | 5 |
+| Batch Cooking | `/api/v1/batch-cooking` | 8 |
 | Anti-Gaspillage | `/api/v1/anti-gaspillage` | 1 |
-| Préférences | `/api/v1/preferences` | 3 |
+| Préférences | `/api/v1/preferences` | 4 |
 | Export PDF | `/api/v1/export` | 1 |
 | Calendriers | `/api/v1/calendriers` | 6 |
 | Documents | `/api/v1/documents` | 5 |
@@ -1102,7 +1021,6 @@ Shim de compatibilité externe maintenu pendant la dépréciation progressive : 
 | Notifications enrichies | `/api/v1/notifications` | 6 |
 | Automations | `/api/v1/automations` | 7 |
 | Garmin | `/api/v1/garmin` | 7 |
-| Innovations | `/api/v1/innovations` | 40 |
 | **Total** | | **400+** |
 
 

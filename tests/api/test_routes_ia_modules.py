@@ -430,3 +430,50 @@ def test_comparaison_devis_artisans_endpoint(client: TestClient) -> None:
     assert payload["projet_id"] == 42
     assert payload["estimation_reference"]["nb_devis"] == 2
     assert payload["recommandation"]["devis_recommande"]["devis_id"] in {1, 2}
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS — ANOMALIES JARDIN
+# ═══════════════════════════════════════════════════════════
+
+
+def test_anomalies_jardin_endpoint(client: TestClient) -> None:
+    """GET /api/v1/ia/modules/jardin/anomalies → 200."""
+    from src.services.maison.ia.jardin_anomalies_ia import AnomaliesJardinResponse
+
+    result = AnomaliesJardinResponse(
+        score_sante_jardin=80.0,
+        recommandations_generales=["Tout va bien"],
+    )
+
+    with patch(
+        "src.api.utils.crud.executer_async",
+        new_callable=lambda: lambda: AsyncMock(return_value=result.model_dump()),
+    ):
+        response = client.get("/api/v1/ia/modules/jardin/anomalies")
+
+    assert response.status_code == 200
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS — SCORE ÉCOLOGIQUE
+# ═══════════════════════════════════════════════════════════
+
+
+def test_score_ecologique_endpoint(client: TestClient) -> None:
+    """POST /api/v1/ia/modules/recette/score-ecologique → 200."""
+    mock_svc = MagicMock()
+    mock_svc.calculer_score_eco_responsable.return_value = None
+
+    with patch(
+        "src.services.ia_avancee.service.get_ia_avancee_service",
+        return_value=mock_svc,
+    ):
+        response = client.post(
+            "/api/v1/ia/modules/recette/score-ecologique",
+            json={"recette_id": 1, "ingredients": ["tomate", "basilic"]},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "score_global" in data

@@ -18,9 +18,8 @@ Les schémas ci-dessous sont déjà présents dans `src/api/schemas/fonctionnali
 | `POST /api/v1/preferences/mode-pilote/config` | `src/api/routes/preferences.py` | `ModePiloteConfigurationRequest` + `ModePiloteAutomatiqueResponse` |
 | `GET /api/v1/rapports/resume-mensuel` | `src/api/routes/rapports.py` | `ResumeMensuelIAResponse` |
 | `GET /api/v1/rapports/rapport-mensuel/pdf` | `src/api/routes/rapports.py` | `RapportMensuelPdfResponse` |
-| `GET /api/v1/innovations/rapport-mensuel/pdf` | `src/api/routes/innovations.py` | `RapportMensuelPdfResponse` |
 
-> **Note** : le routeur `innovations.py` sert désormais uniquement de façade de compatibilité externe dépréciée pour `/api/v1/innovations`, tandis que les usages produit visibles passent surtout par `preferences.py` et `rapports.py`.
+> **Note** : l'ancien namespace `/api/v1/innovations` a été retiré. Les usages produit visibles passent désormais par les routeurs métier stables, en particulier `preferences.py`, `rapports.py`, `famille.py` et `dashboard.py`.
 
 ## anti_gaspillage
 
