@@ -26,7 +26,7 @@ from src.api.schemas.habitat import (
     ZoneJardinHabitatCreate,
     ZoneJardinHabitatPatch,
 )
-from src.api.schemas.fonctionnalites_avancees import (
+from src.api.schemas.ia_transverses import (
     AnomaliesEnergieResponse,
     ComparateurEnergieRequest,
     ComparateurEnergieResponse,

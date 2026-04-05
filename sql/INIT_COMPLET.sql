@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-04-04 06:26 UTC
--- Source     : sql/schema/*.sql (22 fichiers, ~5280 lignes)
+-- Généré le  : 2026-04-05 05:59 UTC
+-- Source     : sql/schema/*.sql (22 fichiers, ~5183 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -650,7 +650,7 @@ CREATE INDEX IF NOT EXISTS ix_job_executions_job_started ON job_executions(job_i
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.04F IA_SUGGESTIONS_HISTORIQUE (historique des suggestions IA — P3-06)
+-- 4.04F IA_SUGGESTIONS_HISTORIQUE (historique des suggestions IA)
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ia_suggestions_historique (
@@ -718,7 +718,7 @@ CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_h
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.13 ARTICLES_COURSES (→ listes_courses, ingredients) — Sprint 12 A5
+-- 4.13 ARTICLES_COURSES (→ listes_courses, ingredients)
 -- Anciennement liste_courses. Renommé en articles_courses pour cohérence.
 
 
@@ -961,7 +961,7 @@ CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_check
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- BANKROLL HISTORIQUE (CT-09 Sprint 4)
+-- BANKROLL HISTORIQUE 
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1066,7 +1066,7 @@ CREATE INDEX IF NOT EXISTS idx_bankroll_historique_user ON jeux_bankroll_histori
 -- ============================================================================
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Table congélation — persistance des articles congelés (P3-05)
+-- Table congélation — persistance des articles congelés
 -- Remplace le stockage mémoire de congelation.py
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3702,7 +3702,7 @@ CREATE TABLE preferences_notifications (
     quiet_hours_end TIME DEFAULT '07:00',
     modules_actifs JSONB DEFAULT '{}'::jsonb,
     canal_prefere VARCHAR(20) DEFAULT 'push',
-    -- Sprint 13 — W4 : canaux par catégorie
+    -- canaux par catégorie
     canaux_par_categorie JSONB DEFAULT '{"rappels":["push","ntfy"],"alertes":["push","ntfy","email"],"resumes":["email"]}'::jsonb,
     user_id UUID,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -5129,7 +5129,7 @@ GRANT USAGE,
 -- avec les conventions actuelles quand les colonnes ont evolue.
 -- ============================================================================
 
--- Phase 5: workflow validation v2 (planning + courses)
+-- workflow validation v2 (planning + courses)
 
 -- Plannings: ajoute `etat` si absent, puis migre depuis `actif` si present.
 ALTER TABLE plannings

@@ -30,7 +30,7 @@ from src.api.schemas.errors import (
     REPONSES_LISTE,
     REPONSES_IA,
 )
-from src.api.schemas.fonctionnalites_avancees import (
+from src.api.schemas.ia_transverses import (
     MangeCeSoirRequest,
     PatternsAlimentairesResponse,
     SaisonnaliteIntelligenteResponse,

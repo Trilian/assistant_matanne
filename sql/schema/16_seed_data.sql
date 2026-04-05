@@ -672,7 +672,7 @@ GRANT USAGE,
 -- avec les conventions actuelles quand les colonnes ont evolue.
 -- ============================================================================
 
--- Phase 5: workflow validation v2 (planning + courses)
+-- workflow validation v2 (planning + courses)
 
 -- Plannings: ajoute `etat` si absent, puis migre depuis `actif` si present.
 ALTER TABLE plannings

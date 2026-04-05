@@ -25,7 +25,7 @@ from src.api.schemas.errors import (
     REPONSES_LISTE,
     REPONSES_IA,
 )
-from src.api.schemas.fonctionnalites_avancees import PlanificationHebdoCompleteResponse
+from src.api.schemas.ia_transverses import PlanificationHebdoCompleteResponse
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
 

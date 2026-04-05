@@ -126,7 +126,7 @@ npm test
 npx next build
 ```
 
-### Vérification rapide Phase 6 (UI, offline, rapports)
+### Vérification rapide (UI, offline, rapports)
 
 ```bash
 # Frontend : paramètres, planning tactile, mode tablette

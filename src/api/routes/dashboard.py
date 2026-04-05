@@ -14,7 +14,7 @@ from sqlalchemy import func
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA, REPONSES_LISTE
-from src.api.schemas.fonctionnalites_avancees import (
+from src.api.schemas.ia_transverses import (
     AlertesContextuellesResponse,
     InsightsQuotidiensResponse,
     MeteoContextuelleResponse,

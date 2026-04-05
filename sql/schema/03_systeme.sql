@@ -539,7 +539,7 @@ CREATE INDEX IF NOT EXISTS ix_job_executions_job_started ON job_executions(job_i
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.04F IA_SUGGESTIONS_HISTORIQUE (historique des suggestions IA — P3-06)
+-- 4.04F IA_SUGGESTIONS_HISTORIQUE (historique des suggestions IA)
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ia_suggestions_historique (
@@ -607,7 +607,7 @@ CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_h
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.13 ARTICLES_COURSES (→ listes_courses, ingredients) — Sprint 12 A5
+-- 4.13 ARTICLES_COURSES (→ listes_courses, ingredients)
 -- Anciennement liste_courses. Renommé en articles_courses pour cohérence.
 
 
@@ -850,7 +850,7 @@ CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_check
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- BANKROLL HISTORIQUE (CT-09 Sprint 4)
+-- BANKROLL HISTORIQUE 
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -955,7 +955,7 @@ CREATE INDEX IF NOT EXISTS idx_bankroll_historique_user ON jeux_bankroll_histori
 -- ============================================================================
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Table congélation — persistance des articles congelés (P3-05)
+-- Table congélation — persistance des articles congelés
 -- Remplace le stockage mémoire de congelation.py
 
 -- ─────────────────────────────────────────────────────────────────────────────

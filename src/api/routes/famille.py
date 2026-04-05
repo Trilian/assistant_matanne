@@ -68,7 +68,7 @@ from src.api.schemas.famille import (
     SuggestionsSejourRequest,
     SuggestionsWeekendRequest,
 )
-from src.api.schemas.fonctionnalites_avancees import (
+from src.api.schemas.ia_transverses import (
     CoachRoutinesResponse,
     EnrichissementContactsResponse,
     ModeVacancesConfigurationRequest,

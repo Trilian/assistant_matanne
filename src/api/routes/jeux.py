@@ -20,7 +20,7 @@ from fastapi import APIRouter, Depends, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_IA
-from src.api.schemas.fonctionnalites_avancees import AnalyseTendancesLotoResponse
+from src.api.schemas.ia_transverses import AnalyseTendancesLotoResponse
 from src.api.utils import gerer_exception_api
 from src.services.jeux.innovations_service import obtenir_service_innovations_jeux
 

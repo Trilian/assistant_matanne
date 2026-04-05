@@ -6,9 +6,9 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 - Nombre total de classes BaseModel: 322
 - Nombre de modules schemas: 26
 
-## Complément Phase 6 — Endpoints métier actifs
+## Endpoints métier actifs
 
-Les schémas ci-dessous sont déjà présents dans `src/api/schemas/fonctionnalites_avancees.py` et correspondent aux alias métier actuellement utilisés par le frontend Phase 6 :
+Les schémas ci-dessous sont déjà présents dans `src/api/schemas/fonctionnalites_avancees.py` et correspondent aux alias métier actuellement utilisés par le frontend :
 
 | Endpoint | Route | Modèle principal |
 |---|---|---|

@@ -1,4 +1,4 @@
-# Audit OWASP — Phase 2
+# Audit OWASP
 
 > Mise à jour : **04/04/2026**  
 > Scope : backend FastAPI, frontend Next.js, endpoints sensibles et stockages chiffrés.
@@ -7,7 +7,7 @@
 
 La base de sécurité est **bonne et active** sur les points critiques : authentification JWT, contrôle d'accès par dépendances, rate limiting, headers HTTP de sécurité, CORS strict et chiffrement des exports/valeurs sensibles.
 
-La vague Phase 2 a renforcé le coffre-fort `mots_de_passe_maison` pour garantir un **chiffrement au stockage côté API** avant écriture en base.
+Le coffre-fort `mots_de_passe_maison` garantit un **chiffrement au stockage côté API** avant écriture en base.
 
 ## Checklist OWASP Top 10
 
@@ -24,7 +24,7 @@ La vague Phase 2 a renforcé le coffre-fort `mots_de_passe_maison` pour garantir
 | A09 — Security Logging & Monitoring Failures | ✅ | Logs admin/sécurité + métriques Prometheus | `src/api/routes/admin_audit.py`, `src/api/prometheus.py` |
 | A10 — SSRF | 🟡 | Appels externes encapsulés et limités, revue continue sur intégrations | `src/core/decorators/validation.py`, `src/services/integrations/` |
 
-## Points livrés pendant cette phase
+## Points livrés
 
 - ✅ Chiffrement au stockage des entrées `mots_de_passe_maison` avant `INSERT` / `UPDATE`
 - ✅ Tests de non-régression backend sur ce chiffrement

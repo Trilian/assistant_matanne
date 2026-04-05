@@ -17,7 +17,7 @@ from src.api.schemas.preferences import (
     PreferencesPatch,
     PreferencesNotificationsUpdate,
 )
-from src.api.schemas.fonctionnalites_avancees import (
+from src.api.schemas.ia_transverses import (
     ApprentissageHabitudesResponse,
     ApprentissagePreferencesResponse,
     ModePiloteAutomatiqueResponse,

@@ -32,7 +32,7 @@ CREATE TABLE preferences_notifications (
     quiet_hours_end TIME DEFAULT '07:00',
     modules_actifs JSONB DEFAULT '{}'::jsonb,
     canal_prefere VARCHAR(20) DEFAULT 'push',
-    -- Sprint 13 — W4 : canaux par catégorie
+    -- canaux par catégorie
     canaux_par_categorie JSONB DEFAULT '{"rappels":["push","ntfy"],"alertes":["push","ntfy","email"],"resumes":["email"]}'::jsonb,
     user_id UUID,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

@@ -20,7 +20,7 @@ from src.api.schemas.batch_cooking import (
     SessionBatchResponse,
 )
 from src.api.schemas.errors import REPONSES_IA
-from src.api.schemas.fonctionnalites_avancees import BatchCookingIntelligentResponse
+from src.api.schemas.ia_transverses import BatchCookingIntelligentResponse
 from src.api.schemas.common import MessageResponse, ReponsePaginee
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
