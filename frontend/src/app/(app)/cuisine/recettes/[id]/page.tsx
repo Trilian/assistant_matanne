@@ -32,7 +32,9 @@ import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { exporterRecettePdf, genererVersionJules, obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
+import { obtenirScoreEcologique } from "@/bibliotheque/api/ia-avancee";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
+import { BadgeEcoscore } from "@/composants/cuisine/badge-ecoscore";
 import { RadarNutritionFamille } from "@/composants/graphiques/radar-nutrition-famille";
 import { toast } from "sonner";
 import { useEffect } from "react";
@@ -52,6 +54,12 @@ export default function PageDetailRecette({
   const { data: recette, isLoading } = utiliserRequete(
     ["recette", id],
     () => obtenirRecette(Number(id))
+  );
+
+  const { data: ecoScore } = utiliserRequete(
+    ["recette-ecoscore", id],
+    () => obtenirScoreEcologique(Number(id)),
+    { enabled: !!recette, staleTime: 10 * 60 * 1000, retry: false }
   );
 
   useEffect(() => {
@@ -152,6 +160,7 @@ export default function PageDetailRecette({
                 {tag}
               </Badge>
             ))}
+            <BadgeEcoscore grade={ecoScore?.score} />
           </div>
         </div>
 

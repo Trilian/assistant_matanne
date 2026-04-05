@@ -5,16 +5,28 @@
 {% block contenu %}
 <h2>🔔 Vos notifications en attente</h2>
 <p>Voici un résumé des {{ notifications|length }} notification{{ "s" if notifications|length > 1 else "" }} reçue{{ "s" if notifications|length > 1 else "" }} :</p>
-<ul>
+
+<table class="stats" style="width:100%;border-collapse:collapse;margin:16px 0">
   {% for notif in notifications %}
-  <li>
-    <strong>{{ notif.timestamp }}</strong> — {{ notif.message }}
-    {% if notif.type_evenement %}
-    <span style="color:#6b7280;font-size:12px">({{ notif.type_evenement }})</span>
-    {% endif %}
-  </li>
+  <tr style="{% if loop.index is odd %}background:#f3f4f6{% endif %}">
+    <td style="padding:10px 12px;vertical-align:top;width:90px">
+      <span style="color:#6b7280;font-size:12px;white-space:nowrap">{{ notif.timestamp }}</span>
+    </td>
+    <td style="padding:10px 12px">
+      {{ notif.message }}
+      {% if notif.type_evenement %}
+      <br><span style="display:inline-block;margin-top:4px;background:#fef3c7;color:#92400e;font-size:11px;padding:2px 8px;border-radius:9999px">{{ notif.type_evenement }}</span>
+      {% endif %}
+    </td>
+  </tr>
   {% endfor %}
-</ul>
+</table>
+
+<p style="text-align:center;margin:20px 0">
+  <a href="{{ app_url | default('http://localhost:3000') }}" class="btn btn-primary" style="display:inline-block;padding:12px 28px;font-size:15px">
+    Ouvrir Matanne
+  </a>
+</p>
 {% endblock %}
 
 {% block footer %}

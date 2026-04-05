@@ -8,6 +8,7 @@ Export JSON multi-domaine et restauration via ExportService.
 from typing import Any
 
 import logging
+import base64
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
@@ -31,6 +32,8 @@ async def exporter_pdf(
         description="Type d'export: courses, planning, recette, budget",
     ),
     id_ressource: int | None = Query(None, description="ID optionnel de la ressource"),
+    envoyer_email: bool = Query(False, description="Envoyer le PDF par email au lieu de le télécharger"),
+    email: str | None = Query(None, description="Adresse email destinataire (requis si envoyer_email=True)"),
     user: dict[str, Any] = Depends(require_auth),
 ):
     """
@@ -41,6 +44,8 @@ async def exporter_pdf(
     - planning: Planning de la semaine (id_ressource requis)
     - recette: Fiche recette détaillée (id_ressource requis)
     - budget: Résumé budget mensuel (id_ressource = période en jours, défaut: 30)
+
+    Si envoyer_email=True, le PDF est envoyé par email au lieu d'être téléchargé.
     """
     if type_export not in TYPES_EXPORT:
         raise HTTPException(
@@ -52,6 +57,12 @@ async def exporter_pdf(
         raise HTTPException(
             status_code=422,
             detail=f"id_ressource requis pour {type_export}",
+        )
+
+    if envoyer_email and not email:
+        raise HTTPException(
+            status_code=422,
+            detail="Paramètre 'email' requis lorsque envoyer_email=True",
         )
 
     def _generate():
@@ -72,6 +83,25 @@ async def exporter_pdf(
 
     buffer, nom_fichier = await executer_async(_generate)
     buffer.seek(0)
+
+    if envoyer_email:
+        from src.services.core.notifications.notif_email import ServiceEmail
+
+        pdf_bytes = buffer.read()
+        pdf_b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+        service_email = ServiceEmail()
+        ok = service_email._envoyer(
+            to=email,
+            subject=f"📄 Export {type_export} — Matanne",
+            html=f"<p>Votre export <strong>{type_export}</strong> est en pièce jointe.</p>",
+            attachments=[{
+                "filename": f"{nom_fichier}.pdf",
+                "content": pdf_b64,
+            }],
+        )
+        if not ok:
+            raise HTTPException(status_code=500, detail="Échec de l'envoi par email")
+        return {"message": f"PDF envoyé par email à {email}", "type": type_export}
 
     return StreamingResponse(
         buffer,

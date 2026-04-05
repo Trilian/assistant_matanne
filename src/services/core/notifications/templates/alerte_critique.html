@@ -8,10 +8,18 @@
   <p>{{ message }}</p>
 </div>
 {% if lien %}
-<a href="{{ lien }}" class="btn btn-danger">Voir les détails</a>
+<p style="text-align:center;margin:20px 0">
+  <a href="{{ lien }}" class="btn btn-danger" style="display:inline-block;padding:12px 28px;font-size:15px">
+    Voir &amp; agir maintenant →
+  </a>
+</p>
 {% endif %}
+<p style="color:#6b7280;font-size:13px;margin-top:20px">
+  💡 Cette alerte est envoyée automatiquement lorsqu'un seuil critique est atteint.
+  Vous pouvez la gérer depuis l'application.
+</p>
 {% endblock %}
 
 {% block footer %}
-Alerte automatique Matanne.
+Alerte automatique Matanne — action requise.
 {% endblock %}

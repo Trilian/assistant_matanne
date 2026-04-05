@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import logging
 from datetime import date, timedelta
 
 from ._helpers import (
@@ -12,6 +13,8 @@ from ._helpers import (
     _resume_statut_article,
     _selectionner_liste_courses,
 )
+
+logger = logging.getLogger(__name__)
 
 
 async def _envoyer_planning_commande(chat_id: str) -> None:
@@ -434,3 +437,56 @@ async def _ajouter_article_liste(chat_id: str, article: str) -> None:
         session.commit()
 
     await envoyer_message_telegram(chat_id, f"✅ '{nom_article}' ajoute a la liste.")
+
+
+async def _envoyer_quoi_manger(chat_id: str) -> None:
+    """Suggère des recettes réalisables avec le stock frigo actuel."""
+    from src.core.db import obtenir_contexte_db
+    from src.services.cuisine.inter_module_inventaire_planning import (
+        obtenir_service_inventaire_planning_interaction,
+    )
+    from src.services.integrations.telegram import envoyer_message_interactif
+
+    try:
+        with obtenir_contexte_db() as session:
+            resultat = obtenir_service_inventaire_planning_interaction().suggerer_recettes_selon_stock(
+                limite=5, db=session,
+            )
+    except Exception:
+        logger.exception("Erreur suggestion recettes depuis stock")
+        resultat = {}
+
+    recettes = resultat.get("recettes", [])
+
+    if not recettes:
+        await envoyer_message_interactif(
+            destinataire=chat_id,
+            corps=(
+                "🍽️ <b>Quoi manger ?</b>\n\n"
+                "Aucune recette trouvée pour le stock actuel.\n"
+                "Remplis d'abord l'inventaire ou envoie une photo du frigo !"
+            ),
+            boutons=[
+                {"url": _obtenir_url_app("/cuisine/inventaire"), "title": "🥫 Inventaire"},
+                {"id": "menu_cuisine", "title": "🍽️ Menu Cuisine"},
+            ],
+        )
+        return
+
+    lignes = ["🍽️ <b>Quoi manger ?</b>", "Recettes possibles avec ton stock :", ""]
+    for r in recettes[:5]:
+        couverture = r.get("couverture_stock_pct", 0)
+        nom = html.escape(str(r.get("nom", "Recette")))
+        couverts = r.get("ingredients_couverts", 0)
+        total = r.get("ingredients_total", 0)
+        lignes.append(f"• <b>{nom}</b> — {couverture:.0f}% ({couverts}/{total} ingrédients)")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/cuisine/recettes"), "title": "📖 Voir les recettes"},
+            {"url": _obtenir_url_app("/cuisine/planning"), "title": "📅 Planning"},
+            {"id": "menu_cuisine", "title": "🍽️ Menu Cuisine"},
+        ],
+    )

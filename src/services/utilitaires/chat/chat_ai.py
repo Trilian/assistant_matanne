@@ -19,7 +19,32 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-ContexteChat = Literal["cuisine", "famille", "maison", "budget", "general", "nutrition"]
+ContexteChat = Literal["cuisine", "famille", "maison", "budget", "general", "nutrition", "jardin", "jeux", "planning", "inventaire"]
+
+# Mapping page → contexte IA pour le chat contextuel
+MAPPING_PAGE_CONTEXTE: dict[str, str] = {
+    "cuisine": "cuisine",
+    "recettes": "cuisine",
+    "courses": "cuisine",
+    "planning": "planning",
+    "inventaire": "inventaire",
+    "batch-cooking": "cuisine",
+    "anti-gaspillage": "cuisine",
+    "famille": "famille",
+    "jules": "famille",
+    "activites": "famille",
+    "routines": "famille",
+    "maison": "maison",
+    "projets": "maison",
+    "entretien": "maison",
+    "jardin": "jardin",
+    "energie": "maison",
+    "jeux": "jeux",
+    "paris": "jeux",
+    "loto": "jeux",
+    "budget": "budget",
+    "outils": "general",
+}
 
 SYSTEM_PROMPTS: dict[str, str] = {
     "cuisine": """Tu es un assistant culinaire expert pour une famille française.
@@ -50,6 +75,23 @@ Sois concret sur les montants et les actions possibles.""",
 Tu aides une famille française avec tous les aspects de la vie quotidienne:
 cuisine, enfants, maison, budget, organisation, loisirs.
 Sois chaleureux, concret et utile. Réponds en français.""",
+    "jardin": """Tu es un expert en jardinage et potager familial.
+Tu aides avec: semis, plantations, entretien, récoltes, maladies des plantes, arrosage.
+Tu connais le climat tempéré français et le calendrier du potager.
+Adapte tes conseils à la saison en cours. Sois pratique et concret.""",
+    "jeux": """Tu es un assistant spécialisé en jeux et paris sportifs.
+Tu aides avec: analyse de cotes, gestion de bankroll, stratégies de paris.
+Tu rappelles l'importance du jeu responsable.
+Sois factuel et objectif dans tes analyses.""",
+    "planning": """Tu es un expert en planification de repas familiaux.
+Tu aides à: organiser les menus de la semaine, équilibrer la nutrition,
+varier les recettes, optimiser les courses et le batch cooking.
+Tu connais les besoins d'une famille avec un jeune enfant (Jules, ~3 ans).
+Sois concret avec des menus pratiques et réalisables.""",
+    "inventaire": """Tu es un assistant de gestion des stocks alimentaires.
+Tu aides à: suivre les dates de péremption, organiser le frigo et les placards,
+éviter le gaspillage alimentaire, suggérer des recettes avec les ingrédients disponibles.
+Sois pratique et aide à optimiser les stocks.""",
 }
 
 ACTIONS_RAPIDES: dict[str, list[dict[str, str]]] = {
@@ -117,11 +159,23 @@ Réponds de manière cohérente avec la conversation précédente."""
 
         return message
 
+    def _resoudre_contexte(self, contexte: ContexteChat, contexte_page: str | None = None) -> str:
+        """Résout le contexte final à partir du contexte explicite et de la page courante."""
+        if contexte != "general" or not contexte_page:
+            return contexte
+        # Extraire le segment principal du chemin de page (ex: "/cuisine/recettes" → "cuisine")
+        segments = [s for s in contexte_page.strip("/").split("/") if s]
+        for segment in segments:
+            if segment in MAPPING_PAGE_CONTEXTE:
+                return MAPPING_PAGE_CONTEXTE[segment]
+        return contexte
+
     def envoyer_message(
         self,
         message: str,
         contexte: ContexteChat = "general",
         historique: list[dict[str, str]] | None = None,
+        contexte_page: str | None = None,
     ) -> str | None:
         """
         Envoie un message au chat IA et retourne la réponse.
@@ -134,7 +188,8 @@ Réponds de manière cohérente avec la conversation précédente."""
         Returns:
             Réponse de l'IA ou None si échec
         """
-        system_prompt = SYSTEM_PROMPTS.get(contexte, SYSTEM_PROMPTS["general"])
+        contexte_final = self._resoudre_contexte(contexte, contexte_page)
+        system_prompt = SYSTEM_PROMPTS.get(contexte_final, SYSTEM_PROMPTS["general"])
         prompt = self._construire_prompt(message, historique)
 
         return self.call_with_cache_sync(
@@ -149,9 +204,11 @@ Réponds de manière cohérente avec la conversation précédente."""
         message: str,
         contexte: ContexteChat = "general",
         historique: list[dict[str, str]] | None = None,
+        contexte_page: str | None = None,
     ):
         """Retourne les morceaux de réponse IA au fil de l'eau."""
-        system_prompt = SYSTEM_PROMPTS.get(contexte, SYSTEM_PROMPTS["general"])
+        contexte_final = self._resoudre_contexte(contexte, contexte_page)
+        system_prompt = SYSTEM_PROMPTS.get(contexte_final, SYSTEM_PROMPTS["general"])
         prompt = self._construire_prompt(message, historique)
 
         yield from self.call_with_streaming_sync(

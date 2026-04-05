@@ -18,9 +18,27 @@ export function OngletAffichage() {
   const [afficherTour, setAfficherTour] = useState(false);
 
   const themes = [
-    { valeur: "light", label: "Clair", Icone: Sun },
-    { valeur: "dark", label: "Sombre", Icone: Moon },
-    { valeur: "system", label: "Système", Icone: Monitor },
+    {
+      valeur: "light",
+      label: "Clair",
+      description: "Lecture lumineuse et contrastée",
+      Icone: Sun,
+      apercuClasse: "from-amber-50 via-white to-sky-50 dark:from-amber-950/20 dark:via-slate-950 dark:to-slate-900",
+    },
+    {
+      valeur: "dark",
+      label: "Sombre",
+      description: "Repos visuel et cuisine du soir",
+      Icone: Moon,
+      apercuClasse: "from-slate-950 via-slate-900 to-indigo-950",
+    },
+    {
+      valeur: "system",
+      label: "Système",
+      description: "Bascule auto selon l'appareil",
+      Icone: Monitor,
+      apercuClasse: "from-slate-100 via-white to-slate-50 dark:from-slate-900 dark:via-slate-950 dark:to-black",
+    },
   ] as const;
 
   const themeActif = useMemo(() => {
@@ -63,18 +81,34 @@ export function OngletAffichage() {
           <div className="space-y-3">
             <div className="space-y-2">
               <Label>Thème</Label>
-              <div className="flex gap-2">
-                {themes.map(({ valeur, label, Icone }) => (
-                  <Button
-                    key={valeur}
-                    variant={theme === valeur ? "default" : "outline"}
-                    className="flex-1"
-                    onClick={() => appliquerThemeAvecTransition(valeur)}
-                  >
-                    <Icone className="mr-2 h-4 w-4" />
-                    {label}
-                  </Button>
-                ))}
+              <div className="grid gap-3 md:grid-cols-3">
+                {themes.map(({ valeur, label, description, Icone, apercuClasse }) => {
+                  const estActif = theme === valeur;
+
+                  return (
+                    <button
+                      key={valeur}
+                      type="button"
+                      onClick={() => appliquerThemeAvecTransition(valeur)}
+                      className={`rounded-2xl border p-3 text-left transition-all ${
+                        estActif
+                          ? "border-primary bg-primary/5 shadow-sm ring-2 ring-primary/20"
+                          : "hover:border-primary/40 hover:bg-muted/40"
+                      }`}
+                    >
+                      <div className={`rounded-xl border bg-gradient-to-br p-3 ${apercuClasse}`}>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-2 text-sm font-semibold">
+                            <Icone className="h-4 w-4" />
+                            {label}
+                          </span>
+                          {estActif ? <Badge>Actif</Badge> : <Badge variant="outline">Choisir</Badge>}
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">{description}</p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -101,6 +135,7 @@ export function OngletAffichage() {
                   <div className="flex flex-wrap gap-2">
                     <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" variant="outline">Cuisine OK</Badge>
                     <Badge className="bg-sky-500/10 text-sky-700 dark:text-sky-300" variant="outline">3 rappels</Badge>
+                    <Badge className="bg-violet-500/10 text-violet-700 dark:text-violet-300" variant="outline">Transitions fluides</Badge>
                   </div>
                 </div>
 
@@ -112,6 +147,11 @@ export function OngletAffichage() {
                   <p className="text-xs text-muted-foreground">
                     Lisibilité optimisée pour mobile, tablette et mode nuit cuisine.
                   </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Badge variant="outline">Contraste AA</Badge>
+                    <Badge variant="outline">Tablette cuisine</Badge>
+                    <Badge variant="outline">Animations discrètes</Badge>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
-"""Routes transverses IA pour les endpoints `/api/v1/innovations`.
+"""Alias HTTP dépréciés conservés sous `/api/v1/innovations`.
 
-Le point d'entrée HTTP historique est conservé pour éviter toute rupture d'API.
-Le module délègue aux routeurs de domaine et au service `src.services.ia_avancee`.
+Le frontend interne s'appuie désormais sur les routes métier stables. Ce module
+ne sert plus qu'à la compatibilité externe pendant la dépréciation progressive.
 """
 
 from __future__ import annotations
@@ -62,11 +62,14 @@ from src.api.utils import gerer_exception_api
 
 RESPONSES_IA_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_IA)
 
-router = APIRouter(prefix="/api/v1/innovations", tags=["IA transverses"])
+router = APIRouter(
+    prefix="/api/v1/innovations",
+    tags=["IA avancée (compatibilité externe, déprécié)"],
+)
 
 
 def get_innovations_service():
-    """Charge paresseusement le service d'innovations via le namespace stable `ia_avancee`."""
+    """Charge paresseusement le service IA avancée utilisé par le shim externe."""
     from src.services.ia_avancee import get_innovations_service as _get_innovations_service
 
     return _get_innovations_service()
@@ -746,3 +749,7 @@ async def telegram_conversationnel(
     service = get_innovations_service()
     result = service.obtenir_capacites_telegram_conversationnelles()
     return result or TelegramConversationnelResponse()
+
+
+for route in router.routes:
+    route.deprecated = True

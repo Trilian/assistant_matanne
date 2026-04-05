@@ -800,137 +800,186 @@ export default function PagePlanning() {
     year: "numeric",
   });
 
+  const resumePeriode =
+    modeAffichage === "semaine"
+      ? `${moisLabel} · du ${new Date(datesSemaine[0] ?? dateDebut).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "short",
+        })} au ${new Date(datesSemaine[datesSemaine.length - 1] ?? dateDebut).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "short",
+        })}`
+      : `Vue mensuelle · ${moisLabelComplet}`;
+  const totalCreneauxSemaine = datesSemaine.length * TYPES_REPAS.length;
+  const repasPlanifies = planning?.repas?.length ?? 0;
+  const creneauxLibres = Math.max(totalCreneauxSemaine - repasPlanifies, 0);
+  const caloriesMoyennes = nutrition?.moyenne_calories_par_jour ?? null;
+  const statsPlanning = [
+    { label: "Repas planifiés", valeur: `${repasPlanifies}/${totalCreneauxSemaine}` },
+    { label: "Créneaux libres", valeur: `${creneauxLibres}` },
+    { label: "Calories moy.", valeur: caloriesMoyennes ? `${caloriesMoyennes} kcal/j` : "En calcul" },
+    { label: "Présence", valeur: `${participantsPlanning.length} membre(s)` },
+  ];
+
   return (
     <div className="space-y-6">
       {/* ─── En-tête ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">📅 Planning repas</h1>
-          <p className="text-muted-foreground capitalize">
-            {modeAffichage === "semaine" ? moisLabel : moisLabelComplet}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Badge variant={synchroPlanningActive ? "default" : modeSynchroPlanning === "polling" ? "secondary" : "outline"}>
-              {synchroPlanningActive ? (
-                <span className="inline-flex items-center gap-1"><Wifi className="h-3 w-3" /> Synchro live</span>
-              ) : (
-                <span className="inline-flex items-center gap-1"><WifiOff className="h-3 w-3" /> {modeSynchroPlanning === "polling" ? "Fallback réseau" : "Hors temps réel"}</span>
-              )}
-            </Badge>
-            <Badge variant="outline">{participantsPlanning.length} participant(s)</Badge>
+      <Card className="overflow-hidden border-orange-200/70 bg-[linear-gradient(135deg,rgba(255,247,237,0.96),rgba(255,255,255,0.92))] shadow-sm dark:border-orange-900/60 dark:bg-[linear-gradient(135deg,rgba(24,16,10,0.96),rgba(9,14,22,0.94))]">
+        <CardContent className="flex flex-col gap-6 p-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="bg-white/80 text-orange-900 dark:bg-white/10 dark:text-orange-100">
+                <CalendarDays className="mr-1 h-3.5 w-3.5" />
+                Planification hebdo
+              </Badge>
+              <Badge variant={synchroPlanningActive ? "default" : modeSynchroPlanning === "polling" ? "secondary" : "outline"}>
+                {synchroPlanningActive ? (
+                  <span className="inline-flex items-center gap-1"><Wifi className="h-3 w-3" /> Synchro live</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1"><WifiOff className="h-3 w-3" /> {modeSynchroPlanning === "polling" ? "Fallback réseau" : "Hors temps réel"}</span>
+                )}
+              </Badge>
+              <Badge variant="outline" className="bg-background/70">{participantsPlanning.length} participant(s)</Badge>
+              {contexteInvitesActif ? (
+                <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+                  Invités : +{modeInvites.nbInvites}
+                </Badge>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">📅 Planning repas</h1>
+              <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+                {resumePeriode} — organisez la semaine, gardez la synchro foyer et lancez courses ou préparation depuis un seul écran.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {statsPlanning.map((stat) => (
+                <div key={stat.label} className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-white/5">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{stat.label}</p>
+                  <p className="mt-1 text-xl font-semibold">{stat.valeur}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="rounded-md border p-0.5 flex items-center gap-0.5">
-            <Button
-              variant={modeAffichage === "semaine" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setModeAffichage("semaine")}
-            >
-              Semaine
-            </Button>
-            <Button
-              variant={modeAffichage === "mois" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setModeAffichage("mois")}
-            >
-              Mois
-            </Button>
+
+          <div className="flex w-full flex-col gap-3 lg:max-w-xl lg:items-end">
+            <div className="rounded-xl border border-white/60 bg-white/80 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <div className="flex items-center gap-0.5">
+                <Button
+                  variant={modeAffichage === "semaine" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setModeAffichage("semaine")}
+                >
+                  Semaine
+                </Button>
+                <Button
+                  variant={modeAffichage === "mois" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setModeAffichage("mois")}
+                >
+                  Mois
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (modeAffichage === "semaine") {
+                    setOffsetSemaine((o) => o - 1);
+                  } else {
+                    setOffsetMois((o) => o - 1);
+                  }
+                }}
+                aria-label="Semaine précédente"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOffsetSemaine(0);
+                  setOffsetMois(0);
+                }}
+              >
+                Aujourd'hui
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (modeAffichage === "semaine") {
+                    setOffsetSemaine((o) => o + 1);
+                  } else {
+                    setOffsetMois((o) => o + 1);
+                  }
+                }}
+                aria-label="Semaine suivante"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => genererIA(undefined)}
+                disabled={enGeneration}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {enGeneration ? "Génération..." : "Générer IA"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (!planning?.planning_id) {
+                    toast.error("Planning non persisté: générez un planning avant export PDF");
+                    return;
+                  }
+                  exporterPlanningPdf(planning.planning_id).catch(() => toast.error("Erreur d'export PDF"));
+                }}
+                title="Exporter en PDF"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                PDF
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exporterPlanningIcal(2).catch(() => toast.error("Erreur d'export"))}
+                title="Exporter en iCalendar"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                iCal
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => genererCourses(undefined)}
+                disabled={enGenerationCourses}
+                title="Générer la liste de courses depuis le planning"
+              >
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                {enGenerationCourses ? "Génération..." : "Courses"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setChoixModePrepa(true)}
+                disabled={!planning}
+                title="Mode préparation — batch cooking ou jour par jour"
+              >
+                <CookingPot className="mr-2 h-4 w-4" />
+                Préparation
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              if (modeAffichage === "semaine") {
-                setOffsetSemaine((o) => o - 1);
-              } else {
-                setOffsetMois((o) => o - 1);
-              }
-            }}
-            aria-label="Semaine précédente"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setOffsetSemaine(0);
-              setOffsetMois(0);
-            }}
-          >
-            Aujourd'hui
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              if (modeAffichage === "semaine") {
-                setOffsetSemaine((o) => o + 1);
-              } else {
-                setOffsetMois((o) => o + 1);
-              }
-            }}
-            aria-label="Semaine suivante"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <div className="w-px h-6 bg-border hidden sm:block" />
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => genererIA(undefined)}
-            disabled={enGeneration}
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            {enGeneration ? "Génération..." : "Générer IA"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (!planning?.planning_id) {
-                toast.error("Planning non persisté: générez un planning avant export PDF");
-                return;
-              }
-              exporterPlanningPdf(planning.planning_id).catch(() => toast.error("Erreur d'export PDF"));
-            }}
-            title="Exporter en PDF"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            PDF
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => exporterPlanningIcal(2).catch(() => toast.error("Erreur d'export"))}
-            title="Exporter en iCalendar"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            iCal
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => genererCourses(undefined)}
-            disabled={enGenerationCourses}
-            title="Générer la liste de courses depuis le planning"
-          >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            {enGenerationCourses ? "Génération..." : "Courses"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setChoixModePrepa(true)}
-            disabled={!planning}
-            title="Mode préparation — batch cooking ou jour par jour"
-          >
-            <CookingPot className="mr-2 h-4 w-4" />
-            Préparation
-          </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <CarteModeInvites
         contexte={modeInvites}
@@ -1005,9 +1054,9 @@ export default function PagePlanning() {
           onDragCancel={() => setRepasGlisse(null)}
         >
           <div className="space-y-2" data-planning-grid>
-            <p className="text-xs text-muted-foreground px-1">
-              Astuce : utilisez la poignée <GripVertical className="inline h-3 w-3" /> pour déplacer un repas par glisser-déposer, y compris sur mobile.
-            </p>
+            <div className="rounded-2xl border border-dashed bg-muted/35 px-3 py-2 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground/80">Astuce :</span> utilisez la poignée <GripVertical className="inline h-3 w-3" /> pour déplacer un repas par glisser-déposer, y compris sur mobile.
+            </div>
             {datesSemaine.map((date, idx) => {
               const dateObj = new Date(date);
               const estAujourdhui =

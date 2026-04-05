@@ -355,12 +355,12 @@
   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
     <div>
       <strong style="font-size:1.1rem;">Progression globale</strong>
-      <span style="color:var(--text-muted); font-size:0.85rem;"> — 7 phases, ~120 tâches • Sprint actif : P2 Bugs/Tests</span>
+      <span style="color:var(--text-muted); font-size:0.85rem;"> — 7 phases, ~120 tâches • Sprint actif : P6 IA++</span>
     </div>
     <div style="color:var(--accent); font-weight:700; font-size:1.3rem;">Note actuelle : 8.3/10 → Cible : 9.3/10</div>
   </div>
   <div class="progress-bar-outer">
-    <div class="progress-bar-inner" style="width:28%"></div>
+    <div class="progress-bar-inner" style="width:85%"></div>
   </div>
   <div class="progress-phases">
     <span>P1 Nettoyage</span>
@@ -505,9 +505,9 @@
               <td>Vérifier tables orphelines, enrichir seed data</td>
             </tr>
             <tr>
-              <td><strong>Services IA</strong></td><td style="color:var(--accent)">8.5/10</td><td>9.5</td>
-              <td>21 intégrations, rate limiting, cache sémantique, circuit breaker</td>
-              <td>IA proactive, feedback→apprentissage, nouvelles intégrations</td>
+              <td><strong>Services IA</strong></td><td style="color:var(--green)">9.5/10</td><td>9.5</td>
+              <td>31+ intégrations, rate limiting, cache sémantique, circuit breaker, IA proactive, pilote auto, chat contextuel</td>
+              <td>✅ Atteint — Nouvelles intégrations P6 déployées</td>
             </tr>
             <tr>
               <td><strong>Tests</strong></td><td style="color:var(--yellow)">7.5/10</td><td>9</td>
@@ -997,8 +997,8 @@
   <div class="section-subtitle">Legacy à supprimer</div>
   <div class="task-list">
     <div class="task-item critical">
-      <h4>Supprimer legacy_compat.py (750 lignes) <span class="tag tag-clean">Nettoyage</span> <span class="tag tag-api">API</span> <span class="badge badge-blue">refactor séparé</span></h4>
-      <p>🔵 Le renommage et la stabilisation du routage sont faits via <code>src/api/routes/innovations.py</code>. Après le sprint P1.2, le <strong>frontend interne n'utilise plus</strong> ce préfixe legacy ; le shim conserve encore <strong>40 endpoints</strong> uniquement pour la compatibilité externe et la dépréciation progressive.</p>
+      <h4>Supprimer legacy_compat.py (750 lignes) <span class="tag tag-clean">Nettoyage</span> <span class="tag tag-api">API</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Vérifié : <code>legacy_compat.py</code> n'existe plus dans le dépôt. Le reliquat est désormais le shim <code>src/api/routes/innovations.py</code>, conservé uniquement pour la compatibilité externe (<strong>40 endpoints dépréciés</strong>) ; le frontend interne n'utilise plus ce préfixe et le sujet reste suivi comme refactor API séparé.</p>
       <div class="files">📁 src/api/routes/innovations.py</div>
     </div>
     <div class="task-item critical">
@@ -1021,18 +1021,18 @@
   <div class="section-subtitle">Commentaires à nettoyer (~25 occurrences)</div>
   <div class="task-list">
     <div class="task-item critical">
-      <h4>Supprimer commentaires "Phase A/B/Sprint X" <span class="tag tag-clean">Nettoyage</span></h4>
-      <p>~15 dans les tests : remplacer par descriptions fonctionnelles (ex: "# Tests edge cases WebSocket" au lieu de "# Phase A")</p>
+      <h4>Supprimer commentaires "Phase A/B/Sprint X" <span class="tag tag-clean">Nettoyage</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Nettoyé dans les tests : les en-têtes techniques ont été remplacés par des descriptions fonctionnelles lisibles.</p>
       <div class="files">📁 tests/</div>
     </div>
     <div class="task-item critical">
-      <h4>Supprimer codes "Phase A - A5.5" <span class="tag tag-clean">Nettoyage</span></h4>
-      <p>~8 dans tests/api/ : supprimer les codes phase, garder la description</p>
+      <h4>Supprimer codes "Phase A - A5.5" <span class="tag tag-clean">Nettoyage</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Les repères internes et commentaires mojibake ont été supprimés au profit d'intitulés métier explicites dans <code>tests/api/</code>.</p>
       <div class="files">📁 tests/api/</div>
     </div>
     <div class="task-item medium">
-      <h4>Remplacer "innovation" par "IA avancée" <span class="tag tag-clean">Nettoyage</span></h4>
-      <p>~5 dans routes/services : contexte fonctionnel au lieu du nom de phase</p>
+      <h4>Remplacer "innovation" par "IA avancée" <span class="tag tag-clean">Nettoyage</span> <span class="badge badge-green">fait</span></h4>
+      <p>✅ Les commentaires du routeur de compatibilité ont été reformulés pour mettre en avant l'IA avancée et le contexte fonctionnel.</p>
       <div class="files">📁 src/api/routes/, src/services/</div>
     </div>
     <div class="task-item medium">
@@ -1387,20 +1387,20 @@
       <p>Amener l'interface de 7 à 9/10 avec des visualisations avancées, animations et UX polish</p>
     </div>
     <div class="phase-meta">
-      <strong>Sprint P5.1 — 14/18 tâches clôturées ou validées</strong><br>
+      <strong>Sprint P5.1 — 18/18 tâches clôturées ou validées</strong><br>
       Impact : UI/UX 7→9, Dataviz 6→8.5
     </div>
   </div>
 
   <div class="card" style="margin-bottom:1.5rem;">
-    <h3>🏁 Statut du sprint P5.1 <span class="badge badge-green">En forte progression</span></h3>
+    <h3>🏁 Statut du sprint P5.1 <span class="badge badge-green">Clôturé</span></h3>
     <ul class="checklist">
       <li class="done"><span class="check"></span><span>Le calendrier mosaïque repas a été enrichi avec une vue <strong>"Équilibre"</strong> et des codes couleur nutritionnels (viande, poisson, végétal, féculent).</span></li>
       <li class="done"><span class="check"></span><span>Le module routines propose désormais une <strong>heatmap annuelle 365 jours</strong> en plus de la vue 12 semaines, via des onglets dédiés.</span></li>
       <li class="done"><span class="check"></span><span>La page budget affiche une <strong>jauge radiale animée</strong> et la visualisation nutrition a été enrichie avec <strong>fibres</strong> et <strong>vitamines</strong>.</span></li>
       <li class="done"><span class="check"></span><span>La timeline planning est devenue <strong>multi-module</strong> : repas + activités famille + tâches maison sur un même axe temporel.</span></li>
       <li class="done"><span class="check"></span><span>Les micro-animations et confettis de progression sont actifs sur les routines, et les briques UX déjà présentes (skeletons, onboarding, mode tablette, dark mode auto, FABs) ont été revérifiées.</span></li>
-      <li><span class="check"></span><span>Reste du polish P5 : finitions visuelles supplémentaires sur certains écrans et dernière passe de cohérence globale.</span></li>
+      <li class="done"><span class="check"></span><span><strong>Polish P5 finalisé</strong> : finitions visuelles supplémentaires livrées sur les écrans planning repas, mode cuisine tablette et préférences d'affichage ; passe de cohérence globale terminée.</span></li>
     </ul>
     <p style="margin-top:0.8rem; color:var(--text-muted); font-size:0.82rem;">Vérification fraîche : <code>npm run build</code> ✅ et <code>npm run lint</code> ✅ passent désormais sur le frontend après nettoyage des derniers blocages TypeScript/ESLint legacy.</p>
   </div>

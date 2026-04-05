@@ -985,9 +985,9 @@ Intégration Garmin pour le suivi sportif et les recommandations nutritionnelles
 
 ---
 
-## 🧪 Innovations — `/api/v1/innovations` (39 endpoints)
+## 🧪 Innovations — `/api/v1/innovations` (40 endpoints dépréciés)
 
-Fonctionnalités innovantes : modes pilote/vacances, scores, rapports, cartes visuelles, apprentissage.
+Shim de compatibilité externe maintenu pendant la dépréciation progressive : modes pilote/vacances, scores, rapports, cartes visuelles, apprentissage.
 
 ### Cuisine IA (8)
 
@@ -1046,7 +1046,7 @@ Fonctionnalités innovantes : modes pilote/vacances, scores, rapports, cartes vi
 | POST | `/innovations/bilan-annuel` | Body: `BilanAnnuelRequest` | Bilan annuel complet IA |
 | POST | `/innovations/carte-visuelle` | Body: `CarteVisuelleRequest` | Carte visuelle partageable |
 
-### Intelligence & Apprentissage (5)
+### Intelligence & Apprentissage (6)
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
@@ -1102,7 +1102,7 @@ Fonctionnalités innovantes : modes pilote/vacances, scores, rapports, cartes vi
 | Notifications enrichies | `/api/v1/notifications` | 6 |
 | Automations | `/api/v1/automations` | 7 |
 | Garmin | `/api/v1/garmin` | 7 |
-| Innovations | `/api/v1/innovations` | 39 |
+| Innovations | `/api/v1/innovations` | 40 |
 | **Total** | | **400+** |
 
 

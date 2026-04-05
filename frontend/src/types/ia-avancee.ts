@@ -188,3 +188,70 @@ export interface AdaptationPlanningMeteoResponse {
   meteo_resume: ObjetDonnees
   date_prevision?: string | null
 }
+
+// ═══════════════════════════════════════════════════════════
+// P6 — IA Avancée & Intelligence Proactive
+// ═══════════════════════════════════════════════════════════
+
+export interface InsightAnalytics {
+  categorie: string
+  titre: string
+  valeur: string | number
+  tendance: 'hausse' | 'baisse' | 'stable' | string
+  detail?: string | null
+}
+
+export interface InsightsAnalyticsResponse {
+  periode_mois: number
+  insights: InsightAnalytics[]
+  score_global?: number | null
+  recommandations: string[]
+}
+
+export interface PiloteAutoStatus {
+  actif: boolean
+  niveau_autonomie: string
+  modules_actifs: string[]
+  derniere_action?: string | null
+}
+
+export interface ActionPiloteAutoRecente {
+  module: string
+  action: string
+  date: string
+  statut: string
+  details?: string | null
+}
+
+export interface AutoTagsResponse {
+  tags: string[]
+  confiance: number
+}
+
+export interface MemoVocalResponse {
+  module: string
+  action: string
+  contenu: string
+  tags: string[]
+  destination_url: string
+  confiance: number
+}
+
+export interface AnomalieJardin {
+  plante: string
+  type_anomalie: string
+  description: string
+  severite: 'faible' | 'moyenne' | 'haute' | string
+  recommandation: string
+}
+
+export interface AnomaliesJardinResponse {
+  anomalies: AnomalieJardin[]
+  recommandations: string[]
+}
+
+export interface ScoreEcologiqueResponse {
+  score: string
+  details: string
+  recommandations: string[]
+}

@@ -1,0 +1,86 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{ sujet }}</mj-title>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Arial, sans-serif" />
+      <mj-text color="#111827" font-size="15px" line-height="1.5" />
+      <mj-section padding="0" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .kpi-card { border-radius: 10px; border: 1px solid #e5e7eb; }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f3f4f6">
+
+    <!-- ──── Hero header ──── -->
+    <mj-section background-color="#2563eb" padding="24px 24px 20px 24px">
+      <mj-column>
+        <mj-text color="#bfdbfe" font-size="12px" font-weight="600" text-transform="uppercase" letter-spacing="1px">
+          Assistant Matanne
+        </mj-text>
+        <mj-text color="#ffffff" font-size="24px" font-weight="700" padding-top="6px">
+          📋 Résumé de la semaine {{ semaine }}
+        </mj-text>
+        <mj-text color="#93c5fd" font-size="14px" padding-top="2px">
+          Votre recap familial — repas, budget, activités, maison
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ──── KPIs ──── -->
+    <mj-section background-color="#ffffff" padding="20px 24px">
+      <mj-column width="50%" css-class="kpi-card" padding="8px">
+        <mj-text color="#6b7280" font-size="12px">🍽️ Repas cuisinés</mj-text>
+        <mj-text color="#111827" font-size="22px" font-weight="700">{{ recettes_cuisinees or 0 }}</mj-text>
+      </mj-column>
+      <mj-column width="50%" css-class="kpi-card" padding="8px">
+        <mj-text color="#6b7280" font-size="12px">💰 Budget dépensé</mj-text>
+        <mj-text color="#111827" font-size="22px" font-weight="700">{{ "%.2f"|format(budget_depense) if budget_depense is not none else "—" }} €</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0 24px 20px 24px">
+      <mj-column width="50%" css-class="kpi-card" padding="8px">
+        <mj-text color="#6b7280" font-size="12px">👶 Activités Jules</mj-text>
+        <mj-text color="#111827" font-size="22px" font-weight="700">{{ activites_jules or 0 }}</mj-text>
+      </mj-column>
+      <mj-column width="50%" css-class="kpi-card" padding="8px">
+        <mj-text color="#6b7280" font-size="12px">🏡 Tâches maison</mj-text>
+        <mj-text color="#111827" font-size="22px" font-weight="700">{{ taches_maison or 0 }}</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- ──── Résumé IA ──── -->
+    {% if resume_ia %}
+    <mj-section background-color="#ffffff" padding="0 24px 24px 24px">
+      <mj-column>
+        <mj-text font-size="16px" font-weight="700" color="#111827" padding-bottom="8px">
+          🤖 Résumé IA
+        </mj-text>
+        <mj-text padding="8px 12px" font-size="14px" color="#374151" container-background-color="#f0f9ff" border-left="4px solid #2563eb">
+          {{ resume_ia }}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    {% endif %}
+
+    <!-- ──── Call to action ──── -->
+    <mj-section background-color="#ffffff" padding="0 24px 24px 24px">
+      <mj-column>
+        <mj-button background-color="#2563eb" color="#ffffff" font-size="14px" font-weight="600" inner-padding="12px 28px" border-radius="8px" href="{{ app_url }}">
+          Ouvrir Matanne
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <!-- ──── Footer ──── -->
+    <mj-section background-color="#f9fafb" padding="14px 24px">
+      <mj-column>
+        <mj-text color="#6b7280" font-size="12px">
+          Vous recevez cet email car vous êtes abonné aux résumés hebdo sur Matanne.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>

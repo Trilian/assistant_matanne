@@ -39,6 +39,11 @@ from src.api.schemas.utilitaires import (
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
+REPONSES_IA = {
+    429: {"description": "Limite de débit IA atteinte"},
+    503: {"description": "Service IA indisponible"},
+}
+
 router = APIRouter(prefix="/api/v1/utilitaires", tags=["Utilitaires"])
 
 HistoriqueChatItem = dict[str, str]
@@ -61,11 +66,14 @@ class MessageChatRequest(BaseModel):
     """RequÃªte de message chat."""
 
     message: str = Field(..., min_length=1, max_length=2000, description="Message de l'utilisateur")
-    contexte: Literal["cuisine", "famille", "maison", "budget", "general"] = Field(
+    contexte: Literal["cuisine", "famille", "maison", "budget", "general", "nutrition", "jardin", "jeux", "planning", "inventaire"] = Field(
         default="general", description="Contexte du chat"
     )
     historique: list[HistoriqueChatItem] = Field(
         default_factory=list, description="Messages prÃ©cÃ©dents [{role, contenu}]"
+    )
+    contexte_page: str | None = Field(
+        default=None, description="Chemin de la page courante pour adapter le contexte (ex: /cuisine/recettes)"
     )
 
 
@@ -84,6 +92,7 @@ async def envoyer_message_chat(
             message=payload.message,
             contexte=payload.contexte,
             historique=payload.historique if payload.historique else None,
+            contexte_page=payload.contexte_page,
         )
         return reponse
 
@@ -116,6 +125,7 @@ async def streamer_message_chat(
                 message=payload.message,
                 contexte=payload.contexte,
                 historique=payload.historique if payload.historique else None,
+                contexte_page=payload.contexte_page,
             ):
                 if not chunk:
                     continue
@@ -134,6 +144,7 @@ async def streamer_message_chat(
                     message=payload.message,
                     contexte=payload.contexte,
                     historique=payload.historique if payload.historique else None,
+                    contexte_page=payload.contexte_page,
                 )
                 if reponse:
                     yield _format_sse(
@@ -1176,4 +1187,93 @@ async def supprimer_minuteur(
             return {"message": "Minuteur supprimé", "id": minuteur_id}
 
     return await executer_async(_delete)
+
+
+# ═══════════════════════════════════════════════════════════
+# AUTO-ÉTIQUETAGE NOTES IA
+# ═══════════════════════════════════════════════════════════
+
+
+class AutoTagsResponse(BaseModel):
+    """Réponse de l'auto-étiquetage IA."""
+
+    tags: list[str] = Field(default_factory=list, description="Tags proposés")
+    confiance: float = Field(0.0, description="Score de confiance")
+
+
+@router.post(
+    "/notes/{note_id}/auto-tags",
+    response_model=AutoTagsResponse,
+    responses={**REPONSES_CRUD_LECTURE, **REPONSES_IA},
+)
+@gerer_exception_api
+async def auto_etiqueter_note(
+    note_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Auto-étiquetage IA d'une note existante."""
+    from src.core.models import Note
+
+    def _process():
+        with executer_avec_session() as session:
+            note = session.query(Note).filter(
+                Note.id == note_id,
+                Note.user_id == user.get("sub", ""),
+            ).first()
+            if not note:
+                raise HTTPException(status_code=404, detail="Note non trouvée")
+
+            from src.services.utilitaires.notes_ia import get_notes_ia_service
+
+            service = get_notes_ia_service()
+            result = service.auto_etiqueter(
+                contenu=note.contenu or "",
+                titre=note.titre or "",
+            )
+            return {"tags": result.tags, "confiance": result.confiance}
+
+    return await executer_async(_process)
+
+
+# ═══════════════════════════════════════════════════════════
+# MÉMO VOCAL → CLASSIFICATION IA
+# ═══════════════════════════════════════════════════════════
+
+
+class MemoVocalRequest(BaseModel):
+    """Requête de classification d'un mémo vocal."""
+
+    texte: str = Field(..., min_length=1, max_length=2000, description="Texte transcrit par Web Speech API")
+
+
+class MemoVocalResponse(BaseModel):
+    """Réponse de classification du mémo vocal."""
+
+    module: str = Field(description="Module cible")
+    action: str = Field(description="Action détectée")
+    contenu: str = Field(description="Contenu extrait")
+    tags: list[str] = Field(default_factory=list, description="Tags auto-détectés")
+    destination_url: str = Field(description="URL de la page cible")
+    confiance: float = Field(description="Score de confiance")
+
+
+@router.post(
+    "/memos/vocal",
+    response_model=MemoVocalResponse,
+    responses=REPONSES_IA,
+)
+@gerer_exception_api
+async def classifier_memo_vocal(
+    payload: MemoVocalRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Classifie un mémo vocal transcrit dans le bon module familial."""
+    from src.services.utilitaires.memo_vocal import get_memo_vocal_service
+
+    def _process():
+        service = get_memo_vocal_service()
+        result = service.transcrire_et_classer(payload.texte)
+        return result.model_dump()
+
+    return await executer_async(_process)
 

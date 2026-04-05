@@ -4,14 +4,21 @@ import type {
   AdaptationPlanningMeteoResponse,
   AnalyseDocumentPhotoResponse,
   AnalysePhotoMultiResponse,
+  AnomaliesJardinResponse,
+  AutoTagsResponse,
   DiagnosticPlantResponse,
   EconomiesEnergieResponse,
   EstimationTravauxResponse,
+  InsightsAnalyticsResponse,
+  MemoVocalResponse,
   OptimisationRoutinesResponse,
+  PiloteAutoStatus,
+  ActionPiloteAutoRecente,
   PlanningAdaptatifResponse,
   PlanningVoyageResponse,
   PredictionPannesResponse,
   PrevisionsDepensesResponse,
+  ScoreEcologiqueResponse,
   SuggestionsAchatsResponse,
   SuggestionsIdeasResponse,
   SuggestionsProactivesResponse,
@@ -145,6 +152,54 @@ export async function obtenirAdaptationsMeteo(
   return data
 }
 
+// ═══════════════════════════════════════════════════════════
+// P6 — IA Avancée & Intelligence Proactive
+// ═══════════════════════════════════════════════════════════
+
+export async function obtenirInsightsAnalytics(periode_mois = 3): Promise<InsightsAnalyticsResponse> {
+  const { data } = await clientApi.get<InsightsAnalyticsResponse>('/api/v1/dashboard/insights-analytics', {
+    params: { periode_mois },
+  })
+  return data
+}
+
+export async function obtenirPiloteAutoStatus(): Promise<PiloteAutoStatus> {
+  const { data } = await clientApi.get<PiloteAutoStatus>(`${API_PREFIX}/pilote-auto/status`)
+  return data
+}
+
+export async function togglePiloteAuto(actif: boolean): Promise<PiloteAutoStatus> {
+  const { data } = await clientApi.post<PiloteAutoStatus>(`${API_PREFIX}/pilote-auto/toggle`, { actif })
+  return data
+}
+
+export async function obtenirActionsPiloteAuto(): Promise<ActionPiloteAutoRecente[]> {
+  const { data } = await clientApi.get<ActionPiloteAutoRecente[]>(`${API_PREFIX}/pilote-auto/actions-recentes`)
+  return data
+}
+
+export async function autoEtiqueterNote(noteId: number): Promise<AutoTagsResponse> {
+  const { data } = await clientApi.post<AutoTagsResponse>(`/api/v1/outils/notes/${noteId}/auto-tags`)
+  return data
+}
+
+export async function classifierMemoVocal(texte: string): Promise<MemoVocalResponse> {
+  const { data } = await clientApi.post<MemoVocalResponse>('/api/v1/outils/memos/vocal', { texte })
+  return data
+}
+
+export async function obtenirAnomaliesJardin(): Promise<AnomaliesJardinResponse> {
+  const { data } = await clientApi.get<AnomaliesJardinResponse>('/api/v1/ia/modules/jardin/anomalies')
+  return data
+}
+
+export async function obtenirScoreEcologique(recetteId: number): Promise<ScoreEcologiqueResponse> {
+  const { data } = await clientApi.post<ScoreEcologiqueResponse>('/api/v1/ia/modules/recette/score-ecologique', {
+    recette_id: recetteId,
+  })
+  return data
+}
+
 export type {
   SuggestionsAchatsResponse,
   PlanningAdaptatifResponse,
@@ -160,4 +215,11 @@ export type {
   PredictionPannesResponse,
   SuggestionsProactivesResponse,
   AdaptationPlanningMeteoResponse,
+  InsightsAnalyticsResponse,
+  PiloteAutoStatus,
+  ActionPiloteAutoRecente,
+  AutoTagsResponse,
+  MemoVocalResponse,
+  AnomaliesJardinResponse,
+  ScoreEcologiqueResponse,
 }

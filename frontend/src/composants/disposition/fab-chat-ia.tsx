@@ -31,14 +31,39 @@ export function FabChatIA() {
   // Ne pas afficher sur la page chat-ia elle-même
   if (pathname === "/outils/chat-ia") return null;
 
-  async function envoyer() {
-    if (!message.trim()) return;
+  // Détection du contexte page pour le chat IA contextuel
+  const segments = pathname.split("/").filter(Boolean);
+  const contexteDetecte = segments[0] ?? "general";
+
+  const SUGGESTIONS_CONTEXTUELLES: Record<string, string[]> = {
+    cuisine: ["Quoi manger ce soir ?", "Idée batch cooking", "Que faire avec mes restes ?"],
+    famille: ["Activité pour Jules ?", "Idée sortie weekend", "Routine du soir"],
+    maison: ["Entretien ce mois-ci ?", "Que faire au jardin ?", "Projet bricolage facile"],
+    jeux: ["Analyse mes paris", "Statistiques bankroll"],
+    outils: ["Organiser ma semaine", "Conseil du jour"],
+  };
+
+  const suggestions = SUGGESTIONS_CONTEXTUELLES[contexteDetecte] ?? [];
+
+  const ACCUEIL_CONTEXTUEL: Record<string, string> = {
+    cuisine: "🍽️ Besoin d'aide en cuisine ?",
+    famille: "👨‍👩‍👦 Comment aider la famille ?",
+    maison: "🏠 Une question sur la maison ?",
+    jeux: "🎮 Analyse de jeux ?",
+  };
+
+  const messageAccueil = ACCUEIL_CONTEXTUEL[contexteDetecte] ?? "✨ Comment puis-je vous aider ?";
+
+  async function envoyer(texte?: string) {
+    const msg = texte ?? message;
+    if (!msg.trim()) return;
     setChargement(true);
     setReponse(null);
     try {
       const { data } = await clientApi.post<ReponseChatIA>("/utilitaires/chat/message", {
-        message: message.trim(),
+        message: msg.trim(),
         contexte: "general",
+        contexte_page: pathname,
       });
       setReponse(data.reponse);
       setMessage("");
@@ -60,7 +85,7 @@ export function FabChatIA() {
       {ouvert && (
         <Card className="w-80 shadow-xl border animate-in slide-in-from-bottom-4">
           <CardHeader className="pb-2 flex-row items-center justify-between">
-            <CardTitle className="text-sm font-semibold">✨ Assistant IA</CardTitle>
+            <CardTitle className="text-sm font-semibold">{messageAccueil}</CardTitle>
             <div className="flex gap-1">
               <Button
                 variant="ghost"
@@ -82,6 +107,22 @@ export function FabChatIA() {
             </div>
           </CardHeader>
           <CardContent className="space-y-2 pb-3">
+            {/* Suggestions contextuelles */}
+            {!reponse && suggestions.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className="text-[11px] px-2 py-1 rounded-full bg-muted hover:bg-muted/80 transition-colors text-muted-foreground"
+                    onClick={() => void envoyer(s)}
+                    disabled={chargement}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
             {reponse && (
               <div className="rounded-md bg-muted p-2 text-sm max-h-40 overflow-y-auto">
                 {reponse}
@@ -95,12 +136,12 @@ export function FabChatIA() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  envoyer();
+                  void envoyer();
                 }
               }}
             />
             <Button
-              onClick={envoyer}
+              onClick={() => void envoyer()}
               disabled={chargement || !message.trim()}
               size="sm"
               className="w-full"

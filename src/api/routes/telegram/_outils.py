@@ -60,6 +60,71 @@ async def _creer_note_rapide_telegram(chat_id: str, texte_note: str) -> None:
     await envoyer_message_telegram(chat_id, f"📝 Note créée avec succès (#{note.id}).")
 
 
+async def _notifier_rappel(chat_id: str, texte: str) -> None:
+    """Envoie la notification du rappel programmé."""
+    from src.services.integrations.telegram import envoyer_message_interactif
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps=f"⏰ <b>Rappel</b>\n\n{html.escape(texte)}",
+        boutons=[{"id": "menu_retour", "title": "🏠 Menu principal"}],
+    )
+
+
+async def _creer_rappel_telegram(chat_id: str, argument: str) -> None:
+    """Crée un rappel programmé. Ex: /rappel sortir poubelles 20h30."""
+    from datetime import datetime, timedelta as td
+
+    from src.services.integrations.telegram import envoyer_message_telegram
+
+    argument = (argument or "").strip()
+    if not argument:
+        await envoyer_message_telegram(
+            chat_id,
+            "⏰ Usage : <code>/rappel texte HH:MM</code>\nExemple : <code>/rappel sortir poubelles 20:30</code>",
+        )
+        return
+
+    # Extraire l'heure à la fin du message (formats : 14:30, 14h30, 14h)
+    match_heure = re.search(r"(\d{1,2})[h:](\d{2})?\s*$", argument)
+    if not match_heure:
+        await envoyer_message_telegram(
+            chat_id,
+            "⏰ Indique l'heure à la fin.\nExemple : <code>/rappel acheter pain 18:00</code>",
+        )
+        return
+
+    heure = int(match_heure.group(1))
+    minute = int(match_heure.group(2) or 0)
+    if not (0 <= heure <= 23 and 0 <= minute <= 59):
+        await envoyer_message_telegram(chat_id, "⏰ Heure invalide (format 0-23h, 0-59min).")
+        return
+
+    texte_rappel = argument[: match_heure.start()].strip()
+    if not texte_rappel:
+        await envoyer_message_telegram(chat_id, "⏰ Ajoute un texte avant l'heure.")
+        return
+
+    now = datetime.now()
+    cible = now.replace(hour=heure, minute=minute, second=0, microsecond=0)
+    if cible <= now:
+        cible += td(days=1)
+
+    delta_secondes = (cible - now).total_seconds()
+    asyncio.create_task(_attendre_puis_rappeler(chat_id, texte_rappel, delta_secondes))
+
+    await envoyer_message_telegram(
+        chat_id,
+        f"⏰ Rappel programmé pour <b>{cible.strftime('%H:%M')}</b> : {html.escape(texte_rappel)}",
+    )
+
+
+async def _attendre_puis_rappeler(chat_id: str, texte: str, secondes: float) -> None:
+    """Attend le délai puis envoie la notification."""
+    await asyncio.sleep(secondes)
+    await _notifier_rappel(chat_id, texte)
+
+
 async def _envoyer_aide_photo_telegram(chat_id: str) -> None:
     from src.services.integrations.telegram import envoyer_message_interactif
 

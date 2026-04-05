@@ -18,9 +18,9 @@ Les schémas ci-dessous sont déjà présents dans `src/api/schemas/fonctionnali
 | `POST /api/v1/preferences/mode-pilote/config` | `src/api/routes/preferences.py` | `ModePiloteConfigurationRequest` + `ModePiloteAutomatiqueResponse` |
 | `GET /api/v1/rapports/resume-mensuel` | `src/api/routes/rapports.py` | `ResumeMensuelIAResponse` |
 | `GET /api/v1/rapports/rapport-mensuel/pdf` | `src/api/routes/rapports.py` | `RapportMensuelPdfResponse` |
-| `GET /api/v1/innovations/rapport-mensuel/pdf` | `src/api/routes/legacy_compat.py` | `RapportMensuelPdfResponse` |
+| `GET /api/v1/innovations/rapport-mensuel/pdf` | `src/api/routes/innovations.py` | `RapportMensuelPdfResponse` |
 
-> **Note** : le routeur `legacy_compat.py` est désormais la façade consolidée des anciennes routes d'innovation, tandis que les usages produit visibles passent surtout par `preferences.py` et `rapports.py`.
+> **Note** : le routeur `innovations.py` sert désormais uniquement de façade de compatibilité externe dépréciée pour `/api/v1/innovations`, tandis que les usages produit visibles passent surtout par `preferences.py` et `rapports.py`.
 
 ## anti_gaspillage
 

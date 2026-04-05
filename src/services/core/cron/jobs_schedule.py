@@ -22,6 +22,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("resume_hebdo", CronTrigger(day_of_week="mon", hour=7, minute=30), replace_existing=True)
     planifier_job("planning_semaine_si_vide", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)
     planifier_job("alertes_peremption_48h", CronTrigger(hour=6, minute=0), replace_existing=True)
+    planifier_job("alertes_peremption_j3_proactive", CronTrigger(hour=7, minute=30), replace_existing=True)
     planifier_job("rapport_mensuel_budget", CronTrigger(day=1, hour=8, minute=15), replace_existing=True)
     planifier_job("score_weekend", CronTrigger(day_of_week="fri", hour=17, minute=0), replace_existing=True)
     planifier_job("rapport_jardin", CronTrigger(day_of_week="wed", hour=20, minute=0), replace_existing=True)
@@ -97,6 +98,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("rappels_jardin_saisonniers", CronTrigger(day_of_week="mon", hour=7, minute=0), replace_existing=True)
     planifier_job("verification_sante_systeme", CronTrigger(minute=0), replace_existing=True)
     planifier_job("backup_auto_hebdo_json", CronTrigger(day_of_week="sun", hour=4, minute=0), replace_existing=True)
+    planifier_job("suggestions_proactives_telegram", CronTrigger(hour=14, minute=0), replace_existing=True)
 
     # Jobs automatisation supplémentaires
     planifier_job("job_expiration_recettes_suggestion", CronTrigger(hour=10, minute=0), replace_existing=True)

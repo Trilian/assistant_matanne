@@ -154,10 +154,9 @@ class ServiceEmail:
         return self._envoyer(email, "Vérifiez votre email — Matanne", html)
 
     def envoyer_resume_hebdo(self, email: str, resume: dict[str, Any]) -> bool:
-        """Envoie le résumé hebdomadaire famille."""
+        """Envoie le résumé hebdomadaire famille (MJML avec fallback HTML)."""
         semaine = resume.get("semaine", "")
-        html = self._render(
-            "resume_hebdo.html",
+        ctx = dict(
             sujet=f"Résumé semaine {semaine}",
             semaine=semaine,
             recettes_cuisinees=resume.get("recettes_cuisinees"),
@@ -165,6 +164,12 @@ class ServiceEmail:
             activites_jules=resume.get("activites_jules"),
             taches_maison=resume.get("taches_maison"),
             resume_ia=resume.get("resume_ia", ""),
+            app_url=self._app_url,
+        )
+        html = self._render_mjml(
+            "resume_hebdo.mjml",
+            fallback_html_template="resume_hebdo.html",
+            **ctx,
         )
         return self._envoyer(email, f"📋 Résumé de la semaine {semaine} — Matanne", html)
 

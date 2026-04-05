@@ -24,6 +24,7 @@ import { obtenirRecette } from "@/bibliotheque/api/recettes";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Progress } from "@/composants/ui/progress";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { utiliserRequete } from "@/crochets/utiliser-api";
@@ -257,6 +258,12 @@ export default function PageTabletteCuisine() {
   const resumeTempsReel = repasCourant
     ? `${badgeTypeRepas} ${dateRepas ?? "du jour"} · ${ingredients.length} ingrédient(s) · ${articlesRestants.length} course(s) restante(s)`
     : "Aucun repas planifié. Utilisez le planning pour préparer la semaine.";
+  const progressionMinuteur =
+    dureeInitiale > 0 ? Math.min(100, Math.max(0, ((dureeInitiale - tempsRestant) / dureeInitiale) * 100)) : 0;
+  const ingredientsPrets = Object.values(ingredientsCoches).filter(Boolean).length;
+  const progressionIngredients = ingredients.length > 0 ? Math.round((ingredientsPrets / ingredients.length) * 100) : 0;
+  const articlesRassembles = Object.values(articlesCoches).filter(Boolean).length;
+  const progressionCourses = articlesRestants.length > 0 ? Math.round((articlesRassembles / articlesRestants.length) * 100) : 0;
 
   const panneauRecette = (
     <Card className="overflow-hidden border-orange-200/70 dark:border-orange-900/50 dark:bg-slate-950/70">
@@ -366,7 +373,11 @@ export default function PageTabletteCuisine() {
                       <label
                         key={cle}
                         htmlFor={`ingredient-${index}`}
-                        className="flex items-center gap-3 rounded-xl border px-3 py-2 text-base hover:bg-muted/40"
+                        className={`flex items-center gap-3 rounded-xl border px-3 py-2 text-base transition-colors ${
+                          ingredientsCoches[cle]
+                            ? "border-emerald-200 bg-emerald-50/80 dark:border-emerald-900/60 dark:bg-emerald-950/20"
+                            : "hover:bg-muted/40"
+                        }`}
                       >
                         <input
                           id={`ingredient-${index}`}
@@ -381,7 +392,7 @@ export default function PageTabletteCuisine() {
                           className="h-5 w-5"
                           aria-label={`Ingrédient prêt : ${ingredient.nom}`}
                         />
-                        <span>
+                        <span className={ingredientsCoches[cle] ? "text-muted-foreground line-through" : ""}>
                           {ingredient.quantite ?? ""} {ingredient.unite ?? ""} {ingredient.nom}
                         </span>
                       </label>
@@ -430,11 +441,35 @@ export default function PageTabletteCuisine() {
           {resumeTempsReel}
         </p>
 
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border bg-muted/35 p-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Cuisson</p>
+            <p className="mt-1 text-lg font-semibold">{Math.round(progressionMinuteur)}%</p>
+          </div>
+          <div className="rounded-xl border bg-muted/35 p-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Ingrédients prêts</p>
+            <p className="mt-1 text-lg font-semibold">{progressionIngredients}%</p>
+            <p className="text-xs text-muted-foreground">{ingredientsPrets}/{ingredients.length} préparés</p>
+          </div>
+          <div className="rounded-xl border bg-muted/35 p-3">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Courses cochées</p>
+            <p className="mt-1 text-lg font-semibold">{progressionCourses}%</p>
+            <p className="text-xs text-muted-foreground">{articlesRassembles}/{articlesRestants.length} récupérées</p>
+          </div>
+        </div>
+
         <div className="rounded-2xl border bg-gradient-to-br from-orange-50 to-white p-5 text-center dark:from-orange-950/20 dark:to-slate-950">
           <div className="text-6xl font-bold tabular-nums text-orange-600 dark:text-orange-300 lg:text-7xl">
             {String(minutes).padStart(2, "0")}:{String(secondes).padStart(2, "0")}
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <div className="mx-auto mt-4 max-w-xl">
+            <div className="mb-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span>Progression estimée</span>
+              <span>{Math.round(progressionMinuteur)}%</span>
+            </div>
+            <Progress value={progressionMinuteur} className="h-2 bg-orange-100 dark:bg-orange-950/40" />
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">
             Raccourcis clavier : <span className="font-mono">Espace</span> pause/démarre · <span className="font-mono">R</span> reset · <span className="font-mono">L</span> change l’affichage
           </p>
         </div>
@@ -488,6 +523,13 @@ export default function PageTabletteCuisine() {
         <p className="text-sm text-muted-foreground">
           {listeActive ? `Liste active : ${listeActive.nom}` : "Aucune liste active trouvée."}
         </p>
+        <div className="rounded-xl border bg-muted/35 p-3 text-sm">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <span className="font-medium">Progression courses</span>
+            <span className="text-muted-foreground">{progressionCourses}%</span>
+          </div>
+          <Progress value={progressionCourses} className="h-2 bg-orange-100 dark:bg-orange-950/40" />
+        </div>
         <div className="space-y-2">
           {articlesRestants.length > 0 ? (
             articlesRestants.map((article) => {
@@ -496,7 +538,11 @@ export default function PageTabletteCuisine() {
                 <label
                   key={article.id}
                   htmlFor={`course-${article.id}`}
-                  className="flex items-center gap-3 rounded-xl border px-3 py-3 text-base hover:bg-muted/40"
+                  className={`flex items-center gap-3 rounded-xl border px-3 py-3 text-base transition-colors ${
+                    articlesCoches[cle]
+                      ? "border-emerald-200 bg-emerald-50/80 dark:border-emerald-900/60 dark:bg-emerald-950/20"
+                      : "hover:bg-muted/40"
+                  }`}
                 >
                   <input
                     id={`course-${article.id}`}
@@ -512,7 +558,7 @@ export default function PageTabletteCuisine() {
                     aria-label={`Article récupéré : ${article.nom}`}
                   />
                   <div className="flex-1">
-                    <p className="font-medium">{article.nom}</p>
+                    <p className={`font-medium ${articlesCoches[cle] ? "text-muted-foreground line-through" : ""}`}>{article.nom}</p>
                     <p className="text-sm text-muted-foreground">
                       {article.quantite ?? 1} {article.unite ?? ""} · {article.categorie ?? "À classer"}
                     </p>
@@ -544,6 +590,20 @@ export default function PageTabletteCuisine() {
               Mode cuisine tablette
             </h1>
             <p className="text-sm text-orange-50/90">Vue épurée pour suivre le prochain repas, le minuteur et la liste de courses sans quitter le plan de travail.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Badge className="border border-white/15 bg-white/10 text-white hover:bg-white/10">
+                {layout === "split" ? "Vue scindée" : "Mode focus"}
+              </Badge>
+              <Badge className="border border-white/15 bg-white/10 text-white hover:bg-white/10">
+                {syntheseSupportee ? "Lecture vocale dispo" : "Lecture vocale indisponible"}
+              </Badge>
+              <Badge className="border border-white/15 bg-white/10 text-white hover:bg-white/10">
+                {ingredientsPrets}/{ingredients.length} ingrédients prêts
+              </Badge>
+              <Badge className="border border-white/15 bg-white/10 text-white hover:bg-white/10">
+                {articlesRestants.length} course(s) restantes
+              </Badge>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
