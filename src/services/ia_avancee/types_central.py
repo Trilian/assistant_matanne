@@ -107,28 +107,6 @@ class AnalyseTendancesLotoResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# 10.19 — OPTIMISATION PARCOURS MAGASIN
-# ═══════════════════════════════════════════════════════════
-
-
-class ArticleRayon(BaseModel):
-    """Article assigné à un rayon."""
-
-    nom: str = ""
-    rayon: str = ""
-    ordre: int = 0
-
-
-class ParcoursOptimiseResponse(BaseModel):
-    """Parcours magasin optimisé."""
-
-    articles_par_rayon: dict[str, list[str]] = Field(default_factory=dict)
-    ordre_rayons: list[str] = Field(default_factory=list)
-    nb_articles: int = 0
-    temps_estime_minutes: int = 0
-
-
-# ═══════════════════════════════════════════════════════════
 # IA AVANCÉE & INNOVATIONS
 # ═══════════════════════════════════════════════════════════
 
@@ -473,28 +451,6 @@ class TelegramConversationnelResponse(BaseModel):
     actif: bool = True
     nb_commandes: int = 0
     commandes: list[CommandeTelegram] = Field(default_factory=list)
-
-
-class PrixIngredientCompare(BaseModel):
-    """Comparaison de prix pour un ingrédient fréquent."""
-
-    ingredient: str = ""
-    frequence_utilisation: int = 0
-    prix_historique_moyen_eur: float | None = None
-    prix_marche_eur: float | None = None
-    source_prix: str = "historique"
-    variation_pct: float | None = None
-    alerte_soldes: bool = False
-
-
-class ComparateurPrixAutomatiqueResponse(BaseModel):
-    """Veille prix automatique sur les ingrédients les plus fréquents."""
-
-    date_reference: str = ""
-    nb_ingredients_analyses: int = 0
-    ingredients: list[PrixIngredientCompare] = Field(default_factory=list)
-    nb_alertes: int = 0
-    alertes: list[str] = Field(default_factory=list)
 
 
 class EnergieTempsReelResponse(BaseModel):

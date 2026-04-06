@@ -58,7 +58,6 @@ EXPECTED_FILES = [
     "14_indexes.sql",          # Index supplémentaires
     "15_rls_policies.sql",     # Row Level Security
     "16_seed_data.sql",        # Données de référence
-    "17_migrations_absorbees.sql",  # V005-V007 en ligne
     "99_footer.sql",           # COMMIT + vérification finale
 ]
 

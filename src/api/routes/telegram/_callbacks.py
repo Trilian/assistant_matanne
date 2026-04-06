@@ -498,6 +498,92 @@ async def _traiter_callback_courses(
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
 
 
+async def _traiter_callback_tache(
+    callback_data: str,
+    callback_query_id: str,
+    chat_id: str,
+) -> None:
+    """Gère les callbacks boutons inline pour les tâches de projet (valider / reporter)."""
+    import html as html_mod
+
+    from src.api.utils import executer_async, executer_avec_session
+    from src.services.integrations.telegram import envoyer_message_telegram, repondre_callback_query
+
+    if ":" not in callback_data:
+        await repondre_callback_query(callback_query_id, "❌ Données incomplètes", show_alert=True)
+        return
+
+    action, id_str = callback_data.split(":", 1)
+    try:
+        tache_id = int(id_str)
+    except ValueError:
+        await repondre_callback_query(callback_query_id, "❌ Erreur: ID invalide", show_alert=True)
+        logger.error(f"Invalid tache ID in callback: {callback_data}")
+        return
+
+    logger.info(f"Callback tâche reçu: action={action}, tache_id={tache_id}")
+
+    if action == "tache_valider":
+        def _valider() -> dict[str, object]:
+            from src.core.models.maison import TacheProjet
+
+            with executer_avec_session() as session:
+                tache = session.query(TacheProjet).filter(TacheProjet.id == tache_id).first()
+                if not tache:
+                    return {"error": "Tâche non trouvée", "status": 404}
+                if tache.statut == "terminé":
+                    return {"message": "Tâche déjà terminée", "nom": tache.nom, "status": 200}
+                tache.statut = "terminé"
+                session.commit()
+                return {"message": "Tâche terminée", "nom": tache.nom, "status": 200}
+
+        try:
+            result = await executer_async(_valider)
+            if result.get("status") == 200:
+                nom = html_mod.escape(str(result.get("nom", "")))
+                await repondre_callback_query(callback_query_id, f"✅ {result.get('nom')} — terminée !", show_alert=False)
+                await envoyer_message_telegram(chat_id, f"✅ <b>{nom}</b> marquée comme terminée.")
+            else:
+                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+        except Exception as e:
+            logger.error(f"❌ Erreur callback tache_valider: {e}", exc_info=True)
+            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+
+    elif action == "tache_reporter":
+        def _reporter() -> dict[str, object]:
+            from datetime import timedelta
+
+            from src.core.models.maison import TacheProjet
+
+            with executer_avec_session() as session:
+                tache = session.query(TacheProjet).filter(TacheProjet.id == tache_id).first()
+                if not tache:
+                    return {"error": "Tâche non trouvée", "status": 404}
+                if tache.date_echeance:
+                    tache.date_echeance = tache.date_echeance + timedelta(days=1)
+                    nouvelle_echeance = tache.date_echeance.strftime("%d/%m")
+                else:
+                    nouvelle_echeance = "demain"
+                session.commit()
+                return {"message": "Tâche reportée", "nom": tache.nom, "echeance": nouvelle_echeance, "status": 200}
+
+        try:
+            result = await executer_async(_reporter)
+            if result.get("status") == 200:
+                nom = html_mod.escape(str(result.get("nom", "")))
+                echeance = html_mod.escape(str(result.get("echeance", "demain")))
+                await repondre_callback_query(callback_query_id, f"🔄 Reportée au {result.get('echeance')}", show_alert=False)
+                await envoyer_message_telegram(chat_id, f"🔄 <b>{nom}</b> reportée au {echeance}.")
+            else:
+                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+        except Exception as e:
+            logger.error(f"❌ Erreur callback tache_reporter: {e}", exc_info=True)
+            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+
+    else:
+        await repondre_callback_query(callback_query_id, "❌ Action inconnue", show_alert=True)
+
+
 async def _obtenir_message_id(callback_query_id: str) -> int | None:
     """Stub pour obtenir le message_id depuis callback_query_id."""
     return None

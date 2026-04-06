@@ -14,9 +14,7 @@ from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas import AdaptationRecetteResponse, SuggestionsPlanningResponse, SuggestionsRecettesResponse
 from src.api.schemas.errors import REPONSES_IA
-from src.api.utils import gerer_exception_api
-
-logger = logging.getLogger(__name__)
+from src.api.utils import gerer_exception_api, executer_async, executer_avec_session
 
 router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
 
@@ -388,9 +386,69 @@ async def predictions_courses(
 async def statut_predictions(
     user: dict = Depends(require_auth),
 ):
-    """Retourne le statut des modÃ¨les ML (entraÃ®nÃ©s ou non)."""
+    """Retourne le statut des modèles ML (entraînés ou non)."""
     from src.services.cuisine.suggestions.ml_predictions import obtenir_ml_predictions
 
     service = obtenir_ml_predictions()
     return {"modeles": service.statut_modeles()}
+
+
+# ══════════════════════════════════════════════════════════════════
+# G1 — Recette express depuis le stock actuel
+# ══════════════════════════════════════════════════════════════════
+
+@router.get(
+    "/depuis-stock",
+    responses=REPONSES_IA,
+    summary="Suggérer des recettes réalisables avec le stock actuel",
+)
+@gerer_exception_api
+async def suggerer_recettes_depuis_stock(
+    max_resultats: int = Query(3, ge=1, le=6, description="Nombre max de suggestions"),
+    temps_max_min: int = Query(45, ge=10, le=120, description="Temps de préparation maximum (minutes)"),
+    user: dict = Depends(require_auth),
+    _rate_check: dict = Depends(verifier_limite_debit_ia),
+) -> dict:
+    """Suggère des recettes réalisables en un tap selon le stock actuel (G1).
+
+    Lit les articles en stock (quantite > quantite_min ou quantite > 0),
+    les transmet à Mistral qui propose des recettes faisables sans courses.
+    """
+
+    def _query() -> dict:
+        from src.core.models.inventaire import ArticleInventaire
+        from src.services.cuisine.recettes.service import obtenir_service_recettes
+
+        with executer_avec_session() as session:
+            # Récupérer les ingrédients en stock (quantité > 0)
+            articles = (
+                session.query(ArticleInventaire)
+                .filter(ArticleInventaire.quantite > 0)
+                .all()
+            )
+            ingredients_en_stock = [
+                {
+                    "nom": a.nom or "inconnu",
+                    "quantite": a.quantite,
+                    "unite": a.unite or "",
+                }
+                for a in articles
+                if a.nom
+            ]
+
+        if not ingredients_en_stock:
+            return {"suggestions": [], "nb_ingredients_stock": 0, "message": "Aucun ingrédient en stock détecté."}
+
+        service = obtenir_service_recettes()
+        suggestions = service.suggerer_depuis_inventaire(
+            ingredients_disponibles=ingredients_en_stock,
+            temps_max_min=temps_max_min,
+            nb_suggestions=max_resultats,
+        )
+        return {
+            "suggestions": [s.model_dump() if hasattr(s, "model_dump") else s for s in suggestions],
+            "nb_ingredients_stock": len(ingredients_en_stock),
+        }
+
+    return await executer_async(_query)
 

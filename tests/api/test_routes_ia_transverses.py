@@ -231,32 +231,6 @@ class TestTendancesLoto:
         assert response.status_code == 200
 
 
-# Parcours magasin
-
-
-class TestParcoursMagasin:
-    """Tests pour POST /api/v1/courses/parcours-magasin."""
-
-    def test_parcours_magasin_optimise(self, client, auth_headers, mock_innovations_service):
-        from src.services.ia_avancee.types_central import ParcoursOptimiseResponse
-
-        mock_innovations_service.optimiser_parcours_magasin.return_value = ParcoursOptimiseResponse(
-            articles_par_rayon={"Fruits": ["pommes", "bananes"], "Laitiers": ["lait"]},
-            ordre_rayons=["Fruits", "Laitiers"],
-            nb_articles=3,
-            temps_estime_minutes=15,
-        )
-
-        response = client.post(
-            "/api/v1/courses/parcours-magasin",
-            json={"liste_id": 1},
-            headers=auth_headers,
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["nb_articles"] == 3
-
-
 # Veille emploi
 
 
@@ -583,36 +557,6 @@ class TestTelegramEnergyTransverses:
         data = response.json()
         assert data["actif"] is True
         assert data["nb_commandes"] >= 5
-
-    def test_comparateur_prix_auto(self, client, auth_headers, mock_innovations_service):
-        from src.services.ia_avancee.types_central import ComparateurPrixAutomatiqueResponse, PrixIngredientCompare
-
-        mock_innovations_service.analyser_comparateur_prix_automatique.return_value = ComparateurPrixAutomatiqueResponse(
-            date_reference="2026-04-02",
-            nb_ingredients_analyses=20,
-            ingredients=[
-                PrixIngredientCompare(
-                    ingredient="tomate",
-                    frequence_utilisation=12,
-                    prix_historique_moyen_eur=2.5,
-                    prix_marche_eur=2.0,
-                    source_prix="openfoodfacts",
-                    variation_pct=-20.0,
-                    alerte_soldes=True,
-                )
-            ],
-            nb_alertes=1,
-            alertes=["tomate: baisse détectée (20.0% vs historique)"],
-        )
-
-        response = client.get(
-            "/api/v1/courses/comparateur-prix-auto?top_n=20",
-            headers=auth_headers,
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["nb_ingredients_analyses"] == 20
-        assert data["nb_alertes"] >= 1
 
     def test_energie_temps_reel(self, client, auth_headers, mock_innovations_service):
         from src.services.ia_avancee.types_central import EnergieTempsReelResponse

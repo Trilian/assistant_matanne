@@ -6,7 +6,6 @@ Service central regroupant les fonctionnalités d'innovation :
 - 10.5 Score bien-être familial composite
 - 10.17 Enrichissement contacts IA
 - 10.18 Analyse tendances Loto/EuroMillions
-- 10.19 Optimisation parcours magasin IA
 - 10.8 Veille emploi multi-sites
 - 10.3 Mode invité (lien partageable)
 
@@ -74,7 +73,6 @@ from .types_central import (
     OffreEmploi,
     OffreEnergieAlternative,
     PatternsAlimentairesResponse,
-    ParcoursOptimiseResponse,
     PlanningJulesAdaptatifResponse,
     ResumeMensuelIAResponse,
     SaisonnaliteIntelligenteResponse,
@@ -95,12 +93,10 @@ from .types_central import (
     CarteMagazineTablette,
     CarteVisuellePartageableResponse,
     CommandeTelegram,
-    ComparateurPrixAutomatiqueResponse,
     EnergieTempsReelResponse,
     EtapeBatchIntelligente,
     ModeTabletteMagazineResponse,
     PlanificationHebdoCompleteResponse,
-    PrixIngredientCompare,
     PreferenceApprise,
     TelegramConversationnelResponse,
 )
@@ -630,14 +626,6 @@ Retourne un JSON avec:
             commandes=commandes,
         )
 
-    @avec_cache(ttl=21600, key_func=lambda self, top_n: f"s23_comparateur_prix_{max(1, min(20, top_n))}_{date.today().isoformat()}")
-    @avec_gestion_erreurs(default_return=None)
-    def analyser_comparateur_prix_automatique(
-        self,
-        top_n: int = 20,
-    ) -> ComparateurPrixAutomatiqueResponse | None:
-        """Comparateur prix : compare les prix des ingrédients fréquents et détecte les soldes."""
-        return cuisine_ia.analyser_comparateur_prix_automatique(self, top_n=top_n)
 
     @avec_cache(ttl=300, key_func=lambda self: f"s23_energie_temps_reel_{datetime.now(UTC).strftime('%Y%m%d%H%M')}")
     @avec_gestion_erreurs(default_return=None)
@@ -776,17 +764,6 @@ Règles :
             system_prompt="Tu es un analyste statistique spécialisé en loterie. Rappelle systématiquement que le loto est un jeu de hasard pur.",
         )
 
-    # ═══════════════════════════════════════════════════════════
-    # 10.19 — OPTIMISATION PARCOURS MAGASIN
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_gestion_erreurs(default_return=None)
-    @chronometre("courses.parcours_magasin", seuil_alerte_ms=5000)
-    def optimiser_parcours_magasin(
-        self, liste_id: int | None = None
-    ) -> ParcoursOptimiseResponse | None:
-        """Optimise le parcours magasin en regroupant les articles par rayon."""
-        return cuisine_ia.optimiser_parcours_magasin(self)
 
     # ═══════════════════════════════════════════════════════════
     # 10.8 — VEILLE EMPLOI HABITAT

@@ -39,7 +39,6 @@ def _store_idempotency(key: str | None, result: Any) -> None:
 
 
 from src.api.dependencies import require_auth
-from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas import (
     ArticleDriveResponse,
     CourseItemBase,
@@ -63,15 +62,9 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_LECTURE,
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
-    REPONSES_IA,
 )
-from src.api.schemas.ia_transverses import (
-    ComparateurPrixAutomatiqueResponse,
-    ParcoursOptimiseRequest,
-    ParcoursOptimiseResponse,
-)
+
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
@@ -103,29 +96,7 @@ class FeedbackPredictionCoursesRequest(BaseModel):
     accepte: bool = Field(..., description="True si l'article a ete ajoute, False sinon")
 
 
-@router.post("/parcours-magasin", response_model=ParcoursOptimiseResponse, responses=REPONSES_IA)
-@gerer_exception_api
-async def optimiser_parcours_magasin(
-    body: ParcoursOptimiseRequest,
-    user: dict[str, Any] = Depends(require_auth),
-    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
-) -> ParcoursOptimiseResponse:
-    """Alias métier pour l'optimisation de parcours magasin."""
-    service = obtenir_service_innovations_cuisine()
-    result = service.optimiser_parcours_magasin(liste_id=body.liste_id)
-    return result or ParcoursOptimiseResponse()
 
-
-@router.get("/comparateur-prix-auto", response_model=ComparateurPrixAutomatiqueResponse, responses=REPONSES_IA)
-@gerer_exception_api
-async def comparateur_prix_automatique(
-    top_n: int = Query(20, ge=1, le=20),
-    user: dict[str, Any] = Depends(require_auth),
-) -> ComparateurPrixAutomatiqueResponse:
-    """Alias métier pour le comparateur de prix automatique."""
-    service = obtenir_service_innovations_cuisine()
-    result = service.analyser_comparateur_prix_automatique(top_n=top_n)
-    return result or ComparateurPrixAutomatiqueResponse()
 
 
 @router.get("", response_model=ReponsePaginee[ListeCoursesResume], responses=REPONSES_LISTE)

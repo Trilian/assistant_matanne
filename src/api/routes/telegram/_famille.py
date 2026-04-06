@@ -450,3 +450,22 @@ async def _envoyer_activites_samedi(chat_id: str) -> None:
         chat_id,
         "🎯 <b>Activites prevues samedi</b>\n\n" + "\n".join(lignes),
     )
+
+
+async def _envoyer_digest_commande(chat_id: str) -> None:
+    """Envoie le digest matinal à la demande via /digest."""
+    from src.services.integrations.telegram import envoyer_digest_matinal, envoyer_message_telegram
+
+    try:
+        succes = await envoyer_digest_matinal()
+        if not succes:
+            await envoyer_message_telegram(
+                chat_id,
+                "📬 Le digest n'a pas pu être généré (aucune donnée ou Telegram non configuré).",
+            )
+    except Exception as exc:
+        logger.warning("Erreur digest Telegram à la demande: %s", exc)
+        await envoyer_message_telegram(
+            chat_id,
+            "⚠️ Une erreur est survenue lors de la génération du digest.",
+        )

@@ -4,10 +4,11 @@
 
 ## Snapshot
 
-- Factories détectées (`@service_factory`): **169**
+- Factories détectées (`@service_factory`): **206**
 - Domaine le plus dense: cuisine/maison/famille
 - Registre central: `src/services/core/registry.py`
-- Validation documentaire du **04/04/2026**: exports `planning`, `dashboard` et `utilitaires` revérifiés contre leurs `__init__.py`
+- Validation documentaire du **05/06/2025**: comptage recalculé (169 → 206), chemins vérifiés
+- ⚠️ 3 doublons de noms `@service_factory` identifiés : `file_attente`, `innovations`, `prediction_courses`
 
 ---
 

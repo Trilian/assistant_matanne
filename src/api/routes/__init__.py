@@ -41,7 +41,7 @@ __all__ = [
     "predictions_router",
     "ia_bridges_router",
     "bridges_router",
-    "intra_flux_router",
+    "flux_utilisateur_router",
 ]
 
 
@@ -79,7 +79,7 @@ _MODULES = {
     "predictions_router": ".predictions",
     "ia_bridges_router": ".ia_bridges",
     "bridges_router": ".bridges",
-    "intra_flux_router": ".intra_flux",
+    "flux_utilisateur_router": ".flux_utilisateur",
 }
 
 _MODULE_ALIASES = {

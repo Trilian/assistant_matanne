@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 # Stockage en mémoire pour les compteurs de rate limiting
 _rate_limit_store: dict[str, Any] = {}
 
+# Tracking granulaire par service (tokens + appels)
+_service_tracking: dict[str, dict[str, Any]] = {}
+
 # Quotas par utilisateur (fraction du quota global)
 _USER_DAILY_LIMIT = max(AI_RATE_LIMIT_DAILY // 5, 10)
 _USER_HOURLY_LIMIT = max(AI_RATE_LIMIT_HOURLY // 5, 5)
@@ -172,6 +175,61 @@ class RateLimitIA:
 
         logger.debug(f"[OK] Appel IA enregistré ({service}, user={user_id})")
 
+        # Tracking granulaire par service
+        RateLimitIA._tracker_service(service, tokens_utilises)
+
+    @staticmethod
+    def _tracker_service(service: str, tokens: int) -> None:
+        """Met à jour le compteur granulaire pour un service donné."""
+        aujourd_hui = datetime.now().date().isoformat()
+        if service not in _service_tracking:
+            _service_tracking[service] = {
+                "total_appels": 0,
+                "total_tokens": 0,
+                "par_jour": {},
+            }
+        st = _service_tracking[service]
+        st["total_appels"] += 1
+        st["total_tokens"] += tokens
+        jour = st["par_jour"].setdefault(aujourd_hui, {"appels": 0, "tokens": 0})
+        jour["appels"] += 1
+        jour["tokens"] += tokens
+        # Garder 30 jours max
+        if len(st["par_jour"]) > 30:
+            cles_triees = sorted(st["par_jour"].keys())
+            for cle in cles_triees[:-30]:
+                del st["par_jour"][cle]
+
+    @staticmethod
+    def obtenir_stats_par_service() -> dict[str, Any]:
+        """Retourne les stats granulaires de consommation IA par service.
+
+        Returns:
+            Dict {service_name: {total_appels, total_tokens, par_jour: {date: {appels, tokens}}}}
+        """
+        return dict(_service_tracking)
+
+    @staticmethod
+    def obtenir_classement_services() -> list[dict[str, Any]]:
+        """Retourne les services classés par consommation de tokens (desc).
+
+        Returns:
+            Liste de dicts triés par total_tokens décroissant.
+        """
+        classement = []
+        for service, data in _service_tracking.items():
+            classement.append({
+                "service": service,
+                "total_appels": data["total_appels"],
+                "total_tokens": data["total_tokens"],
+                "tokens_moyen": (
+                    data["total_tokens"] // data["total_appels"]
+                    if data["total_appels"] > 0 else 0
+                ),
+            })
+        classement.sort(key=lambda x: x["total_tokens"], reverse=True)
+        return classement
+
     @staticmethod
     def obtenir_statistiques(user_id: str | None = None) -> dict:
         """
@@ -203,6 +261,11 @@ class RateLimitIA:
             "pourcentage_heure": (data["appels_heure"] / AI_RATE_LIMIT_HOURLY * 100),
             "par_service": services_usage,
             "total_historique": len(data["historique"]),
+            "tokens_par_service": {
+                svc: d["total_tokens"]
+                for svc, d in _service_tracking.items()
+            },
+            "classement_services": RateLimitIA.obtenir_classement_services()[:10],
         }
 
         # Stats per-user si demandé

@@ -195,3 +195,63 @@ RULES:
 
         logger.info(f"✅ Generated {len(variations)} variations of '{nom_recette}'")
         return variations
+
+    @avec_cache(
+        ttl=1800,
+        key_func=lambda self, ingredients_disponibles, temps_max_min, nb_suggestions: (
+            f"recettes_depuis_stock_{temps_max_min}_{nb_suggestions}_"
+            f"{hash(tuple(sorted(i['nom'] for i in ingredients_disponibles)))}"
+        ),
+    )
+    @avec_gestion_erreurs(default_return=[])
+    def suggerer_depuis_inventaire(
+        self,
+        ingredients_disponibles: list[dict],
+        temps_max_min: int = 45,
+        nb_suggestions: int = 3,
+    ) -> list[RecetteSuggestion]:
+        """Suggère des recettes réalisables avec les ingrédients actuellement en stock (G1).
+
+        Args:
+            ingredients_disponibles: Liste de dicts {"nom", "quantite", "unite"}
+            temps_max_min: Temps de préparation + cuisson maximal en minutes
+            nb_suggestions: Nombre de suggestions à retourner
+
+        Returns:
+            Liste de RecetteSuggestion, vide si échec IA
+        """
+        liste_stock = ", ".join(
+            f"{i['nom']} ({i['quantite']:.0f} {i['unite']})" if i.get("unite") else i["nom"]
+            for i in ingredients_disponibles[:30]  # Limiter à 30 ingrédients pour le prompt
+        )
+
+        prompt = f"""GÉNÈRE {nb_suggestions} RECETTES RÉALISABLES EN JSON.
+
+Ingrédients disponibles en stock : {liste_stock}
+
+Contraintes :
+- Utiliser PRINCIPALEMENT les ingrédients ci-dessus (max 2-3 courses manquantes simples)
+- Temps total (préparation + cuisson) ≤ {temps_max_min} minutes
+- Recettes familiales, adaptées à des adultes et un enfant en bas âge
+- Pas de recettes nécessitant des ingrédients introuvables
+
+RETOURNER UNIQUEMENT CE JSON (sans texte avant/après) :
+
+{{"items": [{{"nom": "Pâtes carbonara", "description": "Pâtes crémeuses aux lardons et parmesan", "raison": "Pâtes et lardons disponibles en stock", "temps_preparation": 10, "temps_cuisson": 15, "portions": 4, "difficulte": "facile", "type_repas": "diner", "saison": "toute_année", "ingredients": [{{"nom": "pâtes", "quantite": 400, "unite": "g"}}], "etapes": [{{"description": "Cuire les pâtes al dente"}}]}}]}}"""
+
+        logger.info(
+            f"🤖 G1 — Suggestion recettes depuis stock ({len(ingredients_disponibles)} ingrédients)"
+        )
+
+        suggestions = self.call_with_list_parsing_sync(
+            prompt=prompt,
+            item_model=RecetteSuggestion,
+            system_prompt="Retourne UNIQUEMENT du JSON valide. Aucun texte avant ou après le JSON.",
+            max_items=nb_suggestions,
+            temperature=0.6,
+            max_tokens=3000,
+        )
+
+        logger.info(f"✅ G1 — {len(suggestions)} recettes suggérées depuis stock")
+        return suggestions
+

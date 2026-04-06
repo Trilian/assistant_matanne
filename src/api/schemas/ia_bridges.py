@@ -400,3 +400,71 @@ class HistoriqueModificationsResponse(BaseModel):
     """Réponse historique des modifications."""
     items: list[HistoriqueModificationItem] = []
     nb_total: int = 0
+
+
+# ═══════════════════════════════════════════════════════════
+# PHASE E — BRIDGES INTER-MODULES AVANCÉS
+# ═══════════════════════════════════════════════════════════
+
+
+class RepasConflitItem(BaseModel):
+    """Repas en conflit avec des tâches maison."""
+    id: int
+    type_repas: str
+    recette_id: int | None = None
+    temps_total: int | None = None
+    complexe: bool = False
+
+
+class ConflitPlanningItem(BaseModel):
+    """Conflit détecté entre planning repas et tâches maison."""
+    date: str
+    repas: RepasConflitItem
+    taches_maison: list[dict] = []
+    niveau: str = "attention"
+
+
+class ConflisFplanningResponse(BaseModel):
+    """Réponse détection conflits planning."""
+    periode: dict
+    nb_conflits: int = 0
+    conflits: list[ConflitPlanningItem] = []
+    suggestions: list[str] = []
+    nb_taches_maison_periode: int = 0
+    nb_taches_sans_conflit: int = 0
+    planning_id: int | None = None
+
+
+class MeteoConditions(BaseModel):
+    """Conditions météo pour la suggestion de recettes."""
+    temperature: float = 15.0
+    precipitations_mm: float = 0.0
+    description: str = ""
+
+
+class MeteoRecettesResponse(BaseModel):
+    """Réponse météo → suggestions recettes."""
+    conditions_meteo: dict
+    conseil: str = ""
+    emoji: str = "🍽️"
+    recettes_suggerees: list[dict] = []
+    nb_recettes: int = 0
+
+
+class SuggestionCadeau(BaseModel):
+    """Suggestion de cadeau d'anniversaire."""
+    nom: str
+    budget_estime: float
+    categorie: str = "cadeau"
+
+
+class CadeauAnniversaireResponse(BaseModel):
+    """Réponse suggestions cadeaux anniversaire IA."""
+    anniversaire: dict
+    budget_estime: float = 40.0
+    depenses_mois_en_cours: float = 0.0
+    idees_existantes: str | None = None
+    historique_recents: list[dict] = []
+    suggestions_cadeaux: list[SuggestionCadeau] = []
+    nb_suggestions: int = 0
+    conseil: str = ""

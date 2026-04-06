@@ -186,7 +186,6 @@ Les schémas ci-dessous sont déjà présents dans `src/api/schemas/fonctionnali
 | MangeCeSoirRequest | 2 |
 | ModePiloteConfigurationRequest | 2 |
 | ModeVacancesConfigurationRequest | 2 |
-| ParcoursOptimiseRequest | 1 |
 | VeilleEmploiRequest | 6 |
 
 ## habitat

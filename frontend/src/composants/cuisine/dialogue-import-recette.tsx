@@ -8,7 +8,7 @@ import { useState, useRef } from "react";
 import { Upload, Link2, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { importerRecetteURL, importerRecettePDF } from "@/bibliotheque/api/recettes";
+import { importerRecetteURL, importerRecettePDF, obtenirDoublonsRecettes } from "@/bibliotheque/api/recettes";
 import { Button } from "@/composants/ui/button";
 import {
   Dialog,
@@ -50,11 +50,18 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
   // Mutation pour import URL
   const mutationURL = useMutation({
     mutationFn: importerRecetteURL,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(`✅ "${data.nom}" importée avec succès !`);
       queryClient.invalidateQueries({ queryKey: ["recettes"] });
       setOpen(false);
       setUrl("");
+      // Vérification doublon post-import
+      try {
+        const doublons = await obtenirDoublonsRecettes(0.75);
+        if (doublons.total > 0) {
+          toast.warning(`⚠️ Doublon possible détecté — "${doublons.items[0].recette_a.nom}" ressemble à une recette existante.`, { duration: 6000 });
+        }
+      } catch { /* silencieux */ }
       onSuccess?.();
     },
     onError: (error: ErreurApiAvecDetail) => {
@@ -68,11 +75,18 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
   // Mutation pour import PDF
   const mutationPDF = useMutation({
     mutationFn: importerRecettePDF,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(`✅ "${data.nom}" importée depuis PDF avec succès !`);
       queryClient.invalidateQueries({ queryKey: ["recettes"] });
       setOpen(false);
       setFichierPDF(null);
+      // Vérification doublon post-import
+      try {
+        const doublons = await obtenirDoublonsRecettes(0.75);
+        if (doublons.total > 0) {
+          toast.warning(`⚠️ Doublon possible détecté — "${doublons.items[0].recette_a.nom}" ressemble à une recette existante.`, { duration: 6000 });
+        }
+      } catch { /* silencieux */ }
       onSuccess?.();
     },
     onError: (error: ErreurApiAvecDetail) => {

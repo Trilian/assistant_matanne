@@ -234,3 +234,94 @@ async def verification_stock_recette(
 
     service = obtenir_service_bridges()
     return service.verifier_stock_recette(recette_id=recette_id)
+
+
+# ═══════════════════════════════════════════════════════════
+# PHASE E — BRIDGES INTER-MODULES AVANCÉS
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/conflits-planning", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def conflits_planning(
+    nb_jours: int = Query(7, ge=1, le=30, description="Horizon en jours"),
+    user: dict = Depends(require_auth),
+):
+    """E1: Détecte les conflits entre planning repas et tâches maison."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.detection_conflits_planning(nb_jours=nb_jours)
+
+
+@router.post("/meteo-recettes", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def meteo_recettes(
+    conditions: dict[str, Any],
+    user: dict = Depends(require_auth),
+):
+    """E3: Suggère des recettes adaptées aux conditions météo (soupe pluie / salade soleil)."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.meteo_vers_recettes(conditions)
+
+
+@router.get("/anniversaire-cadeau-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def anniversaire_cadeau_ia(
+    anniversaire_id: int | None = Query(None, description="ID de l'anniversaire (défaut: prochain)"),
+    jours_horizon: int = Query(30, ge=1, le=90, description="Horizon de recherche si pas d'ID"),
+    user: dict = Depends(require_auth),
+):
+    """E5: Suggestions cadeaux IA pour un anniversaire (budget + âge + intérêts)."""
+    from src.services.ia.inter_modules import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.anniversaire_vers_cadeau_ia(
+        anniversaire_id=anniversaire_id,
+        jours_horizon=jours_horizon,
+    )
+
+
+@router.post("/batch-cooking-termine", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def batch_cooking_termine(
+    payload: dict[str, Any],
+    user: dict = Depends(require_auth),
+):
+    """E6: Déclenche la notification Telegram après une session batch cooking."""
+    import asyncio
+
+    session_id = payload.get("session_id")
+    nom_session = payload.get("nom_session", "Batch cooking")
+    nb_recettes = int(payload.get("nb_recettes", 0))
+    photo_url = payload.get("photo_url")
+
+    from src.services.integrations.telegram import envoyer_confirmation_batch_cooking
+
+    envoi_ok = await envoyer_confirmation_batch_cooking(
+        nom_session=nom_session,
+        nb_recettes=nb_recettes,
+        photo_url=photo_url,
+        session_id=session_id,
+    )
+
+    # Émettre aussi l'événement sur le bus pour les abonnés
+    try:
+        from src.services.core.events import obtenir_bus
+
+        obtenir_bus().emettre("batch_cooking.termine", {
+            "session_id": session_id,
+            "nom_session": nom_session,
+            "nb_recettes": nb_recettes,
+            "photo_url": photo_url,
+        })
+    except Exception:
+        pass
+
+    return {
+        "session_id": session_id,
+        "telegram_envoye": envoi_ok,
+        "message": "Notification batch cooking envoyée" if envoi_ok else "Telegram non configuré",
+    }

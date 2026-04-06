@@ -57,6 +57,7 @@ from .admin_schemas import (  # noqa: F401
     FlowSimulationRequest,
     JobInfoResponse,
     JobRunAllRequest,
+    JobRunRequest,
     JobScheduleUpdateRequest,
     JobsBulkRequest,
     JobsSimulationJourneeRequest,
@@ -134,6 +135,14 @@ def _ajouter_log_job(job_id: str, status: str, message: str) -> None:
     logs.append({"timestamp": datetime.now().isoformat(), "status": status, "message": message})
     if len(logs) > _MAX_LOGS_PAR_JOB:
         logs.pop(0)
+
+    # Diffuser via WebSocket admin jobs (best-effort)
+    try:
+        from src.api.websocket.admin_jobs import emettre_evenement_job
+
+        emettre_evenement_job(job_id=job_id, status=status, message=message)
+    except Exception:
+        pass  # Ne jamais bloquer le job pour un échec WS
 
 
 def _journaliser_action_admin(

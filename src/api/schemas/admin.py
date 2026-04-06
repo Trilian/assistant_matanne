@@ -156,7 +156,7 @@ class AdminBridgesResumeStats(BaseModel):
 class AdminBridgesStatusResponse(BaseModel):
     """Statut complet des bridges inter-modules."""
 
-    phase: str = "bridges_inter_modules"
+    domaine: str = "bridges_inter_modules"
     generated_at: str
     execution_ms: float = 0.0
     statut_global: str
@@ -284,6 +284,7 @@ class AdminAuditLogsResponse(BaseModel):
     total: int = 0
     page: int = 1
     par_page: int = 50
+    pages_totales: int = 1
 
 
 class AdminAuditStatsResponse(BaseModel):

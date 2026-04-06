@@ -30,6 +30,7 @@ from .admin_shared import (
     JobInfoResponse,
     JobsBulkRequest,
     JobRunAllRequest,
+    JobRunRequest,
     JobScheduleUpdateRequest,
     JobsSimulationJourneeRequest,
     _LABELS_JOBS,
@@ -434,7 +435,7 @@ async def statut_bridges(
         statut_global = "operationnel" if indisponibles == 0 else "degrade"
 
         return {
-            "phase": "bridges_inter_modules",
+            "domaine": "bridges_inter_modules",
             "generated_at": datetime.now().isoformat(),
             "execution_ms": round((time.perf_counter() - debut_global) * 1000, 2),
             "statut_global": statut_global,
@@ -499,13 +500,19 @@ async def executer_job(
     job_id: str,
     dry_run: bool = Query(False, description="Simuler le job sans exécution réelle"),
     force: bool = Query(False, description="Ignore le rate-limit admin pour ce déclenchement"),
+    body: JobRunRequest | None = Body(None, description="Paramètres additionnels (optionnel)"),
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict:
     """Déclenche un job cron de façon asynchrone."""
     from src.api.utils import executer_async
 
+    # Le body prend la priorité sur les query params si fourni
+    effective_dry_run = body.dry_run if body is not None else dry_run
+    effective_force = body.force if body is not None else force
+    custom_params = body.params if body is not None else {}
+
     # Rate limiting : 5 triggers/min par admin
-    if not force:
+    if not effective_force:
         _verifier_limite_jobs(str(user.get("id", "admin")))
 
     from src.services.core.cron.jobs import executer_job_par_id, lister_jobs_disponibles
@@ -520,8 +527,8 @@ async def executer_job(
     def _run():
         resultat = executer_job_par_id(
             job_id,
-            dry_run=dry_run,
-            source="manual_force" if force else "manual",
+            dry_run=effective_dry_run,
+            source="manual_force" if effective_force else "manual",
             triggered_by_user_id=str(user.get("id", "admin")),
             relancer_exception=True,
         )
@@ -537,7 +544,7 @@ async def executer_job(
         action="admin.job.run",
         entite_type="job",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"job_id": job_id, "dry_run": dry_run, "force": force},
+        details={"job_id": job_id, "dry_run": effective_dry_run, "force": effective_force, "params": custom_params},
     )
     return result
 

@@ -1194,7 +1194,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | MangeCeSoirRequest | 2 |
 | ModePiloteConfigurationRequest | 2 |
 | ModeVacancesConfigurationRequest | 2 |
-| ParcoursOptimiseRequest | 1 |
 | VeilleEmploiRequest | 6 |
 
 ## habitat

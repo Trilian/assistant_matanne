@@ -60,10 +60,10 @@ export function FabChatIA() {
     setChargement(true);
     setReponse(null);
     try {
-      const { data } = await clientApi.post<ReponseChatIA>("/utilitaires/chat/message", {
+      const { data } = await clientApi.post<ReponseChatIA>("/assistant/chat", {
         message: msg.trim(),
-        contexte: "general",
-        contexte_page: pathname,
+        contexte: contexteDetecte,
+        historique: [],
       });
       setReponse(data.reponse);
       setMessage("");

@@ -319,12 +319,3 @@ def obtenir_jules_ai_service() -> JulesAIService:
     """Factory singleton pour JulesAIService."""
     return JulesAIService()
 
-
-# Alias anglais
-def get_jules_ai_service() -> JulesAIService:
-    """English alias for obtenir_jules_ai_service."""
-    return obtenir_jules_ai_service()
-
-
-# ─── Aliases rétrocompatibilité  ───────────────────────────────
-obtenir_service_jules_ai = obtenir_jules_ai_service  # alias rétrocompatibilité

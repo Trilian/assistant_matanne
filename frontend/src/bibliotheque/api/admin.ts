@@ -624,14 +624,21 @@ export async function declencherJob(jobId: string): Promise<{ status: string; jo
 
 export async function declencherJobAvecOptions(
   jobId: string,
-  options?: { dry_run?: boolean; force?: boolean },
+  options?: { dry_run?: boolean; force?: boolean; params?: Record<string, unknown> },
 ): Promise<{ status: string; job_id: string; message: string }> {
-  const { data } = await clientApi.post(`/api/v1/admin/jobs/${jobId}/run`, null, {
-    params: {
-      dry_run: options?.dry_run ?? false,
-      force: options?.force ?? false,
+  const hasBody = options?.params && Object.keys(options.params).length > 0
+  const { data } = await clientApi.post(
+    `/api/v1/admin/jobs/${jobId}/run`,
+    hasBody
+      ? { dry_run: options?.dry_run ?? false, force: options?.force ?? false, params: options.params }
+      : null,
+    {
+      params: {
+        dry_run: options?.dry_run ?? false,
+        force: options?.force ?? false,
+      },
     },
-  })
+  )
   return data
 }
 

@@ -336,8 +336,8 @@ class TestRoutesImport:
         from src.api.routes.bridges import router
         assert router is not None
 
-    def test_import_intra_flux_route(self):
-        from src.api.routes.intra_flux import router
+    def test_import_flux_utilisateur_route(self):
+        from src.api.routes.flux_utilisateur import router
         assert router is not None
 
 

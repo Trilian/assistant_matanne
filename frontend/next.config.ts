@@ -33,6 +33,10 @@ function construireCsp(): string {
 const nextConfig: NextConfig = {
   // Standalone output pour Docker staging
   output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
+  // View Transitions API (F3 — transitions de page fluides)
+  experimental: {
+    viewTransition: true,
+  },
   // Permettre les images depuis le backend et Supabase
   images: {
     remotePatterns: [

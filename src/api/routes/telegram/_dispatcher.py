@@ -14,6 +14,7 @@ from ._cuisine import (
     _envoyer_resume_batch_cooking,
 )
 from ._famille import (
+    _envoyer_digest_commande,
     _envoyer_meteo_telegram,
     _envoyer_projection_budget_telegram,
     _envoyer_rapport_hebdo,
@@ -27,6 +28,7 @@ from ._maison import (
     _envoyer_resume_energie,
     _envoyer_resume_jardin,
     _envoyer_taches_maison,
+    _envoyer_taches_projets,
 )
 from ._outils import (
     _creer_note_rapide_telegram,
@@ -73,6 +75,9 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
     if normalise == "/maison":
         await _envoyer_taches_maison(chat_id)
         return True
+    if normalise in {"/taches", "/projets"}:
+        await _envoyer_taches_projets(chat_id)
+        return True
     if normalise == "/jardin":
         await _envoyer_resume_jardin(chat_id)
         return True
@@ -93,6 +98,9 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
         return True
     if normalise == "/recap":
         await _envoyer_recap_journee(chat_id)
+        return True
+    if normalise in {"/digest", "/resume"}:
+        await _envoyer_digest_commande(chat_id)
         return True
     if normalise == "/rapport":
         await _envoyer_rapport_hebdo(chat_id)

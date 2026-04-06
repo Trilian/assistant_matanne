@@ -16,6 +16,7 @@ from ._callbacks import (
     _traiter_callback_menu,
     _traiter_callback_planning,
     _traiter_callback_sondage_repas,
+    _traiter_callback_tache,
     _traiter_callback_toggle_article,
     _traiter_reponse_rapide_ok,
 )
@@ -238,6 +239,8 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
             await _traiter_callback_sondage_repas(data, callback_query_id, chat_id)
         elif data.startswith("planning_"):
             await _traiter_callback_planning(data, callback_query_id, chat_id)
+        elif data.startswith("tache_"):
+            await _traiter_callback_tache(data, callback_query_id, chat_id)
         elif data.startswith("courses_"):
             await _traiter_callback_courses(data, callback_query_id, chat_id)
         elif data.startswith("menu_") or data.startswith("action_"):

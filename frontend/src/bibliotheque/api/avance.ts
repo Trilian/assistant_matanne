@@ -171,24 +171,6 @@ export interface TelegramConversationnelResponse {
   commandes: CommandeTelegram[];
 }
 
-export interface PrixIngredientCompare {
-  ingredient: string;
-  frequence_utilisation: number;
-  prix_historique_moyen_eur: number | null;
-  prix_marche_eur: number | null;
-  source_prix: string;
-  variation_pct: number | null;
-  alerte_soldes: boolean;
-}
-
-export interface ComparateurPrixAutomatiqueResponse {
-  date_reference: string;
-  nb_ingredients_analyses: number;
-  ingredients: PrixIngredientCompare[];
-  nb_alertes: number;
-  alertes: string[];
-}
-
 export interface EnergieTempsReelResponse {
   linky_connecte: boolean;
   source: string;
@@ -299,13 +281,6 @@ export async function obtenirModeTabletteMagazine(): Promise<ModeTabletteMagazin
 
 export async function obtenirTelegramConversationnel(): Promise<TelegramConversationnelResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/telegram-conversationnel");
-  return data;
-}
-
-export async function obtenirComparateurPrixAuto(topN = 20): Promise<ComparateurPrixAutomatiqueResponse> {
-  const { data } = await clientApi.get("/api/v1/innovations/comparateur-prix-auto", {
-    params: { top_n: topN },
-  });
   return data;
 }
 

@@ -42,10 +42,10 @@ export function AssistantFlottant() {
     setEnAttente(true);
 
     try {
-      const res = await fetch("/api/v1/maison/assistant/chat", {
+      const res = await fetch("/api/v1/assistant/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, contexte: "maison" }),
+        body: JSON.stringify({ message: question, contexte: "maison", historique: [] }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

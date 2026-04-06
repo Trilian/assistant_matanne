@@ -66,6 +66,12 @@ if not _secret_at_import:
 _API_SECRET_KEY_RESOLVED: str = _secret_at_import or _API_SECRET_KEY_DEFAULT
 del _secret_at_import, _env_at_import
 
+# Clé précédente pour la rotation gracieuse (transition sans déconnexion forcée).
+# Procédure de rotation: glisser API_SECRET_KEY vers API_SECRET_KEY_PREVIOUS,
+# puis générer un nouveau API_SECRET_KEY. Les anciens tokens restent valides
+# pendant la durée de vie maximale d'un token (24h) via la clé précédente.
+_API_SECRET_KEY_PREVIOUS: str = os.getenv("API_SECRET_KEY_PREVIOUS", "")
+
 
 def _est_production() -> bool:
     """Vérifie si l'application tourne en production."""
@@ -73,12 +79,17 @@ def _est_production() -> bool:
 
 
 def _obtenir_api_secret() -> str:
-    """Retourne la clé secrète API (cachée au démarrage du module).
+    """Retourne la clé secrète API courante (cachée au démarrage du module).
 
     En production, la clé est obligatoirement fournie par variable
     d'environnement (vérifiée au chargement du module — fail-fast).
     """
     return _API_SECRET_KEY_RESOLVED
+
+
+def _obtenir_api_secret_precedent() -> str:
+    """Retourne la clé précédente pour la rotation gracieuse (vide si non configurée)."""
+    return _API_SECRET_KEY_PREVIOUS
 
 
 def _obtenir_supabase_jwt_secret() -> str | None:
@@ -182,24 +193,43 @@ def valider_token_api(token: str) -> UtilisateurToken | None:
     Returns:
         UtilisateurToken si valide, None sinon
     """
-    try:
-        payload = jwt.decode(
+    def _decoder(cle: str) -> dict:
+        return jwt.decode(
             token,
-            _obtenir_api_secret(),
+            cle,
             algorithms=[ALGORITHME],
             issuer="assistant-matanne-api",
         )
-        return UtilisateurToken(
-            id=payload.get("sub", "unknown"),
-            email=payload.get("email", ""),
-            role=payload.get("role", "membre"),
-        )
+
+    try:
+        payload = _decoder(_obtenir_api_secret())
     except jwt.ExpiredSignatureError:
         logger.warning("Token API expiré")
         return None
+    except jwt.InvalidSignatureError:
+        # Signature invalide avec la clé courante — essayer la clé précédente (rotation)
+        cle_prec = _obtenir_api_secret_precedent()
+        if not cle_prec:
+            logger.debug("Token API: signature invalide (aucune clé précédente configurée)")
+            return None
+        try:
+            payload = _decoder(cle_prec)
+            logger.debug("Token API validé via la clé précédente (rotation en cours)")
+        except jwt.ExpiredSignatureError:
+            logger.warning("Token API expiré (clé précédente)")
+            return None
+        except jwt.InvalidTokenError as e:
+            logger.debug(f"Token API invalide avec la clé précédente: {e}")
+            return None
     except jwt.InvalidTokenError as e:
         logger.debug(f"Token API invalide: {e}")
         return None
+
+    return UtilisateurToken(
+        id=payload.get("sub", "unknown"),
+        email=payload.get("email", ""),
+        role=payload.get("role", "membre"),
+    )
 
 
 def valider_token_supabase(token: str) -> UtilisateurToken | None:

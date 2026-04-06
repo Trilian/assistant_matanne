@@ -17,6 +17,14 @@ import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
 import { Input } from "@/composants/ui/input";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/composants/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -136,6 +144,9 @@ export default function PageAdminJobs() {
   const [filtreStatus, setFiltreStatus] = useState("all");
   const [filtreDepuis, setFiltreDepuis] = useState("");
   const [filtreJusqua, setFiltreJusqua] = useState("");
+  const [confirmJobId, setConfirmJobId] = useState<string | null>(null);
+  const [paramsJson, setParamsJson] = useState("");
+  const [paramsJsonErreur, setParamsJsonErreur] = useState("");
   const [batchLoading, setBatchLoading] = useState<"morning" | "day" | "all" | null>(null);
   const [batchResultat, setBatchResultat] = useState<JobBatchResponse | null>(null);
   const [schedulesEdition, setSchedulesEdition] = useState<Record<string, string>>({});
@@ -225,10 +236,29 @@ export default function PageAdminJobs() {
     return <Badge variant="outline">{status}</Badge>;
   };
 
+  const parsParamsJson = (): Record<string, unknown> | null => {
+    if (!paramsJson.trim()) return {};
+    try {
+      const parsed = JSON.parse(paramsJson) as unknown;
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        setParamsJsonErreur("Les paramètres doivent être un objet JSON");
+        return null;
+      }
+      setParamsJsonErreur("");
+      return parsed as Record<string, unknown>;
+    } catch {
+      setParamsJsonErreur("JSON invalide");
+      return null;
+    }
+  };
+
   const executerJob = async (jobId: string) => {
+    const params = parsParamsJson();
+    if (params === null) return; // JSON invalide
+    setConfirmJobId(null);
     setRunStatuts((s) => ({ ...s, [jobId]: "running" }));
     try {
-      await declencherJobAvecOptions(jobId, { dry_run: modeDryRun, force: modeForce });
+      await declencherJobAvecOptions(jobId, { dry_run: modeDryRun, force: modeForce, params });
       setRunStatuts((s) => ({ ...s, [jobId]: "success" }));
       // Rafraîchir les logs automatiquement après l'exécution
       chargerLogs(jobId);
@@ -352,6 +382,25 @@ export default function PageAdminJobs() {
             />
             Forcer l'exécution
           </label>
+          <div className="mt-3">
+            <textarea
+              className="w-full max-w-xs rounded border border-input bg-background px-2 py-1.5 text-xs font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+              rows={3}
+              placeholder='{"cle": "valeur"}'
+              value={paramsJson}
+              onChange={(e) => {
+                setParamsJson(e.target.value);
+                setParamsJsonErreur("");
+              }}
+              aria-label="Paramètres JSON personnalisés"
+            />
+            {paramsJsonErreur && (
+              <p className="mt-1 text-xs text-destructive">{paramsJsonErreur}</p>
+            )}
+            {!paramsJsonErreur && paramsJson.trim() && (
+              <p className="mt-1 text-xs text-muted-foreground">Params transmis dans le body de la requête</p>
+            )}
+          </div>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()} aria-label="Actualiser">
           <RefreshCw className="h-4 w-4" />
@@ -455,7 +504,7 @@ export default function PageAdminJobs() {
                                   : "outline"
                               }
                               disabled={runStatus === "running"}
-                              onClick={() => executerJob(job.id)}
+                              onClick={() => setConfirmJobId(job.id)}
                               aria-label={`Exécuter ${job.nom}`}
                             >
                               {runStatus === "running" ? (
@@ -805,5 +854,33 @@ export default function PageAdminJobs() {
         </CardContent>
       </Card>
     </div>
+
+    {/* H4 — Dialog de confirmation avant exécution d'un job */}
+    <Dialog open={confirmJobId !== null} onOpenChange={(open) => { if (!open) setConfirmJobId(null); }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirmer l'exécution</DialogTitle>
+          <DialogDescription>
+            {modeDryRun
+              ? "Le job sera exécuté en mode simulation (aucune modification réelle)."
+              : "Le job sera exécuté immédiatement. Cette action peut modifier des données."}
+            {paramsJson.trim() && (
+              <span className="mt-1 block text-xs font-mono">Params : {paramsJson}</span>
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConfirmJobId(null)}>
+            Annuler
+          </Button>
+          <Button
+            variant={modeDryRun ? "secondary" : "default"}
+            onClick={() => { if (confirmJobId) void executerJob(confirmJobId); }}
+          >
+            {modeDryRun ? "Simuler" : "Exécuter"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

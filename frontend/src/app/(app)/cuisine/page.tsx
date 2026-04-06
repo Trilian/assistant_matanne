@@ -15,6 +15,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   TrendingUp,
+  Flame,
+  RefreshCw,
 } from "lucide-react";
 import {
   Card,
@@ -25,6 +27,8 @@ import {
 } from "@/composants/ui/card";
 import { Progress } from "@/composants/ui/progress";
 import { utiliserRequete } from "@/crochets/utiliser-api";
+import { useQuery } from "@tanstack/react-query";
+import { clientApi } from "@/bibliotheque/api/client";
 import { obtenirDashboardCuisine } from "@/bibliotheque/api/tableau-bord";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
 import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
@@ -79,6 +83,23 @@ export default function PageCuisine() {
     ["dashboard-cuisine"],
     obtenirDashboardCuisine
   );
+
+  // G1 — Recette express depuis stock
+  const {
+    data: recettesStock,
+    isFetching: chargementStock,
+    refetch: rechercherRecettesStock,
+  } = useQuery({
+    queryKey: ["suggestions-depuis-stock"],
+    queryFn: async () => {
+      const { data } = await clientApi.get("/suggestions/depuis-stock", {
+        params: { max_resultats: 3, temps_max_min: 45 },
+      });
+      return data as { suggestions: { nom: string; description: string; raison: string; temps_preparation: number; temps_cuisson: number }[]; nb_ingredients_stock: number };
+    },
+    enabled: false,
+    staleTime: 30 * 60 * 1000,
+  });
 
   const nbRepas = dashboard?.repas_aujourd_hui?.length ?? 0;
   const scoreAntiGaspi = dashboard?.score_anti_gaspillage ?? 100;
@@ -286,6 +307,55 @@ export default function PageCuisine() {
           )}
         </SectionReveal>
       )}
+
+      {/* G1 — Recette express depuis stock */}
+      <SectionReveal delay={0.14}>
+        <Card className="border-orange-200 dark:border-orange-800">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Flame className="h-4 w-4 text-orange-500" />
+                Qu&apos;est-ce qu&apos;on cuisine ce soir ?
+              </CardTitle>
+              <button
+                type="button"
+                onClick={() => void rechercherRecettesStock()}
+                disabled={chargementStock}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors disabled:opacity-60"
+              >
+                {chargementStock ? (
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Flame className="h-3 w-3" />
+                )}
+                {chargementStock ? "Recherche…" : "Idées depuis mon stock"}
+              </button>
+            </div>
+          </CardHeader>
+          {recettesStock && (
+            <CardContent>
+              {recettesStock.suggestions.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Aucune recette trouvée avec le stock actuel ({recettesStock.nb_ingredients_stock} ingrédients).
+                </p>
+              ) : (
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {recettesStock.suggestions.map((s, i) => (
+                    <div key={i} className="rounded-lg border p-3 text-sm space-y-1">
+                      <p className="font-semibold">{s.nom}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{s.description}</p>
+                      <p className="text-xs text-orange-600 dark:text-orange-400">⏱ {(s.temps_preparation ?? 0) + (s.temps_cuisson ?? 0)} min</p>
+                      {s.raison && (
+                        <p className="text-xs text-muted-foreground italic">💡 {s.raison}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          )}
+        </Card>
+      </SectionReveal>
 
       {/* Sections navigation */}
       <SectionReveal delay={0.16} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

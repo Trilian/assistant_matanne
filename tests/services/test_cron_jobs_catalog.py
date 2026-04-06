@@ -27,7 +27,7 @@ class TestJobsCatalog:
         job_ids = {job.id for job in demarreur_cron._scheduler.get_jobs()}
         assert self.JOBS_IA_AUTOMATIONS.issubset(job_ids)
 
-    def test_jobs_phase4_habitat_ont_un_timing_coherent(self, demarreur_cron):
+    def test_jobs_habitat_ont_un_timing_coherent(self, demarreur_cron):
         jobs = {job.id: job for job in demarreur_cron._scheduler.get_jobs()}
 
         trigger_comparateur = str(jobs["comparateur_abonnements"].trigger)

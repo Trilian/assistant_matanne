@@ -11,7 +11,17 @@
 
 Le module admin centralise les opérations sensibles exposées par l'API et l'interface Next.js.
 
-- **Backend** : `src/api/routes/admin.py` (51 endpoints)
+- **Backend** : `src/api/routes/admin*.py` (51 endpoints répartis en 8 fichiers)
+  - `admin.py` — point d'entrée, importe les sous-modules
+  - `admin_shared.py` — routeur partagé, schemas, helpers communs
+  - `admin_audit.py` — audit, sécurité, events
+  - `admin_jobs.py` — jobs planifiés, bridges
+  - `admin_operations.py` — santé des services, diff schéma DB
+  - `admin_notifications.py` — test/simulation/historique notifications
+  - `admin_ia_console.py` — métriques IA, console LLM
+  - `admin_cache.py` — purge, clear, statistics cache
+  - `admin_users.py` — gestion utilisateurs, impersonation
+  - `admin_infra.py` — DB, feature flags, config, simulations, cockpit
 - **Frontend** : `frontend/src/app/(app)/admin/`
 - **Accès** : rôle `admin` obligatoire (`require_role("admin")`)
 - **Rate limiting** : 10 req/min standard, 5 req/min pour triggers jobs
@@ -113,14 +123,19 @@ La console rapide (`POST /api/v1/admin/quick-command`) supporte :
 | `GET` | `/api/v1/admin/jobs/history` | Historique paginé avec filtres |
 | `GET` | `/api/v1/admin/bridges/status` | Statut de tous les bridges (smoke + présence) |
 
-### Notifications (4 endpoints)
+### Notifications (9 endpoints — `admin_notifications.py`)
 
 | Méthode | Route | Usage |
 | --- | --- | --- |
 | `POST` | `/api/v1/admin/notifications/test` | Test sur un canal (ntfy/push/email/Telegram) |
 | `POST` | `/api/v1/admin/notifications/test-all` | Test multi-canal avec failover |
-| `GET` | `/api/v1/admin/notifications/channels` | Canaux configurés + statut |
+| `GET` | `/api/v1/admin/notifications/templates` | Liste des templates de notification disponibles |
+| `POST` | `/api/v1/admin/notifications/templates/preview` | Prévisualiser un template rendu |
+| `POST` | `/api/v1/admin/notifications/simulate` | Simulation d'envoi sans effet de bord |
+| `GET` | `/api/v1/admin/notifications/history` | Historique des notifications envoyées |
 | `GET` | `/api/v1/admin/notifications/queue` | File d'attente notifications digest |
+| `POST` | `/api/v1/admin/notifications/queue/{id}/retry` | Relancer une notification en échec |
+| `DELETE` | `/api/v1/admin/notifications/queue/{id}` | Supprimer une notification de la file |
 
 ### Cache et performance (4 endpoints)
 

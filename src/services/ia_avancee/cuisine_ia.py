@@ -14,15 +14,12 @@ from .types_central import (
     BatchCookingIntelligentResponse,
     BlocPlanificationAuto,
     CarteMagazineTablette,
-    ComparateurPrixAutomatiqueResponse,
     EtapeBatchIntelligente,
     InsightsQuotidiensResponse,
     MeteoContextuelleResponse,
     ModeTabletteMagazineResponse,
-    ParcoursOptimiseResponse,
     PatternsAlimentairesResponse,
     PlanificationHebdoCompleteResponse,
-    PrixIngredientCompare,
     SaisonnaliteIntelligenteResponse,
     ScoreBienEtreResponse,
     SuggestionRepasSoirResponse,
@@ -190,122 +187,6 @@ def obtenir_mode_tablette_magazine(service) -> ModeTabletteMagazineResponse | No
         sous_titre="Vue magazine priorisee pour la famille",
         cartes=cartes,
     )
-
-def analyser_comparateur_prix_automatique(
-    self,
-    top_n: int = 20,
-) -> ComparateurPrixAutomatiqueResponse | None:
-    """Comparateur prix : compare les prix des ingrédients fréquents et détecte les soldes."""
-    limite = max(1, min(20, top_n))
-
-    from sqlalchemy import func
-
-    with obtenir_contexte_db() as session:
-        from src.core.models.courses import ArticleCourses
-        from src.core.models.inventaire import ArticleInventaire
-        from src.core.models.recettes import Ingredient
-
-        top_ingredients = (
-            session.query(
-                Ingredient.nom,
-                func.count(ArticleCourses.id).label("frequence"),
-            )
-            .join(ArticleCourses, ArticleCourses.ingredient_id == Ingredient.id)
-            .group_by(Ingredient.nom)
-            .order_by(func.count(ArticleCourses.id).desc())
-            .limit(limite)
-            .all()
-        )
-
-        prix_historiques_rows = (
-            session.query(
-                Ingredient.nom,
-                func.avg(ArticleInventaire.prix_unitaire).label("prix_moyen"),
-            )
-            .join(ArticleInventaire, ArticleInventaire.ingredient_id == Ingredient.id)
-            .filter(ArticleInventaire.prix_unitaire.isnot(None))
-            .group_by(Ingredient.nom)
-            .all()
-        )
-
-    prix_historiques = {
-        str(row[0]).lower(): float(row[1])
-        for row in prix_historiques_rows
-        if row and row[0] and row[1] is not None
-    }
-
-    ingredients: list[PrixIngredientCompare] = []
-    alertes: list[str] = []
-
-    for nom, frequence in top_ingredients:
-        nom_clean = str(nom)
-        prix_historique = prix_historiques.get(nom_clean.lower())
-        prix_marche, source = self._scraper_prix_marche_ingredient(nom_clean)
-
-        variation_pct: float | None = None
-        alerte_soldes = False
-        if prix_historique and prix_marche and prix_historique > 0:
-            variation_pct = round(((prix_marche - prix_historique) / prix_historique) * 100.0, 1)
-            alerte_soldes = variation_pct <= -10.0
-            if alerte_soldes:
-                alertes.append(
-                    f"{nom_clean}: baisse détectée ({abs(variation_pct):.1f}% vs historique)"
-                )
-
-        ingredients.append(
-            PrixIngredientCompare(
-                ingredient=nom_clean,
-                frequence_utilisation=int(frequence or 0),
-                prix_historique_moyen_eur=round(prix_historique, 2) if prix_historique else None,
-                prix_marche_eur=round(prix_marche, 2) if prix_marche else None,
-                source_prix=source,
-                variation_pct=variation_pct,
-                alerte_soldes=alerte_soldes,
-            )
-        )
-
-    return ComparateurPrixAutomatiqueResponse(
-        date_reference=date.today().isoformat(),
-        nb_ingredients_analyses=len(ingredients),
-        ingredients=ingredients,
-        nb_alertes=len(alertes),
-        alertes=alertes,
-    )
-
-    def optimiser_parcours_magasin(
-        self, liste_id: int | None = None
-    ) -> ParcoursOptimiseResponse | None:
-        """Optimise le parcours magasin en regroupant les articles par rayon."""
-        articles = service._collecter_articles_courses(liste_id)
-        if not articles:
-            return ParcoursOptimiseResponse()
-
-        prompt = f"""Organise ces articles de courses par rayon de supermarché et optimise le parcours.
-
-Articles : {json.dumps(articles, ensure_ascii=False)}
-
-Retourne un JSON :
-{{
-  "articles_par_rayon": {{
-    "Fruits & Légumes": ["tomates", "carottes", "pommes"],
-    "Boulangerie": ["pain", "croissants"],
-    "Produits laitiers": ["lait", "yaourt"]
-  }},
-  "ordre_rayons": ["Fruits & Légumes", "Boulangerie", "Produits laitiers", "Épicerie", "Surgelés", "Boissons"],
-  "nb_articles": {len(articles)},
-  "temps_estime_minutes": 25
-}}
-
-Règles :
-- Ordre typique d'un supermarché français (entrée = fruits&légumes, sortie = caisses)
-- Regroupe les articles similaires
-- Estime le temps en fonction du nombre d'articles"""
-
-        return service.call_with_parsing_sync(
-            prompt=prompt,
-            response_model=ParcoursOptimiseResponse,
-            system_prompt="Tu es un expert en optimisation de parcours en supermarché.",
-        )
 
 def _recettes_rapides(service, temps_disponible_min: int) -> list[dict[str, Any]]:
     """Récupère des recettes rapides compatibles avec le temps disponible."""

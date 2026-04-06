@@ -28,6 +28,7 @@ COMMANDES_TELEGRAM: tuple[tuple[str, str], ...] = (
     ("/budget", "Résumé budget du mois en cours"),
     ("/projection", "Projection budgetaire rapide de fin de mois"),
     ("/recap", "Récapitulatif rapide de la journée"),
+    ("/digest", "Envoyer le digest matinal (repas, alertes, tâches)"),
     ("/rapport", "Résumé hebdomadaire de la famille"),
     ("/photo", "Recevoir l'aide pour analyser une photo du frigo ou de la maison"),
     ("/meteo", "Météo du jour et impact sur les activités"),

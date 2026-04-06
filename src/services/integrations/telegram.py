@@ -796,3 +796,128 @@ async def envoyer_digest_matinal() -> bool:
             {"id": "digest_detail", "title": "📊 Détail"},
         ],
     )
+
+
+# ═══════════════════════════════════════════════════════════
+# PHASE E — NOUVEAUX FONCTIONS TELEGRAM
+# ═══════════════════════════════════════════════════════════
+
+
+async def envoyer_resume_mensuel_jeux(
+    mois: int,
+    annee: int,
+    nb_paris: int = 0,
+    mises_totales: float = 0.0,
+    gains_totaux: float = 0.0,
+    bilan_net: float = 0.0,
+    taux_reussite_pct: float | None = None,
+) -> bool:
+    """E2: Résumé mensuel automatique des dépenses jeux → Telegram."""
+    settings = obtenir_parametres()
+    chat_id = settings.TELEGRAM_CHAT_ID
+    if not chat_id:
+        return False
+
+    import calendar
+    nom_mois = calendar.month_name[mois].capitalize()
+    emoji_bilan = "📈" if bilan_net >= 0 else "📉"
+    signe = "+" if bilan_net >= 0 else ""
+
+    lignes = [
+        f"🎲 <b>Bilan jeux — {nom_mois} {annee}</b>",
+        "",
+        f"• Paris joués : {nb_paris}",
+        f"• Mises totales : {mises_totales:.2f}€",
+        f"• Gains totaux : {gains_totaux:.2f}€",
+        f"• Bilan net : {signe}{bilan_net:.2f}€ {emoji_bilan}",
+    ]
+    if taux_reussite_pct is not None:
+        lignes.append(f"• Taux de réussite : {taux_reussite_pct:.1f}%")
+
+    corps = "\n".join(lignes)
+    return await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps=corps,
+        boutons=[
+            {"id": "jeux_detail_mois", "title": "📊 Détail"},
+            {"id": "jeux_stats_generales", "title": "📈 Historique"},
+        ],
+    )
+
+
+async def envoyer_alerte_inventaire_bas(articles_bas: list[dict]) -> bool:
+    """E4: Notification Telegram — inventaire bas → ajouter à la prochaine liste."""
+    settings = obtenir_parametres()
+    chat_id = settings.TELEGRAM_CHAT_ID
+    if not chat_id:
+        return False
+
+    if not articles_bas:
+        return True
+
+    noms = [a.get("nom", "?") for a in articles_bas[:5]]
+    autres = len(articles_bas) - 5 if len(articles_bas) > 5 else 0
+
+    lignes = ["📦 <b>Stock bas — à racheter bientôt</b>", ""]
+    for article in articles_bas[:5]:
+        nom = article.get("nom", "?")
+        qte = article.get("quantite", 0)
+        unite = article.get("unite", "")
+        lignes.append(f"⚠️ {nom} ({qte} {unite} restant(s))")
+
+    if autres > 0:
+        lignes.append(f"… et {autres} autre(s) article(s)")
+
+    lignes += ["", "Voulez-vous les ajouter à la prochaine liste de courses ?"]
+
+    return await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"id": "inventaire_ajouter_liste", "title": "✅ Ajouter à la liste"},
+            {"id": "inventaire_ignorer", "title": "⏭️ Ignorer"},
+        ],
+    )
+
+
+async def envoyer_confirmation_batch_cooking(
+    nom_session: str = "Batch cooking",
+    nb_recettes: int = 0,
+    photo_url: str | None = None,
+    session_id: int | None = None,
+) -> bool:
+    """E6: Confirmation Telegram — fin de session batch cooking ✅."""
+    settings = obtenir_parametres()
+    chat_id = settings.TELEGRAM_CHAT_ID
+    if not chat_id:
+        return False
+
+    corps = (
+        f"✅ <b>Batch cooking terminé !</b>\n\n"
+        f"📦 Session : {nom_session}\n"
+        f"🍽️ {nb_recettes} recette(s) préparée(s)\n\n"
+        "Le planning a été mis à jour automatiquement. "
+        "Retrouvez les repas prêts dans votre agenda."
+    )
+
+    if photo_url:
+        try:
+            return await envoyer_message_interactif(
+                destinataire=chat_id,
+                corps=corps,
+                boutons=[
+                    {"id": f"batch_voir_{session_id or 0}", "title": "👁️ Voir le récap"},
+                    {"id": "planning_semaine", "title": "📅 Planning"},
+                ],
+            )
+        except Exception:
+            pass
+
+    return await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps=corps,
+        boutons=[
+            {"id": f"batch_voir_{session_id or 0}", "title": "👁️ Voir le récap"},
+            {"id": "planning_semaine", "title": "📅 Planning"},
+        ],
+    )

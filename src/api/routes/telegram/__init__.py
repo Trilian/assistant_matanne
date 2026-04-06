@@ -31,6 +31,7 @@ from ._cuisine import (
 )
 from ._famille import (
     _envoyer_activites_samedi,
+    _envoyer_digest_commande,
     _envoyer_projection_budget_telegram,
     _envoyer_rapport_hebdo,
     _envoyer_recap_journee,

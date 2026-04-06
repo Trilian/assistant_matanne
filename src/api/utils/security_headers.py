@@ -64,9 +64,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "font-src 'self' https://cdn.jsdelivr.net"
             )
         else:
-            # CSP strict pour les endpoints API
+            # CSP strict pour les endpoints API (report-uri pour suivi des violations)
             response.headers["Content-Security-Policy"] = (
-                "default-src 'none'; frame-ancestors 'none'"
+                "default-src 'none'; frame-ancestors 'none'; "
+                "report-uri /api/v1/security/csp-report"
             )
 
         return response

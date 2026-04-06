@@ -184,7 +184,8 @@ def test_e2e_planning_vers_courses_vers_notif(monkeypatch: pytest.MonkeyPatch) -
     )
 
     assert notified >= 1
-    assert len(session.articles) == 1
-    assert session.articles[0].ingredient_id == 11
+    articles_courses = [a for a in session.articles if isinstance(a, _ArticleCoursesModel)]
+    assert len(articles_courses) == 1
+    assert articles_courses[0].ingredient_id == 11
     assert len(notifications) == 1
     assert notifications[0]["click_url"] == "/cuisine/courses"

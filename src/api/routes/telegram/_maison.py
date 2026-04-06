@@ -201,3 +201,53 @@ async def _envoyer_rappels_groupes(chat_id: str) -> None:
             {"url": _obtenir_url_app("/outils/notes"), "title": "📝 Ouvrir les notes"},
         ],
     )
+
+
+async def _envoyer_taches_projets(chat_id: str) -> None:
+    """Envoie la liste des tâches de projet à faire, avec boutons valider/reporter."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models.maison import TacheProjet
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+
+    with obtenir_contexte_db() as session:
+        taches = (
+            session.query(TacheProjet)
+            .filter(TacheProjet.statut == "à_faire")
+            .order_by(TacheProjet.date_echeance.asc().nullsfirst(), TacheProjet.id.asc())
+            .limit(5)
+            .all()
+        )
+        donnees = [
+            {
+                "id": t.id,
+                "nom": t.nom,
+                "echeance": t.date_echeance.strftime("%d/%m") if t.date_echeance else None,
+                "priorite": t.priorite,
+            }
+            for t in taches
+        ]
+
+    if not donnees:
+        await envoyer_message_telegram(chat_id, "✅ Aucune tâche en attente pour le moment.")
+        return
+
+    emojis_priorite = {"haute": "🔴", "moyenne": "🟡", "basse": "🟢"}
+    lignes = ["📋 <b>Tâches à faire</b>", ""]
+    for tache in donnees:
+        echeance = f" — {tache['echeance']}" if tache.get("echeance") else ""
+        emoji = emojis_priorite.get(tache["priorite"], "")
+        lignes.append(f"{emoji} {html.escape(str(tache['nom']))}{echeance}")
+
+    # Boutons par tâche (max 3 tâches pour garder l'interface lisible)
+    boutons = []
+    for tache in donnees[:3]:
+        nom_court = tache["nom"][:18]
+        boutons.append({"id": f"tache_valider:{tache['id']}", "title": f"✅ {nom_court}"})
+        boutons.append({"id": f"tache_reporter:{tache['id']}", "title": "🔄 Reporter"})
+    boutons.append({"id": "action_maison", "title": "🏠 Menu Maison"})
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=boutons,
+    )

@@ -179,5 +179,4 @@ Les actions les plus courantes sont accessibles rapidement :
 | **Planning adaptatif** | Adapté à la météo, l'énergie et le budget |
 | **Score écologique** | Évalue l'empreinte écologique d'un repas |
 | **Analyse nutritionnelle** | Analyse macro/micro-nutriments d'un repas |
-| **Parcours magasin** | Optimise l'ordre de passages en rayon |
-| **Comparateur prix** | Compare les prix entre enseignes |
+

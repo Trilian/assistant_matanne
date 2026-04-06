@@ -65,12 +65,6 @@ class LienInviteRequest(BaseModel):
     }
 
 
-class ParcoursOptimiseRequest(BaseModel):
-    """Requête optimisation parcours magasin."""
-
-    liste_id: int | None = Field(None, description="ID de la liste de courses (défaut: dernière active)")
-
-
 class IdeeRepasSoirRequest(BaseModel):
     """Contexte utilisateur pour la suggestion dîner express."""
 
@@ -166,7 +160,6 @@ from src.services.ia_avancee.types_central import (  # noqa: E402
     EnrichissementContactsResponse,
     LienInviteResponse,
     PatternsAlimentairesResponse,
-    ParcoursOptimiseResponse,
     PlanningJulesAdaptatifResponse,
     ResumeMensuelIAResponse,
     SaisonnaliteIntelligenteResponse,
@@ -177,10 +170,10 @@ from src.services.ia_avancee.types_central import (  # noqa: E402
     InsightsQuotidiensResponse,
     MeteoContextuelleResponse,
     ModeVacancesResponse,
-    ComparateurPrixAutomatiqueResponse,
     EnergieTempsReelResponse,
     TelegramConversationnelResponse,
 )
+
 
 __all__ = [
     "BilanAnnuelRequest",
@@ -197,8 +190,6 @@ __all__ = [
     "RapportMensuelPdfResponse",
     "EnrichissementContactsResponse",
     "AnalyseTendancesLotoResponse",
-    "ParcoursOptimiseRequest",
-    "ParcoursOptimiseResponse",
     "IdeeRepasSoirRequest",
     "SuggestionRepasSoirResponse",
     "PatternsAlimentairesResponse",
@@ -224,6 +215,5 @@ __all__ = [
     "InsightsQuotidiensResponse",
     "MeteoContextuelleResponse",
     "TelegramConversationnelResponse",
-    "ComparateurPrixAutomatiqueResponse",
     "EnergieTempsReelResponse",
 ]

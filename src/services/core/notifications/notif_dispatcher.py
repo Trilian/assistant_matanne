@@ -12,6 +12,20 @@ Centralise l'envoi de notifications sur tous les canaux disponibles :
 
 - Email (Resend)
 
+- Telegram Bot API
+
+
+
+Fonctionnalités :
+
+- Retry/backoff exponentiel par canal (max 3 tentatives)
+
+- Dead letter queue persistée en DB pour les envois définitivement échoués
+
+- Throttling horaire par utilisateur
+
+- Digest queue pour consolidation des envois non urgents
+
 
 
 Usage :
@@ -27,6 +41,8 @@ Usage :
 
 
 import logging
+
+import time
 
 from collections import defaultdict
 
@@ -49,6 +65,14 @@ _APP_BASE_URL = "https://matanne.vercel.app"
 
 
 _CANAUX_VALIDES = {"ntfy", "push", "email", "telegram"}
+
+
+
+# Retry config
+
+_MAX_RETRIES = 3
+
+_BACKOFF_BASE_SECONDS = 1.0  # 1s, 2s, 4s
 
 
 
@@ -127,6 +151,240 @@ class DispatcherNotifications:
         # File de digest in-memory (consolidation des notifications non urgentes).
 
         self._digest_queue: dict[str, list[dict[str, Any]]] = defaultdict(list)
+
+        # Dead letter queue in-memory (doublée en DB).
+
+        self._dead_letters: list[dict[str, Any]] = []
+
+
+
+    # ─── Retry avec backoff exponentiel ────────────────────────────────────────
+
+
+
+    def _envoyer_avec_retry(
+
+        self,
+
+        canal: str,
+
+        envoi_fn,
+
+        max_retries: int = _MAX_RETRIES,
+
+    ) -> bool:
+
+        """Tente l'envoi sur un canal avec retry + backoff exponentiel.
+
+
+
+        Args:
+
+            canal: Nom du canal (pour le logging).
+
+            envoi_fn: Callable sans argument qui retourne bool.
+
+            max_retries: Nombre max de tentatives.
+
+
+
+        Returns:
+
+            True si l'envoi a réussi, False après épuisement des retries.
+
+        """
+
+        for tentative in range(max_retries):
+
+            try:
+
+                if envoi_fn():
+
+                    if tentative > 0:
+
+                        logger.info(
+
+                            "Retry réussi canal '%s' (tentative %d/%d)",
+
+                            canal, tentative + 1, max_retries,
+
+                        )
+
+                    return True
+
+            except Exception as e:
+
+                logger.warning(
+
+                    "Erreur canal '%s' tentative %d/%d : %s",
+
+                    canal, tentative + 1, max_retries, e,
+
+                )
+
+            if tentative < max_retries - 1:
+
+                backoff = _BACKOFF_BASE_SECONDS * (2 ** tentative)
+
+                time.sleep(backoff)
+
+        return False
+
+
+
+    # ─── Dead Letter Queue ─────────────────────────────────────────────────────
+
+
+
+    def _enregistrer_dead_letter(
+
+        self,
+
+        user_id: str,
+
+        message: str,
+
+        canal: str,
+
+        type_evenement: str | None,
+
+        erreur: str,
+
+    ) -> None:
+
+        """Enregistre un envoi définitivement échoué dans la DLQ (mémoire + DB)."""
+
+        entry = {
+
+            "timestamp": datetime.now().isoformat(),
+
+            "user_id": user_id,
+
+            "message": message[:500],
+
+            "canal": canal,
+
+            "type_evenement": type_evenement,
+
+            "erreur": str(erreur)[:200],
+
+            "statut": "failed",
+
+        }
+
+        self._dead_letters.append(entry)
+
+        if len(self._dead_letters) > 500:
+
+            self._dead_letters = self._dead_letters[-500:]
+
+
+
+        # Persistance best-effort en DB
+
+        try:
+
+            from src.core.db import obtenir_contexte_db
+
+            from src.core.models.persistent_state import EtatPersistantDB
+
+
+
+            with obtenir_contexte_db() as session:
+
+                session.add(
+
+                    EtatPersistantDB(
+
+                        namespace="notification_dlq",
+
+                        user_id=user_id or "system",
+
+                        data=entry,
+
+                    )
+
+                )
+
+                session.commit()
+
+        except Exception as exc:
+
+            logger.debug("Persistance DLQ échouée (best-effort): %s", exc)
+
+
+
+    def lister_dead_letters(self, limite: int = 50) -> list[dict[str, Any]]:
+
+        """Retourne les derniers envois échoués (dead letters)."""
+
+        return self._dead_letters[-limite:]
+
+
+
+    def rejouer_dead_letters(self, user_id: str | None = None) -> dict[str, int]:
+
+        """Tente de renvoyer les notifications en dead letter.
+
+
+
+        Returns:
+
+            {"rejoues": N, "reussis": M, "encore_echoues": P}
+
+        """
+
+        a_rejouer = [
+
+            dl for dl in self._dead_letters
+
+            if dl.get("statut") == "failed"
+
+            and (user_id is None or dl.get("user_id") == user_id)
+
+        ]
+
+        reussis = 0
+
+        for dl in a_rejouer:
+
+            resultat = self.envoyer(
+
+                user_id=dl.get("user_id", ""),
+
+                message=dl.get("message", ""),
+
+                canaux=[dl.get("canal", "ntfy")],
+
+                type_evenement=dl.get("type_evenement"),
+
+                forcer=True,
+
+            )
+
+            if any(resultat.values()):
+
+                dl["statut"] = "replayed"
+
+                reussis += 1
+
+
+
+        self._dead_letters = [
+
+            dl for dl in self._dead_letters if dl.get("statut") != "replayed"
+
+        ]
+
+        return {
+
+            "rejoues": len(a_rejouer),
+
+            "reussis": reussis,
+
+            "encore_echoues": len(a_rejouer) - reussis,
+
+        }
 
 
 
@@ -246,35 +504,53 @@ class DispatcherNotifications:
 
         for canal in sequence:
 
-            try:
+            def _faire_envoi(c=canal):
 
-                if canal == "ntfy":
+                if c == "ntfy":
 
-                    resultats[canal] = self._envoyer_ntfy(message, **kwargs)
+                    return self._envoyer_ntfy(message, **kwargs)
 
-                elif canal == "push":
+                elif c == "push":
 
-                    resultats[canal] = self._envoyer_push(user_id, message, **kwargs)
+                    return self._envoyer_push(user_id, message, **kwargs)
 
-                elif canal == "email":
+                elif c == "email":
 
-                    resultats[canal] = self._envoyer_email(user_id, message, **kwargs)
+                    return self._envoyer_email(user_id, message, **kwargs)
 
-                elif canal == "telegram":
+                elif c == "telegram":
 
-                    resultats[canal] = self._envoyer_telegram(message, **kwargs)
+                    return self._envoyer_telegram(message, **kwargs)
 
                 else:
 
-                    logger.warning("Canal de notification inconnu : %s", canal)
+                    logger.warning("Canal de notification inconnu : %s", c)
 
-                    resultats[canal] = False
+                    return False
 
-            except Exception as e:
 
-                logger.error("Erreur envoi canal %s : %s", canal, e)
 
-                resultats[canal] = False
+            succes = self._envoyer_avec_retry(canal, _faire_envoi)
+
+            resultats[canal] = succes
+
+
+
+            if not succes:
+
+                self._enregistrer_dead_letter(
+
+                    user_id=user_id,
+
+                    message=message,
+
+                    canal=canal,
+
+                    type_evenement=type_evenement,
+
+                    erreur=f"Échec après {_MAX_RETRIES} tentatives",
+
+                )
 
 
 

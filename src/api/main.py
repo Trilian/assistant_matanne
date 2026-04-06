@@ -85,10 +85,11 @@ from src.api.routes import (
     predictions_router,
     ia_bridges_router,
     bridges_router,
-    intra_flux_router,
+    flux_utilisateur_router,
 )
 from src.api.routes.auth import router as auth_router
 from src.api.routes.push import router as push_router
+from src.api.routes.security import router as security_router
 from src.api.routes.telegram import router as telegram_router
 from src.api.schemas.errors import REPONSE_500, REPONSES_AUTH_ADMIN
 from src.api.utils import (
@@ -99,6 +100,7 @@ from src.api.utils import (
 )
 from src.api.versioning import VersionMiddleware
 from src.api.websocket import ws_notes_router, ws_planning_router, ws_projets_router
+from src.api.websocket.admin_jobs import router as ws_admin_jobs_router
 from src.api.websocket.admin_logs import router as ws_admin_logs_router
 from src.api.websocket_courses import router as websocket_router
 from src.core.config import obtenir_parametres
@@ -227,6 +229,10 @@ tags_metadata = [
     {
         "name": "WebSocket Projets",
         "description": "Collaboration temps réel sur les projets Kanban",
+    },
+    {
+        "name": "Admin WebSocket Jobs",
+        "description": "Monitoring temps réel des jobs cron (admin)",
     },
     {
         "name": "Webhooks",
@@ -634,6 +640,7 @@ async def get_api_metrics(user: dict = Depends(require_role("admin"))):
 
 
 app.include_router(auth_router)
+app.include_router(security_router)  # CSP violation reporting (public, pas d'auth)
 app.include_router(recettes_router)
 app.include_router(inventaire_router)
 app.include_router(courses_router)
@@ -678,10 +685,11 @@ app.include_router(ws_planning_router)
 app.include_router(ws_notes_router)
 app.include_router(ws_projets_router)
 app.include_router(ws_admin_logs_router)
+app.include_router(ws_admin_jobs_router)
 app.include_router(admin_router)
 
 # IA, Prédictions, Bridges
 app.include_router(predictions_router)
 app.include_router(ia_bridges_router)
 app.include_router(bridges_router)
-app.include_router(intra_flux_router)
+app.include_router(flux_utilisateur_router)

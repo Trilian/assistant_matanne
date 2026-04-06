@@ -138,6 +138,14 @@ class JobRunAllRequest(BaseModel):
     force: bool = False
 
 
+class JobRunRequest(BaseModel):
+    """Corps optionnel pour déclencher un job unique avec params custom."""
+
+    dry_run: bool = False
+    force: bool = False
+    params: dict[str, Any] = {}
+
+
 class JobScheduleUpdateRequest(BaseModel):
     # Format attendu: "minute heure jour_du_mois mois jour_semaine"
     cron: str

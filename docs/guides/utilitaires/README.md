@@ -1,32 +1,31 @@
 # 🛠️ Module Utilitaires
 
-Outils transversaux : scanner codes-barres, commandes vocales, et fonctions helpers partagées.
+Outils transversaux : chat IA, convertisseur, météo, minuteur, notes et fonctions helpers partagées.
 
 ## Fonctionnalités
 
 | Outil | Description | Page frontend |
 | --- | --- | --- |
-| 📷 Scanner codes-barres | Scan WebRTC / photo / saisie manuelle → inventaire & courses | `/outils/scanner` |
-| 🎤 Commandes vocales | Pilotage vocal (Web Speech API) — courses, inventaire, recettes, navigation | `/outils/vocal` |
+| 🤖 Chat IA | Assistant conversationnel Mistral | /outils/chat-ia |
+| 🔄 Convertisseur | Conversion d''unités de mesure | /outils/convertisseur |
+| 🌤️ Météo | Prévisions météo locales | /outils/meteo |
+| ⏱️ Minuteur | Minuteur de cuisine | /outils/minuteur |
+| 📝 Notes | Bloc-notes rapide | /outils/notes |
 
 ## API Backend
 
 | Méthode | Endpoint | Description |
 | --- | --- | --- |
-| `POST` | `/api/v1/utilitaires/barcode-lookup` | Recherche produit par code EAN (OpenFoodFacts) |
-| `POST` | `/api/v1/utilitaires/voice-command` | Parse et exécute une commande vocale |
-| `GET`  | `/api/v1/utilitaires/search` | Recherche globale multi-domaines |
+| GET  | /api/v1/utilitaires/search | Recherche globale multi-domaines |
 
 ## Guides détaillés
 
-- [Scanner Codes-barres](barcode.md) — Modes de scan, formats supportés, OpenFoodFacts, dépannage
-- [Commandes Vocales](vocal.md) — Commandes reconnues, configuration micro, exemples
 - [Google Assistant](../../GOOGLE_ASSISTANT_SETUP.md) — Intents disponibles, webhook fulfillment, sécurité, tests curl
 
 ## Architecture
 
-```
+`
 src/api/routes/utilitaires.py       # Router FastAPI
 src/api/schemas/utilitaires.py      # Schémas Pydantic
-frontend/src/app/(app)/outils/      # Pages Next.js (scanner, vocal, etc.)
-```
+frontend/src/app/(app)/outils/      # Pages Next.js (chat-ia, convertisseur, meteo, minuteur, notes)
+`

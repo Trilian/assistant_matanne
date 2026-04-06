@@ -39,11 +39,6 @@ class ServiceInnovationsCuisine:
     def proposer_batch_cooking_intelligent(self, *, user_id: str = "") -> Any:
         return self._service().proposer_batch_cooking_intelligent(user_id=user_id)
 
-    def optimiser_parcours_magasin(self, *, liste_id: int) -> Any:
-        return self._service().optimiser_parcours_magasin(liste_id=liste_id)
-
-    def analyser_comparateur_prix_automatique(self, *, top_n: int = 20) -> Any:
-        return self._service().analyser_comparateur_prix_automatique(top_n=top_n)
 
 
 @service_factory("cuisine_innovations", tags={"cuisine", "ia"})
