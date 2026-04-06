@@ -5,7 +5,7 @@
 --            configs_calendriers_externes, evenements_calendrier
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE depenses (
+CREATE TABLE IF NOT EXISTS depenses (
     id BIGSERIAL PRIMARY KEY,
     montant NUMERIC(10, 2) NOT NULL,
     categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
@@ -41,7 +41,7 @@ CREATE INDEX IF NOT EXISTS ix_depenses_user_id ON depenses(user_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE budgets_mensuels (
+CREATE TABLE IF NOT EXISTS budgets_mensuels (
     id BIGSERIAL PRIMARY KEY,
     mois DATE NOT NULL,
     budget_total NUMERIC(10, 2) NOT NULL DEFAULT 0,
@@ -58,7 +58,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_budget_mois_user ON budgets_mensuels(mois, 
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE calendriers_externes (
+CREATE TABLE IF NOT EXISTS calendriers_externes (
     id BIGSERIAL PRIMARY KEY,
     provider VARCHAR(30) NOT NULL,
     nom VARCHAR(200) NOT NULL,
@@ -77,7 +77,7 @@ CREATE INDEX IF NOT EXISTS ix_calendriers_externes_user ON calendriers_externes(
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE configs_calendriers_externes (
+CREATE TABLE IF NOT EXISTS configs_calendriers_externes (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     provider VARCHAR(20) NOT NULL DEFAULT 'google',
@@ -100,7 +100,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_user_calendar ON configs_calendriers_extern
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE evenements_calendrier (
+CREATE TABLE IF NOT EXISTS evenements_calendrier (
     id BIGSERIAL PRIMARY KEY,
     uid VARCHAR(255) NOT NULL,
     titre VARCHAR(300) NOT NULL,

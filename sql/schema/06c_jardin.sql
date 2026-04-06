@@ -4,7 +4,7 @@
 -- Contient : jardin, plans, zones, plantes, récoltes, autonomie alimentaire
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE elements_jardin (
+CREATE TABLE IF NOT EXISTS elements_jardin (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     type_plante VARCHAR(100) NOT NULL,
@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS ix_garden_items_derniere_action ON elements_jardin(de
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE plans_jardin (
+CREATE TABLE IF NOT EXISTS plans_jardin (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     largeur NUMERIC(6, 2) NOT NULL,
@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_plans_jardin_nom ON plans_jardin(nom);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE journaux_jardin (
+CREATE TABLE IF NOT EXISTS journaux_jardin (
     id SERIAL PRIMARY KEY,
     garden_item_id INTEGER,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS ix_garden_logs_date ON journaux_jardin(date);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE zones_jardin (
+CREATE TABLE IF NOT EXISTS zones_jardin (
     id SERIAL PRIMARY KEY,
     plan_id INTEGER,
     nom VARCHAR(100) NOT NULL,
@@ -75,7 +75,7 @@ CREATE INDEX IF NOT EXISTS idx_zones_jardin_plan_id ON zones_jardin(plan_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE plantes_jardin (
+CREATE TABLE IF NOT EXISTS plantes_jardin (
     id SERIAL PRIMARY KEY,
     zone_id INTEGER NOT NULL,
     nom VARCHAR(100) NOT NULL,
@@ -96,7 +96,7 @@ CREATE INDEX IF NOT EXISTS idx_plantes_jardin_zone ON plantes_jardin(zone_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE actions_plantes (
+CREATE TABLE IF NOT EXISTS actions_plantes (
     id SERIAL PRIMARY KEY,
     plante_id INTEGER NOT NULL,
     type_action VARCHAR(50) NOT NULL,
@@ -112,7 +112,7 @@ CREATE INDEX IF NOT EXISTS idx_actions_plantes_date_action ON actions_plantes(da
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE plantes_catalogue (
+CREATE TABLE IF NOT EXISTS plantes_catalogue (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL UNIQUE,
     nom_latin VARCHAR(150),
@@ -142,7 +142,7 @@ CREATE INDEX IF NOT EXISTS idx_plantes_catalogue_famille ON plantes_catalogue(fa
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE recoltes (
+CREATE TABLE IF NOT EXISTS recoltes (
     id SERIAL PRIMARY KEY,
     plante_jardin_id INTEGER REFERENCES plantes_jardin(id) ON DELETE CASCADE,
     zone_jardin_id INTEGER REFERENCES zones_jardin(id) ON DELETE CASCADE,
@@ -163,7 +163,7 @@ CREATE INDEX IF NOT EXISTS idx_recoltes_legume ON recoltes(legume);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE objectifs_autonomie (
+CREATE TABLE IF NOT EXISTS objectifs_autonomie (
     id SERIAL PRIMARY KEY,
     legume VARCHAR(100) NOT NULL UNIQUE,
     besoin_kg_an DECIMAL(6, 2) NOT NULL,

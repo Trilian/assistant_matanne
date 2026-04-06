@@ -5,7 +5,7 @@
 --            séries, alertes, cotes_historique
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_equipes (
+CREATE TABLE IF NOT EXISTS jeux_equipes (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     nom_court VARCHAR(50),
@@ -24,7 +24,7 @@ CREATE TABLE jeux_equipes (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_tirages_loto (
+CREATE TABLE IF NOT EXISTS jeux_tirages_loto (
     id SERIAL PRIMARY KEY,
     date_tirage DATE NOT NULL,
     numero_1 INTEGER NOT NULL,
@@ -41,7 +41,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_tirages_loto_date ON jeux_tirages_loto(date
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_stats_loto (
+CREATE TABLE IF NOT EXISTS jeux_stats_loto (
     id SERIAL PRIMARY KEY,
     date_calcul TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     frequences_numeros JSONB,
@@ -56,7 +56,7 @@ CREATE TABLE jeux_stats_loto (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_historique (
+CREATE TABLE IF NOT EXISTS jeux_historique (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
     type_jeu VARCHAR(20) NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE jeux_historique (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_series (
+CREATE TABLE IF NOT EXISTS jeux_series (
     id SERIAL PRIMARY KEY,
     type_jeu VARCHAR(20) NOT NULL,
     championnat VARCHAR(50),
@@ -91,7 +91,7 @@ CREATE INDEX IF NOT EXISTS ix_jeux_series_value ON jeux_series((frequence * seri
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_configuration (
+CREATE TABLE IF NOT EXISTS jeux_configuration (
     id SERIAL PRIMARY KEY,
     cle VARCHAR(50) NOT NULL UNIQUE,
     valeur TEXT NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE jeux_configuration (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_matchs (
+CREATE TABLE IF NOT EXISTS jeux_matchs (
     id SERIAL PRIMARY KEY,
     equipe_domicile_id INTEGER NOT NULL,
     equipe_exterieur_id INTEGER NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE jeux_matchs (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_paris_sportifs (
+CREATE TABLE IF NOT EXISTS jeux_paris_sportifs (
     id SERIAL PRIMARY KEY,
     match_id INTEGER NOT NULL,
     type_pari VARCHAR(30) NOT NULL DEFAULT '1N2',
@@ -152,7 +152,7 @@ CREATE INDEX IF NOT EXISTS idx_paris_match_date ON jeux_paris_sportifs(match_id,
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_grilles_loto (
+CREATE TABLE IF NOT EXISTS jeux_grilles_loto (
     id SERIAL PRIMARY KEY,
     tirage_id INTEGER,
     numero_1 INTEGER NOT NULL,
@@ -175,7 +175,7 @@ CREATE TABLE jeux_grilles_loto (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_alertes (
+CREATE TABLE IF NOT EXISTS jeux_alertes (
     id SERIAL PRIMARY KEY,
     serie_id INTEGER NOT NULL,
     type_jeu VARCHAR(20) NOT NULL,
@@ -198,7 +198,7 @@ CREATE INDEX IF NOT EXISTS ix_jeux_alertes_resultat ON jeux_alertes(resultat_ver
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_tirages_euromillions (
+CREATE TABLE IF NOT EXISTS jeux_tirages_euromillions (
     id SERIAL PRIMARY KEY,
     date_tirage DATE NOT NULL,
     numero_1 INTEGER NOT NULL CHECK (
@@ -234,7 +234,7 @@ CREATE INDEX IF NOT EXISTS idx_tirages_euromillions_date ON jeux_tirages_euromil
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_grilles_euromillions (
+CREATE TABLE IF NOT EXISTS jeux_grilles_euromillions (
     id SERIAL PRIMARY KEY,
     tirage_id INTEGER REFERENCES jeux_tirages_euromillions(id) ON DELETE
     SET NULL,
@@ -252,7 +252,7 @@ CREATE INDEX IF NOT EXISTS idx_grilles_euromillions_date ON jeux_grilles_euromil
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_stats_euromillions (
+CREATE TABLE IF NOT EXISTS jeux_stats_euromillions (
     id SERIAL PRIMARY KEY,
     date_calcul DATE NOT NULL,
     frequences_numeros JSONB NOT NULL DEFAULT '{}',
@@ -268,7 +268,7 @@ CREATE TABLE jeux_stats_euromillions (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_cotes_historique (
+CREATE TABLE IF NOT EXISTS jeux_cotes_historique (
     id SERIAL PRIMARY KEY,
     match_id INTEGER REFERENCES jeux_matchs(id) ON DELETE CASCADE,
     bookmaker VARCHAR(100) NOT NULL,

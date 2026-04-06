@@ -4,7 +4,7 @@
 -- Contient : meubles, stocks, pièces, objets, artisans, devis, diagnostics
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE meubles (
+CREATE TABLE IF NOT EXISTS meubles (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -34,7 +34,7 @@ CREATE INDEX IF NOT EXISTS ix_furniture_date_achat ON meubles(date_achat);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE stocks_maison (
+CREATE TABLE IF NOT EXISTS stocks_maison (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(100) NOT NULL,
@@ -51,7 +51,7 @@ CREATE INDEX IF NOT EXISTS ix_house_stocks_categorie ON stocks_maison(categorie)
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE pieces_maison (
+CREATE TABLE IF NOT EXISTS pieces_maison (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     etage INTEGER DEFAULT 0,
@@ -72,7 +72,7 @@ CREATE INDEX IF NOT EXISTS idx_pieces_maison_type ON pieces_maison(type_piece);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE objets_maison (
+CREATE TABLE IF NOT EXISTS objets_maison (
     id SERIAL PRIMARY KEY,
     piece_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,
@@ -97,7 +97,7 @@ CREATE INDEX IF NOT EXISTS idx_objets_maison_date_achat ON objets_maison(date_ac
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE sessions_travail (
+CREATE TABLE IF NOT EXISTS sessions_travail (
     id SERIAL PRIMARY KEY,
     type_activite VARCHAR(50) NOT NULL,
     zone_jardin_id INTEGER,
@@ -136,7 +136,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_travail_type_debut ON sessions_travail(t
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE versions_pieces (
+CREATE TABLE IF NOT EXISTS versions_pieces (
     id SERIAL PRIMARY KEY,
     piece_id INTEGER NOT NULL REFERENCES pieces_maison(id) ON DELETE CASCADE,
     version INTEGER NOT NULL,
@@ -155,7 +155,7 @@ CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece_version ON versions_pieces(
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE couts_travaux (
+CREATE TABLE IF NOT EXISTS couts_travaux (
     id SERIAL PRIMARY KEY,
     version_id INTEGER NOT NULL,
     categorie VARCHAR(50) NOT NULL,
@@ -172,7 +172,7 @@ CREATE INDEX IF NOT EXISTS idx_couts_travaux_version ON couts_travaux(version_id
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE logs_statut_objets (
+CREATE TABLE IF NOT EXISTS logs_statut_objets (
     id SERIAL PRIMARY KEY,
     objet_id INTEGER NOT NULL,
     ancien_statut VARCHAR(50),
@@ -189,7 +189,7 @@ CREATE INDEX IF NOT EXISTS idx_logs_statut_objet ON logs_statut_objets(objet_id)
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE artisans (
+CREATE TABLE IF NOT EXISTS artisans (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     entreprise VARCHAR(200),
@@ -214,7 +214,7 @@ CREATE INDEX IF NOT EXISTS ix_artisans_metier ON artisans(metier);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE interventions_artisans (
+CREATE TABLE IF NOT EXISTS interventions_artisans (
     id SERIAL PRIMARY KEY,
     artisan_id INTEGER NOT NULL REFERENCES artisans(id) ON DELETE CASCADE,
     date_intervention DATE NOT NULL,
@@ -234,7 +234,7 @@ CREATE INDEX IF NOT EXISTS ix_interventions_artisans_date ON interventions_artis
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE articles_cellier (
+CREATE TABLE IF NOT EXISTS articles_cellier (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(50) NOT NULL,
@@ -260,7 +260,7 @@ CREATE INDEX IF NOT EXISTS ix_articles_cellier_date_achat ON articles_cellier(da
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE diagnostics_maison (
+CREATE TABLE IF NOT EXISTS diagnostics_maison (
     id SERIAL PRIMARY KEY,
     type_diagnostic VARCHAR(50) NOT NULL,
     resultat VARCHAR(100),
@@ -288,7 +288,7 @@ CREATE INDEX IF NOT EXISTS ix_diagnostics_validite ON diagnostics_maison(date_va
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE estimations_immobilieres (
+CREATE TABLE IF NOT EXISTS estimations_immobilieres (
     id SERIAL PRIMARY KEY,
     source VARCHAR(50) NOT NULL,
     date_estimation DATE NOT NULL,
@@ -312,7 +312,7 @@ CREATE TABLE estimations_immobilieres (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE traitements_nuisibles (
+CREATE TABLE IF NOT EXISTS traitements_nuisibles (
     id SERIAL PRIMARY KEY,
     type_nuisible VARCHAR(50) NOT NULL,
     zone VARCHAR(100),
@@ -338,7 +338,7 @@ CREATE INDEX IF NOT EXISTS ix_traitements_prochain ON traitements_nuisibles(date
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE devis_comparatifs (
+CREATE TABLE IF NOT EXISTS devis_comparatifs (
     id SERIAL PRIMARY KEY,
     projet_id INTEGER REFERENCES projets(id),
     artisan_id INTEGER REFERENCES artisans(id),
@@ -369,7 +369,7 @@ CREATE INDEX IF NOT EXISTS ix_devis_date_validite ON devis_comparatifs(date_vali
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE lignes_devis (
+CREATE TABLE IF NOT EXISTS lignes_devis (
     id SERIAL PRIMARY KEY,
     devis_id INTEGER NOT NULL REFERENCES devis_comparatifs(id) ON DELETE CASCADE,
     description VARCHAR(500) NOT NULL,

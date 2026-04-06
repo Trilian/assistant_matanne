@@ -5,7 +5,7 @@
 --            modeles_courses, templates_semaine, batch_cooking, ...
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE ingredients (
+CREATE TABLE IF NOT EXISTS ingredients (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(100) NOT NULL DEFAULT 'Autre',
@@ -21,7 +21,7 @@ CREATE INDEX IF NOT EXISTS ix_ingredients_saison ON ingredients(saison);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE recettes (
+CREATE TABLE IF NOT EXISTS recettes (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -87,7 +87,7 @@ CREATE INDEX IF NOT EXISTS ix_recettes_compatible_airfryer ON recettes(compatibl
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE plannings (
+CREATE TABLE IF NOT EXISTS plannings (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     semaine_debut DATE NOT NULL,
@@ -98,12 +98,16 @@ CREATE TABLE plannings (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Compatibilité rerun / bases legacy : s'assurer que les colonnes existent
+-- avant de créer les index associés.
+ALTER TABLE IF EXISTS plannings
+    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon';
 CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
 CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE listes_courses (
+CREATE TABLE IF NOT EXISTS listes_courses (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
@@ -112,12 +116,17 @@ CREATE TABLE listes_courses (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Compatibilité rerun / bases legacy : s'assurer que les colonnes existent
+-- avant de créer les index associés.
+ALTER TABLE IF EXISTS listes_courses
+    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
+    ADD COLUMN IF NOT EXISTS archivee BOOLEAN NOT NULL DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE modeles_courses (
+CREATE TABLE IF NOT EXISTS modeles_courses (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     description TEXT,
@@ -133,7 +142,7 @@ CREATE INDEX IF NOT EXISTS ix_modeles_courses_actif ON modeles_courses(actif);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE templates_semaine (
+CREATE TABLE IF NOT EXISTS templates_semaine (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
@@ -144,7 +153,7 @@ CREATE TABLE templates_semaine (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE config_batch_cooking (
+CREATE TABLE IF NOT EXISTS config_batch_cooking (
     id SERIAL PRIMARY KEY,
     jours_batch JSONB NOT NULL DEFAULT '[6]',
     heure_debut_preferee TIME DEFAULT '10:00',
@@ -162,7 +171,7 @@ CREATE TABLE config_batch_cooking (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE recette_ingredients (
+CREATE TABLE IF NOT EXISTS recette_ingredients (
     id SERIAL PRIMARY KEY,
     recette_id INTEGER NOT NULL,
     ingredient_id INTEGER NOT NULL,
@@ -179,7 +188,7 @@ CREATE INDEX IF NOT EXISTS idx_recette_ingredients_ingredient_id ON recette_ingr
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE etapes_recette (
+CREATE TABLE IF NOT EXISTS etapes_recette (
     id SERIAL PRIMARY KEY,
     recette_id INTEGER NOT NULL,
     ordre INTEGER NOT NULL,
@@ -197,7 +206,7 @@ CREATE INDEX IF NOT EXISTS ix_etapes_recette_recette ON etapes_recette(recette_i
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE versions_recette (
+CREATE TABLE IF NOT EXISTS versions_recette (
     id SERIAL PRIMARY KEY,
     recette_base_id INTEGER NOT NULL,
     type_version VARCHAR(50) NOT NULL,
@@ -214,7 +223,7 @@ CREATE INDEX IF NOT EXISTS ix_versions_recette_type ON versions_recette(type_ver
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE historique_recettes (
+CREATE TABLE IF NOT EXISTS historique_recettes (
     id SERIAL PRIMARY KEY,
     recette_id INTEGER NOT NULL,
     date_preparation DATE NOT NULL,
@@ -238,7 +247,7 @@ CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(da
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE repas_batch (
+CREATE TABLE IF NOT EXISTS repas_batch (
     id SERIAL PRIMARY KEY,
     recette_id INTEGER,
     nom VARCHAR(200) NOT NULL,
@@ -260,7 +269,7 @@ CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_pe
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE retours_recettes (
+CREATE TABLE IF NOT EXISTS retours_recettes (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     recette_id INTEGER NOT NULL,
@@ -277,7 +286,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_user_recipe_feedback ON retours_recettes(us
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE inventaire (
+CREATE TABLE IF NOT EXISTS inventaire (
     id SERIAL PRIMARY KEY,
     ingredient_id INTEGER NOT NULL,
     quantite FLOAT NOT NULL DEFAULT 0.0,
@@ -304,7 +313,7 @@ CREATE INDEX IF NOT EXISTS ix_inventaire_code_barres ON inventaire(code_barres);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE historique_inventaire (
+CREATE TABLE IF NOT EXISTS historique_inventaire (
     id SERIAL PRIMARY KEY,
     article_id INTEGER NOT NULL,
     ingredient_id INTEGER NOT NULL,
@@ -331,7 +340,7 @@ CREATE INDEX IF NOT EXISTS ix_historique_inventaire_date ON historique_inventair
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE articles_courses (
+CREATE TABLE IF NOT EXISTS articles_courses (
     id SERIAL PRIMARY KEY,
     liste_id INTEGER NOT NULL,
     ingredient_id INTEGER NOT NULL,
@@ -357,7 +366,7 @@ CREATE INDEX IF NOT EXISTS ix_articles_courses_cree_le ON articles_courses(cree_
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE articles_modeles (
+CREATE TABLE IF NOT EXISTS articles_modeles (
     id SERIAL PRIMARY KEY,
     modele_id INTEGER NOT NULL,
     ingredient_id INTEGER,
@@ -382,7 +391,7 @@ CREATE INDEX IF NOT EXISTS ix_articles_modeles_ingredient ON articles_modeles(in
 
 
 -- ─── Correspondances Carrefour Drive ──────────────────────────────────────────
-CREATE TABLE correspondances_drive (
+CREATE TABLE IF NOT EXISTS correspondances_drive (
     id SERIAL PRIMARY KEY,
     ingredient_id INTEGER,
     nom_article VARCHAR(200) NOT NULL,
@@ -406,7 +415,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS ix_correspondances_drive_article_produit ON co
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE repas (
+CREATE TABLE IF NOT EXISTS repas (
     id SERIAL PRIMARY KEY,
     planning_id INTEGER NOT NULL,
     recette_id INTEGER,
@@ -443,7 +452,7 @@ CREATE INDEX IF NOT EXISTS ix_repas_type ON repas(type_repas);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE elements_templates (
+CREATE TABLE IF NOT EXISTS elements_templates (
     id SERIAL PRIMARY KEY,
     template_id INTEGER NOT NULL,
     jour_semaine INTEGER NOT NULL,
@@ -463,7 +472,7 @@ CREATE INDEX IF NOT EXISTS idx_template_jour ON elements_templates(template_id, 
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE sessions_batch_cooking (
+CREATE TABLE IF NOT EXISTS sessions_batch_cooking (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     date_session DATE NOT NULL,
@@ -500,7 +509,7 @@ CREATE INDEX IF NOT EXISTS idx_session_date_statut ON sessions_batch_cooking(dat
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE etapes_batch_cooking (
+CREATE TABLE IF NOT EXISTS etapes_batch_cooking (
     id SERIAL PRIMARY KEY,
     session_id INTEGER NOT NULL,
     recette_id INTEGER,
@@ -535,7 +544,7 @@ CREATE INDEX IF NOT EXISTS idx_etape_session_ordre ON etapes_batch_cooking(sessi
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE preparations_batch (
+CREATE TABLE IF NOT EXISTS preparations_batch (
     id SERIAL PRIMARY KEY,
     session_id INTEGER,
     recette_id INTEGER,

@@ -6,7 +6,7 @@
 --            voyages, checklists_voyage, templates_checklist
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE voyages (
+CREATE TABLE IF NOT EXISTS voyages (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(300) NOT NULL,
     destination VARCHAR(300) NOT NULL,
@@ -31,7 +31,7 @@ CREATE INDEX IF NOT EXISTS ix_voyages_statut ON voyages(statut);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE templates_checklist (
+CREATE TABLE IF NOT EXISTS templates_checklist (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     type_voyage VARCHAR(50),
@@ -44,7 +44,7 @@ CREATE INDEX IF NOT EXISTS ix_templates_type ON templates_checklist(type_voyage)
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE checklists_voyage (
+CREATE TABLE IF NOT EXISTS checklists_voyage (
     id SERIAL PRIMARY KEY,
     voyage_id INTEGER NOT NULL,
     template_id INTEGER,
@@ -60,7 +60,7 @@ CREATE INDEX IF NOT EXISTS ix_checklists_voyage ON checklists_voyage(voyage_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE notes_memos (
+CREATE TABLE IF NOT EXISTS notes_memos (
     id BIGSERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     contenu TEXT,
@@ -79,7 +79,7 @@ CREATE INDEX IF NOT EXISTS idx_notes_memos_archive ON notes_memos(archive);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE journal_bord (
+CREATE TABLE IF NOT EXISTS journal_bord (
     id BIGSERIAL PRIMARY KEY,
     date_entree DATE NOT NULL UNIQUE,
     contenu TEXT,
@@ -96,7 +96,7 @@ CREATE INDEX IF NOT EXISTS idx_journal_date ON journal_bord(date_entree DESC);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE contacts_utiles (
+CREATE TABLE IF NOT EXISTS contacts_utiles (
     id BIGSERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(50) DEFAULT 'autre',
@@ -113,7 +113,7 @@ CREATE INDEX IF NOT EXISTS idx_contacts_utiles_nom ON contacts_utiles(nom);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE liens_favoris (
+CREATE TABLE IF NOT EXISTS liens_favoris (
     id BIGSERIAL PRIMARY KEY,
     titre VARCHAR(300) NOT NULL,
     url TEXT NOT NULL,
@@ -127,7 +127,7 @@ CREATE INDEX IF NOT EXISTS idx_liens_categorie ON liens_favoris(categorie);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE mots_de_passe_maison (
+CREATE TABLE IF NOT EXISTS mots_de_passe_maison (
     id BIGSERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(50) DEFAULT 'autre',
@@ -141,7 +141,7 @@ CREATE INDEX IF NOT EXISTS idx_mdp_categorie ON mots_de_passe_maison(categorie);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE presse_papier_entrees (
+CREATE TABLE IF NOT EXISTS presse_papier_entrees (
     id BIGSERIAL PRIMARY KEY,
     contenu TEXT NOT NULL,
     auteur VARCHAR(100),
@@ -151,7 +151,7 @@ CREATE INDEX IF NOT EXISTS idx_pp_cree_le ON presse_papier_entrees(cree_le DESC)
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE releves_energie (
+CREATE TABLE IF NOT EXISTS releves_energie (
     id BIGSERIAL PRIMARY KEY,
     categorie VARCHAR(30) NOT NULL CHECK (categorie IN ('electricite', 'gaz', 'eau')),
     date_releve DATE NOT NULL,

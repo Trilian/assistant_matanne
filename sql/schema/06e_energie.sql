@@ -4,7 +4,7 @@
 -- Contient : dépenses, abonnements, écologie, entretiens saisonniers, compteurs
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE depenses_maison (
+CREATE TABLE IF NOT EXISTS depenses_maison (
     id SERIAL PRIMARY KEY,
     categorie VARCHAR(50) NOT NULL,
     mois INTEGER NOT NULL,
@@ -31,7 +31,7 @@ CREATE INDEX IF NOT EXISTS ix_house_expenses_annee ON depenses_maison(annee);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE actions_ecologiques (
+CREATE TABLE IF NOT EXISTS actions_ecologiques (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -59,7 +59,7 @@ CREATE INDEX IF NOT EXISTS ix_eco_actions_type ON actions_ecologiques(type_actio
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE abonnements (
+CREATE TABLE IF NOT EXISTS abonnements (
     id SERIAL PRIMARY KEY,
     type_abonnement VARCHAR(50) NOT NULL,
     fournisseur VARCHAR(200) NOT NULL,
@@ -77,7 +77,7 @@ CREATE INDEX IF NOT EXISTS idx_abonnements_type ON abonnements(type_abonnement);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE entretiens_saisonniers (
+CREATE TABLE IF NOT EXISTS entretiens_saisonniers (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -106,7 +106,7 @@ CREATE INDEX IF NOT EXISTS ix_entretiens_saisonniers_prochaine ON entretiens_sai
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE releves_compteurs (
+CREATE TABLE IF NOT EXISTS releves_compteurs (
     id SERIAL PRIMARY KEY,
     type_compteur VARCHAR(30) NOT NULL,
     numero_compteur VARCHAR(50),

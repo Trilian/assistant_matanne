@@ -4,7 +4,7 @@
 -- Contient : abonnements_push, preferences_notifications, webhooks_abonnements
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE abonnements_push (
+CREATE TABLE IF NOT EXISTS abonnements_push (
     id BIGSERIAL PRIMARY KEY,
     endpoint TEXT NOT NULL,
     p256dh_key TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE INDEX IF NOT EXISTS ix_push_subscriptions_user ON abonnements_push(user_i
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE preferences_notifications (
+CREATE TABLE IF NOT EXISTS preferences_notifications (
     id BIGSERIAL PRIMARY KEY,
     courses_rappel BOOLEAN NOT NULL DEFAULT TRUE,
     repas_suggestion BOOLEAN NOT NULL DEFAULT TRUE,

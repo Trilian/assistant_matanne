@@ -5,7 +5,7 @@
 --            santé, jalons, contacts, documents, anniversaires
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE profils_enfants (
+CREATE TABLE IF NOT EXISTS profils_enfants (
     id SERIAL PRIMARY KEY,
     prenom VARCHAR(100) NOT NULL,
     date_naissance DATE NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE profils_enfants (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE routines_sante (
+CREATE TABLE IF NOT EXISTS routines_sante (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS ix_health_routines_actif ON routines_sante(actif);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE objectifs_sante (
+CREATE TABLE IF NOT EXISTS objectifs_sante (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -57,7 +57,7 @@ CREATE INDEX IF NOT EXISTS ix_health_objectives_statut ON objectifs_sante(statut
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE activites_weekend (
+CREATE TABLE IF NOT EXISTS activites_weekend (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -95,7 +95,7 @@ CREATE INDEX IF NOT EXISTS ix_weekend_activities_statut ON activites_weekend(sta
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE achats_famille (
+CREATE TABLE IF NOT EXISTS achats_famille (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -126,7 +126,7 @@ CREATE INDEX IF NOT EXISTS ix_achats_famille_pour_qui ON achats_famille(pour_qui
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE activites_famille (
+CREATE TABLE IF NOT EXISTS activites_famille (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -157,7 +157,7 @@ CREATE INDEX IF NOT EXISTS ix_family_activities_statut ON activites_famille(stat
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE budgets_famille (
+CREATE TABLE IF NOT EXISTS budgets_famille (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     categorie VARCHAR(100) NOT NULL,
@@ -175,7 +175,7 @@ CREATE INDEX IF NOT EXISTS ix_family_budgets_categorie ON budgets_famille(catego
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE articles_achats_famille (
+CREATE TABLE IF NOT EXISTS articles_achats_famille (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     categorie VARCHAR(50) NOT NULL,
@@ -194,7 +194,7 @@ CREATE INDEX IF NOT EXISTS ix_shopping_items_date ON articles_achats_famille(dat
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE historique_achats (
+CREATE TABLE IF NOT EXISTS historique_achats (
     id SERIAL PRIMARY KEY,
     article_nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(100),
@@ -211,7 +211,7 @@ CREATE INDEX IF NOT EXISTS ix_historique_achats_nom_date ON historique_achats(ar
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE garmin_tokens (
+CREATE TABLE IF NOT EXISTS garmin_tokens (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     oauth_token VARCHAR(500) NOT NULL,
@@ -227,7 +227,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_tokens_user_id ON garmin_tokens(user
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE activites_garmin (
+CREATE TABLE IF NOT EXISTS activites_garmin (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     garmin_activity_id VARCHAR(100) NOT NULL,
@@ -255,7 +255,7 @@ CREATE INDEX IF NOT EXISTS ix_garmin_activities_date ON activites_garmin(date_de
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE resumes_quotidiens_garmin (
+CREATE TABLE IF NOT EXISTS resumes_quotidiens_garmin (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     date DATE NOT NULL,
@@ -285,7 +285,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_daily_user_date ON resumes_quotidien
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE journaux_alimentaires (
+CREATE TABLE IF NOT EXISTS journaux_alimentaires (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -313,7 +313,7 @@ CREATE INDEX IF NOT EXISTS ix_food_logs_date ON journaux_alimentaires(date);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE entrees_bien_etre (
+CREATE TABLE IF NOT EXISTS entrees_bien_etre (
     id SERIAL PRIMARY KEY,
     child_id INTEGER,
     username VARCHAR(200),
@@ -331,7 +331,7 @@ CREATE INDEX IF NOT EXISTS ix_wellbeing_date ON entrees_bien_etre(date);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jalons (
+CREATE TABLE IF NOT EXISTS jalons (
     id SERIAL PRIMARY KEY,
     child_id INTEGER NOT NULL,
     titre VARCHAR(200) NOT NULL,
@@ -354,7 +354,7 @@ CREATE INDEX IF NOT EXISTS ix_milestones_date ON jalons(date_atteint);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE entrees_sante (
+CREATE TABLE IF NOT EXISTS entrees_sante (
     id SERIAL PRIMARY KEY,
     routine_id INTEGER,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -389,7 +389,7 @@ CREATE INDEX IF NOT EXISTS ix_health_entries_date ON entrees_sante(date);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE vaccins (
+CREATE TABLE IF NOT EXISTS vaccins (
     id SERIAL PRIMARY KEY,
     child_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,
@@ -409,7 +409,7 @@ CREATE INDEX IF NOT EXISTS ix_vaccins_rappel ON vaccins(rappel_prevu);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE rendez_vous_medicaux (
+CREATE TABLE IF NOT EXISTS rendez_vous_medicaux (
     id SERIAL PRIMARY KEY,
     child_id INTEGER,
     membre_famille VARCHAR(100),
@@ -431,7 +431,7 @@ CREATE INDEX IF NOT EXISTS ix_rdv_membre ON rendez_vous_medicaux(membre_famille)
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE mesures_croissance (
+CREATE TABLE IF NOT EXISTS mesures_croissance (
     id SERIAL PRIMARY KEY,
     child_id INTEGER NOT NULL,
     date_mesure DATE NOT NULL,
@@ -457,7 +457,7 @@ CREATE INDEX IF NOT EXISTS ix_croissance_date ON mesures_croissance(date_mesure)
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE contacts_famille (
+CREATE TABLE IF NOT EXISTS contacts_famille (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     prenom VARCHAR(200),
@@ -488,7 +488,7 @@ WHERE est_urgence = TRUE;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE anniversaires_famille (
+CREATE TABLE IF NOT EXISTS anniversaires_famille (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     date_naissance DATE NOT NULL,
@@ -503,7 +503,7 @@ CREATE INDEX IF NOT EXISTS ix_anniversaires_date ON anniversaires_famille(date_n
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE evenements_familiaux (
+CREATE TABLE IF NOT EXISTS evenements_familiaux (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(300) NOT NULL,
     description TEXT,
@@ -537,7 +537,7 @@ CREATE INDEX IF NOT EXISTS ix_evenements_type ON evenements_familiaux(type_evene
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE documents_famille (
+CREATE TABLE IF NOT EXISTS documents_famille (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(300) NOT NULL,
     titre VARCHAR(200),

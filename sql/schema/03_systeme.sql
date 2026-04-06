@@ -8,7 +8,7 @@
 -- ============================================================================
 -- PARTIE 2 : TABLE DE SUIVI DES MIGRATIONS
 -- ============================================================================
-CREATE TABLE schema_migrations (
+CREATE TABLE IF NOT EXISTS schema_migrations (
     id SERIAL PRIMARY KEY,
     version VARCHAR(50) NOT NULL UNIQUE,
     description TEXT,
@@ -29,7 +29,7 @@ CREATE TABLE schema_migrations (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE profils_utilisateurs (
+CREATE TABLE IF NOT EXISTS profils_utilisateurs (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     display_name VARCHAR(100) NOT NULL,
@@ -160,7 +160,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_profils_username ON profils_utilisateurs(us
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE evenements_planning (
+CREATE TABLE IF NOT EXISTS evenements_planning (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(200) NOT NULL,
     description TEXT,
@@ -213,7 +213,7 @@ CREATE INDEX IF NOT EXISTS idx_date_range ON evenements_planning(date_debut, dat
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE preferences_utilisateurs (
+CREATE TABLE IF NOT EXISTS preferences_utilisateurs (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     nb_adultes INTEGER NOT NULL DEFAULT 2,
@@ -251,7 +251,7 @@ CREATE INDEX IF NOT EXISTS ix_user_preferences_user_id ON preferences_utilisateu
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE openfoodfacts_cache (
+CREATE TABLE IF NOT EXISTS openfoodfacts_cache (
     id SERIAL PRIMARY KEY,
     code_barres VARCHAR(50) NOT NULL,
     nom VARCHAR(300),
@@ -283,7 +283,7 @@ CREATE INDEX IF NOT EXISTS ix_openfoodfacts_code ON openfoodfacts_cache(code_bar
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE alertes_meteo (
+CREATE TABLE IF NOT EXISTS alertes_meteo (
     id BIGSERIAL PRIMARY KEY,
     type_alerte VARCHAR(30) NOT NULL,
     niveau VARCHAR(20) NOT NULL DEFAULT 'info',
@@ -307,7 +307,7 @@ CREATE INDEX IF NOT EXISTS ix_alertes_meteo_user ON alertes_meteo(user_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE config_meteo (
+CREATE TABLE IF NOT EXISTS config_meteo (
     id BIGSERIAL PRIMARY KEY,
     latitude NUMERIC(10, 7) NOT NULL DEFAULT 48.8566,
     longitude NUMERIC(10, 7) NOT NULL DEFAULT 2.3522,
@@ -328,7 +328,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_config_meteo_user ON config_meteo(user_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE sauvegardes (
+CREATE TABLE IF NOT EXISTS sauvegardes (
     id BIGSERIAL PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
     tables_included JSONB DEFAULT '[]',
@@ -349,7 +349,7 @@ CREATE INDEX IF NOT EXISTS ix_backups_cree_le ON sauvegardes(cree_le);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE historique_actions (
+CREATE TABLE IF NOT EXISTS historique_actions (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     user_name VARCHAR(255) NOT NULL,
@@ -366,7 +366,7 @@ CREATE TABLE historique_actions (
     cree_le TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE logs_securite (
+CREATE TABLE IF NOT EXISTS logs_securite (
     id BIGSERIAL PRIMARY KEY,
     user_id VARCHAR(255),
     event_type VARCHAR(100) NOT NULL,
@@ -453,7 +453,7 @@ CREATE INDEX IF NOT EXISTS ix_pstate_user ON etats_persistants(user_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE points_utilisateurs (
+CREATE TABLE IF NOT EXISTS points_utilisateurs (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     semaine_debut DATE NOT NULL,
@@ -476,7 +476,7 @@ CREATE INDEX IF NOT EXISTS ix_points_utilisateurs_semaine ON points_utilisateurs
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE badges_utilisateurs (
+CREATE TABLE IF NOT EXISTS badges_utilisateurs (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     badge_type VARCHAR(100) NOT NULL,
@@ -496,7 +496,7 @@ CREATE INDEX IF NOT EXISTS ix_badges_utilisateurs_type ON badges_utilisateurs(ba
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE automations (
+CREATE TABLE IF NOT EXISTS automations (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     nom VARCHAR(150) NOT NULL,
@@ -744,7 +744,7 @@ CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_h
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE checklists_anniversaire (
+CREATE TABLE IF NOT EXISTS checklists_anniversaire (
     id SERIAL PRIMARY KEY,
     anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
     nom VARCHAR(200) NOT NULL,
@@ -758,7 +758,7 @@ CREATE TABLE checklists_anniversaire (
 CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
 CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
 
-CREATE TABLE items_checklist_anniversaire (
+CREATE TABLE IF NOT EXISTS items_checklist_anniversaire (
     id SERIAL PRIMARY KEY,
     checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
     categorie VARCHAR(50) NOT NULL,
@@ -855,7 +855,7 @@ CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_check
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_bankroll_historique (
+CREATE TABLE IF NOT EXISTS jeux_bankroll_historique (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     montant FLOAT NOT NULL,
@@ -1002,7 +1002,7 @@ CREATE INDEX IF NOT EXISTS idx_congelation_consomme_limite ON batch_cooking_cong
 -- Abonnements maison (eau, électricité, gaz, assurances, téléphone, internet)
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE historique_notifications (
+CREATE TABLE IF NOT EXISTS historique_notifications (
     id BIGSERIAL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     canal VARCHAR(20) NOT NULL,
@@ -1031,7 +1031,7 @@ CREATE INDEX IF NOT EXISTS ix_historique_notifications_cree_le ON historique_not
 -- ============================================================================
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE minuteur_sessions (
+CREATE TABLE IF NOT EXISTS minuteur_sessions (
     id BIGSERIAL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     label VARCHAR(200) NOT NULL,

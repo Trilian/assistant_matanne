@@ -4,7 +4,7 @@
 -- Contient : projets, routines, tâches projet, tâches routine
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE projets (
+CREATE TABLE IF NOT EXISTS projets (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS ix_projects_categorie ON projets(categorie);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE routines (
+CREATE TABLE IF NOT EXISTS routines (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -40,7 +40,7 @@ CREATE INDEX IF NOT EXISTS ix_routines_actif ON routines(actif);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE taches_projets (
+CREATE TABLE IF NOT EXISTS taches_projets (
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,
@@ -57,7 +57,7 @@ CREATE INDEX IF NOT EXISTS ix_project_tasks_statut ON taches_projets(statut);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE taches_routines (
+CREATE TABLE IF NOT EXISTS taches_routines (
     id SERIAL PRIMARY KEY,
     routine_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,

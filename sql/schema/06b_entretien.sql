@@ -4,7 +4,7 @@
 -- Contient : entretien, checklists vacances
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE taches_entretien (
+CREATE TABLE IF NOT EXISTS taches_entretien (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
@@ -39,7 +39,7 @@ CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_fait ON taches_entretien(fait);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE checklists_vacances (
+CREATE TABLE IF NOT EXISTS checklists_vacances (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     type_voyage VARCHAR(50) NOT NULL,
@@ -57,7 +57,7 @@ CREATE INDEX IF NOT EXISTS ix_checklists_type_voyage ON checklists_vacances(type
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE items_checklist (
+CREATE TABLE IF NOT EXISTS items_checklist (
     id SERIAL PRIMARY KEY,
     checklist_id INTEGER NOT NULL REFERENCES checklists_vacances(id) ON DELETE CASCADE,
     libelle VARCHAR(300) NOT NULL,
