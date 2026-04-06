@@ -95,11 +95,12 @@ const LIENS: LienNav[] = [
     chemin: "/cuisine",
     Icone: ChefHat,
     sousLiens: [
-      { nom: "Ma Semaine", chemin: "/cuisine/ma-semaine", Icone: CalendarDays },
+      { nom: "Planning", chemin: "/cuisine/planning", Icone: CalendarDays },
       { nom: "Recettes", chemin: "/cuisine/recettes", Icone: BookOpen },
       { nom: "Courses", chemin: "/cuisine/courses", Icone: ShoppingCart },
       { nom: "Frigo & Stock", chemin: "/cuisine/inventaire", Icone: Package },
       { nom: "Batch Cooking", chemin: "/cuisine/batch-cooking", Icone: CookingPot },
+      { nom: "Saisonnier", chemin: "/cuisine/saisonnier", Icone: CalendarRange },
     ],
   },
   {

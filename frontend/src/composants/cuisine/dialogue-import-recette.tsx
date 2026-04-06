@@ -180,8 +180,8 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={ongletActif} onValueChange={(v) => setOngletActif(v as "url" | "pdf")}>
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={ongletActif} onValueChange={(v) => setOngletActif(v as "url" | "lot" | "pdf")}>
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="url">
               <Link2 className="h-4 w-4 mr-2" />
               URL
@@ -289,6 +289,7 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
               type="file"
               accept=".pdf"
               className="hidden"
+              aria-label="Sélectionner un fichier PDF de recette"
               onChange={handleFileSelect}
             />
 

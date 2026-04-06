@@ -349,6 +349,7 @@ CREATE TABLE preferences_utilisateurs (
     equipement_activites JSONB NOT NULL DEFAULT '{}',
     config_garde JSONB NOT NULL DEFAULT '{}',
     config_dashboard JSONB NOT NULL DEFAULT '{}',
+    preferences_apprises JSONB NOT NULL DEFAULT '{}',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
@@ -1508,6 +1509,7 @@ CREATE TABLE articles_courses (
     achete_le TIMESTAMP WITH TIME ZONE,
     rayon_magasin VARCHAR(100),
     magasin_cible VARCHAR(50),
+    prix_unitaire FLOAT,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_articles_courses_liste FOREIGN KEY (liste_id) REFERENCES listes_courses(id) ON DELETE CASCADE,
@@ -1941,7 +1943,9 @@ CREATE TABLE historique_achats (
     rayon_magasin VARCHAR(100),
     derniere_achat TIMESTAMP WITH TIME ZONE NOT NULL,
     frequence_jours INTEGER,
-    nb_achats INTEGER NOT NULL DEFAULT 1
+    nb_achats INTEGER NOT NULL DEFAULT 1,
+    prix_dernier FLOAT,
+    prix_moyen FLOAT
 );
 CREATE INDEX IF NOT EXISTS ix_historique_achats_nom ON historique_achats(article_nom);
 CREATE INDEX IF NOT EXISTS ix_historique_achats_date ON historique_achats(derniere_achat);

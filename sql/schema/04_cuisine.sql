@@ -342,6 +342,7 @@ CREATE TABLE articles_courses (
     achete_le TIMESTAMP WITH TIME ZONE,
     rayon_magasin VARCHAR(100),
     magasin_cible VARCHAR(50),
+    prix_unitaire FLOAT,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_articles_courses_liste FOREIGN KEY (liste_id) REFERENCES listes_courses(id) ON DELETE CASCADE,

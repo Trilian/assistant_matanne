@@ -31,7 +31,7 @@ export default function PageCalendrierSaisonnier() {
   );
 
   if (isLoading) {
-    return <SkeletonPage lignes={10} />;
+    return <SkeletonPage lignes={["h-10 w-48", "h-64 w-full", "h-40 w-full"]} />;
   }
 
   if (!data) {

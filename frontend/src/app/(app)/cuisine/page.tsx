@@ -41,9 +41,9 @@ import { Button } from "@/composants/ui/button";
 
 const SECTIONS = [
   {
-    titre: "Ma Semaine",
-    description: "Planning repas & nutrition",
-    chemin: "/cuisine/ma-semaine",
+    titre: "Planning",
+    description: "Planning, ma semaine & nutrition",
+    chemin: "/cuisine/planning",
     Icone: CalendarCheck,
     couleur: "text-blue-600",
     bgCouleur: "bg-blue-500/10",
@@ -79,6 +79,14 @@ const SECTIONS = [
     Icone: CookingPot,
     couleur: "text-orange-600",
     bgCouleur: "bg-orange-500/10",
+  },
+  {
+    titre: "Saisonnier",
+    description: "Calendrier visuel des produits de saison",
+    chemin: "/cuisine/saisonnier",
+    Icone: Leaf,
+    couleur: "text-emerald-600",
+    bgCouleur: "bg-emerald-500/10",
   },
 ];
 

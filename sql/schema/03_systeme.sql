@@ -238,6 +238,7 @@ CREATE TABLE preferences_utilisateurs (
     equipement_activites JSONB NOT NULL DEFAULT '{}',
     config_garde JSONB NOT NULL DEFAULT '{}',
     config_dashboard JSONB NOT NULL DEFAULT '{}',
+    preferences_apprises JSONB NOT NULL DEFAULT '{}',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
