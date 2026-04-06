@@ -60,7 +60,7 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
       try {
         const doublons = await obtenirDoublonsRecettes(0.75);
         if (doublons.total > 0) {
-          toast.warning(`⚠️ Doublon possible détecté — "${doublons.items[0].recette_a.nom}" ressemble à une recette existante.`, { duration: 6000 });
+          toast.warning(`⚠️ Doublon possible détecté — "${doublons.items[0].recette_source.nom}" ressemble à une recette existante.`, { duration: 6000 });
         }
       } catch { /* silencieux */ }
       onSuccess?.();
@@ -99,7 +99,7 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
       try {
         const doublons = await obtenirDoublonsRecettes(0.75);
         if (doublons.total > 0) {
-          toast.warning(`⚠️ Doublon possible détecté — "${doublons.items[0].recette_a.nom}" ressemble à une recette existante.`, { duration: 6000 });
+          toast.warning(`⚠️ Doublon possible détecté — "${doublons.items[0].recette_source.nom}" ressemble à une recette existante.`, { duration: 6000 });
         }
       } catch { /* silencieux */ }
       onSuccess?.();

@@ -853,34 +853,41 @@ export default function PageAdminJobs() {
           )}
         </CardContent>
       </Card>
-    </div>
 
-    {/* H4 — Dialog de confirmation avant exécution d'un job */}
-    <Dialog open={confirmJobId !== null} onOpenChange={(open) => { if (!open) setConfirmJobId(null); }}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Confirmer l'exécution</DialogTitle>
-          <DialogDescription>
-            {modeDryRun
-              ? "Le job sera exécuté en mode simulation (aucune modification réelle)."
-              : "Le job sera exécuté immédiatement. Cette action peut modifier des données."}
-            {paramsJson.trim() && (
-              <span className="mt-1 block text-xs font-mono">Params : {paramsJson}</span>
-            )}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setConfirmJobId(null)}>
-            Annuler
-          </Button>
-          <Button
-            variant={modeDryRun ? "secondary" : "default"}
-            onClick={() => { if (confirmJobId) void executerJob(confirmJobId); }}
-          >
-            {modeDryRun ? "Simuler" : "Exécuter"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {/* H4 — Dialog de confirmation avant exécution d'un job */}
+      <Dialog
+        open={confirmJobId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmJobId(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer l'exécution</DialogTitle>
+            <DialogDescription>
+              {modeDryRun
+                ? "Le job sera exécuté en mode simulation (aucune modification réelle)."
+                : "Le job sera exécuté immédiatement. Cette action peut modifier des données."}
+              {paramsJson.trim() && (
+                <span className="mt-1 block text-xs font-mono">Params : {paramsJson}</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmJobId(null)}>
+              Annuler
+            </Button>
+            <Button
+              variant={modeDryRun ? "secondary" : "default"}
+              onClick={() => {
+                if (confirmJobId) void executerJob(confirmJobId);
+              }}
+            >
+              {modeDryRun ? "Simuler" : "Exécuter"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
