@@ -14,7 +14,6 @@ import {
   Mic,
   Bot,
   Brain,
-  BarChart3,
 } from "lucide-react";
 import {
   Card,
@@ -45,7 +44,6 @@ const SECTIONS = [
   { titre: "Météo", description: "Prévisions locales", chemin: "/outils/meteo", Icone: CloudSun },
   { titre: "Minuteur", description: "Chronomètre cuisine", chemin: "/outils/minuteur", Icone: Timer },
   { titre: "Convertisseur", description: "Unités de mesure", chemin: "/outils/convertisseur", Icone: ArrowRightLeft },
-  { titre: "Insights IA", description: "Ma famille en chiffres", chemin: "/outils/insights", Icone: BarChart3 },
 ];
 
 export default function PageOutils() {

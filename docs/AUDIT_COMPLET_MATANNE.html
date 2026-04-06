@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaTanne — Audit Complet & Plan d'Action</title>
+<style>
+  :root {
+    --bg: #0f172a; --bg2: #1e293b; --bg3: #334155;
+    --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+    --accent: #38bdf8; --accent2: #818cf8; --accent3: #a78bfa;
+    --success: #4ade80; --warn: #fbbf24; --error: #f87171;
+    --border: #475569; --card: #1e293b;
+    --gradient1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient2: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); line-height:1.6;
+    scroll-behavior: smooth;
+  }
+  a { color: var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+
+  /* === HEADER === */
+  .hero {
+    background: var(--gradient1);
+    padding: 60px 40px; text-align:center;
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:60px;
+    background: linear-gradient(transparent, var(--bg));
+  }
+  .hero h1 { font-size:2.8rem; font-weight:800; margin-bottom:8px; }
+  .hero .subtitle { font-size:1.2rem; opacity:0.85; margin-bottom:24px; }
+  .hero .date { font-size:0.9rem; opacity:0.6; }
+  .hero .scores-row {
+    display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:30px;
+  }
+  .score-pill {
+    background: rgba(255,255,255,0.15); backdrop-filter:blur(10px);
+    border-radius:16px; padding:12px 24px; min-width:140px;
+    border:1px solid rgba(255,255,255,0.2);
+  }
+  .score-pill .label { font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; opacity:0.7; }
+  .score-pill .value { font-size:1.8rem; font-weight:800; }
+  .score-pill .value.high { color:#4ade80; }
+  .score-pill .value.mid { color:#fbbf24; }
+  .score-pill .value.low { color:#f87171; }
+
+  /* === NAV === */
+  nav.toc {
+    background: var(--bg2); border-bottom:1px solid var(--border);
+    padding:16px 40px; position:sticky; top:0; z-index:100;
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+  }
+  nav.toc a {
+    background: var(--bg3); padding:6px 16px; border-radius:8px;
+    font-size:0.8rem; font-weight:600; transition:all 0.2s;
+    border:1px solid transparent;
+  }
+  nav.toc a:hover { border-color:var(--accent); text-decoration:none; background:var(--bg); }
+
+  /* === CONTENT === */
+  .container { max-width:1400px; margin:0 auto; padding:40px 30px; }
+  section { margin-bottom:60px; }
+  h2 {
+    font-size:1.8rem; font-weight:700; margin-bottom:24px;
+    padding-bottom:12px; border-bottom:2px solid var(--accent);
+    display:flex; align-items:center; gap:12px;
+  }
+  h2 .emoji { font-size:1.6rem; }
+  h3 { font-size:1.2rem; font-weight:600; margin:20px 0 12px; color:var(--accent2); }
+  h4 { font-size:1rem; font-weight:600; margin:16px 0 8px; color:var(--text2); }
+  p { margin-bottom:12px; color:var(--text2); }
+
+  /* === CARDS === */
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(360px,1fr)); gap:20px; }
+  .card {
+    background: var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:24px; transition:transform 0.2s, border-color 0.2s;
+  }
+  .card:hover { transform:translateY(-2px); border-color:var(--accent); }
+  .card h4 { margin-top:0; color:var(--text); font-size:1.05rem; }
+  .card .tag {
+    display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.7rem;
+    font-weight:600; margin-right:6px; margin-bottom:4px;
+  }
+  .tag-ok { background:#166534; color:#4ade80; }
+  .tag-warn { background:#713f12; color:#fbbf24; }
+  .tag-err { background:#7f1d1d; color:#f87171; }
+  .tag-info { background:#1e3a5f; color:#38bdf8; }
+  .tag-ia { background:#4c1d95; color:#a78bfa; }
+
+  /* === TABLES === */
+  .table-wrap { overflow-x:auto; margin:16px 0; border-radius:8px; border:1px solid var(--border); }
+  table {
+    width:100%; border-collapse:collapse; font-size:0.85rem;
+  }
+  th {
+    background:var(--bg3); padding:10px 14px; text-align:left;
+    font-weight:600; font-size:0.75rem; text-transform:uppercase;
+    letter-spacing:0.5px; color:var(--text2); border-bottom:2px solid var(--border);
+    position:sticky; top:0;
+  }
+  td { padding:10px 14px; border-bottom:1px solid rgba(71,85,105,0.3); }
+  tr:hover td { background:rgba(56,189,248,0.05); }
+  .status-dot {
+    width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px;
+  }
+  .dot-green { background:var(--success); }
+  .dot-yellow { background:var(--warn); }
+  .dot-red { background:var(--error); }
+  .dot-blue { background:var(--accent); }
+
+  /* === SCHEMA === */
+  .flow-diagram {
+    background: var(--bg2); border:1px solid var(--border); border-radius:12px;
+    padding:30px; overflow-x:auto; margin:20px 0;
+  }
+  .flow-diagram svg { width:100%; height:auto; }
+  .flow-row {
+    display:flex; align-items:center; gap:12px; margin:10px 0; flex-wrap:wrap;
+  }
+  .flow-box {
+    background: var(--bg3); border:1px solid var(--border); border-radius:8px;
+    padding:10px 18px; font-size:0.85rem; font-weight:600; min-width:120px;
+    text-align:center; transition:all 0.2s;
+  }
+  .flow-box:hover { border-color:var(--accent); background:rgba(56,189,248,0.1); }
+  .flow-box.primary { background:rgba(56,189,248,0.15); border-color:var(--accent); }
+  .flow-box.ia { background:rgba(167,139,250,0.15); border-color:var(--accent3); color:var(--accent3); }
+  .flow-arrow { color:var(--text3); font-size:1.2rem; }
+
+  /* === COLLAPSIBLE === */
+  details { margin:8px 0; }
+  summary {
+    cursor:pointer; padding:12px 16px; background:var(--bg2);
+    border:1px solid var(--border); border-radius:8px;
+    font-weight:600; font-size:0.9rem; list-style:none;
+    display:flex; align-items:center; gap:8px;
+    transition: background 0.2s;
+  }
+  summary:hover { background:var(--bg3); }
+  summary::before {
+    content:'▶'; font-size:0.7rem; transition:transform 0.2s;
+  }
+  details[open] summary::before { transform:rotate(90deg); }
+  details .detail-content {
+    padding:16px; border:1px solid var(--border); border-top:none;
+    border-radius:0 0 8px 8px; background:rgba(30,41,59,0.5);
+  }
+
+  /* === LIST === */
+  ul.check-list { list-style:none; padding:0; }
+  ul.check-list li {
+    padding:8px 0; border-bottom:1px solid rgba(71,85,105,0.2);
+    display:flex; align-items:flex-start; gap:8px; font-size:0.9rem;
+  }
+  ul.check-list li::before { content:'✓'; color:var(--success); font-weight:bold; flex-shrink:0; }
+  ul.check-list li.warn::before { content:'⚠'; color:var(--warn); }
+  ul.check-list li.err::before { content:'✗'; color:var(--error); }
+  ul.check-list li.idea::before { content:'💡'; }
+  ul.check-list li.ia::before { content:'🤖'; }
+  ul.check-list li.plan::before { content:'📋'; }
+
+  /* === BADGES === */
+  .badge-row { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .badge {
+    display:inline-flex; align-items:center; gap:4px; padding:4px 12px;
+    border-radius:20px; font-size:0.75rem; font-weight:600;
+    border:1px solid;
+  }
+  .badge-module { background:rgba(56,189,248,0.1); border-color:rgba(56,189,248,0.3); color:var(--accent); }
+  .badge-count { background:rgba(129,140,248,0.1); border-color:rgba(129,140,248,0.3); color:var(--accent2); }
+
+  /* === PROGRESS === */
+  .progress-bar {
+    background:var(--bg3); border-radius:8px; height:8px; overflow:hidden; margin:4px 0;
+  }
+  .progress-fill { height:100%; border-radius:8px; transition:width 0.5s; }
+  .fill-green { background:var(--success); }
+  .fill-yellow { background:var(--warn); }
+  .fill-red { background:var(--error); }
+  .fill-blue { background:var(--accent); }
+  .fill-purple { background:var(--accent2); }
+
+  /* === INTERFACE SCHEMA === */
+  .ui-mock {
+    background: var(--bg2); border:2px solid var(--border); border-radius:12px;
+    overflow:hidden; margin:16px 0;
+  }
+  .ui-titlebar {
+    background:var(--bg3); padding:8px 16px; display:flex; align-items:center; gap:8px;
+    border-bottom:1px solid var(--border); font-size:0.8rem; font-weight:600;
+  }
+  .ui-dot { width:10px; height:10px; border-radius:50%; }
+  .ui-body { padding:16px; display:flex; gap:16px; min-height:200px; }
+  .ui-sidebar {
+    width:200px; flex-shrink:0; background:var(--bg); border-radius:8px;
+    padding:12px; font-size:0.75rem;
+  }
+  .ui-sidebar .item {
+    padding:6px 10px; border-radius:6px; margin:2px 0; cursor:pointer;
+  }
+  .ui-sidebar .item:hover { background:var(--bg3); }
+  .ui-sidebar .item.active { background:rgba(56,189,248,0.15); color:var(--accent); }
+  .ui-main { flex:1; }
+  .ui-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .ui-widget {
+    background:var(--bg); border:1px solid var(--border); border-radius:8px;
+    padding:12px; font-size:0.75rem; text-align:center;
+    height:80px; display:flex; align-items:center; justify-content:center;
+  }
+
+  /* === FOOTER === */
+  footer {
+    text-align:center; padding:40px; border-top:1px solid var(--border);
+    color:var(--text3); font-size:0.8rem;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width:768px) {
+    .hero h1 { font-size:1.8rem; }
+    nav.toc { padding:12px 16px; }
+    .container { padding:20px 16px; }
+    .card-grid { grid-template-columns:1fr; }
+    .ui-body { flex-direction:column; }
+    .ui-sidebar { width:100%; }
+    .ui-grid { grid-template-columns:repeat(2,1fr); }
+    h2 { font-size:1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== HERO ====== -->
+<header class="hero">
+  <h1>🏠 MaTanne — Audit Complet</h1>
+  <p class="subtitle">Analyse exhaustive de l'application • Fonctionnalités • Architecture • Plan d'action</p>
+  <p class="date">Généré le 6 avril 2026 — Basé sur le code source actuel</p>
+  <div class="scores-row">
+    <div class="score-pill"><div class="label">Architecture</div><div class="value high">8.5</div></div>
+    <div class="score-pill"><div class="label">Frontend UI</div><div class="value mid">7</div></div>
+    <div class="score-pill"><div class="label">Backend API</div><div class="value high">8.5</div></div>
+    <div class="score-pill"><div class="label">Tests</div><div class="value mid">7.5</div></div>
+    <div class="score-pill"><div class="label">Documentation</div><div class="value mid">7</div></div>
+    <div class="score-pill"><div class="label">Sécurité</div><div class="value high">8</div></div>
+    <div class="score-pill"><div class="label">IA/Automation</div><div class="value high">8</div></div>
+    <div class="score-pill"><div class="label">Performance</div><div class="value mid">7.5</div></div>
+    <div class="score-pill"><div class="label">DevOps</div><div class="value mid">7</div></div>
+    <div class="score-pill"><div class="label">UX/Ergonomie</div><div class="value mid">7</div></div>
+  </div>
+</header>
+
+<!-- ====== NAV ====== -->
+<nav class="toc">
+  <a href="#overview">Vue d'ensemble</a>
+  <a href="#modules">Modules</a>
+  <a href="#interface">Interface</a>
+  <a href="#flux">Flux utilisateur</a>
+  <a href="#inter-modules">Inter-modules</a>
+  <a href="#ia">IA & Automations</a>
+  <a href="#admin">Admin</a>
+  <a href="#bugs">Bugs & Gaps</a>
+  <a href="#cleanup">Nettoyage</a>
+  <a href="#ui-improve">UI/Améliorations</a>
+  <a href="#plan">Plan d'action</a>
+  <a href="#notes">Notes</a>
+</nav>
+
+<div class="container">
+
+<!-- ====================================================================== -->
+<!-- SECTION 1: VUE D'ENSEMBLE -->
+<!-- ====================================================================== -->
+<section id="overview">
+<h2><span class="emoji">📊</span> Vue d'ensemble</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>Backend (FastAPI/Python)</h4>
+    <div class="badge-row">
+      <span class="badge badge-count">48 fichiers routes</span>
+      <span class="badge badge-count">500+ endpoints</span>
+      <span class="badge badge-count">200+ schémas Pydantic</span>
+    </div>
+    <p>36 routeurs enregistrés, 6 middlewares, JWT auth, rate limiting, ETag cache</p>
+  </div>
+  <div class="card">
+    <h4>Frontend (Next.js 16)</h4>
+    <div class="badge-row">
+      <span class="badge badge-count">50+ pages</span>
+      <span class="badge badge-count">150+ composants</span>
+      <span class="badge badge-count">30 API clients</span>
+    </div>
+    <p>App Router, 18 widgets dashboard drag-drop, 3D Three.js, Recharts, Zustand, TanStack Query</p>
+  </div>
+  <div class="card">
+    <h4>Base de données</h4>
+    <div class="badge-row">
+      <span class="badge badge-count">~130 tables</span>
+      <span class="badge badge-count">12 vues</span>
+      <span class="badge badge-count">30+ RLS policies</span>
+    </div>
+    <p>Supabase PostgreSQL, schéma modulaire (18 fichiers SQL), triggers auto, indexes optimisés</p>
+  </div>
+  <div class="card">
+    <h4>Tests & Qualité</h4>
+    <div class="badge-row">
+      <span class="badge badge-count">257 fichiers test</span>
+      <span class="badge badge-count">1000+ tests</span>
+      <span class="badge badge-count">31 skip/xfail</span>
+    </div>
+    <p>Pytest + Vitest + Playwright, mutation testing, contract tests, benchmarks</p>
+  </div>
+  <div class="card">
+    <h4>Documentation</h4>
+    <div class="badge-row">
+      <span class="badge badge-count">42 fichiers docs</span>
+      <span class="badge badge-count">8000+ lignes</span>
+    </div>
+    <p>Architecture, API, patterns, sécurité, audits (OWASP, Lighthouse, A11Y, UX 3-clic)</p>
+  </div>
+  <div class="card">
+    <h4>IA & Automations</h4>
+    <div class="badge-row">
+      <span class="badge badge-count">15+ services IA</span>
+      <span class="badge badge-count">25+ bridges</span>
+      <span class="badge badge-count">20+ cron jobs</span>
+    </div>
+    <p>Mistral AI, event bus pub/sub, 5 canaux notif (Telegram, Push, Ntfy, Email, Web)</p>
+  </div>
+</div>
+
+<h3>Stack technique</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Couche</th><th>Technologie</th><th>Version</th></tr>
+  <tr><td>Backend</td><td>Python + FastAPI + SQLAlchemy 2.0 + Pydantic v2</td><td>3.13+</td></tr>
+  <tr><td>Frontend</td><td>Next.js + TypeScript + Tailwind CSS v4 + shadcn/ui</td><td>16.2.1</td></tr>
+  <tr><td>Base de données</td><td>Supabase PostgreSQL + RLS</td><td>16</td></tr>
+  <tr><td>IA</td><td>Mistral AI (Client + Cache sémantique + Circuit breaker)</td><td>Latest</td></tr>
+  <tr><td>Charts</td><td>Recharts + D3 (heatmaps) + Three.js (3D)</td><td>3.8 / 7.9 / 0.183</td></tr>
+  <tr><td>State</td><td>Zustand + TanStack Query v5</td><td>5.0 / 5.94</td></tr>
+  <tr><td>Forms</td><td>React Hook Form + Zod v4</td><td>7.72 / 4.3</td></tr>
+  <tr><td>Maps</td><td>Leaflet + React-Leaflet</td><td>1.9 / 5.0</td></tr>
+  <tr><td>DnD</td><td>@dnd-kit (core + sortable)</td><td>6.3 / 10.0</td></tr>
+  <tr><td>Monitoring</td><td>Sentry + Prometheus</td><td>10.47</td></tr>
+  <tr><td>Deploy</td><td>Railway (backend) + Vercel (frontend)</td><td>Free tier</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 2: MODULES DÉTAILLÉS -->
+<!-- ====================================================================== -->
+<section id="modules">
+<h2><span class="emoji">📦</span> Modules & Fonctionnalités</h2>
+
+<!-- CUISINE -->
+<details open>
+<summary>🍽️ Module Cuisine (12 tables, 11 sous-pages, ~80 endpoints)</summary>
+<div class="detail-content">
+<h4>Fonctionnalités</h4>
+<ul class="check-list">
+  <li>CRUD recettes avec catégories, temps de préparation, Nutriscore, Ecoscore</li>
+  <li>Import de recettes depuis URL, PDF ou CSV</li>
+  <li>Planification des repas hebdomadaire (midi/soir, structure contraintes)</li>
+  <li>Suggestions IA de menus (Mistral) avec adaptation saisonnière</li>
+  <li>Mode invités (adaptation quantités automatique)</li>
+  <li>Listes de courses auto-générées depuis le planning</li>
+  <li>WebSocket collaboration temps réel sur les courses</li>
+  <li>Inventaire maison avec alertes péremption (cron 7h)</li>
+  <li>Module anti-gaspillage (recettes avec stock existant)</li>
+  <li>Batch cooking intelligent (timeline phases, IA)</li>
+  <li>Analyse nutritionnelle IA des repas</li>
+  <li>Score écologique des repas (IA)</li>
+  <li>Prédiction des courses hebdo (cron vendredi 16h, top 30 articles)</li>
+  <li>Feedback recettes → amélioration suggestions IA</li>
+  <li>Adaptation version Jules (sans sel, mixé, pas alcool)</li>
+  <li>Convertisseur d'unités inline</li>
+  <li>QR code partage liste courses</li>
+  <li>Export PDF recettes, planning, courses</li>
+</ul>
+<h4>Sous-pages Frontend</h4>
+<div class="badge-row">
+  <span class="badge badge-module">recettes</span>
+  <span class="badge badge-module">planning</span>
+  <span class="badge badge-module">courses</span>
+  <span class="badge badge-module">inventaire</span>
+  <span class="badge badge-module">batch-cooking</span>
+  <span class="badge badge-module">anti-gaspillage</span>
+  <span class="badge badge-module">nutrition</span>
+  <span class="badge badge-module">feedback</span>
+  <span class="badge badge-module">suggestions</span>
+  <span class="badge badge-module">import</span>
+  <span class="badge badge-module">preferences</span>
+</div>
+<h4>API Routes</h4>
+<p><code>/api/v1/recettes</code> · <code>/api/v1/courses</code> · <code>/api/v1/inventaire</code> · <code>/api/v1/planning</code> · <code>/api/v1/batch-cooking</code> · <code>/api/v1/anti-gaspillage</code> · <code>/api/v1/suggestions</code> · <code>/api/v1/preferences</code></p>
+</div>
+</details>
+
+<!-- FAMILLE -->
+<details>
+<summary>👨‍👩‍👦 Module Famille (10 tables, 14 sous-pages, ~70 endpoints)</summary>
+<div class="detail-content">
+<h4>Fonctionnalités</h4>
+<ul class="check-list">
+  <li>Profil enfant Jules (âge, jalons développement, alimentation)</li>
+  <li>Suivi vaccinal (calendrier vaccinal FR, alertes rappels)</li>
+  <li>Activités par âge (suggestions IA adaptées)</li>
+  <li>Routines familiales avec heatmap (quotidien + annuel 365j)</li>
+  <li>Budget famille (catégories, virements, analyses mensuelles)</li>
+  <li>Calendrier familial avec anniversaires automatiques</li>
+  <li>Timeline interactive jalons Jules</li>
+  <li>Suggestions weekend IA (activités selon météo, âge, saison)</li>
+  <li>Contacts familiaux (médecin, crèche, etc.)</li>
+  <li>Documents famille (scan, expiration, alertes)</li>
+  <li>Journal famille (notes, photos)</li>
+  <li>Liste d'achats famille (Vinted, matériel)</li>
+  <li>Intégration Garmin (sport/santé)</li>
+  <li>Rappel crèche via Telegram</li>
+  <li>Diversification alimentaire Jules</li>
+  <li>Jours spéciaux (fêtes, événements)</li>
+</ul>
+<h4>Sous-pages Frontend</h4>
+<div class="badge-row">
+  <span class="badge badge-module">jules</span>
+  <span class="badge badge-module">activites</span>
+  <span class="badge badge-module">routines</span>
+  <span class="badge badge-module">budget</span>
+  <span class="badge badge-module">calendriers</span>
+  <span class="badge badge-module">anniversaires</span>
+  <span class="badge badge-module">contacts</span>
+  <span class="badge badge-module">documents</span>
+  <span class="badge badge-module">journal</span>
+  <span class="badge badge-module">achats</span>
+  <span class="badge badge-module">garmin</span>
+  <span class="badge badge-module">weekend</span>
+  <span class="badge badge-module">jours-speciaux</span>
+  <span class="badge badge-module">diversification</span>
+</div>
+</div>
+</details>
+
+<!-- MAISON -->
+<details>
+<summary>🏡 Module Maison (15 tables, 16 sous-pages, ~90 endpoints)</summary>
+<div class="detail-content">
+<h4>Fonctionnalités</h4>
+<ul class="check-list">
+  <li>Projets maison (Kanban, Gantt, phases, budget, artisans)</li>
+  <li>Entretien préventif (routines, rappels, fréquences, historique)</li>
+  <li>Jardin (plantes, arrosage, récolte, semis, vue interactive)</li>
+  <li>Équipements (inventaire, garantie badge, diagnostic pannes IA)</li>
+  <li>Énergie (suivi conso, comparaison N vs N-1, HC/HP, anomalies)</li>
+  <li>Plan 3D isométrique de la maison (Three.js, pièces cliquables)</li>
+  <li>Finances maison (charges, dépenses, prévisions)</li>
+  <li>Gestion artisans (contacts, évaluations, devis)</li>
+  <li>Abonnements (eau, élec, gaz, internet, assurances — comparateur)</li>
+  <li>Diagnostics IA (photo + texte → analyse panne/problème)</li>
+  <li>Stocks ménagers (produits, seuils mini)</li>
+  <li>Travaux / rénovation (guide, checklist, budget)</li>
+  <li>Meubles wishlist</li>
+  <li>Timer appareils (cycles machine)</li>
+  <li>Assistant flottant maison</li>
+  <li>Tablette mode (interface dédiée tablette)</li>
+</ul>
+<h4>Sous-pages Frontend</h4>
+<div class="badge-row">
+  <span class="badge badge-module">projets</span>
+  <span class="badge badge-module">menage</span>
+  <span class="badge badge-module">jardin</span>
+  <span class="badge badge-module">equipements</span>
+  <span class="badge badge-module">energie</span>
+  <span class="badge badge-module">finances</span>
+  <span class="badge badge-module">artisans</span>
+  <span class="badge badge-module">abonnements</span>
+  <span class="badge badge-module">diagnostics</span>
+  <span class="badge badge-module">provisions</span>
+  <span class="badge badge-module">travaux</span>
+  <span class="badge badge-module">meubles</span>
+  <span class="badge badge-module">charges</span>
+  <span class="badge badge-module">documents</span>
+  <span class="badge badge-module">tablette</span>
+  <span class="badge badge-module">visualisation</span>
+</div>
+</div>
+</details>
+
+<!-- JEUX -->
+<details>
+<summary>🎮 Module Jeux (8 tables, 4 sous-pages, ~60 endpoints)</summary>
+<div class="detail-content">
+<h4>Fonctionnalités</h4>
+<ul class="check-list">
+  <li>Paris sportifs — suivi matchs, cotes, résultats, P&L</li>
+  <li>Détection value bets automatique (cron 30min, EV > 5%)</li>
+  <li>Scraping cotes The Odds API (cron 2h)</li>
+  <li>Scraping résultats API-Football (cron 23h)</li>
+  <li>Analyse séries cognitive biases (cron 9h)</li>
+  <li>Bankroll management (Kelly criterion, stop-loss)</li>
+  <li>Backtest stratégies historiques</li>
+  <li>Prédictions IA matchs</li>
+  <li>Loto — génération grilles, historique tirages</li>
+  <li>EuroMillions — même logique que Loto</li>
+  <li>Statistiques détaillées (ROI, winrate, séries)</li>
+  <li>Budget jeux séparé (indépendant du budget famille)</li>
+</ul>
+<h4>Sous-pages Frontend</h4>
+<div class="badge-row">
+  <span class="badge badge-module">paris</span>
+  <span class="badge badge-module">bankroll</span>
+  <span class="badge badge-module">loto</span>
+  <span class="badge badge-module">euromillions</span>
+</div>
+</div>
+</details>
+
+<!-- HABITAT -->
+<details>
+<summary>🏠 Module Habitat/Domotique (4 tables, sous le hub Maison)</summary>
+<div class="detail-content">
+<h4>Fonctionnalités</h4>
+<ul class="check-list">
+  <li>Plans d'aménagement (pièces, surfaces, disposition)</li>
+  <li>Scénarios domotique (automatisations)</li>
+  <li>Gestion devices connectés</li>
+  <li>Suggestions déco IA</li>
+  <li>Simulation déménagement (impact budget/maison)</li>
+  <li>Veille immobilière (widget dashboard)</li>
+</ul>
+</div>
+</details>
+
+<!-- OUTILS -->
+<details>
+<summary>🔧 Module Outils (5 sous-pages)</summary>
+<div class="detail-content">
+<h4>Fonctionnalités</h4>
+<ul class="check-list">
+  <li>Chat IA libre (conversation Mistral)</li>
+  <li>Convertisseur d'unités</li>
+  <li>Météo locale</li>
+  <li>Minuteur cuisine / multi-timer</li>
+  <li>Notes rapides</li>
+</ul>
+</div>
+</details>
+
+<!-- PLANNING -->
+<details>
+<summary>📅 Module Planning (transversal)</summary>
+<div class="detail-content">
+<h4>Fonctionnalités</h4>
+<ul class="check-list">
+  <li>Hub planning unifié (tous modules)</li>
+  <li>Vue timeline multi-source</li>
+  <li>Ma journée (agrégation tâches du jour)</li>
+  <li>Ma semaine (vue hebdo consolidée)</li>
+  <li>Focus mode (vue concentrée)</li>
+  <li>Export iCal / Google Calendar sync (cron 23h)</li>
+</ul>
+</div>
+</details>
+
+<!-- DASHBOARD -->
+<details>
+<summary>📊 Dashboard (18 widgets drag-drop)</summary>
+<div class="detail-content">
+<h4>Widgets</h4>
+<ul class="check-list">
+  <li>Métriques clés (repas, courses, activités)</li>
+  <li>Actions rapides (boutons raccourcis)</li>
+  <li>Lecture IA (insights intelligents)</li>
+  <li>Rappels smart (contextuels)</li>
+  <li>Dépenses (camembert/treemap mensuel)</li>
+  <li>Alerte budget (anomalies IA)</li>
+  <li>Checklist du jour (validation tâches)</li>
+  <li>Bilan mensuel (résumé)</li>
+  <li>Météo (bannière)</li>
+  <li>Histoire famille (timeline jalons)</li>
+  <li>Alertes contextuelles (docs expirants, stocks bas)</li>
+  <li>Points famille (gamification limitée)</li>
+  <li>Score foyer (jauge maison)</li>
+  <li>Score bien-être (jauge famille)</li>
+  <li>Score écologique (jauge cuisine)</li>
+  <li>Veille immobilière (widget)</li>
+  <li>Saison jardin (plantes du moment)</li>
+  <li>Journal actions (historique)</li>
+</ul>
+</div>
+</details>
+
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 3: SCHÉMA INTERFACE -->
+<!-- ====================================================================== -->
+<section id="interface">
+<h2><span class="emoji">🖥️</span> Schéma de l'interface</h2>
+
+<h3>Layout principal</h3>
+<div class="ui-mock">
+  <div class="ui-titlebar">
+    <div class="ui-dot" style="background:#f87171"></div>
+    <div class="ui-dot" style="background:#fbbf24"></div>
+    <div class="ui-dot" style="background:#4ade80"></div>
+    MaTanne — Hub familial
+  </div>
+  <div class="ui-body">
+    <div class="ui-sidebar">
+      <div style="font-weight:700;margin-bottom:8px;">☰ Navigation</div>
+      <div class="item active">🏠 Dashboard</div>
+      <div class="item">🍽️ Cuisine</div>
+      <div class="item">👨‍👩‍👦 Famille</div>
+      <div class="item">🏡 Maison</div>
+      <div class="item">📅 Planning</div>
+      <div class="item">🎮 Jeux</div>
+      <div class="item">🔧 Outils</div>
+      <div class="item">⚙️ Paramètres</div>
+      <div style="border-top:1px solid var(--border);margin:8px 0;padding-top:8px;">
+        <div class="item">🔒 Admin</div>
+      </div>
+    </div>
+    <div class="ui-main">
+      <div style="font-weight:600;margin-bottom:12px;">📊 Dashboard — 18 widgets (drag & drop)</div>
+      <div class="ui-grid">
+        <div class="ui-widget" style="background:rgba(56,189,248,0.1);">📈 Métriques</div>
+        <div class="ui-widget" style="background:rgba(74,222,128,0.1);">⚡ Actions rapides</div>
+        <div class="ui-widget" style="background:rgba(167,139,250,0.1);">🤖 Insights IA</div>
+        <div class="ui-widget" style="background:rgba(251,191,36,0.1);">🔔 Rappels</div>
+        <div class="ui-widget" style="background:rgba(248,113,113,0.1);">💰 Dépenses</div>
+        <div class="ui-widget" style="background:rgba(56,189,248,0.1);">✅ Checklist jour</div>
+        <div class="ui-widget" style="background:rgba(74,222,128,0.1);">🌡️ Météo</div>
+        <div class="ui-widget" style="background:rgba(167,139,250,0.1);">👶 Jalons Jules</div>
+        <div class="ui-widget" style="background:rgba(251,191,36,0.1);">🌱 Jardin saison</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Navigation par module</h3>
+<div class="ui-mock">
+  <div class="ui-titlebar">
+    <div class="ui-dot" style="background:#f87171"></div>
+    <div class="ui-dot" style="background:#fbbf24"></div>
+    <div class="ui-dot" style="background:#4ade80"></div>
+    🍽️ Cuisine — Hub
+  </div>
+  <div class="ui-body" style="flex-direction:column;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <div class="flow-box primary">Recettes</div>
+      <div class="flow-box">Planning</div>
+      <div class="flow-box">Courses</div>
+      <div class="flow-box">Inventaire</div>
+      <div class="flow-box">Batch Cooking</div>
+      <div class="flow-box">Anti-Gaspi</div>
+      <div class="flow-box">Nutrition</div>
+      <div class="flow-box">Feedback</div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+      <div style="background:var(--bg);border-radius:8px;padding:16px;">
+        <div style="font-weight:600;margin-bottom:8px;">📋 Liste des recettes</div>
+        <div style="font-size:0.8rem;color:var(--text2);">Filtres + recherche + import URL/PDF • Cartes recettes avec Nutriscore • Actions rapides (planifier, adapter Jules, exporter PDF)</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:16px;">
+        <div style="font-weight:600;margin-bottom:8px;">🤖 Suggestions IA</div>
+        <div style="font-size:0.8rem;color:var(--text2);">Basées sur inventaire + préférences + saison + historique feedback</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Visualisations disponibles</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>📊 13 composants graphiques</h4>
+    <ul class="check-list">
+      <li>Jauges circulaires (bien-être, budget, foyer)</li>
+      <li>Camembert budget (répartition catégories)</li>
+      <li>Graphique budget vs réel (ligne/barre)</li>
+      <li>Sankey flux financiers (flux d'argent)</li>
+      <li>Treemap budget + inventaire (hiérarchique)</li>
+      <li>Heatmap nutritionnel (grille couleurs)</li>
+      <li>Radar skills Jules + nutrition famille</li>
+      <li>Timeline jalons (chronologie)</li>
+      <li>Calendrier énergie (conso quotidienne)</li>
+      <li>Graphique ROI (retour investissement)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🏠 Visualisation 3D + Interactif</h4>
+    <ul class="check-list">
+      <li>Plan 3D maison (Three.js, pièces mobiles, tâches overlay)</li>
+      <li>Vue jardin interactive (SVG, plantations)</li>
+      <li>Kanban projets (colonnes drag-drop)</li>
+      <li>Heatmap routines quotidien (activité par jour)</li>
+      <li>Heatmap routines annuel (365 jours, type GitHub)</li>
+      <li>Timeline interactive famille (scroll)</li>
+      <li>Timeline batch cooking (phases)</li>
+      <li>Frise flux cuisine (prep → cuisson → service)</li>
+      <li>Carte Leaflet (veille immobilière)</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 4: FLUX UTILISATEUR -->
+<!-- ====================================================================== -->
+<section id="flux">
+<h2><span class="emoji">🔄</span> Flux utilisateur actuels</h2>
+
+<h3>Flux 1: Planifier la semaine de repas</h3>
+<div class="flow-diagram">
+  <div class="flow-row">
+    <div class="flow-box primary">Dashboard</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Cuisine Hub</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Planning semaine</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box ia">IA suggère menus</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Valider planning</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Auto-génération courses</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Liste courses prête</div>
+  </div>
+  <p style="margin-top:10px;font-size:0.8rem;"><strong>Automatisé:</strong> Cron dimanche 19h propose un planning si la semaine est vide. L'utilisateur valide → courses générées automatiquement.</p>
+</div>
+
+<h3>Flux 2: Faire les courses</h3>
+<div class="flow-diagram">
+  <div class="flow-row">
+    <div class="flow-box primary">Liste courses</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Cocher articles</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">WebSocket sync temps réel</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Valider fin courses</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Mise à jour inventaire auto</div>
+  </div>
+</div>
+
+<h3>Flux 3: Gérer l'entretien maison</h3>
+<div class="flow-diagram">
+  <div class="flow-row">
+    <div class="flow-box primary">Maison Hub</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Voir tâches du jour</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Cocher (fait/pas fait)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box ia">IA: prochaine suggestion</div>
+  </div>
+  <div class="flow-row" style="margin-top:6px;">
+    <div class="flow-box" style="opacity:0.6;">Tâche échouée</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box ia">Bridge: suggère artisan</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Contacter artisan</div>
+  </div>
+</div>
+
+<h3>Flux 4: Diagnostic problème maison</h3>
+<div class="flow-diagram">
+  <div class="flow-row">
+    <div class="flow-box primary">Problème détecté</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Prendre photo / décrire</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box ia">IA diagnostic (photo/texte)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Estimation coûts + étapes</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Créer projet réparation</div>
+  </div>
+</div>
+
+<h3>Flux 5: Paris sportifs</h3>
+<div class="flow-diagram">
+  <div class="flow-row">
+    <div class="flow-box ia">Cron: scrape cotes (2h)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box ia">Cron: detect value bets (30min)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Notification Telegram</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box primary">Utilisateur valide pari</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Suivi résultat</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">P&L bankroll mis à jour</div>
+  </div>
+</div>
+
+<h3>Flux 6: Morning digest</h3>
+<div class="flow-diagram">
+  <div class="flow-row">
+    <div class="flow-box ia">Cron matin: digest auto</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Agrège: météo + tâches + repas + rappels</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">Envoi Telegram/Push</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box primary">Utilisateur lit depuis mobile</div>
+  </div>
+</div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 5: INTER-MODULES -->
+<!-- ====================================================================== -->
+<section id="inter-modules">
+<h2><span class="emoji">🔗</span> Interactions inter-modules</h2>
+
+<h3>25+ Bridges actifs</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Bridge</th><th>Source</th><th>Cible</th><th>Déclencheur</th><th>Description</th></tr>
+  <tr><td>Récolte → Recettes</td><td>🌱 Jardin</td><td>🍽️ Recettes</td><td>Event bus récolte</td><td>Légumes récoltés → suggestions recettes</td></tr>
+  <tr><td>Récolte → Inventaire</td><td>🌱 Jardin</td><td>📦 Stock</td><td>Event bus récolte</td><td>Ajouter récolte au stock maison</td></tr>
+  <tr><td>Anniversaire → Menu festif</td><td>👨‍👩‍👦 Famille</td><td>🍽️ Planning</td><td>~30j avant</td><td>Planifier menu spécial anniversaire</td></tr>
+  <tr><td>Jalon → Calendrier</td><td>👶 Jules</td><td>📅 Calendrier</td><td>Jalon atteint</td><td>Inscrire nouveau jalon au calendrier famille</td></tr>
+  <tr><td>Budget anomalies → Telegram</td><td>💰 Budget</td><td>📱 Notif</td><td>Cron 20h</td><td>Alerte si catégorie budget > 80%</td></tr>
+  <tr><td>Énergie HC/HP → Planning machines</td><td>⚡ Énergie</td><td>🏡 Entretien</td><td>Cron nuit</td><td>Programmer lave-linge en heures creuses</td></tr>
+  <tr><td>Planning → Courses auto</td><td>🍽️ Planning</td><td>🛒 Courses</td><td>Après validation</td><td>Générer liste courses depuis planning validé</td></tr>
+  <tr><td>Batch cooking → Planning</td><td>🍽️ Batch</td><td>📅 Planning</td><td>Après session</td><td>Pré-remplir planning semaine suivante</td></tr>
+  <tr><td>Feedback → Suggestions IA</td><td>⭐ Feedback</td><td>🤖 IA</td><td>Notation recette</td><td>Améliorer suggestions futures</td></tr>
+  <tr><td>Entretien échoué → Artisan</td><td>🔧 Entretien</td><td>👷 Artisans</td><td>Tâche marquée échouée</td><td>Suggérer artisan compétent</td></tr>
+  <tr><td>Météo → Entretien</td><td>🌤️ Météo</td><td>🔧 Entretien</td><td>Changement météo</td><td>Ajuster tâches selon prévisions</td></tr>
+  <tr><td>Documents expirés → Alertes</td><td>📄 Documents</td><td>🔔 Dashboard</td><td>Cron matin</td><td>Carte alerte document à renouveler</td></tr>
+  <tr><td>Terroir → Recettes saisonnières</td><td>🌾 Terroir</td><td>🍽️ Recettes</td><td>Changement saison</td><td>Proposer recettes produits locaux</td></tr>
+  <tr><td>Budget unifié</td><td>Multi-source</td><td>💰 Budget</td><td>Cron 22h</td><td>Consolider budgets jeux + famille + maison</td></tr>
+  <tr><td>Déménagement simulation</td><td>🏠 Habitat</td><td>💰 Budget</td><td>Manuel</td><td>Impact financier et logistique</td></tr>
+  <tr><td>Jules activités potager</td><td>👶 Jules + 🌱 Jardin</td><td>📅 Planning</td><td>Âge Jules</td><td>Activités jardin adaptées à l'âge</td></tr>
+  <tr><td>Stock → Recette faisable?</td><td>📦 Stock</td><td>🍽️ Recettes</td><td>Sélection recette</td><td>Vérifier ingredients en stock</td></tr>
+  <tr><td>Voyage → Budget</td><td>✈️ Voyages</td><td>💰 Budget</td><td>Fin voyage</td><td>Consolider dépenses voyage dans budget</td></tr>
+  <tr><td>Veille immo</td><td>🏠 Immobilier</td><td>📊 Dashboard</td><td>Alertes marché</td><td>Widget veille prix immobilier</td></tr>
+</table>
+</div>
+
+<h3>Event Bus — 20+ types d'événements</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>Events Cuisine</h4>
+    <ul class="check-list">
+      <li><code>recette.planifiee</code> — recette ajoutée au planning</li>
+      <li><code>recette.importee</code> — recette importée (URL/PDF)</li>
+      <li><code>courses.generees</code> — liste courses créée</li>
+      <li><code>courses.modifiees</code> — articles modifiés</li>
+      <li><code>batch_cooking.termine</code> — session batch terminée</li>
+      <li><code>stock.modifie</code> — inventaire mis à jour</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Events Maison + Famille</h4>
+    <ul class="check-list">
+      <li><code>entretien.routine_creee</code> — nouvelle routine</li>
+      <li><code>entretien.semaine_optimisee</code> — planning optimisé</li>
+      <li><code>jardin.recolte</code> — récolte effectuée</li>
+      <li><code>jardin.modifie</code> — jardin mis à jour</li>
+      <li><code>projets.modifie</code> — projet créé/archivé</li>
+      <li><code>depenses.modifiee</code> — dépense ajoutée</li>
+      <li><code>meubles.modifie</code> — wishlist mise à jour</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 6: IA & AUTOMATIONS -->
+<!-- ====================================================================== -->
+<section id="ia">
+<h2><span class="emoji">🤖</span> IA & Automations</h2>
+
+<h3>15+ Services IA (Mistral)</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Service</th><th>Méthodes IA</th><th>Usage</th></tr>
+  <tr><td>SuggestionsIAService</td><td>batch_cooking_intelligent, conseil_jules, checklist_voyage, score_eco, optim_énergie, nutrition</td><td>6 appels Mistral</td></tr>
+  <tr><td>ResumeHebdoService</td><td>collecter + generer_resume</td><td>Résumé intelligent semaine</td></tr>
+  <tr><td>PrevisionBudgetService</td><td>prevision_fin_mois, anomalies, auto_categoriser</td><td>Analyse budget IA</td></tr>
+  <tr><td>PlanificateurAdaptatifService</td><td>collecter_contexte, suggerer_planning</td><td>Planning adaptatif</td></tr>
+  <tr><td>DiagnosticMaisonService</td><td>diagnostiquer_photo, diagnostiquer_texte</td><td>Diagnostic photo/texte</td></tr>
+  <tr><td>PredictionCoursesService</td><td>predire_prochaine_liste, analyser_habitudes</td><td>Prédiction courses</td></tr>
+  <tr><td>ProjetsService (IA)</td><td>Planning et optimisation projets</td><td>Projets maison</td></tr>
+  <tr><td>JardinService (IA)</td><td>Planning et saisonnalité</td><td>Jardinage</td></tr>
+  <tr><td>PlansHabitatAIService</td><td>Aménagement intérieur, propositions 3D</td><td>Habitat</td></tr>
+  <tr><td>DecoHabitatService</td><td>Suggestions décoration</td><td>Déco</td></tr>
+  <tr><td>PlanningAIService</td><td>Planning repas avec contraintes</td><td>Planning</td></tr>
+  <tr><td>BilanMensuelService</td><td>Rapport mensuel généré IA</td><td>Rapports</td></tr>
+  <tr><td>IAAvanceeService</td><td>Comparaison recettes, estimation, cadeaux, voyage, planning adaptatif</td><td>5 features avancées</td></tr>
+  <tr><td>JulesAIService</td><td>Conseils développement par âge</td><td>Enfant</td></tr>
+  <tr><td>WeekendAIService</td><td>Suggestions activités weekend</td><td>Famille</td></tr>
+</table>
+</div>
+
+<h3>20+ Cron Jobs planifiés</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Horaire</th><th>Job</th><th>Module</th><th>Action</th></tr>
+  <tr><td>Toutes les 30min</td><td>detecter_value_bets</td><td>🎮 Jeux</td><td>Identifier value bets (EV > 5%)</td></tr>
+  <tr><td>Toutes les 2h</td><td>scraper_cotes_sportives</td><td>🎮 Jeux</td><td>Récupérer les cotes (The Odds API)</td></tr>
+  <tr><td>3h</td><td>nettoyer_exports</td><td>🔧 Utils</td><td>Supprimer exports > 7 jours</td></tr>
+  <tr><td>7h</td><td>analyser_peremptions</td><td>🍽️ Cuisine</td><td>Alertes péremption J-3</td></tr>
+  <tr><td>9h</td><td>analyser_series_paris</td><td>🎮 Jeux</td><td>Analyse biais cognitifs</td></tr>
+  <tr><td>9h</td><td>verifier_stocks_bas</td><td>🍽️ Cuisine</td><td>Détection stocks bas (lundi)</td></tr>
+  <tr><td>9h</td><td>rappel_activite_jules</td><td>👶 Famille</td><td>Rappels activités Jules</td></tr>
+  <tr><td>9h (lundi)</td><td>rappel_jardin_saison</td><td>🌱 Jardin</td><td>Rappels jardin saisonniers</td></tr>
+  <tr><td>16h (vendredi)</td><td>prediction_courses</td><td>🍽️ Cuisine</td><td>Prédire top 30 articles</td></tr>
+  <tr><td>18h (dimanche)</td><td>suggestion_planning</td><td>🍽️ Cuisine</td><td>Proposer planning si vide</td></tr>
+  <tr><td>18h (dimanche)</td><td>tendances_nutrition</td><td>🍽️ Cuisine</td><td>Analyse nutrition hebdo</td></tr>
+  <tr><td>19h (dimanche)</td><td>planning_auto</td><td>📅 Planning</td><td>Pré-remplir semaine vide</td></tr>
+  <tr><td>20h</td><td>alertes_budget</td><td>💰 Budget</td><td>Alerte catégorie > 80%</td></tr>
+  <tr><td>22h</td><td>sync_budget</td><td>💰 Budget</td><td>Consolider budgets multi-sources</td></tr>
+  <tr><td>23h</td><td>scraper_resultats</td><td>🎮 Jeux</td><td>Récupérer résultats matchs</td></tr>
+  <tr><td>23h</td><td>sync_google_calendar</td><td>📅 Planning</td><td>Sync Google Calendar</td></tr>
+  <tr><td>1er du mois 8h</td><td>rapport_mensuel</td><td>🍽️ Cuisine</td><td>Bilan conso/gaspillage mensuel</td></tr>
+</table>
+</div>
+
+<h3>Notifications — 5 canaux</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>📱 Telegram (principal)</h4>
+    <p>14 fonctions d'envoi : planning, courses, péremption, crèche, diagnostic, budget, nutrition, weekend, digest matin, entretien...</p>
+    <p>Boutons interactifs inline, rate limiting (30/h, 200/j), état conversation persistant</p>
+  </div>
+  <div class="card">
+    <h4>🔔 Web Push + ntfy.sh</h4>
+    <p>Push navigateur (Web Push API) + ntfy.sh (notifications HTTP gratuites)</p>
+    <p>Configurable par utilisateur, heures silencieuses</p>
+  </div>
+  <div class="card">
+    <h4>📧 Email + Web</h4>
+    <p>Email transactionnel (SendGrid/Mailgun) — non configuré par défaut</p>
+    <p>Notifications web persistantes en base de données</p>
+  </div>
+</div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 7: ADMIN -->
+<!-- ====================================================================== -->
+<section id="admin">
+<h2><span class="emoji">🔒</span> Panel Admin (15 sections, 60+ endpoints)</h2>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>🕹️ Jobs & Scheduler</h4>
+    <ul class="check-list">
+      <li>Lister tous les jobs + état</li>
+      <li>Déclencher un job manuellement</li>
+      <li>Désactiver/réactiver un job</li>
+      <li>Modifier le schedule (cron expression)</li>
+      <li>Simuler une journée complète de jobs</li>
+      <li>Voir historique d'exécution</li>
+      <li>Logs par job</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🔗 Bridges & Services</h4>
+    <ul class="check-list">
+      <li>Status des 25+ bridges</li>
+      <li>Health check tous les services</li>
+      <li>Redémarrer un service singleton</li>
+      <li>Métriques services (appels, erreurs, latence)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🔔 Notifications</h4>
+    <ul class="check-list">
+      <li>Envoyer test par canal choisi</li>
+      <li>Test sur tous les canaux</li>
+      <li>Voir queue en attente</li>
+      <li>Historique envois</li>
+      <li>Templates disponibles</li>
+      <li>Simulation dry-run</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🗄️ Cache & DB</h4>
+    <ul class="check-list">
+      <li>Purger cache par pattern</li>
+      <li>Stats hit/miss cache</li>
+      <li>Lister toutes les clés</li>
+      <li>Vérification cohérence DB</li>
+      <li>Export/import snapshot JSON</li>
+      <li>Schema diff (attendu vs réel)</li>
+      <li>Seed data / Reset DB</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>📊 Monitoring & Logs</h4>
+    <ul class="check-list">
+      <li>Audit logs (paginés, filtrables)</li>
+      <li>Security logs (auth, rate limit)</li>
+      <li>Historique events bus</li>
+      <li>Déclencher un event manuellement</li>
+      <li>Rejouer events (date range)</li>
+      <li>Métriques Prometheus</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>⚙️ Config & Users</h4>
+    <ul class="check-list">
+      <li>Config runtime (feature flags)</li>
+      <li>Export/import config snapshot</li>
+      <li>Lister utilisateurs</li>
+      <li>Impersonate user (dev)</li>
+      <li>Désactiver compte</li>
+      <li>Reset password admin</li>
+      <li>Console SQL admin</li>
+      <li>Test Telegram bot</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 8: BUGS, GAPS, MANQUES -->
+<!-- ====================================================================== -->
+<section id="bugs">
+<h2><span class="emoji">🐛</span> Bugs, Gaps & Manques détectés</h2>
+
+<h3>Bugs & Problèmes techniques</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Sévérité</th><th>Problème</th><th>Fichier</th><th>Action recommandée</th></tr>
+  <tr><td><span class="status-dot dot-red"></span>Haute</td><td>Client API frontend orphelin — aucune route backend correspondante</td><td>frontend/src/bibliotheque/api/avance.ts</td><td>Supprimer le fichier</td></tr>
+  <tr><td><span class="status-dot dot-red"></span>Haute</td><td>31 tests skippés (13 batch_cooking, 10 AI, 8 divers)</td><td>tests/services/batch_cooking/</td><td>Fixer la session DB mock ou marquer xfail avec reason</td></tr>
+  <tr><td><span class="status-dot dot-yellow"></span>Moyenne</td><td>Aliases dépréciés encore exposés dans __init__.py</td><td>src/services/jeux/__init__.py L35-36</td><td>Supprimer ServiceInnovationsJeux et obtenir_service_innovations_jeux</td></tr>
+  <tr><td><span class="status-dot dot-yellow"></span>Moyenne</td><td>Mojibake legacy constant (bÃ©bÃ©) gardée pour compat test</td><td>src/services/cuisine/recettes/recettes_ia_versions.py L49</td><td>Fixer l'encodage ou supprimer la constante legacy</td></tr>
+  <tr><td><span class="status-dot dot-yellow"></span>Moyenne</td><td>D3 en dépendance mais aucun import direct trouvé (potentiel dead dep)</td><td>frontend/package.json</td><td>Vérifier si utilisé dans les heatmaps custom, sinon supprimer</td></tr>
+  <tr><td><span class="status-dot dot-yellow"></span>Moyenne</td><td>admin_operations.py trop gros (~800 lignes) — fourre-tout</td><td>src/api/routes/admin_operations.py</td><td>Splitter en 4 fichiers (notif, cache, ia, users)</td></tr>
+  <tr><td><span class="status-dot dot-yellow"></span>Moyenne</td><td>inter_modules.py monolithique (~1500 lignes)</td><td>src/services/ia/inter_modules.py</td><td>Splitter par domaine de bridge</td></tr>
+  <tr><td><span class="status-dot dot-blue"></span>Basse</td><td>6+ méthodes de compat legacy dans services jeux + cuisine</td><td>Voir Section Legacy</td><td>Supprimer après adaptation des tests</td></tr>
+  <tr><td><span class="status-dot dot-blue"></span>Basse</td><td>Test avec nom "phase4" dans le nom de la fonction</td><td>tests/services/test_cron_jobs_catalog.py L30</td><td>Renommer la fonction test</td></tr>
+  <tr><td><span class="status-dot dot-blue"></span>Basse</td><td>docs/guides/ contient des références Streamlit obsolètes</td><td>docs/guides/cuisine/batch_cooking.md + autres</td><td>Mettre à jour ou supprimer les guides Streamlit</td></tr>
+</table>
+</div>
+
+<h3>Gaps fonctionnels</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Module</th><th>Gap identifié</th><th>Impact</th><th>Suggestion</th></tr>
+  <tr><td>🔔 Telegram</td><td>Pas de webhook pour commandes utilisateur (uniquement envoi)</td><td>🟡 Moyen</td><td>Implémenter /api/v1/telegram/webhook pour commandes entrantes (/planning, /courses, etc.)</td></tr>
+  <tr><td>🔔 Notifications</td><td>Pas de retry/backoff en cas d'échec d'envoi</td><td>🟡 Moyen</td><td>Exponential backoff + dead letter queue</td></tr>
+  <tr><td>📊 Event bus</td><td>Événements non persistés en DB (mémoire only, perdu au restart)</td><td>🟡 Moyen</td><td>Journalisation optionnelle des events en DB pour audit/replay</td></tr>
+  <tr><td>📧 Email</td><td>Canal email non configuré par défaut</td><td>🟢 Bas</td><td>Ajouter un template email basic + activer SendGrid/Resend</td></tr>
+  <tr><td>🤖 IA</td><td>Pas de tracking granulaire des tokens par feature</td><td>🟢 Bas</td><td>Compteur tokens par service IA pour monitoring coûts</td></tr>
+  <tr><td>📅 Planning</td><td>Pas de conflit détecté entre tâches maison et repas</td><td>🟢 Bas</td><td>Bridge planning unifié maison + repas</td></tr>
+  <tr><td>🏠 Admin</td><td>Pas de WebSocket pour monitoring temps réel des jobs</td><td>🟢 Bas</td><td>WebSocket /admin/live pour les jobs en cours</td></tr>
+</table>
+</div>
+
+<h3>Manques documentation</h3>
+<ul class="check-list">
+  <li class="warn">docs/guides/ — 8 fichiers avec références Streamlit (l'app est Next.js)</li>
+  <li class="warn">docs/user-guide/ — guide utilisateur non mis à jour pour l'UI actuelle</li>
+  <li class="warn">SERVICES_REFERENCE.md — quelques chemins de code cassés</li>
+  <li class="warn">Pas de doc unifiée pour le système de bridges (dispersé dans INTER_MODULES + code)</li>
+  <li class="warn">Pas de doc API pour les endpoints admin (uniquement dans le code)</li>
+</ul>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 9: NETTOYAGE -->
+<!-- ====================================================================== -->
+<section id="cleanup">
+<h2><span class="emoji">🧹</span> Plan de nettoyage</h2>
+
+<h3>Fichiers & code legacy à supprimer</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Type</th><th>Cible</th><th>Raison</th></tr>
+  <tr><td><span class="tag tag-err">Supprimer</span></td><td>frontend/src/bibliotheque/api/avance.ts</td><td>Client API orphelin, aucune route backend</td></tr>
+  <tr><td><span class="tag tag-err">Supprimer</span></td><td>src/services/jeux/__init__.py — lignes 35-36</td><td>Aliases dépréciés (ServiceInnovationsJeux)</td></tr>
+  <tr><td><span class="tag tag-err">Supprimer</span></td><td>Constante _TYPE_VERSION_BEBE_LEGACY (mojibake)</td><td>Encodage cassé, adapter les tests</td></tr>
+  <tr><td><span class="tag tag-err">Supprimer</span></td><td>6 méthodes compat legacy (jeux/_internal/, cuisine/planning/)</td><td>Code rétrocompatibilité devenu inutile</td></tr>
+  <tr><td><span class="tag tag-err">Supprimer</span></td><td>sql/schema/17_migrations_absorbees.sql</td><td>Documentation historique sans utilité</td></tr>
+  <tr><td><span class="tag tag-err">Supprimer</span></td><td>sql/schema/18_migration_historique_preparation.sql</td><td>Placeholder vide</td></tr>
+  <tr><td><span class="tag tag-warn">Mettre à jour</span></td><td>docs/guides/ (8 fichiers Streamlit)</td><td>Références à l'ancien framework</td></tr>
+  <tr><td><span class="tag tag-warn">Mettre à jour</span></td><td>docs/user-guide/</td><td>Guide utilisateur pour l'ancienne UI</td></tr>
+  <tr><td><span class="tag tag-warn">Mettre à jour</span></td><td>SERVICES_REFERENCE.md</td><td>Chemins de code cassés</td></tr>
+</table>
+</div>
+
+<h3>Renommages nécessaires</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Fichier / Code</th><th>Problème</th><th>Correction</th></tr>
+  <tr><td>tests/services/test_cron_jobs_catalog.py L30</td><td>Nom de test contient "phase4"</td><td>Renommer: test_jobs_habitat_ont_un_timing_coherent</td></tr>
+  <tr><td>src/api/routes/admin_jobs.py L437</td><td>Champ "phase" dans données bridge</td><td>Renommer en "categorie" ou "domaine"</td></tr>
+  <tr><td>src/api/routes/intra_flux.py</td><td>Nom flou "intra_flux"</td><td>Renommer en "flux_utilisateur.py" ou "raccourcis.py"</td></tr>
+</table>
+</div>
+
+<h3>Refactoring proposé</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>Split admin_operations.py (800→4 fichiers)</h4>
+    <ul class="check-list">
+      <li class="plan">admin_notifications.py — endpoints notifications</li>
+      <li class="plan">admin_cache.py — cache management</li>
+      <li class="plan">admin_ia_console.py — IA endpoints admin</li>
+      <li class="plan">admin_users.py — user management</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Split inter_modules.py (1500→modules)</h4>
+    <ul class="check-list">
+      <li class="plan">inter_modules_orchestrator.py — catalogue + consolidation</li>
+      <li class="plan">inter_modules_cuisine.py — bridges cuisine ↔ autres</li>
+      <li class="plan">inter_modules_famille.py — bridges famille ↔ autres</li>
+      <li class="plan">inter_modules_maison.py — bridges maison ↔ autres</li>
+    </ul>
+  </div>
+</div>
+
+<h3>SQL — Consolidation</h3>
+<ul class="check-list">
+  <li>SQL bien organisé en 18 fichiers modulaires + INIT_COMPLET.sql — rien à fusionner</li>
+  <li class="warn">Supprimer 17_migrations_absorbees.sql (historique pur, pas de valeur)</li>
+  <li class="warn">Supprimer 18_migration_historique_preparation.sql (placeholder vide)</li>
+  <li>Pas de migrations ni versioning (mode dev OK) — le système V-files est prêt si besoin</li>
+</ul>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 10: AMÉLIORATIONS UI -->
+<!-- ====================================================================== -->
+<section id="ui-improve">
+<h2><span class="emoji">🎨</span> Améliorations UI/UX</h2>
+
+<h3>Améliorations visuelles proposées</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>🏠 Plan 3D maison enrichi</h4>
+    <span class="tag tag-info">Three.js</span>
+    <ul class="check-list">
+      <li class="idea">Ajouter textures réalistes (murs, sols, plafonds) au lieu de couleurs plates</li>
+      <li class="idea">Pièces avec ombres et éclairage dynamique (jour/nuit)</li>
+      <li class="idea">Meubles 3D low-poly au lieu de blocs simples</li>
+      <li class="idea">Overlay conso énergie par pièce (gradient couleur)</li>
+      <li class="idea">Mode "vue éclatée" pour naviguer par étage</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🌱 Jardin interactif amélioré</h4>
+    <span class="tag tag-info">SVG / Three.js</span>
+    <ul class="check-list">
+      <li class="idea">Vue isométrique 2.5D du jardin (parcelles, plantes, saisons)</li>
+      <li class="idea">Animation croissance des plantes (timeline semis → récolte)</li>
+      <li class="idea">Indicateurs météo en overlay (pluie, soleil, gel)</li>
+      <li class="idea">Clic sur plante → détails + conseils IA</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>📊 Dashboard + Graphiques</h4>
+    <span class="tag tag-info">Recharts / D3</span>
+    <ul class="check-list">
+      <li class="idea">Transition fluide entre widgets drag (framer-motion)</li>
+      <li class="idea">Micro-animations sur les jauges (compteur qui monte)</li>
+      <li class="idea">Sparklines inline dans les cartes métriques</li>
+      <li class="idea">Mode "plein écran" par widget</li>
+      <li class="idea">Thème saisonnier adaptatif (déjà en place, enrichir)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🍽️ Planning repas visuel</h4>
+    <span class="tag tag-info">UI</span>
+    <ul class="check-list">
+      <li class="idea">Drag-drop des recettes sur le calendrier semaine</li>
+      <li class="idea">Photos miniatures des recettes dans le planning</li>
+      <li class="idea">Indicateur "stock OK / manquant" par recette</li>
+      <li class="idea">Vue timeline batch cooking plus riche (phases parallèles)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>📱 Mobile & Tablette</h4>
+    <span class="tag tag-info">Responsive</span>
+    <ul class="check-list">
+      <li class="idea">Mode tablette dédié (grille 2 colonnes, plus large)</li>
+      <li class="idea">Gestures swipe left/right pour navigation modules</li>
+      <li class="idea">Bottom sheet au lieu de dialogs sur mobile</li>
+      <li class="idea">PWA: splash screen personnalisé, icônes par module</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🎨 Design system avancé</h4>
+    <span class="tag tag-info">Tailwind</span>
+    <ul class="check-list">
+      <li class="idea">Skeleton loaders animés (shimmer) pendant le chargement</li>
+      <li class="idea">Transitions de page fluides (route transitions)</li>
+      <li class="idea">Empty states illustrés (SVG) pour les listes vides</li>
+      <li class="idea">Confetti / toast success pour les actions positives</li>
+      <li class="idea">Mode focus (dim le reste, highlight la tâche en cours)</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Principes UX à respecter</h3>
+<ul class="check-list">
+  <li><strong>L'utilisateur reste pilote</strong> — L'IA propose, l'utilisateur valide toujours</li>
+  <li><strong>Flux en 3 clics max</strong> — Toute action courante accessible en ≤3 taps</li>
+  <li><strong>Pas de surcharge</strong> — Dashboard personnalisable (masquer/ajouter widgets)</li>
+  <li><strong>Feedback immédiat</strong> — Toast confirmation sur chaque action</li>
+  <li><strong>Validation explicite</strong> — Pas d'action automatique sans confirmation pour les données importantes</li>
+</ul>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 11: PLAN D'ACTION -->
+<!-- ====================================================================== -->
+<section id="plan">
+<h2><span class="emoji">📋</span> Plan d'action complet</h2>
+
+<h3>Phase A — Nettoyage & Consolidation (priorité haute)</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>#</th><th>Action</th><th>Effort</th><th>Fichiers</th></tr>
+  <tr><td>A1</td><td>Supprimer avance.ts (client API orphelin)</td><td>5 min</td><td>frontend/src/bibliotheque/api/avance.ts</td></tr>
+  <tr><td>A2</td><td>Supprimer aliases dépréciés jeux __init__.py</td><td>5 min</td><td>src/services/jeux/__init__.py</td></tr>
+  <tr><td>A3</td><td>Supprimer constante mojibake + adapter tests</td><td>30 min</td><td>src/services/cuisine/recettes/recettes_ia_versions.py + tests</td></tr>
+  <tr><td>A4</td><td>Supprimer méthodes compat legacy (6 endroits)</td><td>1h</td><td>services/jeux, famille, cuisine</td></tr>
+  <tr><td>A5</td><td>Supprimer SQL 17_migrations_absorbees.sql & 18_*</td><td>5 min</td><td>sql/schema/</td></tr>
+  <tr><td>A6</td><td>Renommer test "phase4" → nom descriptif</td><td>5 min</td><td>tests/services/test_cron_jobs_catalog.py</td></tr>
+  <tr><td>A7</td><td>Renommer champ "phase" → "domaine" dans bridge data</td><td>10 min</td><td>src/api/routes/admin_jobs.py</td></tr>
+  <tr><td>A8</td><td>Renommer intra_flux.py → flux_utilisateur.py</td><td>15 min</td><td>src/api/routes/intra_flux.py + imports</td></tr>
+  <tr><td>A9</td><td>Vérifier & supprimer D3 si inutilisé dans package.json</td><td>15 min</td><td>frontend/package.json</td></tr>
+  <tr><td>A10</td><td>Supprimer/mettre à jour docs/guides/ Streamlit (8 fichiers)</td><td>1h</td><td>docs/guides/</td></tr>
+  <tr><td>A11</td><td>Mettre à jour docs/user-guide/ pour UI actuelle</td><td>2h</td><td>docs/user-guide/</td></tr>
+  <tr><td>A12</td><td>Auditer & corriger SERVICES_REFERENCE.md</td><td>1h</td><td>docs/SERVICES_REFERENCE.md</td></tr>
+</table>
+</div>
+
+<h3>Phase B — Fix tests & qualité (priorité haute)</h3>
+<div class="table-wrap">
+<table>
+  <tr><td>B1</td><td>Fixer les 13 tests batch_cooking skippés (session DB)</td><td>2h</td><td>tests/services/batch_cooking/</td></tr>
+  <tr><td>B2</td><td>Auditer les 10 tests AI skippés — marquer xfail ou fixer</td><td>1h</td><td>tests/core/ai/</td></tr>
+  <tr><td>B3</td><td>Auditer les 8 tests divers skippés</td><td>1h</td><td>Divers</td></tr>
+  <tr><td>B4</td><td>Ajouter tests pour webhook Telegram (actuellement non testé)</td><td>2h</td><td>tests/services/integrations/</td></tr>
+  <tr><td>B5</td><td>Ajouter tests pour notification dispatcher (retry logic)</td><td>2h</td><td>tests/services/core/notifications/</td></tr>
+</table>
+</div>
+
+<h3>Phase C — Refactoring architecture (priorité moyenne)</h3>
+<div class="table-wrap">
+<table>
+  <tr><td>C1</td><td>Split admin_operations.py → 4 fichiers ciblés</td><td>2h</td><td>src/api/routes/admin_*.py</td></tr>
+  <tr><td>C2</td><td>Split inter_modules.py → modules par domaine</td><td>3h</td><td>src/services/ia/inter_modules_*.py</td></tr>
+  <tr><td>C3</td><td>Documenter API admin (ajouter dans docs/ADMIN.md)</td><td>2h</td><td>docs/ADMIN.md</td></tr>
+  <tr><td>C4</td><td>Enrichir doc INTER_MODULES.md (ajouter catalogue complet bridges, schémas flux, déclencheurs)</td><td>1h</td><td>docs/INTER_MODULES.md</td></tr>
+</table>
+</div>
+
+<h3>Phase D — Nouvelles fonctionnalités (priorité moyenne)</h3>
+<div class="table-wrap">
+<table>
+  <tr><td>D1</td><td>Webhook Telegram entrant : commandes utilisateur (/planning, /courses, /digest)</td><td>4h</td><td>src/api/routes/webhooks.py, src/services/integrations/telegram.py</td></tr>
+  <tr><td>D2</td><td>Mode admin "déclencher manuellement" — bouton par job invisible en UI utilisateur</td><td>2h</td><td>Frontend admin + backend</td></tr>
+  <tr><td>D3</td><td>Retry/backoff pour notifications échouées</td><td>3h</td><td>src/services/core/notifications/</td></tr>
+  <tr><td>D4</td><td>Journalisation events bus en DB pour replay</td><td>3h</td><td>src/services/core/events/</td></tr>
+  <tr><td>D5</td><td>Tracking tokens IA par service (compteur granulaire)</td><td>2h</td><td>src/services/core/base/ai_service.py</td></tr>
+  <tr><td>D6</td><td>WebSocket monitoring jobs temps réel (admin)</td><td>3h</td><td>src/api/ + frontend admin</td></tr>
+  <tr><td>D7</td><td>Email transactionnel basique (Resend gratuit)</td><td>2h</td><td>src/services/core/notifications/notif_email.py</td></tr>
+</table>
+</div>
+
+<h3>Phase E — Interactions inter-modules avancées</h3>
+<div class="table-wrap">
+<table>
+  <tr><td>E1</td><td>Bridge: planning repas ↔ planning tâches maison (conflit detection)</td><td>3h</td><td>Bridges</td></tr>
+  <tr><td>E2</td><td>Bridge: dépenses jeux → résumé Telegram mensuel automatique</td><td>2h</td><td>Cron + Telegram</td></tr>
+  <tr><td>E3</td><td>Bridge: météo → suggestions recettes (soupe quand il pleut / salade quand il fait beau)</td><td>3h</td><td>IA bridge</td></tr>
+  <tr><td>E4</td><td>Bridge: inventaire bas → notification Telegram "ajouter à la prochaine liste"</td><td>2h</td><td>Cron + Telegram</td></tr>
+  <tr><td>E5</td><td>Bridge: anniversaire → suggestion cadeau IA (budget + âge + intérêts)</td><td>3h</td><td>IA + Famille</td></tr>
+  <tr><td>E6</td><td>Bridge: fin batch cooking → photo + partage Telegram "menu sem préparé ✅"</td><td>2h</td><td>Event bus + Telegram</td></tr>
+</table>
+</div>
+
+<h3>Phase F — Améliorations UI/UX</h3>
+<div class="table-wrap">
+<table>
+  <tr><td>F1</td><td>Skeleton loaders (shimmer) sur toutes les pages de données</td><td>3h</td><td>Composants communs</td></tr>
+  <tr><td>F2</td><td>Empty states illustrés (SVG) pour les listes vides</td><td>3h</td><td>Toutes les pages listes</td></tr>
+  <tr><td>F3</td><td>Transitions de page fluides (view transitions API ou framer-motion)</td><td>4h</td><td>Layout + pages</td></tr>
+  <tr><td>F4</td><td>Améliorer plan 3D (textures, éclairage, meubles low-poly)</td><td>6h</td><td>frontend/src/composants/maison/plan-3d.tsx</td></tr>
+  <tr><td>F5</td><td>Jardin 2.5D isométrique avec animation croissance</td><td>6h</td><td>frontend/src/composants/maison/vue-jardin-interactive.tsx</td></tr>
+  <tr><td>F6</td><td>Drag-drop recettes sur calendrier planning</td><td>4h</td><td>Planning page</td></tr>
+  <tr><td>F7</td><td>Micro-animations jauges dashboard (compteur qui monte)</td><td>2h</td><td>Composants graphiques</td></tr>
+  <tr><td>F8</td><td>Sparklines inline dans les cartes métriques</td><td>2h</td><td>Dashboard widgets</td></tr>
+  <tr><td>F9</td><td>Mode plein écran par widget dashboard</td><td>2h</td><td>Dashboard</td></tr>
+  <tr><td>F10</td><td>Bottom sheet pour mobile au lieu de dialogs</td><td>3h</td><td>Composants UI</td></tr>
+  <tr><td>F11</td><td>Toast success avec confetti pour les actions positives</td><td>1h</td><td>Toaster global</td></tr>
+</table>
+</div>
+
+<h3>Phase G — IA avancée & Innovation</h3>
+<div class="table-wrap">
+<table>
+  <tr><td>G1</td><td>IA: "Qu'est-ce qu'on peut cuisiner ce soir?" — recette express avec stock actuel</td><td>3h</td><td>Bridge stock → IA → recette en 1 tap</td></tr>
+  <tr><td>G2</td><td>IA: Auto-catégorisation des dépenses (déjà un endpoint, wirer au flux UI)</td><td>2h</td><td>Budget + formulaire dépenses</td></tr>
+  <tr><td>G3</td><td>IA: Détection automatique de recettes en double (fuzzy matching)</td><td>3h</td><td>Import recettes</td></tr>
+  <tr><td>G4</td><td>IA: Suggestion de routines selon la saison (nettoyage printemps, préparation hiver)</td><td>3h</td><td>Entretien + IA</td></tr>
+  <tr><td>G5</td><td>Assistant IA contextuel dans chaque module (widget flottant déjà présent, enrichir)</td><td>4h</td><td>Assistant flottant + contexte module</td></tr>
+  <tr><td>G6</td><td>IA: Comparaison abonnements (eau/élec/gaz/internet) avec suggestions alternatives</td><td>4h</td><td>Maison abonnements + scraping/API</td></tr>
+</table>
+</div>
+
+<h3>Phase H — Télégram enrichi & Admin manuel</h3>
+<div class="table-wrap">
+<table>
+  <tr><td>H1</td><td>Commandes Telegram: /planning (voir planning), /courses (voir liste), /digest (résumé)</td><td>4h</td><td>Webhook entrant</td></tr>
+  <tr><td>H2</td><td>Telegram: boutons inline pour valider/reporter tâches depuis le message</td><td>3h</td><td>Callbacks webhook</td></tr>
+  <tr><td>H3</td><td>Telegram: /ajouter [article] — ajouter à la liste courses par message</td><td>2h</td><td>Commande entrante</td></tr>
+  <tr><td>H4</td><td>Admin: "Déclencher tout" — bouton pour exécuter n'importe quel job/bridge en 1 clic</td><td>1h</td><td>Existe déjà (admin/jobs/{id}/run), améliorer l'UX</td></tr>
+  <tr><td>H5</td><td>Admin: Console quick-run — formulaire pour tester des bridges avec params custom</td><td>3h</td><td>Frontend admin</td></tr>
+  <tr><td>H6</td><td>Admin: Dry-run mode — exécuter tout sauf l'envoi réel (logs + aperçu)</td><td>3h</td><td>Flag sur chaque job/bridge</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- SECTION 12: NOTES FINALES -->
+<!-- ====================================================================== -->
+<section id="notes">
+<h2><span class="emoji">📝</span> Notes par catégorie</h2>
+
+<h3>Notes sur 10 — Justification</h3>
+<div class="table-wrap">
+<table>
+  <tr><th>Catégorie</th><th>Note</th><th>Justification</th></tr>
+  <tr>
+    <td><strong>Architecture</strong></td>
+    <td><span style="color:var(--success);font-weight:700;">8.5/10</span></td>
+    <td>Architecture modulaire bien pensée, séparation claire routes/schemas/services/models. Factory pattern pour DI. Event bus pour découplage. Points perdus: 2 fichiers monolithiques (admin_operations, inter_modules).</td>
+  </tr>
+  <tr>
+    <td><strong>Frontend UI</strong></td>
+    <td><span style="color:var(--warn);font-weight:700;">7/10</span></td>
+    <td>150+ composants, 3D Three.js, 13 graphiques, drag-drop dashboard. Bon mais manque skeleton loaders, empty states, transitions fluides, micro-animations. Pas de Storybook documenté pour le design system.</td>
+  </tr>
+  <tr>
+    <td><strong>Backend API</strong></td>
+    <td><span style="color:var(--success);font-weight:700;">8.5/10</span></td>
+    <td>500+ endpoints, patterns cohérents, JWT auth, rate limiting, ETag cache, pagination cursor-based. Excellent middleware stack. Point perdu: admin_operations fourre-tout.</td>
+  </tr>
+  <tr>
+    <td><strong>Tests</strong></td>
+    <td><span style="color:var(--warn);font-weight:700;">7.5/10</span></td>
+    <td>1000+ tests, contract tests, mutation testing. 31 tests skippés (dont 13 batch_cooking). Bon coverage mais quelques modules sous-testés (Telegram webhook, notification retry).</td>
+  </tr>
+  <tr>
+    <td><strong>Documentation</strong></td>
+    <td><span style="color:var(--warn);font-weight:700;">7/10</span></td>
+    <td>42 docs, audits OWASP/Lighthouse/A11Y/UX. Mais guides/ contient du Streamlit obsolète, user-guide/ non mis à jour, pas de doc API admin, SERVICES_REFERENCE.md partiellement cassé.</td>
+  </tr>
+  <tr>
+    <td><strong>Sécurité</strong></td>
+    <td><span style="color:var(--success);font-weight:700;">8/10</span></td>
+    <td>JWT + 2FA, RLS policies, rate limiting, input sanitization (XSS/injection), security headers middleware, CORS restrictif. Audit OWASP documenté. Point: pas de CSP strict, email pas sécurisé.</td>
+  </tr>
+  <tr>
+    <td><strong>IA/Automation</strong></td>
+    <td><span style="color:var(--success);font-weight:700;">8/10</span></td>
+    <td>15+ services IA, 25+ bridges, 20+ cron jobs, event bus pub/sub, circuit breaker, cache sémantique. Excellente couverture. Points perdus: pas de token tracking, event bus non persisté.</td>
+  </tr>
+  <tr>
+    <td><strong>Performance</strong></td>
+    <td><span style="color:var(--warn);font-weight:700;">7.5/10</span></td>
+    <td>Cache multi-niveaux (L1 mémoire + L3 fichier), ETag HTTP, lazy loading widgets, TanStack Query staleTime. Points: pas de Redis (L2), pas de CDN pour assets, Railway Free limité.</td>
+  </tr>
+  <tr>
+    <td><strong>DevOps</strong></td>
+    <td><span style="color:var(--warn);font-weight:700;">7/10</span></td>
+    <td>Docker, staging docker-compose, manage.py 30+ commandes, pre-commit hooks. Points: pas de CI/CD pipeline (GitHub Actions), pas de environnement de staging automatisé, pas de rollback automatique.</td>
+  </tr>
+  <tr>
+    <td><strong>UX/Ergonomie</strong></td>
+    <td><span style="color:var(--warn);font-weight:700;">7/10</span></td>
+    <td>Audit 3-clic OK, responsive mobile + tablette, PWA, dark mode auto. Points: pas de onboarding, pas de tutoriel premier lancement, quelques flux en 4+ clics, pas de search global.</td>
+  </tr>
+</table>
+</div>
+
+<h3>Score global : <span style="color:var(--accent);font-size:1.4rem;font-weight:800;">7.6 / 10</span></h3>
+<div class="progress-bar" style="margin:8px 0 4px;height:16px;max-width:400px;">
+  <div class="progress-fill fill-blue" style="width:76%;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:0.7rem;font-weight:700;">76%</div>
+</div>
+<p>Application mature et riche fonctionnellement. Les principaux axes de progression sont le polissage UI (skeleton, animations, empty states), la consolidation documentation, et le nettoyage du code legacy résiduel.</p>
+
+<h3>Axes d'innovation suggérés (non demandés)</h3>
+<ul class="check-list">
+  <li class="idea"><strong>Onboarding interactif</strong> — Tour guidé au premier lancement (react-joyride ou custom) pour découvrir les modules</li>
+  <li class="idea"><strong>Search global</strong> — Barre de recherche unifiée (cmdk déjà installé) pour chercher recettes, tâches, équipements, contacts partout</li>
+  <li class="idea"><strong>Mode "Quick capture"</strong> — Bouton flottant global pour ajouter rapidement une note, une dépense, un article courses sans naviguer</li>
+  <li class="idea"><strong>Rapport PDF mensuel automatique</strong> — Bilan envoyé par email le 1er du mois (toutes catégories, graphiques intégrés)</li>
+  <li class="idea"><strong>Mini-widgets notification</strong> — Sur la home, afficher les dernières actions des autres membres famille en temps réel</li>
+  <li class="idea"><strong>Raccourci vocal</strong> — "Ajoute du lait aux courses" via Google Assistant (hook existant)</li>
+  <li class="idea"><strong>Mode offline enrichi</strong> — Service worker cache les données critiques (liste courses, planning jour, routines) pour utilisation sans connexion</li>
+  <li class="idea"><strong>CI/CD GitHub Actions</strong> — Pipeline auto: lint → tests → build → deploy staging → deploy prod</li>
+  <li class="idea"><strong>Storybook publié</strong> — Documentation vivante des composants shadcn/ui customisés</li>
+</ul>
+
+<h3>Principes à garder en tête</h3>
+<ul class="check-list">
+  <li><strong>L'utilisateur est pilote</strong> — L'IA propose, l'humain valide. Jamais d'action automatique sur les données importantes sans confirmation.</li>
+  <li><strong>Admin invisible</strong> — Les fonctions admin (jobs manuels, dry-run, console) restent cachées de l'UI utilisateur standard.</li>
+  <li><strong>Budget jeux séparé</strong> — Ne jamais fusionner avec le budget famille.</li>
+  <li><strong>Pas de social/communautaire</strong> — Pas de partage public, pas de marketplace.</li>
+  <li><strong>Bien manger avant tout</strong> — Jamais de mode "économies alimentaires".</li>
+  <li><strong>Railway Free</strong> — Optimiser la mémoire backend, pas de plan payant.</li>
+</ul>
+</section>
+
+</div>
+
+<footer>
+  MaTanne — Audit Complet • Généré le 6 avril 2026 • Basé sur l'analyse du code source actuel (pas la mémoire)
+  <br>Backend: 48 routes, 500+ endpoints • Frontend: 50+ pages, 150+ composants • DB: ~130 tables • Tests: 1000+ • IA: 15+ services
+</footer>
+
+</body>
+</html>

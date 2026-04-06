@@ -201,46 +201,46 @@ export interface EnergieTempsReelResponse {
 }
 
 export async function obtenirModePiloteAuto(): Promise<ModePiloteAutoResponse> {
-  const { data } = await clientApi.get("/api/v1/preferences/mode-pilote");
+  const { data } = await clientApi.get("/api/v1/innovations/mode-pilote");
   return data;
 }
 
 export async function configurerModePiloteAuto(
   payload: ConfigurationModePiloteRequest
 ): Promise<ModePiloteAutoResponse> {
-  const { data } = await clientApi.post("/api/v1/preferences/mode-pilote/config", payload);
+  const { data } = await clientApi.post("/api/v1/innovations/mode-pilote/config", payload);
   return data;
 }
 
 export async function obtenirScoreFamilleHebdo(): Promise<ScoreFamilleHebdoResponse> {
-  const { data } = await clientApi.get("/api/v1/famille/score-famille-hebdo");
+  const { data } = await clientApi.get("/api/v1/innovations/score-famille-hebdo");
   return data;
 }
 
 export async function obtenirJournalFamilialAuto(): Promise<JournalFamilialAutoResponse> {
-  const { data } = await clientApi.get("/api/v1/rapports/journal-familial");
+  const { data } = await clientApi.get("/api/v1/innovations/journal-familial");
   return data;
 }
 
 export async function obtenirJournalFamilialPdf(): Promise<RapportMensuelPdfResponse> {
-  const { data } = await clientApi.get("/api/v1/rapports/journal-familial/pdf");
+  const { data } = await clientApi.get("/api/v1/innovations/journal-familial/pdf");
   return data;
 }
 
 export async function obtenirRapportMensuelPdf(mois?: string): Promise<RapportMensuelPdfResponse> {
-  const { data } = await clientApi.get("/api/v1/rapports/rapport-mensuel/pdf", {
+  const { data } = await clientApi.get("/api/v1/innovations/rapport-mensuel/pdf", {
     params: { mois },
   });
   return data;
 }
 
 export async function obtenirSuggestionRepasGarmin(): Promise<SuggestionRepasGarminResponse> {
-  const { data } = await clientApi.get("/api/v1/recettes/garmin-repas-adaptatif");
+  const { data } = await clientApi.get("/api/v1/innovations/garmin-repas-adaptatif");
   return data;
 }
 
 export async function obtenirModeVacances(): Promise<ModeVacancesResponse> {
-  const { data } = await clientApi.get("/api/v1/famille/mode-vacances");
+  const { data } = await clientApi.get("/api/v1/innovations/mode-vacances");
   return data;
 }
 
@@ -248,19 +248,19 @@ export async function configurerModeVacances(payload: {
   actif: boolean;
   checklist_voyage_auto?: boolean;
 }): Promise<ModeVacancesResponse> {
-  const { data } = await clientApi.post("/api/v1/famille/mode-vacances/config", payload);
+  const { data } = await clientApi.post("/api/v1/innovations/mode-vacances/config", payload);
   return data;
 }
 
 export async function obtenirInsightsQuotidiens(limite = 2): Promise<InsightsQuotidiensResponse> {
-  const { data } = await clientApi.get("/api/v1/dashboard/insights-quotidiens", {
+  const { data } = await clientApi.get("/api/v1/innovations/insights-quotidiens", {
     params: { limite },
   });
   return data;
 }
 
 export async function obtenirMeteoContextuelle(): Promise<MeteoContextuelleResponse> {
-  const { data } = await clientApi.get("/api/v1/dashboard/meteo-contextuelle");
+  const { data } = await clientApi.get("/api/v1/innovations/meteo-contextuelle");
   return data;
 }
 
@@ -270,17 +270,17 @@ export async function obtenirApprentissageHabitudes(): Promise<ApprentissageHabi
 }
 
 export async function obtenirPreferencesApprises(): Promise<ApprentissagePreferencesResponse> {
-  const { data } = await clientApi.get("/api/v1/preferences/preferences-apprises");
+  const { data } = await clientApi.get("/api/v1/innovations/preferences-apprises");
   return data;
 }
 
 export async function obtenirPlanificationHebdoAuto(): Promise<PlanificationHebdoCompleteResponse> {
-  const { data } = await clientApi.get("/api/v1/planning/planification-auto");
+  const { data } = await clientApi.get("/api/v1/innovations/planification-auto");
   return data;
 }
 
 export async function obtenirBatchCookingIntelligent(): Promise<BatchCookingIntelligentResponse> {
-  const { data } = await clientApi.get("/api/v1/batch-cooking/intelligent");
+  const { data } = await clientApi.get("/api/v1/innovations/batch-cooking-intelligent");
   return data;
 }
 
@@ -288,29 +288,29 @@ export async function genererCarteVisuellePartageable(payload: {
   type_carte: "planning" | "recette" | "batch" | "maison";
   titre?: string;
 }): Promise<CarteVisuellePartageableResponse> {
-  const { data } = await clientApi.post("/api/v1/rapports/carte-visuelle", payload);
+  const { data } = await clientApi.post("/api/v1/innovations/carte-visuelle", payload);
   return data;
 }
 
 export async function obtenirModeTabletteMagazine(): Promise<ModeTabletteMagazineResponse> {
-  const { data } = await clientApi.get("/api/v1/rapports/mode-tablette-magazine");
+  const { data } = await clientApi.get("/api/v1/innovations/mode-tablette-magazine");
   return data;
 }
 
 export async function obtenirTelegramConversationnel(): Promise<TelegramConversationnelResponse> {
-  const { data } = await clientApi.get("/api/v1/dashboard/telegram-conversationnel");
+  const { data } = await clientApi.get("/api/v1/innovations/telegram-conversationnel");
   return data;
 }
 
 export async function obtenirComparateurPrixAuto(topN = 20): Promise<ComparateurPrixAutomatiqueResponse> {
-  const { data } = await clientApi.get("/api/v1/courses/comparateur-prix-auto", {
+  const { data } = await clientApi.get("/api/v1/innovations/comparateur-prix-auto", {
     params: { top_n: topN },
   });
   return data;
 }
 
 export async function obtenirEnergieTempsReel(): Promise<EnergieTempsReelResponse> {
-  const { data } = await clientApi.get("/api/v1/habitat/energie-temps-reel");
+  const { data } = await clientApi.get("/api/v1/innovations/energie-temps-reel");
   return data;
 }
 

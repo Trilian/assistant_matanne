@@ -33,7 +33,6 @@ from src.api.schemas.errors import (
 from src.api.schemas.ia_transverses import (
     IdeeRepasSoirRequest,
     PatternsAlimentairesResponse,
-    SaisonnaliteIntelligenteResponse,
     SuggestionRepasSoirResponse,
 )
 from src.api.utils import (
@@ -73,17 +72,6 @@ async def obtenir_patterns_alimentaires(
     service = obtenir_service_innovations_cuisine()
     result = service.analyser_patterns_alimentaires(periode_jours=periode_jours)
     return result or PatternsAlimentairesResponse()
-
-
-@router.get("/saisonnalite-intelligente", response_model=SaisonnaliteIntelligenteResponse, responses=REPONSES_IA)
-@gerer_exception_api
-async def obtenir_saisonnalite_intelligente(
-    user: dict[str, Any] = Depends(require_auth),
-) -> SaisonnaliteIntelligenteResponse:
-    """Alias métier pour la saisonnalité intelligente des repas."""
-    service = obtenir_service_innovations_cuisine()
-    result = service.appliquer_saisonnalite_intelligente()
-    return result or SaisonnaliteIntelligenteResponse()
 
 
 @router.get("/garmin-repas-adaptatif", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
@@ -1545,52 +1533,6 @@ async def recette_surprise(
             top = candidates[:5]
             recette = random.choice(top)
             return _serialiser_recette(recette, session, user)
-
-    return await executer_async(_query)
-
-
-# ═══════════════════════════════════════════════════════════
-# P3 — HISTORIQUE MODIFICATIONS
-# ═══════════════════════════════════════════════════════════
-
-
-@router.get("/{recette_id}/historique", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def historique_recette(
-    recette_id: int,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """P3-B2: Historique des modifications d'une recette."""
-    from src.core.models.systeme import HistoriqueAction
-
-    def _query():
-        with executer_avec_session() as session:
-            items = (
-                session.query(HistoriqueAction)
-                .filter(
-                    HistoriqueAction.entity_type == "recette",
-                    HistoriqueAction.entity_id == recette_id,
-                )
-                .order_by(HistoriqueAction.cree_le.desc())
-                .limit(50)
-                .all()
-            )
-            return {
-                "items": [
-                    {
-                        "id": item.id,
-                        "entity_type": item.entity_type,
-                        "entity_id": item.entity_id,
-                        "champ_modifie": item.action_type,
-                        "ancienne_valeur": (item.old_value or {}).get("valeur"),
-                        "nouvelle_valeur": (item.new_value or {}).get("valeur"),
-                        "modifie_par": item.user_name,
-                        "modifie_le": item.cree_le.isoformat() if item.cree_le else "",
-                    }
-                    for item in items
-                ],
-                "nb_total": len(items),
-            }
 
     return await executer_async(_query)
 

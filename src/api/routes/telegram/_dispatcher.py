@@ -9,13 +9,11 @@ from ._cuisine import (
     _envoyer_courses_commande,
     _envoyer_inventaire_commande,
     _envoyer_planning_commande,
-    _envoyer_quoi_manger,
     _envoyer_recette_commande,
     _envoyer_repas_moment,
     _envoyer_resume_batch_cooking,
 )
 from ._famille import (
-    _envoyer_briefing,
     _envoyer_meteo_telegram,
     _envoyer_projection_budget_telegram,
     _envoyer_rapport_hebdo,
@@ -32,7 +30,6 @@ from ._maison import (
 )
 from ._outils import (
     _creer_note_rapide_telegram,
-    _creer_rappel_telegram,
     _envoyer_aide_photo_telegram,
     _lancer_minuteur_telegram,
 )
@@ -96,15 +93,6 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
         return True
     if normalise == "/recap":
         await _envoyer_recap_journee(chat_id)
-        return True
-    if normalise == "/briefing":
-        await _envoyer_briefing(chat_id)
-        return True
-    if normalise.startswith("/quoi-manger") or normalise.startswith("/quoimanger"):
-        await _envoyer_quoi_manger(chat_id)
-        return True
-    if normalise.startswith("/rappel ") or normalise == "/rappel":
-        await _creer_rappel_telegram(chat_id, argument)
         return True
     if normalise == "/rapport":
         await _envoyer_rapport_hebdo(chat_id)
