@@ -72,8 +72,17 @@ def admin_headers():
 @pytest.fixture
 def client(app):
     """Client sync local pour les routes IA transverses stabilisées."""
+    from src.api.rate_limiting import verifier_limite_debit_ia
+
+    app.dependency_overrides[verifier_limite_debit_ia] = lambda: {
+        "allowed": True,
+        "remaining": 999,
+    }
+
     with TestClient(app) as c:
         yield c
+
+    app.dependency_overrides.pop(verifier_limite_debit_ia, None)
 
 
 # Bilan annuel

@@ -8,7 +8,7 @@ import { useState, useRef } from "react";
 import { Upload, Link2, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { importerRecetteURL, importerRecettePDF, obtenirDoublonsRecettes } from "@/bibliotheque/api/recettes";
+import { importerRecetteURL, importerRecettesLot, importerRecettePDF, obtenirDoublonsRecettes } from "@/bibliotheque/api/recettes";
 import { Button } from "@/composants/ui/button";
 import {
   Dialog,
@@ -42,7 +42,8 @@ interface DialogueImportRecetteProps {
 export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
-  const [ongletActif, setOngletActif] = useState<"url" | "pdf">("url");
+  const [urlsLot, setUrlsLot] = useState("");
+  const [ongletActif, setOngletActif] = useState<"url" | "lot" | "pdf">("url");
   const [fichierPDF, setFichierPDF] = useState<File | null>(null);
   const inputFileRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -69,6 +70,20 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
         error.response?.data?.detail ||
           "Impossible d'importer la recette. Vérifiez l'URL."
       );
+    },
+  });
+
+  const mutationLot = useMutation({
+    mutationFn: importerRecettesLot,
+    onSuccess: (data) => {
+      toast.success(`✅ ${data.importees} recette(s) importée(s)${data.echouees ? `, ${data.echouees} en échec` : ""}`);
+      queryClient.invalidateQueries({ queryKey: ["recettes"] });
+      setOpen(false);
+      setUrlsLot("");
+      onSuccess?.();
+    },
+    onError: () => {
+      toast.error("Impossible d'importer les recettes en lot.");
     },
   });
 
@@ -114,6 +129,20 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
     mutationURL.mutate(url);
   };
 
+  const handleImportLot = () => {
+    const urls = urlsLot
+      .split(/\r?\n/)
+      .map((ligne) => ligne.trim())
+      .filter(Boolean);
+
+    if (urls.length === 0) {
+      toast.error("Ajoutez au moins une URL.");
+      return;
+    }
+
+    mutationLot.mutate(urls);
+  };
+
   const handleImportPDF = () => {
     if (!fichierPDF) {
       toast.error("Veuillez sélectionner un fichier PDF.");
@@ -157,6 +186,10 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
               <Link2 className="h-4 w-4 mr-2" />
               URL
             </TabsTrigger>
+            <TabsTrigger value="lot">
+              <Link2 className="h-4 w-4 mr-2" />
+              Lot
+            </TabsTrigger>
             <TabsTrigger value="pdf">
               <Upload className="h-4 w-4 mr-2" />
               PDF
@@ -188,6 +221,30 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Analyse de la recette en cours...</span>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="lot" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="urls-lot">URLs des recettes (une par ligne)</Label>
+              <textarea
+                id="urls-lot"
+                className="min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                placeholder={"https://www.marmiton.org/...\nhttps://www.cuisineaz.com/..."}
+                value={urlsLot}
+                onChange={(e) => setUrlsLot(e.target.value)}
+                disabled={mutationLot.isPending}
+              />
+              <p className="text-xs text-muted-foreground">
+                Import rapide de plusieurs recettes d'un coup.
+              </p>
+            </div>
+
+            {mutationLot.isPending && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Import du lot en cours...</span>
               </div>
             )}
           </TabsContent>
@@ -248,20 +305,22 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            disabled={mutationURL.isPending || mutationPDF.isPending}
+            disabled={mutationURL.isPending || mutationLot.isPending || mutationPDF.isPending}
           >
             Annuler
           </Button>
           <Button
-            onClick={ongletActif === "url" ? handleImportURL : handleImportPDF}
+            onClick={ongletActif === "url" ? handleImportURL : ongletActif === "lot" ? handleImportLot : handleImportPDF}
             disabled={
               mutationURL.isPending || 
+              mutationLot.isPending || 
               mutationPDF.isPending || 
               (ongletActif === "url" && !url.trim()) ||
+              (ongletActif === "lot" && !urlsLot.trim()) ||
               (ongletActif === "pdf" && !fichierPDF)
             }
           >
-            {(mutationURL.isPending || mutationPDF.isPending) ? (
+            {(mutationURL.isPending || mutationLot.isPending || mutationPDF.isPending) ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Importation...

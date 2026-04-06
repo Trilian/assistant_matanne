@@ -100,8 +100,9 @@ async def test_contrat_webhook_schema() -> None:
 
 @pytest.mark.contract
 @pytest.mark.asyncio(loop_scope="function")
-async def test_contrat_envoyer_planning_reponse_401_sans_auth() -> None:
-    """L'envoi sans authentification retourne 401 ou 403."""
+async def test_contrat_envoyer_planning_reponse_401_sans_auth(monkeypatch) -> None:
+    """L'envoi sans authentification retourne 401/403 (ou 422 de validation), jamais 500."""
+    monkeypatch.setenv("ENVIRONMENT", "production")
     transport = httpx.ASGITransport(app=app)
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
@@ -109,7 +110,6 @@ async def test_contrat_envoyer_planning_reponse_401_sans_auth() -> None:
             f"{TELEGRAM_BASE}/envoyer-planning",
             json={"planning_id": 1},
         )
-        # Sans auth, on attend 401 ou 403 (pas 500)
         assert response.status_code in {401, 403, 422}, (
             f"Attendu 401/403/422, reçu {response.status_code}"
         )
@@ -117,8 +117,9 @@ async def test_contrat_envoyer_planning_reponse_401_sans_auth() -> None:
 
 @pytest.mark.contract
 @pytest.mark.asyncio(loop_scope="function")
-async def test_contrat_envoyer_courses_reponse_401_sans_auth() -> None:
+async def test_contrat_envoyer_courses_reponse_401_sans_auth(monkeypatch) -> None:
     """L'envoi courses sans auth retourne 401 ou 403."""
+    monkeypatch.setenv("ENVIRONMENT", "production")
     transport = httpx.ASGITransport(app=app)
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:

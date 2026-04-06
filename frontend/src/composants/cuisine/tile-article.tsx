@@ -44,6 +44,7 @@ interface TileArticleProps {
   categorie?: string;
   magasinCible?: string | null;
   driveMappe?: boolean;
+  prixEstime?: number;
   estCoche?: boolean;
   estSelectionne?: boolean;
   onClick?: () => void;
@@ -57,6 +58,7 @@ export function TileArticle({
   categorie,
   magasinCible,
   driveMappe,
+  prixEstime,
   estCoche = false,
   estSelectionne = false,
   onClick,

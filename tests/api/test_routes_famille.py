@@ -388,22 +388,18 @@ class TestFormatsReponses:
 
 @pytest.mark.asyncio
 class TestAchatsFormats:
-    @patch("src.api.routes.famille.executer_avec_session")
+    @patch("src.services.famille.achats.obtenir_service_achats_famille")
     @patch("src.api.routes.famille.executer_async")
-    async def test_lister_achats_format(self, mock_exec, mock_session, client):
+    async def test_lister_achats_format(self, mock_exec, mock_service_factory, client):
         mock_exec.side_effect = lambda fn: fn()
         mock_achat = creer_mock(ACHAT_TEST)
 
-        ctx = MagicMock()
-        ctx.__enter__ = MagicMock(return_value=MagicMock())
-        ctx.__exit__ = MagicMock(return_value=False)
-        session = ctx.__enter__()
-        query = session.query.return_value
-        query.filter.return_value = query
-        query.order_by.return_value = query
-        query.count.return_value = 1
-        query.offset.return_value.limit.return_value.all.return_value = [mock_achat]
-        mock_session.return_value = ctx
+        service = MagicMock()
+        service.lister_achats.side_effect = lambda achete=False: [mock_achat] if achete is False else []
+        service.lister_par_personne.return_value = [mock_achat]
+        service.lister_a_revendre.return_value = [mock_achat]
+        service.lister_par_categorie.return_value = [mock_achat]
+        mock_service_factory.return_value = service
 
         response = await client.get("/api/v1/famille/achats")
         assert response.status_code == 200

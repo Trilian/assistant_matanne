@@ -33,6 +33,7 @@ type ListeCoursesDetailApi = {
     coche?: boolean;
     categorie?: string;
     magasin_cible?: string;
+    prix_estime?: number;
   }>;
 };
 
@@ -65,6 +66,7 @@ export async function obtenirListeCourses(id: number): Promise<ListeCourses> {
     categorie: item.categorie,
     est_coche: Boolean(item.coche),
     magasin_cible: item.magasin_cible,
+    prix_estime: item.prix_estime,
   }));
 
   return {
@@ -120,6 +122,7 @@ export async function cocherArticle(
     unite: courant.unite,
     categorie: courant.categorie,
     coche: estCoche,
+    prix_estime: courant.prix_estime,
   });
 
   return {
@@ -273,6 +276,25 @@ export async function obtenirSuggestionsBioLocal(
 }
 
 /** Articles récurrents suggérés (basé sur l'historique d'achats) */
+export interface HistoriquePrixCoursesItem {
+  article_nom: string;
+  categorie: string | null;
+  rayon_magasin: string | null;
+  derniere_achat: string | null;
+  prix_dernier: number | null;
+  prix_moyen: number | null;
+  variation: number | null;
+  nb_achats: number;
+}
+
+export async function obtenirHistoriquePrixCourses(): Promise<{
+  items: HistoriquePrixCoursesItem[];
+  total: number;
+}> {
+  const { data } = await clientApi.get("/courses/historique-prix");
+  return data;
+}
+
 export interface ArticleRecurrent {
   article_nom: string;
   categorie: string | null;

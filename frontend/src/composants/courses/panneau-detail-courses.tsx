@@ -257,6 +257,7 @@ export function PanneauDetailCourses({
                           categorie={article.categorie}
                           magasinCible={article.magasin_cible}
                           driveMappe={article.drive_mappe}
+                          prixEstime={article.prix_estime}
                           estSelectionne={articlesSelectionnes.has(article.id)}
                           onClick={() => {
                             if (modeSelection) {
@@ -297,6 +298,7 @@ export function PanneauDetailCourses({
                           categorie={article.categorie}
                           magasinCible={article.magasin_cible}
                           driveMappe={article.drive_mappe}
+                          prixEstime={article.prix_estime}
                           estCoche
                           onClick={() => onCocherArticle(article.id, false)}
                         />

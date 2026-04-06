@@ -79,19 +79,32 @@ export function DialogueArticleCourses({
               placeholder="Fruits, Légumes, Viande..."
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="magasin-cible">Magasin</Label>
-            <select
-              id="magasin-cible"
-              {...regArticle("magasin_cible")}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              defaultValue=""
-            >
-              <option value="">Auto (selon la catégorie)</option>
-              <option value="bio_coop">🥬 Bio Coop</option>
-              <option value="grand_frais">🧀 Grand Frais</option>
-              <option value="carrefour_drive">🛒 Carrefour Drive</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="magasin-cible">Magasin</Label>
+              <select
+                id="magasin-cible"
+                {...regArticle("magasin_cible")}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                defaultValue=""
+              >
+                <option value="">Auto (selon la catégorie)</option>
+                <option value="bio_coop">🥬 Bio Coop</option>
+                <option value="grand_frais">🧀 Grand Frais</option>
+                <option value="carrefour_drive">🛒 Carrefour Drive</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="prix-estime">Prix estimé (€)</Label>
+              <Input
+                id="prix-estime"
+                type="number"
+                min={0}
+                step="0.01"
+                {...regArticle("prix_estime")}
+                placeholder="2,50"
+              />
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

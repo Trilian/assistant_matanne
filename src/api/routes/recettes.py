@@ -1136,6 +1136,39 @@ async def importer_recette_url(
     return await executer_async(_import)
 
 
+@router.post("/import-lot", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def importer_recettes_lot(
+    urls: list[str] = Query(..., description="Liste d'URLs de recettes à importer"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Importe plusieurs recettes en lot depuis une liste d'URLs."""
+
+    resultats = []
+    for url in urls[:10]:
+        try:
+            recette = await importer_recette_url(url=url, user=user)
+            resultats.append({
+                "url": url,
+                "succes": True,
+                "recette_id": recette.id,
+                "nom": recette.nom,
+            })
+        except HTTPException as exc:
+            resultats.append({
+                "url": url,
+                "succes": False,
+                "erreur": exc.detail,
+            })
+
+    return {
+        "total": len(resultats),
+        "importees": sum(1 for r in resultats if r["succes"]),
+        "echouees": sum(1 for r in resultats if not r["succes"]),
+        "resultats": resultats,
+    }
+
+
 @router.post("/import-pdf", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def importer_recette_pdf(

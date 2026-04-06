@@ -80,6 +80,7 @@ class ArticleCourses(CreeLeMixin, Base):
         suggere_par_ia: Si suggéré par l'IA
         rayon_magasin: Rayon du magasin
         magasin_cible: Magasin préféré
+        prix_unitaire: Prix unitaire saisi au moment des courses
         notes: Notes supplémentaires
     """
 
@@ -103,6 +104,7 @@ class ArticleCourses(CreeLeMixin, Base):
     # Organisation
     rayon_magasin: Mapped[str | None] = mapped_column(String(100), index=True)
     magasin_cible: Mapped[str | None] = mapped_column(String(50), index=True)
+    prix_unitaire: Mapped[float | None] = mapped_column(Float, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Relations
@@ -229,6 +231,8 @@ class HistoriqueAchats(Base):
     derniere_achat: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
     frequence_jours: Mapped[int | None] = mapped_column(Integer)
     nb_achats: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    prix_dernier: Mapped[float | None] = mapped_column(Float, nullable=True)
+    prix_moyen: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     __table_args__ = (
         Index("ix_historique_achats_nom_date", "article_nom", "derniere_achat"),

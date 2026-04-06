@@ -282,6 +282,7 @@ async def ajouter_article(
                 priorite="moyenne",
                 rayon_magasin=donnees.categorie,
                 magasin_cible=magasin,
+                prix_unitaire=donnees.prix_estime,
             )
             session.add(article)
             session.commit()
@@ -344,6 +345,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
                         "coche": a.achete,
                         "categorie": a.rayon_magasin,
                         "magasin_cible": a.magasin_cible,
+                        "prix_estime": a.prix_unitaire,
                     }
                     for a in (liste.articles or [])
                 ],
@@ -558,6 +560,8 @@ async def modifier_article(
                 article.rayon_magasin = maj.categorie
             if maj.magasin_cible is not None:
                 article.magasin_cible = maj.magasin_cible
+            if maj.prix_estime is not None:
+                article.prix_unitaire = maj.prix_estime
             session.commit()
 
             return MessageResponse(message="Article mis à jour", id=item_id)
@@ -1262,6 +1266,15 @@ async def valider_courses(
                                 )
                         hist.nb_achats += 1
                         hist.derniere_achat = now
+                        if art.prix_unitaire is not None and art.prix_unitaire > 0:
+                            hist.prix_dernier = float(art.prix_unitaire)
+                            if hist.prix_moyen and hist.prix_moyen > 0:
+                                hist.prix_moyen = round(
+                                    ((hist.prix_moyen * max(hist.nb_achats - 1, 1)) + float(art.prix_unitaire)) / hist.nb_achats,
+                                    2,
+                                )
+                            else:
+                                hist.prix_moyen = round(float(art.prix_unitaire), 2)
                     else:
                         session.add(
                             HistoriqueAchats(
@@ -1270,6 +1283,8 @@ async def valider_courses(
                                 rayon_magasin=art.rayon_magasin,
                                 derniere_achat=now,
                                 nb_achats=1,
+                                prix_dernier=float(art.prix_unitaire) if art.prix_unitaire is not None else None,
+                                prix_moyen=float(art.prix_unitaire) if art.prix_unitaire is not None else None,
                             )
                         )
 
@@ -1366,6 +1381,54 @@ async def obtenir_suggestions_bio_local(
             }
 
     return await executer_async(_analyse)
+
+
+@router.get(
+    "/historique-prix",
+    responses=REPONSES_LISTE,
+)
+@gerer_exception_api
+async def obtenir_historique_prix_courses(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne l'historique synthétique des prix observés sur les achats courses."""
+    from src.core.models.courses import HistoriqueAchats
+
+    def _historique():
+        with executer_avec_session() as session:
+            historiques = (
+                session.query(HistoriqueAchats)
+                .filter(
+                    (HistoriqueAchats.prix_dernier.isnot(None)) |
+                    (HistoriqueAchats.prix_moyen.isnot(None))
+                )
+                .order_by(HistoriqueAchats.derniere_achat.desc())
+                .limit(30)
+                .all()
+            )
+
+            items = []
+            for h in historiques:
+                variation = None
+                if h.prix_dernier is not None and h.prix_moyen not in (None, 0):
+                    variation = round(float(h.prix_dernier) - float(h.prix_moyen), 2)
+                items.append({
+                    "article_nom": h.article_nom,
+                    "categorie": h.categorie,
+                    "rayon_magasin": h.rayon_magasin,
+                    "derniere_achat": h.derniere_achat.isoformat() if h.derniere_achat else None,
+                    "prix_dernier": float(h.prix_dernier) if h.prix_dernier is not None else None,
+                    "prix_moyen": float(h.prix_moyen) if h.prix_moyen is not None else None,
+                    "variation": variation,
+                    "nb_achats": h.nb_achats,
+                })
+
+            return {
+                "items": items,
+                "total": len(items),
+            }
+
+    return await executer_async(_historique)
 
 
 @router.get(

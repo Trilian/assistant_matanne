@@ -28,7 +28,7 @@ import { PanneauDetailCourses } from "@/composants/courses/panneau-detail-course
 import { PanneauListesCourses } from "@/composants/courses/panneau-listes-courses";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
-import { obtenirArticlesDrive } from "@/bibliotheque/api/courses";
+import { obtenirArticlesDrive, obtenirHistoriquePrixCourses } from "@/bibliotheque/api/courses";
 import { envoyerCoursesMagasinTelegram } from "@/bibliotheque/api/telegram";
 import { PREFIXE_API, URL_API } from "@/bibliotheque/constantes";
 import { utiliserRequete } from "@/crochets/utiliser-api";
@@ -113,6 +113,12 @@ export default function PageCourses() {
     ["courses", "articles-drive", String(listeSelectionnee)],
     () => obtenirArticlesDrive(listeSelectionnee!),
     { enabled: listeSelectionnee !== null }
+  );
+
+  const { data: historiquePrix } = utiliserRequete(
+    ["courses", "historique-prix"],
+    obtenirHistoriquePrixCourses,
+    { staleTime: 10 * 60 * 1000 }
   );
 
   const compteursMagasins = useMemo(() => {
@@ -397,6 +403,33 @@ export default function PageCourses() {
         suggestionsEvenements={suggestionsInvites}
         description="Le contexte invité alimente les suggestions d'achats et les quantités recommandées pour la liste active."
       />
+
+      {historiquePrix?.items?.length ? (
+        <div className="rounded-lg border bg-muted/20 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Historique prix</p>
+              <p className="text-xs text-muted-foreground">Derniers prix observés sur vos achats</p>
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {historiquePrix.items.slice(0, 6).map((item) => (
+              <div key={`${item.article_nom}-${item.derniere_achat ?? "na"}`} className="rounded-md border bg-background p-3 text-sm">
+                <div className="font-medium">{item.article_nom}</div>
+                <div className="text-muted-foreground text-xs mt-1">
+                  Dernier: {item.prix_dernier != null ? `${item.prix_dernier.toFixed(2)} €` : "—"} ·
+                  Moyen: {item.prix_moyen != null ? ` ${item.prix_moyen.toFixed(2)} €` : " —"}
+                </div>
+                {item.variation != null ? (
+                  <div className={`mt-1 text-xs ${item.variation > 0 ? "text-amber-600" : item.variation < 0 ? "text-green-600" : "text-muted-foreground"}`}>
+                    {item.variation > 0 ? "+" : ""}{item.variation.toFixed(2)} € vs moyenne
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {listeSelectionnee && (
         <>

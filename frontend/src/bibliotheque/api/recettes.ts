@@ -167,6 +167,20 @@ export async function importerRecetteURL(url: string): Promise<Recette> {
   return data;
 }
 
+/** Importer plusieurs recettes depuis une liste d'URLs */
+export async function importerRecettesLot(urls: string[]): Promise<{
+  total: number;
+  importees: number;
+  echouees: number;
+  resultats: Array<{ url: string; succes: boolean; recette_id?: number; nom?: string; erreur?: string }>;
+}> {
+  const { data } = await clientApi.post("/recettes/import-lot", null, {
+    params: { urls },
+    paramsSerializer: { indexes: null },
+  });
+  return data;
+}
+
 /** Importer une recette depuis un fichier PDF */
 export async function importerRecettePDF(file: File): Promise<Recette> {
   const formData = new FormData();

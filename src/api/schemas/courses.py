@@ -18,6 +18,7 @@ class CourseItemBase(BaseModel, NomValidatorMixin, QuantiteValidatorMixin):
     categorie: str | None = Field(None, max_length=100)
     coche: bool = False
     magasin_cible: str | None = Field(None, max_length=50, description="Magasin cible (bio_coop, grand_frais, carrefour_drive, autre)")
+    prix_estime: float | None = Field(None, ge=0, description="Prix unitaire estimé ou observé")
 
     model_config = {
         "json_schema_extra": {
@@ -28,6 +29,7 @@ class CourseItemBase(BaseModel, NomValidatorMixin, QuantiteValidatorMixin):
                 "categorie": "produits_frais",
                 "coche": False,
                 "magasin_cible": "carrefour_drive",
+                "prix_estime": 2.35,
             }
         }
     }
@@ -76,6 +78,7 @@ class ArticleResponse(BaseModel):
     coche: bool = False
     categorie: str | None = Field(None, max_length=100)
     magasin_cible: str | None = Field(None, max_length=50)
+    prix_estime: float | None = None
 
 
 class ListeCoursesResponse(BaseModel):
