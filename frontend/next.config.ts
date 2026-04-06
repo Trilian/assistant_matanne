@@ -33,6 +33,8 @@ function construireCsp(): string {
 const nextConfig: NextConfig = {
   // Standalone output pour Docker staging
   output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
+  // Exclure les packages OpenTelemetry/Prisma du bundling webpack (ESM Node platform)
+  serverExternalPackages: ["@opentelemetry/instrumentation", "@prisma/instrumentation"],
   // View Transitions API (F3 — transitions de page fluides)
   experimental: {
     viewTransition: true,
