@@ -9,8 +9,10 @@ Utilise un singleton thread-safe avec ``threading.Lock``.
 """
 
 import logging
+import os
 import threading
 import time
+from urllib.parse import urlparse
 
 from sqlalchemy import Engine, create_engine, pool, text
 from sqlalchemy.exc import DatabaseError, OperationalError
@@ -51,6 +53,19 @@ def _creer_engine_impl(
         ErreurBaseDeDonnees: Si connexion impossible après toutes les tentatives
     """
     derniere_erreur = None
+
+    hostname = urlparse(database_url).hostname or ""
+    est_serverless = bool(
+        os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME") or os.getenv("SERVERLESS")
+    )
+    est_supabase_direct = hostname.startswith("db.") and hostname.endswith(".supabase.co")
+
+    if est_serverless and est_supabase_direct:
+        nombre_tentatives = 1
+        logger.warning(
+            "URL DB Supabase directe détectée en environnement serverless ; "
+            "utilisez de préférence l'URL pooler IPv4 (SUPABASE_DB_POOLER_URL)."
+        )
 
     for tentative in range(nombre_tentatives):
         try:

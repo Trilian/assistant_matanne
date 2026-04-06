@@ -117,6 +117,15 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # noqa: ARG001
     """Gère le démarrage et l'arrêt de l'application FastAPI."""
+    parametres = obtenir_parametres()
+
+    if parametres.est_serverless():
+        logger.info(
+            "Environnement serverless détecté : listener cache et scheduler cron désactivés."
+        )
+        yield
+        return
+
     # ── Démarrage ───────────────────────────────────────────
     try:
         from src.core.caching.invalidation_listener import (

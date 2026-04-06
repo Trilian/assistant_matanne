@@ -10,6 +10,7 @@ Toutes les valeurs passent par la validation Pydantic.
 from __future__ import annotations
 
 import logging
+import os
 
 from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -88,6 +89,17 @@ class Parametres(BaseSettings):
     )
     """URL complète de la base de données (résolue depuis env vars ou composants)."""
 
+    db_pooler_url: str | None = Field(
+        None,
+        validation_alias=AliasChoices(
+            "SUPABASE_DB_POOLER_URL",
+            "SUPABASE_POOLER_URL",
+            "DATABASE_POOLER_URL",
+            "POOLER_DATABASE_URL",
+        ),
+    )
+    """URL pooler IPv4 optionnelle, utile pour Vercel/serverless."""
+
     @property
     def DATABASE_URL(self) -> str:
         """
@@ -112,7 +124,9 @@ class Parametres(BaseSettings):
             "2. Variable DATABASE_URL:\n"
             "   DATABASE_URL='postgresql://user:pass@host/db'\n\n"
             "3. Sur Vercel / Postgres managé :\n"
-            "   POSTGRES_URL ou POSTGRES_URL_NON_POOLING"
+            "   POSTGRES_URL ou POSTGRES_URL_NON_POOLING\n\n"
+            "4. Avec Supabase sur Vercel : utilisez de préférence l'URL pooler IPv4\n"
+            "   (SUPABASE_DB_POOLER_URL) plutôt que l'hôte direct db.<project-ref>.supabase.co"
         )
 
     # ═══════════════════════════════════════════════════════════
@@ -266,6 +280,12 @@ class Parametres(BaseSettings):
         1. DATABASE_URL env var (déjà chargé dans db_url par pydantic-settings)
         2. Composants individuels DB_HOST/DB_USER/... (pydantic-settings)
         """
+        if self.est_serverless() and self.db_pooler_url and (
+            not self.db_url or "@db." in self.db_url
+        ):
+            logger.info("Environnement serverless détecté : utilisation de l'URL pooler DB.")
+            self.db_url = self.db_pooler_url
+
         if self.db_url:
             if self.db_url.startswith("postgres://"):
                 self.db_url = self.db_url.replace("postgres://", "postgresql://", 1)
@@ -311,6 +331,13 @@ class Parametres(BaseSettings):
             True si développement
         """
         return self.ENV.lower() in ["development", "dev"]
+
+    def est_serverless(self) -> bool:
+        """Vérifie si l'application s'exécute dans un environnement serverless."""
+        return self.ENV.lower() == "serverless" or any(
+            os.getenv(var)
+            for var in ("VERCEL", "AWS_LAMBDA_FUNCTION_NAME", "SERVERLESS")
+        )
 
     def obtenir_config_publique(self) -> dict:
         """
