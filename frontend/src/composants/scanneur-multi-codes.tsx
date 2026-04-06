@@ -6,9 +6,10 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import { ScanLine, X, Check, Camera, CameraOff } from "lucide-react";
+import { ScanLine, X, Check, Camera, CameraOff, Minus, Plus } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
+import { Input } from "@/composants/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -27,8 +28,8 @@ export interface CodeScanné {
 interface ScanneurMultiCodesProps {
   ouvert: boolean;
   onFermer: () => void;
-  /** Callback avec les articles résolus et les codes inconnus */
-  onImporter: (trouves: ArticleBarcode[], inconnus: string[]) => void;
+  /** Callback avec les articles résolus et les codes inconnus, avec quantités */
+  onImporter: (trouves: ArticleBarcode[], inconnus: string[], quantites: Record<string, number>) => void;
   /** Label personnalisé pour le bouton "Importer" */
   labelImporter?: string;
 }
@@ -52,6 +53,7 @@ export function ScanneurMultiCodes({
   const vusRef = useRef<Set<string>>(new Set());
 
   const [codesScannés, setCodesScannés] = useState<string[]>([]);
+  const [quantitésCodes, setQuantitésCodes] = useState<Record<string, number>>({});
   const [cameraActive, setCameraActive] = useState(false);
   const [erreurCamera, setErreurCamera] = useState<string | null>(null);
   const [enResolution, setEnResolution] = useState(false);
@@ -60,6 +62,7 @@ export function ScanneurMultiCodes({
     if (vusRef.current.has(code)) return;
     vusRef.current.add(code);
     setCodesScannés((prev) => [...prev, code]);
+    setQuantitésCodes((prev) => ({ ...prev, [code]: 1 }));
     // Feedback haptic si disponible
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate(60);
@@ -113,6 +116,7 @@ export function ScanneurMultiCodes({
       // Reset à la fermeture
       vusRef.current = new Set();
       setCodesScannés([]);
+      setQuantitésCodes({});
       setErreurCamera(null);
     }
     return arrêterCamera;
@@ -121,6 +125,11 @@ export function ScanneurMultiCodes({
   const supprimerCode = (code: string) => {
     vusRef.current.delete(code);
     setCodesScannés((prev) => prev.filter((c) => c !== code));
+    setQuantitésCodes((prev) => {
+      const next = { ...prev };
+      delete next[code];
+      return next;
+    });
   };
 
   const importer = async () => {
@@ -128,7 +137,7 @@ export function ScanneurMultiCodes({
     setEnResolution(true);
     try {
       const resultat = await scannerCodesBatch(codesScannés);
-      onImporter(resultat.trouves, resultat.inconnus);
+      onImporter(resultat.trouves, resultat.inconnus, quantitésCodes);
       if (resultat.inconnus.length > 0) {
         toast.info(
           `${resultat.trouves.length} article(s) trouv\u00e9(s), ${resultat.inconnus.length} code(s) non reconnu(s)`
@@ -218,6 +227,7 @@ export function ScanneurMultiCodes({
                 onClick={() => {
                   vusRef.current = new Set();
                   setCodesScannés([]);
+                  setQuantitésCodes({});
                 }}
               >
                 Tout effacer
@@ -230,22 +240,62 @@ export function ScanneurMultiCodes({
               Dirigez la caméra vers un code-barres
             </p>
           ) : (
-            <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+            <div className="space-y-1 max-h-32 overflow-y-auto">
               {codesScannés.map((code) => (
-                <Badge
+                <div
                   key={code}
-                  variant="outline"
-                  className="gap-1 pr-1 font-mono text-xs"
+                  className="flex items-center gap-2 rounded-md border px-2 py-1"
                 >
-                  {code.length > 13 ? `${code.slice(0, 13)}…` : code}
+                  <span className="font-mono text-xs flex-1 truncate">
+                    {code.length > 13 ? `${code.slice(0, 13)}…` : code}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() =>
+                        setQuantitésCodes((prev) => ({
+                          ...prev,
+                          [code]: Math.max(1, (prev[code] ?? 1) - 1),
+                        }))
+                      }
+                      className="p-0.5 rounded hover:bg-muted"
+                      aria-label="Réduire quantité"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </button>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={99}
+                      value={quantitésCodes[code] ?? 1}
+                      onChange={(e) =>
+                        setQuantitésCodes((prev) => ({
+                          ...prev,
+                          [code]: Math.max(1, Math.min(99, Number(e.target.value) || 1)),
+                        }))
+                      }
+                      className="h-6 w-12 text-center text-xs px-1"
+                    />
+                    <button
+                      onClick={() =>
+                        setQuantitésCodes((prev) => ({
+                          ...prev,
+                          [code]: Math.min(99, (prev[code] ?? 1) + 1),
+                        }))
+                      }
+                      className="p-0.5 rounded hover:bg-muted"
+                      aria-label="Augmenter quantité"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
+                  </div>
                   <button
                     onClick={() => supprimerCode(code)}
-                    className="hover:text-destructive transition-colors"
+                    className="hover:text-destructive transition-colors p-0.5"
                     aria-label={`Retirer le code ${code}`}
                   >
                     <X className="h-3 w-3" />
                   </button>
-                </Badge>
+                </div>
               ))}
             </div>
           )}

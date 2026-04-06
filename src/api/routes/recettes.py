@@ -62,6 +62,22 @@ async def idee_repas_soir(
     return result or SuggestionRepasSoirResponse()
 
 
+@router.post("/mange-ce-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def mange_ce_soir(
+    body: IdeeRepasSoirRequest,
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+) -> SuggestionRepasSoirResponse:
+    """Alias métier pour suggestion dîner rapide ce soir."""
+    service = obtenir_service_innovations_cuisine()
+    result = service.suggerer_repas_ce_soir(
+        temps_disponible_min=body.temps_disponible_min,
+        humeur=body.humeur,
+    )
+    return result or SuggestionRepasSoirResponse()
+
+
 @router.get("/patterns-alimentaires", response_model=PatternsAlimentairesResponse, responses=REPONSES_IA)
 @gerer_exception_api
 async def obtenir_patterns_alimentaires(
@@ -810,6 +826,65 @@ async def recettes_saisonnieres(
             }
 
     return await executer_async(_query)
+
+
+@router.get("/calendrier-saisonnier", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def calendrier_saisonnier(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Calendrier visuel des produits de saison par mois (C1).
+
+    Retourne le catalogue enrichi d'ingrédients de saison avec
+    catégories, mois de pic, paires classiques et mois courant.
+    """
+    from src.services.cuisine.suggestions.saisons_enrichi import (
+        INGREDIENTS_SAISON_ENRICHI,
+        PAIRES_SAISON,
+        obtenir_saison,
+    )
+
+    mois_courant = date.today().month
+    saison_courante = obtenir_saison()
+
+    # Construire la vue par mois (1-12)
+    mois_noms = [
+        "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+    ]
+
+    calendrier = []
+    for mois in range(1, 13):
+        ingredients_mois = []
+        for _saison, items in INGREDIENTS_SAISON_ENRICHI.items():
+            for ing in items:
+                if mois in ing.pic_mois:
+                    ingredients_mois.append({
+                        "nom": ing.nom,
+                        "categorie": ing.categorie,
+                        "bio_local": ing.bio_local_courant,
+                    })
+        calendrier.append({
+            "mois": mois,
+            "nom": mois_noms[mois],
+            "ingredients": ingredients_mois,
+        })
+
+    paires = [
+        {
+            "ingredients": p.ingredients,
+            "description": p.description,
+            "saison": p.saison,
+        }
+        for p in PAIRES_SAISON
+    ]
+
+    return {
+        "mois_courant": mois_courant,
+        "saison_courante": saison_courante,
+        "calendrier": calendrier,
+        "paires_saison": paires,
+    }
 
 
 @router.get("/depuis-jardin", response_model=dict, responses=REPONSES_LISTE)

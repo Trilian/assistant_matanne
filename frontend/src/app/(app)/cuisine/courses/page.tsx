@@ -9,6 +9,7 @@ import {
   CheckCheck,
   CheckCircle2,
   CheckSquare,
+  Copy,
   Leaf,
   Link2,
   Loader2,
@@ -303,6 +304,22 @@ export default function PageCourses() {
             <Button variant="outline" size="sm" onClick={ouvrirQrPartage}>
               <QrCode className="mr-1 h-4 w-4" />
               QR partage
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const lignes = articlesNonCoches.map(
+                  (a: { nom: string; quantite_necessaire?: number; unite?: string }) =>
+                    `- ${a.nom}${a.quantite_necessaire ? ` (${a.quantite_necessaire}${a.unite ? ` ${a.unite}` : ""})` : ""}`
+                );
+                const texte = `🛒 Courses${detailListe?.nom ? ` — ${detailListe.nom}` : ""}\n${lignes.join("\n")}`;
+                navigator.clipboard.writeText(texte).then(() => toast.success("Liste copiée !"));
+              }}
+            >
+              <Copy className="mr-1 h-4 w-4" />
+              Copier liste
             </Button>
 
             <Button variant="outline" size="sm" onClick={() => setPanneauBio((valeur) => !valeur)}>

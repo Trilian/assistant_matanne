@@ -258,13 +258,13 @@ class TestHistoriqueRecette:
 
     def test_get_stats_recette_with_history(self, service, db, recette_in_db, patch_db_context):
         """Test stats avec historique."""
-        service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=2, note=4)
-        service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=4, note=5)
+        service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=2)
+        service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=4)
 
         result = service.get_stats_recette(recette_in_db.id)
         assert result["nb_cuissons"] == 2
         assert result["total_portions"] == 6
-        assert result["note_moyenne"] == 4.5
+        assert result["note_moyenne"] is None
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

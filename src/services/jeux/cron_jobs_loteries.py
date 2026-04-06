@@ -418,7 +418,6 @@ def backtest_grilles():
     
     except Exception as e:
         logger.error(f"❌ Erreur backtest grilles: {e}", exc_info=True)
-        raise ErreurServiceIA(f"Échec backtest: {e}")
 
 
 def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]:

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
+from src.api.dependencies import require_auth
 from src.api.schemas import MessageResponse
 from src.api.utils import gerer_exception_api
 
@@ -48,7 +50,10 @@ router = APIRouter(prefix="/api/v1/telegram", tags=["Telegram"])
 
 @router.post("/envoyer-planning", response_model=MessageResponse)
 @gerer_exception_api
-async def envoyer_planning_telegram(payload: EnvoyerPlanningTelegramRequest) -> MessageResponse:
+async def envoyer_planning_telegram(
+    payload: EnvoyerPlanningTelegramRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
     """Envoie un planning existant sur Telegram avec boutons interactifs."""
     from src.api.utils import executer_async, executer_avec_session
     from src.core.models.planning import Planning

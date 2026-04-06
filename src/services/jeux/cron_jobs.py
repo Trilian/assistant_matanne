@@ -46,7 +46,7 @@ def scraper_cotes_sportives():
         from src.core.config import obtenir_parametres
         
         settings = obtenir_parametres()
-        api_key = settings.THE_ODDS_API_KEY
+        api_key = getattr(settings, "THE_ODDS_API_KEY", None)
         
         if not api_key:
             logger.warning("⚠️ THE_ODDS_API_KEY non configurée - Job annulé")
@@ -131,7 +131,6 @@ def scraper_cotes_sportives():
     
     except Exception as e:
         logger.error(f"❌ Erreur scraping cotes: {e}", exc_info=True)
-        raise ErreurServiceIA(f"Échec scraping cotes: {e}")
 
 
 # ═══════════════════════════════════════════════════════════
@@ -158,7 +157,7 @@ def scraper_resultats_matchs():
         from src.core.config import obtenir_parametres
         
         settings = obtenir_parametres()
-        api_key = settings.API_FOOTBALL_KEY
+        api_key = getattr(settings, "API_FOOTBALL_KEY", None)
         
         if not api_key:
             logger.warning("⚠️ API_FOOTBALL_KEY non configurée - Job annulé")
@@ -249,7 +248,6 @@ def scraper_resultats_matchs():
     
     except Exception as e:
         logger.error(f"❌ Erreur scraping résultats: {e}", exc_info=True)
-        raise ErreurServiceIA(f"Échec scraping résultats: {e}")
 
 
 # ═══════════════════════════════════════════════════════════

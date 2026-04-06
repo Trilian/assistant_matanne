@@ -60,6 +60,29 @@ async def obtenir_insights_quotidiens(
     return result or InsightsQuotidiensResponse(limite_journaliere=limite)
 
 
+@router.get("/insights-analytics")
+@gerer_exception_api
+async def obtenir_insights_analytics(
+    periode_mois: int = Query(1, ge=1, le=12, description="Période 1-12 mois"),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+) -> dict[str, Any]:
+    """Analytics insights — tendances famille sur une période donnée."""
+    from src.services.dashboard.insights_analytics import get_insights_analytics_service
+
+    service = get_insights_analytics_service()
+    result = service.generer_insights_famille(periode_mois=periode_mois)
+    if result:
+        return result.model_dump()
+    return {
+        "periode_jours": periode_mois * 30,
+        "repas_planifies": 0,
+        "repas_cuisines": 0,
+        "taux_realisation_repas": 0.0,
+        "resume_ia": "",
+    }
+
+
 @router.get("/meteo-contextuelle", response_model=MeteoContextuelleResponse, responses=REPONSES_IA)
 @gerer_exception_api
 async def obtenir_meteo_contextuelle(

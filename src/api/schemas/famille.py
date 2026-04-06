@@ -87,6 +87,12 @@ class AnniversaireResponse(BaseModel):
     }
 
 
+class AnniversairesListeResponse(BaseModel):
+    """Réponse pour la liste des anniversaires."""
+
+    items: list[AnniversaireResponse]
+
+
 class ChecklistAnniversaireSyncRequest(BaseModel):
     force_recalcul_budget: bool = False
 
@@ -189,6 +195,12 @@ class EvenementFamilialResponse(BaseModel):
             }
         }
     }
+
+
+class EvenementsListeResponse(BaseModel):
+    """Réponse pour la liste des événements familiaux."""
+
+    items: list[EvenementFamilialResponse]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -372,6 +384,13 @@ class AchatResponse(BaseModel):
 
 class MarquerAchetePayload(BaseModel):
     prix_reel: float | None = None
+
+
+class AchatsListeResponse(BaseModel):
+    """Réponse pour la liste des achats famille."""
+
+    items: list[AchatResponse]
+    total: int
 
 
 # ═══════════════════════════════════════════════════════════

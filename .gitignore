@@ -87,6 +87,7 @@ build/
 # ===================================
 logs/
 *.log
+.cache/
 
 # ===================================
 # OS
@@ -120,11 +121,3 @@ test_results*.txt
 test_detail.txt
 tests/reports/
 /coverage
-
-# ===================================
-# Fichiers supprimes (stubs vides)
-# ===================================
-docs/TEMPLATE_IMPORT.csv
-docs/GUIDE_UTILISATEUR.md
-docs/MIGRATION_CORE_PACKAGES.md
-docs/guides/cuisine/batch_cooking.md

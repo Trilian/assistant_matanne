@@ -33,17 +33,20 @@ def mock_session():
     return session
 
 
-@contextmanager
-def _ctx(mock_session):
-    yield mock_session
-
-
 @pytest.fixture
 def patch_db(mock_session):
-    """Patch le contexte DB."""
-    with patch(
-        "src.core.db.obtenir_contexte_db",
-        return_value=_ctx(mock_session),
+    """Patch le contexte DB pour les deux modules de cron jobs."""
+    @contextmanager
+    def mock_context():
+        try:
+            yield mock_session
+        except Exception:
+            mock_session.rollback()
+            raise
+
+    with (
+        patch("src.services.jeux.cron_jobs.obtenir_contexte_db", side_effect=lambda: mock_context()),
+        patch("src.services.jeux.cron_jobs_loteries.obtenir_contexte_db", side_effect=lambda: mock_context()),
     ):
         yield mock_session
 

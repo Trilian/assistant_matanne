@@ -311,6 +311,7 @@ class AdminEventsListResponse(BaseModel):
 
     items: list[AdminEventResponse] = Field(default_factory=list)
     total: int = 0
+    metriques: dict[str, Any] = Field(default_factory=dict)
 
 
 # ═══════════════════════════════════════════════════════════

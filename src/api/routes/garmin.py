@@ -105,7 +105,13 @@ async def synchroniser_garmin(
         with executer_avec_session() as session:
             user_id = _resoudre_user_id(session, user)
             service = obtenir_garmin_service()
-            return service.sync_user_data(user_id=user_id, days_back=days_back, db=session)
+            result = service.sync_user_data(user_id=user_id, days_back=days_back, db=session)
+            if isinstance(result, dict):
+                return {
+                    "status": "success" if result.get("synced") else "error",
+                    "activities_synced": result.get("activites", result.get("activities_synced", 0)),
+                }
+            return {"status": "success", "activities_synced": 0}
 
     return await executer_async(_query)
 

@@ -16,14 +16,16 @@ from src.api.schemas.voyages import (
     VoyagePlanifieIAResponse,
     VoyageResume,
     VoyageTemplateItem,
+    VoyageTemplatesListeResponse,
     VoyageToggleChecklistResponse,
+    VoyagesListeResponse,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/famille/voyages", tags=["Voyages"])
 
 
-@router.get("", response_model=list[VoyageResume], responses=REPONSES_LISTE)
+@router.get("", response_model=VoyagesListeResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_voyages(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
@@ -36,7 +38,7 @@ async def lister_voyages(user: dict[str, Any] = Depends(require_auth)) -> dict[s
     return await executer_async(_query)
 
 
-@router.get("/templates", response_model=list[VoyageTemplateItem], responses=REPONSES_LISTE)
+@router.get("/templates", response_model=VoyageTemplatesListeResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_templates_voyage(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
@@ -51,9 +53,9 @@ async def lister_templates_voyage(user: dict[str, Any] = Depends(require_auth)) 
                     "id": t.id,
                     "nom": t.nom,
                     "type_voyage": t.type_voyage,
-                    "membre": t.membre,
-                    "description": t.description,
-                    "articles": t.articles or [],
+                    "membre": t.membre or "",
+                    "description": t.description or "",
+                    "articles": [str(article) for article in (t.articles or [])],
                 }
                 for t in templates
             ],

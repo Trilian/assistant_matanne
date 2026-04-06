@@ -354,7 +354,7 @@ class TestAdminInterModuleBridgesStatus:
         assert response.status_code == 200
 
         data = response.json()
-        assert data.get("phase") == "bridges_inter_modules"
+        assert data.get("domaine") == "bridges_inter_modules"
         assert "resume" in data
         assert data["resume"].get("total_actions") == 17
         assert data["resume"].get("mode_verification") == "presence_only"

@@ -66,6 +66,20 @@ class VoyageTemplateItem(BaseModel):
     articles: list[str] = Field(default_factory=list)
 
 
+class VoyagesListeResponse(BaseModel):
+    """Réponse pour la liste des voyages."""
+
+    items: list[VoyageResume]
+    total: int
+
+
+class VoyageTemplatesListeResponse(BaseModel):
+    """Réponse pour la liste des templates de voyage."""
+
+    items: list[VoyageTemplateItem]
+    total: int
+
+
 class VoyagePlanifieIAResponse(BaseModel):
     """Réponse de planification IA d'un voyage."""
 

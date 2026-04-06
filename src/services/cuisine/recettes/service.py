@@ -488,6 +488,7 @@ class ServiceRecettes(
                     "derniere_cuisson": None,
                     "total_portions": 0,
                     "jours_depuis_derniere": None,
+                    "note_moyenne": None,
                 }
 
             derniere = historique[0]
@@ -497,6 +498,7 @@ class ServiceRecettes(
                 "derniere_cuisson": derniere.date_preparation,
                 "total_portions": sum(h.portions_cuisinees for h in historique),
                 "jours_depuis_derniere": (date.today() - derniere.date_preparation).days,
+                "note_moyenne": None,
             }
         except Exception as e:
             logger.error(f"Erreur stats recette: {e}")

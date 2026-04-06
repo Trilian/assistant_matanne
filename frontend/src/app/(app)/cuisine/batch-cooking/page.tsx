@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   CalendarPlus,
   UtensilsCrossed,
+  Timer,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -515,6 +516,12 @@ function SessionCard({
             <span className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
               {session.duree_estimee} min
+              <Link href={`/outils/minuteur?minutes=${session.duree_estimee}`}>
+                <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                  <Timer className="h-3 w-3 mr-1" />
+                  Minuteur
+                </Button>
+              </Link>
             </span>
           )}
           {session.recettes_selectionnees.length > 0 && (

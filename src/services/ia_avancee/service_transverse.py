@@ -554,6 +554,10 @@ Retourne un JSON avec:
         else:
             ajustements.append("Collecte en cours: davantage de feedback est necessaire pour personnaliser")
 
+        # Persister les préférences apprises en DB
+        if user_id and (favoris or a_eviter):
+            self._persister_preferences_apprises(user_id, semaines_analysees, favoris, a_eviter, influence_active)
+
         return ApprentissagePreferencesResponse(
             semaines_analysees=semaines_analysees,
             influence_active=influence_active,
@@ -1222,6 +1226,36 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         except Exception:
             logger.debug("Analyse preferences apprises indisponible", exc_info=True)
             return 0, [], []
+
+    def _persister_preferences_apprises(
+        self,
+        user_id: str,
+        semaines_analysees: int,
+        favoris: list,
+        a_eviter: list,
+        influence_active: bool,
+    ) -> None:
+        """Persiste les préférences apprises dans le modèle PreferenceUtilisateur."""
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models import PreferenceUtilisateur
+
+                prefs = (
+                    session.query(PreferenceUtilisateur)
+                    .filter(PreferenceUtilisateur.user_id == user_id)
+                    .first()
+                )
+                if prefs:
+                    prefs.preferences_apprises = {
+                        "semaines_analysees": semaines_analysees,
+                        "influence_active": influence_active,
+                        "favoris": [{"categorie": f.categorie, "valeur": f.valeur, "score": f.score_confiance} for f in favoris],
+                        "a_eviter": [{"categorie": e.categorie, "valeur": e.valeur, "score": e.score_confiance} for e in a_eviter],
+                        "mis_a_jour": datetime.now(UTC).isoformat(),
+                    }
+                    session.commit()
+        except Exception:
+            logger.debug("Persistance preferences apprises echouee", exc_info=True)
 
     def _contenu_carte_visuelle(self, type_carte: str) -> list[str]:
         """Construit des lignes de contenu pour la carte visuelle exportable."""

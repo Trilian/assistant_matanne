@@ -48,10 +48,12 @@ from src.api.schemas.famille import (
     AchatCreate,
     AchatPatch,
     AchatResponse,
+    AchatsListeResponse,
     AnnonceIBCRequest,
     AnnonceIBCResponse,
     AnniversaireCreate,
     AnniversaireResponse,
+    AnniversairesListeResponse,
     ChecklistAnniversaireItemCreate,
     ChecklistAnniversaireItemPatch,
     ChecklistAnniversaireSyncRequest,
@@ -62,6 +64,7 @@ from src.api.schemas.famille import (
     EvenementFamilialCreate,
     EvenementFamilialPatch,
     EvenementFamilialResponse,
+    EvenementsListeResponse,
     MarquerAchetePayload,
     PlanningJoursSansCrecheResponse,
     PreferencesFamilleRequest,
@@ -452,7 +455,7 @@ def _serialiser_anniversaire(a) -> dict:  # noqa: ANN001
     }
 
 
-@router.get("/anniversaires", response_model=list[AnniversaireResponse], responses=REPONSES_LISTE)
+@router.get("/anniversaires", response_model=AnniversairesListeResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_anniversaires(
     relation: str | None = Query(None),
@@ -755,7 +758,7 @@ def _serialiser_evenement(e) -> dict:  # noqa: ANN001
     }
 
 
-@router.get("/evenements", response_model=list[EvenementFamilialResponse], responses=REPONSES_LISTE)
+@router.get("/evenements", response_model=EvenementsListeResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_evenements_familiaux(
     type_evenement: str | None = Query(None),
@@ -934,7 +937,7 @@ def _serialiser_achat(a) -> dict:  # noqa: ANN001
     }
 
 
-@router.get("/achats", response_model=list[AchatResponse], responses=REPONSES_LISTE)
+@router.get("/achats", response_model=AchatsListeResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_achats_famille(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),

@@ -55,7 +55,7 @@ function badgeJours(jours: number) {
   );
 }
 
-export default function PageAntiGaspillage() {
+export function ContenuAntiGaspillage() {
   const { data, isLoading } = utiliserRequete(
     ["anti-gaspillage"],
     () => obtenirAntiGaspillage()
@@ -411,4 +411,8 @@ export default function PageAntiGaspillage() {
       )}
     </div>
   );
+}
+
+export default function PageAntiGaspillage() {
+  return <ContenuAntiGaspillage />;
 }

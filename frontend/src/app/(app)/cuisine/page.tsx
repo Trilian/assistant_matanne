@@ -4,6 +4,7 @@
 
 "use client";
 
+import { useState } from "react";
 import {
   BookOpen,
   CalendarCheck,
@@ -17,6 +18,7 @@ import {
   TrendingUp,
   Flame,
   RefreshCw,
+  Star,
 } from "lucide-react";
 import {
   Card,
@@ -34,6 +36,8 @@ import { CarteNotificationsModule } from "@/composants/disposition/carte-notific
 import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
 import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
 import { LienTransition } from "@/composants/ui/lien-transition";
+import { DialogueFeedbackSemaine } from "@/composants/cuisine/dialogue-feedback-semaine";
+import { Button } from "@/composants/ui/button";
 
 const SECTIONS = [
   {
@@ -79,6 +83,8 @@ const SECTIONS = [
 ];
 
 export default function PageCuisine() {
+  const [feedbackOuvert, setFeedbackOuvert] = useState(false);
+
   const { data: dashboard } = utiliserRequete(
     ["dashboard-cuisine"],
     obtenirDashboardCuisine
@@ -114,11 +120,17 @@ export default function PageCuisine() {
   return (
     <div className="space-y-6">
       <SectionReveal>
+        <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">🍽️ Cuisine</h1>
           <p className="text-muted-foreground">
             Ton cockpit cuisine — planning, courses, stocks
           </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setFeedbackOuvert(true)}>
+          <Star className="h-4 w-4 mr-1.5 text-yellow-500" />
+          Feedback semaine
+        </Button>
         </div>
       </SectionReveal>
 
@@ -390,6 +402,8 @@ export default function PageCuisine() {
           );
         })}
       </SectionReveal>
+
+      <DialogueFeedbackSemaine ouvert={feedbackOuvert} onFermer={() => setFeedbackOuvert(false)} />
     </div>
   );
 }

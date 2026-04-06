@@ -89,7 +89,7 @@ function BarreProgression({
   );
 }
 
-export default function PageNutrition() {
+export function ContenuNutrition() {
   const [decalageSemaine, setDecalageSemaine] = useState(0);
 
   const semaine =
@@ -340,4 +340,8 @@ export default function PageNutrition() {
       )}
     </div>
   );
+}
+
+export default function PageNutrition() {
+  return <ContenuNutrition />;
 }

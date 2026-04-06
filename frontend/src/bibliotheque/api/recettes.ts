@@ -47,6 +47,16 @@ export async function supprimerRecette(id: number): Promise<void> {
   await clientApi.delete(`/recettes/${id}`);
 }
 
+/** Ajouter aux favoris */
+export async function ajouterAuFavori(id: number): Promise<void> {
+  await clientApi.post(`/recettes/${id}/favori`);
+}
+
+/** Retirer des favoris */
+export async function retirerDuFavori(id: number): Promise<void> {
+  await clientApi.delete(`/recettes/${id}/favori`);
+}
+
 /** Obtenir des suggestions IA */
 export async function obtenirSuggestions(contexte: string): Promise<SuggestionRecette[]> {
   const { data } = await clientApi.post<SuggestionRecette[]>("/suggestions/recettes", {
@@ -82,6 +92,38 @@ export async function listerRecettesSaisonnieres(
   const { data } = await clientApi.get<ReponseSaisonnieres>("/recettes/saisonnieres", {
     params: { page, mois },
   });
+  return data;
+}
+
+/** Calendrier saisonnier — données par mois */
+export interface IngredientSaisonCalendrier {
+  nom: string;
+  categorie: string;
+  bio_local: boolean;
+}
+
+export interface MoisCalendrier {
+  mois: number;
+  nom: string;
+  ingredients: IngredientSaisonCalendrier[];
+}
+
+export interface PaireSaisonCalendrier {
+  ingredients: string[];
+  description: string;
+  saison: string;
+}
+
+export interface ReponseCalendrierSaisonnier {
+  mois_courant: number;
+  saison_courante: string;
+  calendrier: MoisCalendrier[];
+  paires_saison: PaireSaisonCalendrier[];
+}
+
+/** Récupérer le calendrier saisonnier complet */
+export async function obtenirCalendrierSaisonnier(): Promise<ReponseCalendrierSaisonnier> {
+  const { data } = await clientApi.get<ReponseCalendrierSaisonnier>("/recettes/calendrier-saisonnier");
   return data;
 }
 

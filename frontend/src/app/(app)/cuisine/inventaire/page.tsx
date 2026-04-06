@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import {
   Plus,
   Package,
@@ -83,6 +83,13 @@ import { TreemapInventaire } from "@/composants/graphiques/treemap-inventaire";
 import { construireDonneesTreemapInventaire } from "@/bibliotheque/inventaire-treemap";
 import { predireConsommationInventaire } from "@/bibliotheque/api/ia-modules";
 
+const ContenuPhotoFrigoLazy = lazy(() =>
+  import("../photo-frigo/page").then((m) => ({ default: m.ContenuPhotoFrigo }))
+);
+const ContenuAntiGaspillageLazy = lazy(() =>
+  import("../anti-gaspillage/page").then((m) => ({ default: m.ContenuAntiGaspillage }))
+);
+
 const EMPLACEMENTS: { id: string; label: string; icone: LucideIcon }[] = [
   { id: "Frigo", label: "Frigo", icone: Refrigerator },
   { id: "Congélateur Tiroir", label: "Congél. Tiroir", icone: Archive },
@@ -112,6 +119,7 @@ const FILTRES_ETAT = [
 ];
 
 export default function PageInventaire() {
+  const [vueInventaire, setVueInventaire] = useState<"stock" | "photo-frigo" | "anti-gaspillage">("stock");
   const [ongletActif, setOngletActif] = useState("Frigo");
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState("Tous");
@@ -244,14 +252,16 @@ export default function PageInventaire() {
 
   async function importerStockDepuisScanner(
     trouves: ArticleBarcode[],
-    inconnus: string[]
+    inconnus: string[],
+    quantites: Record<string, number>
   ) {
     let misAJour = 0;
     let enrichis = 0;
     for (const t of trouves) {
       try {
+        const qté = quantites[t.code] ?? 1;
         await modifierArticleInventaire(t.article.id, {
-          quantite: (t.article.quantite ?? 0) + 1,
+          quantite: (t.article.quantite ?? 0) + qté,
         });
         misAJour++;
         // Auto-enrichissement OpenFoodFacts (nutriscore, ecoscore)
@@ -333,6 +343,30 @@ export default function PageInventaire() {
           <h1 className="text-2xl font-bold tracking-tight">📦 Inventaire</h1>
           <p className="text-muted-foreground">Stock alimentaire et alertes</p>
         </div>
+      </div>
+
+      {/* ─── Onglets haut niveau ─── */}
+      <Tabs value={vueInventaire} onValueChange={(v) => setVueInventaire(v as typeof vueInventaire)}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="stock">📦 Stock</TabsTrigger>
+          <TabsTrigger value="photo-frigo">📸 Photo Frigo</TabsTrigger>
+          <TabsTrigger value="anti-gaspillage">♻️ Anti-gaspi</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="photo-frigo" className="mt-4">
+          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <ContenuPhotoFrigoLazy />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="anti-gaspillage" className="mt-4">
+          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <ContenuAntiGaspillageLazy />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="stock" className="mt-4 space-y-6">
+      <div className="flex items-center justify-end">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -733,6 +767,8 @@ export default function PageInventaire() {
         onImporter={importerStockDepuisScanner}
         labelImporter="Mettre à jour stock"
       />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

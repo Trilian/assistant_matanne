@@ -7,6 +7,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -474,3 +475,8 @@ class GrilleExpertEuromillionsResponse(BaseModel):
     distribution: dict[str, Any] = Field(default_factory=dict)
     backtest: dict[str, Any] | None = None
     statut: str = ""
+
+
+# Résolution des références forward (nécessaire avec `from __future__ import annotations`)
+AnalyseGrilleLotoResponse.model_rebuild()
+GrilleExpertEuromillionsResponse.model_rebuild()

@@ -1,11 +1,13 @@
 ﻿"""
 Cron jobs pour le module Cuisine.
 
-4 jobs automatisés :
+6 jobs automatisés :
 1. Analyse péremptions matin : 7h00 → alerte articles expirant sous 3 jours
 2. Suggestion planning semaine : Dimanche 18h → génère planning IA si aucun actif
 3. Vérifier stocks bas : Lundi 9h → détecte articles sous seuil min
 4. Rapport mensuel cuisine : 1er du mois 8h → synthèse consommation/gaspillage
+5. Entraînement ML satisfaction : Dimanche 22h → re-entraîne le modèle ML
+6. Rappel mi-semaine : Mercredi 11h → rappel si créneaux vides jeudi-dimanche
 """
 
 import logging
@@ -332,12 +334,130 @@ def generer_rapport_mensuel_cuisine():
 
 
 # ═══════════════════════════════════════════════════════════
+# JOB 5 — Entraînement ML satisfaction (Dimanche 22h)
+# ═══════════════════════════════════════════════════════════
+
+
+def rappeler_planning_mi_semaine() -> None:
+    """Mercredi 11h : rappel si la 2e moitié de semaine (jeu-dim) a des créneaux vides."""
+    logger.info("🔄 Rappel mi-semaine : vérification créneaux jeudi→dimanche")
+
+    try:
+        from src.core.models.planning import RepasPlanning
+
+        with obtenir_contexte_db() as session:
+            # Calculer jeudi à dimanche de la semaine courante
+            aujourd_hui = date.today()
+            jours_restants = 4  # jeudi, vendredi, samedi, dimanche
+            jeudi = aujourd_hui + timedelta(days=1)  # mercredi +1 = jeudi
+            dimanche = jeudi + timedelta(days=3)
+
+            nb_repas = (
+                session.query(RepasPlanning)
+                .filter(
+                    RepasPlanning.date >= str(jeudi),
+                    RepasPlanning.date <= str(dimanche),
+                )
+                .count()
+            )
+
+            creneaux_total = jours_restants * 3  # 3 repas principaux par jour
+            if nb_repas < creneaux_total * 0.5:
+                _notifier_rappel_mi_semaine(nb_repas, creneaux_total)
+            else:
+                logger.info(f"✅ Mi-semaine OK : {nb_repas}/{creneaux_total} créneaux remplis")
+
+    except Exception as e:
+        logger.error(f"❌ Erreur rappel mi-semaine : {e}", exc_info=True)
+
+
+def _notifier_rappel_mi_semaine(nb_repas: int, creneaux_total: int) -> None:
+    """Envoie une notification pour les créneaux vides de fin de semaine."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        dispatcher = get_dispatcher_notifications()
+        vides = creneaux_total - nb_repas
+        message = (
+            f"📅 Planning mi-semaine : {vides} créneau(x) vide(s) pour jeudi→dimanche. "
+            "Complétez votre planning !"
+        )
+
+        for user_id in _obtenir_user_ids():
+            dispatcher.envoyer_evenement(
+                user_id=user_id,
+                type_evenement="rappel_courses",
+                message=message,
+                titre="Rappel mi-semaine",
+            )
+        logger.info(f"📤 Rappel mi-semaine envoyé ({vides} créneaux vides)")
+    except Exception as e:
+        logger.error(f"❌ Erreur envoi rappel mi-semaine : {e}", exc_info=True)
+
+
+def entrainer_ml_satisfaction() -> None:
+    """Reconstruit le modèle ML de satisfaction à partir des feedbacks récents."""
+    try:
+        from src.core.models.recettes import Recette
+        from src.core.models.user_preferences import RetourRecette
+        from src.services.cuisine.suggestions.ml_satisfaction import ScoreSatisfactionRepas
+        import re
+
+        with obtenir_contexte_db() as session:
+            # Joindre RetourRecette + Recette pour construire le dataset
+            resultats = (
+                session.query(RetourRecette, Recette)
+                .join(Recette, RetourRecette.recette_id == Recette.id)
+                .filter(RetourRecette.contexte.isnot(None))
+                .all()
+            )
+
+            historique: list[dict] = []
+            for retour, recette in resultats:
+                # Extraire la note depuis contexte "note=X/5"
+                match = re.search(r"note=(\d)/5", retour.contexte or "")
+                if not match:
+                    continue
+
+                note = int(match.group(1))
+                nb_ingredients = len(recette.ingredients) if recette.ingredients else 5
+
+                historique.append({
+                    "note": note,
+                    "nb_ingredients": nb_ingredients,
+                    "temps_preparation": recette.temps_preparation or 30,
+                    "temps_cuisson": recette.temps_cuisson or 0,
+                    "categorie": recette.categorie or "Autre",
+                    "date": str(retour.cree_le.date()) if retour.cree_le else "",
+                    "nb_personnes": recette.portions or 4,
+                })
+
+        if not historique:
+            logger.info("🤖 ML satisfaction : aucun feedback trouvé, entraînement ignoré")
+            return
+
+        scorer = ScoreSatisfactionRepas()
+        result = scorer.entrainer(historique)
+
+        if result.get("trained"):
+            logger.info(
+                f"🤖 ML satisfaction entraîné : R²={result.get('r2_score', 0):.3f}, "
+                f"{result.get('n_samples', 0)} échantillons"
+            )
+        else:
+            logger.info(f"🤖 ML satisfaction non entraîné : {result.get('reason', '?')}")
+
+    except Exception as e:
+        logger.error(f"❌ Erreur entraînement ML satisfaction : {e}", exc_info=True)
+
+
+# ═══════════════════════════════════════════════════════════
 # CONFIGURATION DES JOBS
 # ═══════════════════════════════════════════════════════════
 
 
 def configurer_jobs_cuisine(scheduler: BackgroundScheduler) -> None:
-    """Enregistre les 4 cron jobs cuisine dans le scheduler."""
+    """Enregistre les 6 cron jobs cuisine dans le scheduler."""
 
     # Job 1: Alertes péremption — tous les jours à 7h
     scheduler.add_job(
@@ -375,4 +495,22 @@ def configurer_jobs_cuisine(scheduler: BackgroundScheduler) -> None:
         replace_existing=True,
     )
 
-    logger.info("✅ 4 cron jobs Cuisine configurés")
+    # Job 5: Entraînement ML satisfaction — dimanche 22h
+    scheduler.add_job(
+        entrainer_ml_satisfaction,
+        trigger=CronTrigger(day_of_week="sun", hour=22, minute=0),
+        id="cuisine_ml_satisfaction",
+        name="Cuisine: Entraînement ML satisfaction (dim 22h)",
+        replace_existing=True,
+    )
+
+    # Job 6: Rappel mi-semaine — mercredi 11h
+    scheduler.add_job(
+        rappeler_planning_mi_semaine,
+        trigger=CronTrigger(day_of_week="wed", hour=11, minute=0),
+        id="cuisine_rappel_mercredi",
+        name="Cuisine: Rappel mi-semaine (mer 11h)",
+        replace_existing=True,
+    )
+
+    logger.info("✅ 6 cron jobs Cuisine configurés")

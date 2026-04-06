@@ -1,0 +1,243 @@
+# serializer version: 1
+# name: TestAIPromptsMixinSnapshot.test_build_json_prompt
+  '''
+  Famille française, 2 adultes, 1 enfant de 3 ans
+  
+  TÂCHE: Génère un planning de repas pour la semaine
+  
+  CONTRAINTES:
+  - Pas de poisson le lundi
+  - Recettes rapides en semaine (30 min max)
+  - Au moins 2 repas végétariens
+  
+  FORMAT JSON ATTENDU:
+  [{"jour": "Lundi", "midi": "...", "soir": "..."}]
+  
+  IMPORTANT: Réponds UNIQUEMENT en JSON valide, sans texte avant ou après.
+  '''
+# ---
+# name: TestAIPromptsMixinSnapshot.test_build_system_prompt
+  '''
+  Tu es un expert culinaire familial.
+  
+  EXPERTISE:
+  - Cuisine française et méditerranéenne
+  - Nutrition infantile
+  - Batch cooking et meal prep
+  
+  RÈGLES:
+  - Toujours proposer des alternatives pour les allergies
+  - Privilégier les produits de saison
+  
+  Réponds toujours en français, de manière claire et structurée.
+  '''
+# ---
+# name: TestPromptBatchCookingSnapshot.test_prompt_batch_cooking_avec_jules
+  '''
+  Expert batch cooking familial. Génère des instructions détaillées et concrètes.
+  
+  SESSION: SAMEDI MATIN
+  Avec Jules (19 mois) - prévoir des tâches simples et sécurisées pour lui
+  
+  ÉQUIPEMENT:
+  - Mixeur plongeant
+  
+  RECETTES À PRÉPARER:
+  
+  - Mardi midi: Gratin dauphinois
+  - Mardi soir: Salade composée
+  
+  RÉPONDS EN JSON VALIDE avec cette structure:
+  {"session": {"duree_estimee_minutes": 120, "conseils_organisation": ["..."]},
+   "recettes": [{"nom": "...", "pour_jours": ["Lundi midi"], "portions": 4,
+     "ingredients": [{"nom": "carottes", "quantite": "500g", "decoupe": "rondelles 5mm", "tache_jules": "Laver"}],
+     "etapes_batch": [{"titre": "Découper carottes en rondelles 5mm", "duree_minutes": 10, "robot": null, "temperature": null, "est_passif": false, "detail": "Économe, rondelles régulières 5mm", "jules_participation": false, "tache_jules": null}],
+     "instructions_finition": ["Réchauffer 3min micro-ondes"],
+     "stockage": "Boîte hermétique frigo", "duree_conservation_jours": 3}],
+   "moments_jules": [{"temps": "0-15min", "tache": "Laver légumes"}],
+   "timeline": [{"debut_min": 0, "fin_min": 15, "tache": "Découpe légumes", "robot": null}]}
+  
+  RÈGLES:
+  1. Étapes CONCRÈTES: découpe exacte, grammes, °C, durée. Jamais "les légumes" → nommer chaque légume avec quantité
+  2. Robot utilisé: programme exact, température, vitesse, durée
+  3. PARALLÉLISER: pendant qu'un robot tourne (est_passif=true), travailler sur une autre recette. La timeline montre les opérations simultanées
+  4. Quantités en grammes/ml (sauf pièces: oeufs, oignons). Finition = réchauffage/assaisonnement jour J
+  5. Jules 19 mois: UNIQUEMENT laver, mélanger dans un bol, verser (PAS de couteau, PAS de chaleur)
+  
+  Réponds UNIQUEMENT en JSON valide, sans commentaire ni markdown.
+  '''
+# ---
+# name: TestPromptBatchCookingSnapshot.test_prompt_batch_cooking_sans_jules
+  '''
+  Expert batch cooking familial. Génère des instructions détaillées et concrètes.
+  
+  SESSION: DIMANCHE APRÈS-MIDI
+  Session solo
+  
+  ÉQUIPEMENT:
+  - Thermomix TM6
+  - Robot pâtissier
+  
+  RECETTES À PRÉPARER:
+  
+  - Lundi midi: Pâtes bolognaise
+  - Lundi soir: Soupe de légumes
+  
+  RÉPONDS EN JSON VALIDE avec cette structure:
+  {"session": {"duree_estimee_minutes": 120, "conseils_organisation": ["..."]},
+   "recettes": [{"nom": "...", "pour_jours": ["Lundi midi"], "portions": 4,
+     "ingredients": [{"nom": "carottes", "quantite": "500g", "decoupe": "rondelles 5mm", "tache_jules": "Laver"}],
+     "etapes_batch": [{"titre": "Découper carottes en rondelles 5mm", "duree_minutes": 10, "robot": null, "temperature": null, "est_passif": false, "detail": "Économe, rondelles régulières 5mm", "jules_participation": false, "tache_jules": null}],
+     "instructions_finition": ["Réchauffer 3min micro-ondes"],
+     "stockage": "Boîte hermétique frigo", "duree_conservation_jours": 3}],
+   "moments_jules": [{"temps": "0-15min", "tache": "Laver légumes"}],
+   "timeline": [{"debut_min": 0, "fin_min": 15, "tache": "Découpe légumes", "robot": null}]}
+  
+  RÈGLES:
+  1. Étapes CONCRÈTES: découpe exacte, grammes, °C, durée. Jamais "les légumes" → nommer chaque légume avec quantité
+  2. Robot utilisé: programme exact, température, vitesse, durée
+  3. PARALLÉLISER: pendant qu'un robot tourne (est_passif=true), travailler sur une autre recette. La timeline montre les opérations simultanées
+  4. Quantités en grammes/ml (sauf pièces: oeufs, oignons). Finition = réchauffage/assaisonnement jour J
+  
+  Réponds UNIQUEMENT en JSON valide, sans commentaire ni markdown.
+  '''
+# ---
+# name: TestPromptBilanMensuelSnapshot.test_prompt_bilan_mensuel
+  '''
+  Bilan familial du mois de March 2026 :
+  - Dépenses totales : 2450 €
+  - Catégories principales : Alimentation, Logement, Transport
+  - Repas planifiés : 42
+  - Activités réalisées : 8
+  - Tâches entretien complétées : 12
+  - Tâches entretien en retard : 3
+  - Activités notables : Parc, Piscine, Bibliothèque
+  '''
+# ---
+# name: TestPromptImagesSnapshot.test_query_recette_dessert
+  'Tarte aux pommes dessert finished plated beautiful decorated fresh homemade delicious appetizing'
+# ---
+# name: TestPromptImagesSnapshot.test_query_recette_plat_general
+  'Poulet rôti cooked finished plated served prepared eating fresh homemade delicious appetizing'
+# ---
+# name: TestPromptImagesSnapshot.test_query_recette_soupe
+  'Soupe de potiron soup cooked served hot finished in bowl fresh homemade delicious appetizing'
+# ---
+# name: TestPromptRestesSnapshot.test_prompt_restes_basique
+  '''
+  Voici mes restes à utiliser:
+  
+  - Poulet cuit (200g)
+  - Riz (1 bol)
+  - Carottes cuites (3 pièces) [état: à consommer]
+  
+  Propose des recettes créatives pour les utiliser !
+  '''
+# ---
+# name: TestPromptsJeuxSnapshot.test_prompt_loto_chance
+  '''
+  Analyse des numéros en retard - Loto Numéros Chance (1-10):
+  
+  - Numéro 3: Value=1.80, Série=15 tirages, Fréquence=9.0% [⚪]
+  
+  Fréquence théorique: 10.0%
+  Total en retard: 1
+  
+  RAPPEL: Chaque tirage est INDÉPENDANT. Un numéro 'en retard' n'a pas plus de chances.
+  
+  Analyse ces données avec prudence et rappelle que le Loto est un jeu de hasard pur.
+  '''
+# ---
+# name: TestPromptsJeuxSnapshot.test_prompt_loto_principaux
+  '''
+  Analyse des numéros en retard - Loto Numéros principaux (1-49):
+  
+  - Numéro 7: Value=3.20, Série=45 tirages, Fréquence=8.0% [🟢]
+  - Numéro 22: Value=2.80, Série=38 tirages, Fréquence=9.0% [🟢]
+  - Numéro 41: Value=2.50, Série=32 tirages, Fréquence=10.0% [🟢]
+  
+  Fréquence théorique: 10.2%
+  Total en retard: 3
+  
+  RAPPEL: Chaque tirage est INDÉPENDANT. Un numéro 'en retard' n'a pas plus de chances.
+  
+  Analyse ces données avec prudence et rappelle que le Loto est un jeu de hasard pur.
+  '''
+# ---
+# name: TestPromptsJeuxSnapshot.test_prompt_paris_sportifs
+  '''
+  Analyse des opportunités Paris Sportifs - Ligue 1:
+  
+  - ML PSG vs Lyon: Value=2.50, Série=8, Fréquence=15.0% [🟢]
+  - 1X Marseille: Value=1.80, Série=5, Fréquence=22.0% [⚪]
+  - O2.5 Monaco: Value=1.50, Série=3, Fréquence=35.0% [⚪]
+  
+  Total opportunités: 3
+  - Très en retard (🟢): 1
+  - En retard (🟡): 0
+  
+  Analyse ces données et fournis un résumé avec recommandations prudentes.
+  '''
+# ---
+# name: TestSystemPromptsSnapshot.test_actions_rapides_completude
+  list([
+    'budget',
+    'cuisine',
+    'famille',
+    'general',
+    'maison',
+    'nutrition',
+  ])
+# ---
+# name: TestSystemPromptsSnapshot.test_system_prompt_budget
+  '''
+  Tu es un conseiller en finances familiales.
+  Tu aides avec: gestion du budget, économies, investissements familiers, dépenses.
+  Tu donnes des conseils pragmatiques adaptés à une famille française.
+  Sois concret sur les montants et les actions possibles.
+  '''
+# ---
+# name: TestSystemPromptsSnapshot.test_system_prompt_cuisine
+  '''
+  Tu es un assistant culinaire expert pour une famille française.
+  Tu aides avec: recettes, planification des repas, courses, conseils nutritionnels, batch cooking.
+  Tu connais bien la cuisine française, méditerranéenne et les plats familiaux.
+  Sois concret, donne des quantités et temps précis.
+  '''
+# ---
+# name: TestSystemPromptsSnapshot.test_system_prompt_famille
+  '''
+  Tu es un assistant familial bienveillant.
+  Tu aides avec: activités pour enfants (Jules, ~3 ans), développement, routines, sorties weekend.
+  Tu connais les étapes de développement de la petite enfance et les activités Montessori.
+  Sois rassurant et pratique dans tes conseils.
+  '''
+# ---
+# name: TestSystemPromptsSnapshot.test_system_prompt_general
+  '''
+  Tu es un assistant familial polyvalent nommé 'Assistant Matanne'.
+  Tu aides une famille française avec tous les aspects de la vie quotidienne:
+  cuisine, enfants, maison, budget, organisation, loisirs.
+  Sois chaleureux, concret et utile. Réponds en français.
+  '''
+# ---
+# name: TestSystemPromptsSnapshot.test_system_prompt_maison
+  '''
+  Tu es un assistant maison et bricolage.
+  Tu aides avec: projets d'aménagement, entretien, jardin, réparations, décoration.
+  Tu donnes des conseils pratiques adaptés à des non-professionnels.
+  Indique le niveau de difficulté et si un professionnel est recommandé.
+  '''
+# ---
+# name: TestSystemPromptsSnapshot.test_system_prompt_nutrition
+  '''
+  Tu es un(e) nutritionniste diététicien(ne) expert(e) en nutrition française.
+  Tu aides à analyser les repas, évaluer l'équilibre nutritionnel et proposer des améliorations concrètes.
+  Tu maîtrises: macronutriments, micronutriments, alimentation de la petite enfance, allergies alimentaires.
+  Tu connais les recommandations PNNS (Programme National Nutrition Santé) et ANSES française.
+  Tu peux analyser un planning de repas, calculer des apports caloriques approximatifs,
+  identifier les carences ou excès, et proposer des alternatives saines sans sacrifier le plaisir.
+  Sois bienveillant(e), pratique et basé(e) sur des données scientifiques.
+  Précise toujours qu'il faut consulter un professionnel de santé pour un suivi personnalisé.
+  '''
+# ---

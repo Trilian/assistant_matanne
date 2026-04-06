@@ -49,15 +49,19 @@ def test_adaptation_recette_propose_une_substitution_connue(client: TestClient):
 
 
 def test_automations_par_defaut_contiennent_cinq_regles():
-    """Les automations par défaut initialisent bien les 5 règles A1 à A5."""
+    """Les automations par défaut initialisent bien les règles A1 à A9."""
     from src.api.routes.automations import _automations_par_defaut
 
     regles = _automations_par_defaut()
 
-    assert len(regles) == 5
+    assert len(regles) == 9
     noms = {regle["nom"] for regle in regles}
     assert any(nom.startswith("A1") for nom in noms)
     assert any(nom.startswith("A2") for nom in noms)
     assert any(nom.startswith("A3") for nom in noms)
     assert any(nom.startswith("A4") for nom in noms)
     assert any(nom.startswith("A5") for nom in noms)
+    assert any(nom.startswith("A6") for nom in noms)
+    assert any(nom.startswith("A7") for nom in noms)
+    assert any(nom.startswith("A8") for nom in noms)
+    assert any(nom.startswith("A9") for nom in noms)

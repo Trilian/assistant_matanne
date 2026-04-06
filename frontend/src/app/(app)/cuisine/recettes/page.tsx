@@ -46,6 +46,8 @@ import {
   planifierRecetteSemaine,
   deplanifierRecetteSemaine,
   obtenirDoublonsRecettes,
+  ajouterAuFavori,
+  retirerDuFavori,
 } from "@/bibliotheque/api/recettes";
 import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
 import { SwipeableItem } from "@/composants/swipeable-item";
@@ -147,6 +149,18 @@ export default function PageRecettes() {
     (id: number) => deplanifierRecetteSemaine(id),
     [["recettes", "semaine"]],
     { onSuccess: () => toast.success("Recette retirée du menu de la semaine") }
+  );
+
+  const mutationAjouterFavori = utiliserMutationAvecInvalidation(
+    (id: number) => ajouterAuFavori(id),
+    [["recettes"]],
+    { onSuccess: () => toast.success("Ajouté aux favoris") }
+  );
+
+  const mutationRetirerFavori = utiliserMutationAvecInvalidation(
+    (id: number) => retirerDuFavori(id),
+    [["recettes"]],
+    { onSuccess: () => toast.success("Retiré des favoris") }
   );
 
   const recettes = useMemo(() => data?.items ?? [], [data]);
@@ -391,11 +405,22 @@ export default function PageRecettes() {
                     )}
                     {/* Actions overlay */}
                     <div className="absolute top-2 right-2 flex gap-1">
-                      {recette.est_favori && (
-                        <div className="rounded-full bg-white/80 dark:bg-black/50 p-1">
-                          <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                        </div>
-                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (recette.est_favori) {
+                            mutationRetirerFavori.mutate(recette.id);
+                          } else {
+                            mutationAjouterFavori.mutate(recette.id);
+                          }
+                        }}
+                        className="rounded-full bg-white/80 dark:bg-black/50 p-1 hover:bg-white transition-colors"
+                        aria-label={recette.est_favori ? "Retirer des favoris" : "Ajouter aux favoris"}
+                      >
+                        <Heart className={`h-4 w-4 ${recette.est_favori ? "text-red-500 fill-red-500" : "text-muted-foreground"}`} />
+                      </button>
                       <button
                         type="button"
                         onClick={(e) => {

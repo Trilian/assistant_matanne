@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense, type ReactNode } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -110,6 +110,13 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+
+const ContenuNutritionLazy = lazy(() =>
+  import("../nutrition/page").then((m) => ({ default: m.ContenuNutrition }))
+);
+const ContenuMaSemaineLazy = lazy(() =>
+  import("../ma-semaine/page").then((m) => ({ default: m.ContenuMaSemaine }))
+);
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];
@@ -335,6 +342,7 @@ function CaseRepasPlanning({
 }
 
 export default function PagePlanning() {
+  const [vuePlanning, setVuePlanning] = useState<"planning" | "ma-semaine" | "nutrition">("planning");
   const { contexte: modeInvites, mettreAJour: mettreAJourModeInvites, reinitialiser: reinitialiserModeInvites } = utiliserModeInvites();
   const { utilisateur } = utiliserAuth();
   const [modeAffichage, setModeAffichage] = useState<"semaine" | "mois">("semaine");
@@ -823,6 +831,27 @@ export default function PagePlanning() {
 
   return (
     <div className="space-y-6">
+      {/* ─── Onglets haut niveau ─── */}
+      <Tabs value={vuePlanning} onValueChange={(v) => setVuePlanning(v as typeof vuePlanning)}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="planning">📅 Planning</TabsTrigger>
+          <TabsTrigger value="ma-semaine">🔄 Ma Semaine</TabsTrigger>
+          <TabsTrigger value="nutrition">🥗 Nutrition</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="ma-semaine" className="mt-4">
+          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <ContenuMaSemaineLazy />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="nutrition" className="mt-4">
+          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <ContenuNutritionLazy />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="planning" className="mt-4 space-y-6">
       {/* ─── En-tête ─── */}
       <Card className="overflow-hidden border-orange-200/70 bg-[linear-gradient(135deg,rgba(255,247,237,0.96),rgba(255,255,255,0.92))] shadow-sm dark:border-orange-900/60 dark:bg-[linear-gradient(135deg,rgba(24,16,10,0.96),rgba(9,14,22,0.94))]">
         <CardContent className="flex flex-col gap-6 p-5 lg:flex-row lg:items-end lg:justify-between">
@@ -1595,6 +1624,8 @@ export default function PagePlanning() {
           </button>
         </div>
       </ResponsiveOverlay>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
