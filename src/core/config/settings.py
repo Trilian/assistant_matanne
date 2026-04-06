@@ -77,7 +77,14 @@ class Parametres(BaseSettings):
 
     db_url: str | None = Field(
         None,
-        validation_alias=AliasChoices("DATABASE_URL", "db_url"),
+        validation_alias=AliasChoices(
+            "DATABASE_URL",
+            "POSTGRES_URL",
+            "POSTGRES_PRISMA_URL",
+            "POSTGRES_URL_NON_POOLING",
+            "SUPABASE_DB_URL",
+            "db_url",
+        ),
     )
     """URL complète de la base de données (résolue depuis env vars ou composants)."""
 
@@ -103,7 +110,9 @@ class Parametres(BaseSettings):
             "1. Variables d'environnement (.env.local):\n"
             "   DB_HOST, DB_USER, DB_PASSWORD, DB_NAME\n\n"
             "2. Variable DATABASE_URL:\n"
-            "   DATABASE_URL='postgresql://user:pass@host/db'"
+            "   DATABASE_URL='postgresql://user:pass@host/db'\n\n"
+            "3. Sur Vercel / Postgres managé :\n"
+            "   POSTGRES_URL ou POSTGRES_URL_NON_POOLING"
         )
 
     # ═══════════════════════════════════════════════════════════
@@ -258,8 +267,15 @@ class Parametres(BaseSettings):
         2. Composants individuels DB_HOST/DB_USER/... (pydantic-settings)
         """
         if self.db_url:
-            if "sslmode" not in self.db_url and "supabase" in self.db_url:
-                self.db_url += "?sslmode=require"
+            if self.db_url.startswith("postgres://"):
+                self.db_url = self.db_url.replace("postgres://", "postgresql://", 1)
+
+            if "sslmode" not in self.db_url and any(
+                provider in self.db_url
+                for provider in ("supabase", "neon", "render", "railway", "vercel-storage")
+            ):
+                separateur = "&" if "?" in self.db_url else "?"
+                self.db_url += f"{separateur}sslmode=require"
             return
 
         if all([self.DB_HOST, self.DB_USER, self.DB_PASSWORD, self.DB_NAME]):

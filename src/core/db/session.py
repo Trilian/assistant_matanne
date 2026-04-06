@@ -78,7 +78,15 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
         >>>     recettes = db.query(Recette).all()
     """
     # Obtenir une factory de session à la demande (création différée)
-    fabrique = obtenir_fabrique_session()
+    try:
+        fabrique = obtenir_fabrique_session()
+    except ValueError as e:
+        logger.error("Configuration DB invalide ou absente: %s", e)
+        raise ErreurBaseDeDonnees(
+            str(e),
+            message_utilisateur="Configuration de base de données manquante ou invalide",
+        ) from e
+
     db = fabrique()
 
     # Récupérer le correlation_id pour tracer cette transaction

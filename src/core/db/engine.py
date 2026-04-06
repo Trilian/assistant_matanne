@@ -161,6 +161,6 @@ def obtenir_moteur_securise() -> "Engine | None":
     """
     try:
         return obtenir_moteur()
-    except ErreurBaseDeDonnees as e:
+    except (ErreurBaseDeDonnees, ValueError) as e:
         logger.error(f"DB non disponible: {e}")
         return None
