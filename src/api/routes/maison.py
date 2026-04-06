@@ -683,7 +683,7 @@ async def suggestions_renouvellement(
 # SOUS-ROUTEURS
 # Chaque sous-routeur hérite du préfixe /api/v1/maison
 # et définit ses propres paths relatifs.
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 from src.api.routes.maison_projets import router as _projets_router
 from src.api.routes.maison_entretien import router as _entretien_router
 from src.api.routes.maison_finances import router as _finances_router

@@ -1028,6 +1028,54 @@ export async function obtenirAstucesDomotique(categorie?: string): Promise<Categ
   return data;
 }
 
+// ─── Entretien saisonnier IA ──────────────────────────────
+
+export interface SuggestionEntretienSaisonnier {
+  nom: string;
+  description: string;
+  duree_minutes: number;
+  priorite: "haute" | "moyenne" | "basse";
+  frequence: string;
+}
+
+export interface ReponseSuggestionsEntretien {
+  saison: string;
+  emoji: string;
+  suggestions: SuggestionEntretienSaisonnier[];
+}
+
+/** Suggestions d'entretien saisonnier générées par IA (cache 24h côté backend) */
+export async function obtenirSuggestionsRoutinesSaison(): Promise<ReponseSuggestionsEntretien> {
+  const { data } = await clientApi.get<ReponseSuggestionsEntretien>(
+    "/maison/entretien-saisonnier/suggestions-ia"
+  );
+  return data;
+}
+
+// ─── Abonnements IA ───────────────────────────────────────
+
+export interface ConseilAbonnement {
+  titre: string;
+  detail: string;
+  economies_estimees_eur: number | null;
+  priorite: "haute" | "moyenne" | "basse";
+  categorie: string;
+}
+
+export interface ReponseComparaisonAbonnements {
+  conseils: ConseilAbonnement[];
+  economies_potentielles_eur: number;
+  resume: string;
+}
+
+/** Analyse IA des abonnements actuels, conseils d'optimisation (cache 1h côté backend) */
+export async function comparerAbonnementsIA(): Promise<ReponseComparaisonAbonnements> {
+  const { data } = await clientApi.post<ReponseComparaisonAbonnements>(
+    "/maison/abonnements/ia-comparaison"
+  );
+  return data;
+}
+
 // ─── Assistant IA Maison ──────────────────────────────────
 
 export interface ConseilIA {

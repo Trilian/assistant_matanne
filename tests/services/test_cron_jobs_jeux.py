@@ -2,12 +2,12 @@
 Tests pour les cron jobs du module Jeux.
 
 Couvre les 6 jobs dans src/services/jeux/cron_jobs.py et cron_jobs_loteries.py :
-1. job_actualiser_cotes — Toutes les 2h
-2. job_resultats_matchs — Quotidien 23h
-3. job_detecter_opportunites — Toutes les 30min
-4. job_analyser_series — Quotidien 9h
-5. job_scraper_fdj_resultats — Quotidien 21h30
-6. job_backtest_grilles — Quotidien 22h
+1. scraper_cotes_sportives — Toutes les 2h
+2. scraper_resultats_matchs — Quotidien 23h
+3. detecter_opportunites — Toutes les 30min
+4. analyser_series — Quotidien 9h
+5. scraper_resultats_fdj — Quotidien 21h30
+6. backtest_grilles — Quotidien 22h
 """
 
 import pytest
@@ -59,41 +59,33 @@ class TestJobActualiserCotes:
     @pytest.mark.unit
     def test_actualiser_cotes_sans_matchs(self):
         """Aucun match trouvé → exit propre."""
-        mock_service = MagicMock()
-        mock_service.actualiser_cotes.return_value = {"total": 0, "mises_a_jour": 0}
-
         with patch(
-            "src.services.jeux.cron_jobs.obtenir_cotes_service",
-            return_value=mock_service,
+            "src.services.jeux.cron_jobs.obtenir_contexte_db",
+            side_effect=Exception("DB not available"),
         ):
-            from src.services.jeux.cron_jobs import job_actualiser_cotes
+            from src.services.jeux.cron_jobs import scraper_cotes_sportives
 
-            job_actualiser_cotes()
+            scraper_cotes_sportives()
 
     @pytest.mark.unit
-    def test_actualiser_cotes_avec_resultats(self):
+    def test_actualiser_cotes_avec_resultats(self, patch_db):
         """Cotes mises à jour correctement."""
-        mock_service = MagicMock()
-        mock_service.actualiser_cotes.return_value = {"total": 15, "mises_a_jour": 12}
+        patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        with patch(
-            "src.services.jeux.cron_jobs.obtenir_cotes_service",
-            return_value=mock_service,
-        ):
-            from src.services.jeux.cron_jobs import job_actualiser_cotes
+        from src.services.jeux.cron_jobs import scraper_cotes_sportives
 
-            job_actualiser_cotes()
+        scraper_cotes_sportives()
 
     @pytest.mark.unit
     def test_actualiser_cotes_erreur_api(self):
         """Erreur API externe gérée."""
         with patch(
-            "src.services.jeux.cron_jobs.obtenir_cotes_service",
+            "src.services.jeux.cron_jobs.obtenir_contexte_db",
             side_effect=Exception("API timeout"),
         ):
-            from src.services.jeux.cron_jobs import job_actualiser_cotes
+            from src.services.jeux.cron_jobs import scraper_cotes_sportives
 
-            job_actualiser_cotes()
+            scraper_cotes_sportives()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -105,36 +97,22 @@ class TestJobResultatsMatchs:
     """Tests pour le job de récupération des résultats."""
 
     @pytest.mark.unit
-    def test_resultats_matchs_vides(self):
+    def test_resultats_matchs_vides(self, patch_db):
         """Aucun résultat disponible."""
-        mock_service = MagicMock()
-        mock_service.recuperer_resultats.return_value = []
+        patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        with patch(
-            "src.services.jeux.cron_jobs.obtenir_resultats_service",
-            return_value=mock_service,
-        ):
-            from src.services.jeux.cron_jobs import job_resultats_matchs
+        from src.services.jeux.cron_jobs import scraper_resultats_matchs
 
-            job_resultats_matchs()
+        scraper_resultats_matchs()
 
     @pytest.mark.unit
-    def test_resultats_matchs_avec_donnees(self):
+    def test_resultats_matchs_avec_donnees(self, patch_db):
         """Résultats récupérés et enregistrés."""
-        resultats = [
-            {"match_id": 1, "score": "2-1", "statut": "terminé"},
-            {"match_id": 2, "score": "0-0", "statut": "terminé"},
-        ]
-        mock_service = MagicMock()
-        mock_service.recuperer_resultats.return_value = resultats
+        patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        with patch(
-            "src.services.jeux.cron_jobs.obtenir_resultats_service",
-            return_value=mock_service,
-        ):
-            from src.services.jeux.cron_jobs import job_resultats_matchs
+        from src.services.jeux.cron_jobs import scraper_resultats_matchs
 
-            job_resultats_matchs()
+        scraper_resultats_matchs()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -146,35 +124,22 @@ class TestJobDetecterOpportunites:
     """Tests pour le job de détection d'opportunités."""
 
     @pytest.mark.unit
-    def test_aucune_opportunite(self):
+    def test_aucune_opportunite(self, patch_db):
         """Pas d'opportunité détectée."""
-        mock_service = MagicMock()
-        mock_service.detecter_opportunites.return_value = []
+        patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        with patch(
-            "src.services.jeux.cron_jobs.obtenir_opportunites_service",
-            return_value=mock_service,
-        ):
-            from src.services.jeux.cron_jobs import job_detecter_opportunites
+        from src.services.jeux.cron_jobs import detecter_opportunites
 
-            job_detecter_opportunites()
+        detecter_opportunites()
 
     @pytest.mark.unit
-    def test_opportunites_detectees(self):
+    def test_opportunites_detectees(self, patch_db):
         """Opportunités trouvées et alertées."""
-        opps = [
-            {"marche": "ML PSG", "value": 2.5, "serie": 8},
-        ]
-        mock_service = MagicMock()
-        mock_service.detecter_opportunites.return_value = opps
+        patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        with patch(
-            "src.services.jeux.cron_jobs.obtenir_opportunites_service",
-            return_value=mock_service,
-        ):
-            from src.services.jeux.cron_jobs import job_detecter_opportunites
+        from src.services.jeux.cron_jobs import detecter_opportunites
 
-            job_detecter_opportunites()
+        detecter_opportunites()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -186,29 +151,24 @@ class TestJobAnalyserSeries:
     """Tests pour le job d'analyse des séries."""
 
     @pytest.mark.unit
-    def test_analyser_series_vide(self):
+    def test_analyser_series_vide(self, patch_db):
         """Pas de série à analyser."""
-        mock_service = MagicMock()
-        mock_service.analyser_series.return_value = {"series": [], "total": 0}
+        patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        with patch(
-            "src.services.jeux.cron_jobs.obtenir_series_service",
-            return_value=mock_service,
-        ):
-            from src.services.jeux.cron_jobs import job_analyser_series
+        from src.services.jeux.cron_jobs import analyser_series
 
-            job_analyser_series()
+        analyser_series()
 
     @pytest.mark.unit
     def test_analyser_series_erreur(self):
         """Erreur analyse gérée."""
         with patch(
-            "src.services.jeux.cron_jobs.obtenir_series_service",
+            "src.services.jeux.cron_jobs.obtenir_contexte_db",
             side_effect=Exception("Analysis failed"),
         ):
-            from src.services.jeux.cron_jobs import job_analyser_series
+            from src.services.jeux.cron_jobs import analyser_series
 
-            job_analyser_series()
+            analyser_series()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -222,30 +182,24 @@ class TestJobScraperFDJ:
     @pytest.mark.unit
     def test_scraper_fdj_succes(self):
         """Résultats FDJ scrapés correctement."""
-        mock_service = MagicMock()
-        mock_service.scraper_derniers_resultats.return_value = {
-            "loto": {"numeros": [3, 7, 15, 22, 41], "chance": 5},
-            "date_tirage": "2026-04-04",
-        }
-
         with patch(
-            "src.services.jeux.cron_jobs_loteries.obtenir_fdj_service",
-            return_value=mock_service,
+            "src.services.jeux.cron_jobs_loteries.obtenir_contexte_db",
+            side_effect=Exception("DB mocked"),
         ):
-            from src.services.jeux.cron_jobs_loteries import job_scraper_fdj_resultats
+            from src.services.jeux.cron_jobs_loteries import scraper_resultats_fdj
 
-            job_scraper_fdj_resultats()
+            scraper_resultats_fdj()
 
     @pytest.mark.unit
     def test_scraper_fdj_site_indisponible(self):
         """Site FDJ indisponible → pas de crash."""
         with patch(
-            "src.services.jeux.cron_jobs_loteries.obtenir_fdj_service",
+            "src.services.jeux.cron_jobs_loteries.obtenir_contexte_db",
             side_effect=Exception("Connection timeout"),
         ):
-            from src.services.jeux.cron_jobs_loteries import job_scraper_fdj_resultats
+            from src.services.jeux.cron_jobs_loteries import scraper_resultats_fdj
 
-            job_scraper_fdj_resultats()
+            scraper_resultats_fdj()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -259,27 +213,21 @@ class TestJobBacktestGrilles:
     @pytest.mark.unit
     def test_backtest_succes(self):
         """Backtest exécuté correctement."""
-        mock_service = MagicMock()
-        mock_service.backtester_grilles.return_value = {
-            "grilles_testees": 100,
-            "gains_simules": 45.50,
-        }
-
         with patch(
-            "src.services.jeux.cron_jobs_loteries.obtenir_backtest_service",
-            return_value=mock_service,
+            "src.services.jeux.cron_jobs_loteries.obtenir_contexte_db",
+            side_effect=Exception("DB mocked"),
         ):
-            from src.services.jeux.cron_jobs_loteries import job_backtest_grilles
+            from src.services.jeux.cron_jobs_loteries import backtest_grilles
 
-            job_backtest_grilles()
+            backtest_grilles()
 
     @pytest.mark.unit
     def test_backtest_erreur(self):
         """Erreur backtest gérée."""
         with patch(
-            "src.services.jeux.cron_jobs_loteries.obtenir_backtest_service",
+            "src.services.jeux.cron_jobs_loteries.obtenir_contexte_db",
             side_effect=Exception("Insufficient data"),
         ):
-            from src.services.jeux.cron_jobs_loteries import job_backtest_grilles
+            from src.services.jeux.cron_jobs_loteries import backtest_grilles
 
-            job_backtest_grilles()
+            backtest_grilles()

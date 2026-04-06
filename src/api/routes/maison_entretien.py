@@ -1260,9 +1260,30 @@ async def synchroniser_taches_vers_planning(
             "succes": True,
             "evenements_crees": crees,
             "conflits_detectes": conflits,
-            "message": f"{crees} Ã©vÃ©nement(s) crÃ©Ã©(s) dans le planning familial",
+            "message": f"{crees} événement(s) créé(s) dans le planning familial",
         }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS SAISONNIÈRES IA (G4)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/entretien-saisonnier/suggestions-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_suggestions_routines_saisonieres(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggestions de routines d'entretien adaptées à la saison actuelle (cache 24h)."""
+
+    def _fn() -> dict[str, Any]:
+        from src.services.maison.ia.entretien_ia_service import obtenir_service_entretien_ia
+
+        service = obtenir_service_entretien_ia()
+        return service.suggestions_saisonieres()
+
+    return await executer_async(_fn)
 
 

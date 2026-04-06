@@ -2,10 +2,10 @@
 Tests pour les cron jobs du module Cuisine.
 
 Couvre les 4 jobs dans src/services/cuisine/cron_cuisine.py :
-1. analyser_peremptions_matin — Quotidien 7h
-2. suggerer_planning_semaine — Dimanche 18h
-3. verifier_stocks_bas — Lundi 9h
-4. generer_rapport_mensuel_cuisine — 1er du mois 8h
+1. job_verifier_peremptions — Quotidien 7h
+2. job_proposition_planning — Dimanche 18h
+3. job_stocks_bas — Lundi 9h
+4. job_rapport_mensuel — 1er du mois 8h
 """
 
 import pytest
@@ -62,16 +62,16 @@ def patch_notifications():
 
 
 class TestJobVerifierPeremptions:
-    """Tests pour analyser_peremptions_matin."""
+    """Tests pour job_verifier_peremptions."""
 
     @pytest.mark.unit
     def test_aucune_peremption(self, patch_db):
         """Aucun article en péremption → pas de notification."""
         patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        from src.services.cuisine.cron_cuisine import analyser_peremptions_matin
+        from src.services.cuisine.cron_cuisine import job_verifier_peremptions
 
-        analyser_peremptions_matin()
+        job_verifier_peremptions()
 
     @pytest.mark.unit
     def test_articles_en_peremption(self, patch_db):
@@ -88,10 +88,9 @@ class TestJobVerifierPeremptions:
         ]
         patch_db.query.return_value.filter.return_value.all.return_value = articles
 
-        from src.services.cuisine.cron_cuisine import analyser_peremptions_matin
+        from src.services.cuisine.cron_cuisine import job_verifier_peremptions
 
-        with patch("src.services.cuisine.cron_cuisine._notifier_peremptions"):
-            analyser_peremptions_matin()
+        job_verifier_peremptions()
 
     @pytest.mark.unit
     def test_peremption_erreur_db(self):
@@ -100,9 +99,9 @@ class TestJobVerifierPeremptions:
             "src.services.cuisine.cron_cuisine.obtenir_contexte_db",
             side_effect=Exception("DB error"),
         ):
-            from src.services.cuisine.cron_cuisine import analyser_peremptions_matin
+            from src.services.cuisine.cron_cuisine import job_verifier_peremptions
 
-            analyser_peremptions_matin()
+            job_verifier_peremptions()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -111,7 +110,7 @@ class TestJobVerifierPeremptions:
 
 
 class TestJobPropositionPlanning:
-    """Tests pour suggerer_planning_semaine."""
+    """Tests pour job_proposition_planning."""
 
     @pytest.mark.unit
     def test_planning_existe_deja(self, patch_db):
@@ -119,19 +118,18 @@ class TestJobPropositionPlanning:
         planning = SimpleNamespace(id=1, statut="actif")
         patch_db.query.return_value.filter.return_value.first.return_value = planning
 
-        from src.services.cuisine.cron_cuisine import suggerer_planning_semaine
+        from src.services.cuisine.cron_cuisine import job_proposition_planning
 
-        suggerer_planning_semaine()
+        job_proposition_planning()
 
     @pytest.mark.unit
     def test_planning_absent_notification(self, patch_db):
         """Pas de planning → notification envoyée."""
         patch_db.query.return_value.filter.return_value.first.return_value = None
 
-        from src.services.cuisine.cron_cuisine import suggerer_planning_semaine
+        from src.services.cuisine.cron_cuisine import job_proposition_planning
 
-        with patch("src.services.cuisine.cron_cuisine._notifier_planning_manquant"):
-            suggerer_planning_semaine()
+        job_proposition_planning()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -140,16 +138,16 @@ class TestJobPropositionPlanning:
 
 
 class TestJobStocksBas:
-    """Tests pour verifier_stocks_bas."""
+    """Tests pour job_stocks_bas."""
 
     @pytest.mark.unit
     def test_aucun_stock_bas(self, patch_db):
         """Aucun stock bas détecté."""
         patch_db.query.return_value.filter.return_value.all.return_value = []
 
-        from src.services.cuisine.cron_cuisine import verifier_stocks_bas
+        from src.services.cuisine.cron_cuisine import job_stocks_bas
 
-        verifier_stocks_bas()
+        job_stocks_bas()
 
     @pytest.mark.unit
     def test_stocks_bas_detectes(self, patch_db):
@@ -160,10 +158,9 @@ class TestJobStocksBas:
         ]
         patch_db.query.return_value.filter.return_value.all.return_value = articles_bas
 
-        from src.services.cuisine.cron_cuisine import verifier_stocks_bas
+        from src.services.cuisine.cron_cuisine import job_stocks_bas
 
-        with patch("src.services.cuisine.cron_cuisine._ajouter_stocks_bas_aux_courses"):
-            verifier_stocks_bas()
+        job_stocks_bas()
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -172,14 +169,14 @@ class TestJobStocksBas:
 
 
 class TestJobRapportMensuel:
-    """Tests pour generer_rapport_mensuel_cuisine."""
+    """Tests pour job_rapport_mensuel."""
 
     @pytest.mark.unit
     def test_rapport_mensuel_generation(self, patch_db):
         """Rapport mensuel généré correctement."""
-        from src.services.cuisine.cron_cuisine import generer_rapport_mensuel_cuisine
+        from src.services.cuisine.cron_cuisine import job_rapport_mensuel
 
-        generer_rapport_mensuel_cuisine()
+        job_rapport_mensuel()
 
     @pytest.mark.unit
     def test_rapport_mensuel_erreur(self):
@@ -188,6 +185,6 @@ class TestJobRapportMensuel:
             "src.services.cuisine.cron_cuisine.obtenir_contexte_db",
             side_effect=Exception("Timeout"),
         ):
-            from src.services.cuisine.cron_cuisine import generer_rapport_mensuel_cuisine
+            from src.services.cuisine.cron_cuisine import job_rapport_mensuel
 
-            generer_rapport_mensuel_cuisine()
+            job_rapport_mensuel()

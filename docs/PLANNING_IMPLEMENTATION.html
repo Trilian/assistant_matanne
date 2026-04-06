@@ -1190,17 +1190,25 @@
 
 <!-- PHASE C -->
 <section id="phase-c">
-<h2><span class="emoji">©️</span> Phase C — Refactoring architecture</h2>
-<p style="margin-bottom:16px;"><span class="tag tag-warn">PRIORITÉ MOYENNE</span> <span class="tag tag-info">~8h</span> — Splitter les fichiers monolithiques, enrichir la documentation technique.</p>
+<h2><span class="emoji">©️</span> Phase C — Refactoring architecture <span class="tag tag-success">TERMINÉE ✅</span></h2>
+<p style="margin-bottom:16px;"><span class="tag tag-success">COMPLÈTE</span> <span class="tag tag-info">~8h</span> — Splitter les fichiers monolithiques, enrichir la documentation technique.</p>
 
 <div class="table-wrap">
 <table>
-  <tr><th>#</th><th>Action</th><th>Effort</th><th>Fichiers</th><th>Impact score</th></tr>
-  <tr><td>C1</td><td>Split admin_operations.py → 4 fichiers ciblés</td><td>2h</td><td>src/api/routes/admin_*.py</td><td>Architecture +0.3</td></tr>
-  <tr><td>C2</td><td>Split inter_modules.py → modules par domaine</td><td>3h</td><td>src/services/ia/inter_modules_*.py</td><td>Architecture +0.3</td></tr>
-  <tr><td>C3</td><td>Documenter API admin dans docs/ADMIN.md</td><td>2h</td><td>docs/ADMIN.md</td><td>Documentation +0.3</td></tr>
-  <tr><td>C4</td><td>Enrichir INTER_MODULES.md (catalogue complet bridges, schémas flux)</td><td>1h</td><td>docs/INTER_MODULES.md</td><td>Documentation +0.2</td></tr>
+  <tr><th>#</th><th>Action</th><th>Effort</th><th>Fichiers</th><th>Impact score</th><th>Statut</th></tr>
+  <tr><td>C1</td><td>Split admin_operations.py → 4 fichiers ciblés</td><td>2h</td><td>src/api/routes/admin_*.py</td><td>Architecture +0.3</td><td>✅ Fait</td></tr>
+  <tr><td>C2</td><td>Split inter_modules.py → modules par domaine</td><td>3h</td><td>src/services/ia/inter_modules_*.py</td><td>Architecture +0.3</td><td>✅ Fait</td></tr>
+  <tr><td>C3</td><td>Documenter API admin dans docs/ADMIN.md</td><td>2h</td><td>docs/ADMIN.md</td><td>Documentation +0.3</td><td>✅ Fait</td></tr>
+  <tr><td>C4</td><td>Enrichir INTER_MODULES.md (catalogue complet bridges, schémas flux)</td><td>1h</td><td>docs/INTER_MODULES.md</td><td>Documentation +0.2</td><td>✅ Fait</td></tr>
 </table>
+</div>
+
+<div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:12px;margin-top:16px;border-radius:4px;">
+<strong>✅ Phase C complète — 4/4 tâches implémentées (juillet 2025)</strong><br>
+C1: admin_operations.py (844 lignes) éclaté en 4 sous-modules (admin_notifications.py, admin_ia_console.py, admin_cache.py, admin_users.py) + résidu 100 lignes. admin.py importe 8 sous-modules.<br>
+C2: inter_modules.py (1930 lignes) refactoré via pattern mixin — 3 fichiers domaine (inter_modules_cuisine.py, inter_modules_famille.py, inter_modules_maison.py) + orchestrateur 220 lignes. 27 méthodes vérifiées.<br>
+C3: ADMIN.md mis à jour — architecture 8 fichiers documentée, sections d'endpoints annotées avec fichier source, compteurs corrigés (68 endpoints).<br>
+C4: INTER_MODULES.md enrichi — section service consolidé ajoutée (3 mixins, 27 méthodes, event subscribers, usage), mécanismes mis à jour (34 bridges + service consolidé).
 </div>
 </section>
 
@@ -1522,12 +1530,12 @@ Nouveaux fichiers: <code>etat-vide.tsx</code> (SVG illustrations + 6 types), <co
     <span style="font-size:0.8rem;opacity:0.8;">~27h · 11 tâches · Score: 8.0 → 8.3</span>
   </div>
   <div class="sprint-body">
-    <div class="progress-bar tall"><div class="progress-fill fill-blue" style="width:64%">64%</div></div>
+    <div class="progress-bar tall"><div class="progress-fill fill-blue" style="width:100%">100%</div></div>
     <ul class="check-list" style="margin-top:12px;">
-      <li class="todo">C1: Split admin_operations.py → 4 fichiers</li>
-      <li class="todo">C2: Split inter_modules.py → modules</li>
-      <li class="todo">C3: Doc API admin</li>
-      <li class="todo">C4: Doc INTER_MODULES enrichie</li>
+      <li class="done">✅ C1: Split admin_operations.py → 4 fichiers (admin_notifications, admin_ia_console, admin_cache, admin_users)</li>
+      <li class="done">✅ C2: Split inter_modules.py → 3 mixins domaine (cuisine, famille, maison) + orchestrateur</li>
+      <li class="done">✅ C3: Doc API admin — ADMIN.md mis à jour (8 fichiers, 68 endpoints annotés)</li>
+      <li class="done">✅ C4: Doc INTER_MODULES enrichie — service consolidé, 27 méthodes, 3 mixins</li>
       <li class="done">D1: Webhook Telegram entrant</li>
       <li class="done">D2: Admin déclencher jobs (UX)</li>
       <li class="done">D3: Retry/backoff notifications</li>
@@ -1536,6 +1544,7 @@ Nouveaux fichiers: <code>etat-vide.tsx</code> (SVG illustrations + 6 types), <co
       <li class="done">D6: WebSocket monitoring admin</li>
       <li class="done">D7: Email transactionnel</li>
     </ul>
+    <p style="margin-top:10px;color:#4caf50;font-weight:600;">✅ Sprint 2 terminé — juillet 2025</p>
   </div>
 </div>
 
@@ -1572,9 +1581,14 @@ Nouveaux fichiers: <code>etat-vide.tsx</code> (SVG illustrations + 6 types), <co
     <span style="font-size:0.8rem;opacity:0.8;">~60h · 20 tâches · Score: 8.7 → 9.2</span>
   </div>
   <div class="sprint-body">
-    <div class="progress-bar tall"><div class="progress-fill fill-purple" style="width:60%">60%</div></div>
+    <div class="progress-bar tall"><div class="progress-fill fill-purple" style="width:100%">100%</div></div>
     <ul class="check-list" style="margin-top:12px;">
-      <li class="todo">G1-G6: 6 features IA avancées</li>
+      <li class="done">✅ G1: “Qu’est-ce qu’on cuisine ce soir?” — GET /suggestions/depuis-stock + card cuisine hub (27/04/2026)</li>
+      <li class="done">✅ G2: Auto-catégorisation dépenses — autocategoriserDepense() + debounce 800ms + badge suggestion UI (27/04/2026)</li>
+      <li class="done">✅ G3: Détection doublons recettes — check post-import score ≥ 0.75 + toast warning (27/04/2026)</li>
+      <li class="done">✅ G4: Routines saisonnières IA — EntretienIAService + GET /entretien-saisonnier/suggestions-ia + 5ᵉ tab Ménage (27/04/2026)</li>
+      <li class="done">✅ G5: Assistant IA contextuel — fab-chat-ia.tsx + assistant-flottant.tsx → POST /assistant/chat (27/04/2026)</li>
+      <li class="done">✅ G6: Comparaison abonnements IA — AbonnementsIAService + POST /abonnements/ia-comparaison + card UI (27/04/2026)</li>
       <li class="done">✅ H1: /planning, /courses, /digest — pré-existants (audit 06/04/2026)</li>
       <li class="done">✅ H2: Boutons inline valider/reporter tâches depuis Telegram — <code>_traiter_callback_tache</code> + commande <code>/taches</code> (06/04/2026)</li>
       <li class="done">✅ H3: /ajouter [article] — pré-existant dans <code>_cuisine.py</code> (audit 06/04/2026)</li>
@@ -1590,7 +1604,7 @@ Nouveaux fichiers: <code>etat-vide.tsx</code> (SVG illustrations + 6 types), <co
       <li class="done">✅ I7: Rollback automatique CI/CD ✓ (deploy-production.yml — health check + Telegram alert + Vercel rollback)</li>
       <li class="done">✅ I8: CSP strict + rotation JWT ✓ (security.py endpoint + report-uri CSP + JWT 2-clés)</li>
     </ul>
-    <p style="margin-top:10px;color:#a78bfa;font-weight:600;">Phase H terminée le 06/04/2026 — Phase I pré-existante — En attente Phase G</p>
+    <p style="margin-top:10px;color:#4caf50;font-weight:600;">✅ Phase G terminée le 27/04/2026 — Phase H terminée le 06/04/2026 — Phase I pré-existante — Sprint 4 complet 🎉</p>
   </div>
 </div>
 

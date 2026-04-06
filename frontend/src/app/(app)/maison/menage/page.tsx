@@ -26,6 +26,7 @@ import {
   supprimerRoutineMaison,
   creerTachePonctuelle,
   regenererPlanningIA,
+  obtenirSuggestionsRoutinesSaison,
   type FicheTache,
   type RoutineMaison,
 } from "@/bibliotheque/api/maison";
@@ -546,6 +547,13 @@ function ContenuMenage() {
     obtenirPlanningMenageSemaine
   );
 
+  // Suggestions saisonnières IA (triggered manually)
+  const { data: suggestionsSaisonnieres, isFetching: chargSaison, refetch: chargerSaison } = utiliserRequete(
+    ["entretien-saisonnier-ia"],
+    obtenirSuggestionsRoutinesSaison,
+    { enabled: false, staleTime: 24 * 60 * 60 * 1000 }
+  );
+
   type TacheItem = { id?: string; nom?: string; categorie?: string; duree_estimee_min?: number };
   const tachesArray: TacheItem[] = Array.isArray(tachesJour)
     ? (tachesJour as TacheItem[])
@@ -579,7 +587,7 @@ function ContenuMenage() {
       </div>
 
       <Tabs value={onglet} onValueChange={(v) => router.replace(`?tab=${v}`)}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="aujourd-hui">Aujourd&apos;hui</TabsTrigger>
           <TabsTrigger value="semaine">Semaine</TabsTrigger>
           <TabsTrigger value="guides">Guides</TabsTrigger>
@@ -587,6 +595,7 @@ function ContenuMenage() {
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
             Routines
           </TabsTrigger>
+          <TabsTrigger value="saisonnier">🌸 Saison</TabsTrigger>
         </TabsList>
 
         {/* �"?�"? Onglet Aujourd'hui �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"? */}
@@ -743,6 +752,54 @@ function ContenuMenage() {
         {/* �"?�"? Onglet Routines �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"? */}
         <TabsContent value="routines" className="mt-4">
           <OngletRoutines />
+        </TabsContent>
+
+        {/* 🌸 Onglet Saisonnier */}
+        <TabsContent value="saisonnier" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">
+                  {suggestionsSaisonnieres ? `${suggestionsSaisonnieres.emoji} Entretien ${suggestionsSaisonnieres.saison}` : "🌸 Routines saisonnières"}
+                </CardTitle>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void chargerSaison()}
+                  disabled={chargSaison}
+                  className="gap-1.5"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${chargSaison ? "animate-spin" : ""}`} />
+                  {chargSaison ? "Génération…" : "Suggestions IA"}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {!suggestionsSaisonnieres && !chargSaison && (
+                <p className="text-sm text-muted-foreground">
+                  Cliquez sur «&nbsp;Suggestions IA&nbsp;» pour obtenir des recommandations d&apos;entretien adaptées à la saison actuelle.
+                </p>
+              )}
+              {suggestionsSaisonnieres && (
+                <div className="space-y-3">
+                  {suggestionsSaisonnieres.suggestions.map((s, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-semibold">{s.nom}</p>
+                          <Badge variant={s.priorite === "haute" ? "destructive" : s.priorite === "moyenne" ? "secondary" : "outline"} className="text-xs">
+                            {s.priorite}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">🔄 {s.frequence} · ⏱ {s.duree_minutes}&nbsp;min</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 

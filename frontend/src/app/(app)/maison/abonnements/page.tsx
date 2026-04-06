@@ -43,6 +43,7 @@ import {
   modifierAbonnement,
   supprimerAbonnement,
   resumeAbonnements,
+  comparerAbonnementsIA,
 } from "@/bibliotheque/api/maison";
 import type { Abonnement } from "@/types/maison";
 import { toast } from "sonner";
@@ -109,6 +110,14 @@ function ContenuAbonnements() {
 
   const { data: abonnements, isLoading } = utiliserRequete(["maison", "abonnements"], listerAbonnements);
   const { data: resume } = utiliserRequete(["maison", "abonnements", "resume"], resumeAbonnements);
+
+  // Comparaison IA (triggered manually, cache 1h)
+  const { data: analyseia, isFetching: chargAnalyseIA, refetch: lancerAnalyseIA } = utiliserRequete(
+    ["maison", "abonnements", "ia-comparaison"],
+    comparerAbonnementsIA,
+    { enabled: false, staleTime: 60 * 60 * 1000 }
+  );
+
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "abonnements"] });
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
@@ -270,6 +279,55 @@ function ContenuAbonnements() {
 
       <SectionReveal delay={0.03}>
         <BandeauIA section="abonnements" />
+      </SectionReveal>
+
+      {/* G6 — Analyse IA des abonnements */}
+      <SectionReveal delay={0.04}>
+        <Card className="border-purple-200 dark:border-purple-800">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                🧠 Comparateur IA
+              </CardTitle>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void lancerAnalyseIA()}
+                disabled={chargAnalyseIA}
+                className="gap-1.5"
+              >
+                <TrendingDown className={`h-3.5 w-3.5 ${chargAnalyseIA ? "animate-pulse" : ""}`} />
+                {chargAnalyseIA ? "Analyse…" : "Analyser mes contrats"}
+              </Button>
+            </div>
+            {analyseia && (
+              <CardDescription>{analyseia.resume}</CardDescription>
+            )}
+          </CardHeader>
+          {analyseia && analyseia.conseils.length > 0 && (
+            <CardContent className="space-y-2 pt-0">
+              {analyseia.conseils.map((c, i) => (
+                <div key={i} className="rounded-lg border p-3 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold">{c.titre}</p>
+                    <Badge variant={c.priorite === "haute" ? "destructive" : c.priorite === "moyenne" ? "secondary" : "outline"} className="text-xs">
+                      {c.priorite}
+                    </Badge>
+                    {c.economies_estimees_eur != null && c.economies_estimees_eur > 0 && (
+                      <span className="ml-auto text-xs font-medium text-green-600 dark:text-green-400">
+                        −{c.economies_estimees_eur.toFixed(0)} €/mois
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{c.detail}</p>
+                </div>
+              ))}
+              <p className="text-xs text-muted-foreground text-right">
+                Économies potentielles&nbsp;: <strong>{analyseia.economies_potentielles_eur.toFixed(0)} €/mois</strong>
+              </p>
+            </CardContent>
+          )}
+        </Card>
       </SectionReveal>
 
       {resume ? (
