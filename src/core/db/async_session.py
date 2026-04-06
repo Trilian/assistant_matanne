@@ -246,6 +246,9 @@ async def obtenir_fabrique_session_async() -> async_sessionmaker[AsyncSession]:
 
     with _async_engine_lock:
         if _async_session_factory is None:
+            from ..models import charger_tous_modeles
+
+            charger_tous_modeles()
             moteur = await obtenir_moteur_async()
             _async_session_factory = async_sessionmaker(
                 moteur,

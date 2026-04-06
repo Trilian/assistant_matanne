@@ -42,6 +42,9 @@ def obtenir_fabrique_session() -> sessionmaker:
 
     with _factory_lock:
         if _session_factory is None:
+            from ..models import charger_tous_modeles
+
+            charger_tous_modeles()
             moteur = obtenir_moteur()
             _session_factory = sessionmaker(
                 autocommit=False,
