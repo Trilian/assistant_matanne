@@ -13,7 +13,7 @@ from typing import Any
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel
 
 # ═══════════════════════════════════════════════════════════
@@ -542,22 +542,23 @@ _START_TIME = datetime.now(UTC)
 
 
 @app.get("/", tags=["Santé"])
-async def root():
+async def root(request: Request):
     """
     Point d'entrée racine de l'API.
 
-    Returns:
-        Message de bienvenue avec liens utiles.
-
-    Example:
-        ```json
-        {
-            "message": "API Assistant Matanne",
-            "docs": "/docs",
-            "version": "1.0.0"
-        }
-        ```
+    Redirige les visites navigateur vers le frontend si `FRONTEND_URL` est configuré,
+    tout en conservant une réponse JSON pour les appels programmatiques/API.
     """
+    frontend_url = (
+        os.getenv("FRONTEND_URL")
+        or os.getenv("NEXT_PUBLIC_APP_URL")
+        or os.getenv("NEXT_PUBLIC_FRONTEND_URL")
+    )
+    accept = request.headers.get("accept", "")
+
+    if frontend_url and "text/html" in accept:
+        return RedirectResponse(url=frontend_url.rstrip("/"), status_code=307)
+
     return {"message": "API Assistant Matanne", "docs": "/docs", "version": "1.0.0"}
 
 
