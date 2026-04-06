@@ -83,12 +83,8 @@ import { TreemapInventaire } from "@/composants/graphiques/treemap-inventaire";
 import { construireDonneesTreemapInventaire } from "@/bibliotheque/inventaire-treemap";
 import { predireConsommationInventaire } from "@/bibliotheque/api/ia-modules";
 
-const ContenuPhotoFrigoLazy = lazy(() =>
-  import("../photo-frigo/page").then((m) => ({ default: m.ContenuPhotoFrigo }))
-);
-const ContenuAntiGaspillageLazy = lazy(() =>
-  import("../anti-gaspillage/page").then((m) => ({ default: m.ContenuAntiGaspillage }))
-);
+const ContenuPhotoFrigoLazy = lazy(() => import("../photo-frigo/page"));
+const ContenuAntiGaspillageLazy = lazy(() => import("../anti-gaspillage/page"));
 
 const EMPLACEMENTS: { id: string; label: string; icone: LucideIcon }[] = [
   { id: "Frigo", label: "Frigo", icone: Refrigerator },

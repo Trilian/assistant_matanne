@@ -55,7 +55,7 @@ function badgeJours(jours: number) {
   );
 }
 
-export function ContenuAntiGaspillage() {
+function ContenuAntiGaspillage() {
   const { data, isLoading } = utiliserRequete(
     ["anti-gaspillage"],
     () => obtenirAntiGaspillage()

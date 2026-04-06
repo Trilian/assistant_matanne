@@ -111,12 +111,8 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 
-const ContenuNutritionLazy = lazy(() =>
-  import("../nutrition/page").then((m) => ({ default: m.ContenuNutrition }))
-);
-const ContenuMaSemaineLazy = lazy(() =>
-  import("../ma-semaine/page").then((m) => ({ default: m.ContenuMaSemaine }))
-);
+const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
+const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];

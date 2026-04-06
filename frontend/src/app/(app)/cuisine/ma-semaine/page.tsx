@@ -127,7 +127,7 @@ const TYPE_REPAS_LABEL: Record<string, string> = {
   diner: "🌙 Dîner",
 };
 
-export function ContenuMaSemaine() {
+function ContenuMaSemaine() {
   const router = useRouter();
   const [etapeActuelle, setEtapeActuelle] = useState(0);
   const [dateDebut] = useState(getLundiDeSemaine(0));

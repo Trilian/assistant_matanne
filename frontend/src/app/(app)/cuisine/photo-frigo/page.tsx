@@ -88,7 +88,7 @@ function sauvegarderHistorique(entry: AnalyseHistorique) {
   localStorage.setItem(LS_KEY, JSON.stringify(hist.slice(0, 5)));
 }
 
-export function ContenuPhotoFrigo() {
+function ContenuPhotoFrigo() {
   const [preview, setPreview] = useState<string | null>(null);
   const [fichier, setFichier] = useState<File | null>(null);
   const [resultat, setResultat] = useState<ResultatPhotoFrigo | null>(null);
