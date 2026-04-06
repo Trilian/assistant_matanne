@@ -46,7 +46,10 @@ ml = [
 monitoring = ["sentry-sdk[fastapi,sqlalchemy]>=2.0.0,<3.0.0"]
 
 [project.scripts]
-app = "src.api.main:app"
+app = "main:run"
+
+[tool.uv]
+package = false
 
 [tool.poetry]
 package-mode = false
