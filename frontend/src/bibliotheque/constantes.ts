@@ -2,8 +2,12 @@
 // Constantes de l'application
 // ═══════════════════════════════════════════════════════════
 
-/** URL de base de l'API backend */
-export const URL_API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+/**
+ * URL de base de l'API backend.
+ * - En production (Vercel) : laisser vide → les requêtes /api/v1/* sont proxiées vers Railway via vercel.json
+ * - En développement local : définir NEXT_PUBLIC_API_URL=http://localhost:8000 dans .env.local
+ */
+export const URL_API = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 /** URL Supabase */
 export const URL_SUPABASE = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
