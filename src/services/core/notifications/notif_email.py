@@ -15,14 +15,25 @@ Templates Jinja2 dans le dossier templates/ adjacent.
 Dépendance : `pip install resend` + `RESEND_API_KEY` dans `.env.local`
 """
 
+import base64
 import logging
 import os
-import base64
-from pathlib import Path
 from io import BytesIO
+from pathlib import Path
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+try:
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+    JINJA2_DISPONIBLE = True
+except ImportError:
+    Environment = None  # type: ignore[assignment]
+    FileSystemLoader = None  # type: ignore[assignment]
+    JINJA2_DISPONIBLE = False
+
+    def select_autoescape(*_args: Any, **_kwargs: Any) -> bool:
+        """Fallback minimal quand Jinja2 n'est pas disponible."""
+        return False
 
 from src.services.core.registry import service_factory
 
@@ -47,10 +58,17 @@ class ServiceEmail:
         self._app_url = os.getenv("NEXT_PUBLIC_API_URL", _APP_URL_DEFAULT).rstrip("/")
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
         self._app_url = frontend_url
-        self._jinja_env = Environment(
-            loader=FileSystemLoader(str(_TEMPLATES_DIR)),
-            autoescape=select_autoescape(["html"]),
-        )
+        self._jinja_env: Any | None = None
+
+        if JINJA2_DISPONIBLE and Environment is not None and FileSystemLoader is not None:
+            self._jinja_env = Environment(
+                loader=FileSystemLoader(str(_TEMPLATES_DIR)),
+                autoescape=select_autoescape(["html"]),
+            )
+        else:
+            logger.warning(
+                "Jinja2 non installé : fallback HTML minimal activé pour les emails."
+            )
 
     # ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -101,10 +119,45 @@ class ServiceEmail:
             logger.error("Erreur envoi email '%s' à %s : %s", subject, to, e)
             return False
 
+    def _render_fallback_html(self, **kwargs: Any) -> str:
+        """Construit un HTML minimal si Jinja2 n'est pas disponible."""
+        sujet = str(kwargs.get("sujet", "Notification Matanne"))
+        lignes: list[str] = []
+        for cle, valeur in kwargs.items():
+            if cle == "sujet" or valeur in (None, "", [], {}):
+                continue
+            libelle = cle.replace("_", " ").capitalize()
+            lignes.append(f"<li><strong>{libelle} :</strong> {valeur}</li>")
+
+        contenu = "\n".join(lignes) if lignes else "<li>Aucun détail supplémentaire.</li>"
+        return f"""
+        <html>
+          <body style=\"font-family: Arial, sans-serif; line-height: 1.5;\">
+            <h2>{sujet}</h2>
+            <ul>{contenu}</ul>
+          </body>
+        </html>
+        """
+
     def _render(self, template_name: str, **kwargs: Any) -> str:
         """Rend un template Jinja2 avec les variables données."""
-        template = self._jinja_env.get_template(template_name)
-        return template.render(**kwargs)
+        if self._jinja_env is None:
+            logger.warning(
+                "Template %s rendu sans Jinja2 ; utilisation du fallback HTML minimal.",
+                template_name,
+            )
+            return self._render_fallback_html(**kwargs)
+
+        try:
+            template = self._jinja_env.get_template(template_name)
+            return template.render(**kwargs)
+        except Exception as exc:
+            logger.warning(
+                "Impossible de rendre le template %s (%s) ; fallback HTML utilisé.",
+                template_name,
+                exc,
+            )
+            return self._render_fallback_html(**kwargs)
 
     def _render_mjml(self, template_name: str, fallback_html_template: str, **kwargs: Any) -> str:
         """Rend un template MJML puis le compile en HTML.
