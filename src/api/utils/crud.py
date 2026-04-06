@@ -83,8 +83,15 @@ def executer_avec_session() -> Generator[Session, None, None]:
         with obtenir_contexte_db() as session:
             yield session
     except ErreurBaseDeDonnees as e:
-        logger.warning("Erreur DB transitoire potentielle: %s", e)
-        raise
+        logger.warning("Erreur DB côté API: %s", e)
+        raise HTTPException(
+            status_code=503,
+            detail=getattr(
+                e,
+                "message_utilisateur",
+                "La base de données est temporairement indisponible. Réessayez.",
+            ),
+        ) from e
     except HTTPException:
         raise
     except Exception as e:

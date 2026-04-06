@@ -3,11 +3,13 @@ Gestion des exceptions pour l'API REST.
 """
 
 import logging
-from inspect import Signature, signature
 from functools import wraps
+from inspect import Signature, signature
 from typing import Any, Callable, TypeVar, get_type_hints
 
 from fastapi import HTTPException
+
+from src.core.exceptions import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +41,16 @@ def gerer_exception_api(func: F) -> F:
             return await func(*args, **kwargs)
         except HTTPException:
             raise
+        except ErreurBaseDeDonnees as e:
+            logger.warning("Erreur DB dans %s: %s", func.__name__, e)
+            raise HTTPException(
+                status_code=503,
+                detail=getattr(
+                    e,
+                    "message_utilisateur",
+                    "La base de données est temporairement indisponible. Réessayez.",
+                ),
+            ) from e
         except Exception as e:
             logger.error(f"Erreur API dans {func.__name__}: {e}", exc_info=True)
             raise HTTPException(
