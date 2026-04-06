@@ -119,6 +119,16 @@ CREATE TABLE IF NOT EXISTS achats_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Compatibilité rerun / bases legacy : garantir les colonnes indexées et les
+-- champs ajoutés tardivement avant la création des index.
+ALTER TABLE IF EXISTS achats_famille
+    ADD COLUMN IF NOT EXISTS categorie VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
+    ADD COLUMN IF NOT EXISTS achete BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS pour_qui VARCHAR(50) NOT NULL DEFAULT 'famille',
+    ADD COLUMN IF NOT EXISTS a_revendre BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS prix_revente_estime FLOAT,
+    ADD COLUMN IF NOT EXISTS vendu_le DATE;
 CREATE INDEX IF NOT EXISTS ix_family_purchases_categorie ON achats_famille(categorie);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_priorite ON achats_famille(priorite);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_achete ON achats_famille(achete);

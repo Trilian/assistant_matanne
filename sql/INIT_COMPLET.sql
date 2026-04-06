@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-04-06 08:25 UTC
--- Source     : sql/schema/*.sql (21 fichiers, ~5168 lignes)
+-- Généré le  : 2026-04-06 08:46 UTC
+-- Source     : sql/schema/*.sql (21 fichiers, ~5203 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -1409,6 +1409,12 @@ CREATE TABLE IF NOT EXISTS historique_recettes (
     ),
     CONSTRAINT ck_portions_cuisinees_positive CHECK (portions_cuisinees > 0)
 );
+-- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
+-- la création des index sur un schéma déjà existant.
+ALTER TABLE IF EXISTS historique_recettes
+    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
+    ADD COLUMN IF NOT EXISTS portions_cuisinees INTEGER NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS feedback VARCHAR(20) DEFAULT 'neutral';
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_recette ON historique_recettes(recette_id);
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_preparation);
 
@@ -1430,6 +1436,14 @@ CREATE TABLE IF NOT EXISTS repas_batch (
     CONSTRAINT fk_batch_meals_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL
 );
+-- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
+-- la création des index sur un schéma déjà existant.
+ALTER TABLE IF EXISTS repas_batch
+    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
+    ADD COLUMN IF NOT EXISTS date_peremption DATE,
+    ADD COLUMN IF NOT EXISTS portions_creees INTEGER NOT NULL DEFAULT 4,
+    ADD COLUMN IF NOT EXISTS portions_restantes INTEGER NOT NULL DEFAULT 4,
+    ADD COLUMN IF NOT EXISTS localisation VARCHAR(200);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_recette ON repas_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_prep ON repas_batch(date_preparation);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_peremption);
@@ -1737,6 +1751,15 @@ CREATE TABLE IF NOT EXISTS preparations_batch (
         CONSTRAINT ck_prep_portions_initiales_positive CHECK (portions_initiales > 0),
         CONSTRAINT ck_prep_portions_restantes_positive CHECK (portions_restantes >= 0)
 );
+-- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
+-- la création des index sur un schéma déjà existant.
+ALTER TABLE IF EXISTS preparations_batch
+    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
+    ADD COLUMN IF NOT EXISTS date_peremption DATE,
+    ADD COLUMN IF NOT EXISTS localisation VARCHAR(50) DEFAULT 'frigo',
+    ADD COLUMN IF NOT EXISTS consomme BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS portions_initiales INTEGER NOT NULL DEFAULT 4,
+    ADD COLUMN IF NOT EXISTS portions_restantes INTEGER NOT NULL DEFAULT 4;
 CREATE INDEX IF NOT EXISTS ix_prep_batch_session ON preparations_batch(session_id);
 CREATE INDEX IF NOT EXISTS ix_prep_batch_recette ON preparations_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_prep_batch_date ON preparations_batch(date_preparation);
@@ -1870,6 +1893,16 @@ CREATE TABLE IF NOT EXISTS achats_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Compatibilité rerun / bases legacy : garantir les colonnes indexées et les
+-- champs ajoutés tardivement avant la création des index.
+ALTER TABLE IF EXISTS achats_famille
+    ADD COLUMN IF NOT EXISTS categorie VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
+    ADD COLUMN IF NOT EXISTS achete BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS pour_qui VARCHAR(50) NOT NULL DEFAULT 'famille',
+    ADD COLUMN IF NOT EXISTS a_revendre BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS prix_revente_estime FLOAT,
+    ADD COLUMN IF NOT EXISTS vendu_le DATE;
 CREATE INDEX IF NOT EXISTS ix_family_purchases_categorie ON achats_famille(categorie);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_priorite ON achats_famille(priorite);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_achete ON achats_famille(achete);
@@ -4117,7 +4150,7 @@ CREATE TRIGGER trg_articles_courses_update_liste
     FOR EACH ROW EXECUTE FUNCTION update_liste_courses_modifie_le();
 
 -- ============================================================================
--- Trigger : invalidation cache planning via repas_planning
+-- Trigger : invalidation cache planning via repas
 -- (V005 absorbé)
 -- ============================================================================
 CREATE OR REPLACE FUNCTION notify_planning_changed()
@@ -4134,9 +4167,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trg_repas_planning_notify ON repas_planning;
+DROP TRIGGER IF EXISTS trg_repas_planning_notify ON repas;
 CREATE TRIGGER trg_repas_planning_notify
-    AFTER INSERT OR UPDATE OR DELETE ON repas_planning
+    AFTER INSERT OR UPDATE OR DELETE ON repas
     FOR EACH ROW EXECUTE FUNCTION notify_planning_changed();
 -- ============================================================================
 
@@ -4278,7 +4311,7 @@ ORDER BY d.jour;
 -- de domaine (03-11). Ce fichier contient uniquement les index additionnels.
 -- ============================================================================
 
--- Consolidation V005 : Index composites porte-parole performance
+-- Consolidation V005 : index composites alignés sur le schéma actuel
 CREATE INDEX IF NOT EXISTS ix_repas_planning_date ON repas(planning_id, date_repas);
 CREATE INDEX IF NOT EXISTS ix_repas_planning_type ON repas(planning_id, type_repas);
 CREATE INDEX IF NOT EXISTS ix_articles_courses_liste_achete ON articles_courses(liste_id, achete);
@@ -4286,18 +4319,20 @@ CREATE INDEX IF NOT EXISTS ix_articles_courses_liste_priorite ON articles_course
 CREATE INDEX IF NOT EXISTS ix_inventaire_peremption_quantite ON inventaire(date_peremption, quantite)
     WHERE date_peremption IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient_date ON historique_inventaire(ingredient_id, date_modification);
-CREATE INDEX IF NOT EXISTS ix_listes_courses_statut_semaine ON listes_courses(statut, semaine_du);
-CREATE INDEX IF NOT EXISTS ix_plannings_actif_semaine ON plannings(actif, semaine_debut) WHERE actif = TRUE;
+CREATE INDEX IF NOT EXISTS ix_listes_courses_statut_semaine ON listes_courses(etat, cree_le DESC);
+CREATE INDEX IF NOT EXISTS ix_plannings_actif_semaine ON plannings(etat, semaine_debut)
+    WHERE etat = 'valide';
 
--- Index migration V001-V004 (absorbés)
+-- Index migration V001-V004 (absorbés) → redirigés vers les tables/colonnes
+-- actuelles pour rester compatibles lors des réexécutions de l'init.
 CREATE INDEX IF NOT EXISTS idx_articles_inventaire_peremption
-    ON articles_inventaire(date_peremption);
+    ON inventaire(date_peremption);
 CREATE INDEX IF NOT EXISTS idx_repas_planning_planning_date
-    ON repas_planning(planning_id, date_repas);
+    ON repas(planning_id, date_repas);
 CREATE INDEX IF NOT EXISTS idx_historique_actions_user_date
-    ON historique_actions(user_id, created_at);
+    ON historique_actions(user_id, cree_le);
 CREATE INDEX IF NOT EXISTS idx_paris_sportifs_statut_user
-    ON paris_sportifs(statut, user_id);
+    ON jeux_paris_sportifs(statut, cree_le DESC);
 
 -- Source: 15_rls_policies.sql
 -- PARTIE 9 : ROW LEVEL SECURITY (RLS)

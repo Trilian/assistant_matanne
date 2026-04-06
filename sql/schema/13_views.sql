@@ -1,7 +1,8 @@
 -- PARTIE 7 : VUES UTILES
 -- ============================================================================
 -- Vue: Objets à remplacer avec priorité
-CREATE OR REPLACE VIEW v_objets_a_remplacer AS
+DROP VIEW IF EXISTS v_objets_a_remplacer CASCADE;
+CREATE VIEW v_objets_a_remplacer AS
 SELECT o.id,
     o.nom,
     o.categorie,
@@ -23,7 +24,8 @@ ORDER BY CASE
     END,
     o.prix_remplacement_estime DESC NULLS LAST;
 -- Vue: Temps par activité (30 derniers jours)
-CREATE OR REPLACE VIEW v_temps_par_activite_30j AS
+DROP VIEW IF EXISTS v_temps_par_activite_30j CASCADE;
+CREATE VIEW v_temps_par_activite_30j AS
 SELECT type_activite,
     COUNT(*) AS nb_sessions,
     COALESCE(SUM(duree_minutes), 0) AS duree_totale_minutes,
@@ -36,7 +38,8 @@ WHERE debut >= NOW() - INTERVAL '30 days'
 GROUP BY type_activite
 ORDER BY duree_totale_minutes DESC;
 -- Vue: Budget travaux par pièce
-CREATE OR REPLACE VIEW v_budget_travaux_par_piece AS
+DROP VIEW IF EXISTS v_budget_travaux_par_piece CASCADE;
+CREATE VIEW v_budget_travaux_par_piece AS
 SELECT p.id AS piece_id,
     p.nom AS piece,
     COUNT(DISTINCT v.id) AS nb_versions,
@@ -52,7 +55,8 @@ ORDER BY cout_total DESC;
 -- Vue: Tâches du jour
 -- S'appuie désormais sur `taches_entretien` (table active) au lieu de la
 -- table legacy `taches_home` retirée du schéma courant.
-CREATE OR REPLACE VIEW v_taches_jour AS
+DROP VIEW IF EXISTS v_taches_jour CASCADE;
+CREATE VIEW v_taches_jour AS
 SELECT
     t.id,
     'entretien'::VARCHAR(20) AS domaine,
@@ -95,7 +99,8 @@ ORDER BY priorite_ordre,
     t.nom;
 
 -- Vue: Charge semaine
-CREATE OR REPLACE VIEW v_charge_semaine AS
+DROP VIEW IF EXISTS v_charge_semaine CASCADE;
+CREATE VIEW v_charge_semaine AS
 SELECT d.jour,
     COALESCE(SUM(t.duree_minutes), 0) AS temps_prevu_min,
     COUNT(t.id) AS nb_taches,

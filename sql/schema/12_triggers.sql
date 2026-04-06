@@ -66,7 +66,7 @@ CREATE TRIGGER trg_articles_courses_update_liste
     FOR EACH ROW EXECUTE FUNCTION update_liste_courses_modifie_le();
 
 -- ============================================================================
--- Trigger : invalidation cache planning via repas_planning
+-- Trigger : invalidation cache planning via repas
 -- (V005 absorbé)
 -- ============================================================================
 CREATE OR REPLACE FUNCTION notify_planning_changed()
@@ -83,9 +83,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS trg_repas_planning_notify ON repas_planning;
+DROP TRIGGER IF EXISTS trg_repas_planning_notify ON repas;
 CREATE TRIGGER trg_repas_planning_notify
-    AFTER INSERT OR UPDATE OR DELETE ON repas_planning
+    AFTER INSERT OR UPDATE OR DELETE ON repas
     FOR EACH ROW EXECUTE FUNCTION notify_planning_changed();
 -- ============================================================================
 
