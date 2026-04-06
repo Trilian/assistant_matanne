@@ -73,7 +73,7 @@ class ArticleInventaire(Base):
     prix_unitaire: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # Relations
-    ingredient: Mapped["Ingredient"] = relationship(back_populates="inventaire")
+    ingredient: Mapped["Ingredient"] = relationship("Ingredient", back_populates="inventaire")
     historique: Mapped[list["HistoriqueInventaire"]] = relationship(
         back_populates="article", cascade="all, delete-orphan"
     )

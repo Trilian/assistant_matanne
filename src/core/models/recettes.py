@@ -72,7 +72,9 @@ class Ingredient(Base):
         back_populates="ingredient", cascade="all, delete-orphan"
     )
     inventaire: Mapped[list["ArticleInventaire"]] = relationship(
-        back_populates="ingredient", cascade="all, delete-orphan"
+        "ArticleInventaire",
+        back_populates="ingredient",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:
@@ -198,7 +200,9 @@ class Recette(TimestampMixin, Base):
     )
     # Feedbacks utilisateurs pour apprentissage IA
     feedbacks: Mapped[list["RetourRecette"]] = relationship(
-        back_populates="recette", cascade="all, delete-orphan"
+        "RetourRecette",
+        back_populates="recette",
+        cascade="all, delete-orphan",
     )
 
     # Contraintes
@@ -417,6 +421,10 @@ class HistoriqueRecette(CreeLeMixin, Base):
     def __repr__(self) -> str:
         return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_preparation})>"
 
+# Charger explicitement les modèles liés définis dans d'autres fichiers.
+# Cela évite les erreurs de résolution SQLAlchemy en environnement lazy/serverless.
+from .inventaire import ArticleInventaire  # noqa: E402,F401
+from .user_preferences import RetourRecette  # noqa: E402,F401
 
 class RepasBatch(CreeLeMixin, Base):
     """Recette préparée en batch cooking.

@@ -168,7 +168,7 @@ class RetourRecette(CreeLeMixin, Base):
     )
 
     # Relations
-    recette: Mapped["Recette"] = relationship(back_populates="feedbacks")
+    recette: Mapped["Recette"] = relationship("Recette", back_populates="feedbacks")
 
     def __repr__(self) -> str:
         return f"<RetourRecette(user='{self.user_id}', recette={self.recette_id}, feedback='{self.feedback}')>"
