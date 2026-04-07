@@ -149,7 +149,7 @@ export default function PageConnexion() {
         <CardTitle className="text-2xl">Assistant Matanne</CardTitle>
         <CardDescription>Connectez-vous à votre espace familial</CardDescription>
       </CardHeader>
-      <form method="post" onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           {erreur && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -183,7 +183,7 @@ export default function PageConnexion() {
                 className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
                 aria-label={montrerMdp ? "Masquer le mot de passe" : "Afficher le mot de passe"}
               >
-                {montrerMdp ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {montrerMdp ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
               </button>
             </div>
             {errors.mot_de_passe && (
