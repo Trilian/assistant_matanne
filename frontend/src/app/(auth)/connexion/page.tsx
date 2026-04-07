@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,6 +37,7 @@ export default function PageConnexion() {
   const { definirUtilisateur } = utiliserStoreAuth();
   const [erreur, setErreur] = useState<string | null>(null);
   const [montrerMdp, setMontrerMdp] = useState(false);
+  const [monte, setMonte] = useState(false);
   const [etape2FA, setEtape2FA] = useState(false);
   const [tempToken, setTempToken] = useState("");
   const [code2FA, setCode2FA] = useState("");
@@ -49,6 +50,8 @@ export default function PageConnexion() {
   } = useForm<DonneesFormulaire>({
     resolver: zodResolver(schemaConnexion),
   });
+
+  useEffect(() => setMonte(true), []);
 
   async function onSubmit(donnees: DonneesFormulaire) {
     setErreur(null);
@@ -180,7 +183,7 @@ export default function PageConnexion() {
               <button
                 type="button"
                 onClick={() => setMontrerMdp((v) => !v)}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                className="absolute inset-y-0 right-0 z-10 flex items-center px-3 text-muted-foreground hover:text-foreground"
                 aria-label={montrerMdp ? "Masquer le mot de passe" : "Afficher le mot de passe"}
               >
                 {montrerMdp ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
@@ -194,7 +197,7 @@ export default function PageConnexion() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={!monte || isSubmitting}>
             {isSubmitting ? "Connexion..." : "Se connecter"}
           </Button>
           <p className="text-sm text-muted-foreground">
