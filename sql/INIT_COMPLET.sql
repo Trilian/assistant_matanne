@@ -7,6 +7,7 @@
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
+--
 -- ⚠️  NE PAS MODIFIER CE FICHIER DIRECTEMENT.
 --     Modifier les fichiers dans sql/schema/ puis relancer:
 --       python scripts/db/regenerate_init.py
