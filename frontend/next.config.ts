@@ -30,18 +30,7 @@ function construireCsp(): string {
   ].join("; ");
 }
 
-const RAILWAY_URL = "https://assistantmatanne-production.up.railway.app";
-
 const nextConfig: NextConfig = {
-  // Proxy API → Railway backend (toutes méthodes HTTP : GET, POST, PUT, DELETE, PATCH)
-  async rewrites() {
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: `${RAILWAY_URL}/api/v1/:path*`,
-      },
-    ];
-  },
   // Standalone output pour Docker staging
   output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   // Exclure les packages OpenTelemetry/Prisma du bundling webpack (ESM Node platform)
