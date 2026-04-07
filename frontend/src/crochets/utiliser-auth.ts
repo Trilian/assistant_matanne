@@ -13,23 +13,22 @@ import { obtenirProfil, deconnecter as apiDeconnecter } from "@/bibliotheque/api
  * @returns {{ utilisateur, estConnecte, estChargement, deconnecter }}
  */
 export function utiliserAuth() {
-  const { utilisateur, estConnecte, estChargement, definirUtilisateur, reinitialiser } =
+  const { utilisateur, estConnecte, estChargement, definirUtilisateur, definirChargement, reinitialiser } =
     utiliserStoreAuth();
 
   // Charger le profil au montage si un token existe
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token && !utilisateur) {
+      definirChargement(true);
       obtenirProfil()
         .then(definirUtilisateur)
         .catch(() => {
           localStorage.removeItem("access_token");
           definirUtilisateur(null);
         });
-    } else if (!token) {
-      definirUtilisateur(null);
     }
-  }, [utilisateur, definirUtilisateur]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const deconnecter = useCallback(() => {
     reinitialiser();
