@@ -1022,16 +1022,16 @@ async def generer_planning_ia(
                 preferences=preferences_enrichies,
             )
         except ExceptionApp as e:
-            logger.warning("[planning] Exception métier depuis generer_planning_ia: %s", e)
-            raise HTTPException(
-                status_code=503,
-                detail=getattr(e, "message_utilisateur", "Génération IA impossible. Réessayez plus tard."),
-            ) from e
+            tech_msg = getattr(e, "message", "") or ""
+            user_msg = getattr(e, "message_utilisateur", "Génération IA impossible. Réessayez plus tard.")
+            logger.warning("[planning] Exception métier depuis generer_planning_ia: %s — %s", type(e).__name__, tech_msg)
+            detail = f"{user_msg} | Détail: {tech_msg[:300]}" if tech_msg and tech_msg != user_msg else user_msg
+            raise HTTPException(status_code=503, detail=detail) from e
         except Exception as e:
             logger.error("[planning] Erreur inattendue depuis generer_planning_ia: %s", e, exc_info=True)
             raise HTTPException(
                 status_code=503,
-                detail="Génération IA impossible. Réessayez plus tard.",
+                detail=f"Génération IA impossible. Réessayez plus tard. | Détail: {str(e)[:300]}",
             ) from e
 
         if not planning_obj:
