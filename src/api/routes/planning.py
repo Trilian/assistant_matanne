@@ -906,84 +906,94 @@ async def generer_planning_ia(
         # Enrichir les préférences avec signaux historiques + nutrition
         preferences_base = getattr(body, "preferences", None) or {}
         preferences_enrichies = dict(preferences_base)
-        with executer_avec_session() as session:
-            top_recettes = (
-                session.query(Recette.nom, func.count(HistoriqueRecette.id).label("nb"))
-                .join(HistoriqueRecette, HistoriqueRecette.recette_id == Recette.id)
-                .group_by(Recette.id, Recette.nom)
-                .order_by(func.count(HistoriqueRecette.id).desc())
-                .limit(8)
-                .all()
-            )
 
-            if top_recettes:
-                preferences_enrichies["recettes_favorites"] = [
-                    {"nom": r.nom, "frequence": int(r.nb or 0)} for r in top_recettes
-                ]
-
-            stats_nutri = (
-                session.query(
-                    func.avg(Recette.calories).label("avg_cal"),
-                    func.avg(Recette.proteines).label("avg_prot"),
-                    func.avg(Recette.lipides).label("avg_lip"),
-                    func.avg(Recette.glucides).label("avg_glu"),
+        # Chaque enrichissement est isolé : un échec n'interrompt pas la génération.
+        try:
+            with executer_avec_session() as session:
+                top_recettes = (
+                    session.query(Recette.nom, func.count(HistoriqueRecette.id).label("nb"))
+                    .join(HistoriqueRecette, HistoriqueRecette.recette_id == Recette.id)
+                    .group_by(Recette.id, Recette.nom)
+                    .order_by(func.count(HistoriqueRecette.id).desc())
+                    .limit(8)
+                    .all()
                 )
-                .filter(Recette.calories.isnot(None))
-                .first()
-            )
+                if top_recettes:
+                    preferences_enrichies["recettes_favorites"] = [
+                        {"nom": r.nom, "frequence": int(r.nb or 0)} for r in top_recettes
+                    ]
+        except Exception as e:
+            logger.warning("[planning] Enrichissement recettes favorites ignoré: %s", e)
 
-            avg_cal = float(getattr(stats_nutri, "avg_cal", 900) or 900)
-            avg_prot = float(getattr(stats_nutri, "avg_prot", 25) or 25)
-            avg_lip = float(getattr(stats_nutri, "avg_lip", 20) or 20)
-            avg_glu = float(getattr(stats_nutri, "avg_glu", 55) or 55)
-
-            cal_cible = int(avg_cal * 2)
-            cal_cible = max(1500, min(2800, cal_cible))
-
-            preferences_enrichies["objectif_nutrition"] = {
-                "calories_jour_cible": cal_cible,
-                "proteines_min_jour": round(avg_prot * 2, 1),
-                "lipides_max_jour": round(avg_lip * 2.2, 1),
-                "glucides_cible_jour": round(avg_glu * 2, 1),
-            }
-
-            # Enrichir avec l'inventaire disponible (priorisation des recettes compatibles stock).
-            inventaire_disponible = (
-                session.query(ArticleInventaire)
-                .filter(ArticleInventaire.quantite > 0)
-                .order_by(ArticleInventaire.quantite.desc())
-                .limit(40)
-                .all()
-            )
-            if inventaire_disponible:
-                preferences_enrichies["inventaire_disponible"] = [
-                    {
-                        "ingredient": item.nom,
-                        "quantite": float(item.quantite or 0),
-                        "unite": item.unite,
-                    }
-                    for item in inventaire_disponible
-                    if item.nom
-                ]
-
-            # Enrichir avec un signal budget alimentaire récent (60 derniers jours).
-            debut_budget = datetime.now(UTC).date() - timedelta(days=60)
-            depenses_alim = (
-                session.query(func.sum(Depense.montant).label("total"), func.count(Depense.id).label("nb"))
-                .filter(
-                    Depense.categorie == "alimentation",
-                    Depense.date >= debut_budget,
+        try:
+            with executer_avec_session() as session:
+                stats_nutri = (
+                    session.query(
+                        func.avg(Recette.calories).label("avg_cal"),
+                        func.avg(Recette.proteines).label("avg_prot"),
+                        func.avg(Recette.lipides).label("avg_lip"),
+                        func.avg(Recette.glucides).label("avg_glu"),
+                    )
+                    .filter(Recette.calories.isnot(None))
+                    .first()
                 )
-                .first()
-            )
-            total_budget = float(getattr(depenses_alim, "total", 0) or 0)
-            nb_depenses = int(getattr(depenses_alim, "nb", 0) or 0)
-            preferences_enrichies["budget_alimentation"] = {
-                "periode_jours": 60,
-                "depenses_total": round(total_budget, 2),
-                "depense_moyenne": round(total_budget / nb_depenses, 2) if nb_depenses > 0 else 0,
-                "nb_transactions": nb_depenses,
-            }
+                avg_cal = float(getattr(stats_nutri, "avg_cal", 900) or 900)
+                avg_prot = float(getattr(stats_nutri, "avg_prot", 25) or 25)
+                avg_lip = float(getattr(stats_nutri, "avg_lip", 20) or 20)
+                avg_glu = float(getattr(stats_nutri, "avg_glu", 55) or 55)
+                cal_cible = max(1500, min(2800, int(avg_cal * 2)))
+                preferences_enrichies["objectif_nutrition"] = {
+                    "calories_jour_cible": cal_cible,
+                    "proteines_min_jour": round(avg_prot * 2, 1),
+                    "lipides_max_jour": round(avg_lip * 2.2, 1),
+                    "glucides_cible_jour": round(avg_glu * 2, 1),
+                }
+        except Exception as e:
+            logger.warning("[planning] Enrichissement nutrition ignoré: %s", e)
+
+        try:
+            with executer_avec_session() as session:
+                inventaire_disponible = (
+                    session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.quantite > 0)
+                    .order_by(ArticleInventaire.quantite.desc())
+                    .limit(40)
+                    .all()
+                )
+                if inventaire_disponible:
+                    preferences_enrichies["inventaire_disponible"] = [
+                        {
+                            "ingredient": item.nom,
+                            "quantite": float(item.quantite or 0),
+                            "unite": item.unite,
+                        }
+                        for item in inventaire_disponible
+                        if item.nom
+                    ]
+        except Exception as e:
+            logger.warning("[planning] Enrichissement inventaire ignoré: %s", e)
+
+        try:
+            with executer_avec_session() as session:
+                debut_budget = datetime.now(UTC).date() - timedelta(days=60)
+                depenses_alim = (
+                    session.query(func.sum(Depense.montant).label("total"), func.count(Depense.id).label("nb"))
+                    .filter(
+                        Depense.categorie == "alimentation",
+                        Depense.date >= debut_budget,
+                    )
+                    .first()
+                )
+                total_budget = float(getattr(depenses_alim, "total", 0) or 0)
+                nb_depenses = int(getattr(depenses_alim, "nb", 0) or 0)
+                preferences_enrichies["budget_alimentation"] = {
+                    "periode_jours": 60,
+                    "depenses_total": round(total_budget, 2),
+                    "depense_moyenne": round(total_budget / nb_depenses, 2) if nb_depenses > 0 else 0,
+                    "nb_transactions": nb_depenses,
+                }
+        except Exception as e:
+            logger.warning("[planning] Enrichissement budget ignoré: %s", e)
 
         # Enrichir avec les produits de saison du mois en cours
         try:
