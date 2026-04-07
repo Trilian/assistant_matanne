@@ -153,11 +153,13 @@ class BaseAIService(
 
         # ✅ Vérifier circuit breaker AVANT l'appel
         from src.core.ai.circuit_breaker import EtatCircuit
+        from src.core.exceptions import ErreurServiceIA
 
         etat = self.circuit_breaker.etat
         if etat == EtatCircuit.OUVERT:
-            logger.warning(f"⚡ Circuit '{self.circuit_breaker.nom}' OUVERT — appel bloqué")
-            return None
+            msg = f"Circuit '{self.circuit_breaker.nom}' ouvert suite à des erreurs répétées. Réessayez dans quelques instants."
+            logger.warning(f"⚡ {msg}")
+            raise ErreurServiceIA(msg, message_utilisateur="L'IA est temporairement indisponible. Réessayez dans quelques instants.")
 
         # Appel IA protégé par CircuitBreaker + contexte d'observabilité
         start_time = datetime.now()

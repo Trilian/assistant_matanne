@@ -228,50 +228,12 @@ RULES:
 
         # Log de debug pour voir la réponse
         if not planning_data:
-            logger.warning(f"⚠️ Failed to generate planning for {semaine_debut} - no data returned")
-            logger.debug("Checking if we can create default planning instead...")
-
-            # Créer un planning par défaut avec des repas simples
-            planning = Planning(
-                nom=f"Planning {semaine_debut.strftime('%d/%m/%Y')}",
-                semaine_debut=semaine_debut,
-                semaine_fin=semaine_fin,
-                statut="actif",
-                genere_par_ia=False,  # Non généré par IA car fallback
+            logger.warning(f"⚠️ Aucune donnée IA reçue pour le planning {semaine_debut} — l'appel Mistral n'a pas produit de résultat parsable.")
+            from src.core.exceptions import ErreurServiceIA
+            raise ErreurServiceIA(
+                "Aucune donnée retournée par Mistral pour la génération du planning",
+                message_utilisateur="L'IA n'a pas pu générer le planning. Vérifiez la clé Mistral ou réessayez.",
             )
-            db.add(planning)
-            db.flush()
-
-            # Créer repas par défaut (simplement lundi à dimanche)
-            jours_semaine = [
-                "Lundi",
-                "Mardi",
-                "Mercredi",
-                "Jeudi",
-                "Vendredi",
-                "Samedi",
-                "Dimanche",
-            ]
-            for idx, jour_name in enumerate(jours_semaine):
-                date_jour = semaine_debut + timedelta(days=idx)
-
-                repas = Repas(
-                    planning_id=planning.id,
-                    date_repas=date_jour,
-                    type_repas="dejeuner",
-                    notes=f"Repas du {jour_name} - À remplir manuellement",
-                )
-                db.add(repas)
-
-            db.commit()
-            logger.info(f"✅ Created default planning for {semaine_debut} with 7 days")
-
-            emettre_evenement_simple(
-                "planning.modifie",
-                {"planning_id": planning.id, "semaine": str(semaine_debut), "action": "cree"},
-                source="planning_ia",
-            )
-            return planning
 
         # Planning IA réussi
         logger.info(f"✅ Generated planning with {len(planning_data)} days using AI")
