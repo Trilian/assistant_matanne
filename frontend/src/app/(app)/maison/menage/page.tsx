@@ -1,4 +1,4 @@
-﻿// �.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.�
+﻿// ──────────────────────────────────────────────────────────────────────────────
 // Page Ménage �?" Planning, tâches du jour, guides, routines
 // �.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.��.�
 
@@ -264,7 +264,7 @@ function GuideLessive() {
       {data && tacheSelectee && !isLoading && (
         <Card>
           <CardContent className="pt-4 space-y-4">
-            {/* �?tapes */}
+            {/* Étapes */}
             {(() => {
               const etapes = Array.isArray(data.etapes)
                 ? data.etapes.filter((etape): etape is string => typeof etape === "string")
@@ -272,7 +272,7 @@ function GuideLessive() {
 
               return etapes.length > 0 ? (
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">�?tapes</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Étapes</p>
                   <ol className="space-y-2">
                     {etapes.map((e, i) => (
                       <li key={i} className="flex gap-2 text-sm">
@@ -295,7 +295,7 @@ function GuideLessive() {
                   <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Produits</p>
                   <div className="flex flex-wrap gap-2">
                     {produits.map((p) => (
-                      <Badge key={p} variant="secondary">�Y�� {p}</Badge>
+                      <Badge key={p} variant="secondary">🧼 {p}</Badge>
                     ))}
                   </div>
                 </div>
@@ -312,7 +312,7 @@ function GuideLessive() {
 
 function SectionTimers() {
   const APPAREILS = [
-    { id: "lave_linge", nom: "Lave-linge", dureeMin: 90, action: "�?tendre le linge" },
+    { id: "lave_linge", nom: "Lave-linge", dureeMin: 90, action: "Étendre le linge" },
     { id: "lave_vaisselle", nom: "Lave-vaisselle", dureeMin: 60, action: "Vider le lave-vaisselle" },
     { id: "seche_linge", nom: "Sèche-linge", dureeMin: 60, action: "Plier le linge" },
   ];
@@ -396,9 +396,9 @@ function OngletRoutines() {
     {
       nom: "moment_journee", label: "Moment", type: "select" as const,
       options: [
-        { valeur: "matin", label: "Matin �YO." },
-        { valeur: "soir", label: "Soir �YOT" },
-        { valeur: "flexible", label: "Flexible �Y.�" },
+        { valeur: "matin", label: "Matin 🌅" },
+        { valeur: "soir", label: "Soir 🌙" },
+        { valeur: "flexible", label: "Flexible 🔄" },
       ],
     },
   ];
@@ -446,7 +446,7 @@ function OngletRoutines() {
                   </span>
                   {r.moment_journee && (
                     <span className="text-[10px] text-muted-foreground">
-                      {r.moment_journee === "matin" ? "�YO." : r.moment_journee === "soir" ? "�YOT" : "�Y.�"}
+                      {r.moment_journee === "matin" ? "🌅" : r.moment_journee === "soir" ? "🌙" : "🔄"}
                     </span>
                   )}
                   {(r.taches_count ?? 0) > 0 && (
@@ -515,12 +515,12 @@ function ContenuMenage() {
         queryClient.invalidateQueries({ queryKey: ["taches-jour-maison"] });
         setPopoverOuvert(false);
         setNomPonctuel("");
-        toast.success("T�che ajout�e");
-        toast("?? Ajouter � une routine ?", {
+        toast.success("Tâche ajoutée");
+        toast("➕ Ajouter à une routine ?", {
           action: { label: "Oui", onClick: () => router.push("?tab=routines") },
         });
       },
-      onError: () => toast.error("Erreur lors de la cr�ation"),
+      onError: () => toast.error("Erreur lors de la création"),
     }
   );
 
@@ -529,9 +529,9 @@ function ContenuMenage() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["planning-semaine-menage"] });
-        toast.success("Planning r�g�n�r�");
+        toast.success("Planning régénéré");
       },
-      onError: () => toast.error("Erreur lors de la r�g�n�ration"),
+      onError: () => toast.error("Erreur lors de la régénération"),
     }
   );
 
@@ -563,10 +563,10 @@ function ContenuMenage() {
     tachesTerminees.includes(String(t.id ?? t.nom))
   ).length;
 
-  // Toast c�l�bration quand toutes les t�ches sont faites
+  // Toast c�l�bration quand toutes les tâches sont faites
   useEffect(() => {
     if (tachesArray.length > 0 && tachesTermineesAujourdHui === tachesArray.length) {
-      toast("?? Toutes les t�ches du jour termin�es !");
+      toast("🎉 Toutes les tâches du jour terminées !");
     }
   }, [tachesTermineesAujourdHui, tachesArray.length]);
 
@@ -598,7 +598,7 @@ function ContenuMenage() {
           <TabsTrigger value="saisonnier">🌸 Saison</TabsTrigger>
         </TabsList>
 
-        {/* �"?�"? Onglet Aujourd'hui �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"? */}
+        {/* ─── */}
         <TabsContent value="aujourd-hui" className="space-y-6 mt-4">
           {/* Tâches du jour */}
           <Card>
@@ -611,7 +611,7 @@ function ContenuMenage() {
               )}
               {!chargTaches && tachesArray.length === 0 && (
                 <p className="text-sm text-muted-foreground italic">
-                  Aucune tâche prévue aujourd&apos;hui �YZ?
+                  Aucune tâche prévue aujourd&apos;hui 🧹
                 </p>
               )}
               <div className="space-y-2">
@@ -627,34 +627,34 @@ function ContenuMenage() {
                   />
                 ))}
               </div>
-              {/* T�che ponctuelle */}
+              {/* Tâche ponctuelle */}
               <div className="mt-3">
                 <Popover open={popoverOuvert} onOpenChange={setPopoverOuvert}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="w-full gap-1.5">
                       <Plus className="h-3.5 w-3.5" />
-                      T�che ponctuelle
+                      Tâche ponctuelle
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-72 space-y-3 p-4">
-                    <p className="text-sm font-semibold">Nouvelle t�che ponctuelle</p>
+                    <p className="text-sm font-semibold">Nouvelle tâche ponctuelle</p>
                     <div className="space-y-1">
                       <label className="text-xs text-muted-foreground">Nom</label>
                       <Input
                         value={nomPonctuel}
                         onChange={(e) => setNomPonctuel(e.target.value)}
-                        placeholder="Ex: R�paration carreau de douche"
+                        placeholder="Ex: Réparation carreau de douche"
                         className="h-8 text-sm"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Pi�ce</label>
+                      <label className="text-xs text-muted-foreground">Pièce</label>
                       <Select value={piecePonctuelle} onValueChange={setPiecePonctuelle}>
                         <SelectTrigger className="h-8 text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {["Salon", "Cuisine", "Chambre", "Salle de bain", "Bureau", "Buanderie", "Ext�rieur", "Autre"].map((p) => (
+                          {["Salon", "Cuisine", "Chambre", "Salle de bain", "Bureau", "Buanderie", "Extérieur", "Autre"].map((p) => (
                             <SelectItem key={p} value={p}>{p}</SelectItem>
                           ))}
                         </SelectContent>
@@ -679,7 +679,7 @@ function ContenuMenage() {
                       disabled={!nomPonctuel.trim() || enCreationPonctuelle}
                       onClick={() => creerPonctuelle({ nom: nomPonctuel.trim(), piece: piecePonctuelle, quand: quandPonctuel })}
                     >
-                      ? Cr�er
+                      Créer
                     </Button>
                   </PopoverContent>
                 </Popover>
@@ -693,12 +693,12 @@ function ContenuMenage() {
           </Card>
         </TabsContent>
 
-        {/* �"?�"? Onglet Semaine �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"? */}
+        {/* ─── */}
         <TabsContent value="semaine" className="mt-4">
           <div className="flex justify-end mb-3">
             <Button variant="outline" size="sm" onClick={() => regenererPlanning()} disabled={enRegeneration} className="gap-1.5">
               <RefreshCw className={`h-3.5 w-3.5 ${enRegeneration ? "animate-spin" : ""}`} />
-              R�g�n�rer
+              Régénérer
             </Button>
           </div>
           {chargPlanning && <p className="text-sm text-muted-foreground">Chargement...</p>}
@@ -737,7 +737,7 @@ function ContenuMenage() {
           )}
         </TabsContent>
 
-        {/* �"?�"? Onglet Guides �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"? */}
+        {/* ─── */}
         <TabsContent value="guides" className="mt-4">
           <Card>
             <CardHeader>
@@ -749,7 +749,7 @@ function ContenuMenage() {
           </Card>
         </TabsContent>
 
-        {/* �"?�"? Onglet Routines �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"? */}
+        {/* ─── */}
         <TabsContent value="routines" className="mt-4">
           <OngletRoutines />
         </TabsContent>
