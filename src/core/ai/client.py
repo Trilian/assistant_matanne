@@ -161,14 +161,24 @@ class ClientIA(VisionMixin, StreamingMixin):
 
             except httpx.HTTPStatusError as e:
                 status = e.response.status_code if e.response is not None else 0
-                # 429: quota Mistral dépassé — ne pas retenter, signaler clairement
+                # 429: quota Mistral dépassé — respecter Retry-After si présent
                 if status == 429:
-                    logger.warning("[RATE LIMIT] Quota Mistral 429 — pas de retry")
+                    retry_after = 0
+                    if e.response is not None:
+                        try:
+                            retry_after = int(e.response.headers.get("Retry-After", 0))
+                        except (ValueError, TypeError):
+                            retry_after = 0
+                    logger.warning("[RATE LIMIT] Quota Mistral 429 — Retry-After=%ss", retry_after)
+                    # Si Mistral demande d'attendre peu de temps ET qu'on a encore des tentatives, on attend
+                    if retry_after > 0 and retry_after <= 30 and tentative < max_tentatives - 1:
+                        await asyncio.sleep(retry_after)
+                        continue
                     raise ErreurLimiteDebit(
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur=(
-                            "Quota Mistral atteint (429). Réessayez dans quelques secondes "
-                            "ou vérifiez votre plan sur console.mistral.ai."
+                            f"Quota Mistral atteint (429)."
+                            + (f" Réessayez dans {retry_after}s." if retry_after else " Réessayez dans quelques secondes.")
                         ),
                     ) from e
                 if tentative == max_tentatives - 1:

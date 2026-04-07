@@ -920,7 +920,7 @@ async def generer_planning_ia(
                 )
                 if top_recettes:
                     preferences_enrichies["recettes_favorites"] = [
-                        {"nom": r.nom, "frequence": int(r.nb or 0)} for r in top_recettes
+                        {"nom": r.nom, "frequence": int(r.nb or 0)} for r in top_recettes[:5]  # Top 5 seulement
                     ]
         except Exception as e:
             logger.warning("[planning] Enrichissement recettes favorites ignoré: %s", e)
@@ -967,7 +967,7 @@ async def generer_planning_ia(
                             "quantite": float(item.quantite or 0),
                             "unite": item.unite,
                         }
-                        for item in inventaire_disponible
+                        for item in inventaire_disponible[:15]  # Limité à 15 pour réduire la taille du prompt
                         if item.nom
                     ]
         except Exception as e:
