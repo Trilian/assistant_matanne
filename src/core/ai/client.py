@@ -159,15 +159,36 @@ class ClientIA(VisionMixin, StreamingMixin):
 
                 return reponse
 
-            except httpx.HTTPError as e:
+            except httpx.HTTPStatusError as e:
+                status = e.response.status_code if e.response is not None else 0
+                # 429: quota Mistral dépassé — ne pas retenter, signaler clairement
+                if status == 429:
+                    logger.warning("[RATE LIMIT] Quota Mistral 429 — pas de retry")
+                    raise ErreurLimiteDebit(
+                        f"Erreur API Mistral: {str(e)}",
+                        message_utilisateur=(
+                            "Quota Mistral atteint (429). Réessayez dans quelques secondes "
+                            "ou vérifiez votre plan sur console.mistral.ai."
+                        ),
+                    ) from e
                 if tentative == max_tentatives - 1:
                     logger.error(f"[ERROR] Erreur API après {max_tentatives} tentatives: {e}")
                     raise ErreurServiceIA(
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur="L'IA est temporairement indisponible",
                     ) from e
+                # Attente exponentielle pour les autres erreurs HTTP
+                temps_attente = 2**tentative
+                logger.warning(f"Tentative {tentative + 1}/{max_tentatives} après {temps_attente}s")
+                await asyncio.sleep(temps_attente)
 
-                # Attente exponentielle
+            except httpx.HTTPError as e:
+                if tentative == max_tentatives - 1:
+                    logger.error(f"[ERROR] Erreur réseau après {max_tentatives} tentatives: {e}")
+                    raise ErreurServiceIA(
+                        f"Erreur réseau Mistral: {str(e)}",
+                        message_utilisateur="L'IA est temporairement indisponible",
+                    ) from e
                 temps_attente = 2**tentative
                 logger.warning(f"Tentative {tentative + 1}/{max_tentatives} après {temps_attente}s")
                 await asyncio.sleep(temps_attente)
