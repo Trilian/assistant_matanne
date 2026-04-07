@@ -26,7 +26,8 @@ export function utiliserAuth() {
         .catch(() => {
           localStorage.removeItem("access_token");
           definirUtilisateur(null);
-        });
+        })
+        .finally(() => definirChargement(false));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
