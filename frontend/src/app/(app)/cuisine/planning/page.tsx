@@ -23,6 +23,7 @@ import {
   Wifi,
   WifiOff,
   Users,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -389,6 +390,8 @@ export default function PagePlanning() {
   const [nbPersonnesBase, setNbPersonnesBase] = utiliserStockageLocal<number>("planning.nbPersonnes", 2);
   // Panneau invités : ouvert uniquement si l'utilisateur l'active, fermé par défaut
   const [panneauInvitesOuvert, setPanneauInvitesOuvert] = utiliserStockageLocal<boolean>("planning.panneauInvites", false);
+  // Message d'erreur IA affiché sous le bouton "Générer IA" (plus fiable qu'un toast)
+  const [erreurIA, setErreurIA] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -581,11 +584,11 @@ export default function PagePlanning() {
         invalider(["planning"]);
 
         if (!resultat.genere_par_ia) {
-          toast.warning(
-            "L'IA n'est pas configurée. Un planning par défaut a été créé — remplissez-le manuellement ou configurez la clé Mistral.",
-            { duration: 8000 }
-          );
+          const msg = "L'IA n'est pas disponible. Un planning par défaut a été créé — remplissez-le manuellement ou vérifiez la clé Mistral.";
+          setErreurIA(msg);
+          toast.warning(msg, { duration: 8000 });
         } else {
+          setErreurIA(null);
           toast.success("Planning généré par l'IA !", { duration: 5000 });
         }
 
@@ -607,7 +610,9 @@ export default function PagePlanning() {
         }
         const detail =
           (erreur as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-        toast.error(detail ?? "Erreur lors de la génération IA", { duration: 6000 });
+        const msg = detail ?? "Erreur lors de la génération IA";
+        setErreurIA(msg);
+        toast.error(msg, { duration: 6000 });
       },
     }
   );
@@ -1061,6 +1066,7 @@ export default function PagePlanning() {
                 variant="default"
                 size="sm"
                 onClick={() => {
+                  setErreurIA(null);
                   toastIaRef.current = toast.loading(
                     "Génération du planning en cours… (peut prendre 30 s)",
                     { duration: Infinity }
@@ -1134,6 +1140,22 @@ export default function PagePlanning() {
               </Button>
             </div>
           </div>
+
+          {/* Erreur IA — bandeau persistant sous les actions */}
+          {erreurIA && (
+            <div className="mt-3 flex items-start gap-2 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 text-sm text-orange-800 dark:border-orange-800 dark:bg-orange-950/30 dark:text-orange-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span className="flex-1">{erreurIA}</span>
+              <button
+                type="button"
+                aria-label="Fermer"
+                className="rounded p-0.5 hover:bg-orange-200 dark:hover:bg-orange-800"
+                onClick={() => setErreurIA(null)}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

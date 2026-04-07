@@ -872,6 +872,20 @@ async def generer_planning_ia(
 
     from src.services.cuisine.planning import obtenir_service_planning
 
+    # Vérification anticipée : la clé Mistral doit être configurée
+    try:
+        from src.core.config import obtenir_parametres
+        obtenir_parametres().MISTRAL_API_KEY  # Lève ValueError si absente
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "L'IA Mistral n'est pas configurée. "
+                "Ajoutez MISTRAL_API_KEY dans vos variables d'environnement "
+                "pour utiliser la génération automatique de planning."
+            ),
+        )
+
     if body is None:
         body = GenererPlanningRequest()
 
