@@ -13,7 +13,6 @@ export const clientApi = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
 });
 
 // ─── Intercepteur requête : injection du token JWT ───
