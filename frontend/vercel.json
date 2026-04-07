@@ -55,11 +55,5 @@
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/v1/:path*",
-      "destination": "https://assistantmatanne-production.up.railway.app/api/v1/:path*"
-    }
   ]
 }
