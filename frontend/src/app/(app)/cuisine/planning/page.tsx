@@ -926,13 +926,9 @@ export default function PagePlanning() {
               <div
                 key={stat.label}
                 className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-white/5"
-                title={"info" in stat ? stat.info : undefined}
               >
                 <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{stat.label}</p>
                 <p className="mt-1 text-xl font-semibold">{stat.valeur}</p>
-                {"info" in stat && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{stat.info}</p>
-                )}
               </div>
             ))}
             {/* Personnes — ajustable */}
