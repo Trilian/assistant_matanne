@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from src.core.caching import obtenir_cache
 from src.core.date_utils.helpers import obtenir_noms_jours_semaine
-from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
+from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.core.models import Planning, Repas
 from src.core.monitoring import chronometre
 from src.services.core.event_bus_mixin import emettre_evenement_simple
@@ -158,12 +158,6 @@ class PlanningIAGenerationMixin:
     # GÉNÉRATION IA PLANNING HEBDOMADAIRE
     # ═══════════════════════════════════════════════════════════
 
-    @avec_cache(
-        ttl=3600,
-        key_func=lambda self, semaine_debut, preferences=None: (
-            f"planning_ia_{semaine_debut.isoformat()}"
-        ),
-    )
     @avec_gestion_erreurs(default_return=None)
     @chronometre("ia.planning.generer", seuil_alerte_ms=15000)
     @avec_session_db

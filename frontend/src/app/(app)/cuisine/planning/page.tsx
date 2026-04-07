@@ -584,9 +584,9 @@ export default function PagePlanning() {
         invalider(["planning"]);
 
         if (!resultat.genere_par_ia) {
-          const msg = "L'IA n'est pas disponible. Un planning par défaut a été créé — remplissez-le manuellement ou vérifiez la clé Mistral.";
+          const msg = "Le planning a été créé sans IA. Réessayez ou vérifiez la clé Mistral.";
           setErreurIA(msg);
-          toast.warning(msg, { duration: 8000 });
+          toast.error(msg, { duration: 8000 });
         } else {
           setErreurIA(null);
           toast.success("Planning généré par l'IA !", { duration: 5000 });
