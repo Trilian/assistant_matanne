@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -365,6 +366,7 @@ export function MenuCommandes() {
 
   return (
     <CommandDialog open={rechercheOuverte} onOpenChange={definirRecherche}>
+      <Command>
       <CommandInput
         placeholder="Rechercher pages, recettes, notes, contrats..."
         value={recherche}
@@ -489,6 +491,7 @@ export function MenuCommandes() {
           </CommandGroup>
         ))}
       </CommandList>
+      </Command>
     </CommandDialog>
   );
 }
