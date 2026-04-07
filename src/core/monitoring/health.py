@@ -179,6 +179,13 @@ def _verifier_ia() -> SanteComposant:
         statut = StatutSante.SAIN
         msg_parts = [f"Appels: {appels_jour}/{limite_jour}"]
 
+        # Exposer le modèle Mistral configuré
+        try:
+            from src.core.config import obtenir_parametres
+            stats["modele"] = obtenir_parametres().MISTRAL_MODEL
+        except Exception:
+            pass
+
         # Vérifier l'état du circuit breaker
         try:
             from src.core.ai.circuit_breaker import EtatCircuit, obtenir_circuit

@@ -185,7 +185,12 @@ class BaseAIService(
                 )
                 self.circuit_breaker._enregistrer_succes()
             except Exception as e:
-                self.circuit_breaker._enregistrer_echec()
+                from src.core.exceptions import ErreurLimiteDebit
+                # Un 429 (quota atteint) n'est PAS une panne du service :
+                # ne pas incrémenter le circuit breaker pour éviter de bloquer
+                # tous les appels suivants à cause d'une limite de débit.
+                if not isinstance(e, ErreurLimiteDebit):
+                    self.circuit_breaker._enregistrer_echec()
                 logger.warning("Appel IA échoué (%s): %s", self.service_name, e)
                 raise
 

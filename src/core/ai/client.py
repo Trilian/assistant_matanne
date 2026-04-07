@@ -169,16 +169,20 @@ class ClientIA(VisionMixin, StreamingMixin):
                             retry_after = int(e.response.headers.get("Retry-After", 0))
                         except (ValueError, TypeError):
                             retry_after = 0
-                    logger.warning("[RATE LIMIT] Quota Mistral 429 — Retry-After=%ss", retry_after)
-                    # Si Mistral demande d'attendre peu de temps ET qu'on a encore des tentatives, on attend
-                    if retry_after > 0 and retry_after <= 30 and tentative < max_tentatives - 1:
-                        await asyncio.sleep(retry_after)
+                    # Free Tier Mistral n'envoie pas de Retry-After : attente par défaut
+                    delai_effectif = retry_after if retry_after > 0 else 65
+                    logger.warning(
+                        "[RATE LIMIT] Quota Mistral 429 — attente %ss (Retry-After=%ss)",
+                        delai_effectif, retry_after,
+                    )
+                    if tentative < max_tentatives - 1 and delai_effectif <= 120:
+                        await asyncio.sleep(delai_effectif)
                         continue
                     raise ErreurLimiteDebit(
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur=(
-                            f"Quota Mistral atteint (429)."
-                            + (f" Réessayez dans {retry_after}s." if retry_after else " Réessayez dans quelques secondes.")
+                            "Quota Mistral atteint (429). "
+                            + (f"Réessayez dans {retry_after}s." if retry_after else "Réessayez dans ~1 minute (limite Free Tier).")
                         ),
                     ) from e
                 if tentative == max_tentatives - 1:

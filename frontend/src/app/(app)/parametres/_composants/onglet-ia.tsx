@@ -13,15 +13,19 @@ import {
   togglePiloteAuto,
   obtenirActionsPiloteAuto,
 } from "@/bibliotheque/api/ia-avancee";
-import { lireRuntimeConfig } from "@/bibliotheque/api/admin";
+import { apiClient } from "@/bibliotheque/api/client";
+
+async function obtenirModeleIa(): Promise<string> {
+  const { data } = await apiClient.get<{ services?: { ia?: { details?: { modele?: string } } } }>("/health");
+  return data?.services?.ia?.details?.modele ?? "—";
+}
 
 export function OngletIA() {
-  const { data: runtimeConfig } = utiliserRequete(
-    ["admin", "runtime-config"],
-    lireRuntimeConfig,
-    { staleTime: 60_000 }
+  const { data: modeleReel = "—" } = utiliserRequete(
+    ["ia", "modele"],
+    obtenirModeleIa,
+    { staleTime: 300_000 }
   );
-  const modeleReel = (runtimeConfig?.readonly?.mistral_model as string) ?? "—";
 
   const { data: piloteStatus, refetch: rechargerPilote } = utiliserRequete(
     ["pilote-auto", "status"],
