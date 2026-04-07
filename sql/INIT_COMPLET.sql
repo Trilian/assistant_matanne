@@ -1612,6 +1612,10 @@ CREATE TABLE IF NOT EXISTS repas (
     dessert_recette_id INTEGER,
     dessert_jules VARCHAR(200),
     dessert_jules_recette_id INTEGER,
+    plat_jules TEXT,
+    notes_jules TEXT,
+    adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
+    contexte_meteo VARCHAR(50),
     CONSTRAINT fk_repas_planning FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE,
     CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL,

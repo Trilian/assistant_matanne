@@ -1501,42 +1501,26 @@ async def obtenir_semaine_unifiee(
                 acts = (
                     session.query(ActiviteFamille)
                     .filter(
-                        ActiviteFamille.date >= debut,
-                        ActiviteFamille.date <= fin,
+                        ActiviteFamille.date_prevue >= debut,
+                        ActiviteFamille.date_prevue <= fin,
                     )
-                    .order_by(ActiviteFamille.date)
+                    .order_by(ActiviteFamille.date_prevue)
                     .all()
                 )
                 activites = [
                     {
                         "id": a.id,
-                        "date": a.date.isoformat() if a.date else None,
+                        "date": a.date_prevue.isoformat() if a.date_prevue else None,
                         "titre": a.titre,
-                        "type": getattr(a, "type_activite", None) or getattr(a, "type", None),
+                        "type": getattr(a, "type_activite", None),
                     }
                     for a in acts
                 ]
             except Exception as e:
                 logger.warning("[planning] Activites famille non chargees pour ma-semaine: %s", e)
 
-            # Taches maison
+            # Taches maison (non disponible pour l'instant)
             taches_maison: list[dict] = []
-            try:
-                from src.services.maison import get_service_menage
-
-                service_menage = get_service_menage()
-                taches_raw = service_menage.obtenir_taches_jour()
-                taches_maison = [
-                    {
-                        "nom": t.get("nom") or getattr(t, "nom", ""),
-                        "categorie": t.get("categorie") or getattr(t, "categorie", None),
-                        "duree_estimee_min": t.get("duree_estimee_min")
-                        or getattr(t, "duree_estimee_min", None),
-                    }
-                    for t in (taches_raw or [])
-                ]
-            except Exception as e:
-                logger.warning("[planning] Taches maison non chargees pour ma-semaine: %s", e)
 
             return {
                 "meta": {
