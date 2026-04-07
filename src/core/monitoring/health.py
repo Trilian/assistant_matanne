@@ -163,7 +163,7 @@ def _verifier_cache() -> SanteComposant:
 
 
 def _verifier_ia() -> SanteComposant:
-    """Vérifie l'état du rate limiter IA."""
+    """Vérifie l'état du rate limiter IA et du circuit breaker."""
     start = time.perf_counter()
     try:
         from src.core.ai.rate_limit import RateLimitIA
@@ -177,15 +177,32 @@ def _verifier_ia() -> SanteComposant:
         ratio = appels_jour / max(limite_jour, 1)
 
         statut = StatutSante.SAIN
-        if ratio > 0.9:
-            statut = StatutSante.CRITIQUE
-        elif ratio > 0.7:
-            statut = StatutSante.DEGRADE
+        msg_parts = [f"Appels: {appels_jour}/{limite_jour}"]
+
+        # Vérifier l'état du circuit breaker
+        try:
+            from src.core.ai.circuit_breaker import EtatCircuit, obtenir_circuit
+            cb = obtenir_circuit("ai_planning", seuil_echecs=5, delai_reset=60.0)
+            cb_stats = cb.obtenir_statistiques()
+            etat_cb = cb_stats.get("etat", "unknown")
+            echecs = cb_stats.get("echecs_consecutifs", 0)
+            msg_parts.append(f"Circuit: {etat_cb} ({echecs} échecs)")
+            stats["circuit_breaker"] = cb_stats
+            if etat_cb == EtatCircuit.OUVERT:
+                statut = StatutSante.CRITIQUE
+        except Exception:
+            pass
+
+        if statut == StatutSante.SAIN:
+            if ratio > 0.9:
+                statut = StatutSante.CRITIQUE
+            elif ratio > 0.7:
+                statut = StatutSante.DEGRADE
 
         return SanteComposant(
             nom="ia",
             statut=statut,
-            message=f"Appels: {appels_jour}/{limite_jour}",
+            message=" | ".join(msg_parts),
             details=stats,
             duree_verification_ms=duree,
         )

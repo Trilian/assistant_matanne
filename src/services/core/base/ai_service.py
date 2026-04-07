@@ -281,7 +281,9 @@ class BaseAIService(
 
         Rate limiting + cache AUTO intégrés !
         """
-        # Appel IA (rate limiting déjà géré)
+        from src.core.exceptions import ExceptionApp
+
+        # Appel IA — les ExceptionApp (circuit ouvert, rate limit, etc.) se propagent
         response = await self.call_with_cache(
             prompt=prompt,
             system_prompt=system_prompt,
@@ -293,7 +295,7 @@ class BaseAIService(
         if not response:
             return []
 
-        # Parser liste
+        # Parser liste — seules les erreurs de parsing sont silencieuses
         try:
             from src.core.ai.parser import analyser_liste_reponse
 
@@ -309,6 +311,8 @@ class BaseAIService(
             logger.info(f"✅ {len(items)} items parsés ({item_model.__name__})")
             return items
 
+        except ExceptionApp:
+            raise
         except Exception as e:
             logger.error(f"❌ Erreur parsing liste: {e}")
             return []

@@ -834,6 +834,23 @@ async def obtenir_alternatives_repas(
 # ----------------------------------------------------------
 
 
+@router.post("/ia/circuit-reset", response_model=MessageResponse)
+@gerer_exception_api
+async def reset_circuit_breaker_ia(
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Réinitialise le circuit breaker IA (utile après correction d'une panne transitoire)."""
+    from src.core.ai.circuit_breaker import EtatCircuit, obtenir_circuit
+
+    cb = obtenir_circuit("ai_planning", seuil_echecs=5, delai_reset=60.0)
+    etat_avant = cb.obtenir_statistiques().get("etat", "unknown")
+    with cb._lock:
+        cb._etat = EtatCircuit.FERME
+        cb._echecs_consecutifs = 0
+    logger.info("[planning] Circuit breaker IA réinitialisé par %s: %s → closed", user.get("id"), etat_avant)
+    return MessageResponse(message=f"Circuit breaker réinitialisé ({etat_avant} → closed)")
+
+
 @router.post("/generer", response_model=PlanningSemaineResponse)
 @gerer_exception_api
 async def generer_planning_ia(
