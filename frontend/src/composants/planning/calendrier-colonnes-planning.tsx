@@ -107,7 +107,7 @@ export function CalendrierColonnesPlanning({
                 return (
                   <div
                     key={`${date}-${creneau.type}`}
-                    className={`min-h-[92px] rounded-xl border p-3 transition-colors hover:border-primary/40 ${creneau.classes}`}
+                    className={`min-h-[92px] rounded-xl border p-3 ${creneau.classes}`}
                   >
                     <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       {creneau.label}

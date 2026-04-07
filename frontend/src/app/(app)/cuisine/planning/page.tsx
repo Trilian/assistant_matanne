@@ -6,6 +6,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense, type ReactNode } from "react";
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -97,6 +98,14 @@ import {
   type SimplificationPlanningResponse,
 } from "@/bibliotheque/api/ia-modules";
 import { useIsMobile } from "@/crochets/use-mobile";
+import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/composants/ui/select";
 import {
   closestCenter,
   DndContext,
@@ -114,7 +123,13 @@ import { CSS } from "@dnd-kit/utilities";
 const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
 const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
 
-const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+// Noms des jours indexés 0=Dimanche … 6=Samedi (aligné sur Date.getDay())
+const NOMS_JOURS_SEMAINE = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+
+// Construit le tableau ordonné de 7 jours à partir d'un jour de début (0-6)
+function construireJoursOrdonnes(jourDebut: number): string[] {
+  return Array.from({ length: 7 }, (_, i) => NOMS_JOURS_SEMAINE[(jourDebut + i) % 7]);
+}
 const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
   { valeur: "petit_dejeuner", label: "Petit-déj", emoji: "🌅" },
@@ -172,13 +187,20 @@ function ResponsiveOverlay({
   );
 }
 
-function getLundiDeSemaine(offset: number): string {
+/**
+ * Retourne la date du premier jour de la semaine courante + offset semaines.
+ * @param offset  décalage de semaines (0 = semaine en cours)
+ * @param jourDebut  0=Dimanche, 1=Lundi … 6=Samedi
+ */
+function getDebutDeSemaine(offset: number, jourDebut: number): string {
   const now = new Date();
-  const jour = now.getDay();
-  const diff = jour === 0 ? -6 : 1 - jour;
-  const lundi = new Date(now);
-  lundi.setDate(now.getDate() + diff + offset * 7);
-  return lundi.toISOString().split("T")[0];
+  const jour = now.getDay(); // 0=dim, 1=lun …
+  // Nombre de jours à soustraire pour revenir au jour de début voulu
+  let diff = ((jour - jourDebut + 7) % 7);
+  // Si diff === 0 on est pile le bon jour, aucun recul
+  const debut = new Date(now);
+  debut.setDate(now.getDate() - diff + offset * 7);
+  return debut.toISOString().split("T")[0];
 }
 
 function getDatesDeSemaine(dateDebut: string): string[] {
@@ -359,6 +381,9 @@ export default function PagePlanning() {
   const [choixModePrepa, setChoixModePrepa] = useState(false);
   const [repasGlisse, setRepasGlisse] = useState<RepasPlanning | null>(null);
   const [analysePlanningIa, setAnalysePlanningIa] = useState<AnalysePlanningIaResultat | null>(null);
+  const [vuesSupplementairesOuvertes, setVuesSupplementairesOuvertes] = utiliserStockageLocal<boolean>("planning.vuesSupplementaires", false);
+  // Jour de début de semaine persisté en localStorage (0=Dim, 1=Lun … 6=Sam)
+  const [jourDebutSemaine, setJourDebutSemaine] = utiliserStockageLocal<number>("planning.jourDebutSemaine", 1);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -370,11 +395,12 @@ export default function PagePlanning() {
 
   const invalider = utiliserInvalidation();
   const { planifierSuppression } = utiliserSuppressionAnnulable({ ttlMs: 8000 });
-  const dateDebut = getLundiDeSemaine(offsetSemaine);
+  const dateDebut = getDebutDeSemaine(offsetSemaine, jourDebutSemaine);
   const datesSemaine = getDatesDeSemaine(dateDebut);
   const moisDate = new Date();
   moisDate.setMonth(moisDate.getMonth() + offsetMois);
   const moisSelectionne = `${moisDate.getFullYear()}-${String(moisDate.getMonth() + 1).padStart(2, "0")}`;
+  const jours = construireJoursOrdonnes(jourDebutSemaine);
   const identifiantPresencePlanning = String(utilisateur?.id ?? utilisateur?.email ?? "planning-local");
   const nomPresencePlanning = String(utilisateur?.nom ?? "Membre du foyer");
   const baseWsPlanning = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws");
@@ -524,6 +550,8 @@ export default function PagePlanning() {
     [confirmerSuppressionRepas, planifierSuppression]
   );
 
+  const toastIaRef = useRef<string | number | null>(null);
+
   const { mutate: genererIA, isPending: enGeneration } = utiliserMutation(
     () =>
       genererPlanningSemaine({
@@ -541,8 +569,12 @@ export default function PagePlanning() {
       }),
     {
       onSuccess: async (resultat) => {
+        if (toastIaRef.current !== null) {
+          toast.dismiss(toastIaRef.current);
+          toastIaRef.current = null;
+        }
         invalider(["planning"]);
-        toast.success("Planning généré par l'IA !");
+        toast.success("Planning généré par l'IA !", { duration: 5000 });
 
         if (resultat?.planning_id) {
           try {
@@ -553,7 +585,15 @@ export default function PagePlanning() {
           }
         }
       },
-      onError: () => toast.error("Erreur lors de la génération IA"),
+      onError: (erreur) => {
+        if (toastIaRef.current !== null) {
+          toast.dismiss(toastIaRef.current);
+          toastIaRef.current = null;
+        }
+        const detail =
+          (erreur as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+        toast.error(detail ?? "Erreur lors de la génération IA", { duration: 6000 });
+      },
     }
   );
 
@@ -676,7 +716,7 @@ export default function PagePlanning() {
         };
 
         return {
-          jour: JOURS[index].toLowerCase(),
+          jour: jours[index].toLowerCase(),
           petit_dej: trouverLibelle("petit_dejeuner"),
           midi: trouverLibelle("dejeuner"),
           soir: trouverLibelle("diner"),
@@ -818,11 +858,12 @@ export default function PagePlanning() {
   const repasPlanifies = planning?.repas?.length ?? 0;
   const creneauxLibres = Math.max(totalCreneauxSemaine - repasPlanifies, 0);
   const caloriesMoyennes = nutrition?.moyenne_calories_par_jour ?? null;
+  const nbPersonnes = 4 + (contexteInvitesActif ? modeInvites.nbInvites : 0);
   const statsPlanning = [
     { label: "Repas planifiés", valeur: `${repasPlanifies}/${totalCreneauxSemaine}` },
     { label: "Créneaux libres", valeur: `${creneauxLibres}` },
     { label: "Calories moy.", valeur: caloriesMoyennes ? `${caloriesMoyennes} kcal/j` : "En calcul" },
-    { label: "Présence", valeur: `${participantsPlanning.length} membre(s)` },
+    { label: "Personnes", valeur: `${nbPersonnes} pers.`, info: "Ajustez via Mode Invités" },
   ];
 
   return (
@@ -850,9 +891,16 @@ export default function PagePlanning() {
         <TabsContent value="planning" className="mt-4 space-y-6">
       {/* ─── En-tête ─── */}
       <Card className="overflow-hidden border-orange-200/70 bg-[linear-gradient(135deg,rgba(255,247,237,0.96),rgba(255,255,255,0.92))] shadow-sm dark:border-orange-900/60 dark:bg-[linear-gradient(135deg,rgba(24,16,10,0.96),rgba(9,14,22,0.94))]">
-        <CardContent className="flex flex-col gap-6 p-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
+        <CardContent className="flex flex-col gap-5 p-5">
+          {/* ─ Ligne 1 : titre + badges ─ */}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">📅 Planning repas</h1>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {resumePeriode} — organisez la semaine, gardez la synchro foyer et lancez courses ou préparation depuis un seul écran.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
               <Badge variant="secondary" className="bg-white/80 text-orange-900 dark:bg-white/10 dark:text-orange-100">
                 <CalendarDays className="mr-1 h-3.5 w-3.5" />
                 Planification hebdo
@@ -864,52 +912,53 @@ export default function PagePlanning() {
                   <span className="inline-flex items-center gap-1"><WifiOff className="h-3 w-3" /> {modeSynchroPlanning === "polling" ? "Fallback réseau" : "Hors temps réel"}</span>
                 )}
               </Badge>
-              <Badge variant="outline" className="bg-background/70">{participantsPlanning.length} participant(s)</Badge>
               {contexteInvitesActif ? (
                 <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
                   Invités : +{modeInvites.nbInvites}
                 </Badge>
               ) : null}
             </div>
-
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">📅 Planning repas</h1>
-              <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-                {resumePeriode} — organisez la semaine, gardez la synchro foyer et lancez courses ou préparation depuis un seul écran.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {statsPlanning.map((stat) => (
-                <div key={stat.label} className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-white/5">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{stat.label}</p>
-                  <p className="mt-1 text-xl font-semibold">{stat.valeur}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 lg:max-w-xl lg:items-end">
-            <div className="rounded-xl border border-white/60 bg-white/80 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <div className="flex items-center gap-0.5">
-                <Button
-                  variant={modeAffichage === "semaine" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setModeAffichage("semaine")}
-                >
-                  Semaine
-                </Button>
-                <Button
-                  variant={modeAffichage === "mois" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setModeAffichage("mois")}
-                >
-                  Mois
-                </Button>
+          {/* ─ Ligne 2 : stats pleine largeur ─ */}
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+            {statsPlanning.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-white/5"
+                title={"info" in stat ? stat.info : undefined}
+              >
+                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{stat.label}</p>
+                <p className="mt-1 text-xl font-semibold">{stat.valeur}</p>
+                {"info" in stat && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{stat.info}</p>
+                )}
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+          {/* ─ Ligne 3 : navigation + actions pleine largeur ─ */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Navigation temporelle */}
+            <div className="flex items-center gap-1.5">
+              <div className="rounded-xl border border-white/60 bg-white/80 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
+                <div className="flex items-center gap-0.5">
+                  <Button
+                    variant={modeAffichage === "semaine" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setModeAffichage("semaine")}
+                  >
+                    Semaine
+                  </Button>
+                  <Button
+                    variant={modeAffichage === "mois" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setModeAffichage("mois")}
+                  >
+                    Mois
+                  </Button>
+                </div>
+              </div>
               <Button
                 variant="outline"
                 size="icon"
@@ -931,9 +980,33 @@ export default function PagePlanning() {
                   setOffsetSemaine(0);
                   setOffsetMois(0);
                 }}
+                title="Revenir à la semaine en cours"
               >
-                Aujourd'hui
+                Cette semaine
               </Button>
+              {/* Sélecteur du jour de début de semaine */}
+              <Select
+                value={String(jourDebutSemaine)}
+                onValueChange={(v) => {
+                  setJourDebutSemaine(Number(v));
+                  setOffsetSemaine(0);
+                }}
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="h-9 w-auto gap-1 border-white/60 bg-white/80 text-xs dark:border-white/10 dark:bg-white/5"
+                  title="Changer le jour de début de semaine"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {NOMS_JOURS_SEMAINE.map((nom, idx) => (
+                    <SelectItem key={idx} value={String(idx)}>
+                      Sem. {nom.toLowerCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button
                 variant="outline"
                 size="icon"
@@ -948,10 +1021,20 @@ export default function PagePlanning() {
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => genererIA(undefined)}
+                onClick={() => {
+                  toastIaRef.current = toast.loading(
+                    "Génération du planning en cours… (peut prendre 30 s)",
+                    { duration: Infinity }
+                  );
+                  genererIA(undefined);
+                }}
                 disabled={enGeneration}
               >
                 <Sparkles className="mr-2 h-4 w-4" />
@@ -1095,7 +1178,7 @@ export default function PagePlanning() {
                   <CardHeader className="py-2 px-4">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium">
-                        {JOURS[idx]}{" "}
+                        {jours[idx]}{" "}
                         <span className="text-muted-foreground font-normal">
                           {dateObj.toLocaleDateString("fr-FR", {
                             day: "numeric",
@@ -1142,9 +1225,25 @@ export default function PagePlanning() {
       )}
 
       {modeAffichage === "semaine" && !isLoading && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-1 duration-500 delay-300">
-          <CalendrierMosaiqueRepas dates={datesSemaine} repasParJour={repasParJour} />
-          <CalendrierColonnesPlanning dates={datesSemaine} repasParJour={repasParJour} />
+        <div className="animate-in fade-in slide-in-from-bottom-1 duration-500 delay-300">
+          <button
+            type="button"
+            onClick={() => setVuesSupplementairesOuvertes(!vuesSupplementairesOuvertes)}
+            className="flex w-full items-center justify-between rounded-xl border border-dashed bg-muted/30 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+          >
+            <span className="font-medium">Vues supplémentaires — mosaïque &amp; colonnes</span>
+            <ChevronDown
+              className={`h-4 w-4 shrink-0 transition-transform duration-200 ${
+                vuesSupplementairesOuvertes ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {vuesSupplementairesOuvertes && (
+            <div className="mt-3 space-y-4">
+              <CalendrierMosaiqueRepas dates={datesSemaine} repasParJour={repasParJour} />
+              <CalendrierColonnesPlanning dates={datesSemaine} repasParJour={repasParJour} />
+            </div>
+          )}
         </div>
       )}
 
@@ -1323,7 +1422,7 @@ export default function PagePlanning() {
       >
         {repasEnCours && (
           <p className="text-sm text-muted-foreground -mt-2">
-            {JOURS[datesSemaine.indexOf(repasEnCours.date)]}{" "}
+            {jours[datesSemaine.indexOf(repasEnCours.date)]}{" "}
             {new Date(repasEnCours.date).toLocaleDateString("fr-FR", {
               day: "numeric",
               month: "long",
