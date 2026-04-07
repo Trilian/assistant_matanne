@@ -68,6 +68,7 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
         except HTTPException as exc:
             if exc.status_code == 429:
                 from src.api.dependencies import extraire_ip_client
+                from starlette.responses import JSONResponse as _JSONResponse
 
                 client_ip = extraire_ip_client(request)
                 journaliser_evenement_securite(
@@ -81,6 +82,13 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
                         "query": str(request.url.query),
                         "is_ai_endpoint": est_ia,
                     },
+                )
+                # Retourner une JSONResponse directement — ne pas relancer l'exception
+                # dans BaseHTTPMiddleware car cela provoquerait un crash 500 Starlette.
+                return _JSONResponse(
+                    status_code=429,
+                    content={"detail": exc.detail},
+                    headers=dict(exc.headers) if exc.headers else {},
                 )
             raise
 

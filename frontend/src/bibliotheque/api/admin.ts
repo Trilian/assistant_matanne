@@ -558,12 +558,12 @@ export async function listerAuditLogs(params?: {
   depuis?: string
   jusqu_a?: string
 }): Promise<AuditLogsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/audit-logs', { params })
+  const { data } = await clientApi.get('admin/audit-logs', { params })
   return data
 }
 
 export async function obtenirStatsAudit(): Promise<AuditStatsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/audit-stats')
+  const { data } = await clientApi.get('admin/audit-stats')
   return data
 }
 
@@ -606,19 +606,19 @@ export async function listerLogsSecurite(params?: {
   depuis?: string
   jusqu_a?: string
 }): Promise<SecurityLogsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/security-logs', { params })
+  const { data } = await clientApi.get('admin/security-logs', { params })
   return data
 }
 
 // ─── Jobs Cron ─────────────────────────────────────────────
 
 export async function listerJobs(): Promise<JobInfo[]> {
-  const { data } = await clientApi.get('/api/v1/admin/jobs')
+  const { data } = await clientApi.get('admin/jobs')
   return data
 }
 
 export async function declencherJob(jobId: string): Promise<{ status: string; job_id: string; message: string }> {
-  const { data } = await clientApi.post(`/api/v1/admin/jobs/${jobId}/run`)
+  const { data } = await clientApi.post(`admin/jobs/${jobId}/run`)
   return data
 }
 
@@ -628,7 +628,7 @@ export async function declencherJobAvecOptions(
 ): Promise<{ status: string; job_id: string; message: string }> {
   const hasBody = options?.params && Object.keys(options.params).length > 0
   const { data } = await clientApi.post(
-    `/api/v1/admin/jobs/${jobId}/run`,
+    `/admin/jobs/${jobId}/run`,
     hasBody
       ? { dry_run: options?.dry_run ?? false, force: options?.force ?? false, params: options.params }
       : null,
@@ -643,7 +643,7 @@ export async function declencherJobAvecOptions(
 }
 
 export async function obtenirLogsJob(jobId: string): Promise<JobLogsResponse> {
-  const { data } = await clientApi.get(`/api/v1/admin/jobs/${jobId}/logs`)
+  const { data } = await clientApi.get(`admin/jobs/${jobId}/logs`)
   return data
 }
 
@@ -655,7 +655,7 @@ export async function listerHistoriqueJobs(params?: {
   depuis?: string
   jusqu_a?: string
 }): Promise<JobHistoryResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/jobs/history', { params })
+  const { data } = await clientApi.get('admin/jobs/history', { params })
   return data
 }
 
@@ -663,7 +663,7 @@ export async function executerJobsDuMatin(options?: {
   dry_run?: boolean
   continuer_sur_erreur?: boolean
 }): Promise<JobBatchResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/jobs/run-morning-batch', {
+  const { data } = await clientApi.post('admin/jobs/run-morning-batch', {
     dry_run: options?.dry_run ?? false,
     continuer_sur_erreur: options?.continuer_sur_erreur ?? true,
   })
@@ -676,7 +676,7 @@ export async function executerTousLesJobs(options?: {
   inclure_jobs_inactifs?: boolean
   force?: boolean
 }): Promise<JobBatchResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/jobs/run-all', {
+  const { data } = await clientApi.post('admin/jobs/run-all', {
     dry_run: options?.dry_run ?? false,
     continuer_sur_erreur: options?.continuer_sur_erreur ?? true,
     inclure_jobs_inactifs: options?.inclure_jobs_inactifs ?? false,
@@ -691,7 +691,7 @@ export async function simulerJourneeJobs(options?: {
   inclure_jobs_inactifs?: boolean
   date_reference?: string
 }): Promise<JobBatchResponse & { date_reference?: string; jobs_cibles?: string[] }> {
-  const { data } = await clientApi.post('/api/v1/admin/jobs/simulate-day', {
+  const { data } = await clientApi.post('admin/jobs/simulate-day', {
     dry_run: options?.dry_run ?? true,
     continuer_sur_erreur: options?.continuer_sur_erreur ?? true,
     inclure_jobs_inactifs: options?.inclure_jobs_inactifs ?? false,
@@ -704,7 +704,7 @@ export async function comparerDryRunVsRun(params?: {
   limite?: number
   depuis_heures?: number
 }): Promise<JobCompareResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/jobs/compare-dry-run', { params })
+  const { data } = await clientApi.get('admin/jobs/compare-dry-run', { params })
   return data
 }
 
@@ -712,7 +712,7 @@ export async function mettreAJourScheduleJob(
   jobId: string,
   cron: string,
 ): Promise<JobScheduleUpdateResponse> {
-  const { data } = await clientApi.put(`/api/v1/admin/jobs/${jobId}/schedule`, { cron })
+  const { data } = await clientApi.put(`admin/jobs/${jobId}/schedule`, { cron })
   return data
 }
 
@@ -720,7 +720,7 @@ export async function relancerJobDepuisHistorique(
   executionId: number,
   options?: { dry_run?: boolean; force?: boolean },
 ): Promise<{ status: string; job_id: string; message: string }> {
-  const { data } = await clientApi.post(`/api/v1/admin/jobs/history/${executionId}/retry`, null, {
+  const { data } = await clientApi.post(`admin/jobs/history/${executionId}/retry`, null, {
     params: {
       dry_run: options?.dry_run ?? false,
       force: options?.force ?? false,
@@ -732,24 +732,24 @@ export async function relancerJobDepuisHistorique(
 // ─── Services & Santé ──────────────────────────────────────
 
 export async function obtenirSanteServices(): Promise<ServiceHealthResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/services/health')
+  const { data } = await clientApi.get('admin/services/health')
   return data
 }
 
 export async function obtenirStatutBridges(params?: {
   inclure_smoke?: boolean
 }): Promise<StatutBridgesResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/bridges/status', { params })
+  const { data } = await clientApi.get('admin/bridges/status', { params })
   return data
 }
 
 export async function obtenirDashboardAdmin(): Promise<AdminDashboardResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/dashboard')
+  const { data } = await clientApi.get('admin/dashboard')
   return data
 }
 
 export async function listerActionsServices(): Promise<ServiceActionsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/services/actions')
+  const { data } = await clientApi.get('admin/services/actions')
   return data
 }
 
@@ -758,7 +758,7 @@ export async function executerActionService(
   options?: { dry_run?: boolean; params?: ObjetDonnees },
 ): Promise<{ status: string; action_id: string; dry_run?: boolean; result: unknown }> {
   const { data } = await clientApi.post(
-    `/api/v1/admin/services/actions/${actionId}/run`,
+    `/admin/services/actions/${actionId}/run`,
     { params: options?.params ?? {} },
     { params: { dry_run: options?.dry_run ?? false } },
   )
@@ -768,46 +768,46 @@ export async function executerActionService(
 // ─── Cache ─────────────────────────────────────────────────
 
 export async function obtenirStatsCache(): Promise<CacheStatsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/cache/stats')
+  const { data } = await clientApi.get('admin/cache/stats')
   return data
 }
 
 export async function purgerCache(pattern = '*'): Promise<{ status: string; nb_invalidees: number; message: string }> {
-  const { data } = await clientApi.post('/api/v1/admin/cache/purge', { pattern })
+  const { data } = await clientApi.post('admin/cache/purge', { pattern })
   return data
 }
 
 export async function viderCache(): Promise<{ status: string; message: string }> {
-  const { data } = await clientApi.post('/api/v1/admin/cache/clear')
+  const { data } = await clientApi.post('admin/cache/clear')
   return data
 }
 
 export async function lireFeatureFlags(): Promise<FeatureFlagsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/feature-flags')
+  const { data } = await clientApi.get('admin/feature-flags')
   return data
 }
 
 export async function sauvegarderFeatureFlags(
   flags: Record<string, boolean>,
 ): Promise<{ status: string; flags: Record<string, boolean>; total: number }> {
-  const { data } = await clientApi.put('/api/v1/admin/feature-flags', { flags })
+  const { data } = await clientApi.put('admin/feature-flags', { flags })
   return data
 }
 
 export async function lireRuntimeConfig(): Promise<RuntimeConfigResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/runtime-config')
+  const { data } = await clientApi.get('admin/runtime-config')
   return data
 }
 
 export async function sauvegarderRuntimeConfig(
   values: ObjetDonnees,
 ): Promise<{ status: string; values: ObjetDonnees }> {
-  const { data } = await clientApi.put('/api/v1/admin/runtime-config', { values })
+  const { data } = await clientApi.put('admin/runtime-config', { values })
   return data
 }
 
 export async function listerResyncTargets(): Promise<ResyncTargetsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/resync/targets')
+  const { data } = await clientApi.get('admin/resync/targets')
   return data
 }
 
@@ -816,7 +816,7 @@ export async function forcerResync(
   dryRun = false,
 ): Promise<ObjetDonnees> {
   const { data } = await clientApi.post(
-    `/api/v1/admin/resync/${targetId}`,
+    `/admin/resync/${targetId}`,
     null,
     { params: { dry_run: dryRun } },
   )
@@ -828,7 +828,7 @@ export async function lancerSeedDev(
   dryRun = false,
 ): Promise<ObjetDonnees> {
   const { data } = await clientApi.post(
-    '/api/v1/admin/seed/dev',
+    '/admin/seed/dev',
     { scope },
     { params: { dry_run: dryRun } },
   )
@@ -841,7 +841,7 @@ export async function listerUtilisateurs(params?: {
   page?: number
   par_page?: number
 }): Promise<UtilisateurAdmin[]> {
-  const { data } = await clientApi.get('/api/v1/admin/users', { params })
+  const { data } = await clientApi.get('admin/users', { params })
   return data
 }
 
@@ -849,7 +849,7 @@ export async function desactiverUtilisateur(
   userId: string,
   raison?: string,
 ): Promise<{ status: string; user_id: string; message: string }> {
-  const { data } = await clientApi.post(`/api/v1/admin/users/${userId}/disable`, { raison })
+  const { data } = await clientApi.post(`admin/users/${userId}/disable`, { raison })
   return data
 }
 
@@ -858,19 +858,19 @@ export async function desactiverUtilisateur(
 export async function envoyerNotificationTest(
   payload: NotificationTestPayload,
 ): Promise<{ resultats: ObjetDonnees; message: string }> {
-  const { data } = await clientApi.post('/api/v1/admin/notifications/test', payload)
+  const { data } = await clientApi.post('admin/notifications/test', payload)
   return data
 }
 
 export async function envoyerNotificationTestTousCanaux(
   payload: NotificationTestAllPayload,
 ): Promise<NotificationTestAllResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/notifications/test-all', payload)
+  const { data } = await clientApi.post('admin/notifications/test-all', payload)
   return data
 }
 
 export async function listerTemplatesNotifications(): Promise<NotificationTemplatesResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/notifications/templates')
+  const { data } = await clientApi.get('admin/notifications/templates')
   return data
 }
 
@@ -878,17 +878,17 @@ export async function listerQueueNotifications(params?: {
   user_id?: string
   limit?: number
 }): Promise<NotificationQueueResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/notifications/queue', { params })
+  const { data } = await clientApi.get('admin/notifications/queue', { params })
   return data
 }
 
 export async function relancerQueueNotifications(userId: string): Promise<{ status: string; user_id: string }> {
-  const { data } = await clientApi.post(`/api/v1/admin/notifications/queue/${userId}/retry`)
+  const { data } = await clientApi.post(`admin/notifications/queue/${userId}/retry`)
   return data
 }
 
 export async function supprimerQueueNotifications(userId: string): Promise<{ status: string; user_id: string; deleted: number }> {
-  const { data } = await clientApi.delete(`/api/v1/admin/notifications/queue/${userId}`)
+  const { data } = await clientApi.delete(`admin/notifications/queue/${userId}`)
   return data
 }
 
@@ -896,21 +896,21 @@ export async function previsualiserTemplateNotification(
   canal: string,
   templateId: string,
 ): Promise<NotificationTemplatePreviewResponse> {
-  const { data } = await clientApi.get(`/api/v1/admin/notifications/templates/${canal}/${templateId}/preview`)
+  const { data } = await clientApi.get(`admin/notifications/templates/${canal}/${templateId}/preview`)
   return data
 }
 
 export async function simulerNotificationAdmin(
   payload: NotificationSimulationPayload,
 ): Promise<NotificationSimulationResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/notifications/simulate', payload)
+  const { data } = await clientApi.post('admin/notifications/simulate', payload)
   return data
 }
 
 export async function listerHistoriqueNotifications(
   limit = 50,
 ): Promise<NotificationHistoryResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/notifications/history', { params: { limit } })
+  const { data } = await clientApi.get('admin/notifications/history', { params: { limit } })
   return data
 }
 
@@ -930,7 +930,7 @@ export interface QuickCommandResponse {
 }
 
 export async function executerCommandeRapide(commande: string): Promise<QuickCommandResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/quick-command', { commande })
+  const { data } = await clientApi.post('admin/quick-command', { commande })
   return data
 }
 
@@ -942,31 +942,31 @@ export interface JobScheduleInfo extends JobInfo {
 }
 
 export async function listerJobsAvecSchedule(): Promise<JobScheduleInfo[]> {
-  const { data } = await clientApi.get('/api/v1/admin/jobs')
+  const { data } = await clientApi.get('admin/jobs')
   return data
 }
 
 export async function exporterConfigAdmin(): Promise<ConfigAdminExport> {
-  const { data } = await clientApi.get('/api/v1/admin/config/export')
+  const { data } = await clientApi.get('admin/config/export')
   return data
 }
 
 export async function importerConfigAdmin(
   payload: ConfigAdminImportPayload,
 ): Promise<{ status: string; feature_flags: Record<string, boolean>; runtime_config: ObjetDonnees }> {
-  const { data } = await clientApi.post('/api/v1/admin/config/import', payload)
+  const { data } = await clientApi.post('admin/config/import', payload)
   return data
 }
 
 export async function obtenirDiffConfigAdmin(): Promise<ConfigDiffResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/config/diff')
+  const { data } = await clientApi.get('admin/config/diff')
   return data
 }
 
 export async function simulerFluxAdmin(
   payload: FlowSimulationPayload,
 ): Promise<FlowSimulationResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/flow-simulator', payload)
+  const { data } = await clientApi.post('admin/flow-simulator', payload)
   return data
 }
 
@@ -974,51 +974,51 @@ export async function lireEvenementsAdmin(params?: {
   limite?: number
   type_evenement?: string
 }): Promise<EventBusResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/events', { params })
+  const { data } = await clientApi.get('admin/events', { params })
   return data
 }
 
 export async function declencherEvenementAdmin(
   payload: EventBusTriggerPayload,
 ): Promise<EventBusTriggerResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/events/trigger', payload)
+  const { data } = await clientApi.post('admin/events/trigger', payload)
   return data
 }
 
 export async function rejouerEvenementAdmin(
   payload: EventBusReplayPayload,
 ): Promise<EventBusReplayResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/events/replay', payload)
+  const { data } = await clientApi.post('admin/events/replay', payload)
   return data
 }
 
 export async function lancerTestE2EOneClickAdmin(): Promise<OneClickE2EAdminResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/tests/e2e-one-click')
+  const { data } = await clientApi.post('admin/tests/e2e-one-click')
   return data
 }
 
 export async function lireMetriquesIAAdmin(): Promise<AiMetricsResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/ia/metrics')
+  const { data } = await clientApi.get('admin/ia/metrics')
   return data
 }
 
 export async function obtenirLiveSnapshotAdmin(): Promise<LiveSnapshotResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/live-snapshot')
+  const { data } = await clientApi.get('admin/live-snapshot')
   return data
 }
 
 export async function testerConsoleIA(payload: AiConsolePayload): Promise<AiConsoleResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/ai/console', payload)
+  const { data } = await clientApi.post('admin/ai/console', payload)
   return data
 }
 
 export async function lireModeMaintenance(): Promise<MaintenanceModeResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/maintenance')
+  const { data } = await clientApi.get('admin/maintenance')
   return data
 }
 
 export async function basculerModeMaintenance(enabled: boolean): Promise<MaintenanceModeResponse & { status: string }> {
-  const { data } = await clientApi.put('/api/v1/admin/maintenance', { enabled })
+  const { data } = await clientApi.put('admin/maintenance', { enabled })
   return data
 }
 
@@ -1026,17 +1026,17 @@ export async function simulerUtilisateur(
   userId: string,
   payload?: UserImpersonationPayload,
 ): Promise<UserImpersonationResponse> {
-  const { data } = await clientApi.post(`/api/v1/admin/users/${userId}/impersonate`, payload ?? {})
+  const { data } = await clientApi.post(`admin/users/${userId}/impersonate`, payload ?? {})
   return data
 }
 
 export async function lireModeMaintenancePublic(): Promise<MaintenanceModeResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/public/maintenance')
+  const { data } = await clientApi.get('admin/public/maintenance')
   return data
 }
 
 export async function exporterDbJson(): Promise<DbExportResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/db/export', { params: { format: 'json' } })
+  const { data } = await clientApi.get('admin/db/export', { params: { format: 'json' } })
   return data
 }
 
@@ -1044,19 +1044,19 @@ export async function importerDbJson(
   tables: Record<string, ListeObjetsDonnees>,
   merge = false,
 ): Promise<DbImportResponse> {
-  const { data } = await clientApi.post('/api/v1/admin/db/import', { tables, merge })
+  const { data } = await clientApi.post('admin/db/import', { tables, merge })
   return data
 }
 
 // ─── Base de données ───────────────────────────────────────
 
 export async function verifierCoherenceDb(): Promise<DbCoherenceResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/db/coherence')
+  const { data } = await clientApi.get('admin/db/coherence')
   return data
 }
 
 export async function listerVuesSql(): Promise<VuesSqlResponse> {
-  const { data } = await clientApi.get('/api/v1/admin/sql-views')
+  const { data } = await clientApi.get('admin/sql-views')
   return data
 }
 
@@ -1064,6 +1064,6 @@ export async function lireVueSql(
   viewName: string,
   params?: { page?: number; page_size?: number },
 ): Promise<VueSqlDataResponse> {
-  const { data } = await clientApi.get(`/api/v1/admin/sql-views/${viewName}`, { params })
+  const { data } = await clientApi.get(`admin/sql-views/${viewName}`, { params })
   return data
 }
