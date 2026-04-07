@@ -1,35 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { NextMiddleware } from 'next/server'
 
-/**
- * Middleware — Bloque l'accès aux routes avancées (/ia-avancee)
- * pour les utilisateurs non-admin
- */
-export const middleware: NextMiddleware = (request: NextRequest) => {
-  const pathname = request.nextUrl.pathname
+const ROUTES_PUBLIQUES = ["/connexion", "/inscription"];
+const FICHIERS_PUBLICS = ["/_next", "/icons", "/manifest.json", "/sw.js", "/offline.html", "/favicon.ico"];
 
-  // Bloquer les routes /ia-avancee sauf pour les admins
-  if (pathname.startsWith('/ia-avancee')) {
-    // Note: Une vérification complète du rôle nécessiterait un JWT decode
-    // Pour une meilleure protection, cela est aussi géré côté backend et API
-    // Cette route ne devrait pas être accessible via la sidebar (déjà supprimée)
-    // Rediriger vers le dashboard
-    return NextResponse.redirect(new URL('/', request.url))
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Laisser passer les fichiers statiques et routes API sans vérification
+  if (FICHIERS_PUBLICS.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
   }
 
-  return NextResponse.next()
+  // Les routes API ne doivent jamais être redirigées vers /connexion
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
+  // Routes publiques (connexion, inscription)
+  if (ROUTES_PUBLIQUES.some((r) => pathname.startsWith(r))) {
+    return NextResponse.next();
+  }
+
+  // Vérifier le token JWT (cookie ou header Authorization)
+  const token =
+    request.cookies.get("access_token")?.value ??
+    request.headers.get("authorization")?.replace("Bearer ", "");
+
+  if (!token) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/connexion";
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
 }
 
-// Appliquer le middleware à toutes les routes (sauf api, etc.)
 export const config = {
   matcher: [
-    /*
-     * Correspondre à tous les chemins de requête sauf les suivants:
-     * - api (routes API)
-     * - _next/static (fichiers statiques)
-     * - _next/image (optimisation image)
-     * - favicon.ico (favicon)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icons|manifest.json|sw.js|offline.html).*)',
   ],
 }
