@@ -1,15 +1,23 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { WifiOff, RefreshCw, CheckCircle2 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { utiliserHorsLigne } from "@/crochets/utiliser-hors-ligne";
 
 export function BandeauHorsLigne() {
   const { estHorsLigne, nbEnAttente, forcerSync } = utiliserHorsLigne();
+  const [masquerSync, setMasquerSync] = useState(false);
 
-  if (!estHorsLigne && nbEnAttente === 0) {
-    return null;
-  }
+  // Auto-masquer "Synchronisation rétablie" après 4 s pour éviter le bandeau bloqué
+  useEffect(() => {
+    if (!estHorsLigne && nbEnAttente > 0) {
+      setMasquerSync(false);
+      const timer = setTimeout(() => setMasquerSync(true), 4000);
+      return () => clearTimeout(timer);
+    }
+    setMasquerSync(false);
+  }, [estHorsLigne, nbEnAttente]);
 
   if (estHorsLigne) {
     return (
@@ -38,12 +46,16 @@ export function BandeauHorsLigne() {
     );
   }
 
-  return (
-    <div className="border-b bg-emerald-50/90 px-4 py-2 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100">
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-2 text-sm">
-        <CheckCircle2 className="h-4 w-4" />
-        Synchronisation rétablie.
+  if (nbEnAttente > 0 && !masquerSync) {
+    return (
+      <div className="border-b bg-emerald-50/90 px-4 py-2 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100">
+        <div className="mx-auto flex w-full max-w-7xl items-center gap-2 text-sm">
+          <CheckCircle2 className="h-4 w-4" />
+          Synchronisation rétablie.
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }

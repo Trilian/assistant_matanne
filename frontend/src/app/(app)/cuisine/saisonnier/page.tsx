@@ -25,7 +25,7 @@ const COULEURS_CATEGORIES: Record<string, string> = {
 };
 
 export default function PageCalendrierSaisonnier() {
-  const { data, isLoading } = utiliserRequete(
+  const { data, isLoading, isError, refetch } = utiliserRequete(
     ["calendrier-saisonnier"],
     obtenirCalendrierSaisonnier
   );
@@ -34,11 +34,19 @@ export default function PageCalendrierSaisonnier() {
     return <SkeletonPage lignes={["h-10 w-48", "h-64 w-full", "h-40 w-full"]} />;
   }
 
-  if (!data) {
+  if (isError || !data) {
     return (
       <EtatVide
         titre="Calendrier indisponible"
         description="Impossible de charger les produits de saison pour le moment."
+        action={
+          <button
+            className="mt-3 rounded-md border px-4 py-2 text-sm hover:bg-muted"
+            onClick={() => void refetch()}
+          >
+            Réessayer
+          </button>
+        }
       />
     );
   }

@@ -384,6 +384,7 @@ export default function PagePlanning() {
   const [vuesSupplementairesOuvertes, setVuesSupplementairesOuvertes] = utiliserStockageLocal<boolean>("planning.vuesSupplementaires", false);
   // Jour de début de semaine persisté en localStorage (0=Dim, 1=Lun … 6=Sam)
   const [jourDebutSemaine, setJourDebutSemaine] = utiliserStockageLocal<number>("planning.jourDebutSemaine", 1);
+  const [nbPersonnesBase, setNbPersonnesBase] = utiliserStockageLocal<number>("planning.nbPersonnes", 2);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -556,7 +557,7 @@ export default function PagePlanning() {
     () =>
       genererPlanningSemaine({
         date_debut: dateDebut,
-        nb_personnes: 4 + (contexteInvitesActif ? modeInvites.nbInvites : 0),
+        nb_personnes: nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0),
         preferences:
           contexteInvitesActif || evenementsModeInvites.length > 0
             ? {
@@ -858,12 +859,11 @@ export default function PagePlanning() {
   const repasPlanifies = planning?.repas?.length ?? 0;
   const creneauxLibres = Math.max(totalCreneauxSemaine - repasPlanifies, 0);
   const caloriesMoyennes = nutrition?.moyenne_calories_par_jour ?? null;
-  const nbPersonnes = 4 + (contexteInvitesActif ? modeInvites.nbInvites : 0);
+  const nbPersonnes = nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0);
   const statsPlanning = [
     { label: "Repas planifiés", valeur: `${repasPlanifies}/${totalCreneauxSemaine}` },
     { label: "Créneaux libres", valeur: `${creneauxLibres}` },
     { label: "Calories moy.", valeur: caloriesMoyennes ? `${caloriesMoyennes} kcal/j` : "En calcul" },
-    { label: "Personnes", valeur: `${nbPersonnes} pers.`, info: "Ajustez via Mode Invités" },
   ];
 
   return (
@@ -935,6 +935,28 @@ export default function PagePlanning() {
                 )}
               </div>
             ))}
+            {/* Personnes — ajustable */}
+            <div className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-white/5">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Personnes</p>
+              <div className="mt-1 flex items-center gap-2">
+                <button
+                  type="button"
+                  className="flex h-6 w-6 items-center justify-center rounded-full border text-sm leading-none hover:bg-muted"
+                  onClick={() => setNbPersonnesBase(Math.max(1, nbPersonnesBase - 1))}
+                  aria-label="Réduire le nombre de personnes"
+                >−</button>
+                <span className="text-xl font-semibold">{nbPersonnes} pers.</span>
+                <button
+                  type="button"
+                  className="flex h-6 w-6 items-center justify-center rounded-full border text-sm leading-none hover:bg-muted"
+                  onClick={() => setNbPersonnesBase(nbPersonnesBase + 1)}
+                  aria-label="Augmenter le nombre de personnes"
+                >+</button>
+              </div>
+              {contexteInvitesActif && (
+                <p className="text-[10px] text-muted-foreground mt-0.5">dont {modeInvites.nbInvites} invité(s)</p>
+              )}
+            </div>
           </div>
 
           {/* ─ Ligne 3 : navigation + actions pleine largeur ─ */}

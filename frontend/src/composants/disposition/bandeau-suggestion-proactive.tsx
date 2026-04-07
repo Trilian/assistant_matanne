@@ -2,9 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lightbulb, ArrowRight, X } from "lucide-react";
 import { Button } from "@/composants/ui/button";
+
+const CLE_SESSION = "suggestion-proactive-fermees";
+
+function lireFermees(): string[] {
+  try {
+    return JSON.parse(sessionStorage.getItem(CLE_SESSION) ?? "[]") as string[];
+  } catch {
+    return [];
+  }
+}
+
+function marquerFermee(titre: string) {
+  try {
+    const fermees = lireFermees();
+    if (!fermees.includes(titre)) {
+      sessionStorage.setItem(CLE_SESSION, JSON.stringify([...fermees, titre]));
+    }
+  } catch {
+    // sessionStorage indisponible — on ignore
+  }
+}
 
 interface SuggestionModule {
   match: (pathname: string) => boolean;
@@ -48,8 +69,23 @@ const SUGGESTIONS: SuggestionModule[] = [
 
 export function BandeauSuggestionProactive() {
   const pathname = usePathname();
-  const [ferme, setFerme] = useState(false);
   const suggestion = SUGGESTIONS.find((s) => s.match(pathname));
+  // Initialisé depuis sessionStorage pour survivre aux navigations
+  const [ferme, setFerme] = useState(() => {
+    if (!suggestion) return true;
+    return lireFermees().includes(suggestion.titre);
+  });
+
+  // Resync si la suggestion change (changement de section)
+  useEffect(() => {
+    if (!suggestion) { setFerme(true); return; }
+    setFerme(lireFermees().includes(suggestion.titre));
+  }, [suggestion?.titre]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fermerDefinitivement = () => {
+    if (suggestion) marquerFermee(suggestion.titre);
+    setFerme(true);
+  };
 
   if (!suggestion || ferme) return null;
 
@@ -74,7 +110,7 @@ export function BandeauSuggestionProactive() {
             variant="ghost"
             size="sm"
             className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-            onClick={() => setFerme(true)}
+            onClick={fermerDefinitivement}
             aria-label="Fermer la suggestion"
           >
             <X className="h-3.5 w-3.5" />

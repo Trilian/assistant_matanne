@@ -37,10 +37,13 @@ export function utiliserHorsLigne() {
       return
     }
 
-    const compterEnAttente = async () => {
+    let isCurrent = true
+
+    const compterEnAttente = () => {
       try {
         const req = indexedDB.open('matanne-sync', 1)
         req.onsuccess = (e) => {
+          if (!isCurrent) return
           const db = (e.target as IDBOpenDBRequest).result
           if (!db.objectStoreNames.contains('queue')) {
             setNbEnAttente(0)
@@ -48,16 +51,21 @@ export function utiliserHorsLigne() {
           }
           const tx = db.transaction('queue', 'readonly')
           const countReq = tx.objectStore('queue').count()
-          countReq.onsuccess = () => setNbEnAttente(countReq.result)
+          countReq.onsuccess = () => {
+            if (isCurrent) setNbEnAttente(countReq.result)
+          }
         }
       } catch {
-        setNbEnAttente(0)
+        if (isCurrent) setNbEnAttente(0)
       }
     }
 
     compterEnAttente()
     const interval = setInterval(compterEnAttente, 5000)
-    return () => clearInterval(interval)
+    return () => {
+      isCurrent = false
+      clearInterval(interval)
+    }
   }, [estHorsLigne])
 
   useEffect(() => {
