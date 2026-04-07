@@ -3,6 +3,20 @@ import { NextRequest, NextResponse } from 'next/server'
 const ROUTES_PUBLIQUES = ["/connexion", "/inscription"];
 const FICHIERS_PUBLICS = ["/_next", "/icons", "/manifest.json", "/sw.js", "/offline.html", "/favicon.ico"];
 
+/** Décode le payload JWT et vérifie si le token est expiré (sans vérification de signature) */
+function jwtExpire(token: string): boolean {
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return true;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+    if (!payload.exp) return false; // pas d'expiry = token permanent
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true; // malformé = considéré expiré
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -26,11 +40,14 @@ export function middleware(request: NextRequest) {
     request.cookies.get("access_token")?.value ??
     request.headers.get("authorization")?.replace("Bearer ", "");
 
-  if (!token) {
+  if (!token || jwtExpire(token)) {
     const url = request.nextUrl.clone();
     url.pathname = "/connexion";
     url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    // Supprimer le cookie expiré s'il existe
+    if (token) response.cookies.delete("access_token");
+    return response;
   }
 
   return NextResponse.next();

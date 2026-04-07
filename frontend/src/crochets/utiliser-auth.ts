@@ -24,7 +24,9 @@ export function utiliserAuth() {
       obtenirProfil()
         .then(definirUtilisateur)
         .catch(() => {
+          // Nettoyer les deux storages (localStorage + cookie)
           localStorage.removeItem("access_token");
+          document.cookie = "access_token=; path=/; max-age=0";
           definirUtilisateur(null);
         })
         .finally(() => definirChargement(false));
