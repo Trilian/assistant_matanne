@@ -23,7 +23,7 @@ import {
   CardTitle,
 } from "@/composants/ui/card";
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 const schemaConnexion = z.object({
   email: z.string().email("Email invalide"),
@@ -36,6 +36,7 @@ export default function PageConnexion() {
   const router = useRouter();
   const { definirUtilisateur } = utiliserStoreAuth();
   const [erreur, setErreur] = useState<string | null>(null);
+  const [montrerMdp, setMontrerMdp] = useState(false);
   const [etape2FA, setEtape2FA] = useState(false);
   const [tempToken, setTempToken] = useState("");
   const [code2FA, setCode2FA] = useState("");
@@ -148,7 +149,7 @@ export default function PageConnexion() {
         <CardTitle className="text-2xl">Assistant Matanne</CardTitle>
         <CardDescription>Connectez-vous à votre espace familial</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form method="post" onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           {erreur && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -169,11 +170,22 @@ export default function PageConnexion() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="mot_de_passe">Mot de passe</Label>
-            <Input
-              id="mot_de_passe"
-              type="password"
-              {...register("mot_de_passe")}
-            />
+            <div className="relative">
+              <Input
+                id="mot_de_passe"
+                type={montrerMdp ? "text" : "password"}
+                className="pr-10"
+                {...register("mot_de_passe")}
+              />
+              <button
+                type="button"
+                onClick={() => setMontrerMdp((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                aria-label={montrerMdp ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              >
+                {montrerMdp ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.mot_de_passe && (
               <p className="text-xs text-destructive">
                 {errors.mot_de_passe.message}

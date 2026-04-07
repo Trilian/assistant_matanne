@@ -5,6 +5,21 @@
 import { clientApi } from "./client";
 import type { Utilisateur, ReponseToken } from "@/types/api";
 
+/** Stocke le token dans localStorage ET cookie (lisible par le middleware Next.js) */
+function stockerToken(token: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("access_token", token);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `access_token=${token}; path=/; SameSite=Lax; max-age=86400${secure}`;
+}
+
+/** Supprime le token de localStorage ET cookie */
+function supprimerToken(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("access_token");
+  document.cookie = "access_token=; path=/; max-age=0";
+}
+
 export interface DonneesConnexion {
   email: string;
   mot_de_passe: string;
@@ -32,7 +47,7 @@ export async function connecter(donnees: DonneesConnexion): Promise<ReponseLogin
     password: donnees.mot_de_passe,
   });
   if (data.access_token) {
-    localStorage.setItem("access_token", data.access_token);
+    stockerToken(data.access_token);
   }
   return data;
 }
@@ -44,7 +59,7 @@ export async function inscrire(donnees: DonneesInscription): Promise<ReponseToke
     password: donnees.mot_de_passe,
     nom: donnees.nom,
   });
-  localStorage.setItem("access_token", data.access_token);
+  stockerToken(data.access_token);
   return data;
 }
 
@@ -56,14 +71,14 @@ export async function obtenirProfil(): Promise<Utilisateur> {
 
 /** Déconnexion */
 export function deconnecter(): void {
-  localStorage.removeItem("access_token");
+  supprimerToken();
   window.location.href = "/connexion";
 }
 
 /** Rafraîchir le token */
 export async function rafraichirToken(): Promise<ReponseToken> {
   const { data } = await clientApi.post<ReponseToken>("/auth/refresh");
-  localStorage.setItem("access_token", data.access_token);
+  stockerToken(data.access_token);
   return data;
 }
 
@@ -108,6 +123,6 @@ export async function login2FA(tempToken: string, code: string): Promise<Reponse
     temp_token: tempToken,
     code,
   });
-  localStorage.setItem("access_token", data.access_token);
+  stockerToken(data.access_token);
   return data;
 }

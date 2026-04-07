@@ -24,6 +24,7 @@ import {
   CardTitle,
 } from "@/composants/ui/card";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 const schemaInscription = z
   .object({
@@ -43,6 +44,8 @@ export default function PageInscription() {
   const router = useRouter();
   const { definirUtilisateur } = utiliserStoreAuth();
   const [erreur, setErreur] = useState<string | null>(null);
+  const [montrerMdp, setMontrerMdp] = useState(false);
+  const [montrerConfirmation, setMontrerConfirmation] = useState(false);
 
   const {
     register,
@@ -75,7 +78,7 @@ export default function PageInscription() {
         <CardTitle className="text-2xl">Créer un compte</CardTitle>
         <CardDescription>Rejoignez votre espace familial</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form method="post" onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           {erreur && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -103,11 +106,22 @@ export default function PageInscription() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="mot_de_passe">Mot de passe</Label>
-            <Input
-              id="mot_de_passe"
-              type="password"
-              {...register("mot_de_passe")}
-            />
+            <div className="relative">
+              <Input
+                id="mot_de_passe"
+                type={montrerMdp ? "text" : "password"}
+                className="pr-10"
+                {...register("mot_de_passe")}
+              />
+              <button
+                type="button"
+                onClick={() => setMontrerMdp((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                aria-label={montrerMdp ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              >
+                {montrerMdp ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.mot_de_passe && (
               <p className="text-xs text-destructive">
                 {errors.mot_de_passe.message}
@@ -116,11 +130,22 @@ export default function PageInscription() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmation">Confirmer le mot de passe</Label>
-            <Input
-              id="confirmation"
-              type="password"
-              {...register("confirmation")}
-            />
+            <div className="relative">
+              <Input
+                id="confirmation"
+                type={montrerConfirmation ? "text" : "password"}
+                className="pr-10"
+                {...register("confirmation")}
+              />
+              <button
+                type="button"
+                onClick={() => setMontrerConfirmation((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                aria-label={montrerConfirmation ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              >
+                {montrerConfirmation ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {errors.confirmation && (
               <p className="text-xs text-destructive">
                 {errors.confirmation.message}
