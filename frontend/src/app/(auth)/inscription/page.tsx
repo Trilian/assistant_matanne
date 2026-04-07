@@ -25,6 +25,7 @@ import {
 } from "@/composants/ui/card";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 const schemaInscription = z
   .object({
@@ -43,7 +44,6 @@ type DonneesFormulaire = z.infer<typeof schemaInscription>;
 export default function PageInscription() {
   const router = useRouter();
   const { definirUtilisateur } = utiliserStoreAuth();
-  const [erreur, setErreur] = useState<string | null>(null);
   const [montrerMdp, setMontrerMdp] = useState(false);
   const [montrerConfirmation, setMontrerConfirmation] = useState(false);
 
@@ -56,7 +56,6 @@ export default function PageInscription() {
   });
 
   async function onSubmit(donnees: DonneesFormulaire) {
-    setErreur(null);
     try {
       await inscrire({
         nom: donnees.nom,
@@ -67,7 +66,7 @@ export default function PageInscription() {
       definirUtilisateur(profil);
       router.push("/");
     } catch {
-      setErreur("Impossible de créer le compte. Réessayez.");
+      toast.error("Impossible de créer le compte. Réessayez.", { duration: 8000 });
     }
   }
 
@@ -80,11 +79,6 @@ export default function PageInscription() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
-          {erreur && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {erreur}
-            </div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="nom">Nom</Label>
             <Input id="nom" placeholder="Votre nom" {...register("nom")} />

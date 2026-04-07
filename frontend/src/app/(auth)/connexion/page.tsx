@@ -24,6 +24,7 @@ import {
 } from "@/composants/ui/card";
 import Link from "next/link";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 
 const schemaConnexion = z.object({
   email: z.string().email("Email invalide"),
@@ -35,7 +36,6 @@ type DonneesFormulaire = z.infer<typeof schemaConnexion>;
 export default function PageConnexion() {
   const router = useRouter();
   const { definirUtilisateur } = utiliserStoreAuth();
-  const [erreur, setErreur] = useState<string | null>(null);
   const [montrerMdp, setMontrerMdp] = useState(false);
   const [etape2FA, setEtape2FA] = useState(false);
   const [tempToken, setTempToken] = useState("");
@@ -51,7 +51,6 @@ export default function PageConnexion() {
   });
 
   async function onSubmit(donnees: DonneesFormulaire) {
-    setErreur(null);
     try {
       const reponse = await connecter(donnees);
 
@@ -65,12 +64,11 @@ export default function PageConnexion() {
       definirUtilisateur(profil);
       router.push("/");
     } catch {
-      setErreur("Email ou mot de passe incorrect");
+      toast.error("Email ou mot de passe incorrect", { duration: 8000 });
     }
   }
 
   async function onVerifier2FA() {
-    setErreur(null);
     setEnVerification(true);
     try {
       await login2FA(tempToken, code2FA);
@@ -78,7 +76,7 @@ export default function PageConnexion() {
       definirUtilisateur(profil);
       router.push("/");
     } catch {
-      setErreur("Code 2FA invalide");
+      toast.error("Code 2FA invalide", { duration: 8000 });
     } finally {
       setEnVerification(false);
     }
@@ -98,11 +96,6 @@ export default function PageConnexion() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {erreur && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {erreur}
-            </div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="code-2fa">Code de vérification</Label>
             <Input
@@ -132,7 +125,7 @@ export default function PageConnexion() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => { setEtape2FA(false); setCode2FA(""); setErreur(null); }}
+            onClick={() => { setEtape2FA(false); setCode2FA(""); }}
           >
             Retour à la connexion
           </Button>
@@ -151,11 +144,6 @@ export default function PageConnexion() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
-          {erreur && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {erreur}
-            </div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input

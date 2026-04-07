@@ -395,7 +395,7 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
 
   return (
     <Dialog open={ouvert} onOpenChange={(open) => !open && fermer()}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-xl w-full overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2">
@@ -415,19 +415,20 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
               <span>{Math.round(progression)}% du tour parcouru</span>
             </div>
             <Progress value={progression} className="h-2" />
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {ETAPES_TOUR.map((item, index) => (
                 <button
                   key={item.titre}
                   type="button"
                   onClick={() => setEtapeActuelle(index)}
-                  className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                  title={item.description}
+                  className={`rounded-full border w-7 h-7 text-xs font-medium transition-colors ${
                     index === etapeActuelle
                       ? 'border-primary bg-primary/10 text-primary'
                       : 'border-border text-muted-foreground hover:bg-muted'
                   }`}
                 >
-                  {index + 1}. {item.description}
+                  {index + 1}
                 </button>
               ))}
             </div>
