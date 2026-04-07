@@ -64,6 +64,7 @@ import {
   exporterPlanningPdf,
   obtenirNutritionHebdo,
   obtenirSuggestionsRapides,
+  type ResultatGenerationPlanning,
 } from "@/bibliotheque/api/planning";
 import { toast } from "sonner";
 import { genererCoursesDepuisPlanning, type GenererCoursesResult } from "@/bibliotheque/api/courses";
@@ -569,20 +570,30 @@ export default function PagePlanning() {
             : undefined,
       }),
     {
-      onSuccess: async (resultat) => {
+      onSuccess: async (resultat: ResultatGenerationPlanning) => {
         if (toastIaRef.current !== null) {
           toast.dismiss(toastIaRef.current);
           toastIaRef.current = null;
         }
         invalider(["planning"]);
-        toast.success("Planning généré par l'IA !", { duration: 5000 });
+
+        if (!resultat.genere_par_ia) {
+          toast.warning(
+            "L'IA n'est pas configurée. Un planning par défaut a été créé — remplissez-le manuellement ou configurez la clé Mistral.",
+            { duration: 8000 }
+          );
+        } else {
+          toast.success("Planning généré par l'IA !", { duration: 5000 });
+        }
 
         if (resultat?.planning_id) {
           try {
             await envoyerPlanningTelegram(resultat.planning_id);
           } catch {
             // Ne bloque pas le flux principal si Telegram échoue.
-            toast.info("Planning généré, notification Telegram non envoyée.");
+            if (resultat.genere_par_ia) {
+              toast.info("Planning généré, notification Telegram non envoyée.");
+            }
           }
         }
       },

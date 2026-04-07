@@ -59,12 +59,16 @@ class PlanningSemaineResponse(BaseModel):
     date_debut: str
     date_fin: str
     planning: dict[str, dict[str, Any]]
+    planning_id: int | None = None
+    genere_par_ia: bool = False
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "date_debut": "2026-04-06",
                 "date_fin": "2026-04-12",
+                "planning_id": 1,
+                "genere_par_ia": True,
                 "planning": {
                     "2026-04-06": {
                         "dejeuner": {"recette_id": 12, "recette_nom": "Pâtes au pesto"},

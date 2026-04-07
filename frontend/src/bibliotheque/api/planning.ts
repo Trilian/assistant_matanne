@@ -101,11 +101,20 @@ export async function obtenirAlternativesRepas(
   return data;
 }
 
+/** Résultat de la génération IA d'un planning */
+export interface ResultatGenerationPlanning {
+  date_debut: string;
+  date_fin: string;
+  planning_id: number | null;
+  genere_par_ia: boolean;
+  planning: Record<string, Record<string, unknown>>;
+}
+
 /** Générer un planning IA pour la semaine */
 export async function genererPlanningSemaine(
   params?: GenererPlanningParams
-): Promise<PlanningSemaine> {
-  const { data } = await clientApi.post<PlanningSemaine>("/planning/generer", params ?? {});
+): Promise<ResultatGenerationPlanning> {
+  const { data } = await clientApi.post<ResultatGenerationPlanning>("/planning/generer", params ?? {});
   return data;
 }
 

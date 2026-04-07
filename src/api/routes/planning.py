@@ -1060,6 +1060,8 @@ async def generer_planning_ia(
             return {
                 "date_debut": semaine_debut.isoformat(),
                 "date_fin": date_fin.isoformat(),
+                "planning_id": planning_obj.id,
+                "genere_par_ia": bool(getattr(planning_obj, "genere_par_ia", False)),
                 "planning": planning_dict,
             }
 
