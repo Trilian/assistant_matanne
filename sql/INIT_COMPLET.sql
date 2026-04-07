@@ -5239,24 +5239,19 @@ END $$;
 CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
 
--- Source: 99_footer.sql
+-- Source: migrations/V001__add_repas_jules_columns.sql
 -- ============================================================================
--- ASSISTANT MATANNE — Vérification finale & COMMIT
+-- MIGRATION V001 — Ajout colonnes Jules et contexte sur la table repas
 -- ============================================================================
+-- Colonnes présentes dans le modèle SQLAlchemy mais absentes du schéma initial.
+-- Idempotent : ADD COLUMN IF NOT EXISTS.
 
--- Grants Supabase (déjà dans seed_data, ici pour réexécution idempotente)
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+ALTER TABLE repas
+    ADD COLUMN IF NOT EXISTS plat_jules TEXT,
+    ADD COLUMN IF NOT EXISTS notes_jules TEXT,
+    ADD COLUMN IF NOT EXISTS adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS contexte_meteo VARCHAR(50);
 
--- Vérification finale
-SELECT tablename,
-    (SELECT COUNT(*) FROM information_schema.columns c
-     WHERE c.table_name = t.tablename) AS nb_colonnes
-FROM pg_tables t
-WHERE schemaname = 'public'
-ORDER BY tablename;
-
-COMMIT;
 
 -- Source: 99_footer.sql
 -- ============================================================================
