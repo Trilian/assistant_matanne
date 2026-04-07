@@ -30,7 +30,9 @@ COPY data/ data/
 COPY sql/ sql/
 
 # ─── Utilisateur non-root (sécurité) ───
-RUN adduser --disabled-password --no-create-home appuser
+RUN mkdir -p /app/.cache && \
+    adduser --disabled-password --no-create-home appuser && \
+    chown -R appuser:appuser /app/.cache
 USER appuser
 
 # ─── Port exposé ───
