@@ -13,10 +13,10 @@ import {
   togglePiloteAuto,
   obtenirActionsPiloteAuto,
 } from "@/bibliotheque/api/ia-avancee";
-import { apiClient } from "@/bibliotheque/api/client";
+import { clientApi } from "@/bibliotheque/api/client";
 
 async function obtenirModeleIa(): Promise<string> {
-  const { data } = await apiClient.get<{ services?: { ia?: { details?: { modele?: string } } } }>("/health");
+  const { data } = await clientApi.get<{ services?: { ia?: { details?: { modele?: string } } } }>("/health");
   return data?.services?.ia?.details?.modele ?? "—";
 }
 
