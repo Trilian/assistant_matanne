@@ -22,6 +22,7 @@ import {
   GripVertical,
   Wifi,
   WifiOff,
+  Users,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -386,6 +387,8 @@ export default function PagePlanning() {
   // Jour de début de semaine persisté en localStorage (0=Dim, 1=Lun … 6=Sam)
   const [jourDebutSemaine, setJourDebutSemaine] = utiliserStockageLocal<number>("planning.jourDebutSemaine", 1);
   const [nbPersonnesBase, setNbPersonnesBase] = utiliserStockageLocal<number>("planning.nbPersonnes", 2);
+  // Panneau invités : ouvert uniquement si l'utilisateur l'active, fermé par défaut
+  const [panneauInvitesOuvert, setPanneauInvitesOuvert] = utiliserStockageLocal<boolean>("planning.panneauInvites", false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -1113,18 +1116,44 @@ export default function PagePlanning() {
                 <CookingPot className="mr-2 h-4 w-4" />
                 Préparation
               </Button>
+              {/* Bouton mode invités */}
+              <Button
+                variant={contexteInvitesActif ? "default" : "outline"}
+                size="sm"
+                onClick={() => setPanneauInvitesOuvert((v) => !v)}
+                title="Mode invités — adapter portions, planning et courses"
+                className={contexteInvitesActif ? "bg-amber-500 text-white hover:bg-amber-600 border-transparent" : ""}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Invités
+                {contexteInvitesActif && (
+                  <span className="ml-1 rounded-full bg-white/30 px-1.5 text-xs font-semibold">
+                    +{modeInvites.nbInvites}
+                  </span>
+                )}
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <CarteModeInvites
-        contexte={modeInvites}
-        onChange={mettreAJourModeInvites}
-        onReset={reinitialiserModeInvites}
-        suggestionsEvenements={suggestionsInvites}
-        description="Adaptez le nombre de portions, la génération IA et la liste de courses pour une réception ou un repas élargi."
-      />
+      {/* Mode invités — panneau collapsible, caché par défaut */}
+      {panneauInvitesOuvert && (
+        <CarteModeInvites
+          contexte={modeInvites}
+          onChange={(patch) => {
+            mettreAJourModeInvites(patch);
+            // Fermer automatiquement si on désactive le mode
+            if (patch.actif === false) setPanneauInvitesOuvert(false);
+          }}
+          onReset={() => {
+            reinitialiserModeInvites();
+            setPanneauInvitesOuvert(false);
+          }}
+          suggestionsEvenements={suggestionsInvites}
+          description="Adaptez le nombre de portions, la génération IA et la liste de courses pour une réception ou un repas élargi."
+        />
+      )}
 
       {fluxCuisine?.etape_actuelle === "valider_planning" && fluxCuisine.planning && (
         <Card className="border-amber-300 bg-amber-50/60">
