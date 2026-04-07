@@ -328,7 +328,6 @@ Les endpoints sont protégés par une limitation de débit:
 )
 
 # CORS sécurisé
-# En production, CORS_ORIGINS DOIT être défini (ex: https://assistant-matanne.vercel.app)
 _cors_origins = [
     o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()
 ]
@@ -342,19 +341,18 @@ _environment = os.getenv("ENVIRONMENT", "development").lower()
 
 if _cors_origins:
     _allowed_origins = _cors_origins
-elif _environment in ("production", "staging"):
-    # Fail-fast — refuser de démarrer sans CORS_ORIGINS en prod/staging
-    raise RuntimeError(
-        f"CORS_ORIGINS non défini en {_environment}. L'application refuse de démarrer. "
-        "Définir CORS_ORIGINS avec l'URL du frontend "
-        "(ex: CORS_ORIGINS=https://assistant-matanne.vercel.app)."
-    )
 else:
     _allowed_origins = _default_origins
+
+# Regex pour autoriser tous les previews Vercel du projet (URLs changeantes à chaque deploy)
+_cors_origin_regex = (
+    r"https://assistantfamilial(-[a-z0-9]+)*-matanne-projects\.vercel\.app"
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins,
+    allow_origin_regex=_cors_origin_regex,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
