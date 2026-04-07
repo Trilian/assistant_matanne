@@ -1013,11 +1013,26 @@ async def generer_planning_ia(
         except Exception as e:
             logger.warning("[planning] Enrichissement saisonnier non chargé: %s", e)
 
+        from src.core.exceptions import ExceptionApp
+
         service = obtenir_service_planning()
-        planning_obj = service.generer_planning_ia(
-            semaine_debut=semaine_debut,
-            preferences=preferences_enrichies,
-        )
+        try:
+            planning_obj = service.generer_planning_ia(
+                semaine_debut=semaine_debut,
+                preferences=preferences_enrichies,
+            )
+        except ExceptionApp as e:
+            logger.warning("[planning] Exception métier depuis generer_planning_ia: %s", e)
+            raise HTTPException(
+                status_code=503,
+                detail=getattr(e, "message_utilisateur", "Génération IA impossible. Réessayez plus tard."),
+            ) from e
+        except Exception as e:
+            logger.error("[planning] Erreur inattendue depuis generer_planning_ia: %s", e, exc_info=True)
+            raise HTTPException(
+                status_code=503,
+                detail="Génération IA impossible. Réessayez plus tard.",
+            ) from e
 
         if not planning_obj:
             raise HTTPException(
@@ -1046,6 +1061,8 @@ async def generer_planning_ia(
 
             planning_dict = {}
             for r in repas:
+                if not r.date_repas:
+                    continue
                 jour = r.date_repas.strftime("%Y-%m-%d")
                 if jour not in planning_dict:
                     planning_dict[jour] = {}
