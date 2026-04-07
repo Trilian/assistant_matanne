@@ -28,6 +28,9 @@ export function utiliserAuth() {
           definirUtilisateur(null);
         })
         .finally(() => definirChargement(false));
+    } else {
+      // Pas de token — auth terminée immédiatement
+      definirChargement(false);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

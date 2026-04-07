@@ -17,7 +17,7 @@ interface EtatAuth {
 export const utiliserStoreAuth = create<EtatAuth>((set) => ({
   utilisateur: null,
   estConnecte: false,
-  estChargement: false,
+  estChargement: true,
   definirUtilisateur: (utilisateur) =>
     set({ utilisateur, estConnecte: !!utilisateur, estChargement: false }),
   definirChargement: (estChargement) => set({ estChargement }),

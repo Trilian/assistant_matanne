@@ -19,17 +19,20 @@ export function FournisseurAuth({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (estChargement) return;
-
     if (!estConnecte && !estPublique) {
       router.replace("/connexion");
     } else if (estConnecte && estPublique) {
       router.replace("/");
     }
-  }, [estConnecte, estChargement, estPublique, pathname, router]);
+  }, [estConnecte, estChargement, estPublique, router]);
 
-  // Sur les routes publiques (/connexion, /inscription), on affiche toujours le formulaire
-  // sans bloquer sur le spinner — la redirection se fera via le useEffect si déjà connecté.
-  if (estChargement && !estPublique) {
+  // Routes publiques (/connexion, /inscription) : toujours afficher le formulaire
+  if (estPublique) {
+    return <>{children}</>;
+  }
+
+  // Routes protégées : spinner pendant le chargement ou en attendant la redirection
+  if (estChargement || !estConnecte) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
