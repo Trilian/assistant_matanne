@@ -4160,14 +4160,9 @@ CREATE TRIGGER trg_articles_courses_update_liste
 -- ============================================================================
 CREATE OR REPLACE FUNCTION notify_planning_changed()
 RETURNS TRIGGER AS $$
-DECLARE
-    v_user_id TEXT;
 BEGIN
-    SELECT p.cree_par INTO v_user_id
-    FROM plannings p
-    WHERE p.id = COALESCE(NEW.planning_id, OLD.planning_id)
-    LIMIT 1;
-    PERFORM pg_notify('planning_changed', COALESCE(v_user_id, ''));
+    -- cree_par n'existe pas dans plannings, on envoie l'id du planning comme payload
+    PERFORM pg_notify('planning_changed', COALESCE(CAST(COALESCE(NEW.planning_id, OLD.planning_id) AS TEXT), ''));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
