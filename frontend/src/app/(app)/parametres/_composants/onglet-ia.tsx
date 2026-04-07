@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Save, Bot, History } from "lucide-react";
+import { Bot, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Label } from "@/composants/ui/label";
 import { Input } from "@/composants/ui/input";
-import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
 import { Switch } from "@/composants/ui/switch";
 import { toast } from "sonner";
@@ -15,10 +13,15 @@ import {
   togglePiloteAuto,
   obtenirActionsPiloteAuto,
 } from "@/bibliotheque/api/ia-avancee";
+import { lireRuntimeConfig } from "@/bibliotheque/api/admin";
 
 export function OngletIA() {
-  const [modele, setModele] = useState("mistral-large-latest");
-  const [limiteJournaliere, setLimiteJournaliere] = useState("100");
+  const { data: runtimeConfig } = utiliserRequete(
+    ["admin", "runtime-config"],
+    lireRuntimeConfig,
+    { staleTime: 60_000 }
+  );
+  const modeleReel = (runtimeConfig?.readonly?.mistral_model as string) ?? "—";
 
   const { data: piloteStatus, refetch: rechargerPilote } = utiliserRequete(
     ["pilote-auto", "status"],
@@ -54,33 +57,17 @@ export function OngletIA() {
         </CardHeader>
         <CardContent className="space-y-4 max-w-md">
           <div className="space-y-2">
-            <Label htmlFor="ia-modele">Modèle IA</Label>
+            <Label htmlFor="ia-modele">Modèle IA actif</Label>
             <Input
               id="ia-modele"
-              value={modele}
-              onChange={(e) => setModele(e.target.value)}
+              value={modeleReel}
+              readOnly
+              className="bg-muted cursor-default"
             />
             <p className="text-xs text-muted-foreground">
-              Modèle Mistral utilisé pour les suggestions
+              Défini par <code>MISTRAL_MODEL</code> dans les variables d&apos;environnement serveur.
             </p>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="ia-limite">Limite journalière d&apos;appels</Label>
-            <Input
-              id="ia-limite"
-              type="number"
-              min={1}
-              value={limiteJournaliere}
-              onChange={(e) => setLimiteJournaliere(e.target.value)}
-            />
-          </div>
-          <Button disabled>
-            <Save className="mr-2 h-4 w-4" />
-            Enregistrer
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Ces paramètres sont définis côté serveur dans .env.local
-          </p>
         </CardContent>
       </Card>
 

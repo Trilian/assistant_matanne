@@ -1115,11 +1115,18 @@ async def generer_planning_ia(
 
                 planning_dict[jour][r.type_repas] = entry
 
+            ia_success = bool(getattr(planning_db, "genere_par_ia", False) if planning_db else False)
+            if not ia_success:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Le planning n'a pas pu être généré par l'IA. Réessayez dans quelques secondes.",
+                )
+
             return {
                 "date_debut": semaine_debut.isoformat(),
                 "date_fin": date_fin.isoformat(),
                 "planning_id": planning_obj.id,
-                "genere_par_ia": bool(getattr(planning_obj, "genere_par_ia", False)),
+                "genere_par_ia": True,
                 "planning": planning_dict,
             }
 
