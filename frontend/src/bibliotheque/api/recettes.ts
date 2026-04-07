@@ -59,10 +59,10 @@ export async function retirerDuFavori(id: number): Promise<void> {
 
 /** Obtenir des suggestions IA */
 export async function obtenirSuggestions(contexte: string): Promise<SuggestionRecette[]> {
-  const { data } = await clientApi.post<SuggestionRecette[]>("/suggestions/recettes", {
-    contexte,
+  const { data } = await clientApi.get<{ suggestions: SuggestionRecette[] }>("/suggestions/recettes", {
+    params: { contexte },
   });
-  return data;
+  return data.suggestions ?? [];
 }
 
 // ─── Planification "cette semaine" ───────────────────────

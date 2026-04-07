@@ -1,11 +1,12 @@
 """
 Routes API pour les suggestions IA.
 
-Suggestions de recettes et de plannings de repas gÃ©nÃ©rÃ©es par Mistral AI,
-avec limitation de dÃ©bit intÃ©grÃ©e et cache sÃ©mantique.
+Suggestions de recettes et de plannings de repas générées par Mistral AI,
+avec limitation de débit intégrée et cache sémantique.
 """
 
 import logging
+from datetime import date
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
@@ -17,6 +18,46 @@ from src.api.schemas.errors import REPONSES_IA
 from src.api.utils import gerer_exception_api, executer_async, executer_avec_session
 
 router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
+
+
+def _verifier_ia_configuree() -> None:
+    """Lève HTTP 503 si MISTRAL_API_KEY n'est pas configurée."""
+    from src.core.config import obtenir_parametres
+
+    try:
+        params = obtenir_parametres()
+        params.MISTRAL_API_KEY  # Raises ValueError if not set
+    except (ValueError, Exception):
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Le service IA n'est pas configuré. "
+                "Ajoutez MISTRAL_API_KEY dans votre fichier .env.local."
+            ),
+        )
+
+
+def _detecter_saison() -> str:
+    """Retourne la saison actuelle en français."""
+    month = date.today().month
+    if month in (3, 4, 5):
+        return "printemps"
+    elif month in (6, 7, 8):
+        return "été"
+    elif month in (9, 10, 11):
+        return "automne"
+    return "hiver"
+
+
+def _detecter_type_repas(contexte: str) -> str:
+    """Déduit le type de repas depuis le contexte libre."""
+    c = contexte.lower()
+    if any(k in c for k in ("matin", "petit", "breakfast")):
+        return "petit_dejeuner"
+    if any(k in c for k in ("midi", "dejeuner", "déjeuner", "lunch")):
+        return "dejeuner"
+    return "diner"
+
 
 
 class AdaptationRecetteRequest(BaseModel):
@@ -81,11 +122,17 @@ async def suggest_recettes(
     """
     from src.services.cuisine.recettes import obtenir_service_recettes
 
+    _verifier_ia_configuree()
+
     service = obtenir_service_recettes()
 
-    suggestions = service.suggerer_recettes_ia(
-        contexte=contexte,
-        nombre_suggestions=nombre,
+    difficulte = "facile" if any(k in contexte.lower() for k in ("rapide", "express", "vite", "simple")) else "moyen"
+
+    suggestions = service.generer_recettes_ia(
+        type_repas=_detecter_type_repas(contexte),
+        saison=_detecter_saison(),
+        difficulte=difficulte,
+        nb_recettes=nombre,
     )
 
     return {
@@ -137,9 +184,11 @@ async def suggest_planning(
         }
         ```
     """
-    from datetime import date, timedelta
+    from datetime import timedelta
 
     from src.services.cuisine.planning import obtenir_service_planning
+
+    _verifier_ia_configuree()
 
     service = obtenir_service_planning()
 
@@ -151,6 +200,12 @@ async def suggest_planning(
         semaine_debut=semaine_debut,
         preferences={"nombre_personnes": personnes, "nombre_jours": jours},
     )
+
+    if planning is None:
+        raise HTTPException(
+            status_code=503,
+            detail="La génération du planning a échoué. Vérifiez que MISTRAL_API_KEY est configuré.",
+        )
 
     return {
         "planning": planning,

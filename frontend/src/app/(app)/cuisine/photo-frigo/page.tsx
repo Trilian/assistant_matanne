@@ -109,7 +109,7 @@ function ContenuPhotoFrigo() {
       const params = new URLSearchParams();
       zonesSelectionnees.forEach((z) => params.append("zones", z));
       const { data } = await clientApi.post(
-        `/api/v1/suggestions/photo-frigo?${params.toString()}`,
+        `/suggestions/photo-frigo?${params.toString()}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -121,13 +121,13 @@ function ContenuPhotoFrigo() {
         const entry: AnalyseHistorique = {
           date: new Date().toISOString(),
           zone: zonePrincipale,
-          nb_ingredients: data.ingredients_detectes.length,
-          nb_recettes: data.recettes_suggerees.length + data.recettes_db.length,
+          nb_ingredients: (data.ingredients_detectes ?? []).length,
+          nb_recettes: (data.recettes_suggerees ?? []).length + (data.recettes_db ?? []).length,
         };
         sauvegarderHistorique(entry);
         setHistorique(chargerHistorique());
         toast.success(
-          `${data.ingredients_detectes.length} ingrédients détectés, ${data.recettes_db.length + data.recettes_suggerees.length} recettes trouvées`
+          `${(data.ingredients_detectes ?? []).length} ingrédients détectés, ${(data.recettes_db ?? []).length + (data.recettes_suggerees ?? []).length} recettes trouvées`
         );
       },
       onError: () => toast.error("Erreur lors de l'analyse de la photo"),

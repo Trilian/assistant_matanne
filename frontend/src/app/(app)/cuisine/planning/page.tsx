@@ -1515,7 +1515,7 @@ export default function PagePlanning() {
                 ⏱️ Durée estimée : {batchResultat.duree_estimee} minutes
               </p>
             </div>
-            {batchResultat.robots_utilises.length > 0 && (
+            {(batchResultat.robots_utilises ?? []).length > 0 && (
               <div className="space-y-1">
                 <p className="text-sm font-medium">Robots compatibles :</p>
                 <div className="flex flex-wrap gap-1">
@@ -1527,7 +1527,7 @@ export default function PagePlanning() {
                 </div>
               </div>
             )}
-            {batchResultat.recettes.length > 0 && (
+            {(batchResultat.recettes ?? []).length > 0 && (
               <div className="space-y-1">
                 <p className="text-sm font-medium">Recettes :</p>
                 <div className="max-h-40 overflow-y-auto space-y-1">

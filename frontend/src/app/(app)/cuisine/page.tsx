@@ -354,7 +354,7 @@ export default function PageCuisine() {
           </CardHeader>
           {recettesStock && (
             <CardContent>
-              {recettesStock.suggestions.length === 0 ? (
+              {(recettesStock.suggestions ?? []).length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   Aucune recette trouvée avec le stock actuel ({recettesStock.nb_ingredients_stock} ingrédients).
                 </p>

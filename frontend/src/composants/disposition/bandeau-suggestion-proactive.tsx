@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Lightbulb, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Lightbulb, ArrowRight, X } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 
 interface SuggestionModule {
@@ -47,9 +48,10 @@ const SUGGESTIONS: SuggestionModule[] = [
 
 export function BandeauSuggestionProactive() {
   const pathname = usePathname();
+  const [ferme, setFerme] = useState(false);
   const suggestion = SUGGESTIONS.find((s) => s.match(pathname));
 
-  if (!suggestion) return null;
+  if (!suggestion || ferme) return null;
 
   return (
     <div className="mx-4 md:mx-6 mt-2 rounded-lg border border-amber-300/60 bg-amber-50/70 dark:border-amber-900/40 dark:bg-amber-950/20 px-3 py-2">
@@ -61,12 +63,23 @@ export function BandeauSuggestionProactive() {
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">{suggestion.message}</p>
         </div>
-        <Button variant="ghost" size="sm" asChild className="shrink-0 h-7 px-2">
-          <Link href={suggestion.lien} className="flex items-center gap-1 text-xs">
-            Voir
-            <ArrowRight className="h-3 w-3" />
-          </Link>
-        </Button>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button variant="ghost" size="sm" asChild className="h-7 px-2">
+            <Link href={suggestion.lien} className="flex items-center gap-1 text-xs">
+              Voir
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
+            onClick={() => setFerme(true)}
+            aria-label="Fermer la suggestion"
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
     </div>
   );

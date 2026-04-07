@@ -24,6 +24,8 @@ export function OngletAffichage() {
       description: "Lecture lumineuse et contrastée",
       Icone: Sun,
       apercuClasse: "from-amber-50 via-white to-sky-50 dark:from-amber-950/20 dark:via-slate-950 dark:to-slate-900",
+      couleurLabel: "text-slate-900",
+      couleurDescription: "text-slate-500",
     },
     {
       valeur: "dark",
@@ -31,6 +33,8 @@ export function OngletAffichage() {
       description: "Repos visuel et cuisine du soir",
       Icone: Moon,
       apercuClasse: "from-slate-950 via-slate-900 to-indigo-950",
+      couleurLabel: "text-white",
+      couleurDescription: "text-slate-400",
     },
     {
       valeur: "system",
@@ -38,6 +42,8 @@ export function OngletAffichage() {
       description: "Bascule auto selon l'appareil",
       Icone: Monitor,
       apercuClasse: "from-slate-100 via-white to-slate-50 dark:from-slate-900 dark:via-slate-950 dark:to-black",
+      couleurLabel: "text-slate-800 dark:text-white",
+      couleurDescription: "text-slate-500 dark:text-slate-400",
     },
   ] as const;
 
@@ -82,7 +88,7 @@ export function OngletAffichage() {
             <div className="space-y-2">
               <Label>Thème</Label>
               <div className="grid gap-3 md:grid-cols-3">
-                {themes.map(({ valeur, label, description, Icone, apercuClasse }) => {
+                {themes.map(({ valeur, label, description, Icone, apercuClasse, couleurLabel, couleurDescription }) => {
                   const estActif = theme === valeur;
 
                   return (
@@ -98,13 +104,13 @@ export function OngletAffichage() {
                     >
                       <div className={`rounded-xl border bg-gradient-to-br p-3 ${apercuClasse}`}>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-2 text-sm font-semibold">
+                          <span className={`inline-flex items-center gap-2 text-sm font-semibold ${couleurLabel}`}>
                             <Icone className="h-4 w-4" />
                             {label}
                           </span>
                           {estActif ? <Badge>Actif</Badge> : <Badge variant="outline">Choisir</Badge>}
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground">{description}</p>
+                        <p className={`mt-2 text-xs ${couleurDescription}`}>{description}</p>
                       </div>
                     </button>
                   );
