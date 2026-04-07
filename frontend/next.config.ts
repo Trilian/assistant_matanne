@@ -52,6 +52,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Pages de l'app (protégées) : jamais en cache CDN pour que le middleware s'exécute
+        source: "/((?!_next|api|connexion|inscription|icons|manifest\\.json|sw\\.js|offline\\.html|favicon\\.ico).*)",
+        headers: [
+          { key: "Cache-Control", value: "private, no-cache, no-store, must-revalidate" },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },
