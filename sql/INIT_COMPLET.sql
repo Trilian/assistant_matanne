@@ -2406,6 +2406,9 @@ ALTER TABLE IF EXISTS documents_famille
 ALTER TABLE IF EXISTS documents_famille
     ADD COLUMN IF NOT EXISTS actif BOOLEAN NOT NULL DEFAULT TRUE;
 CREATE INDEX IF NOT EXISTS ix_documents_famille_actif ON documents_famille(actif);
+-- Colonne ajoutée par migration 004
+ALTER TABLE IF EXISTS documents_famille
+    ADD COLUMN IF NOT EXISTS date_document DATE;
 
 -- ============================================================================
 -- PARTIE 5 : TABLES MAISON (sans modèles ORM — migration 020)

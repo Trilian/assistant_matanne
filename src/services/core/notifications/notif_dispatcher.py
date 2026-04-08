@@ -579,7 +579,7 @@ class DispatcherNotifications:
 
             elif strategie == "failover" and not resultats.get(canal):
 
-                logger.warning(
+                logger.debug(
 
                     "Failover canal '%s' échoué, tentative canal suivant…", canal
 
