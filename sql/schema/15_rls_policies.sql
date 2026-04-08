@@ -21,7 +21,9 @@ user_id_tables TEXT[] := ARRAY[
     'alertes_meteo', 'config_meteo',
     'sauvegardes',
     'abonnements_push', 'preferences_notifications',
-    'webhooks_abonnements'
+    'webhooks_abonnements',
+    'preferences_utilisateurs', 'retours_recettes',
+    'configs_calendriers_externes', 'historique_actions'
 ];
 BEGIN FOREACH t IN ARRAY user_id_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -40,9 +42,8 @@ END $$;
 DO $$
 DECLARE t TEXT;
 user_id_varchar_tables TEXT[] := ARRAY[
-    'preferences_utilisateurs', 'retours_recettes',
-    'configs_calendriers_externes', 'etats_persistants',
-    'historique_actions', 'ia_suggestions_historique',
+    'etats_persistants',
+    'ia_suggestions_historique',
     'historique_notifications', 'minuteur_sessions'
 ];
 BEGIN FOREACH t IN ARRAY user_id_varchar_tables LOOP
