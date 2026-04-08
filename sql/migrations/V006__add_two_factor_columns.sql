@@ -1,4 +1,4 @@
--- Migration V005: Ajout des colonnes 2FA sur profils_utilisateurs
+-- Migration V006: Ajout des colonnes 2FA sur profils_utilisateurs
 -- Les colonnes two_factor_enabled, two_factor_secret et backup_codes
 -- sont présentes dans le modèle SQLAlchemy mais absentes du schéma DB.
 

@@ -128,6 +128,13 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
 
     # ── Démarrage ───────────────────────────────────────────
     try:
+        from src.core.db.migrations import GestionnaireMigrations
+
+        GestionnaireMigrations.executer_migrations()
+    except Exception:
+        logger.warning("Migrations non appliquées au démarrage", exc_info=True)
+
+    try:
         from src.core.caching.invalidation_listener import (
             demarrer_listener_invalidation_cache,
         )

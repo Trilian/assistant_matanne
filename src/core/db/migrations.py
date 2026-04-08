@@ -143,9 +143,9 @@ class GestionnaireMigrations:
         """
         Extrait le numéro de version depuis un nom de fichier.
 
-        Formats supportés: 001_xxx.sql, 17_xxx.sql
+        Formats supportés: 001_xxx.sql, 17_xxx.sql, V001__xxx.sql, V17__xxx.sql
         """
-        match = re.match(r"^(\d+)_", nom_fichier)
+        match = re.match(r"^[Vv]?(\d+)_", nom_fichier)
         return int(match.group(1)) if match else None
 
     @staticmethod
