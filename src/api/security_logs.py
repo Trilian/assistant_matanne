@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -34,7 +35,7 @@ def journaliser_evenement_securite(
                     "event_type": event_type,
                     "ip": ip,
                     "user_agent": user_agent,
-                    "details": str(details or {}),
+                    "details": json.dumps(details or {}, ensure_ascii=False),
                 },
             )
             session.commit()
