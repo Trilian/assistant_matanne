@@ -526,9 +526,7 @@ async def basculer_mode_maintenance(
     description="Endpoint lecture seule pour afficher un bandeau maintenance côté UI.",
 )
 @gerer_exception_api
-async def lire_mode_maintenance_public(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
+async def lire_mode_maintenance_public() -> dict[str, Any]:
     flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
     return {"maintenance_mode": bool(flags.get("admin.maintenance_mode", False))}
 

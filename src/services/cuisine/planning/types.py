@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, model_validator
 class JourPlanning(BaseModel):
     """Jour du planning généré par l'IA"""
 
-    jour: str = Field(..., min_length=6, max_length=10)
+    jour: str = Field(..., min_length=4, max_length=12)
     dejeuner: str = Field(..., min_length=3)
     diner: str = Field(..., min_length=3)
 

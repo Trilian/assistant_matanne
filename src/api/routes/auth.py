@@ -122,6 +122,36 @@ def _maj_profil_2fa(email: str, **kwargs):
     return False
 
 
+def _upsert_profil(user_id: str, email: str, nom: str | None = None) -> None:
+    """Crée ou met à jour le ProfilUtilisateur en DB (best-effort)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.users import ProfilUtilisateur
+
+        display = nom or email.split("@")[0]
+        with obtenir_contexte_db() as session:
+            profil = (
+                session.query(ProfilUtilisateur)
+                .filter(ProfilUtilisateur.username == user_id)
+                .first()
+            )
+            if profil is None:
+                profil = ProfilUtilisateur(
+                    username=user_id,
+                    display_name=display,
+                    email=email,
+                )
+                session.add(profil)
+            else:
+                if email and profil.email != email:
+                    profil.email = email
+                if nom and profil.display_name != display:
+                    profil.display_name = display
+            session.commit()
+    except Exception as exc:
+        logger.warning("Upsert profil ignoré pour %s: %s", user_id, exc)
+
+
 # ═══════════════════════════════════════════════════════════
 # LOGIN
 # ═══════════════════════════════════════════════════════════
@@ -198,6 +228,10 @@ async def connexion(request: LoginRequest, raw_request: Request):
         metadata = response.user.user_metadata or {}
         role = metadata.get("role", "membre")
         email = response.user.email or request.email
+        nom = metadata.get("nom") or metadata.get("full_name")
+
+        # Créer ou mettre à jour le profil en DB (idempotent)
+        _upsert_profil(user_id=response.user.id, email=email, nom=nom)
 
         # Vérifier si 2FA est activé pour cet utilisateur
         profil = _obtenir_profil_par_email(email)
@@ -281,9 +315,13 @@ async def inscription(request: RegisterRequest):
         if not response.user:
             raise HTTPException(status_code=400, detail="Impossible de créer le compte")
 
+        email_ok = response.user.email or request.email
+        # Créer le profil en DB dès l'inscription
+        _upsert_profil(user_id=response.user.id, email=email_ok, nom=request.nom)
+
         token = creer_token_acces(
             user_id=response.user.id,
-            email=response.user.email or request.email,
+            email=email_ok,
             role="membre",
         )
 
