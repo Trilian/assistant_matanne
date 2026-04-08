@@ -8,7 +8,7 @@ import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 
-const ROUTES_PUBLIQUES = ["/connexion", "/inscription"];
+const ROUTES_PUBLIQUES = ["/connexion", "/inscription", "/auth-callback"];
 
 export function FournisseurAuth({ children }: { children: ReactNode }) {
   const { estConnecte, estChargement } = utiliserAuth();

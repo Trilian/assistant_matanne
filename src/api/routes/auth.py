@@ -304,11 +304,17 @@ async def inscription(request: RegisterRequest):
 
     try:
         client = create_client(supabase_url, supabase_key)
+        # Construire l'URL de redirection vers la page de callback du frontend
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+        email_redirect_to = f"{frontend_url}/auth-callback"
         response = client.auth.sign_up(
             {
                 "email": request.email,
                 "password": request.password,
-                "options": {"data": {"nom": request.nom, "role": "membre"}},
+                "options": {
+                    "data": {"nom": request.nom, "role": "membre"},
+                    "email_redirect_to": email_redirect_to,
+                },
             }
         )
 

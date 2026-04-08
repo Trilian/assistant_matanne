@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const ROUTES_PUBLIQUES = ["/connexion", "/inscription"];
+const ROUTES_PUBLIQUES = ["/connexion", "/inscription", "/auth-callback"];
 const FICHIERS_PUBLICS = ["/_next", "/icons", "/manifest.json", "/sw.js", "/offline.html", "/favicon.ico"];
 
 /** Décode le payload JWT et vérifie si le token est expiré (sans vérification de signature) */
