@@ -722,11 +722,17 @@ async def bilan_mensuel(
     user: dict = Depends(require_auth),
 ) -> dict:
     """
-    Retourne les donnÃ©es agrÃ©gÃ©es du mois + synthÃ¨se IA.
+    Retourne les données agrégées du mois + synthèse IA.
 
-    Le paramÃ¨tre `mois` est au format YYYY-MM (ex: 2025-06).
+    Le paramètre `mois` est au format YYYY-MM (ex: 2025-06).
     Si absent, utilise le mois courant.
     """
+    import re
+
+    # Rejeter toute valeur qui n'est pas au format YYYY-MM (ex: [object Object])
+    if mois is not None and not re.fullmatch(r"\d{4}-(?:0[1-9]|1[0-2])", mois):
+        mois = None
+
     from src.services.rapports.bilan_mensuel import obtenir_bilan_mensuel_service
 
     service = obtenir_bilan_mensuel_service()
@@ -1282,6 +1288,123 @@ async def obtenir_historique_actions_widgets(
             for event in reversed(events)
         ]
         return {"items": items, "total": len(items)}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# POINTS FAMILLE (sport/Garmin + alimentation + anti-gaspi)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/points-famille",
+    responses=REPONSES_LISTE,
+    summary="Points famille semaine courante",
+)
+@gerer_exception_api
+async def obtenir_points_famille(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les points famille agrégés pour la semaine courante.
+
+    Basé sur : activités Garmin (sport), repas planifiés (alimentation),
+    articles anti-gaspi (anti_gaspi).
+    """
+
+    def _query() -> dict[str, Any]:
+        from src.core.models import ArticleInventaire
+        from src.core.models.cuisine import Repas
+        from src.core.models.users import ActiviteGarmin, ResumeQuotidienGarmin
+
+        aujourd_hui = date.today()
+        debut = aujourd_hui - timedelta(days=aujourd_hui.weekday())
+        fin = debut + timedelta(days=6)
+
+        with executer_avec_session() as session:
+            # --- Sport / Garmin ---
+            garmin_activites = (
+                session.query(ActiviteGarmin)
+                .filter(
+                    ActiviteGarmin.date_debut >= debut,
+                    ActiviteGarmin.date_debut <= fin,
+                )
+                .all()
+            )
+            nb_activites = len(garmin_activites)
+            total_calories = sum(a.calories or 0 for a in garmin_activites)
+
+            resumes = (
+                session.query(ResumeQuotidienGarmin)
+                .filter(
+                    ResumeQuotidienGarmin.date >= debut,
+                    ResumeQuotidienGarmin.date <= fin,
+                )
+                .all()
+            )
+            total_pas = sum(r.pas for r in resumes)
+
+            pts_sport = min(nb_activites * 15, 100)
+
+            # --- Alimentation (repas planifiés cette semaine) ---
+            nb_repas = (
+                session.query(func.count(Repas.id))
+                .filter(Repas.date_repas >= debut, Repas.date_repas <= fin)
+                .scalar()
+                or 0
+            )
+            pts_alimentation = min(int(nb_repas * 100 / 14), 100)  # max 2 repas/jour
+
+            # --- Anti-gaspi (articles à risque) ---
+            articles_a_risque = (
+                session.query(func.count(ArticleInventaire.id))
+                .filter(
+                    ArticleInventaire.date_peremption.isnot(None),
+                    ArticleInventaire.date_peremption <= aujourd_hui + timedelta(days=3),
+                )
+                .scalar()
+                or 0
+            )
+            pts_anti_gaspi = max(0, 100 - articles_a_risque * 20)
+
+            total = round((pts_sport + pts_alimentation + pts_anti_gaspi) / 3)
+
+            # --- Badges ---
+            badges: list[str] = []
+            if nb_activites >= 3:
+                badges.append("sportif")
+            if nb_repas >= 10:
+                badges.append("planificateur")
+            if articles_a_risque == 0:
+                badges.append("zero-gaspi")
+            if total >= 80:
+                badges.append("semaine-verte")
+
+            # --- Score bien-être (best-effort) ---
+            score_bien_etre = 0
+            try:
+                from src.services.dashboard.score_bienetre import obtenir_score_bien_etre_service
+
+                sbe = obtenir_score_bien_etre_service()
+                result = sbe.calculer_score()
+                score_bien_etre = result.get("score_global", 0)
+            except Exception:
+                pass
+
+        return {
+            "total_points": total,
+            "sport": pts_sport,
+            "alimentation": pts_alimentation,
+            "anti_gaspi": pts_anti_gaspi,
+            "badges": badges,
+            "details": {
+                "activites_garmin": nb_activites,
+                "total_pas": total_pas,
+                "total_calories": total_calories,
+                "score_bien_etre": score_bien_etre,
+                "articles_a_risque": articles_a_risque,
+            },
+        }
 
     return await executer_async(_query)
 

@@ -85,6 +85,22 @@ async def obtenir_briefing_maison(
     return await executer_async(_query)
 
 
+@router.get("/taches-jour", response_model=list[TacheJour], responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_taches_jour(
+    user: dict[str, Any] = Depends(require_auth),
+) -> list[TacheJour]:
+    """Retourne les tâches du jour (extrait du briefing maison)."""
+    from src.services.maison.contexte_maison_service import obtenir_service_contexte_maison
+
+    def _query() -> list[TacheJour]:
+        service = obtenir_service_contexte_maison()
+        briefing = service.obtenir_briefing()
+        return briefing.taches_jour_detail
+
+    return await executer_async(_query)
+
+
 @router.get("/alertes", response_model=list[AlerteMaison], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def obtenir_alertes_maison(

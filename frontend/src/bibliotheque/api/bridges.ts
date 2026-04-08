@@ -24,7 +24,7 @@ export interface WidgetVeilleImmoResponse {
 }
 
 export async function obtenirWidgetVeilleImmo(): Promise<WidgetVeilleImmoResponse> {
-  const { data } = await clientApi.get('/api/v1/bridges/widget-veille-immo')
+  const { data } = await clientApi.get('/bridges/widget-veille-immo')
   return data
 }
 
@@ -45,6 +45,6 @@ export interface WidgetSaisonJardinResponse {
 }
 
 export async function obtenirWidgetSaisonJardin(): Promise<WidgetSaisonJardinResponse> {
-  const { data } = await clientApi.get('/api/v1/bridges/widget-saison-jardin')
+  const { data } = await clientApi.get('/bridges/widget-saison-jardin')
   return data
 }

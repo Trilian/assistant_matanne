@@ -213,7 +213,7 @@ export default function PageAccueil() {
     ["maison", "taches-jour", "dashboard"],
     obtenirTachesJourMaison
   );
-  const { data: bilanMensuel } = utiliserRequete(["bilan-mensuel"], obtenirBilanMensuel);
+  const { data: bilanMensuel } = utiliserRequete(["bilan-mensuel"], () => obtenirBilanMensuel());
   const { data: configDashboard } = utiliserRequete(["dashboard", "config"], obtenirConfigDashboard);
   const { data: histoireFamille } = utiliserRequete(
     ["famille", "aujourd-hui-histoire"],
