@@ -410,7 +410,7 @@ CREATE INDEX IF NOT EXISTS idx_action_history_entity ON historique_actions(entit
 CREATE TABLE IF NOT EXISTS etats_persistants (
     id SERIAL PRIMARY KEY,
     namespace VARCHAR(100) NOT NULL,
-    user_id UUID NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     data JSONB NOT NULL DEFAULT '{}'::jsonb,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

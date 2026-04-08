@@ -844,7 +844,7 @@ export default function PageAccueil() {
                 <p>Anti-gaspi: {pointsFamille.anti_gaspi}</p>
               </div>
             </div>
-            {!!pointsFamille.badges.length && (
+            {!!(pointsFamille.badges?.length) && (
               <div className="flex flex-wrap gap-2 text-xs">
                 {pointsFamille.badges.map((badge) => (
                   <span key={badge} className="rounded-full border px-2 py-1">{badge}</span>
@@ -873,7 +873,7 @@ export default function PageAccueil() {
           </CardHeader>
           <CardContent className="space-y-3">
             <JaugeScoreFoyerLazy score={scoreFoyer.score_global} composantes={scoreFoyer.composantes} />
-            {scoreFoyer.leviers_prioritaires.length > 0 && (
+            {(scoreFoyer.leviers_prioritaires?.length ?? 0) > 0 && (
               <div className="rounded-md border border-indigo-200/70 bg-background/70 p-2 text-xs space-y-1">
                 <p className="font-medium">Leviers d&apos;amélioration :</p>
                 {scoreFoyer.leviers_prioritaires.map((levier, i) => (
@@ -971,14 +971,14 @@ export default function PageAccueil() {
       <div data-tour="metriques" className={`grid gap-4 grid-cols-2 lg:grid-cols-4 ${classeTour("metriques")}`}>
         <CarteMetrique
           titre="Repas aujourd'hui"
-          valeur={data?.repas_aujourd_hui.length ?? 0}
+          valeur={data?.repas_aujourd_hui?.length ?? 0}
           icone={<ChefHat className="h-4 w-4" />}
           lien="/cuisine/planning"
           chargement={isLoading}
           sparkline={[
-            Math.max(0, (data?.repas_aujourd_hui.length ?? 0) - 2),
-            Math.max(0, (data?.repas_aujourd_hui.length ?? 0) - 1),
-            data?.repas_aujourd_hui.length ?? 0,
+            Math.max(0, (data?.repas_aujourd_hui?.length ?? 0) - 2),
+            Math.max(0, (data?.repas_aujourd_hui?.length ?? 0) - 1),
+            data?.repas_aujourd_hui?.length ?? 0,
           ]}
         />
         <CarteMetrique

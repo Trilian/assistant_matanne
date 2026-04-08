@@ -294,43 +294,6 @@ async def lister_evenements(
     return await executer_async(_query)
 
 
-@router.get("/evenements/{evenement_id}", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def obtenir_evenement(
-    evenement_id: int,
-    user: dict[str, Any] = Depends(require_auth),
-):
-    """RÃ©cupÃ¨re un Ã©vÃ©nement par son ID."""
-
-    def _query():
-        with executer_avec_session() as session:
-            evenement = (
-                session.query(EvenementCalendrier)
-                .filter(EvenementCalendrier.id == evenement_id)
-                .first()
-            )
-            if not evenement:
-                raise HTTPException(status_code=404, detail="Ã‰vÃ©nement non trouvÃ©")
-
-            return {
-                "id": evenement.id,
-                "uid": evenement.uid,
-                "titre": evenement.titre,
-                "description": evenement.description,
-                "date_debut": evenement.date_debut.isoformat(),
-                "date_fin": evenement.date_fin.isoformat() if evenement.date_fin else None,
-                "lieu": evenement.lieu,
-                "all_day": evenement.all_day,
-                "recurrence_rule": evenement.recurrence_rule,
-                "rappel_minutes": evenement.rappel_minutes,
-                "source_calendrier_id": evenement.source_calendrier_id,
-                "created_at": evenement.cree_le.isoformat() if evenement.cree_le else None,
-                "updated_at": evenement.modifie_le.isoformat() if evenement.modifie_le else None,
-            }
-
-    return await executer_async(_query)
-
-
 @router.get("/evenements/aujourd-hui", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def evenements_aujourdhui(
@@ -426,6 +389,43 @@ async def evenements_semaine(
                 "date_fin": fin.isoformat(),
                 "par_jour": par_jour,
                 "total": len(evenements),
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/evenements/{evenement_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_evenement(
+    evenement_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """RÃ©cupÃ¨re un Ã©vÃ©nement par son ID."""
+
+    def _query():
+        with executer_avec_session() as session:
+            evenement = (
+                session.query(EvenementCalendrier)
+                .filter(EvenementCalendrier.id == evenement_id)
+                .first()
+            )
+            if not evenement:
+                raise HTTPException(status_code=404, detail="Ã‰vÃ©nement non trouvÃ©")
+
+            return {
+                "id": evenement.id,
+                "uid": evenement.uid,
+                "titre": evenement.titre,
+                "description": evenement.description,
+                "date_debut": evenement.date_debut.isoformat(),
+                "date_fin": evenement.date_fin.isoformat() if evenement.date_fin else None,
+                "lieu": evenement.lieu,
+                "all_day": evenement.all_day,
+                "recurrence_rule": evenement.recurrence_rule,
+                "rappel_minutes": evenement.rappel_minutes,
+                "source_calendrier_id": evenement.source_calendrier_id,
+                "created_at": evenement.cree_le.isoformat() if evenement.cree_le else None,
+                "updated_at": evenement.modifie_le.isoformat() if evenement.modifie_le else None,
             }
 
     return await executer_async(_query)

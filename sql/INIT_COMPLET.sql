@@ -549,7 +549,7 @@ CREATE INDEX IF NOT EXISTS idx_action_history_entity ON historique_actions(entit
 CREATE TABLE IF NOT EXISTS etats_persistants (
     id SERIAL PRIMARY KEY,
     namespace VARCHAR(100) NOT NULL,
-    user_id UUID NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     data JSONB NOT NULL DEFAULT '{}'::jsonb,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -4426,10 +4426,7 @@ user_id_tables TEXT[] := ARRAY[
     'alertes_meteo', 'config_meteo',
     'sauvegardes',
     'abonnements_push', 'preferences_notifications',
-    'webhooks_abonnements',
-    'preferences_utilisateurs', 'retours_recettes',
-    'configs_calendriers_externes', 'etats_persistants',
-    'historique_actions'
+    'webhooks_abonnements'
 ];
 BEGIN FOREACH t IN ARRAY user_id_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -4448,7 +4445,9 @@ END $$;
 DO $$
 DECLARE t TEXT;
 user_id_varchar_tables TEXT[] := ARRAY[
-    'ia_suggestions_historique',
+    'preferences_utilisateurs', 'retours_recettes',
+    'configs_calendriers_externes', 'etats_persistants',
+    'historique_actions', 'ia_suggestions_historique',
     'historique_notifications', 'minuteur_sessions'
 ];
 BEGIN FOREACH t IN ARRAY user_id_varchar_tables LOOP

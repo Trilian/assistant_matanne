@@ -907,10 +907,10 @@ async def generer_planning_ia(
         body = GenererPlanningRequest()
 
     # Calculer le lundi de la semaine
+    today = date.today()
     if body.date_debut:
         semaine_debut = body.date_debut
     else:
-        today = date.today()
         semaine_debut = today - timedelta(days=today.weekday())
 
     def _generate():
