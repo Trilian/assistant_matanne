@@ -34,6 +34,9 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
         if os.environ.get("RATE_LIMITING_DISABLED", "").lower() == "true":
             return await call_next(request)
 
+        # Bypass CORS preflight — les OPTIONS ne consomment pas de quota
+        if request.method == "OPTIONS":
+            return await call_next(request)
         # Bypass si mode test admin activé
         try:
             from src.api.routes.admin import est_mode_test_actif

@@ -94,6 +94,9 @@ class LimiteurDebit:
         if request.url.path in self.config.chemins_exemptes:
             return {"allowed": True, "limit": -1, "remaining": -1}
 
+        # Les requêtes preflight CORS (OPTIONS) ne consomment pas de quota
+        if request.method == "OPTIONS":
+            return {"allowed": True, "limit": -1, "remaining": -1}
         cle = self._generer_cle(request, id_utilisateur)
 
         if self.stockage.est_bloque(cle):
