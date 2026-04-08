@@ -2610,6 +2610,9 @@ CREATE TABLE IF NOT EXISTS elements_jardin (
 -- Colonnes ajoutées par migration 002
 ALTER TABLE IF EXISTS elements_jardin
     ADD COLUMN IF NOT EXISTS type VARCHAR(100) NOT NULL DEFAULT 'plante';
+-- Colonnes ajoutées par migration 003
+ALTER TABLE IF EXISTS elements_jardin
+    ADD COLUMN IF NOT EXISTS date_recolte_prevue DATE;
 CREATE INDEX IF NOT EXISTS ix_garden_items_type ON elements_jardin(type_plante);
 CREATE INDEX IF NOT EXISTS ix_garden_items_statut ON elements_jardin(statut);
 CREATE INDEX IF NOT EXISTS ix_garden_items_derniere_action ON elements_jardin(derniere_action);

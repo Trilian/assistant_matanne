@@ -280,32 +280,37 @@ class DispatcherNotifications:
 
 
 
-        # Persistance best-effort en DB
+        # Persistance best-effort en DB — upsert pour éviter UniqueViolation
 
         try:
 
             from src.core.db import obtenir_contexte_db
-
             from src.core.models.persistent_state import EtatPersistantDB
 
-
+            dlq_user = user_id or "system"
 
             with obtenir_contexte_db() as session:
-
-                session.add(
-
-                    EtatPersistantDB(
-
-                        namespace="notification_dlq",
-
-                        user_id=user_id or "system",
-
-                        data=entry,
-
-                    )
-
+                existing = (
+                    session.query(EtatPersistantDB)
+                    .filter_by(namespace="notification_dlq", user_id=dlq_user)
+                    .first()
                 )
-
+                if existing:
+                    # Append à la liste existante
+                    entries = list(existing.data.get("entries", []))
+                    entries.append(entry)
+                    # Limiter à 200 entrées
+                    if len(entries) > 200:
+                        entries = entries[-200:]
+                    existing.data = {"entries": entries}
+                else:
+                    session.add(
+                        EtatPersistantDB(
+                            namespace="notification_dlq",
+                            user_id=dlq_user,
+                            data={"entries": [entry]},
+                        )
+                    )
                 session.commit()
 
         except Exception as exc:
@@ -781,6 +786,9 @@ class DispatcherNotifications:
     def _recuperer_preferences_notifications(self, user_id: str) -> dict[str, Any]:
 
         """Charge les préférences notifications de l'utilisateur (best-effort)."""
+
+        if not user_id:
+            return {}
 
         try:
 

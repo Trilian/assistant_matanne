@@ -103,6 +103,231 @@ async def lister_calendriers(
     return await executer_async(_query)
 
 
+# ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS
+# ═══════════════════════════════════════════════════════════
+# IMPORTANT: Ces routes doivent être enregistrées AVANT /{calendrier_id}
+# pour éviter que "/evenements" soit capturé comme calendrier_id=evenements.
+
+
+@router.get("/evenements", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_evenements(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    calendrier_id: int | None = Query(None, description="Filtrer par calendrier source"),
+    date_debut: date | None = Query(None, description="Date minimum (YYYY-MM-DD)"),
+    date_fin: date | None = Query(None, description="Date maximum (YYYY-MM-DD)"),
+    all_day: bool | None = Query(None, description="Filtrer événements journée entière"),
+    cursor: str | None = Query(None, description="Curseur pour pagination cursor-based"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Liste les événements de calendrier.
+
+    Supporte pagination offset ou cursor-based pour grandes collections.
+    """
+
+    def _query():
+        with executer_avec_session() as session:
+            query = session.query(EvenementCalendrier)
+
+            if calendrier_id:
+                query = query.filter(EvenementCalendrier.source_calendrier_id == calendrier_id)
+            if date_debut:
+                query = query.filter(EvenementCalendrier.date_debut >= date_debut)
+            if date_fin:
+                query = query.filter(EvenementCalendrier.date_debut <= date_fin)
+            if all_day is not None:
+                query = query.filter(EvenementCalendrier.all_day == all_day)
+
+            query = query.order_by(EvenementCalendrier.date_debut.asc(), EvenementCalendrier.id.asc())
+
+            # Pagination cursor-based
+            if cursor:
+                cursor_params = decoder_cursor(cursor)
+                query = appliquer_cursor_filter(
+                    query,
+                    cursor_params,
+                    EvenementCalendrier,
+                    cursor_field="date_debut",
+                    secondary_field="id"
+                )
+                items = query.limit(page_size + 1).all()
+                return construire_reponse_cursor(
+                    items,
+                    page_size,
+                    cursor_field="date_debut",
+                    secondary_field="id"
+                )
+
+            # Pagination offset
+            total = query.count()
+            items = query.offset((page - 1) * page_size).limit(page_size).all()
+
+            return {
+                "items": [
+                    {
+                        "id": e.id,
+                        "uid": e.uid,
+                        "titre": e.titre,
+                        "description": e.description,
+                        "date_debut": e.date_debut.isoformat(),
+                        "date_fin": e.date_fin.isoformat() if e.date_fin else None,
+                        "lieu": e.lieu,
+                        "all_day": e.all_day,
+                        "recurrence_rule": e.recurrence_rule,
+                        "rappel_minutes": e.rappel_minutes,
+                        "source_calendrier_id": e.source_calendrier_id,
+                    }
+                    for e in items
+                ],
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "pages": (total + page_size - 1) // page_size if total > 0 else 0,
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/evenements/aujourd-hui", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def evenements_aujourdhui(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Récupère les événements du jour."""
+    def _query():
+        with executer_avec_session() as session:
+            from datetime import timedelta
+
+            now = datetime.now()
+            debut_jour = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            fin_jour = debut_jour + timedelta(days=1)
+
+            evenements = (
+                session.query(EvenementCalendrier)
+                .filter(
+                    EvenementCalendrier.date_debut >= debut_jour,
+                    EvenementCalendrier.date_debut < fin_jour,
+                )
+                .order_by(EvenementCalendrier.date_debut.asc())
+                .all()
+            )
+
+            return {
+                "date": now.date().isoformat(),
+                "items": [
+                    {
+                        "id": e.id,
+                        "titre": e.titre,
+                        "date_debut": e.date_debut.isoformat(),
+                        "date_fin": e.date_fin.isoformat() if e.date_fin else None,
+                        "lieu": e.lieu,
+                        "all_day": e.all_day,
+                    }
+                    for e in evenements
+                ],
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/evenements/semaine", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def evenements_semaine(
+    date_debut: datetime | None = Query(None, description="Date de début (défaut: lundi courant)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Récupère les événements de la semaine."""
+
+    def _query():
+        with executer_avec_session() as session:
+            from datetime import timedelta
+
+            if not date_debut:
+                now = datetime.now()
+                debut = now - timedelta(days=now.weekday())
+                debut = debut.replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                debut = date_debut.replace(hour=0, minute=0, second=0, microsecond=0)
+
+            fin = debut + timedelta(days=7)
+
+            evenements = (
+                session.query(EvenementCalendrier)
+                .filter(
+                    EvenementCalendrier.date_debut >= debut,
+                    EvenementCalendrier.date_debut < fin,
+                )
+                .order_by(EvenementCalendrier.date_debut.asc())
+                .all()
+            )
+
+            # Grouper par jour
+            par_jour: dict[str, list] = {}
+            for e in evenements:
+                jour = e.date_debut.date().isoformat()
+                if jour not in par_jour:
+                    par_jour[jour] = []
+                par_jour[jour].append(
+                    {
+                        "id": e.id,
+                        "titre": e.titre,
+                        "date_debut": e.date_debut.isoformat(),
+                        "date_fin": e.date_fin.isoformat() if e.date_fin else None,
+                        "lieu": e.lieu,
+                        "all_day": e.all_day,
+                    }
+                )
+
+            return {
+                "date_debut": debut.isoformat(),
+                "date_fin": fin.isoformat(),
+                "par_jour": par_jour,
+                "total": len(evenements),
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/evenements/{evenement_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_evenement(
+    evenement_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Récupère un événement par son ID."""
+
+    def _query():
+        with executer_avec_session() as session:
+            evenement = (
+                session.query(EvenementCalendrier)
+                .filter(EvenementCalendrier.id == evenement_id)
+                .first()
+            )
+            if not evenement:
+                raise HTTPException(status_code=404, detail="Événement non trouvé")
+
+            return {
+                "id": evenement.id,
+                "uid": evenement.uid,
+                "titre": evenement.titre,
+                "description": evenement.description,
+                "date_debut": evenement.date_debut.isoformat(),
+                "date_fin": evenement.date_fin.isoformat() if evenement.date_fin else None,
+                "lieu": evenement.lieu,
+                "all_day": evenement.all_day,
+                "recurrence_rule": evenement.recurrence_rule,
+                "rappel_minutes": evenement.rappel_minutes,
+                "source_calendrier_id": evenement.source_calendrier_id,
+                "created_at": evenement.cree_le.isoformat() if evenement.cree_le else None,
+                "updated_at": evenement.modifie_le.isoformat() if evenement.modifie_le else None,
+            }
+
+    return await executer_async(_query)
+
+
 @router.get("/{calendrier_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_calendrier(
@@ -206,229 +431,6 @@ async def supprimer_calendrier(
             return MessageResponse(message="Calendrier supprimÃ©", id=calendrier_id)
 
     return await executer_async(_delete)
-
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Ã‰VÃ‰NEMENTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-
-@router.get("/evenements", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def lister_evenements(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(50, ge=1, le=200),
-    calendrier_id: int | None = Query(None, description="Filtrer par calendrier source"),
-    date_debut: date | None = Query(None, description="Date minimum (YYYY-MM-DD)"),
-    date_fin: date | None = Query(None, description="Date maximum (YYYY-MM-DD)"),
-    all_day: bool | None = Query(None, description="Filtrer Ã©vÃ©nements journÃ©e entiÃ¨re"),
-    cursor: str | None = Query(None, description="Curseur pour pagination cursor-based"),
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """
-    Liste les Ã©vÃ©nements de calendrier.
-
-    Supporte pagination offset ou cursor-based pour grandes collections.
-    """
-
-    def _query():
-        with executer_avec_session() as session:
-            query = session.query(EvenementCalendrier)
-
-            if calendrier_id:
-                query = query.filter(EvenementCalendrier.source_calendrier_id == calendrier_id)
-            if date_debut:
-                query = query.filter(EvenementCalendrier.date_debut >= date_debut)
-            if date_fin:
-                query = query.filter(EvenementCalendrier.date_debut <= date_fin)
-            if all_day is not None:
-                query = query.filter(EvenementCalendrier.all_day == all_day)
-
-            query = query.order_by(EvenementCalendrier.date_debut.asc(), EvenementCalendrier.id.asc())
-
-            # Pagination cursor-based
-            if cursor:
-                cursor_params = decoder_cursor(cursor)
-                query = appliquer_cursor_filter(
-                    query, 
-                    cursor_params, 
-                    EvenementCalendrier,
-                    cursor_field="date_debut",  # FIX B12: match l'ordre principal
-                    secondary_field="id"         # Stable tie-breaker
-                )
-                items = query.limit(page_size + 1).all()
-                return construire_reponse_cursor(
-                    items, 
-                    page_size, 
-                    cursor_field="date_debut",   # FIX B12: match l'ordre
-                    secondary_field="id"         # FIX B12: ti-breaker unique
-                )
-
-            # Pagination offset
-            total = query.count()
-            items = query.offset((page - 1) * page_size).limit(page_size).all()
-
-            return {
-                "items": [
-                    {
-                        "id": e.id,
-                        "uid": e.uid,
-                        "titre": e.titre,
-                        "description": e.description,
-                        "date_debut": e.date_debut.isoformat(),
-                        "date_fin": e.date_fin.isoformat() if e.date_fin else None,
-                        "lieu": e.lieu,
-                        "all_day": e.all_day,
-                        "recurrence_rule": e.recurrence_rule,
-                        "rappel_minutes": e.rappel_minutes,
-                        "source_calendrier_id": e.source_calendrier_id,
-                    }
-                    for e in items
-                ],
-                "total": total,
-                "page": page,
-                "page_size": page_size,
-                "pages": (total + page_size - 1) // page_size if total > 0 else 0,
-            }
-
-    return await executer_async(_query)
-
-
-@router.get("/evenements/aujourd-hui", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def evenements_aujourdhui(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """RÃ©cupÃ¨re les Ã©vÃ©nements du jour."""
-    def _query():
-        with executer_avec_session() as session:
-            from datetime import timedelta
-
-            now = datetime.now()
-            debut_jour = now.replace(hour=0, minute=0, second=0, microsecond=0)
-            fin_jour = debut_jour + timedelta(days=1)
-
-            evenements = (
-                session.query(EvenementCalendrier)
-                .filter(
-                    EvenementCalendrier.date_debut >= debut_jour,
-                    EvenementCalendrier.date_debut < fin_jour,
-                )
-                .order_by(EvenementCalendrier.date_debut.asc())
-                .all()
-            )
-
-            return {
-                "date": now.date().isoformat(),
-                "items": [
-                    {
-                        "id": e.id,
-                        "titre": e.titre,
-                        "date_debut": e.date_debut.isoformat(),
-                        "date_fin": e.date_fin.isoformat() if e.date_fin else None,
-                        "lieu": e.lieu,
-                        "all_day": e.all_day,
-                    }
-                    for e in evenements
-                ],
-            }
-
-    return await executer_async(_query)
-
-
-@router.get("/evenements/semaine", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def evenements_semaine(
-    date_debut: datetime | None = Query(None, description="Date de dÃ©but (dÃ©faut: lundi courant)"),
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """RÃ©cupÃ¨re les Ã©vÃ©nements de la semaine."""
-
-    def _query():
-        with executer_avec_session() as session:
-            from datetime import timedelta
-
-            if not date_debut:
-                now = datetime.now()
-                debut = now - timedelta(days=now.weekday())
-                debut = debut.replace(hour=0, minute=0, second=0, microsecond=0)
-            else:
-                debut = date_debut.replace(hour=0, minute=0, second=0, microsecond=0)
-
-            fin = debut + timedelta(days=7)
-
-            evenements = (
-                session.query(EvenementCalendrier)
-                .filter(
-                    EvenementCalendrier.date_debut >= debut,
-                    EvenementCalendrier.date_debut < fin,
-                )
-                .order_by(EvenementCalendrier.date_debut.asc())
-                .all()
-            )
-
-            # Grouper par jour
-            par_jour: dict[str, list] = {}
-            for e in evenements:
-                jour = e.date_debut.date().isoformat()
-                if jour not in par_jour:
-                    par_jour[jour] = []
-                par_jour[jour].append(
-                    {
-                        "id": e.id,
-                        "titre": e.titre,
-                        "date_debut": e.date_debut.isoformat(),
-                        "date_fin": e.date_fin.isoformat() if e.date_fin else None,
-                        "lieu": e.lieu,
-                        "all_day": e.all_day,
-                    }
-                )
-
-            return {
-                "date_debut": debut.isoformat(),
-                "date_fin": fin.isoformat(),
-                "par_jour": par_jour,
-                "total": len(evenements),
-            }
-
-    return await executer_async(_query)
-
-
-@router.get("/evenements/{evenement_id}", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def obtenir_evenement(
-    evenement_id: int,
-    user: dict[str, Any] = Depends(require_auth),
-):
-    """RÃ©cupÃ¨re un Ã©vÃ©nement par son ID."""
-
-    def _query():
-        with executer_avec_session() as session:
-            evenement = (
-                session.query(EvenementCalendrier)
-                .filter(EvenementCalendrier.id == evenement_id)
-                .first()
-            )
-            if not evenement:
-                raise HTTPException(status_code=404, detail="Ã‰vÃ©nement non trouvÃ©")
-
-            return {
-                "id": evenement.id,
-                "uid": evenement.uid,
-                "titre": evenement.titre,
-                "description": evenement.description,
-                "date_debut": evenement.date_debut.isoformat(),
-                "date_fin": evenement.date_fin.isoformat() if evenement.date_fin else None,
-                "lieu": evenement.lieu,
-                "all_day": evenement.all_day,
-                "recurrence_rule": evenement.recurrence_rule,
-                "rappel_minutes": evenement.rappel_minutes,
-                "source_calendrier_id": evenement.source_calendrier_id,
-                "created_at": evenement.cree_le.isoformat() if evenement.cree_le else None,
-                "updated_at": evenement.modifie_le.isoformat() if evenement.modifie_le else None,
-            }
-
-    return await executer_async(_query)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

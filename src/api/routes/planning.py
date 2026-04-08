@@ -539,7 +539,7 @@ async def valider_planning(
         )
         dispatcher = get_dispatcher_notifications()
         dispatcher.envoyer(
-            user_id=user.get("sub", ""),
+            user_id=str(user.get("id", user.get("sub", ""))),
             message=message,
             canaux=["telegram"],
             titre="Planning validé",

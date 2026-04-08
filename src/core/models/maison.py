@@ -195,7 +195,7 @@ class ElementJardin(CreeLeMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
     type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
-    location: Mapped[str | None] = mapped_column(String(200))
+    location: Mapped[str | None] = mapped_column(String(200), name="emplacement")
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="actif", index=True)
     date_plantation: Mapped[date | None] = mapped_column(Date)
     date_recolte_prevue: Mapped[date | None] = mapped_column(Date)

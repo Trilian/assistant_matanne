@@ -307,23 +307,25 @@ def _serialiser_routine(routine) -> dict[str, Any]:
 @gerer_exception_api
 async def lister_routines(
     actif: bool | None = Query(None, description="Filtrer par statut actif"),
+    est_active: bool | None = Query(None, description="Filtrer par statut actif (alias)"),
     user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
+) -> list[Any]:
     """Liste les routines familiales avec leurs étapes."""
     from src.core.models import Routine
+
+    # Support both param names: est_active (frontend) and actif (legacy)
+    filtre_actif = est_active if est_active is not None else actif
 
     def _query():
         with executer_avec_session() as session:
             query = session.query(Routine)
 
-            if actif is not None:
-                query = query.filter(Routine.actif == actif)
+            if filtre_actif is not None:
+                query = query.filter(Routine.actif == filtre_actif)
 
             routines = query.order_by(Routine.nom).all()
 
-            return {
-                "items": [_serialiser_routine(r) for r in routines],
-            }
+            return [_serialiser_routine(r) for r in routines]
 
     return await executer_async(_query)
 
@@ -453,6 +455,36 @@ def _serialiser_anniversaire(a) -> dict:  # noqa: ANN001
         "jours_restants": a.jours_restants,
         "cree_le": a.cree_le.isoformat() if a.cree_le else None,
     }
+
+
+@router.get("/anniversaires/aujourd-hui", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def anniversaires_aujourdhui(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les anniversaires du jour (jours_restants == 0)."""
+    from src.core.models import AnniversaireFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            items = (
+                session.query(AnniversaireFamille)
+                .filter(AnniversaireFamille.actif == True)  # noqa: E712
+                .all()
+            )
+            today = [
+                {
+                    "id": a.id,
+                    "nom_personne": a.nom_personne,
+                    "age": a.age,
+                    "relation": a.relation,
+                }
+                for a in items
+                if a.jours_restants == 0
+            ]
+            return {"items": today}
+
+    return await executer_async(_query)
 
 
 @router.get("/anniversaires", response_model=AnniversairesListeResponse, responses=REPONSES_LISTE)
