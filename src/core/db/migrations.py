@@ -223,12 +223,13 @@ class GestionnaireMigrations:
                 # Exécuter le SQL de la migration
                 conn.execute(text(sql))
 
-                # Enregistrer dans la table de suivi
+                # Enregistrer dans la table de suivi (ON CONFLICT DO NOTHING = idempotent)
                 conn.execute(
                     text(f"""
                         INSERT INTO {GestionnaireMigrations.TABLE_MIGRATIONS}
                         (version, name, checksum)
                         VALUES (:version, :name, :checksum)
+                        ON CONFLICT (version) DO NOTHING
                     """),
                     {"version": version, "name": nom, "checksum": checksum},
                 )

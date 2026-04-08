@@ -383,40 +383,46 @@ class ServiceConflits:
         return self.detecter_conflits_jour(date_jour, events_existants)
 
     def _charger_evenements_semaine(self, date_debut: date) -> dict[date, list[dict]]:
-        """Charge les événements d'une semaine depuis le calendrier."""
+        """Charge les activités de la semaine depuis la DB pour la détection de conflits."""
         try:
-            from src.services.planning.calendrier.aggregation import (
-                construire_semaine_calendrier,
-            )
-            from src.services.planning.calendrier.data import charger_donnees_semaine
+            from src.core.db import obtenir_contexte_db
+            from src.core.models import ActiviteFamille
 
-            donnees = charger_donnees_semaine(date_debut)
-            semaine = construire_semaine_calendrier(
-                date_debut=date_debut,
-                repas=donnees.get("repas", []),
-                sessions_batch=donnees.get("sessions_batch", []),
-                activites=donnees.get("activites", []),
-                events=donnees.get("events", []),
-                courses_planifiees=donnees.get("courses_planifiees", []),
-                taches_menage=donnees.get("taches_menage", []),
-            )
-
+            date_fin = date_debut + timedelta(days=6)
             result: dict[date, list[dict]] = {}
-            for jour in semaine.jours:
-                result[jour.date_jour] = [
-                    {
-                        "titre": evt.titre,
-                        "heure_debut": evt.heure_debut,
-                        "heure_fin": evt.heure_fin,
-                        "type": evt.type.value,
-                        "pour_jules": evt.pour_jules,
+
+            with obtenir_contexte_db() as session:
+                activites = (
+                    session.query(ActiviteFamille)
+                    .filter(
+                        ActiviteFamille.date_prevue >= date_debut,
+                        ActiviteFamille.date_prevue <= date_fin,
+                        ActiviteFamille.statut != "annulé",
+                    )
+                    .all()
+                )
+
+                for act in activites:
+                    heure_fin = None
+                    if act.heure_debut and act.duree_heures:
+                        heure_fin = _ajouter_duree(
+                            act.heure_debut, int(act.duree_heures * 60)
+                        )
+                    participants = [p.lower() for p in (act.qui_participe or [])]
+                    event = {
+                        "titre": act.titre,
+                        "heure_debut": act.heure_debut,
+                        "heure_fin": heure_fin,
+                        "type": act.type_activite,
+                        "pour_jules": "jules" in participants,
                     }
-                    for evt in jour.evenements
-                ]
+                    jour = act.date_prevue
+                    result.setdefault(jour, []).append(event)
+
             return result
 
         except Exception as e:
-            logger.error(f"Erreur chargement événements semaine: {e}")
+            logger.warning(f"Chargement événements semaine impossible: {e}")
             return {}
 
     def _charger_evenements_jour(self, date_jour: date) -> list[dict]:

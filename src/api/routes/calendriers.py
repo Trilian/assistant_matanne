@@ -6,7 +6,7 @@ Endpoints pour:
 - Ã‰vÃ©nements de calendrier
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -219,8 +219,8 @@ async def lister_evenements(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     calendrier_id: int | None = Query(None, description="Filtrer par calendrier source"),
-    date_debut: datetime | None = Query(None, description="Date minimum (ISO 8601)"),
-    date_fin: datetime | None = Query(None, description="Date maximum (ISO 8601)"),
+    date_debut: date | None = Query(None, description="Date minimum (YYYY-MM-DD)"),
+    date_fin: date | None = Query(None, description="Date maximum (YYYY-MM-DD)"),
     all_day: bool | None = Query(None, description="Filtrer Ã©vÃ©nements journÃ©e entiÃ¨re"),
     cursor: str | None = Query(None, description="Curseur pour pagination cursor-based"),
     user: dict[str, Any] = Depends(require_auth),
