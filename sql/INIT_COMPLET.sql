@@ -34,6 +34,23 @@
 
 BEGIN;
 
+-- ============================================================================
+-- DROP ALL TABLES (reset propre — drop dynamique du schéma public)
+-- ============================================================================
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
+
+-- ============================================================================
 -- Source: 02_functions.sql
 -- PARTIE 1 : FONCTIONS TRIGGER
 -- ============================================================================
@@ -862,49 +879,6 @@ CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_h
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.XX CHECKLISTS_ANNIVERSAIRE — Listes de tâches pour préparer les anniversaires
-
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS checklists_anniversaire (
-    id SERIAL PRIMARY KEY,
-    anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
-    nom VARCHAR(200) NOT NULL,
-    budget_total FLOAT,
-    date_limite DATE,
-    completee BOOLEAN NOT NULL DEFAULT FALSE,
-    notes TEXT,
-    maj_auto_le TIMESTAMP,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
-CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
-
-CREATE TABLE IF NOT EXISTS items_checklist_anniversaire (
-    id SERIAL PRIMARY KEY,
-    checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
-    categorie VARCHAR(50) NOT NULL,
-    libelle VARCHAR(300) NOT NULL,
-    budget_estime FLOAT,
-    budget_reel FLOAT,
-    fait BOOLEAN NOT NULL DEFAULT FALSE,
-    priorite VARCHAR(20) NOT NULL DEFAULT 'moyenne',
-    responsable VARCHAR(50),
-    quand VARCHAR(20),
-    source VARCHAR(20) NOT NULL DEFAULT 'manuel',
-    score_pertinence FLOAT,
-    raison_suggestion TEXT,
-    ordre INTEGER NOT NULL DEFAULT 0,
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_checklist_id ON items_checklist_anniversaire(checklist_id);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_checklist_anniversaire(categorie);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
-
-
--- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX EVENEMENTS_FAMILIAUX — Calendrier partagé
 
 
@@ -1096,8 +1070,7 @@ CREATE TABLE IF NOT EXISTS batch_cooking_congelation (
     date_consommation DATE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-    CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL,
+    CONSTRAINT ck_congelation_portions_positive_placeholder CHECK (1=1),
     CONSTRAINT ck_congelation_portions_positive CHECK (portions > 0),
     CONSTRAINT ck_congelation_categorie CHECK (categorie IN (
         'viande', 'poisson', 'legume', 'fruit', 'plat_cuisine',
@@ -1158,7 +1131,7 @@ CREATE TABLE IF NOT EXISTS minuteur_sessions (
     user_id VARCHAR(255) NOT NULL,
     label VARCHAR(200) NOT NULL,
     duree_secondes INTEGER NOT NULL CHECK (duree_secondes > 0),
-    recette_id INTEGER REFERENCES recettes(id) ON DELETE SET NULL,
+    recette_id INTEGER,
     date_debut TIMESTAMP,
     date_fin TIMESTAMP,
     terminee BOOLEAN DEFAULT FALSE,
@@ -2307,6 +2280,44 @@ CREATE TABLE IF NOT EXISTS anniversaires_famille (
 );
 CREATE INDEX IF NOT EXISTS ix_anniversaires_date ON anniversaires_famille(date_naissance);
 CREATE INDEX IF NOT EXISTS ix_anniversaires_actif ON anniversaires_famille(actif);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS checklists_anniversaire (
+    id SERIAL PRIMARY KEY,
+    anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
+    nom VARCHAR(200) NOT NULL,
+    budget_total FLOAT,
+    date_limite DATE,
+    completee BOOLEAN NOT NULL DEFAULT FALSE,
+    notes TEXT,
+    maj_auto_le TIMESTAMP,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
+
+CREATE TABLE IF NOT EXISTS items_checklist_anniversaire (
+    id SERIAL PRIMARY KEY,
+    checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
+    categorie VARCHAR(50) NOT NULL,
+    libelle VARCHAR(300) NOT NULL,
+    budget_estime FLOAT,
+    budget_reel FLOAT,
+    fait BOOLEAN NOT NULL DEFAULT FALSE,
+    priorite VARCHAR(20) NOT NULL DEFAULT 'moyenne',
+    responsable VARCHAR(50),
+    quand VARCHAR(20),
+    source VARCHAR(20) NOT NULL DEFAULT 'manuel',
+    score_pertinence FLOAT,
+    raison_suggestion TEXT,
+    ordre INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_checklist_id ON items_checklist_anniversaire(checklist_id);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_checklist_anniversaire(categorie);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -4415,7 +4426,10 @@ user_id_tables TEXT[] := ARRAY[
     'alertes_meteo', 'config_meteo',
     'sauvegardes',
     'abonnements_push', 'preferences_notifications',
-    'webhooks_abonnements'
+    'webhooks_abonnements',
+    'preferences_utilisateurs', 'retours_recettes',
+    'configs_calendriers_externes', 'etats_persistants',
+    'historique_actions'
 ];
 BEGIN FOREACH t IN ARRAY user_id_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -4434,9 +4448,7 @@ END $$;
 DO $$
 DECLARE t TEXT;
 user_id_varchar_tables TEXT[] := ARRAY[
-    'preferences_utilisateurs', 'retours_recettes',
-    'configs_calendriers_externes', 'etats_persistants',
-    'historique_actions', 'ia_suggestions_historique',
+    'ia_suggestions_historique',
     'historique_notifications', 'minuteur_sessions'
 ];
 BEGIN FOREACH t IN ARRAY user_id_varchar_tables LOOP
@@ -5298,6 +5310,15 @@ ALTER TABLE repas
     ADD COLUMN IF NOT EXISTS notes_jules TEXT,
     ADD COLUMN IF NOT EXISTS adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
     ADD COLUMN IF NOT EXISTS contexte_meteo VARCHAR(50);
+
+-- ============================================================================
+-- FOREIGN KEYS DIFFÉRÉES (tables créées après leurs référents)
+-- ============================================================================
+ALTER TABLE batch_cooking_congelation
+    ADD CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    ADD CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL;
+ALTER TABLE minuteur_sessions
+    ADD CONSTRAINT fk_minuteur_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL;
 
 
 -- Source: 99_footer.sql
