@@ -1427,7 +1427,7 @@ export default function PagePlanning() {
                       <>
                         <p className="text-sm font-semibold pt-1">Idées de variété</p>
                         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-                          {analysePlanningIa.variete.recommandations.slice(0, 3).map((item) => (
+                          {(analysePlanningIa.variete.recommandations ?? []).slice(0, 3).map((item) => (
                             <li key={item}>{item}</li>
                           ))}
                         </ul>
@@ -1437,7 +1437,7 @@ export default function PagePlanning() {
                   <div className="rounded-lg border bg-background/80 p-3 space-y-2">
                     <p className="text-sm font-semibold">Charge & simplification</p>
                     <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-                      {analysePlanningIa.simplification.suggestions_simplification.slice(0, 3).map((item) => (
+                      {(analysePlanningIa.simplification.suggestions_simplification ?? []).slice(0, 3).map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>

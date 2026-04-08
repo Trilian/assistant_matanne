@@ -2400,6 +2400,12 @@ CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famil
 ALTER TABLE IF EXISTS documents_famille
     ADD COLUMN IF NOT EXISTS categorie VARCHAR(50) NOT NULL DEFAULT 'autre';
 CREATE INDEX IF NOT EXISTS ix_documents_famille_categorie ON documents_famille(categorie);
+-- Colonnes ajoutées par migration 002
+ALTER TABLE IF EXISTS documents_famille
+    ADD COLUMN IF NOT EXISTS fichier_nom VARCHAR(200);
+ALTER TABLE IF EXISTS documents_famille
+    ADD COLUMN IF NOT EXISTS actif BOOLEAN NOT NULL DEFAULT TRUE;
+CREATE INDEX IF NOT EXISTS ix_documents_famille_actif ON documents_famille(actif);
 
 -- ============================================================================
 -- PARTIE 5 : TABLES MAISON (sans modèles ORM — migration 020)
@@ -2463,6 +2469,9 @@ CREATE TABLE IF NOT EXISTS routines (
 -- Compatibilité rerun / bases legacy : categorie ajoutée par migration V008
 ALTER TABLE IF EXISTS routines
     ADD COLUMN IF NOT EXISTS categorie VARCHAR(100);
+-- Colonnes ajoutées par migration 002
+ALTER TABLE IF EXISTS routines
+    ADD COLUMN IF NOT EXISTS frequence VARCHAR(50) NOT NULL DEFAULT 'quotidien';
 CREATE INDEX IF NOT EXISTS ix_routines_type ON routines(type_routine);
 CREATE INDEX IF NOT EXISTS ix_routines_actif ON routines(actif);
 CREATE INDEX IF NOT EXISTS ix_routines_categorie ON routines(categorie);
@@ -2598,6 +2607,9 @@ CREATE TABLE IF NOT EXISTS elements_jardin (
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Colonnes ajoutées par migration 002
+ALTER TABLE IF EXISTS elements_jardin
+    ADD COLUMN IF NOT EXISTS type VARCHAR(100) NOT NULL DEFAULT 'plante';
 CREATE INDEX IF NOT EXISTS ix_garden_items_type ON elements_jardin(type_plante);
 CREATE INDEX IF NOT EXISTS ix_garden_items_statut ON elements_jardin(statut);
 CREATE INDEX IF NOT EXISTS ix_garden_items_derniere_action ON elements_jardin(derniere_action);

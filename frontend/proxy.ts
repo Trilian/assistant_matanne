@@ -17,7 +17,7 @@ function jwtExpire(token: string): boolean {
   }
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Laisser passer les fichiers statiques et routes API sans vérification
