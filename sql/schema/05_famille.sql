@@ -505,11 +505,14 @@ CREATE TABLE IF NOT EXISTS anniversaires_famille (
     relation VARCHAR(100),
     notes TEXT,
     rappel_jours_avant JSONB DEFAULT '[7, 1]',
+    idees_cadeaux TEXT,
     historique_cadeaux JSONB DEFAULT '[]',
+    actif BOOLEAN NOT NULL DEFAULT true,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_anniversaires_date ON anniversaires_famille(date_naissance);
+CREATE INDEX IF NOT EXISTS ix_anniversaires_actif ON anniversaires_famille(actif);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
