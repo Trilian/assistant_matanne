@@ -51,12 +51,22 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
 
         if auth_header.startswith("Bearer "):
             try:
-                from src.api.auth import valider_token
+                import base64
+                import json as _json
 
                 token = auth_header.split(" ")[1]
-                utilisateur = valider_token(token)
-                if utilisateur:
-                    id_utilisateur = utilisateur.id
+                # Décoder le payload JWT sans vérification de signature —
+                # uniquement pour obtenir le `sub` (user ID) afin d'isoler
+                # les compteurs de rate limit par utilisateur et non par IP.
+                # La vérification complète est effectuée par les routes FastAPI.
+                parts = token.split(".")
+                if len(parts) == 3:
+                    padding = 4 - len(parts[1]) % 4
+                    payload_bytes = base64.urlsafe_b64decode(parts[1] + "=" * (padding % 4))
+                    payload_data = _json.loads(payload_bytes)
+                    sub = payload_data.get("sub") or payload_data.get("user_id")
+                    if sub:
+                        id_utilisateur = str(sub)
             except Exception:
                 pass
 
