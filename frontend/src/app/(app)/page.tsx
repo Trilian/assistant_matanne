@@ -652,7 +652,7 @@ export default function PageAccueil() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            {histoireFamille.items.slice(0, 3).map((item) => (
+            {(histoireFamille.items ?? []).slice(0, 3).map((item) => (
               <div key={item.id} className="rounded-md border px-3 py-2">
                 <p className="text-sm font-medium">{item.titre}</p>
                 <p className="text-xs text-muted-foreground">
@@ -954,7 +954,7 @@ export default function PageAccueil() {
               </div>
             </div>
             <div className="space-y-1">
-              {scoreEcologique.leviers_prioritaires.slice(0, 2).map((levier) => (
+              {(scoreEcologique.leviers_prioritaires ?? []).slice(0, 2).map((levier) => (
                 <p key={levier} className="text-xs text-muted-foreground">
                   • {levier}
                 </p>
@@ -1160,7 +1160,7 @@ export default function PageAccueil() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {rappelsData.rappels.slice(0, 4).map((rappel, i) => (
+            {(rappelsData.rappels ?? []).slice(0, 4).map((rappel, i) => (
               <RappelCard
                 key={`${rappel.type}-${rappel.titre}-${i}`}
                 rappel={rappel}

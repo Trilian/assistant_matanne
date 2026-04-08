@@ -109,7 +109,7 @@ export function GrilleDashboardDnd({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext items={ordre} strategy={verticalListSortingStrategy}>
+      <SortableContext items={Array.isArray(ordre) ? ordre : []} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
     </DndContext>
