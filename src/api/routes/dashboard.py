@@ -1314,7 +1314,7 @@ async def obtenir_points_famille(
 
     def _query() -> dict[str, Any]:
         from src.core.models import ArticleInventaire
-        from src.core.models.cuisine import Repas
+        from src.core.models.planning import Repas
         from src.core.models.users import ActiviteGarmin, ResumeQuotidienGarmin
 
         aujourd_hui = date.today()

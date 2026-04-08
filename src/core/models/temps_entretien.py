@@ -397,6 +397,7 @@ class ObjetMaison(TimestampMixin, Base):
     # Infos achat
     date_achat: Mapped[date | None] = mapped_column(Date)
     duree_garantie_mois: Mapped[int | None] = mapped_column(Integer)
+    duree_vie_ans: Mapped[int | None] = mapped_column(Integer)
     prix_achat: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     prix_remplacement_estime: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
 
