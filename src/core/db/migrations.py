@@ -73,6 +73,22 @@ class GestionnaireMigrations:
                     END $$;
                 """)
             )
+            # Ajouter name si table existante sans cette colonne (rétrocompatibilité)
+            conn.execute(
+                text(f"""
+                    DO $$
+                    BEGIN
+                        IF NOT EXISTS (
+                            SELECT 1 FROM information_schema.columns
+                            WHERE table_name = '{GestionnaireMigrations.TABLE_MIGRATIONS}'
+                            AND column_name = 'name'
+                        ) THEN
+                            ALTER TABLE {GestionnaireMigrations.TABLE_MIGRATIONS}
+                            ADD COLUMN name VARCHAR(255);
+                        END IF;
+                    END $$;
+                """)
+            )
             conn.commit()
 
         logger.info("[OK] Table migrations initialisée")
