@@ -173,6 +173,11 @@ CREATE TABLE IF NOT EXISTS profils_utilisateurs (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Compatibilité rerun / bases legacy : colonnes 2FA ajoutées tardivement
+ALTER TABLE IF EXISTS profils_utilisateurs
+    ADD COLUMN IF NOT EXISTS two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS two_factor_secret VARCHAR(255),
+    ADD COLUMN IF NOT EXISTS backup_codes JSONB;
 CREATE UNIQUE INDEX IF NOT EXISTS uq_profils_username ON profils_utilisateurs(username);
 
 
@@ -1486,6 +1491,7 @@ CREATE TABLE IF NOT EXISTS inventaire (
     photo_uploaded_at TIMESTAMP WITH TIME ZONE,
     code_barres VARCHAR(50),
     prix_unitaire FLOAT,
+    date_entree DATE NOT NULL DEFAULT CURRENT_DATE,
     CONSTRAINT fk_inventaire_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
     CONSTRAINT ck_quantite_inventaire_positive CHECK (quantite >= 0),
     CONSTRAINT ck_seuil_positif CHECK (quantite_min >= 0)
@@ -1497,6 +1503,10 @@ CREATE INDEX IF NOT EXISTS ix_inventaire_peremption ON inventaire(date_peremptio
 CREATE INDEX IF NOT EXISTS ix_inventaire_derniere_maj ON inventaire(derniere_maj);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_code_barres ON inventaire(code_barres);
 CREATE INDEX IF NOT EXISTS ix_inventaire_code_barres ON inventaire(code_barres);
+-- Compatibilité rerun / bases legacy : date_entree ajoutée tardivement
+ALTER TABLE IF EXISTS inventaire
+    ADD COLUMN IF NOT EXISTS date_entree DATE NOT NULL DEFAULT CURRENT_DATE;
+CREATE INDEX IF NOT EXISTS ix_inventaire_date_entree ON inventaire(date_entree);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2306,12 +2316,16 @@ CREATE TABLE IF NOT EXISTS evenements_familiaux (
     description TEXT,
     date_debut TIMESTAMP WITH TIME ZONE NOT NULL,
     date_fin TIMESTAMP WITH TIME ZONE,
+    date_evenement DATE DEFAULT CURRENT_DATE,
     lieu VARCHAR(300),
     type_evenement VARCHAR(50) NOT NULL DEFAULT 'famille',
     recurrence VARCHAR(30),
     rappel_minutes INTEGER,
+    rappel_jours_avant INTEGER NOT NULL DEFAULT 7,
     participants JSONB DEFAULT '[]',
     couleur VARCHAR(20),
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_evt_type CHECK (
@@ -2331,6 +2345,15 @@ CREATE TABLE IF NOT EXISTS evenements_familiaux (
 );
 CREATE INDEX IF NOT EXISTS ix_evenements_date_debut ON evenements_familiaux(date_debut);
 CREATE INDEX IF NOT EXISTS ix_evenements_type ON evenements_familiaux(type_evenement);
+-- Compatibilité rerun / bases legacy : colonnes ajoutées par migrations V004/V007
+ALTER TABLE IF EXISTS evenements_familiaux
+    ADD COLUMN IF NOT EXISTS date_evenement DATE DEFAULT CURRENT_DATE,
+    ADD COLUMN IF NOT EXISTS actif BOOLEAN NOT NULL DEFAULT TRUE,
+    ADD COLUMN IF NOT EXISTS notes TEXT,
+    ADD COLUMN IF NOT EXISTS rappel_jours_avant INTEGER NOT NULL DEFAULT 7;
+UPDATE evenements_familiaux SET date_evenement = date_debut::DATE WHERE date_evenement IS NULL;
+CREATE INDEX IF NOT EXISTS ix_evenements_familiaux_date_evenement ON evenements_familiaux(date_evenement);
+CREATE INDEX IF NOT EXISTS ix_evenements_familiaux_actif ON evenements_familiaux(actif);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2339,6 +2362,7 @@ CREATE TABLE IF NOT EXISTS documents_famille (
     nom VARCHAR(300) NOT NULL,
     titre VARCHAR(200),
     type_document VARCHAR(50) NOT NULL,
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
     fichier_url VARCHAR(500),
     date_expiration DATE,
     membre_famille VARCHAR(100),
@@ -2361,6 +2385,10 @@ CREATE INDEX IF NOT EXISTS ix_documents_type ON documents_famille(type_document)
 CREATE INDEX IF NOT EXISTS ix_documents_expiration ON documents_famille(date_expiration)
 WHERE date_expiration IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famille);
+-- Compatibilité rerun / bases legacy : categorie ajoutée par migration V008
+ALTER TABLE IF EXISTS documents_famille
+    ADD COLUMN IF NOT EXISTS categorie VARCHAR(50) NOT NULL DEFAULT 'autre';
+CREATE INDEX IF NOT EXISTS ix_documents_famille_categorie ON documents_famille(categorie);
 
 -- ============================================================================
 -- PARTIE 5 : TABLES MAISON (sans modèles ORM — migration 020)
@@ -2391,11 +2419,17 @@ CREATE TABLE IF NOT EXISTS projets (
     priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
     date_debut DATE,
     date_fin DATE,
+    date_fin_prevue DATE,
+    date_fin_reelle DATE,
     budget_estime FLOAT,
     budget_reel FLOAT,
     categorie VARCHAR(100),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Compatibilité rerun / bases legacy : date_fin_prevue/reelle ajoutées par migration V008
+ALTER TABLE IF EXISTS projets
+    ADD COLUMN IF NOT EXISTS date_fin_prevue DATE,
+    ADD COLUMN IF NOT EXISTS date_fin_reelle DATE;
 CREATE INDEX IF NOT EXISTS ix_projects_statut ON projets(statut);
 CREATE INDEX IF NOT EXISTS ix_projects_categorie ON projets(categorie);
 
@@ -2406,6 +2440,7 @@ CREATE TABLE IF NOT EXISTS routines (
     nom VARCHAR(200) NOT NULL,
     description TEXT,
     type_routine VARCHAR(100) NOT NULL,
+    categorie VARCHAR(100),
     jours JSONB DEFAULT '[]',
     heure_debut VARCHAR(10),
     actif BOOLEAN NOT NULL DEFAULT TRUE,
@@ -2414,8 +2449,12 @@ CREATE TABLE IF NOT EXISTS routines (
     derniere_completion DATE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+-- Compatibilité rerun / bases legacy : categorie ajoutée par migration V008
+ALTER TABLE IF EXISTS routines
+    ADD COLUMN IF NOT EXISTS categorie VARCHAR(100);
 CREATE INDEX IF NOT EXISTS ix_routines_type ON routines(type_routine);
 CREATE INDEX IF NOT EXISTS ix_routines_actif ON routines(actif);
+CREATE INDEX IF NOT EXISTS ix_routines_categorie ON routines(categorie);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2802,6 +2841,7 @@ CREATE TABLE IF NOT EXISTS objets_maison (
     priorite_remplacement VARCHAR(20),
     date_achat DATE,
     duree_garantie_mois INTEGER,
+    duree_vie_ans INTEGER,
     prix_achat NUMERIC(10, 2),
     prix_remplacement_estime NUMERIC(10, 2),
     marque VARCHAR(100),
@@ -2811,6 +2851,10 @@ CREATE TABLE IF NOT EXISTS objets_maison (
     modifie_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE
 );
+-- Compatibilité rerun / bases legacy : colonnes ajoutées par migrations V007/V008
+ALTER TABLE IF EXISTS objets_maison
+    ADD COLUMN IF NOT EXISTS duree_garantie_mois INTEGER,
+    ADD COLUMN IF NOT EXISTS duree_vie_ans INTEGER;
 CREATE INDEX IF NOT EXISTS idx_objets_maison_piece ON objets_maison(piece_id);
 CREATE INDEX IF NOT EXISTS idx_objets_maison_categorie ON objets_maison(categorie);
 CREATE INDEX IF NOT EXISTS idx_objets_maison_statut ON objets_maison(statut);
