@@ -307,6 +307,7 @@ CREATE TABLE IF NOT EXISTS inventaire (
     quantite_min FLOAT NOT NULL DEFAULT 1.0,
     emplacement VARCHAR(100),
     date_peremption DATE,
+    date_entree DATE NOT NULL DEFAULT CURRENT_DATE,
     derniere_maj TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     photo_url VARCHAR(500),
     photo_filename VARCHAR(200),

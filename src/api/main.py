@@ -696,6 +696,14 @@ app.include_router(ws_admin_logs_router)
 app.include_router(ws_admin_jobs_router)
 app.include_router(admin_router)
 
+# ── Endpoint public admin (hors router sécurisé) ──────────────────────────────
+# Le router admin a Depends(require_role("admin")) au niveau router → bloque tout.
+# /public/maintenance est en lecture seule pour le bandeau UI, sans auth requise.
+@app.get("/api/v1/admin/public/maintenance", tags=["Admin"], include_in_schema=False)
+async def maintenance_public() -> dict:
+    from src.api.routes.admin_infra import get_maintenance_status
+    return get_maintenance_status()
+
 # IA, Prédictions, Bridges
 app.include_router(predictions_router)
 app.include_router(ia_bridges_router)

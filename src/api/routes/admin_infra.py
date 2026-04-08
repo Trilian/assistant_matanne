@@ -520,13 +520,10 @@ async def basculer_mode_maintenance(
     return {"status": "ok", "maintenance_mode": bool(flags.get("admin.maintenance_mode", False))}
 
 
-@router.get(
-    "/public/maintenance",
-    summary="État public du mode maintenance",
-    description="Endpoint lecture seule pour afficher un bandeau maintenance côté UI.",
-)
-@gerer_exception_api
-async def lire_mode_maintenance_public() -> dict[str, Any]:
+# NOTE: /public/maintenance est enregistré dans main.py sur un router public
+# sans auth (Depends au niveau router admin_shared bloque toutes les routes).
+def get_maintenance_status() -> dict[str, bool]:
+    """Retourne l'état du mode maintenance (lecture seule, pas d'auth requise)."""
     flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
     return {"maintenance_mode": bool(flags.get("admin.maintenance_mode", False))}
 

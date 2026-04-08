@@ -162,6 +162,10 @@ CREATE TABLE IF NOT EXISTS profils_utilisateurs (
     -- Sécurité
     pin_hash VARCHAR(255),
     sections_protegees JSONB,
+    -- 2FA (TOTP)
+    two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    two_factor_secret VARCHAR(255),
+    backup_codes JSONB,
     -- Préférences avancées
     preferences_modules JSONB,
     theme_prefere VARCHAR(20) DEFAULT 'auto',

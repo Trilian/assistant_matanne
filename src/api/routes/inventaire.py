@@ -551,6 +551,40 @@ async def enrichir_par_code_barres(
     return await executer_async(_update)
 
 
+@router.get("/alertes", response_model=list[InventaireItemResponse], responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_alertes_inventaire(
+    user: dict[str, Any] = Depends(require_auth),
+) -> list[InventaireItemResponse]:
+    """Retourne les articles en stock bas ou dont la péremption est proche (7 jours)."""
+    from datetime import date, timedelta
+
+    from sqlalchemy import or_
+    from sqlalchemy.orm import joinedload
+
+    from src.core.models import ArticleInventaire
+
+    def _query():
+        with executer_avec_session() as session:
+            seuil = date.today() + timedelta(days=7)
+            articles = (
+                session.query(ArticleInventaire)
+                .options(joinedload(ArticleInventaire.ingredient))
+                .filter(
+                    or_(
+                        ArticleInventaire.date_peremption <= seuil,
+                        (ArticleInventaire.quantite_min.isnot(None))
+                        & (ArticleInventaire.quantite <= ArticleInventaire.quantite_min),
+                    )
+                )
+                .order_by(ArticleInventaire.date_peremption.asc().nullslast())
+                .all()
+            )
+            return [InventaireItemResponse.model_validate(a) for a in articles]
+
+    return await executer_async(_query)
+
+
 @router.get("/{item_id}", response_model=InventaireItemResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):

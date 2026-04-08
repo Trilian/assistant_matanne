@@ -264,6 +264,12 @@ async def connexion(request: LoginRequest, raw_request: Request):
     except HTTPException:
         raise
     except Exception as e:
+        err_lower = str(e).lower()
+        if "email not confirmed" in err_lower or "email_not_confirmed" in err_lower:
+            raise HTTPException(
+                status_code=401,
+                detail="Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte mail.",
+            ) from e
         logger.error(f"Erreur login: {e}")
         raise HTTPException(status_code=401, detail="Identifiants invalides") from e
 
