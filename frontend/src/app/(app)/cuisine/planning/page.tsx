@@ -1083,15 +1083,19 @@ export default function PagePlanning() {
                 onClick={() => {
                   setErreurIA(null);
                   toastIaRef.current = toast.loading(
-                    "Génération du planning en cours… (peut prendre 30 s)",
+                    "Génération IA en cours… cela peut prendre 1 à 2 minutes ☕",
                     { duration: Infinity }
                   );
                   genererIA(undefined);
                 }}
                 disabled={enGeneration}
               >
-                <Sparkles className="mr-2 h-4 w-4" />
-                {enGeneration ? "Génération..." : "Générer IA"}
+                {enGeneration ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-2 h-4 w-4" />
+                )}
+                {enGeneration ? "Génération en cours…" : "Générer IA"}
               </Button>
               <Button
                 variant="outline"
@@ -1207,7 +1211,8 @@ export default function PagePlanning() {
                 onClick={() => validerBrouillonPlanning(fluxCuisine.planning!.id)}
                 disabled={enValidationPlanning || enRegenerationPlanning}
               >
-                {enValidationPlanning ? "Validation..." : "Valider"}
+                {enValidationPlanning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {enValidationPlanning ? "Validation en cours…" : "Valider"}
               </Button>
               <Button
                 size="sm"
