@@ -37,7 +37,7 @@ def calculer_score_famille_hebdo(service: Any) -> ScoreFamilleHebdoResponse | No
 
             nb_taches_faites = int(
                 session.query(func.count(TacheEntretien.id))
-                .filter(TacheEntretien.fait.is_(True), TacheEntretien.date_prevue >= debut)
+                .filter(TacheEntretien.fait.is_(True), TacheEntretien.prochaine_fois >= debut)
                 .scalar()
                 or 0
             )
