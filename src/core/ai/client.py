@@ -169,19 +169,22 @@ class ClientIA(VisionMixin, StreamingMixin):
                             retry_after = int(e.response.headers.get("Retry-After", 0))
                         except (ValueError, TypeError):
                             retry_after = 0
-                    # Free Tier Mistral n'envoie pas de Retry-After : on ne réessaie pas
-                    # car 65 s × 2 tentatives dépasse le timeout client (120 s). On échoue
-                    # directement avec un message clair pour l'utilisateur.
-                    delai_effectif = retry_after if retry_after > 0 else 0
+                    # Limite de 1 req/s sur Free Tier : attente courte + 1 seul retry.
+                    # Retry-After est rarement envoyé ; on attend 2 s (suffisant pour
+                    # que la fenêtre RPS se réinitialise) sauf si Retry-After > 10 s.
+                    delai_effectif = retry_after if 0 < retry_after <= 10 else 2
                     logger.warning(
-                        "[RATE LIMIT] Quota Mistral 429 — Retry-After=%ss, pas de retry automatique",
-                        retry_after,
+                        "[RATE LIMIT] Quota Mistral 429 — attente %ss avant retry (tentative %s/%s)",
+                        delai_effectif, tentative + 1, max_tentatives,
                     )
+                    if tentative < max_tentatives - 1:
+                        await asyncio.sleep(delai_effectif)
+                        continue
                     raise ErreurLimiteDebit(
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur=(
-                            "Quota Mistral temporairement dépassé. "
-                            + (f"Réessayez dans {retry_after}s." if retry_after else "Réessayez dans ~1 minute.")
+                            "Limite de requêtes Mistral atteinte. "
+                            + (f"Réessayez dans {retry_after}s." if retry_after else "Réessayez dans quelques secondes.")
                         ),
                     ) from e
                 if tentative == max_tentatives - 1:
