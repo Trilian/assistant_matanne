@@ -199,6 +199,7 @@ class ElementJardin(CreeLeMixin, Base):
     statut: Mapped[str] = mapped_column(String(50), nullable=False, default="actif", index=True)
     date_plantation: Mapped[date | None] = mapped_column(Date)
     date_recolte_prevue: Mapped[date | None] = mapped_column(Date)
+    dernier_arrosage: Mapped[date | None] = mapped_column(Date, name="derniere_action")
     notes: Mapped[str | None] = mapped_column(Text)
 
     # Relations

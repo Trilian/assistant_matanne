@@ -195,7 +195,7 @@ export async function configurerModePiloteAuto(
 }
 
 export async function obtenirScoreFamilleHebdo(): Promise<ScoreFamilleHebdoResponse> {
-  const { data } = await clientApi.get("/innovations/score-famille-hebdo");
+  const { data } = await clientApi.get("/famille/score-famille-hebdo");
   return data;
 }
 
@@ -235,7 +235,7 @@ export async function configurerModeVacances(payload: {
 }
 
 export async function obtenirInsightsQuotidiens(limite = 2): Promise<InsightsQuotidiensResponse> {
-  const { data } = await clientApi.get("/innovations/insights-quotidiens", {
+  const { data } = await clientApi.get("/dashboard/insights-quotidiens", {
     params: { limite },
   });
   return data;

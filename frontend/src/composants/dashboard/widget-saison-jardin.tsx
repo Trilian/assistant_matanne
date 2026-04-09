@@ -36,7 +36,7 @@ export function WidgetSaisonJardin() {
     );
   }
 
-  if (error || !data || data.activites.length === 0) {
+  if (error || !data || (data.activites?.length ?? 0) === 0) {
     return (
       <Card>
         <CardHeader className="pb-3">
@@ -62,7 +62,7 @@ export function WidgetSaisonJardin() {
         <CardDescription>{data.mois}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        {data.activites.slice(0, 4).map((activite, i) => (
+        {(data.activites ?? []).slice(0, 4).map((activite, i) => (
           <div
             key={`${activite.type}-${i}`}
             className="rounded-md border bg-background/70 px-3 py-2"

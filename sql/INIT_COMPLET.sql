@@ -2323,6 +2323,7 @@ CREATE TABLE IF NOT EXISTS documents_famille (
     membre_famille VARCHAR(100),
     actif BOOLEAN NOT NULL DEFAULT TRUE,
     notes TEXT,
+    rappel_expiration_jours INTEGER DEFAULT 30,
     tags JSONB DEFAULT '[]',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

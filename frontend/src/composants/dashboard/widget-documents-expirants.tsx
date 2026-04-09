@@ -93,7 +93,7 @@ export function WidgetDocumentsExpirants() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {data.items.slice(0, 5).map((doc) => (
+        {(data.items ?? []).slice(0, 5).map((doc) => (
           <Link
             key={doc.id}
             href="/famille/documents"

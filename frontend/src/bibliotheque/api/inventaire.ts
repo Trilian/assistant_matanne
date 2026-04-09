@@ -10,8 +10,8 @@ import type { ArticleInventaire, CreerArticleInventaireDTO } from "@/types/inven
 export async function listerInventaire(emplacement?: string): Promise<ArticleInventaire[]> {
   const params: Record<string, string> = {};
   if (emplacement) params.emplacement = emplacement;
-  const { data } = await clientApi.get<ArticleInventaire[]>("/inventaire", { params });
-  return data;
+  const { data } = await clientApi.get<{ items: ArticleInventaire[] } | ArticleInventaire[]>("/inventaire", { params });
+  return (data as { items: ArticleInventaire[] }).items ?? (data as ArticleInventaire[]);
 }
 
 /** Lister les emplacements normalisés */

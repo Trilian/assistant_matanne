@@ -479,7 +479,7 @@ export default function PagePlanning() {
 
   const { data: evenementsFamille } = utiliserRequete(
     ["famille", "evenements", "planning-invites"],
-    listerEvenementsFamiliaux,
+    () => listerEvenementsFamiliaux(),
     { staleTime: 10 * 60 * 1000 }
   );
 

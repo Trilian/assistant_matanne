@@ -102,7 +102,7 @@ export function utiliserPageCourses() {
 
   const { data: evenementsFamille } = utiliserRequete(
     ["famille", "evenements", "courses-invites"],
-    listerEvenementsFamiliaux,
+    () => listerEvenementsFamiliaux(),
     { staleTime: 10 * 60 * 1000 },
   );
 

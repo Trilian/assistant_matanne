@@ -65,7 +65,7 @@ export function WidgetVeilleImmo() {
             Prix moyen : {data.prix_moyen.toLocaleString("fr-FR")} €
           </div>
         )}
-        {data.annonces_recentes.slice(0, 3).map((annonce) => (
+        {(data.annonces_recentes ?? []).slice(0, 3).map((annonce) => (
           <Link
             key={annonce.id}
             href="/maison/projets"
