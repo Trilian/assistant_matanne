@@ -420,17 +420,22 @@ export default function PagePlanning() {
   moisDate.setMonth(moisDate.getMonth() + offsetMois);
   const moisSelectionne = `${moisDate.getFullYear()}-${String(moisDate.getMonth() + 1).padStart(2, "0")}`;
   const jours = construireJoursOrdonnes(jourDebutSemaine);
-  const identifiantPresencePlanning = String(utilisateur?.id ?? utilisateur?.email ?? "planning-local");
+  const identifiantPresencePlanning = String(utilisateur?.id ?? utilisateur?.email ?? "");
   const nomPresencePlanning = String(utilisateur?.nom ?? "Membre du foyer");
   const baseWsPlanning = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws");
   const salonPlanningId = Number(dateDebut.replaceAll("-", ""));
+  // Ne connecter le WebSocket qu'une fois l'identité résolue pour éviter les
+  // reconnexions multiples (planning-local → vrai UUID).
+  const urlWsPlanning = identifiantPresencePlanning
+    ? `${baseWsPlanning}/api/v1/ws/planning/${salonPlanningId}?user=${encodeURIComponent(identifiantPresencePlanning)}&username=${encodeURIComponent(nomPresencePlanning)}`
+    : null;
   const {
     connecte: synchroPlanningActive,
     utilisateurs: participantsPlanning,
     envoyer: diffuserPlanning,
     mode: modeSynchroPlanning,
   } = utiliserWebSocket({
-    url: `${baseWsPlanning}/api/v1/ws/planning/${salonPlanningId}?user=${encodeURIComponent(identifiantPresencePlanning)}&username=${encodeURIComponent(nomPresencePlanning)}`,
+    url: urlWsPlanning,
     gestionnaires: {
       repas_added: (message) => {
         if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
