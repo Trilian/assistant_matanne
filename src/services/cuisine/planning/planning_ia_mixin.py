@@ -232,12 +232,22 @@ RULES:
         # Planning IA réussi
         logger.info(f"✅ Generated planning with {len(planning_data)} days using AI")
 
+        # Archiver les plannings existants de la même semaine pour éviter les doublons.
+        # (brouillons orphelins laissés par des générations précédentes)
+        semaine_fin = semaine_debut + timedelta(days=6)
+        db.query(Planning).filter(
+            Planning.semaine_debut == semaine_debut,
+            Planning.etat.notin_(["archive"]),
+        ).update({"etat": "archive"}, synchronize_session=False)
+
         # Créer planning en DB
+        # etat="brouillon" : le planning généré doit être validé par l'utilisateur
+        # avant d'être activé (cf. route POST /{id}/valider).
         planning = Planning(
             nom=f"Planning {semaine_debut.strftime('%d/%m/%Y')}",
             semaine_debut=semaine_debut,
             semaine_fin=semaine_fin,
-            statut="actif",
+            etat="brouillon",
             genere_par_ia=True,
         )
         db.add(planning)

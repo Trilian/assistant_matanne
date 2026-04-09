@@ -217,10 +217,14 @@ async def obtenir_planning_semaine(
                 for rec in session.query(Recette.id, Recette.nom).filter(Recette.id.in_(recette_ids)):
                     recettes_map[rec.id] = rec.nom
 
-            # Récupérer l'ID du planning pour la période
+            # Récupérer l'ID du planning actif (non archivé) pour la période
             planning_db = (
                 session.query(Planning)
-                .filter(Planning.semaine_debut <= date_debut.date(), Planning.semaine_fin >= date_debut.date())
+                .filter(
+                    Planning.semaine_debut <= date_debut.date(),
+                    Planning.semaine_fin >= date_debut.date(),
+                    Planning.etat.notin_(["archive"]),
+                )
                 .order_by(Planning.id.desc())
                 .first()
             )
