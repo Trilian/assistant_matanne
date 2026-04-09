@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS projets (
     priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
     date_debut DATE,
     date_fin DATE,
+    date_fin_prevue DATE,
+    date_fin_reelle DATE,
     budget_estime FLOAT,
     budget_reel FLOAT,
     categorie VARCHAR(100),
@@ -27,6 +29,8 @@ CREATE TABLE IF NOT EXISTS routines (
     nom VARCHAR(200) NOT NULL,
     description TEXT,
     type_routine VARCHAR(100) NOT NULL,
+    categorie VARCHAR(100),
+    frequence VARCHAR(50) NOT NULL DEFAULT 'quotidien',
     jours JSONB DEFAULT '[]',
     heure_debut VARCHAR(10),
     actif BOOLEAN NOT NULL DEFAULT TRUE,
@@ -37,6 +41,7 @@ CREATE TABLE IF NOT EXISTS routines (
 );
 CREATE INDEX IF NOT EXISTS ix_routines_type ON routines(type_routine);
 CREATE INDEX IF NOT EXISTS ix_routines_actif ON routines(actif);
+CREATE INDEX IF NOT EXISTS ix_routines_categorie ON routines(categorie);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

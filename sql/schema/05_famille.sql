@@ -119,16 +119,6 @@ CREATE TABLE IF NOT EXISTS achats_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées et les
--- champs ajoutés tardivement avant la création des index.
-ALTER TABLE IF EXISTS achats_famille
-    ADD COLUMN IF NOT EXISTS categorie VARCHAR(50),
-    ADD COLUMN IF NOT EXISTS priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
-    ADD COLUMN IF NOT EXISTS achete BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS pour_qui VARCHAR(50) NOT NULL DEFAULT 'famille',
-    ADD COLUMN IF NOT EXISTS a_revendre BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS prix_revente_estime FLOAT,
-    ADD COLUMN IF NOT EXISTS vendu_le DATE;
 CREATE INDEX IF NOT EXISTS ix_family_purchases_categorie ON achats_famille(categorie);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_priorite ON achats_famille(priorite);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_achete ON achats_famille(achete);
@@ -522,12 +512,16 @@ CREATE TABLE IF NOT EXISTS evenements_familiaux (
     description TEXT,
     date_debut TIMESTAMP WITH TIME ZONE NOT NULL,
     date_fin TIMESTAMP WITH TIME ZONE,
+    date_evenement DATE DEFAULT CURRENT_DATE,
     lieu VARCHAR(300),
     type_evenement VARCHAR(50) NOT NULL DEFAULT 'famille',
     recurrence VARCHAR(30),
     rappel_minutes INTEGER,
+    rappel_jours_avant INTEGER NOT NULL DEFAULT 7,
     participants JSONB DEFAULT '[]',
     couleur VARCHAR(20),
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT ck_evt_type CHECK (
@@ -547,6 +541,8 @@ CREATE TABLE IF NOT EXISTS evenements_familiaux (
 );
 CREATE INDEX IF NOT EXISTS ix_evenements_date_debut ON evenements_familiaux(date_debut);
 CREATE INDEX IF NOT EXISTS ix_evenements_type ON evenements_familiaux(type_evenement);
+CREATE INDEX IF NOT EXISTS ix_evenements_familiaux_date_evenement ON evenements_familiaux(date_evenement);
+CREATE INDEX IF NOT EXISTS ix_evenements_familiaux_actif ON evenements_familiaux(actif);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -555,9 +551,13 @@ CREATE TABLE IF NOT EXISTS documents_famille (
     nom VARCHAR(300) NOT NULL,
     titre VARCHAR(200),
     type_document VARCHAR(50) NOT NULL,
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
     fichier_url VARCHAR(500),
+    fichier_nom VARCHAR(200),
     date_expiration DATE,
+    date_document DATE,
     membre_famille VARCHAR(100),
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
     notes TEXT,
     tags JSONB DEFAULT '[]',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -577,6 +577,8 @@ CREATE INDEX IF NOT EXISTS ix_documents_type ON documents_famille(type_document)
 CREATE INDEX IF NOT EXISTS ix_documents_expiration ON documents_famille(date_expiration)
 WHERE date_expiration IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famille);
+CREATE INDEX IF NOT EXISTS ix_documents_famille_categorie ON documents_famille(categorie);
+CREATE INDEX IF NOT EXISTS ix_documents_famille_actif ON documents_famille(actif);
 
 -- ============================================================================
 -- PARTIE 5 : TABLES MAISON (sans modèles ORM — migration 020)

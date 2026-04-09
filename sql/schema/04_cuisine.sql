@@ -98,10 +98,6 @@ CREATE TABLE IF NOT EXISTS plannings (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : s'assurer que les colonnes existent
--- avant de créer les index associés.
-ALTER TABLE IF EXISTS plannings
-    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon';
 CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
 CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
 
@@ -116,11 +112,6 @@ CREATE TABLE IF NOT EXISTS listes_courses (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : s'assurer que les colonnes existent
--- avant de créer les index associés.
-ALTER TABLE IF EXISTS listes_courses
-    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
-    ADD COLUMN IF NOT EXISTS archivee BOOLEAN NOT NULL DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
 
@@ -242,12 +233,6 @@ CREATE TABLE IF NOT EXISTS historique_recettes (
     ),
     CONSTRAINT ck_portions_cuisinees_positive CHECK (portions_cuisinees > 0)
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
--- la création des index sur un schéma déjà existant.
-ALTER TABLE IF EXISTS historique_recettes
-    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
-    ADD COLUMN IF NOT EXISTS portions_cuisinees INTEGER NOT NULL DEFAULT 1,
-    ADD COLUMN IF NOT EXISTS feedback VARCHAR(20) DEFAULT 'neutral';
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_recette ON historique_recettes(recette_id);
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_preparation);
 
@@ -269,14 +254,6 @@ CREATE TABLE IF NOT EXISTS repas_batch (
     CONSTRAINT fk_batch_meals_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
--- la création des index sur un schéma déjà existant.
-ALTER TABLE IF EXISTS repas_batch
-    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
-    ADD COLUMN IF NOT EXISTS date_peremption DATE,
-    ADD COLUMN IF NOT EXISTS portions_creees INTEGER NOT NULL DEFAULT 4,
-    ADD COLUMN IF NOT EXISTS portions_restantes INTEGER NOT NULL DEFAULT 4,
-    ADD COLUMN IF NOT EXISTS localisation VARCHAR(200);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_recette ON repas_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_prep ON repas_batch(date_preparation);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_peremption);
@@ -325,6 +302,7 @@ CREATE INDEX IF NOT EXISTS ix_inventaire_peremption ON inventaire(date_peremptio
 CREATE INDEX IF NOT EXISTS ix_inventaire_derniere_maj ON inventaire(derniere_maj);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_code_barres ON inventaire(code_barres);
 CREATE INDEX IF NOT EXISTS ix_inventaire_code_barres ON inventaire(code_barres);
+CREATE INDEX IF NOT EXISTS ix_inventaire_date_entree ON inventaire(date_entree);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -589,15 +567,6 @@ CREATE TABLE IF NOT EXISTS preparations_batch (
         CONSTRAINT ck_prep_portions_initiales_positive CHECK (portions_initiales > 0),
         CONSTRAINT ck_prep_portions_restantes_positive CHECK (portions_restantes >= 0)
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
--- la création des index sur un schéma déjà existant.
-ALTER TABLE IF EXISTS preparations_batch
-    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
-    ADD COLUMN IF NOT EXISTS date_peremption DATE,
-    ADD COLUMN IF NOT EXISTS localisation VARCHAR(50) DEFAULT 'frigo',
-    ADD COLUMN IF NOT EXISTS consomme BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS portions_initiales INTEGER NOT NULL DEFAULT 4,
-    ADD COLUMN IF NOT EXISTS portions_restantes INTEGER NOT NULL DEFAULT 4;
 CREATE INDEX IF NOT EXISTS ix_prep_batch_session ON preparations_batch(session_id);
 CREATE INDEX IF NOT EXISTS ix_prep_batch_recette ON preparations_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_prep_batch_date ON preparations_batch(date_preparation);

@@ -1,21 +1,20 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
--- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-04-06 08:48 UTC
--- Source     : sql/schema/*.sql (21 fichiers, ~5208 lignes)
+-- Version    : 4.0
+-- Mis à jour : 2026-04-08
+-- Source     : sql/schema/*.sql (consolidé, migrations intégrées)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
---
--- ⚠️  NE PAS MODIFIER CE FICHIER DIRECTEMENT.
---     Modifier les fichiers dans sql/schema/ puis relancer:
---       python scripts/db/regenerate_init.py
+-- Ce fichier est la source de vérité pour l'initialisation complète.
+-- Toutes les modifications de schéma passent désormais par les fichiers
+-- sql/schema/*.sql ET sont répercutées ici — plus de migrations séparées.
 --
 -- Workflow SQL-first:
---   - Nouvelles tables → ajouter dans sql/schema/0X_domaine.sql
---   - Modifications  → créer sql/migrations/VNNN__description.sql
---   - Réinitialisation complète → exécuter ce fichier (DROP CASCADE)
+--   - Nouvelles tables / colonnes → modifier sql/schema/0X_domaine.sql
+--                                   ET mettre à jour ce fichier
+--   - Réinitialisation complète   → exécuter ce fichier (DROP CASCADE)
 --
 -- Usage:
 --   psql $DATABASE_URL -f sql/INIT_COMPLET.sql
@@ -190,11 +189,6 @@ CREATE TABLE IF NOT EXISTS profils_utilisateurs (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : colonnes 2FA ajoutées tardivement
-ALTER TABLE IF EXISTS profils_utilisateurs
-    ADD COLUMN IF NOT EXISTS two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS two_factor_secret VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS backup_codes JSONB;
 CREATE UNIQUE INDEX IF NOT EXISTS uq_profils_username ON profils_utilisateurs(username);
 
 
@@ -1249,10 +1243,6 @@ CREATE TABLE IF NOT EXISTS plannings (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : s'assurer que les colonnes existent
--- avant de créer les index associés.
-ALTER TABLE IF EXISTS plannings
-    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon';
 CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
 CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
 
@@ -1267,11 +1257,6 @@ CREATE TABLE IF NOT EXISTS listes_courses (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : s'assurer que les colonnes existent
--- avant de créer les index associés.
-ALTER TABLE IF EXISTS listes_courses
-    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
-    ADD COLUMN IF NOT EXISTS archivee BOOLEAN NOT NULL DEFAULT FALSE;
 CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
 
@@ -1393,12 +1378,6 @@ CREATE TABLE IF NOT EXISTS historique_recettes (
     ),
     CONSTRAINT ck_portions_cuisinees_positive CHECK (portions_cuisinees > 0)
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
--- la création des index sur un schéma déjà existant.
-ALTER TABLE IF EXISTS historique_recettes
-    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
-    ADD COLUMN IF NOT EXISTS portions_cuisinees INTEGER NOT NULL DEFAULT 1,
-    ADD COLUMN IF NOT EXISTS feedback VARCHAR(20) DEFAULT 'neutral';
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_recette ON historique_recettes(recette_id);
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_preparation);
 
@@ -1420,14 +1399,6 @@ CREATE TABLE IF NOT EXISTS repas_batch (
     CONSTRAINT fk_batch_meals_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
--- la création des index sur un schéma déjà existant.
-ALTER TABLE IF EXISTS repas_batch
-    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
-    ADD COLUMN IF NOT EXISTS date_peremption DATE,
-    ADD COLUMN IF NOT EXISTS portions_creees INTEGER NOT NULL DEFAULT 4,
-    ADD COLUMN IF NOT EXISTS portions_restantes INTEGER NOT NULL DEFAULT 4,
-    ADD COLUMN IF NOT EXISTS localisation VARCHAR(200);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_recette ON repas_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_prep ON repas_batch(date_preparation);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_peremption);
@@ -1476,9 +1447,6 @@ CREATE INDEX IF NOT EXISTS ix_inventaire_peremption ON inventaire(date_peremptio
 CREATE INDEX IF NOT EXISTS ix_inventaire_derniere_maj ON inventaire(derniere_maj);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_code_barres ON inventaire(code_barres);
 CREATE INDEX IF NOT EXISTS ix_inventaire_code_barres ON inventaire(code_barres);
--- Compatibilité rerun / bases legacy : date_entree ajoutée tardivement
-ALTER TABLE IF EXISTS inventaire
-    ADD COLUMN IF NOT EXISTS date_entree DATE NOT NULL DEFAULT CURRENT_DATE;
 CREATE INDEX IF NOT EXISTS ix_inventaire_date_entree ON inventaire(date_entree);
 
 
@@ -1744,15 +1712,6 @@ CREATE TABLE IF NOT EXISTS preparations_batch (
         CONSTRAINT ck_prep_portions_initiales_positive CHECK (portions_initiales > 0),
         CONSTRAINT ck_prep_portions_restantes_positive CHECK (portions_restantes >= 0)
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées avant
--- la création des index sur un schéma déjà existant.
-ALTER TABLE IF EXISTS preparations_batch
-    ADD COLUMN IF NOT EXISTS date_preparation DATE DEFAULT CURRENT_DATE,
-    ADD COLUMN IF NOT EXISTS date_peremption DATE,
-    ADD COLUMN IF NOT EXISTS localisation VARCHAR(50) DEFAULT 'frigo',
-    ADD COLUMN IF NOT EXISTS consomme BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS portions_initiales INTEGER NOT NULL DEFAULT 4,
-    ADD COLUMN IF NOT EXISTS portions_restantes INTEGER NOT NULL DEFAULT 4;
 CREATE INDEX IF NOT EXISTS ix_prep_batch_session ON preparations_batch(session_id);
 CREATE INDEX IF NOT EXISTS ix_prep_batch_recette ON preparations_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_prep_batch_date ON preparations_batch(date_preparation);
@@ -1886,16 +1845,6 @@ CREATE TABLE IF NOT EXISTS achats_famille (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : garantir les colonnes indexées et les
--- champs ajoutés tardivement avant la création des index.
-ALTER TABLE IF EXISTS achats_famille
-    ADD COLUMN IF NOT EXISTS categorie VARCHAR(50),
-    ADD COLUMN IF NOT EXISTS priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
-    ADD COLUMN IF NOT EXISTS achete BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS pour_qui VARCHAR(50) NOT NULL DEFAULT 'famille',
-    ADD COLUMN IF NOT EXISTS a_revendre BOOLEAN NOT NULL DEFAULT FALSE,
-    ADD COLUMN IF NOT EXISTS prix_revente_estime FLOAT,
-    ADD COLUMN IF NOT EXISTS vendu_le DATE;
 CREATE INDEX IF NOT EXISTS ix_family_purchases_categorie ON achats_famille(categorie);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_priorite ON achats_famille(priorite);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_achete ON achats_famille(achete);
@@ -2356,13 +2305,6 @@ CREATE TABLE IF NOT EXISTS evenements_familiaux (
 );
 CREATE INDEX IF NOT EXISTS ix_evenements_date_debut ON evenements_familiaux(date_debut);
 CREATE INDEX IF NOT EXISTS ix_evenements_type ON evenements_familiaux(type_evenement);
--- Compatibilité rerun / bases legacy : colonnes ajoutées par migrations V004/V007
-ALTER TABLE IF EXISTS evenements_familiaux
-    ADD COLUMN IF NOT EXISTS date_evenement DATE DEFAULT CURRENT_DATE,
-    ADD COLUMN IF NOT EXISTS actif BOOLEAN NOT NULL DEFAULT TRUE,
-    ADD COLUMN IF NOT EXISTS notes TEXT,
-    ADD COLUMN IF NOT EXISTS rappel_jours_avant INTEGER NOT NULL DEFAULT 7;
-UPDATE evenements_familiaux SET date_evenement = date_debut::DATE WHERE date_evenement IS NULL;
 CREATE INDEX IF NOT EXISTS ix_evenements_familiaux_date_evenement ON evenements_familiaux(date_evenement);
 CREATE INDEX IF NOT EXISTS ix_evenements_familiaux_actif ON evenements_familiaux(actif);
 
@@ -2375,8 +2317,11 @@ CREATE TABLE IF NOT EXISTS documents_famille (
     type_document VARCHAR(50) NOT NULL,
     categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
     fichier_url VARCHAR(500),
+    fichier_nom VARCHAR(200),
     date_expiration DATE,
+    date_document DATE,
     membre_famille VARCHAR(100),
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
     notes TEXT,
     tags JSONB DEFAULT '[]',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -2396,19 +2341,8 @@ CREATE INDEX IF NOT EXISTS ix_documents_type ON documents_famille(type_document)
 CREATE INDEX IF NOT EXISTS ix_documents_expiration ON documents_famille(date_expiration)
 WHERE date_expiration IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famille);
--- Compatibilité rerun / bases legacy : categorie ajoutée par migration V008
-ALTER TABLE IF EXISTS documents_famille
-    ADD COLUMN IF NOT EXISTS categorie VARCHAR(50) NOT NULL DEFAULT 'autre';
 CREATE INDEX IF NOT EXISTS ix_documents_famille_categorie ON documents_famille(categorie);
--- Colonnes ajoutées par migration 002
-ALTER TABLE IF EXISTS documents_famille
-    ADD COLUMN IF NOT EXISTS fichier_nom VARCHAR(200);
-ALTER TABLE IF EXISTS documents_famille
-    ADD COLUMN IF NOT EXISTS actif BOOLEAN NOT NULL DEFAULT TRUE;
 CREATE INDEX IF NOT EXISTS ix_documents_famille_actif ON documents_famille(actif);
--- Colonne ajoutée par migration 004
-ALTER TABLE IF EXISTS documents_famille
-    ADD COLUMN IF NOT EXISTS date_document DATE;
 
 -- ============================================================================
 -- PARTIE 5 : TABLES MAISON (sans modèles ORM — migration 020)
@@ -2446,10 +2380,6 @@ CREATE TABLE IF NOT EXISTS projets (
     categorie VARCHAR(100),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : date_fin_prevue/reelle ajoutées par migration V008
-ALTER TABLE IF EXISTS projets
-    ADD COLUMN IF NOT EXISTS date_fin_prevue DATE,
-    ADD COLUMN IF NOT EXISTS date_fin_reelle DATE;
 CREATE INDEX IF NOT EXISTS ix_projects_statut ON projets(statut);
 CREATE INDEX IF NOT EXISTS ix_projects_categorie ON projets(categorie);
 
@@ -2461,6 +2391,7 @@ CREATE TABLE IF NOT EXISTS routines (
     description TEXT,
     type_routine VARCHAR(100) NOT NULL,
     categorie VARCHAR(100),
+    frequence VARCHAR(50) NOT NULL DEFAULT 'quotidien',
     jours JSONB DEFAULT '[]',
     heure_debut VARCHAR(10),
     actif BOOLEAN NOT NULL DEFAULT TRUE,
@@ -2469,12 +2400,6 @@ CREATE TABLE IF NOT EXISTS routines (
     derniere_completion DATE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Compatibilité rerun / bases legacy : categorie ajoutée par migration V008
-ALTER TABLE IF EXISTS routines
-    ADD COLUMN IF NOT EXISTS categorie VARCHAR(100);
--- Colonnes ajoutées par migration 002
-ALTER TABLE IF EXISTS routines
-    ADD COLUMN IF NOT EXISTS frequence VARCHAR(50) NOT NULL DEFAULT 'quotidien';
 CREATE INDEX IF NOT EXISTS ix_routines_type ON routines(type_routine);
 CREATE INDEX IF NOT EXISTS ix_routines_actif ON routines(actif);
 CREATE INDEX IF NOT EXISTS ix_routines_categorie ON routines(categorie);
@@ -2602,20 +2527,16 @@ CREATE TABLE IF NOT EXISTS elements_jardin (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,
     type_plante VARCHAR(100) NOT NULL,
+    type VARCHAR(100) NOT NULL DEFAULT 'plante',
     emplacement VARCHAR(200),
     date_plantation DATE,
+    date_recolte_prevue DATE,
     frequence_arrosage VARCHAR(50),
     derniere_action DATE,
     statut VARCHAR(50) NOT NULL DEFAULT 'actif',
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
--- Colonnes ajoutées par migration 002
-ALTER TABLE IF EXISTS elements_jardin
-    ADD COLUMN IF NOT EXISTS type VARCHAR(100) NOT NULL DEFAULT 'plante';
--- Colonnes ajoutées par migration 003
-ALTER TABLE IF EXISTS elements_jardin
-    ADD COLUMN IF NOT EXISTS date_recolte_prevue DATE;
 CREATE INDEX IF NOT EXISTS ix_garden_items_type ON elements_jardin(type_plante);
 CREATE INDEX IF NOT EXISTS ix_garden_items_statut ON elements_jardin(statut);
 CREATE INDEX IF NOT EXISTS ix_garden_items_derniere_action ON elements_jardin(derniere_action);
@@ -2880,10 +2801,6 @@ CREATE TABLE IF NOT EXISTS objets_maison (
     modifie_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE
 );
--- Compatibilité rerun / bases legacy : colonnes ajoutées par migrations V007/V008
-ALTER TABLE IF EXISTS objets_maison
-    ADD COLUMN IF NOT EXISTS duree_garantie_mois INTEGER,
-    ADD COLUMN IF NOT EXISTS duree_vie_ans INTEGER;
 CREATE INDEX IF NOT EXISTS idx_objets_maison_piece ON objets_maison(piece_id);
 CREATE INDEX IF NOT EXISTS idx_objets_maison_categorie ON objets_maison(categorie);
 CREATE INDEX IF NOT EXISTS idx_objets_maison_statut ON objets_maison(statut);
