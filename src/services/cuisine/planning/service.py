@@ -493,7 +493,7 @@ class ServicePlanning(
 
 
 
-            type_repas_map = {"midi": "déjeuner", "soir": "dîner"}
+            type_repas_map = {"midi": "dejeuner", "soir": "diner"}
 
 
 

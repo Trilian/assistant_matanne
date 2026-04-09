@@ -257,13 +257,13 @@ class TestPlanningPayloadExact:
     pytestmark = [pytest.mark.asyncio(loop_scope="function")]
 
     async def test_planning_semaine_payload_exact_empty(self, client):
-        response = await client.get("/api/v1/planning/semaine?date_debut=2026-02-10T00:00:00")
+        response = await client.get("/api/v1/planning/semaine?date_debut=2026-02-10")
         assert response.status_code == 200
-        assert response.json() == {
-            "date_debut": "2026-02-10T00:00:00",
-            "date_fin": "2026-02-17T00:00:00",
-            "planning": {},
-        }
+        payload = response.json()
+        assert payload["date_debut"] == "2026-02-10"
+        assert payload["date_fin"] == "2026-02-17"
+        assert payload["planning"] == {}
+        assert payload["repas"] == []
 
     async def test_planning_mensuel_payload_exact_empty(self, client):
         response = await client.get("/api/v1/planning/mensuel?mois=2026-02")

@@ -156,8 +156,8 @@ async def obtenir_conflits_planning(
 @router.get("/semaine", response_model=PlanningSemaineResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def obtenir_planning_semaine(
-    date_debut: datetime | None = Query(
-        None, description="Date de début de semaine (ISO 8601). Défaut: lundi courant"
+    date_debut: date | None = Query(
+        None, description="Date de début de semaine (YYYY-MM-DD). Défaut: lundi courant"
     ),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -193,7 +193,7 @@ async def obtenir_planning_semaine(
     from src.core.models import Repas
 
     if not date_debut:
-        today = datetime.now(UTC)
+        today = date.today()
         date_debut = today - timedelta(days=today.weekday())
 
     date_fin = date_debut + timedelta(days=7)
@@ -221,8 +221,8 @@ async def obtenir_planning_semaine(
             planning_db = (
                 session.query(Planning)
                 .filter(
-                    Planning.semaine_debut <= date_debut.date(),
-                    Planning.semaine_fin >= date_debut.date(),
+                    Planning.semaine_debut <= date_debut,
+                    Planning.semaine_fin >= date_debut,
                     Planning.etat.notin_(["archive"]),
                 )
                 .order_by(Planning.id.desc())
@@ -1593,7 +1593,6 @@ async def obtenir_semaine_unifiee(
     import datetime as dt
 
     from src.core.models.planning import Repas
-    from src.core.models.recettes import Recette
 
     if date_debut:
         debut = dt.date.fromisoformat(date_debut)
@@ -1607,7 +1606,6 @@ async def obtenir_semaine_unifiee(
             # Repas
             repas_liste = (
                 session.query(Repas)
-                .join(Recette, Repas.recette_id == Recette.id, isouter=True)
                 .filter(
                     Repas.date_repas >= debut,
                     Repas.date_repas <= fin,
@@ -1615,6 +1613,17 @@ async def obtenir_semaine_unifiee(
                 .order_by(Repas.date_repas)
                 .all()
             )
+
+            # Charger les noms de recettes en une seule requête (évite le lazy-loading N+1)
+            recette_ids = [r.recette_id for r in repas_liste if r.recette_id]
+            recettes_map: dict[int, str] = {}
+            if recette_ids:
+                from src.core.models.recettes import Recette as RecetteModel
+                for rec in session.query(RecetteModel.id, RecetteModel.nom).filter(
+                    RecetteModel.id.in_(recette_ids)
+                ):
+                    recettes_map[rec.id] = rec.nom
+
             repas_par_jour: dict[str, list[dict]] = {}
             for r in repas_liste:
                 jour = r.date_repas.isoformat()
@@ -1623,7 +1632,7 @@ async def obtenir_semaine_unifiee(
                         "id": r.id,
                         "type": r.type_repas,
                         "recette_id": r.recette_id,
-                        "nom_recette": r.recette.nom if r.recette else None,
+                        "nom_recette": recettes_map.get(r.recette_id) if r.recette_id else None,
                     }
                 )
 

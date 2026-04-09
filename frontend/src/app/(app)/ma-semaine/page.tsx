@@ -55,8 +55,8 @@ export default function PageMaSemaine() {
 
   // Générer les 7 jours de la semaine
   const jours: string[] = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(dateDebut + "T00:00:00");
-    d.setDate(d.getDate() + i);
+    const d = new Date(dateDebut + "T00:00:00.000Z"); // UTC pour éviter le décalage DST
+    d.setUTCDate(d.getUTCDate() + i);
     return d.toISOString().split("T")[0];
   });
 

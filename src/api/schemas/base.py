@@ -79,21 +79,27 @@ class IdentifiedResponse(TimestampedResponse):
 class TypeRepasValidator:
     """Validateur pour le type de repas."""
 
+    # Normalise les variantes accentuées vers les valeurs canoniques sans accents.
+    # Garantit que la DB stocke toujours la forme sans accent attendue par le frontend.
+    _NORMALISATION: dict[str, str] = {
+        "petit_déjeuner": "petit_dejeuner",
+        "déjeuner": "dejeuner",
+        "dîner": "diner",
+        "goûter": "gouter",
+    }
+
     TYPES_VALIDES = [
-        "petit_déjeuner",
         "petit_dejeuner",
-        "déjeuner",
         "dejeuner",
-        "dîner",
         "diner",
-        "goûter",
         "gouter",
     ]
 
     @field_validator("type_repas")
     @classmethod
     def validate_type_repas(cls, v: str) -> str:
-        """Valide le type de repas."""
+        """Valide et normalise le type de repas (retire les accents)."""
+        v = cls._NORMALISATION.get(v, v)
         if v not in cls.TYPES_VALIDES:
-            raise ValueError("Type de repas invalide")
+            raise ValueError(f"Type de repas invalide: {v!r}")
         return v
