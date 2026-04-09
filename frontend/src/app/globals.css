@@ -385,7 +385,10 @@
 
   @supports (background: color-mix(in oklch, red 70%, white)) {
     .cn-toast::after {
-      background: color-mix(in oklch, var(--primary) 70%, white);
+      /* Mélange avec le fond (popover) pour s'adapter au thème :
+         light mode : primary dark + fond blanc → gris foncé visible
+         dark mode  : primary blanc + fond sombre → gris moyen visible */
+      background: color-mix(in oklch, var(--primary) 70%, var(--popover));
       opacity: 0.9;
     }
   }

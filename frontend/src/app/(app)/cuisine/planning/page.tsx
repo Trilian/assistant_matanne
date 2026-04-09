@@ -271,9 +271,20 @@ function CarteRepasDraggable({
         >
           <GripVertical className="h-3 w-3" />
         </button>
-        <span className="font-medium text-foreground truncate">
-          {repas.recette_nom || repas.notes || "—"}
-        </span>
+        {repas.recette_id ? (
+          <a
+            href={`/cuisine/recettes/${repas.recette_id}`}
+            className="font-medium text-foreground truncate hover:underline hover:text-primary transition-colors"
+            title={`Voir la recette : ${repas.recette_nom || repas.notes || "—"}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {repas.recette_nom || repas.notes || "—"}
+          </a>
+        ) : (
+          <span className="font-medium text-foreground truncate">
+            {repas.recette_nom || repas.notes || "—"}
+          </span>
+        )}
         {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
       </div>
       <div className="flex items-center gap-0.5 shrink-0">

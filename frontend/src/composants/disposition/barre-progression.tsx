@@ -14,7 +14,7 @@ export function BarreProgression() {
   return (
     <ProgressBar
       height="3px"
-      color="hsl(var(--primary))"
+      color="var(--primary)"
       options={{ showSpinner: false }}
       shallowRouting
     />
