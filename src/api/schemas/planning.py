@@ -61,6 +61,7 @@ class PlanningSemaineResponse(BaseModel):
     planning: dict[str, dict[str, Any]]
     planning_id: int | None = None
     genere_par_ia: bool = False
+    repas: list[dict[str, Any]] = Field(default_factory=list)
 
     model_config = {
         "json_schema_extra": {

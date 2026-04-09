@@ -199,6 +199,9 @@ async def obtenir_planning_semaine(
     date_fin = date_debut + timedelta(days=7)
 
     def _query():
+        from src.core.models import Planning
+        from src.core.models.recettes import Recette
+
         with executer_avec_session() as session:
             repas = (
                 session.query(Repas)
@@ -207,21 +210,55 @@ async def obtenir_planning_semaine(
                 .all()
             )
 
-            planning = {}
+            # Récupérer les noms de recettes en une seule requête
+            recette_ids = [r.recette_id for r in repas if r.recette_id]
+            recettes_map: dict[int, str] = {}
+            if recette_ids:
+                for rec in session.query(Recette.id, Recette.nom).filter(Recette.id.in_(recette_ids)):
+                    recettes_map[rec.id] = rec.nom
+
+            # Récupérer l'ID du planning pour la période
+            planning_db = (
+                session.query(Planning)
+                .filter(Planning.semaine_debut <= date_debut.date(), Planning.semaine_fin >= date_debut.date())
+                .order_by(Planning.id.desc())
+                .first()
+            )
+            planning_id = planning_db.id if planning_db else None
+
+            planning_dict: dict = {}
+            repas_list = []
             for r in repas:
                 jour = r.date_repas.strftime("%Y-%m-%d")
-                if jour not in planning:
-                    planning[jour] = {}
-                planning[jour][r.type_repas] = {
+                recette_nom = recettes_map.get(r.recette_id) if r.recette_id else None
+                entry: dict = {
                     "id": r.id,
                     "recette_id": r.recette_id,
                     "notes": getattr(r, "notes", None),
+                    "recette_nom": recette_nom,
                 }
+                if jour not in planning_dict:
+                    planning_dict[jour] = {}
+                planning_dict[jour][r.type_repas] = entry
+
+                repas_list.append({
+                    "id": r.id,
+                    "date_repas": jour,
+                    "type_repas": r.type_repas,
+                    "recette_id": r.recette_id,
+                    "recette_nom": recette_nom,
+                    "notes": getattr(r, "notes", None),
+                    "plat_jules": getattr(r, "plat_jules", None),
+                    "notes_jules": getattr(r, "notes_jules", None),
+                    "adaptation_auto": getattr(r, "adaptation_auto", True),
+                })
 
             return {
                 "date_debut": date_debut.isoformat(),
                 "date_fin": date_fin.isoformat(),
-                "planning": planning,
+                "planning": planning_dict,
+                "planning_id": planning_id,
+                "repas": repas_list,
             }
 
     return await executer_async(_query)
@@ -1060,6 +1097,7 @@ async def generer_planning_ia(
         # Reconstruire la réponse dans le même format que GET /semaine
         with executer_avec_session() as session:
             from src.core.models import Planning, Repas
+            from src.core.models.recettes import Recette
 
             planning_db = session.query(Planning).filter(Planning.id == planning_obj.id).first()
             if planning_db and planning_db.etat != "brouillon":
@@ -1076,7 +1114,15 @@ async def generer_planning_ia(
                 .all()
             )
 
+            # Récupérer les noms de recettes en une seule requête
+            recette_ids = [r.recette_id for r in repas if r.recette_id]
+            recettes_map: dict[int, str] = {}
+            if recette_ids:
+                for rec in session.query(Recette.id, Recette.nom, Recette.calories, Recette.proteines, Recette.lipides).filter(Recette.id.in_(recette_ids)):
+                    recettes_map[rec.id] = rec
+
             planning_dict = {}
+            repas_list = []
             for r in repas:
                 if not r.date_repas:
                     continue
@@ -1084,19 +1130,17 @@ async def generer_planning_ia(
                 if jour not in planning_dict:
                     planning_dict[jour] = {}
 
-                # Inclure le nom de la recette si liée
-                entry = {
+                rec = recettes_map.get(r.recette_id) if r.recette_id else None
+                recette_nom = rec.nom if rec else None
+                entry: dict = {
                     "id": r.id,
                     "recette_id": r.recette_id,
                     "notes": getattr(r, "notes", None),
+                    "recette_nom": recette_nom,
                 }
-                if r.recette_id and hasattr(r, "recette") and r.recette:
-                    entry["recette_nom"] = r.recette.nom
-                    # Nutri-Score simplifié dérivé des macros (heuristique)
-                    rec = r.recette
+                if rec:
                     cal = rec.calories or 0
                     prot = rec.proteines or 0
-                    glu = rec.glucides or 0
                     lip = rec.lipides or 0
                     if cal > 0 or prot > 0:
                         score = 0
@@ -1115,6 +1159,19 @@ async def generer_planning_ia(
 
                 planning_dict[jour][r.type_repas] = entry
 
+                repas_list.append({
+                    "id": r.id,
+                    "date_repas": jour,
+                    "type_repas": r.type_repas,
+                    "recette_id": r.recette_id,
+                    "recette_nom": recette_nom,
+                    "notes": getattr(r, "notes", None),
+                    "nutri_score": entry.get("nutri_score"),
+                    "plat_jules": getattr(r, "plat_jules", None),
+                    "notes_jules": getattr(r, "notes_jules", None),
+                    "adaptation_auto": getattr(r, "adaptation_auto", True),
+                })
+
             ia_success = bool(getattr(planning_db, "genere_par_ia", False) if planning_db else False)
             if not ia_success:
                 raise HTTPException(
@@ -1128,6 +1185,7 @@ async def generer_planning_ia(
                 "planning_id": planning_obj.id,
                 "genere_par_ia": True,
                 "planning": planning_dict,
+                "repas": repas_list,
             }
 
     return await executer_async(_generate)
