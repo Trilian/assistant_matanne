@@ -114,7 +114,9 @@ export interface ResultatGenerationPlanning {
 export async function genererPlanningSemaine(
   params?: GenererPlanningParams
 ): Promise<ResultatGenerationPlanning> {
-  const { data } = await clientApi.post<ResultatGenerationPlanning>("/planning/generer", params ?? {});
+  const { data } = await clientApi.post<ResultatGenerationPlanning>("/planning/generer", params ?? {}, {
+    timeout: 120_000, // 2 minutes — Mistral peut prendre 60-90 s
+  });
   return data;
 }
 

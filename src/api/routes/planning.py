@@ -8,7 +8,7 @@ modification et suppression de repas planifiés.
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from fastapi.responses import Response
 
 from src.api.dependencies import require_auth
@@ -481,6 +481,7 @@ async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_
 @gerer_exception_api
 async def valider_planning(
     planning_id: int,
+    background_tasks: "BackgroundTasks",
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Valide un planning brouillon et active la génération des courses.
@@ -565,26 +566,30 @@ async def valider_planning(
     except Exception as exc:
         logger.debug("Emission event planning.semaine_validee ignorée: %s", exc)
 
-    # Notification Telegram best-effort après validation.
-    try:
-        from src.services.core.notifications import get_dispatcher_notifications
+    # Notification Telegram best-effort après validation — en tâche de fond
+    # pour ne pas bloquer la réponse HTTP (le dispatcher utilise time.sleep()
+    # pour ses retries, ce qui bloquerait la boucle d'événements asyncio).
+    def _notifier_validation() -> None:
+        try:
+            from src.services.core.notifications import get_dispatcher_notifications
 
-        semaine = semaine_debut
-        message = (
-            f"Planning semaine validé ({semaine}). "
-            "La semaine est activée et prête pour les courses."
-        )
-        dispatcher = get_dispatcher_notifications()
-        dispatcher.envoyer(
-            user_id=str(user.get("id", user.get("sub", ""))),
-            message=message,
-            canaux=["telegram"],
-            titre="Planning validé",
-            strategie="failover",
-        )
-    except Exception as exc:
-        logger.debug("Notification Telegram planning non envoyée: %s", exc)
+            semaine = semaine_debut
+            message = (
+                f"Planning semaine validé ({semaine}). "
+                "La semaine est activée et prête pour les courses."
+            )
+            dispatcher = get_dispatcher_notifications()
+            dispatcher.envoyer(
+                user_id=str(user.get("id", user.get("sub", ""))),
+                message=message,
+                canaux=["telegram"],
+                titre="Planning validé",
+                strategie="failover",
+            )
+        except Exception as exc:
+            logger.debug("Notification Telegram planning non envoyée: %s", exc)
 
+    background_tasks.add_task(_notifier_validation)
     return resultat
 
 

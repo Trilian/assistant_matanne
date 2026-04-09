@@ -619,6 +619,10 @@ export default function PagePlanning() {
           toast.dismiss(toastIaRef.current);
           toastIaRef.current = null;
         }
+        // Le backend a peut-être quand même créé le planning (timeout Axios côté client
+        // avant que le serveur réponde) — on invalide pour récupérer le nouveau brouillon.
+        invalider(["planning"]);
+        invalider(["flux", "cuisine"]);
         const detail =
           (erreur as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
         const msg = detail ?? "Erreur lors de la génération IA";
