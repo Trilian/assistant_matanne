@@ -59,7 +59,6 @@ import {
 import { listerRecettes } from "@/bibliotheque/api/recettes";
 import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
-import type { Recette } from "@/types/recettes";
 import { TimelineBatchCooking } from "@/composants/cuisine/timeline-batch-cooking";
 
 const BADGES_STATUT: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
