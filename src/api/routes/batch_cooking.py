@@ -342,6 +342,97 @@ async def modifier_session(
     return await executer_async(_update)
 
 
+@router.post(
+    "/{session_id}/generer-etapes",
+    response_model=SessionBatchResponse,
+    responses=REPONSES_IA,
+)
+@gerer_exception_api
+async def generer_etapes_session(
+    session_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère les étapes IA pour une session batch cooking et les persiste en base."""
+    from src.core.models import EtapeBatchCooking, SessionBatchCooking
+    from src.services.cuisine.batch_cooking import obtenir_service_batch_cooking
+
+    def _generate():
+        with executer_avec_session() as session:
+            s = (
+                session.query(SessionBatchCooking)
+                .filter(SessionBatchCooking.id == session_id)
+                .first()
+            )
+            if not s:
+                raise HTTPException(status_code=404, detail="Session non trouvée")
+
+            recettes_ids = s.recettes_selectionnees or []
+            if not recettes_ids:
+                raise HTTPException(
+                    status_code=422,
+                    detail="La session ne contient aucune recette",
+                )
+
+            robots = s.robots_utilises or []
+            service = obtenir_service_batch_cooking()
+
+            plan = service.generer_plan_ia(
+                recettes_ids=recettes_ids,
+                robots_disponibles=robots,
+                avec_jules=s.avec_jules,
+            )
+            if not plan or not plan.etapes:
+                raise HTTPException(
+                    status_code=503,
+                    detail="La génération IA n'a pas produit d'étapes. Réessayez.",
+                )
+
+            # Supprimer les étapes existantes avant de les régénérer
+            for etape_existante in list(s.etapes or []):
+                session.delete(etape_existante)
+            session.flush()
+
+            for etape_ia in plan.etapes:
+                nouv = EtapeBatchCooking(
+                    session_id=s.id,
+                    ordre=etape_ia.ordre,
+                    groupe_parallele=etape_ia.groupe_parallele,
+                    titre=etape_ia.titre,
+                    description=etape_ia.description,
+                    duree_minutes=etape_ia.duree_minutes,
+                    robots_requis=etape_ia.robots or [],
+                    est_supervision=etape_ia.est_supervision,
+                    alerte_bruit=etape_ia.alerte_bruit,
+                    temperature=etape_ia.temperature,
+                    statut="a_faire",
+                )
+                session.add(nouv)
+
+            s.genere_par_ia = True
+            if plan.duree_totale_estimee:
+                s.duree_estimee = plan.duree_totale_estimee
+            session.commit()
+            session.refresh(s)
+
+            result = _serialiser_session(s)
+            result["etapes"] = [
+                {
+                    "id": e.id,
+                    "ordre": e.ordre,
+                    "groupe_parallele": e.groupe_parallele,
+                    "titre": e.titre,
+                    "duree_minutes": e.duree_minutes,
+                    "robots_requis": e.robots_requis or [],
+                    "statut": e.statut,
+                    "est_terminee": e.est_terminee,
+                }
+                for e in sorted(s.etapes, key=lambda x: x.ordre)
+            ]
+            return result
+
+    return await executer_async(_generate)
+
+
 @router.delete("/{session_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
 @gerer_exception_api
 async def supprimer_session(

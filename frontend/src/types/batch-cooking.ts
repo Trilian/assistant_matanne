@@ -50,6 +50,7 @@ export interface ModifierSessionBatchDTO {
   statut?: StatutSessionBatch
   duree_estimee?: number
   avec_jules?: boolean
+  recettes_selectionnees?: number[]
 }
 
 export interface PreparationBatch {

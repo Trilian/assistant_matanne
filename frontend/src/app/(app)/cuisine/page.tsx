@@ -102,6 +102,8 @@ export default function PageCuisine() {
   const {
     data: recettesStock,
     isFetching: chargementStock,
+    isError: erreurStock,
+    error: detailErreurStock,
     refetch: rechercherRecettesStock,
   } = useQuery({
     queryKey: ["suggestions-depuis-stock"],
@@ -109,10 +111,11 @@ export default function PageCuisine() {
       const { data } = await clientApi.get("/suggestions/depuis-stock", {
         params: { max_resultats: 3, temps_max_min: 45 },
       });
-      return data as { suggestions: { nom: string; description: string; raison: string; temps_preparation: number; temps_cuisson: number }[]; nb_ingredients_stock: number };
+      return data as { suggestions: { nom: string; description: string; raison: string; temps_preparation: number; temps_cuisson: number }[]; nb_ingredients_stock: number; message?: string };
     },
     enabled: false,
     staleTime: 30 * 60 * 1000,
+    retry: false,
   });
 
   const nbRepas = dashboard?.repas_aujourd_hui?.length ?? 0;
@@ -352,11 +355,18 @@ export default function PageCuisine() {
               </button>
             </div>
           </CardHeader>
+          {erreurStock && (
+            <CardContent>
+              <p className="text-sm text-destructive">
+                {(detailErreurStock as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Erreur lors de la recherche de recettes. Réessaie dans un instant."}
+              </p>
+            </CardContent>
+          )}
           {recettesStock && (
             <CardContent>
               {(recettesStock.suggestions ?? []).length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Aucune recette trouvée avec le stock actuel ({recettesStock.nb_ingredients_stock} ingrédients).
+                  {recettesStock.message ?? `Aucune recette trouvée avec le stock actuel (${recettesStock.nb_ingredients_stock} ingrédients).`}
                 </p>
               ) : (
                 <div className="grid gap-2 sm:grid-cols-3">

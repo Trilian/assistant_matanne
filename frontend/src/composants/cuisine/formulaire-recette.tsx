@@ -55,7 +55,9 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
       ? {
           nom: recetteExistante.nom,
           description: recetteExistante.description ?? "",
-          instructions: recetteExistante.instructions ?? "",
+          instructions: recetteExistante.etapes && recetteExistante.etapes.length > 0
+            ? recetteExistante.etapes.map((e) => e.description).join("\n")
+            : (recetteExistante.instructions ?? ""),
           temps_preparation: recetteExistante.temps_preparation ?? undefined,
           temps_cuisson: recetteExistante.temps_cuisson ?? undefined,
           portions: recetteExistante.portions ?? undefined,

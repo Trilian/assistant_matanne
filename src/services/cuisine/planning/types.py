@@ -44,8 +44,8 @@ class JourPlanning(BaseModel):
     dejeuner_dessert: str | None = None
     dejeuner_dessert_est_recette: bool = False
 
-    # Goûter
-    gouter: str | None = None
+    # Goûter — obligatoire, fallback "Fruit de saison" si l'IA renvoie null
+    gouter: str | None = None  # None accepté en entrée mais normalisé avant persistance
     gouter_est_recette: bool = False
 
     # Dîner — entrée optionnelle

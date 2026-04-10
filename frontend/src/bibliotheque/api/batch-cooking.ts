@@ -102,3 +102,13 @@ export async function obtenirConfigBatch(): Promise<ConfigBatchCooking> {
   const { data } = await clientApi.get<ConfigBatchCooking>("/batch-cooking/config")
   return data
 }
+
+/** Générer les étapes IA pour une session existante et les persister */
+export async function genererEtapesSession(
+  id: number
+): Promise<SessionBatchCooking> {
+  const { data } = await clientApi.post<SessionBatchCooking>(
+    `/batch-cooking/${id}/generer-etapes`
+  )
+  return data
+}

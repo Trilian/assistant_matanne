@@ -2,11 +2,20 @@
 // Types Recettes
 // ═══════════════════════════════════════════════════════════
 
+export interface EtapeRecette {
+  id: number;
+  ordre: number;
+  description: string;
+  titre?: string;
+  duree?: number;
+}
+
 export interface Recette {
   id: number;
   nom: string;
   description?: string;
   instructions?: string;
+  etapes?: EtapeRecette[];
   temps_preparation?: number;
   temps_cuisson?: number;
   portions?: number;

@@ -218,6 +218,7 @@ class DashboardMainResponse(BaseModel):
     habitat: DashboardHabitatItem = Field(default_factory=DashboardHabitatItem)
     prochaines_activites: list[dict[str, Any]] = Field(default_factory=list)
     alertes: list[dict[str, Any]] = Field(default_factory=list)
+    repas_aujourd_hui: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ModuleScoreEcoCuisine(BaseModel):

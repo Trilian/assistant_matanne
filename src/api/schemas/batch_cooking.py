@@ -95,6 +95,7 @@ class SessionBatchPatch(BaseModel):
     )
     duree_estimee: int | None = None
     avec_jules: bool | None = None
+    recettes_selectionnees: list[int] | None = Field(None, description="IDs des recettes sélectionnées")
 
 
 class SessionBatchResponse(BaseModel):

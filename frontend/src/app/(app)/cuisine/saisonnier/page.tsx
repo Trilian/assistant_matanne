@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { CalendarDays, Leaf, Sparkles, ChefHat } from "lucide-react";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
@@ -24,7 +25,10 @@ const COULEURS_CATEGORIES: Record<string, string> = {
   champignon: "bg-amber-100 text-amber-800 border-amber-200",
 };
 
+const LIMITE_DEFAUT = 12;
+
 export default function PageCalendrierSaisonnier() {
+  const [moisdeveloppes, setMoisDeveloppes] = useState<Set<number>>(new Set());
   const { data, isLoading, isError, refetch } = utiliserRequete(
     ["calendrier-saisonnier"],
     obtenirCalendrierSaisonnier
@@ -92,6 +96,11 @@ export default function PageCalendrierSaisonnier() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {data.calendrier.map((mois) => {
               const estActuel = mois.mois === data.mois_courant;
+              const estDeveloppe = moisdeveloppes.has(mois.mois);
+              const ingredientsAffiches = estDeveloppe
+                ? mois.ingredients
+                : mois.ingredients.slice(0, LIMITE_DEFAUT);
+              const nbCaches = mois.ingredients.length - LIMITE_DEFAUT;
               return (
                 <div
                   key={mois.mois}
@@ -103,7 +112,7 @@ export default function PageCalendrierSaisonnier() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {mois.ingredients.slice(0, 12).map((ingredient) => (
+                    {ingredientsAffiches.map((ingredient) => (
                       <span
                         key={`${mois.mois}-${ingredient.nom}`}
                         className={`rounded-full border px-2 py-1 text-xs ${COULEURS_CATEGORIES[ingredient.categorie] ?? "bg-muted text-foreground"}`}
@@ -111,10 +120,28 @@ export default function PageCalendrierSaisonnier() {
                         {ingredient.nom}
                       </span>
                     ))}
-                    {mois.ingredients.length > 12 ? (
-                      <span className="rounded-full border px-2 py-1 text-xs text-muted-foreground">
-                        +{mois.ingredients.length - 12} autres
-                      </span>
+                    {!estDeveloppe && nbCaches > 0 ? (
+                      <button
+                        onClick={() =>
+                          setMoisDeveloppes((prev) => new Set([...prev, mois.mois]))
+                        }
+                        className="rounded-full border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                      >
+                        +{nbCaches} autres
+                      </button>
+                    ) : estDeveloppe && mois.ingredients.length > LIMITE_DEFAUT ? (
+                      <button
+                        onClick={() =>
+                          setMoisDeveloppes((prev) => {
+                            const next = new Set(prev);
+                            next.delete(mois.mois);
+                            return next;
+                          })
+                        }
+                        className="rounded-full border px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                      >
+                        Réduire
+                      </button>
                     ) : null}
                   </div>
                 </div>

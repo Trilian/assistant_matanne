@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -20,6 +20,8 @@ import {
   CalendarPlus,
   UtensilsCrossed,
   Timer,
+  Search,
+  X,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -54,8 +56,10 @@ import {
   listerPreparations,
   consommerPreparation,
 } from "@/bibliotheque/api/batch-cooking";
+import { listerRecettes } from "@/bibliotheque/api/recettes";
 import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
+import type { Recette } from "@/types/recettes";
 import { TimelineBatchCooking } from "@/composants/cuisine/timeline-batch-cooking";
 
 const BADGES_STATUT: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -98,6 +102,9 @@ export default function PageBatchCooking() {
   const [dateSession, setDateSession] = useState("");
   const [dureeEstimee, setDureeEstimee] = useState("");
   const [filtreLocalisation, setFiltreLocalisation] = useState<FiltreLocalisation>("tout");
+  const [etapeCreation, setEtapeCreation] = useState<1 | 2>(1);
+  const [recettesSelectionnees, setRecettesSelectionnees] = useState<number[]>([]);
+  const [rechercheRecette, setRechercheRecette] = useState("");
 
   const invalider = utiliserInvalidation();
 
@@ -112,14 +119,12 @@ export default function PageBatchCooking() {
         nom: nomSession.trim(),
         date_session: dateSession || undefined,
         duree_estimee: dureeEstimee ? Number(dureeEstimee) : undefined,
+        recettes_selectionnees: recettesSelectionnees.length > 0 ? recettesSelectionnees : undefined,
       }),
     {
       onSuccess: () => {
         invalider(["batch-cooking"]);
-        setDialogueCreation(false);
-        setNomSession("");
-        setDateSession("");
-        setDureeEstimee("");
+        reinitialiserDialogue();
         toast.success("Session créée");
       },
       onError: () => toast.error("Erreur lors de la création"),
@@ -135,6 +140,35 @@ export default function PageBatchCooking() {
   );
 
   const sessions = donnees?.items ?? [];
+
+  const { data: toutesRecettes, isLoading: chargementRecettes } = utiliserRequete(
+    ["recettes", "batch-picker"],
+    () => listerRecettes(1, 100),
+    { enabled: dialogueCreation && etapeCreation === 2 }
+  );
+
+  const recettesFiltrees = useMemo(() => {
+    const items = toutesRecettes?.items ?? [];
+    if (!rechercheRecette.trim()) return items;
+    const q = rechercheRecette.toLowerCase();
+    return items.filter((r) => r.nom.toLowerCase().includes(q));
+  }, [toutesRecettes, rechercheRecette]);
+
+  function toggleRecette(id: number) {
+    setRecettesSelectionnees((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function reinitialiserDialogue() {
+    setDialogueCreation(false);
+    setNomSession("");
+    setDateSession("");
+    setDureeEstimee("");
+    setEtapeCreation(1);
+    setRecettesSelectionnees([]);
+    setRechercheRecette("");
+  }
 
   const { data: preparationsDonnees } = utiliserRequete(
     ["batch-cooking", "preparations"],
@@ -402,68 +436,153 @@ export default function PageBatchCooking() {
       </Tabs>
 
       {/* Dialogue création */}
-      <Dialog open={dialogueCreation} onOpenChange={setDialogueCreation}>
-        <DialogContent>
+      <Dialog open={dialogueCreation} onOpenChange={(open) => { if (!open) reinitialiserDialogue(); else setDialogueCreation(true); }}>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Nouvelle session</DialogTitle>
+            <DialogTitle>
+              Nouvelle session
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                Étape {etapeCreation}/2
+              </span>
+            </DialogTitle>
           </DialogHeader>
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (nomSession.trim()) creer(undefined);
-            }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="bc-nom">Nom de la session *</Label>
-              <Input
-                id="bc-nom"
-                value={nomSession}
-                onChange={(e) => setNomSession(e.target.value)}
-                placeholder="Ex: Batch du dimanche"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+
+          {etapeCreation === 1 ? (
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (nomSession.trim()) setEtapeCreation(2);
+              }}
+            >
               <div className="space-y-2">
-                <Label htmlFor="bc-date">Date</Label>
+                <Label htmlFor="bc-nom">Nom de la session *</Label>
                 <Input
-                  id="bc-date"
-                  type="date"
-                  value={dateSession}
-                  onChange={(e) => setDateSession(e.target.value)}
+                  id="bc-nom"
+                  value={nomSession}
+                  onChange={(e) => setNomSession(e.target.value)}
+                  placeholder="Ex: Batch du dimanche"
+                  autoFocus
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="bc-duree">Durée estimée (min)</Label>
-                <Input
-                  id="bc-duree"
-                  type="number"
-                  min={0}
-                  value={dureeEstimee}
-                  onChange={(e) => setDureeEstimee(e.target.value)}
-                  placeholder="120"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bc-date">Date</Label>
+                  <Input
+                    id="bc-date"
+                    type="date"
+                    value={dateSession}
+                    onChange={(e) => setDateSession(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bc-duree">Durée estimée (min)</Label>
+                  <Input
+                    id="bc-duree"
+                    type="number"
+                    min={0}
+                    value={dureeEstimee}
+                    onChange={(e) => setDureeEstimee(e.target.value)}
+                    placeholder="120"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDialogueCreation(false)}
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                disabled={enCreation || !nomSession.trim()}
-              >
-                {enCreation && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={reinitialiserDialogue}>
+                  Annuler
+                </Button>
+                <Button type="submit" disabled={!nomSession.trim()}>
+                  Suivant : choisir les recettes
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Sélectionnez les recettes à préparer lors de cette session.
+                {recettesSelectionnees.length > 0 && (
+                  <span className="ml-1 font-medium text-foreground">
+                    {recettesSelectionnees.length} sélectionnée{recettesSelectionnees.length > 1 ? "s" : ""}
+                  </span>
                 )}
-                Créer
-              </Button>
+              </p>
+
+              {/* Recherche */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-8"
+                  placeholder="Rechercher une recette…"
+                  value={rechercheRecette}
+                  onChange={(e) => setRechercheRecette(e.target.value)}
+                  autoFocus
+                />
+                {rechercheRecette && (
+                  <button
+                    type="button"
+                    aria-label="Effacer la recherche"
+                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                    onClick={() => setRechercheRecette("")}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Liste recettes */}
+              <div className="max-h-64 overflow-y-auto space-y-1 rounded-md border p-2">
+                {chargementRecettes ? (
+                  <div className="flex justify-center py-6">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : recettesFiltrees.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-muted-foreground">Aucune recette trouvée</p>
+                ) : (
+                  recettesFiltrees.map((r) => {
+                    const selectionne = recettesSelectionnees.includes(r.id);
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        className={`w-full flex items-center justify-between gap-2 rounded px-3 py-2 text-left text-sm transition-colors hover:bg-accent ${
+                          selectionne ? "bg-primary/10 font-medium" : ""
+                        }`}
+                        onClick={() => toggleRecette(r.id)}
+                      >
+                        <span className="min-w-0 truncate">{r.nom}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {r.temps_preparation != null && (
+                            <span className="text-xs text-muted-foreground">{r.temps_preparation + (r.temps_cuisson ?? 0)} min</span>
+                          )}
+                          {selectionne && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="flex justify-between gap-2">
+                <Button type="button" variant="outline" onClick={() => setEtapeCreation(1)}>
+                  Retour
+                </Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="ghost" onClick={reinitialiserDialogue}>
+                    Annuler
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={enCreation}
+                    onClick={() => creer(undefined)}
+                  >
+                    {enCreation && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Créer la session
+                  </Button>
+                </div>
+              </div>
             </div>
-          </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>

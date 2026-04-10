@@ -244,9 +244,9 @@ RULES:
 3. petit_dejeuner: simple text on weekdays (tartines, céréales, fruit), can be est_recette=true on weekend (crêpes, gaufres...)
 4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
-6. gouter: simple text (pain au chocolat, fruit, yaourt...), est_recette=true only for real preparations
+6. gouter: MANDATORY — always a non-null short text (pain au chocolat, fruit, yaourt, biscuits, compote...). est_recette=true only for real preparations. Never leave null.
 7. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
-8. null is valid for optional fields
+8. null is valid ONLY for entree, laitage, dessert — never for gouter
 9. No explanations, no text, ONLY JSON"""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
@@ -345,7 +345,9 @@ RULES:
                 )
             )
 
-            # Goûter (optionnel)
+            # Goûter (obligatoire — fallback si l'IA a quand même renvoyé null)
+            if not jour_data.gouter:
+                jour_data.gouter = "Fruit de saison"
             if jour_data.gouter:
                 recette_gouter_id = (
                     self._trouver_ou_creer_recette(db, jour_data.gouter)

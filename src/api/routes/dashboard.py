@@ -537,6 +537,22 @@ async def obtenir_tableau_bord(
             except Exception as e:
                 logger.warning("[dashboard] Alertes documents non chargées: %s", e)
 
+            # Repas du jour
+            repas_aujourd_hui = []
+            try:
+                repas_jour = (
+                    session.query(Repas).filter(Repas.date_repas == aujourd_hui).all()
+                )
+                repas_aujourd_hui = [
+                    {
+                        "type_repas": r.type_repas,
+                        "recette_nom": r.recette.nom if r.recette else r.notes,
+                    }
+                    for r in repas_jour
+                ]
+            except Exception as e:
+                logger.warning("[dashboard] Repas du jour non chargés: %s", e)
+
             return {
                 "statistiques": {
                     "recettes_total": recettes_total,
@@ -566,6 +582,7 @@ async def obtenir_tableau_bord(
                     for a in prochaines
                 ],
                 "alertes": alertes,
+                "repas_aujourd_hui": repas_aujourd_hui,
             }
 
     return await executer_async(_query)

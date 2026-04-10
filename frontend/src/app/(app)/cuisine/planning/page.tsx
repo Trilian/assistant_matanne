@@ -291,34 +291,36 @@ function CarteRepasDraggable({
           </div>
           {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
             (repas.entree || repas.laitage || repas.dessert) && (
-              <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
+              <div className="flex flex-col gap-y-0.5 mt-0.5">
                 {repas.entree && (
                   repas.entree_recette_id ? (
                     <a
                       href={`/cuisine/recettes/${repas.entree_recette_id}`}
-                      className="text-[10px] text-muted-foreground hover:underline truncate max-w-[90px]"
+                      className="text-[10px] text-muted-foreground hover:underline line-clamp-1"
+                      title={`Entrée : ${repas.entree}`}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      E·{repas.entree}
+                      🥗 {repas.entree}
                     </a>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground truncate max-w-[90px]">E·{repas.entree}</span>
+                    <span className="text-[10px] text-muted-foreground line-clamp-1" title={`Entrée : ${repas.entree}`}>🥗 {repas.entree}</span>
                   )
                 )}
                 {repas.laitage && (
-                  <span className="text-[10px] text-muted-foreground truncate max-w-[90px]">🥛 {repas.laitage}</span>
+                  <span className="text-[10px] text-muted-foreground line-clamp-1" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
                 )}
                 {repas.dessert && (
                   repas.dessert_recette_id ? (
                     <a
                       href={`/cuisine/recettes/${repas.dessert_recette_id}`}
-                      className="text-[10px] text-muted-foreground hover:underline truncate max-w-[90px]"
+                      className="text-[10px] text-muted-foreground hover:underline line-clamp-1"
+                      title={`Dessert : ${repas.dessert}`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       🍮 {repas.dessert}
                     </a>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground truncate max-w-[90px]">🍮 {repas.dessert}</span>
+                    <span className="text-[10px] text-muted-foreground line-clamp-1" title={`Dessert : ${repas.dessert}`}>🍮 {repas.dessert}</span>
                   )
                 )}
               </div>
@@ -692,7 +694,10 @@ export default function PagePlanning() {
         setCoursesDialogue(true);
         toast.success(`${result.total_articles} articles ajoutés !`);
       },
-      onError: () => toast.error("Erreur lors de la génération des courses"),
+      onError: (err) => {
+        const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+        toast.error(detail ?? "Erreur lors de la génération des courses", { duration: 8000 });
+      },
     }
   );
 

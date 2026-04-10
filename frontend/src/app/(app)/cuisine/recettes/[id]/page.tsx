@@ -369,7 +369,26 @@ export default function PageDetailRecette({
             )}
           </CardHeader>
           <CardContent>
-            {recette.instructions ? (
+            {recette.etapes && recette.etapes.length > 0 ? (
+              <ol className="space-y-3">
+                {recette.etapes.map((etape, i) => (
+                  <li key={etape.id ?? i} className="flex gap-3 text-sm">
+                    <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary font-semibold text-xs">
+                      {etape.ordre}
+                    </span>
+                    <div className="flex-1 pt-0.5">
+                      {etape.titre && (
+                        <p className="font-medium mb-0.5">{etape.titre}</p>
+                      )}
+                      <p className="text-muted-foreground whitespace-pre-wrap">{etape.description}</p>
+                      {etape.duree && (
+                        <p className="text-xs text-muted-foreground mt-1">{etape.duree} min</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : recette.instructions ? (
               <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
                 {recette.instructions}
               </div>

@@ -1125,27 +1125,22 @@ async def generer_planning_ia(
         except Exception as e:
             logger.warning("[planning] Enrichissement budget ignoré: %s", e)
 
-        # Enrichir avec les produits de saison du mois en cours
+        # Enrichir avec les produits de saison du mois en cours (catalogue enrichi ~120 ingrédients)
         try:
-            import json
-            from pathlib import Path
-
-            saison_path = (
-                Path(__file__).parent.parent.parent.parent
-                / "data"
-                / "reference"
-                / "produits_de_saison.json"
+            from src.services.cuisine.suggestions.saisons_enrichi import (
+                INGREDIENTS_SAISON_ENRICHI,
+                obtenir_saison,
             )
-            if saison_path.exists():
-                saison_data = json.loads(saison_path.read_text(encoding="utf-8"))
-                mois_actuel = today.month
-                produits_saison = [
-                    p["nom"]
-                    for p in saison_data.get("produits", [])
-                    if mois_actuel in p.get("mois", [])
-                ]
-                if produits_saison:
-                    preferences_enrichies["produits_de_saison"] = produits_saison[:20]
+
+            mois_actuel = today.month
+            saison_actuelle = obtenir_saison()
+            produits_saison = [
+                ing.nom
+                for ing in INGREDIENTS_SAISON_ENRICHI.get(saison_actuelle, [])
+                if mois_actuel in ing.pic_mois
+            ]
+            if produits_saison:
+                preferences_enrichies["produits_de_saison"] = produits_saison
         except Exception as e:
             logger.warning("[planning] Enrichissement saisonnier non chargé: %s", e)
 

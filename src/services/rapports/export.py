@@ -19,7 +19,7 @@ from sqlalchemy.orm import joinedload
 
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_gestion_erreurs
-from src.core.models import ArticleCourses, Planning, Recette, RecetteIngredient, Repas
+from src.core.models import ArticleCourses, ListeCourses, Planning, Recette, RecetteIngredient, Repas
 from src.services.rapports._couleurs import Couleur
 from src.services.rapports.types import (
     DonneesCoursesPDF,
@@ -252,8 +252,8 @@ class ServiceExportPDF:
             ]
 
             for repas in planning.repas:
-                if repas.date and date_debut.date() <= repas.date <= date_fin.date():
-                    jour_idx = (repas.date - date_debut.date()).days
+                if repas.date_repas and date_debut.date() <= repas.date_repas <= date_fin.date():
+                    jour_idx = (repas.date_repas - date_debut.date()).days
                     jour_nom = jours_semaine[jour_idx] if 0 <= jour_idx < 7 else "Autre"
 
                     if jour_nom not in repas_par_jour:
@@ -370,34 +370,63 @@ class ServiceExportPDF:
             BytesIO contenant le PDF
         """
         with obtenir_contexte_db() as db:
-            articles = (
-                db.query(ArticleCourses)
-                .filter(not ArticleCourses.achete)
-                .order_by(ArticleCourses.categorie, ArticleCourses.nom)
-                .all()
+            # Chercher la liste active la plus récente (non archivée, non terminée)
+            liste = (
+                db.query(ListeCourses)
+                .filter(ListeCourses.archivee.is_(False), ListeCourses.etat != "terminee")
+                .order_by(ListeCourses.cree_le.desc())
+                .first()
             )
 
-            # Organiser par catégorie
-            par_categorie = {}
-            for article in articles:
-                cat = article.categorie or "Autre"
-                if cat not in par_categorie:
-                    par_categorie[cat] = []
-                par_categorie[cat].append(
-                    {
-                        "nom": article.nom,
-                        "quantite": article.quantite or 1,
-                        "unite": article.unite or "",
-                        "urgent": article.urgent or False,
-                    }
+            if not liste:
+                # Pas de liste active — retourner un PDF vide signalant l'état
+                articles_data = []
+                par_categorie = {}
+            else:
+                articles = (
+                    db.query(ArticleCourses)
+                    .options(joinedload(ArticleCourses.ingredient))
+                    .filter(
+                        ArticleCourses.liste_id == liste.id,
+                        ArticleCourses.achete.is_(False),
+                    )
+                    .order_by(ArticleCourses.rayon_magasin)
+                    .all()
                 )
 
-            data = DonneesCoursesPDF(
-                articles=[
-                    {"nom": a.nom, "quantite": a.quantite, "categorie": a.categorie}
+                # Organiser par rayon
+                par_categorie: dict = {}
+                for article in articles:
+                    nom = article.ingredient.nom if article.ingredient else "Inconnu"
+                    unite = (article.ingredient.unite if article.ingredient else "") or ""
+                    cat = article.rayon_magasin or (
+                        article.ingredient.categorie if article.ingredient else "Autre"
+                    ) or "Autre"
+                    if cat not in par_categorie:
+                        par_categorie[cat] = []
+                    par_categorie[cat].append(
+                        {
+                            "nom": nom,
+                            "quantite": article.quantite_necessaire or 1,
+                            "unite": unite,
+                            "urgent": article.priorite == "haute",
+                        }
+                    )
+
+                articles_data = [
+                    {
+                        "nom": a.ingredient.nom if a.ingredient else "Inconnu",
+                        "quantite": a.quantite_necessaire,
+                        "categorie": a.rayon_magasin or (
+                            a.ingredient.categorie if a.ingredient else "Autre"
+                        ),
+                    }
                     for a in articles
-                ],
-                total_articles=len(articles),
+                ]
+
+            data = DonneesCoursesPDF(
+                articles=articles_data,
+                total_articles=len(articles_data),
                 par_categorie=par_categorie,
             )
 

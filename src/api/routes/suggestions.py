@@ -513,9 +513,12 @@ async def suggerer_recettes_depuis_stock(
             temps_max_min=temps_max_min,
             nb_suggestions=max_resultats,
         )
-        return {
+        resultat: dict = {
             "suggestions": [s.model_dump() if hasattr(s, "model_dump") else s for s in suggestions],
             "nb_ingredients_stock": len(ingredients_en_stock),
         }
+        if not suggestions:
+            resultat["message"] = "L'IA n'a pas pu générer de suggestions. Vérifiez que MISTRAL_API_KEY est configuré."
+        return resultat
 
     return await executer_async(_query)

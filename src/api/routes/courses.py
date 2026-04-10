@@ -919,6 +919,22 @@ async def generer_depuis_planning(
                 .all()
             )
 
+            if not rows:
+                # Les recettes du planning n'ont aucun ingrédient enregistré.
+                recette_noms = (
+                    session.query(Recette.nom)
+                    .filter(Recette.id.in_(recette_ids))
+                    .all()
+                )
+                noms = ", ".join(r.nom for r in recette_noms) if recette_noms else str(recette_ids)
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        f"Les recettes du planning n'ont pas d'ingrédients enregistrés : {noms}. "
+                        "Ajoutez des ingrédients aux recettes avant de générer la liste de courses."
+                    ),
+                )
+
             ingredients_list = [
                 {
                     "nom": row.nom,
