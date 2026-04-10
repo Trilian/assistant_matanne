@@ -219,7 +219,7 @@ tags_metadata = [
         "description": "Projets, routines, entretien, jardin et stocks maison",
     },
     {
-        "name": "Habitat",
+        "name": "Vision Maison",
         "description": "Scenarios, veille immo, plans, deco et paysagisme",
     },
     {

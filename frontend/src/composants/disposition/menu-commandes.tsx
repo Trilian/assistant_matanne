@@ -269,7 +269,7 @@ export function MenuCommandes() {
             statut: "brouillon",
           });
           toast.success(`Scénario créé: ${scenario.nom}`);
-          router.push("/habitat/scenarios");
+          router.push("/vision-maison/scenarios");
         },
       },
       {

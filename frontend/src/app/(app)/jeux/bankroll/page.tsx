@@ -12,7 +12,7 @@ import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { BankrollWidget } from "@/composants/jeux/bankroll-widget";
 
 export default function PageBankroll() {
-  const { utilisateur } = utiliserAuth();
+  const { utilisateur, estChargement } = utiliserAuth();
   const userId = Number(utilisateur?.id ?? 0);
 
   return (
@@ -44,7 +44,13 @@ export default function PageBankroll() {
         </CardContent>
       </Card>
 
-      {userId > 0 ? (
+      {estChargement ? (
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
+            Chargement…
+          </CardContent>
+        </Card>
+      ) : userId > 0 ? (
         <BankrollWidget userId={userId} />
       ) : (
         <Card>

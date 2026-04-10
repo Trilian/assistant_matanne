@@ -58,7 +58,7 @@ from src.services.habitat.scenarios_service import obtenir_service_scenarios_hab
 from src.services.habitat.veille_service import obtenir_service_veille_habitat
 from src.services.integrations.image_generation import obtenir_service_generation_image
 
-router = APIRouter(prefix="/api/v1/habitat", tags=["Habitat"])
+router = APIRouter(prefix="/api/v1/vision-maison", tags=["Vision Maison"])
 REPONSES_LISTE_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_LISTE)
 REPONSES_CRUD_LECTURE_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_CRUD_LECTURE)
 REPONSES_CRUD_CREATION_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_CRUD_CREATION)

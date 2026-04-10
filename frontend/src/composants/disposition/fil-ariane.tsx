@@ -66,6 +66,11 @@ function traduireSegment(segment: string): string {
     parametres: "Paramètres",
     nouveau: "Nouveau",
     timeline: "Timeline",
+    "vision-maison": "Vision Maison",
+    scenarios: "Scénarios",
+    "veille-immo": "Veille Immo",
+    marche: "Marché",
+    deco: "Déco",
   };
   return traductions[segment] ?? segment;
 }

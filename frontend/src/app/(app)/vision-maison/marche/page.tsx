@@ -24,7 +24,7 @@ export default function MarcheHabitatPage() {
     <div className="space-y-6">
       <EntetePageHabitat
         badge="H12 • Marche local"
-        titre="Marche Habitat"
+        titre="Marché"
         description="Lecture du marche immobilier local a partir des transactions DVF publiques, avec historique de prix, volumes et reperes exploitables pour la veille Habitat."
         stats={[
           { label: "Transactions", valeur: `${data?.resume.nb_transactions ?? 0}` },

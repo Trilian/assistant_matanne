@@ -45,7 +45,7 @@ const ITEMS = [
 // Contenu du drawer « Plus »
 const PLUS_ITEMS = [
   { nom: "Ma Semaine", chemin: "/ma-semaine", Icone: CalendarRange },
-  { nom: "Habitat", chemin: "/habitat", Icone: Map },
+  { nom: "Vision Maison", chemin: "/vision-maison", Icone: Map },
   { nom: "Jeux", chemin: "/jeux", Icone: Gamepad2 },
   { nom: "IA Avancée", chemin: "/ia-avancee", Icone: Sparkles },
   { nom: "Outils", chemin: "/outils", Icone: Wrench },
@@ -53,7 +53,7 @@ const PLUS_ITEMS = [
 ] as const;
 
 /** Routes couvertes par l'onglet « Plus » */
-const PLUS_PREFIXES = ["/ma-semaine", "/habitat", "/jeux", "/ia-avancee", "/outils", "/parametres"];
+const PLUS_PREFIXES = ["/ma-semaine", "/vision-maison", "/jeux", "/ia-avancee", "/outils", "/parametres"];
 
 /**
  * Bottom navigation bar mobile — visible uniquement sur petits écrans (< md).

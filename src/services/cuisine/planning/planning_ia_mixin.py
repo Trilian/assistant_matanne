@@ -112,7 +112,7 @@ class PlanningIAGenerationMixin:
                         "description": recette.description,
                         "temps_total": (recette.temps_preparation or 0)
                         + (recette.temps_cuisson or 0),
-                        "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
+                        "type_repas": "dejeuner" if idx % 2 == 0 else "diner",
                         "raison": raison_jour,
                         "type_proteines": recette.type_proteines,
                     }
@@ -135,7 +135,7 @@ class PlanningIAGenerationMixin:
                             "description": recette.description,
                             "temps_total": (recette.temps_preparation or 0)
                             + (recette.temps_cuisson or 0),
-                            "type_repas": "déjeuner" if idx % 2 == 0 else "dîner",
+                            "type_repas": "dejeuner" if idx % 2 == 0 else "diner",
                             "raison": "📝 Alternative équilibrée",
                             "type_proteines": getattr(recette, "type_proteines", "mixte"),
                         }
@@ -261,7 +261,7 @@ RULES:
             repas_dej = Repas(
                 planning_id=planning.id,
                 date_repas=date_jour,
-                type_repas="déjeuner",
+                type_repas="dejeuner",
                 notes=jour_data.dejeuner,
             )
             db.add(repas_dej)
@@ -270,7 +270,7 @@ RULES:
             repas_din = Repas(
                 planning_id=planning.id,
                 date_repas=date_jour,
-                type_repas="dîner",
+                type_repas="diner",
                 notes=jour_data.diner,
             )
             db.add(repas_din)

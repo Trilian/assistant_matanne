@@ -15,37 +15,37 @@ const BLOCS = [
   {
     titre: "Scenarios",
     description: "Comparer demenager, agrandir ou rester avec un score multi-criteres.",
-    chemin: "/habitat/scenarios",
+    chemin: "/vision-maison/scenarios",
     Icone: Home,
   },
   {
     titre: "Veille Immo",
     description: "Centraliser les annonces et piloter leur statut.",
-    chemin: "/habitat/veille-immo",
+    chemin: "/vision-maison/veille-immo",
     Icone: Search,
   },
   {
     titre: "Plans",
     description: "Importer les plans et structurer les pieces.",
-    chemin: "/habitat/plans",
+    chemin: "/vision-maison/plans",
     Icone: Ruler,
   },
   {
     titre: "Marche",
     description: "Comparer les prix DVF locaux avant arbitrage ou visite.",
-    chemin: "/habitat/marche",
+    chemin: "/vision-maison/marche",
     Icone: Building2,
   },
   {
     titre: "Deco",
     description: "Suivre les projets deco par piece et par budget.",
-    chemin: "/habitat/deco",
+    chemin: "/vision-maison/deco",
     Icone: Armchair,
   },
   {
-    titre: "Jardin",
+    titre: "Jardin Design",
     description: "Organiser les zones paysageres du terrain.",
-    chemin: "/habitat/jardin",
+    chemin: "/vision-maison/jardin",
     Icone: Trees,
   },
 ];
@@ -62,8 +62,8 @@ export default function HabitatPage() {
   return (
     <div className="space-y-6">
       <EntetePageHabitat
-        badge="Module Habitat"
-        titre="Habitat"
+        badge="Vision Maison"
+        titre="Vision Maison"
         description="Hub de decision logement pour cadrer la veille immo, les plans, le marche local, la deco et le jardin dans une meme trajectoire projet."
         stats={data ? [
           { label: "Scenarios", valeur: `${data.scenarios}` },

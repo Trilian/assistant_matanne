@@ -108,7 +108,7 @@ class Repas(Base):
         ForeignKey("recettes.id", ondelete="SET NULL"), index=True
     )
     date_repas: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    type_repas: Mapped[str] = mapped_column(String(50), nullable=False, default="dîner", index=True)
+    type_repas: Mapped[str] = mapped_column(String(50), nullable=False, default="diner", index=True)
     portion_ajustee: Mapped[int | None] = mapped_column(Integer)
     prepare: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[str | None] = mapped_column(Text)

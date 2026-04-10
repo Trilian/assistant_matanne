@@ -230,11 +230,21 @@ async def obtenir_planning_semaine(
             )
             planning_id = planning_db.id if planning_db else None
 
+            # Normalise les valeurs accentuées stockées en DB vers les valeurs
+            # canoniques sans accents attendues par le frontend.
+            _TYPE_NORM = {
+                "petit_déjeuner": "petit_dejeuner",
+                "déjeuner": "dejeuner",
+                "dîner": "diner",
+                "goûter": "gouter",
+            }
+
             planning_dict: dict = {}
             repas_list = []
             for r in repas:
                 jour = r.date_repas.strftime("%Y-%m-%d")
                 recette_nom = recettes_map.get(r.recette_id) if r.recette_id else None
+                type_repas = _TYPE_NORM.get(r.type_repas, r.type_repas)
                 entry: dict = {
                     "id": r.id,
                     "recette_id": r.recette_id,
@@ -243,12 +253,12 @@ async def obtenir_planning_semaine(
                 }
                 if jour not in planning_dict:
                     planning_dict[jour] = {}
-                planning_dict[jour][r.type_repas] = entry
+                planning_dict[jour][type_repas] = entry
 
                 repas_list.append({
                     "id": r.id,
                     "date_repas": jour,
-                    "type_repas": r.type_repas,
+                    "type_repas": type_repas,
                     "recette_id": r.recette_id,
                     "recette_nom": recette_nom,
                     "notes": getattr(r, "notes", None),
@@ -1130,6 +1140,15 @@ async def generer_planning_ia(
                 for rec in session.query(Recette.id, Recette.nom, Recette.calories, Recette.proteines, Recette.lipides).filter(Recette.id.in_(recette_ids)):
                     recettes_map[rec.id] = rec
 
+            # Normalise les valeurs accentuées stockées en DB vers les valeurs
+            # canoniques sans accents attendues par le frontend.
+            _TYPE_NORM = {
+                "petit_déjeuner": "petit_dejeuner",
+                "déjeuner": "dejeuner",
+                "dîner": "diner",
+                "goûter": "gouter",
+            }
+
             planning_dict = {}
             repas_list = []
             for r in repas:
@@ -1141,6 +1160,7 @@ async def generer_planning_ia(
 
                 rec = recettes_map.get(r.recette_id) if r.recette_id else None
                 recette_nom = rec.nom if rec else None
+                type_repas = _TYPE_NORM.get(r.type_repas, r.type_repas)
                 entry: dict = {
                     "id": r.id,
                     "recette_id": r.recette_id,
@@ -1166,12 +1186,12 @@ async def generer_planning_ia(
                         grade = ["a", "a", "b", "c", "d", "e"][min(score, 5)]
                         entry["nutri_score"] = grade
 
-                planning_dict[jour][r.type_repas] = entry
+                planning_dict[jour][type_repas] = entry
 
                 repas_list.append({
                     "id": r.id,
                     "date_repas": jour,
-                    "type_repas": r.type_repas,
+                    "type_repas": type_repas,
                     "recette_id": r.recette_id,
                     "recette_nom": recette_nom,
                     "notes": getattr(r, "notes", None),

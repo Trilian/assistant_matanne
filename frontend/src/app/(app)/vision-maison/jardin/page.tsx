@@ -51,7 +51,7 @@ export default function JardinHabitatPage() {
     <div className="space-y-6">
       <EntetePageHabitat
         badge="H8 • Paysagisme"
-        titre="Jardin Habitat"
+        titre="Jardin Design"
         description="Pilotage des zones exterieures, lecture surfacique et budget d'amenagement dans le meme flux que les plans Habitat." 
         stats={[
           { label: "Zones", valeur: `${resume?.zones ?? zones?.length ?? 0}` },

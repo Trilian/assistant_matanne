@@ -14,17 +14,17 @@ export default function HabitatError({
     <div className="flex items-center justify-center p-8">
       <Card className="max-w-md w-full">
         <CardHeader>
-          <CardTitle className="text-destructive">Erreur Habitat</CardTitle>
+          <CardTitle className="text-destructive">Erreur Vision Maison</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            {error.message || "Une erreur est survenue dans le module habitat."}
+            {error.message || "Une erreur est survenue dans le module Vision Maison."}
           </p>
         </CardContent>
         <CardFooter className="flex gap-2">
           <Button onClick={reset}>Reessayer</Button>
           <Button variant="outline" asChild>
-            <a href="/habitat">Retour au hub habitat</a>
+            <a href="/vision-maison">Retour au hub Vision Maison</a>
           </Button>
         </CardFooter>
       </Card>

@@ -454,7 +454,7 @@ async def obtenir_calendrier_semis_personnalise(
 
 
 @router.get(
-    "/habitat/estimation-roi",
+    "/vision-maison/estimation-roi",
     response_model=EstimationRoiHabitatResponse,
     responses=REPONSES_IA,
     summary="IA-4: estimation prix bien + ROI rénovation",

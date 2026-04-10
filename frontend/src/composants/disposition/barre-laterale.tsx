@@ -137,7 +137,7 @@ const LIENS: LienNav[] = [
     chemin: "/maison",
     Icone: House,
     sousLiens: [
-      // 🏠 Habitat
+      // 🏠 Ma Maison
       { nom: "Visualisation", chemin: "/maison/visualisation", Icone: Layers },
       { nom: "Ménage", chemin: "/maison/menage", Icone: SprayCan },
       { nom: "Jardin", chemin: "/maison/jardin", Icone: Sprout },
@@ -153,22 +153,22 @@ const LIENS: LienNav[] = [
       { nom: "Documents", chemin: "/maison/documents", Icone: FileText },
     ],
     categories: [
-      { label: "Habitat", debut: 0, fin: 3 },
+      { label: "Ma Maison", debut: 0, fin: 3 },
       { label: "Travaux & Équipements", debut: 3, fin: 7 },
       { label: "Admin & Finances", debut: 7, fin: 11 },
     ],
   },
   {
-    nom: "Habitat",
-    chemin: "/habitat",
+    nom: "Vision Maison",
+    chemin: "/vision-maison",
     Icone: Map,
     sousLiens: [
-      { nom: "Scenarios", chemin: "/habitat/scenarios", Icone: Home },
-      { nom: "Veille Immo", chemin: "/habitat/veille-immo", Icone: ShoppingBag },
-      { nom: "Marche", chemin: "/habitat/marche", Icone: TrendingUp },
-      { nom: "Plans", chemin: "/habitat/plans", Icone: Layers },
-      { nom: "Deco", chemin: "/habitat/deco", Icone: House },
-      { nom: "Jardin", chemin: "/habitat/jardin", Icone: Sprout },
+      { nom: "Scenarios", chemin: "/vision-maison/scenarios", Icone: Home },
+      { nom: "Veille Immo", chemin: "/vision-maison/veille-immo", Icone: ShoppingBag },
+      { nom: "Marche", chemin: "/vision-maison/marche", Icone: TrendingUp },
+      { nom: "Plans", chemin: "/vision-maison/plans", Icone: Layers },
+      { nom: "Deco", chemin: "/vision-maison/deco", Icone: House },
+      { nom: "Jardin Design", chemin: "/vision-maison/jardin", Icone: Sprout },
     ],
   },
   {

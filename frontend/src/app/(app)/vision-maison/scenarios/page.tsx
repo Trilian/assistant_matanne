@@ -68,7 +68,7 @@ export default function ScenariosHabitatPage() {
     <div className="space-y-6">
       <EntetePageHabitat
         badge="H1-H2 • Decision"
-        titre="Scenarios Habitat"
+        titre="Scénarios"
         description="Comparer objectivement les options logement et garder un arbitrage lisible entre budget, surface cible et confort familial." 
         stats={[
           { label: "Scenarios", valeur: `${scenarios?.length ?? 0}` },
