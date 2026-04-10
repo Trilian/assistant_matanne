@@ -5,13 +5,13 @@ Analyse patterns de routines, détecte anomalies, suggère personnalisations.
 """
 
 from datetime import datetime
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
-
 
 # ── Modèles Pydantic ──
 
@@ -21,10 +21,14 @@ class AnalyseHabitude(BaseModel):
 
     habitude: str = Field(..., description="Nom de l'habitude (ex: petit-déj, dodo, sport)")
     frequence_hebdo: int = Field(..., ge=0, le=7, description="Fois par semaine")
-    consistency: float = Field(..., ge=0, le=1, description="Consistance (0=chaotique, 1=régulière)")
+    consistency: float = Field(
+        ..., ge=0, le=1, description="Consistance (0=chaotique, 1=régulière)"
+    )
     jours_preferres: list[str] = Field(..., description="Jours où c'est régulier")
     heures_preferees: list[str] = Field(..., description="Horaires généraux (matin/midi/soir)")
-    status: Literal["etablie", "fragile", "negligee"] = Field(..., description="Statut de la routine")
+    status: Literal["etablie", "fragile", "negligee"] = Field(
+        ..., description="Statut de la routine"
+    )
     impact_positif: list[str] = Field(..., description="Impacts positifs détectés")
     facteurs_decouplage: list[str] = Field(..., description="Ce qui la déstabilise")
 
@@ -37,9 +41,7 @@ class TendanceFamiliale(BaseModel):
         ..., ge=0, le=100, description="% d'engagement dans activités"
     )
     variete_activites: int = Field(..., ge=0, le=100, description="Score variété")
-    coherence_routines: int = Field(
-        ..., ge=0, le=100, description="Score cohérence des routines"
-    )
+    coherence_routines: int = Field(..., ge=0, le=100, description="Score cohérence des routines")
     equilibre_work_life: str = Field(..., description="Évaluation (excellent/bon/moyen/difficile)")
     moments_stress_detectes: list[str] = Field(..., description="Moments critiques")
     points_forts: list[str] = Field(..., description="Aspects positifs à maintenir")
@@ -70,7 +72,9 @@ class HabitudesAIService(BaseAIService):
     async def analyser_habitude(
         self,
         habitude_nom: str,
-        historique_7j: list[dict],  # [{"date": "2026-04-05", "realise": true, "heure": "07:30"}, ...]
+        historique_7j: list[
+            dict
+        ],  # [{"date": "2026-04-05", "realise": true, "heure": "07:30"}, ...]
         description_contexte: str = "",
     ) -> AnalyseHabitude:
         """
@@ -92,8 +96,8 @@ Contexte: {description_contexte}
 
 Historique 7 jours:
 - Réalisations: {nb_realisations}/7
-- Horaires: {', '.join(heures) if heures else 'variables'}
-- Jours: {[h['date'] for h in historique_7j]}
+- Horaires: {", ".join(heures) if heures else "variables"}
+- Jours: {[h["date"] for h in historique_7j]}
 
 Évalue:
 1. Fréquence hebdo (0-7)
@@ -124,7 +128,9 @@ Format JSON."""
 
     async def analyser_tendances_famille(
         self,
-        habitudes_analysees: list[dict],  # [{"nom": "petit-déj", "realisations": 5, "status": "établie"}, ...]
+        habitudes_analysees: list[
+            dict
+        ],  # [{"nom": "petit-déj", "realisations": 5, "status": "établie"}, ...]
         periode_jours: int = 7,
         notes_contexte: str = "",
     ) -> TendanceFamiliale:
@@ -140,14 +146,13 @@ Format JSON."""
             Tendances avec insights
         """
         habitudes_str = "\n".join(
-            f"- {h['nom']}: {h['realisations']}/10, {h['status']}"
-            for h in habitudes_analysees
+            f"- {h['nom']}: {h['realisations']}/10, {h['status']}" for h in habitudes_analysees
         )
 
         prompt = f"""Analyse les tendances familiales (période: {periode_jours}j):
 {habitudes_str}
 
-Contexte: {notes_contexte if notes_contexte else 'Normal'}
+Contexte: {notes_contexte if notes_contexte else "Normal"}
 
 Évalue:
 1. Engagement activités (%)
@@ -266,8 +271,7 @@ Format JSON."""
     ):
         """Stream d'analyse des tendances."""
         habitudes_str = "\n".join(
-            f"- {h['nom']}: {h['realisations']}/{h['max']}"
-            for h in habitudes_analysees
+            f"- {h['nom']}: {h['realisations']}/{h['max']}" for h in habitudes_analysees
         )
 
         prompt = f"""Analyser tendances familiales (période: {periode_jours}j):

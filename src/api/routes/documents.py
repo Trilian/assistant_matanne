@@ -32,7 +32,9 @@ router = APIRouter(prefix="/api/v1/documents", tags=["Documents"])
 
 def _normaliser_texte_document(*valeurs: str | None) -> str:
     """Normalise le texte libre pour faciliter les règles de catégorisation."""
-    texte = " ".join(valeur.strip() for valeur in valeurs if isinstance(valeur, str) and valeur.strip())
+    texte = " ".join(
+        valeur.strip() for valeur in valeurs if isinstance(valeur, str) and valeur.strip()
+    )
     return normalize("NFKD", texte).encode("ascii", "ignore").decode("ascii").lower()
 
 
@@ -104,9 +106,7 @@ async def lister_documents(
 
     def _query():
         with executer_avec_session() as session:
-            query = session.query(DocumentFamille).filter(
-                DocumentFamille.actif.is_(True)
-            )
+            query = session.query(DocumentFamille).filter(DocumentFamille.actif.is_(True))
 
             if categorie:
                 query = query.filter(DocumentFamille.categorie == categorie)
@@ -143,9 +143,7 @@ async def lister_documents(
                         "membre_famille": d.membre_famille,
                         "fichier_url": d.fichier_url,
                         "fichier_nom": d.fichier_nom,
-                        "date_document": d.date_document.isoformat()
-                        if d.date_document
-                        else None,
+                        "date_document": d.date_document.isoformat() if d.date_document else None,
                         "date_expiration": d.date_expiration.isoformat()
                         if d.date_expiration
                         else None,
@@ -178,11 +176,7 @@ async def obtenir_document(
 
     def _query():
         with executer_avec_session() as session:
-            doc = (
-                session.query(DocumentFamille)
-                .filter(DocumentFamille.id == document_id)
-                .first()
-            )
+            doc = session.query(DocumentFamille).filter(DocumentFamille.id == document_id).first()
             if not doc:
                 raise HTTPException(status_code=404, detail="Document non trouvé")
 
@@ -193,12 +187,8 @@ async def obtenir_document(
                 "membre_famille": doc.membre_famille,
                 "fichier_url": doc.fichier_url,
                 "fichier_nom": doc.fichier_nom,
-                "date_document": doc.date_document.isoformat()
-                if doc.date_document
-                else None,
-                "date_expiration": doc.date_expiration.isoformat()
-                if doc.date_expiration
-                else None,
+                "date_document": doc.date_document.isoformat() if doc.date_document else None,
+                "date_expiration": doc.date_expiration.isoformat() if doc.date_expiration else None,
                 "notes": doc.notes,
                 "tags": doc.tags or [],
                 "actif": doc.actif,
@@ -245,8 +235,10 @@ async def obtenir_documents_garantie_objet(
     )
 
     def _query():
-        resultat = obtenir_service_garanties_documents_interaction().obtenir_documents_garantie_pour_objet(
-            objet_id=objet_id,
+        resultat = (
+            obtenir_service_garanties_documents_interaction().obtenir_documents_garantie_pour_objet(
+                objet_id=objet_id,
+            )
         )
         if not resultat.get("ok"):
             message = resultat.get("message") or "Équipement introuvable"
@@ -321,11 +313,7 @@ async def modifier_document(
 
     def _update():
         with executer_avec_session() as session:
-            doc = (
-                session.query(DocumentFamille)
-                .filter(DocumentFamille.id == document_id)
-                .first()
-            )
+            doc = session.query(DocumentFamille).filter(DocumentFamille.id == document_id).first()
             if not doc:
                 raise HTTPException(status_code=404, detail="Document non trouvé")
 
@@ -350,11 +338,7 @@ async def supprimer_document(
 
     def _delete():
         with executer_avec_session() as session:
-            doc = (
-                session.query(DocumentFamille)
-                .filter(DocumentFamille.id == document_id)
-                .first()
-            )
+            doc = session.query(DocumentFamille).filter(DocumentFamille.id == document_id).first()
             if not doc:
                 raise HTTPException(status_code=404, detail="Document non trouvé")
 

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from ._helpers import _normaliser_texte
-from ._menus import _envoyer_aide_telegram, _envoyer_menu_principal
 from ._cuisine import (
     _ajouter_article_liste,
     _envoyer_courses_commande,
@@ -23,6 +21,7 @@ from ._famille import (
     _envoyer_resume_jules,
     _envoyer_resume_weekend,
 )
+from ._helpers import _normaliser_texte
 from ._maison import (
     _envoyer_rappels_groupes,
     _envoyer_resume_energie,
@@ -30,6 +29,7 @@ from ._maison import (
     _envoyer_taches_maison,
     _envoyer_taches_projets,
 )
+from ._menus import _envoyer_aide_telegram, _envoyer_menu_principal
 from ._outils import (
     _creer_note_rapide_telegram,
     _envoyer_aide_photo_telegram,

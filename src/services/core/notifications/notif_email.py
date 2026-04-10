@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service d'envoi d'emails transactionnels via Resend.
 
 Fonctionnalités :
@@ -35,6 +35,7 @@ except ImportError:
         """Fallback minimal quand Jinja2 n'est pas disponible."""
         return False
 
+
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -66,9 +67,7 @@ class ServiceEmail:
                 autoescape=select_autoescape(["html"]),
             )
         else:
-            logger.warning(
-                "Jinja2 non installé : fallback HTML minimal activé pour les emails."
-            )
+            logger.warning("Jinja2 non installé : fallback HTML minimal activé pour les emails.")
 
     # ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -178,7 +177,9 @@ class ServiceEmail:
                 if html:
                     return html
             except Exception:
-                logger.warning("Compilation MJML indisponible, fallback HTML pour %s", template_name)
+                logger.warning(
+                    "Compilation MJML indisponible, fallback HTML pour %s", template_name
+                )
         except Exception:
             logger.warning("Template MJML introuvable ou invalide: %s", template_name)
 

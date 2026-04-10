@@ -72,7 +72,9 @@ async def console_ia_admin(
 
     prompt = body.prompt.strip()
     if len(prompt) < 3:
-        raise HTTPException(status_code=422, detail="Le prompt doit contenir au moins 3 caractères.")
+        raise HTTPException(
+            status_code=422, detail="Le prompt doit contenir au moins 3 caractères."
+        )
 
     start = time.perf_counter()
     client = obtenir_client_ia()

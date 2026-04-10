@@ -9,8 +9,8 @@ import logging
 from datetime import datetime, timedelta
 
 from src.api.schemas import MessageResponse
-from src.core.decorators import avec_session_db
 from src.core.db import obtenir_contexte_db
+from src.core.decorators import avec_session_db
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -30,14 +30,13 @@ class BudgetJeuxInteractionService:
         Returns:
             Dict avec alerte_declenche (bool), cumul, seuil, message
         """
-        from datetime import date, timedelta
+        from datetime import date
+
         from src.core.models import PariSportif
         from src.core.models.family import UserPreferences
 
         # Récupérer le seuil depuis les préférences
-        prefs = db.query(UserPreferences).filter(
-            UserPreferences.user_id == user_id
-        ).first()
+        prefs = db.query(UserPreferences).filter(UserPreferences.user_id == user_id).first()
 
         seuil = 100.0  # Défaut
         if prefs and isinstance(prefs.preferences, dict):
@@ -55,7 +54,8 @@ class BudgetJeuxInteractionService:
                 PariSportif.cree_le <= fin_semaine,
             )
             .with_entities(db.func.sum(PariSportif.mise))
-            .scalar() or 0.0
+            .scalar()
+            or 0.0
         )
 
         alerte_declenche = cumul > seuil
@@ -120,8 +120,7 @@ class BudgetJeuxInteractionService:
         Returns:
             Dict avec id_journal, id_budget, message
         """
-        from src.core.models import NoteMemo, BudgetLigne
-        from datetime import datetime
+        from src.core.models import BudgetLigne, NoteMemo
 
         try:
             # Ajouter au journal
@@ -148,9 +147,7 @@ class BudgetJeuxInteractionService:
             db.add(ligne)
             db.commit()
 
-            logger.info(
-                f"✅ Gain {type_jeu} de {montant_gain}€ noté pour {user_id}"
-            )
+            logger.info(f"✅ Gain {type_jeu} de {montant_gain}€ noté pour {user_id}")
             return {
                 "id_journal": note.id,
                 "id_budget": ligne.id,

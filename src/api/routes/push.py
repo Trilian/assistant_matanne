@@ -8,7 +8,6 @@ Endpoints:
 """
 
 import logging
-
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends
@@ -48,6 +47,7 @@ async def obtenir_cle_vapid_publique():
     lors de l'appel Ã  `pushManager.subscribe()`.
     """
     from src.services.core.notifications.types import VAPID_PUBLIC_KEY
+
     return {"public_key": VAPID_PUBLIC_KEY}
 
 
@@ -175,8 +175,8 @@ async def evaluer_rappels(
     current_user: dict = Depends(require_auth),
 ):
     """Retourne la liste consolidÃ©e des rappels intelligents."""
-    from src.services.core.rappels_intelligents import obtenir_rappels_intelligents_service
     from src.api.utils import executer_async
+    from src.services.core.rappels_intelligents import obtenir_rappels_intelligents_service
 
     service = obtenir_rappels_intelligents_service()
 
@@ -198,12 +198,16 @@ async def evaluer_rappels(
 @gerer_exception_api
 async def notifier_metier(
     module: str = Body(..., description="Module origine : famille | jeux | maison"),
-    type_evenement: str = Body(..., description="Type : rappel | serie_defaites | alerte_predictive | budget"),
+    type_evenement: str = Body(
+        ..., description="Type : rappel | serie_defaites | alerte_predictive | budget"
+    ),
     titre: str = Body(..., description="Titre de la notification"),
     message: str = Body(..., description="Corps de la notification"),
     url: str = Body("/", description="URL de redirection"),
     dry_run: bool = Body(False, description="Si True, vÃ©rifie sans envoyer"),
-    donnees: dict[str, Any] = Body(default_factory=dict, description="DonnÃ©es optionnelles selon le type"),
+    donnees: dict[str, Any] = Body(
+        default_factory=dict, description="DonnÃ©es optionnelles selon le type"
+    ),
     current_user: dict = Depends(require_auth),
 ):
     """DÃ©clenche une notification push mÃ©tier vers l'utilisateur authentifiÃ©.
@@ -238,6 +242,7 @@ async def notifier_metier(
             return service.notifier_alerte_predictive_maison(user_id, titre, message, url)
         # Fallback gÃ©nÃ©rique
         from src.services.core.notifications.types import NotificationPush, TypeNotification
+
         notif = NotificationPush(
             title=titre,
             body=message,
@@ -249,13 +254,16 @@ async def notifier_metier(
 
     envoye = await executer_async(_envoyer)
 
-    logger.info(f"Notification mÃ©tier {'envoyÃ©e' if envoye else 'ignorÃ©e (prÃ©fÃ©rences)'} â†’ {user_id} [{module}/{type_evenement}]")
+    logger.info(
+        f"Notification mÃ©tier {'envoyÃ©e' if envoye else 'ignorÃ©e (prÃ©fÃ©rences)'} â†’ {user_id} [{module}/{type_evenement}]"
+    )
 
     return {
         "success": bool(envoye),
         "user_id": user_id,
         "module": module,
         "type_evenement": type_evenement,
-        "message": "Notification envoyÃ©e" if envoye else "IgnorÃ©e (prÃ©fÃ©rences ou pas d'abonnement)",
+        "message": "Notification envoyÃ©e"
+        if envoye
+        else "IgnorÃ©e (prÃ©fÃ©rences ou pas d'abonnement)",
     }
-

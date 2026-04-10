@@ -31,8 +31,7 @@ class PrevisionBudgetService(BaseAIService):
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
     def prevision_fin_de_mois(
-        self, mois: int | None = None, annee: int | None = None,
-        db: Session | None = None
+        self, mois: int | None = None, annee: int | None = None, db: Session | None = None
     ) -> dict:
         """Prédit les dépenses totales en fin de mois.
 
@@ -45,8 +44,9 @@ class PrevisionBudgetService(BaseAIService):
         Returns:
             Dict avec depenses_actuelles, prevision, tendance, anomalies
         """
-        from src.core.models import BudgetFamille
         import calendar
+
+        from src.core.models import BudgetFamille
 
         aujourd_hui = date.today()
         mois = mois or aujourd_hui.month
@@ -59,7 +59,8 @@ class PrevisionBudgetService(BaseAIService):
                 func.extract("month", BudgetFamille.date) == mois,
                 func.extract("year", BudgetFamille.date) == annee,
             )
-            .scalar() or 0
+            .scalar()
+            or 0
         )
 
         # Dépenses par catégorie
@@ -97,12 +98,15 @@ class PrevisionBudgetService(BaseAIService):
                 func.extract("month", BudgetFamille.date) == mois_prec,
                 func.extract("year", BudgetFamille.date) == annee_prec,
             )
-            .scalar() or 0
+            .scalar()
+            or 0
         )
 
         # Tendance
         if float(depenses_mois_prec) > 0:
-            tendance_pct = ((prevision - float(depenses_mois_prec)) / float(depenses_mois_prec)) * 100
+            tendance_pct = (
+                (prevision - float(depenses_mois_prec)) / float(depenses_mois_prec)
+            ) * 100
         else:
             tendance_pct = 0
 
@@ -116,17 +120,20 @@ class PrevisionBudgetService(BaseAIService):
                     func.extract("year", BudgetFamille.date) == annee_prec,
                     BudgetFamille.categorie == cat,
                 )
-                .scalar() or 0
+                .scalar()
+                or 0
             )
             if float(cat_prec) > 0:
                 variation = ((float(total) - float(cat_prec)) / float(cat_prec)) * 100
                 if variation > 30:
-                    anomalies.append({
-                        "categorie": cat,
-                        "montant_actuel": float(total),
-                        "montant_precedent": float(cat_prec),
-                        "variation_pct": round(variation, 1),
-                    })
+                    anomalies.append(
+                        {
+                            "categorie": cat,
+                            "montant_actuel": float(total),
+                            "montant_precedent": float(cat_prec),
+                            "variation_pct": round(variation, 1),
+                        }
+                    )
 
         return {
             "mois": f"{mois:02d}/{annee}",
@@ -145,7 +152,9 @@ class PrevisionBudgetService(BaseAIService):
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def detecter_anomalies_budget(self, seuil_pct: float = 80, db: Session | None = None) -> list[dict]:
+    def detecter_anomalies_budget(
+        self, seuil_pct: float = 80, db: Session | None = None
+    ) -> list[dict]:
         """Détecte les catégories qui dépassent un seuil de leur budget mensuel.
 
         Args:
@@ -186,19 +195,22 @@ class PrevisionBudgetService(BaseAIService):
                     func.extract("year", BudgetFamille.date) == annee_prec,
                     BudgetFamille.categorie == cat,
                 )
-                .scalar() or 0
+                .scalar()
+                or 0
             )
 
             if float(budget_ref) > 0:
                 pct = (float(total) / float(budget_ref)) * 100
                 if pct >= seuil_pct:
-                    alertes.append({
-                        "categorie": cat,
-                        "depense": float(total),
-                        "budget_ref": float(budget_ref),
-                        "pourcentage": round(pct, 1),
-                        "niveau": "critique" if pct >= 100 else "attention",
-                    })
+                    alertes.append(
+                        {
+                            "categorie": cat,
+                            "depense": float(total),
+                            "budget_ref": float(budget_ref),
+                            "pourcentage": round(pct, 1),
+                            "niveau": "critique" if pct >= 100 else "attention",
+                        }
+                    )
 
         alertes.sort(key=lambda x: -x["pourcentage"])
         return alertes
@@ -214,17 +226,38 @@ class PrevisionBudgetService(BaseAIService):
         """
         # Mapping statique pour les cas communs
         MAPPING_CATEGORIES = {
-            "carrefour": "alimentation", "leclerc": "alimentation", "auchan": "alimentation",
-            "lidl": "alimentation", "monoprix": "alimentation", "picard": "alimentation",
-            "boulangerie": "alimentation", "boucherie": "alimentation",
-            "restaurant": "resto", "mcdo": "resto", "uber eats": "resto", "deliveroo": "resto",
-            "edf": "energie", "engie": "energie", "total": "energie",
-            "orange": "telecom", "sfr": "telecom", "free": "telecom", "bouygues": "telecom",
-            "amazon": "shopping", "fnac": "shopping", "darty": "shopping",
-            "ikea": "maison", "leroy merlin": "maison", "castorama": "maison",
-            "decathlon": "loisirs", "cinema": "loisirs",
-            "pharmacie": "sante", "doctolib": "sante",
-            "essence": "transport", "sncf": "transport", "ratp": "transport",
+            "carrefour": "alimentation",
+            "leclerc": "alimentation",
+            "auchan": "alimentation",
+            "lidl": "alimentation",
+            "monoprix": "alimentation",
+            "picard": "alimentation",
+            "boulangerie": "alimentation",
+            "boucherie": "alimentation",
+            "restaurant": "resto",
+            "mcdo": "resto",
+            "uber eats": "resto",
+            "deliveroo": "resto",
+            "edf": "energie",
+            "engie": "energie",
+            "total": "energie",
+            "orange": "telecom",
+            "sfr": "telecom",
+            "free": "telecom",
+            "bouygues": "telecom",
+            "amazon": "shopping",
+            "fnac": "shopping",
+            "darty": "shopping",
+            "ikea": "maison",
+            "leroy merlin": "maison",
+            "castorama": "maison",
+            "decathlon": "loisirs",
+            "cinema": "loisirs",
+            "pharmacie": "sante",
+            "doctolib": "sante",
+            "essence": "transport",
+            "sncf": "transport",
+            "ratp": "transport",
         }
 
         desc_lower = description.lower()
@@ -263,4 +296,3 @@ Réponds en JSON: {{"categorie": "...", "confiance": 0.8}}"""
 def obtenir_service_prevision_budget() -> PrevisionBudgetService:
     """Factory singleton pour le service de prévision budget."""
     return PrevisionBudgetService()
-

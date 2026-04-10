@@ -20,8 +20,8 @@ from typing import Any
 
 from ..constants import CACHE_TTL_IA
 from .embeddings import (
-    embedder_texte,
     distance_hamming,
+    embedder_texte,
     signature_ann,
     similarite_cosine,
 )

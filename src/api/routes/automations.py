@@ -35,7 +35,11 @@ def _charger_automations(session, user: dict[str, Any]):
 
     profil = None
     if user.get("email"):
-        profil = session.query(ProfilUtilisateur).filter(ProfilUtilisateur.email == user["email"]).first()
+        profil = (
+            session.query(ProfilUtilisateur)
+            .filter(ProfilUtilisateur.email == user["email"])
+            .first()
+        )
     if profil is None:
         profil = session.query(ProfilUtilisateur).order_by(ProfilUtilisateur.id.asc()).first()
     if profil is None:
@@ -175,7 +179,9 @@ def _serialiser_automation(item) -> dict[str, Any]:
         "declencheur": item.declencheur or {},
         "action": item.action or {},
         "active": bool(item.active),
-        "derniere_execution": item.derniere_execution.isoformat() if item.derniere_execution else None,
+        "derniere_execution": item.derniere_execution.isoformat()
+        if item.derniere_execution
+        else None,
         "execution_count": int(item.execution_count or 0),
     }
 
@@ -196,6 +202,7 @@ async def lister_automations(user: dict[str, Any] = Depends(require_auth)) -> di
 @gerer_exception_api
 async def initialiser_automations(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Initialise les automations depuis les préférences legacy (migration unique, idempotent)."""
+
     def _query():
         with executer_avec_session() as session:
             profil, automations = _charger_automations(session, user)
@@ -209,7 +216,9 @@ async def initialiser_automations(user: dict[str, Any] = Depends(require_auth)) 
 
 @router.post("", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
-async def creer_automation(payload: dict[str, Any], user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+async def creer_automation(
+    payload: dict[str, Any], user: dict[str, Any] = Depends(require_auth)
+) -> dict[str, Any]:
     from src.core.models import AutomationRegle
 
     def _query():
@@ -321,9 +330,16 @@ async def executer_automation_maintenant(
                 db=session,
             )
             if not result.get("success"):
-                raise HTTPException(status_code=404, detail=result.get("message", "Automation introuvable"))
+                raise HTTPException(
+                    status_code=404, detail=result.get("message", "Automation introuvable")
+                )
             message = "Automation simulée" if dry_run else "Automation exécutée"
-            return {"message": message, "resultat": result, "user_id": profil.id, "dry_run": dry_run}
+            return {
+                "message": message,
+                "resultat": result,
+                "user_id": profil.id,
+                "dry_run": dry_run,
+            }
 
     return await executer_async(_query)
 
@@ -353,8 +369,8 @@ async def generer_automation_ia(
             "- condition (dict)\n"
             "- action (dict)\n"
             "- parametres (dict)\n"
-            "Exemple condition: {\"type\": \"stock_bas\", \"seuil\": 2}\n"
-            "Exemple action: {\"type\": \"ajouter_courses\"}"
+            'Exemple condition: {"type": "stock_bas", "seuil": 2}\n'
+            'Exemple action: {"type": "ajouter_courses"}'
         )
 
         regle = ai_service.call_with_json_parsing_sync(

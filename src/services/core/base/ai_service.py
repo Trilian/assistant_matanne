@@ -9,8 +9,8 @@ chaque fichier à taille raisonnable tout en conservant la même API publique.
     par la couche UI via l'Event Bus.
 """
 
-import json
 import inspect
+import json
 import logging
 from datetime import datetime
 from typing import Any
@@ -159,7 +159,10 @@ class BaseAIService(
         if etat == EtatCircuit.OUVERT:
             msg = f"Circuit '{self.circuit_breaker.nom}' ouvert suite à des erreurs répétées. Réessayez dans quelques instants."
             logger.warning(f"⚡ {msg}")
-            raise ErreurServiceIA(msg, message_utilisateur="L'IA est temporairement indisponible. Réessayez dans quelques instants.")
+            raise ErreurServiceIA(
+                msg,
+                message_utilisateur="L'IA est temporairement indisponible. Réessayez dans quelques instants.",
+            )
 
         # Appel IA protégé par CircuitBreaker + contexte d'observabilité
         start_time = datetime.now()
@@ -179,13 +182,12 @@ class BaseAIService(
                     utiliser_cache=False,  # On gère le cache nous-mêmes
                 )
                 response = (
-                    await maybe_response
-                    if inspect.isawaitable(maybe_response)
-                    else maybe_response
+                    await maybe_response if inspect.isawaitable(maybe_response) else maybe_response
                 )
                 self.circuit_breaker._enregistrer_succes()
             except Exception as e:
                 from src.core.exceptions import ErreurLimiteDebit
+
                 # Un 429 (quota atteint) n'est PAS une panne du service :
                 # ne pas incrémenter le circuit breaker pour éviter de bloquer
                 # tous les appels suivants à cause d'une limite de débit.

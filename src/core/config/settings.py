@@ -280,8 +280,10 @@ class Parametres(BaseSettings):
         1. DATABASE_URL env var (déjà chargé dans db_url par pydantic-settings)
         2. Composants individuels DB_HOST/DB_USER/... (pydantic-settings)
         """
-        if self.est_serverless() and self.db_pooler_url and (
-            not self.db_url or "@db." in self.db_url
+        if (
+            self.est_serverless()
+            and self.db_pooler_url
+            and (not self.db_url or "@db." in self.db_url)
         ):
             logger.info("Environnement serverless détecté : utilisation de l'URL pooler DB.")
             self.db_url = self.db_pooler_url
@@ -335,8 +337,7 @@ class Parametres(BaseSettings):
     def est_serverless(self) -> bool:
         """Vérifie si l'application s'exécute dans un environnement serverless."""
         return self.ENV.lower() == "serverless" or any(
-            os.getenv(var)
-            for var in ("VERCEL", "AWS_LAMBDA_FUNCTION_NAME", "SERVERLESS")
+            os.getenv(var) for var in ("VERCEL", "AWS_LAMBDA_FUNCTION_NAME", "SERVERLESS")
         )
 
     def obtenir_config_publique(self) -> dict:
@@ -417,6 +418,7 @@ def obtenir_parametres() -> Parametres:
                 _logging_configured = True
             except Exception as e:
                 import logging
+
                 logging.getLogger(__name__).debug(f"Configuration logging échouée: {e}")
 
         _parametres = instance

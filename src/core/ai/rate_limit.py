@@ -60,9 +60,7 @@ class RateLimitIA:
                 "appels_jour": 0,
                 "appels_heure": 0,
                 "dernier_reset_jour": datetime.now().date(),
-                "dernier_reset_heure": datetime.now().replace(
-                    minute=0, second=0, microsecond=0
-                ),
+                "dernier_reset_heure": datetime.now().replace(minute=0, second=0, microsecond=0),
                 "historique": [],
             }
 
@@ -111,10 +109,16 @@ class RateLimitIA:
         RateLimitIA._sauvegarder_data(data)
 
         if data["appels_jour"] >= AI_RATE_LIMIT_DAILY:
-            return False, f"⏳ Limite quotidienne globale atteinte ({AI_RATE_LIMIT_DAILY} appels/jour)"
+            return (
+                False,
+                f"⏳ Limite quotidienne globale atteinte ({AI_RATE_LIMIT_DAILY} appels/jour)",
+            )
 
         if data["appels_heure"] >= AI_RATE_LIMIT_HOURLY:
-            return False, f"⏳ Limite horaire globale atteinte ({AI_RATE_LIMIT_HOURLY} appels/heure)"
+            return (
+                False,
+                f"⏳ Limite horaire globale atteinte ({AI_RATE_LIMIT_HOURLY} appels/heure)",
+            )
 
         # Vérification quota per-user
         if user_id:
@@ -125,15 +129,23 @@ class RateLimitIA:
             RateLimitIA._sauvegarder_data(data_user, cle_user)
 
             if data_user["appels_jour"] >= _USER_DAILY_LIMIT:
-                return False, f"⏳ Votre limite quotidienne IA atteinte ({_USER_DAILY_LIMIT} appels/jour)"
+                return (
+                    False,
+                    f"⏳ Votre limite quotidienne IA atteinte ({_USER_DAILY_LIMIT} appels/jour)",
+                )
 
             if data_user["appels_heure"] >= _USER_HOURLY_LIMIT:
-                return False, f"⏳ Votre limite horaire IA atteinte ({_USER_HOURLY_LIMIT} appels/heure)"
+                return (
+                    False,
+                    f"⏳ Votre limite horaire IA atteinte ({_USER_HOURLY_LIMIT} appels/heure)",
+                )
 
         return True, ""
 
     @staticmethod
-    def enregistrer_appel(service: str = "unknown", tokens_utilises: int = 0, user_id: str | None = None):
+    def enregistrer_appel(
+        service: str = "unknown", tokens_utilises: int = 0, user_id: str | None = None
+    ):
         """
         Enregistre un appel IA.
 
@@ -218,15 +230,18 @@ class RateLimitIA:
         """
         classement = []
         for service, data in _service_tracking.items():
-            classement.append({
-                "service": service,
-                "total_appels": data["total_appels"],
-                "total_tokens": data["total_tokens"],
-                "tokens_moyen": (
-                    data["total_tokens"] // data["total_appels"]
-                    if data["total_appels"] > 0 else 0
-                ),
-            })
+            classement.append(
+                {
+                    "service": service,
+                    "total_appels": data["total_appels"],
+                    "total_tokens": data["total_tokens"],
+                    "tokens_moyen": (
+                        data["total_tokens"] // data["total_appels"]
+                        if data["total_appels"] > 0
+                        else 0
+                    ),
+                }
+            )
         classement.sort(key=lambda x: x["total_tokens"], reverse=True)
         return classement
 
@@ -261,10 +276,7 @@ class RateLimitIA:
             "pourcentage_heure": (data["appels_heure"] / AI_RATE_LIMIT_HOURLY * 100),
             "par_service": services_usage,
             "total_historique": len(data["historique"]),
-            "tokens_par_service": {
-                svc: d["total_tokens"]
-                for svc, d in _service_tracking.items()
-            },
+            "tokens_par_service": {svc: d["total_tokens"] for svc, d in _service_tracking.items()},
             "classement_services": RateLimitIA.obtenir_classement_services()[:10],
         }
 

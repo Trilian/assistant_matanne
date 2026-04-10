@@ -18,21 +18,21 @@ logger = logging.getLogger(__name__)
 
 def job_prediction_courses_hebdo() -> None:
     """E.9: Génère une liste de courses prédictive pour la semaine.
-    
+
     Basée sur:
     - Historique achats acheminés (ML simple)
     - Planning repas validé (si existe)
     - Stock actuel
-    
+
     Envoi: Email + Telegram
     """
     try:
         logger.info("E.9: Début prédiction courses hebdo")
 
         with obtenir_contexte_db() as session:
+            from src.core.models.courses import ArticleCourses, ListeCourses
             from src.core.models.inventaire import ArticleInventaire
             from src.core.models.planning import Repas
-            from src.core.models.courses import ListeCourses, ArticleCourses
 
             # Récupérer les repas prévus pour la semaine
             lundi = date.today() - timedelta(days=date.today().weekday())
@@ -92,7 +92,9 @@ def job_prediction_courses_hebdo() -> None:
 
             # Envoyer notification
             dispatcher = get_dispatcher_notifications()
-            message = f"🛒 Prédiction courses: {len(ingredients_needed)} articles générés pour la semaine"
+            message = (
+                f"🛒 Prédiction courses: {len(ingredients_needed)} articles générés pour la semaine"
+            )
             dispatcher.envoyer(
                 user_id="1",
                 message=message,
@@ -113,7 +115,7 @@ def job_prediction_courses_hebdo() -> None:
 
 def job_rapport_energie_mensuel() -> None:
     """E.10: Génère rapport conso énergie + comparaison mois précédent.
-    
+
     Envoi: Email (PDF en pièce jointe)
     """
     try:
@@ -149,7 +151,9 @@ def job_rapport_energie_mensuel() -> None:
 
             # Calculer consommations
             conso_courant = sum(r.consommation_kwh for r in releves_courant if r.consommation_kwh)
-            conso_precedent = sum(r.consommation_kwh for r in releves_precedent if r.consommation_kwh)
+            conso_precedent = sum(
+                r.consommation_kwh for r in releves_precedent if r.consommation_kwh
+            )
             diff_percent = (
                 ((conso_courant - conso_precedent) / conso_precedent * 100)
                 if conso_precedent > 0
@@ -184,7 +188,7 @@ def job_rapport_energie_mensuel() -> None:
 
 def job_suggestions_recettes_saison() -> None:
     """E.11: Suggère nouvelles recettes de saison.
-    
+
     Envoi: Push + Email
     """
     try:
@@ -192,7 +196,9 @@ def job_suggestions_recettes_saison() -> None:
 
         with obtenir_contexte_db() as session:
             from src.core.models.recettes import Recette
-            from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+            from src.services.core.notifications.notif_dispatcher import (
+                get_dispatcher_notifications,
+            )
 
             # Déterminer la saison actuelle
             mois = date.today().month
@@ -206,9 +212,7 @@ def job_suggestions_recettes_saison() -> None:
                 saison = "automne"
 
             # Récupérer recettes de saison non encore essayées
-            recettes_saison = (
-                session.query(Recette).filter(Recette.saison == saison).limit(5).all()
-            )
+            recettes_saison = session.query(Recette).filter(Recette.saison == saison).limit(5).all()
 
             if not recettes_saison:
                 logger.info("E.11: Aucune recette de saison trouvée")
@@ -226,7 +230,9 @@ def job_suggestions_recettes_saison() -> None:
                 titre="🍁 Recettes saisonnières",
             )
 
-            logger.info(f"E.11: Suggestions saisonnières envoyées — {len(recettes_saison)} recettes")
+            logger.info(
+                f"E.11: Suggestions saisonnières envoyées — {len(recettes_saison)} recettes"
+            )
     except Exception as e:
         logger.error(f"E.11: Erreur suggestions saison: {e}", exc_info=True)
 
@@ -238,7 +244,7 @@ def job_suggestions_recettes_saison() -> None:
 
 def job_audit_securite_hebdo() -> None:
     """E.12: Audit hebdo — intégrité données + logs suspects.
-    
+
     Envoi: Email (rapport admin)
     """
     try:
@@ -373,7 +379,7 @@ def job_alerte_meteo_jardin() -> None:
 
 def job_resume_financier_semaine() -> None:
     """E.16: Résumé dépenses de la semaine.
-    
+
     Envoi: Email + Push
     """
     try:

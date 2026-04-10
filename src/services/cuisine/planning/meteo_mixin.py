@@ -31,9 +31,7 @@ class MeteoMixin:
         """Récupère la météo pour un jour donné."""
         return await obtenir_meteo_jour(jour)
 
-    async def obtenir_meteo_semaine(
-        self, date_debut: date | None = None
-    ) -> list[MeteoJour]:
+    async def obtenir_meteo_semaine(self, date_debut: date | None = None) -> list[MeteoJour]:
         """Récupère la météo pour 7 jours à partir de date_debut.
 
         Returns:
@@ -50,9 +48,7 @@ class MeteoMixin:
 
         return resultats
 
-    def construire_contexte_meteo(
-        self, meteo_jours: list[MeteoJour]
-    ) -> str:
+    def construire_contexte_meteo(self, meteo_jours: list[MeteoJour]) -> str:
         """Construit un contexte météo complet pour un prompt IA.
 
         Args:
@@ -67,9 +63,7 @@ class MeteoMixin:
         fragments = [construire_contexte_meteo_prompt(m) for m in meteo_jours]
         return "\n".join(fragments)
 
-    def enrichir_prompt_avec_meteo(
-        self, prompt: str, meteo_jours: list[MeteoJour]
-    ) -> str:
+    def enrichir_prompt_avec_meteo(self, prompt: str, meteo_jours: list[MeteoJour]) -> str:
         """Enrichit un prompt IA avec le contexte météo.
 
         Si aucune donnée météo, retourne le prompt inchangé.
@@ -80,9 +74,7 @@ class MeteoMixin:
 
         return f"{prompt}\n\n--- Contexte météo ---\n{contexte}"
 
-    def filtrer_suggestions_par_meteo(
-        self, suggestions: list[str], meteo: MeteoJour
-    ) -> list[str]:
+    def filtrer_suggestions_par_meteo(self, suggestions: list[str], meteo: MeteoJour) -> list[str]:
         """Filtre/réordonne des suggestions de repas selon la météo.
 
         Place les suggestions cohérentes avec l'ambiance météo en premier.

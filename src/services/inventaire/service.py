@@ -222,6 +222,3 @@ __all__ = [
     # Variable globale
     "inventaire_service",
 ]
-
-
-

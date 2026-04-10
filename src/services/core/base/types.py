@@ -25,7 +25,7 @@ T = TypeVar("T")
 # ═══════════════════════════════════════════════════════════
 
 
-class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
+class BaseService[T](PipelineMixin, AdvancedQueryMixin):
     """
     Service CRUD Universel avec toutes les fonctionnalités.
 

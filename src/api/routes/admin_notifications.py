@@ -24,10 +24,10 @@ from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
 from .admin_shared import (
-    NotificationTestAllRequest,
-    NotificationSimulationRequest,
-    NotificationTestRequest,
     _NOTIFICATION_TEMPLATES,
+    NotificationSimulationRequest,
+    NotificationTestAllRequest,
+    NotificationTestRequest,
     _journaliser_action_admin,
     router,
 )
@@ -65,10 +65,14 @@ async def envoyer_notification_test(
                     detail="Aucun chat Telegram de destination configuré.",
                 )
 
-            result = asyncio.run(envoyer_message_telegram(destinataire=destinataire, texte=body.message))
+            result = asyncio.run(
+                envoyer_message_telegram(destinataire=destinataire, texte=body.message)
+            )
             return {
                 "resultats": {"telegram": result},
-                "message": "Notification Telegram de test envoyée." if result else "Échec envoi Telegram.",
+                "message": "Notification Telegram de test envoyée."
+                if result
+                else "Échec envoi Telegram.",
             }
 
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -280,18 +284,22 @@ async def historique_notifications(
     from src.api.utils import executer_avec_session
 
     with executer_avec_session() as session:
-        rows = session.execute(
-            text(
-                """
+        rows = (
+            session.execute(
+                text(
+                    """
                 SELECT id, created_at, action, details
                 FROM audit_logs
                 WHERE action LIKE 'admin.notifications.%'
                 ORDER BY created_at DESC, id DESC
                 LIMIT :limit
                 """
-            ),
-            {"limit": limit},
-        ).mappings().all()
+                ),
+                {"limit": limit},
+            )
+            .mappings()
+            .all()
+        )
 
     items = [
         {

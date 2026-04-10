@@ -66,4 +66,3 @@ def obtenir_index_jour_semaine(day_name: str) -> int:
         return JOURS_SEMAINE_LOWER.index(day_name.lower())
     except ValueError:
         return -1
-

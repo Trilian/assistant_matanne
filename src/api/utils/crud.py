@@ -14,6 +14,7 @@ from typing import Any, TypeVar
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
 from src.core.exceptions import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ DB_RETRY_ATTEMPTS = max(1, int(os.getenv("DB_TRANSIENT_RETRY_ATTEMPTS", "2")))
 DB_RETRY_DELAY_S = max(0.0, float(os.getenv("DB_TRANSIENT_RETRY_DELAY_S", "0.25")))
 
 
-def construire_reponse_paginee(
+def construire_reponse_paginee[T: BaseModel](
     items: list[Any],
     total: int,
     page: int,
@@ -107,7 +108,7 @@ def executer_avec_session() -> Generator[Session, None, None]:
 # ═══════════════════════════════════════════════════════════
 
 
-async def executer_async(func: Callable[..., R], *args: Any, **kwargs: Any) -> R:
+async def executer_async[R](func: Callable[..., R], *args: Any, **kwargs: Any) -> R:
     """
     Exécute une fonction synchrone dans un thread pool.
 
@@ -164,7 +165,7 @@ async def executer_async(func: Callable[..., R], *args: Any, **kwargs: Any) -> R
     )
 
 
-async def query_async(query_func: Callable[[Session], R]) -> R:
+async def query_async[R](query_func: Callable[[Session], R]) -> R:
     """
     Exécute une fonction de requête DB de manière asynchrone.
 

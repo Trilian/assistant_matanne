@@ -6,10 +6,10 @@ visible depuis la base configurée.
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from importlib import import_module
 from pathlib import Path
-import re
 from typing import Any
 
 from sqlalchemy import inspect
@@ -54,7 +54,9 @@ def generer_schema_diff() -> dict[str, Any]:
         "generated_at": datetime.now(UTC).isoformat(),
         "status": "ok",
         "sources": {
-            "sql_init": str((_RACINE_PROJET / "sql" / "INIT_COMPLET.sql").relative_to(_RACINE_PROJET)),
+            "sql_init": str(
+                (_RACINE_PROJET / "sql" / "INIT_COMPLET.sql").relative_to(_RACINE_PROJET)
+            ),
             "sql_schema_dir": str((_RACINE_PROJET / "sql" / "schema").relative_to(_RACINE_PROJET)),
         },
         "summary": {

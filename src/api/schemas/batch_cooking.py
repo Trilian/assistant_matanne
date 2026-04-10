@@ -44,12 +44,19 @@ class GenererSessionDepuisPlanningRequest(BaseModel):
 
     planning_id: int = Field(..., description="ID du planning source")
     date_session: date = Field(..., description="Date de la session batch")
-    nom: str | None = Field(None, description="Nom personnalisé (sinon auto-généré)", max_length=200)
+    nom: str | None = Field(
+        None, description="Nom personnalisé (sinon auto-généré)", max_length=200
+    )
     avec_jules: bool = Field(False, description="Jules participe ?")
 
     model_config = {
         "json_schema_extra": {
-            "example": {"planning_id": 7, "date_session": "2026-04-06", "nom": "Préparation semaine 15", "avec_jules": False}
+            "example": {
+                "planning_id": 7,
+                "date_session": "2026-04-06",
+                "nom": "Préparation semaine 15",
+                "avec_jules": False,
+            }
         }
     }
 
@@ -83,7 +90,9 @@ class SessionBatchPatch(BaseModel):
 
     nom: str | None = Field(None, min_length=1, max_length=200)
     date_session: date | None = None
-    statut: str | None = Field(None, pattern=r"^(planifiee|en_cours|terminee|annulee)$", max_length=20)
+    statut: str | None = Field(
+        None, pattern=r"^(planifiee|en_cours|terminee|annulee)$", max_length=20
+    )
     duree_estimee: int | None = None
     avec_jules: bool | None = None
 

@@ -57,9 +57,7 @@ def valider_modele(
         return False, str(e), None
 
 
-def valider_formulaire(
-    donnees_formulaire: dict, schema: dict
-) -> tuple[bool, list[str], dict]:
+def valider_formulaire(donnees_formulaire: dict, schema: dict) -> tuple[bool, list[str], dict]:
     """
     Valide un formulaire selon un schéma dict.
 
@@ -219,5 +217,3 @@ def valider_entree(schema: dict | None = None, nettoyer_tout: bool = True):
         return wrapper
 
     return decorateur
-
-

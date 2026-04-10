@@ -263,6 +263,3 @@ class ExportService:
 def obtenir_export_service() -> ExportService:
     """Factory singleton ExportService."""
     return ExportService()
-
-
-

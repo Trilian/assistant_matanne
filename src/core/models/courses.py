@@ -234,9 +234,7 @@ class HistoriqueAchats(Base):
     prix_dernier: Mapped[float | None] = mapped_column(Float, nullable=True)
     prix_moyen: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    __table_args__ = (
-        Index("ix_historique_achats_nom_date", "article_nom", "derniere_achat"),
-    )
+    __table_args__ = (Index("ix_historique_achats_nom_date", "article_nom", "derniere_achat"),)
 
     def __repr__(self) -> str:
         return f"<HistoriqueAchats(article={self.article_nom}, freq={self.frequence_jours}j)>"
@@ -281,12 +279,23 @@ class CorrespondanceDrive(TimestampMixin, Base):
     actif: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
 
     # Relations
-    ingredient: Mapped["Ingredient | None"] = relationship("Ingredient", foreign_keys=[ingredient_id])
+    ingredient: Mapped["Ingredient | None"] = relationship(
+        "Ingredient", foreign_keys=[ingredient_id]
+    )
 
     __table_args__ = (
-        Index("ix_correspondances_drive_article_produit", "nom_article", "produit_drive_id", unique=True),
-        CheckConstraint("quantite_par_defaut > 0", name="ck_correspondance_drive_quantite_positive"),
+        Index(
+            "ix_correspondances_drive_article_produit",
+            "nom_article",
+            "produit_drive_id",
+            unique=True,
+        ),
+        CheckConstraint(
+            "quantite_par_defaut > 0", name="ck_correspondance_drive_quantite_positive"
+        ),
     )
 
     def __repr__(self) -> str:
-        return f"<CorrespondanceDrive(article={self.nom_article}, produit={self.produit_drive_nom})>"
+        return (
+            f"<CorrespondanceDrive(article={self.nom_article}, produit={self.produit_drive_nom})>"
+        )

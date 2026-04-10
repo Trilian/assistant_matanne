@@ -4,6 +4,7 @@ Routes API Maison â€” Projets domestiques.
 Sous-routeur inclus dans maison.py.
 """
 
+import logging
 from datetime import date
 from typing import Any
 
@@ -20,7 +21,6 @@ from src.api.schemas.errors import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.core.backup.utils_serialization import model_to_dict
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Maison"])
@@ -35,7 +35,9 @@ router = APIRouter(tags=["Maison"])
 async def lister_projets(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    statut: str | None = Query(None, description="Filtrer par statut (en_cours, terminÃ©, annulÃ©)"),
+    statut: str | None = Query(
+        None, description="Filtrer par statut (en_cours, terminÃ©, annulÃ©)"
+    ),
     priorite: str | None = Query(None, description="Filtrer par prioritÃ©"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -176,7 +178,15 @@ async def modifier_projet(
             if not projet:
                 raise HTTPException(status_code=404, detail="Projet non trouvÃ©")
 
-            for champ in ("nom", "description", "statut", "priorite", "date_debut", "date_fin_prevue", "date_fin_reelle"):
+            for champ in (
+                "nom",
+                "description",
+                "statut",
+                "priorite",
+                "date_debut",
+                "date_fin_prevue",
+                "date_fin_reelle",
+            ):
                 if champ in payload:
                     setattr(projet, champ, payload[champ])
 
@@ -256,9 +266,9 @@ async def prioriser_projets_ia(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """SuggÃ¨re un ordre de prioritÃ© pour les projets en cours via l'IA."""
+    from src.api.utils import executer_avec_session
     from src.core.models.maison import ProjetMaison
     from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
-    from src.api.utils import executer_avec_session
 
     def _query():
         with executer_avec_session() as session:
@@ -276,7 +286,13 @@ async def prioriser_projets_ia(
             noms = ", ".join(p.nom for p in projets)
             try:
                 conseil = service.obtenir_conseil("travaux")
-                message = conseil.get("conseils", ["Priorisez selon l'urgence et le budget disponible."])[0] if isinstance(conseil.get("conseils"), list) else "Priorisez selon l'urgence et le budget."
+                message = (
+                    conseil.get("conseils", ["Priorisez selon l'urgence et le budget disponible."])[
+                        0
+                    ]
+                    if isinstance(conseil.get("conseils"), list)
+                    else "Priorisez selon l'urgence et le budget."
+                )
             except Exception:
                 message = "Priorisez selon l'urgence et le budget disponible."
                 logger.warning("[maison] Conseil IA priorisation projets non disponible")
@@ -291,6 +307,3 @@ async def prioriser_projets_ia(
             }
 
     return await executer_async(_query)
-
-
-

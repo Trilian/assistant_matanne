@@ -111,7 +111,9 @@ class GroupeurNotifications:
 
         # Footer
         nb_total = len(self._pendantes)
-        lignes.append(f"<i>{nb_total} notification{'s' if nb_total > 1 else ''} regroupée{'s' if nb_total > 1 else ''}</i>")
+        lignes.append(
+            f"<i>{nb_total} notification{'s' if nb_total > 1 else ''} regroupée{'s' if nb_total > 1 else ''}</i>"
+        )
 
         return "\n".join(lignes)
 

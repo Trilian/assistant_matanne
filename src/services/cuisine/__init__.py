@@ -127,4 +127,3 @@ def __getattr__(name: str):
 
         return get_garmin_nutrition_adultes_service
     raise AttributeError(f"module 'src.services.cuisine' has no attribute '{name}'")
-

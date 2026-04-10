@@ -54,20 +54,20 @@ async def lister_utilisateurs(
             )
             result = []
             for p in profils:
-                result.append({
-                    "id": str(getattr(p, "username", p.id)),
-                    "email": getattr(p, "email", ""),
-                    "nom": getattr(p, "nom", None) or getattr(p, "display_name", None),
-                    "role": getattr(p, "role", "membre"),
-                    "actif": not bool(
-                        (getattr(p, "preferences_modules", None) or {}).get("compteDesactive")
-                    ),
-                    "cree_le": (
-                        p.cree_le.isoformat()
-                        if hasattr(p, "cree_le") and p.cree_le
-                        else None
-                    ),
-                })
+                result.append(
+                    {
+                        "id": str(getattr(p, "username", p.id)),
+                        "email": getattr(p, "email", ""),
+                        "nom": getattr(p, "nom", None) or getattr(p, "display_name", None),
+                        "role": getattr(p, "role", "membre"),
+                        "actif": not bool(
+                            (getattr(p, "preferences_modules", None) or {}).get("compteDesactive")
+                        ),
+                        "cree_le": (
+                            p.cree_le.isoformat() if hasattr(p, "cree_le") and p.cree_le else None
+                        ),
+                    }
+                )
             return result
 
     return await executer_async(_query)
@@ -139,9 +139,7 @@ async def simuler_utilisateur(
 
     with executer_avec_session() as session:
         profil = (
-            session.query(ProfilUtilisateur)
-            .filter(ProfilUtilisateur.username == user_id)
-            .first()
+            session.query(ProfilUtilisateur).filter(ProfilUtilisateur.username == user_id).first()
         )
         if profil is None:
             raise HTTPException(status_code=404, detail=f"Utilisateur '{user_id}' introuvable.")
@@ -159,7 +157,11 @@ async def simuler_utilisateur(
         action="admin.user.impersonate",
         entite_type="utilisateur",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"cible_user_id": user_id, "duree_heures": body.duree_heures, "raison": body.raison},
+        details={
+            "cible_user_id": user_id,
+            "duree_heures": body.duree_heures,
+            "raison": body.raison,
+        },
     )
     return {
         "status": "ok",

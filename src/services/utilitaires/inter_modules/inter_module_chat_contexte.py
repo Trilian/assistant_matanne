@@ -56,11 +56,7 @@ class ChatContexteMultiModuleService:
         """Résumé du contenu du frigo/inventaire."""
         from src.core.models import ArticleInventaire
 
-        articles = (
-            db.query(ArticleInventaire)
-            .filter(ArticleInventaire.quantite > 0)
-            .all()
-        )
+        articles = db.query(ArticleInventaire).filter(ArticleInventaire.quantite > 0).all()
 
         if not articles:
             return {"total": 0, "message": "Inventaire vide"}
@@ -74,9 +70,7 @@ class ChatContexteMultiModuleService:
             par_emplacement.setdefault(emp, []).append(a.nom)
 
             if a.date_peremption and (a.date_peremption - aujourd_hui).days <= 3:
-                expirants.append(
-                    f"{a.nom} (expire {a.date_peremption.isoformat()})"
-                )
+                expirants.append(f"{a.nom} (expire {a.date_peremption.isoformat()})")
 
         return {
             "total_articles": len(articles),
@@ -108,11 +102,13 @@ class ChatContexteMultiModuleService:
 
         repas_info = []
         for r in repas[:14]:
-            repas_info.append({
-                "date": r.date_repas.isoformat() if r.date_repas else None,
-                "type": getattr(r, "type_repas", ""),
-                "recette": getattr(r, "recette_nom", "") or "",
-            })
+            repas_info.append(
+                {
+                    "date": r.date_repas.isoformat() if r.date_repas else None,
+                    "type": getattr(r, "type_repas", ""),
+                    "recette": getattr(r, "recette_nom", "") or "",
+                }
+            )
 
         return {
             "nb_repas_planifies": len(repas),
@@ -123,7 +119,7 @@ class ChatContexteMultiModuleService:
     @avec_session_db
     def _contexte_courses(self, *, db=None) -> dict[str, Any]:
         """Résumé de la liste de courses active."""
-        from src.core.models.courses import ListeCourses, ArticleCourses
+        from src.core.models.courses import ArticleCourses, ListeCourses
 
         liste = (
             db.query(ListeCourses)
@@ -135,11 +131,7 @@ class ChatContexteMultiModuleService:
         if not liste:
             return {"message": "Aucune liste de courses active"}
 
-        articles = (
-            db.query(ArticleCourses)
-            .filter(ArticleCourses.liste_id == liste.id)
-            .all()
-        )
+        articles = db.query(ArticleCourses).filter(ArticleCourses.liste_id == liste.id).all()
 
         non_coches = [a.nom for a in articles if not getattr(a, "coche", False)]
         coches = [a.nom for a in articles if getattr(a, "coche", False)]
@@ -156,6 +148,7 @@ class ChatContexteMultiModuleService:
     def _contexte_budget(self, *, db=None) -> dict[str, Any]:
         """Résumé du budget du mois en cours."""
         from sqlalchemy import extract, func
+
         from src.core.models import BudgetFamille
 
         aujourd_hui = date.today()
@@ -202,11 +195,13 @@ class ChatContexteMultiModuleService:
         for anniv in tous:
             jours_restants = getattr(anniv, "jours_restants", None)
             if jours_restants is not None and 0 <= jours_restants <= 30:
-                prochains.append({
-                    "nom": anniv.nom,
-                    "jours_restants": jours_restants,
-                    "age": getattr(anniv, "age", None),
-                })
+                prochains.append(
+                    {
+                        "nom": anniv.nom,
+                        "jours_restants": jours_restants,
+                        "age": getattr(anniv, "age", None),
+                    }
+                )
 
         if not prochains:
             return {}

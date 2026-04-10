@@ -5,8 +5,6 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 
-from ._helpers import _extraire_id_depuis_callback, _normaliser_texte, _obtenir_url_app
-from ._menus import _envoyer_aide_telegram, _envoyer_menu_module, _envoyer_menu_principal
 from ._cuisine import (
     _envoyer_courses_commande,
     _envoyer_inventaire_commande,
@@ -20,12 +18,14 @@ from ._famille import (
     _envoyer_resume_jules,
     _envoyer_resume_weekend,
 )
+from ._helpers import _extraire_id_depuis_callback, _normaliser_texte, _obtenir_url_app
 from ._maison import (
     _envoyer_rappels_groupes,
     _envoyer_resume_energie,
     _envoyer_resume_jardin,
     _envoyer_taches_maison,
 )
+from ._menus import _envoyer_aide_telegram, _envoyer_menu_module, _envoyer_menu_principal
 from ._outils import _creer_note_rapide_telegram, _lancer_minuteur_telegram
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,10 @@ async def _traiter_callback_action_article(
             if not article:
                 return {"status": 404, "error": "Article non trouvé"}
 
-            nom_article = getattr(getattr(article, "ingredient", None), "nom", None) or f"Article #{article.id}"
+            nom_article = (
+                getattr(getattr(article, "ingredient", None), "nom", None)
+                or f"Article #{article.id}"
+            )
             if action == "achete":
                 article.achete = True
                 article.achete_le = datetime.utcnow()
@@ -90,7 +93,9 @@ async def _traiter_callback_action_article(
         )
         return
 
-    await repondre_callback_query(callback_query_id, str(resultat.get("message") or "✅ OK"), show_alert=False)
+    await repondre_callback_query(
+        callback_query_id, str(resultat.get("message") or "✅ OK"), show_alert=False
+    )
     await _envoyer_courses_commande(chat_id, liste_id=int(resultat["liste_id"]))
 
 
@@ -111,7 +116,9 @@ async def _traiter_callback_sondage_repas(
     }
     message = libelles.get(choix, choix)
     await repondre_callback_query(callback_query_id, "🍽️ Préférence notée", show_alert=False)
-    await envoyer_message_telegram(chat_id, f"🍽️ Bien noté, vous avez envie de {html_mod.escape(message)}.")
+    await envoyer_message_telegram(
+        chat_id, f"🍽️ Bien noté, vous avez envie de {html_mod.escape(message)}."
+    )
 
 
 async def _traiter_callback_toggle_article(
@@ -137,7 +144,10 @@ async def _traiter_callback_toggle_article(
 
             article.achete = not bool(article.achete)
             article.achete_le = datetime.utcnow() if article.achete else None
-            nom_article = getattr(getattr(article, "ingredient", None), "nom", None) or f"Article #{article.id}"
+            nom_article = (
+                getattr(getattr(article, "ingredient", None), "nom", None)
+                or f"Article #{article.id}"
+            )
             liste_id = article.liste_id
             session.commit()
             return {
@@ -257,7 +267,9 @@ async def _traiter_reponse_rapide_ok(chat_id: str) -> bool:
             await envoyer_message_telegram(chat_id, "✅ Planning validé depuis Telegram.")
             return True
 
-        await envoyer_message_telegram(chat_id, f"❌ {result.get('error', 'Validation impossible')}")
+        await envoyer_message_telegram(
+            chat_id, f"❌ {result.get('error', 'Validation impossible')}"
+        )
         return True
 
     if type_etat == "courses_confirmation":
@@ -281,10 +293,14 @@ async def _traiter_reponse_rapide_ok(chat_id: str) -> bool:
         result = await executer_async(_confirmer)
         if result.get("status") == 200:
             effacer_etat_conversation(chat_id)
-            await envoyer_message_telegram(chat_id, "✅ Liste de courses confirmée depuis Telegram.")
+            await envoyer_message_telegram(
+                chat_id, "✅ Liste de courses confirmée depuis Telegram."
+            )
             return True
 
-        await envoyer_message_telegram(chat_id, f"❌ {result.get('error', 'Confirmation impossible')}")
+        await envoyer_message_telegram(
+            chat_id, f"❌ {result.get('error', 'Confirmation impossible')}"
+        )
         return True
 
     return False
@@ -296,7 +312,7 @@ async def _traiter_callback_planning(
     chat_id: str,
 ) -> None:
     from src.api.utils import executer_async, executer_avec_session
-    from src.services.integrations.telegram import repondre_callback_query, modifier_message
+    from src.services.integrations.telegram import modifier_message, repondre_callback_query
 
     if ":" in callback_data:
         action, id_str = callback_data.split(":", 1)
@@ -314,14 +330,19 @@ async def _traiter_callback_planning(
 
     if action == "planning_valider":
         try:
+
             def _valider():
                 from src.core.models.planning import Planning
 
                 with executer_avec_session() as session:
                     if planning_id:
-                        planning = session.query(Planning).filter(Planning.id == planning_id).first()
+                        planning = (
+                            session.query(Planning).filter(Planning.id == planning_id).first()
+                        )
                     else:
-                        planning = session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
+                        planning = (
+                            session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
+                        )
 
                     if not planning:
                         return {"error": "Planning non trouvé", "status": 404}
@@ -333,7 +354,9 @@ async def _traiter_callback_planning(
 
             result = await executer_async(_valider)
             if result.get("status") == 200:
-                await repondre_callback_query(callback_query_id, "✅ Planning validé!", show_alert=False)
+                await repondre_callback_query(
+                    callback_query_id, "✅ Planning validé!", show_alert=False
+                )
                 await modifier_message(
                     chat_id,
                     (await _obtenir_message_id(callback_query_id)) or 0,
@@ -341,35 +364,48 @@ async def _traiter_callback_planning(
                     boutons=None,
                 )
             else:
-                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+                await repondre_callback_query(
+                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
+                )
         except Exception as e:
             logger.error(f"❌ Erreur traitement callback planning_valider: {e}", exc_info=True)
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
 
     elif action == "planning_modifier":
         web_url = "https://matanne.vercel.app/app/cuisine/planning"
-        await repondre_callback_query(callback_query_id, f"Ouvrez ce lien pour modifier: {web_url}", show_alert=False)
+        await repondre_callback_query(
+            callback_query_id, f"Ouvrez ce lien pour modifier: {web_url}", show_alert=False
+        )
 
     elif action == "planning_regenerer":
         try:
+
             def _regenerer():
                 from src.core.models.planning import Planning
 
                 with executer_avec_session() as session:
                     if planning_id:
-                        old_planning = session.query(Planning).filter(Planning.id == planning_id).first()
+                        old_planning = (
+                            session.query(Planning).filter(Planning.id == planning_id).first()
+                        )
                     else:
-                        old_planning = session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
+                        old_planning = (
+                            session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
+                        )
 
                     if not old_planning:
                         return {"error": "Planning non trouvé", "status": 404}
                     if old_planning.etat == "archive":
-                        return {"error": "Planning archivé ne peut pas être régénéré", "status": 409}
+                        return {
+                            "error": "Planning archivé ne peut pas être régénéré",
+                            "status": 409,
+                        }
 
                     old_planning.etat = "archive"
                     session.flush()
 
                     from src.core.models.planning import Planning as PlanningModel
+
                     new_planning = PlanningModel(
                         nom=f"{old_planning.nom} (refait)",
                         semaine_debut=old_planning.semaine_debut,
@@ -382,7 +418,9 @@ async def _traiter_callback_planning(
 
             result = await executer_async(_regenerer)
             if result.get("status") == 200:
-                await repondre_callback_query(callback_query_id, "🔄 Planning en cours de régénération...", show_alert=False)
+                await repondre_callback_query(
+                    callback_query_id, "🔄 Planning en cours de régénération...", show_alert=False
+                )
                 await modifier_message(
                     chat_id,
                     (await _obtenir_message_id(callback_query_id)) or 0,
@@ -390,7 +428,9 @@ async def _traiter_callback_planning(
                     boutons=None,
                 )
             else:
-                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+                await repondre_callback_query(
+                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
+                )
         except Exception as e:
             logger.error(f"❌ Erreur traitement callback planning_regenerer: {e}", exc_info=True)
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
@@ -402,7 +442,7 @@ async def _traiter_callback_courses(
     chat_id: str,
 ) -> None:
     from src.api.utils import executer_async, executer_avec_session
-    from src.services.integrations.telegram import repondre_callback_query, modifier_message
+    from src.services.integrations.telegram import modifier_message, repondre_callback_query
 
     if ":" in callback_data:
         action, id_str = callback_data.split(":", 1)
@@ -420,16 +460,22 @@ async def _traiter_callback_courses(
 
     if action == "courses_confirmer":
         try:
+
             def _confirmer():
                 from src.core.models.courses import ListeCourses
 
                 with executer_avec_session() as session:
                     if liste_id:
-                        liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+                        liste = (
+                            session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+                        )
                     else:
-                        liste = session.query(ListeCourses).filter(
-                            ListeCourses.etat == "brouillon"
-                        ).order_by(ListeCourses.cree_le.desc()).first()
+                        liste = (
+                            session.query(ListeCourses)
+                            .filter(ListeCourses.etat == "brouillon")
+                            .order_by(ListeCourses.cree_le.desc())
+                            .first()
+                        )
 
                     if not liste:
                         return {"error": "Liste non trouvée", "status": 404}
@@ -441,7 +487,9 @@ async def _traiter_callback_courses(
 
             result = await executer_async(_confirmer)
             if result.get("status") == 200:
-                await repondre_callback_query(callback_query_id, "✅ Liste confirmée!", show_alert=False)
+                await repondre_callback_query(
+                    callback_query_id, "✅ Liste confirmée!", show_alert=False
+                )
                 await modifier_message(
                     chat_id,
                     (await _obtenir_message_id(callback_query_id)) or 0,
@@ -449,27 +497,37 @@ async def _traiter_callback_courses(
                     boutons=None,
                 )
             else:
-                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+                await repondre_callback_query(
+                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
+                )
         except Exception as e:
             logger.error(f"❌ Erreur traitement callback courses_confirmer: {e}", exc_info=True)
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
 
     elif action == "courses_ajouter":
         web_url = "https://matanne.vercel.app/app/cuisine/courses"
-        await repondre_callback_query(callback_query_id, f"Ouvrez ce lien pour ajouter: {web_url}", show_alert=False)
+        await repondre_callback_query(
+            callback_query_id, f"Ouvrez ce lien pour ajouter: {web_url}", show_alert=False
+        )
 
     elif action == "courses_refaire":
         try:
+
             def _refaire():
                 from src.core.models.courses import ListeCourses
 
                 with executer_avec_session() as session:
                     if liste_id:
-                        old_liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+                        old_liste = (
+                            session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+                        )
                     else:
-                        old_liste = session.query(ListeCourses).filter(
-                            ListeCourses.etat == "brouillon"
-                        ).order_by(ListeCourses.cree_le.desc()).first()
+                        old_liste = (
+                            session.query(ListeCourses)
+                            .filter(ListeCourses.etat == "brouillon")
+                            .order_by(ListeCourses.cree_le.desc())
+                            .first()
+                        )
 
                     if not old_liste:
                         return {"error": "Liste non trouvée", "status": 404}
@@ -484,7 +542,9 @@ async def _traiter_callback_courses(
 
             result = await executer_async(_refaire)
             if result.get("status") == 200:
-                await repondre_callback_query(callback_query_id, "🔄 Liste en cours de refonte...", show_alert=False)
+                await repondre_callback_query(
+                    callback_query_id, "🔄 Liste en cours de refonte...", show_alert=False
+                )
                 await modifier_message(
                     chat_id,
                     (await _obtenir_message_id(callback_query_id)) or 0,
@@ -492,7 +552,9 @@ async def _traiter_callback_courses(
                     boutons=None,
                 )
             else:
-                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+                await repondre_callback_query(
+                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
+                )
         except Exception as e:
             logger.error(f"❌ Erreur traitement callback courses_refaire: {e}", exc_info=True)
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
@@ -524,6 +586,7 @@ async def _traiter_callback_tache(
     logger.info(f"Callback tâche reçu: action={action}, tache_id={tache_id}")
 
     if action == "tache_valider":
+
         def _valider() -> dict[str, object]:
             from src.core.models.maison import TacheProjet
 
@@ -541,15 +604,20 @@ async def _traiter_callback_tache(
             result = await executer_async(_valider)
             if result.get("status") == 200:
                 nom = html_mod.escape(str(result.get("nom", "")))
-                await repondre_callback_query(callback_query_id, f"✅ {result.get('nom')} — terminée !", show_alert=False)
+                await repondre_callback_query(
+                    callback_query_id, f"✅ {result.get('nom')} — terminée !", show_alert=False
+                )
                 await envoyer_message_telegram(chat_id, f"✅ <b>{nom}</b> marquée comme terminée.")
             else:
-                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+                await repondre_callback_query(
+                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
+                )
         except Exception as e:
             logger.error(f"❌ Erreur callback tache_valider: {e}", exc_info=True)
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
 
     elif action == "tache_reporter":
+
         def _reporter() -> dict[str, object]:
             from datetime import timedelta
 
@@ -565,17 +633,26 @@ async def _traiter_callback_tache(
                 else:
                     nouvelle_echeance = "demain"
                 session.commit()
-                return {"message": "Tâche reportée", "nom": tache.nom, "echeance": nouvelle_echeance, "status": 200}
+                return {
+                    "message": "Tâche reportée",
+                    "nom": tache.nom,
+                    "echeance": nouvelle_echeance,
+                    "status": 200,
+                }
 
         try:
             result = await executer_async(_reporter)
             if result.get("status") == 200:
                 nom = html_mod.escape(str(result.get("nom", "")))
                 echeance = html_mod.escape(str(result.get("echeance", "demain")))
-                await repondre_callback_query(callback_query_id, f"🔄 Reportée au {result.get('echeance')}", show_alert=False)
+                await repondre_callback_query(
+                    callback_query_id, f"🔄 Reportée au {result.get('echeance')}", show_alert=False
+                )
                 await envoyer_message_telegram(chat_id, f"🔄 <b>{nom}</b> reportée au {echeance}.")
             else:
-                await repondre_callback_query(callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True)
+                await repondre_callback_query(
+                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
+                )
         except Exception as e:
             logger.error(f"❌ Erreur callback tache_reporter: {e}", exc_info=True)
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)

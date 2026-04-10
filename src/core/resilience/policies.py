@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class Policy(ABC, Generic[T]):
+class Policy[T](ABC):
     """Politique de résilience abstraite."""
 
     @abstractmethod

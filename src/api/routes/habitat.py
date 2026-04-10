@@ -9,6 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
+from src.api.schemas.common import MessageResponse
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.schemas.habitat import (
     AnnonceHabitatCreate,
     CritereImmoCreate,
@@ -32,13 +39,6 @@ from src.api.schemas.ia_transverses import (
     ComparateurEnergieResponse,
     EnergieTempsReelResponse,
 )
-from src.api.schemas.common import MessageResponse
-from src.api.schemas.errors import (
-    REPONSES_CRUD_CREATION,
-    REPONSES_CRUD_LECTURE,
-    REPONSES_CRUD_SUPPRESSION,
-    REPONSES_LISTE,
-)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.core.models.habitat_projet import (
     AnnonceHabitat,
@@ -52,9 +52,9 @@ from src.core.models.habitat_projet import (
 )
 from src.services.habitat.deco_service import obtenir_service_deco_habitat
 from src.services.habitat.dvf_service import obtenir_service_dvf_habitat
-from src.services.habitat.service_ia import obtenir_service_innovations_habitat
 from src.services.habitat.plans_ai_service import obtenir_service_plans_habitat
 from src.services.habitat.scenarios_service import obtenir_service_scenarios_habitat
+from src.services.habitat.service_ia import obtenir_service_innovations_habitat
 from src.services.habitat.veille_service import obtenir_service_veille_habitat
 from src.services.integrations.image_generation import obtenir_service_generation_image
 
@@ -85,15 +85,25 @@ async def habitat_hub(user: dict[str, Any] = Depends(require_auth)) -> dict[str,
                 "projets_deco": session.query(ProjetDecoHabitat).count(),
                 "zones_jardin": session.query(ZoneJardinHabitat).count(),
                 "alertes": len(alertes),
-                "annonces_a_traiter": session.query(AnnonceHabitat).filter(AnnonceHabitat.statut.in_(["nouveau", "alerte"])).count(),
-                "budget_deco_total": round(sum(float(item.budget_prevu or 0) for item in depenses_deco), 2),
-                "budget_deco_depense": round(sum(float(item.budget_depense or 0) for item in depenses_deco), 2),
+                "annonces_a_traiter": session.query(AnnonceHabitat)
+                .filter(AnnonceHabitat.statut.in_(["nouveau", "alerte"]))
+                .count(),
+                "budget_deco_total": round(
+                    sum(float(item.budget_prevu or 0) for item in depenses_deco), 2
+                ),
+                "budget_deco_depense": round(
+                    sum(float(item.budget_depense or 0) for item in depenses_deco), 2
+                ),
             }
 
     return await executer_async(_query)
 
 
-@router.get("/anomalies-energie", response_model=AnomaliesEnergieResponse, responses=REPONSES_CRUD_LECTURE_TYPED)
+@router.get(
+    "/anomalies-energie",
+    response_model=AnomaliesEnergieResponse,
+    responses=REPONSES_CRUD_LECTURE_TYPED,
+)
 @gerer_exception_api
 async def obtenir_anomalies_energie(
     user: dict[str, Any] = Depends(require_auth),
@@ -104,7 +114,11 @@ async def obtenir_anomalies_energie(
     return result or AnomaliesEnergieResponse()
 
 
-@router.post("/comparateur-energie", response_model=ComparateurEnergieResponse, responses=REPONSES_CRUD_CREATION_TYPED)
+@router.post(
+    "/comparateur-energie",
+    response_model=ComparateurEnergieResponse,
+    responses=REPONSES_CRUD_CREATION_TYPED,
+)
 @gerer_exception_api
 async def comparer_fournisseurs_energie(
     body: ComparateurEnergieRequest,
@@ -120,7 +134,11 @@ async def comparer_fournisseurs_energie(
     return result or ComparateurEnergieResponse()
 
 
-@router.get("/energie-temps-reel", response_model=EnergieTempsReelResponse, responses=REPONSES_CRUD_LECTURE_TYPED)
+@router.get(
+    "/energie-temps-reel",
+    response_model=EnergieTempsReelResponse,
+    responses=REPONSES_CRUD_LECTURE_TYPED,
+)
 @gerer_exception_api
 async def obtenir_energie_temps_reel(
     user: dict[str, Any] = Depends(require_auth),
@@ -211,7 +229,9 @@ async def lister_scenarios(user: dict[str, Any] = Depends(require_auth)) -> dict
     def _query() -> dict[str, Any]:
         with executer_avec_session() as session:
             service = obtenir_service_scenarios_habitat()
-            items = session.query(ScenarioHabitat).order_by(ScenarioHabitat.score_global.desc()).all()
+            items = (
+                session.query(ScenarioHabitat).order_by(ScenarioHabitat.score_global.desc()).all()
+            )
             result: list[dict[str, Any]] = []
             for scenario in items:
                 score = service.calculer_score_global(session, scenario.id)
@@ -266,7 +286,9 @@ async def modifier_scenario(
 
     def _query() -> dict[str, Any]:
         with executer_avec_session() as session:
-            scenario = session.query(ScenarioHabitat).filter(ScenarioHabitat.id == scenario_id).first()
+            scenario = (
+                session.query(ScenarioHabitat).filter(ScenarioHabitat.id == scenario_id).first()
+            )
             if not scenario:
                 raise HTTPException(status_code=404, detail="Scenario habitat non trouve")
             for key, value in payload.model_dump(exclude_unset=True).items():
@@ -292,7 +314,9 @@ async def supprimer_scenario(
 
     def _query() -> MessageResponse:
         with executer_avec_session() as session:
-            scenario = session.query(ScenarioHabitat).filter(ScenarioHabitat.id == scenario_id).first()
+            scenario = (
+                session.query(ScenarioHabitat).filter(ScenarioHabitat.id == scenario_id).first()
+            )
             if not scenario:
                 raise HTTPException(status_code=404, detail="Scenario habitat non trouve")
             session.delete(scenario)
@@ -301,7 +325,9 @@ async def supprimer_scenario(
     return await executer_async(_query)
 
 
-@router.post("/scenarios/{scenario_id}/criteres", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
+@router.post(
+    "/scenarios/{scenario_id}/criteres", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED
+)
 @gerer_exception_api
 async def ajouter_critere_scenario(
     scenario_id: int,
@@ -312,7 +338,9 @@ async def ajouter_critere_scenario(
 
     def _query() -> dict[str, Any]:
         with executer_avec_session() as session:
-            scenario = session.query(ScenarioHabitat).filter(ScenarioHabitat.id == scenario_id).first()
+            scenario = (
+                session.query(ScenarioHabitat).filter(ScenarioHabitat.id == scenario_id).first()
+            )
             if not scenario:
                 raise HTTPException(status_code=404, detail="Scenario habitat non trouve")
             critere = CritereScenarioHabitat(scenario_id=scenario_id, **payload.model_dump())
@@ -511,7 +539,9 @@ async def lister_plans(user: dict[str, Any] = Depends(require_auth)) -> dict[str
                         "surface_totale_m2": _to_float(p.surface_totale_m2),
                         "budget_estime": _to_float(p.budget_estime),
                         "version": p.version,
-                        "suggestions_ia": cast(dict[str, Any], p.donnees_pieces or {}).get("suggestions_ia", []),
+                        "suggestions_ia": cast(dict[str, Any], p.donnees_pieces or {}).get(
+                            "suggestions_ia", []
+                        ),
                     }
                     for p in items
                 ]
@@ -576,7 +606,9 @@ async def creer_plan(
 
 @router.get("/plans/{plan_id}/pieces", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
-async def lister_pieces(plan_id: int, user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+async def lister_pieces(
+    plan_id: int, user: dict[str, Any] = Depends(require_auth)
+) -> dict[str, Any]:
     """Liste les pièces associées à un plan."""
 
     def _query() -> dict[str, Any]:
@@ -648,7 +680,9 @@ async def lister_projets_deco(user: dict[str, Any] = Depends(require_auth)) -> d
     return await executer_async(_query)
 
 
-@router.post("/deco/projets/{projet_id}/suggestions", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
+@router.post(
+    "/deco/projets/{projet_id}/suggestions", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED
+)
 @gerer_exception_api
 async def suggerer_projet_deco(
     projet_id: int,
@@ -669,7 +703,9 @@ async def suggerer_projet_deco(
     return await executer_async(_query)
 
 
-@router.post("/deco/projets/{projet_id}/depenses", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
+@router.post(
+    "/deco/projets/{projet_id}/depenses", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED
+)
 @gerer_exception_api
 async def synchroniser_depense_deco(
     projet_id: int,

@@ -226,6 +226,3 @@ class MeteoService:
 def obtenir_meteo_service() -> MeteoService:
     """Factory singleton MeteoService."""
     return MeteoService()
-
-
-

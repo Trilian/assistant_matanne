@@ -23,7 +23,9 @@ class AssistantProactifService:
     TTL_SUGGESTIONS_S = 60 * 60 * 6
     THROTTLE_S = 60 * 10
 
-    def traiter_evenement(self, event_type: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
+    def traiter_evenement(
+        self, event_type: str, data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Traite un événement et met à jour les suggestions proactives."""
         data = data or {}
         if self._est_throttle(event_type):
@@ -97,17 +99,23 @@ class AssistantProactifService:
         cache.set(cle, now, ttl=self.THROTTLE_S, tags=["assistant", "proactif"])
         return False
 
-    def _suggestions_contextuelles(self, event_type: str, data: dict[str, Any]) -> list[dict[str, Any]]:
+    def _suggestions_contextuelles(
+        self, event_type: str, data: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         suggestions: list[dict[str, Any]] = []
         event_lower = event_type.lower()
 
         if event_lower.startswith("meteo."):
             suggestions.extend(self._suggestions_meteo(data, event_type=event_lower))
-            suggestions.extend(self._suggestions_planning_adaptatif(event_type=event_lower, data=data))
+            suggestions.extend(
+                self._suggestions_planning_adaptatif(event_type=event_lower, data=data)
+            )
 
         if event_lower.startswith("planning."):
             suggestions.extend(self._suggestions_planning(data, event_type=event_lower))
-            suggestions.extend(self._suggestions_planning_adaptatif(event_type=event_lower, data=data))
+            suggestions.extend(
+                self._suggestions_planning_adaptatif(event_type=event_lower, data=data)
+            )
 
         if event_lower == "budget.depassement":
             suggestions.append(
@@ -127,7 +135,9 @@ class AssistantProactifService:
 
         return suggestions
 
-    def _suggestions_meteo(self, data: dict[str, Any], event_type: str | None = None) -> list[dict[str, Any]]:
+    def _suggestions_meteo(
+        self, data: dict[str, Any], event_type: str | None = None
+    ) -> list[dict[str, Any]]:
         suggestions: list[dict[str, Any]] = []
         condition = str(data.get("condition") or data.get("description") or "").lower()
         temperature = data.get("temperature")
@@ -158,7 +168,9 @@ class AssistantProactifService:
             )
         return suggestions
 
-    def _suggestions_planning(self, data: dict[str, Any], event_type: str | None = None) -> list[dict[str, Any]]:
+    def _suggestions_planning(
+        self, data: dict[str, Any], event_type: str | None = None
+    ) -> list[dict[str, Any]]:
         suggestions: list[dict[str, Any]] = []
         charge = data.get("charge_score")
         event_type = str(event_type or "").lower()
@@ -204,7 +216,9 @@ class AssistantProactifService:
             )
         return suggestions
 
-    def _suggestions_planning_adaptatif(self, event_type: str, data: dict[str, Any]) -> list[dict[str, Any]]:
+    def _suggestions_planning_adaptatif(
+        self, event_type: str, data: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Complète les suggestions avec un vrai réajustement de planning via l'IA avancée."""
         suggestions: list[dict[str, Any]] = []
         try:
@@ -306,7 +320,9 @@ class AssistantProactifService:
 
         return suggestions
 
-    def _dedoublonner_limite(self, suggestions: list[dict[str, Any]], limite: int) -> list[dict[str, Any]]:
+    def _dedoublonner_limite(
+        self, suggestions: list[dict[str, Any]], limite: int
+    ) -> list[dict[str, Any]]:
         dedup: list[dict[str, Any]] = []
         vus: set[tuple[str, str]] = set()
         for item in suggestions:

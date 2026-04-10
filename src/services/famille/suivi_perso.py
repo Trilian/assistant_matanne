@@ -1,332 +1,1 @@
-"""
-Service Suivi Perso - Logique métier pour le suivi santé personnel.
-
-Opérations:
-- Récupération des données utilisateur (stats, activités, streak)
-- Gestion des logs alimentation
-"""
-
-import logging
-from datetime import date as date_type
-from datetime import datetime, timedelta
-from typing import Any, TypedDict
-
-from sqlalchemy.orm import Session
-
-from src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUT
-from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import (
-    ActiviteGarmin,
-    JournalAlimentaire,
-    ProfilUtilisateur,
-    ResumeQuotidienGarmin,
-)
-from src.core.monitoring import chronometre
-from src.services.core.events import obtenir_bus
-from src.services.core.registry import service_factory
-
-logger = logging.getLogger(__name__)
-
-
-class UserDataDict(TypedDict, total=False):
-    """Structure de données pour les infos utilisateur.
-
-    total=False car la structure peut être vide en cas d'erreur.
-    """
-
-    user: Any  # ProfilUtilisateur
-    summaries: list[Any]  # list[ResumeQuotidienGarmin]
-    activities: list[Any]  # list[ActiviteGarmin]
-    total_pas: int
-    total_calories: int
-    total_minutes: int
-    streak: int
-    garmin_connected: bool
-    objectif_pas: int
-    objectif_calories: int
-
-
-class ServiceSuiviPerso:
-    """Service de suivi santé personnel (alimentation, stats).
-
-    Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable
-    car il ne fait que de la lecture/écriture spécifique au domaine via
-    @avec_session_db, pas de CRUD générique standard.
-
-    Encapsule toutes les opérations liées au suivi personnel:
-    - Données utilisateur agrégées (stats Garmin, streak)
-    - Logs alimentation (CRUD)
-    """
-
-    # ═══════════════════════════════════════════════════════════
-    # USER DATA
-    # ═══════════════════════════════════════════════════════════
-
-    @chronometre("famille.suivi_perso.user_data", seuil_alerte_ms=2000)
-    @avec_gestion_erreurs(default_return={})
-    @avec_cache(ttl=300)
-    @avec_session_db
-    def get_user_data(self, username: str, db: Session | None = None) -> UserDataDict:
-        """Récupère les données complètes d'un utilisateur (7 derniers jours).
-
-        Args:
-            username: Nom d'utilisateur (ex: "anne", "mathieu").
-            db: Session DB (injectée automatiquement).
-
-        Returns:
-            UserDataDict contenant:
-            - user: ProfilUtilisateur
-            - summaries: Liste ResumeQuotidienGarmin (7 jours)
-            - activities: Liste ActiviteGarmin (7 jours)
-            - total_pas: Total des pas
-            - total_calories: Total calories actives
-            - total_minutes: Total minutes actives
-            - streak: Jours consécutifs avec objectif atteint
-            - garmin_connected: Connexion Garmin active
-            - objectif_pas: Objectif quotidien de pas
-            - objectif_calories: Objectif calories brûlées
-        """
-        if db is None:
-            raise ValueError("Session DB requise")
-
-        from src.services.integrations.garmin import get_or_create_user
-
-        try:
-            user = db.query(ProfilUtilisateur).filter_by(username=username).first()
-
-            if not user:
-                # Créer l'utilisateur si inexistant
-                display_name = "Anne" if username == "anne" else "Mathieu"
-                user = get_or_create_user(username, display_name, db=db)
-
-            # Stats des 7 derniers jours
-            end_date = date_type.today()
-            start_date = end_date - timedelta(days=7)
-
-            summaries = (
-                db.query(ResumeQuotidienGarmin)
-                .filter(
-                    ResumeQuotidienGarmin.user_id == user.id,
-                    ResumeQuotidienGarmin.date >= start_date,
-                )
-                .all()
-            )
-
-            activities = (
-                db.query(ActiviteGarmin)
-                .filter(
-                    ActiviteGarmin.user_id == user.id,
-                    ActiviteGarmin.date_debut >= datetime.combine(start_date, datetime.min.time()),
-                )
-                .all()
-            )
-
-            # Calculer les stats
-            total_pas = sum(s.pas for s in summaries)
-            total_calories = sum(s.calories_actives for s in summaries)
-            total_minutes = sum(s.minutes_actives for s in summaries)
-
-            # Streak
-            streak = self._calculate_streak(user, summaries)
-
-            return {
-                "user": user,
-                "summaries": summaries,
-                "activities": activities,
-                "total_pas": total_pas,
-                "total_calories": total_calories,
-                "total_minutes": total_minutes,
-                "streak": streak,
-                "garmin_connected": user.garmin_connected,
-                "objectif_pas": user.objectif_pas_quotidien,
-                "objectif_calories": user.objectif_calories_brulees,
-            }
-        except Exception as e:
-            logger.error(f"Erreur chargement données utilisateur {username}: {e}")
-            return {}
-
-    def _calculate_streak(self, user: ProfilUtilisateur, summaries: list) -> int:
-        """Calcule le streak actuel (jours consécutifs objectif atteint).
-
-        Args:
-            user: Profil utilisateur avec objectif de pas.
-            summaries: Liste des résumés quotidiens.
-
-        Returns:
-            Nombre de jours consécutifs où l'objectif a été atteint.
-        """
-        if not summaries:
-            return 0
-
-        objectif = user.objectif_pas_quotidien or OBJECTIF_PAS_QUOTIDIEN_DEFAUT
-        summary_by_date = {s.date: s for s in summaries}
-
-        streak = 0
-        current_date = date_type.today()
-
-        for _ in range(60):  # Max 60 jours de recherche
-            summary = summary_by_date.get(current_date)
-            if summary and summary.pas >= objectif:
-                streak += 1
-                current_date -= timedelta(days=1)
-            else:
-                break
-
-        return streak
-
-    # ═══════════════════════════════════════════════════════════
-    # FOOD LOGS
-    # ═══════════════════════════════════════════════════════════
-
-    @avec_gestion_erreurs(default_return=[])
-    @avec_cache(ttl=300)
-    @avec_session_db
-    def get_food_logs_today(
-        self, username: str, db: Session | None = None
-    ) -> list[JournalAlimentaire]:
-        """Récupère les logs alimentation du jour.
-
-        Args:
-            username: Nom d'utilisateur.
-            db: Session DB (injectée automatiquement).
-
-        Returns:
-            Liste des JournalAlimentaire du jour, triée par heure.
-        """
-        if db is None:
-            raise ValueError("Session DB requise")
-
-        try:
-            user = db.query(ProfilUtilisateur).filter_by(username=username).first()
-            if not user:
-                return []
-
-            return (
-                db.query(JournalAlimentaire)
-                .filter(
-                    JournalAlimentaire.user_id == user.id,
-                    JournalAlimentaire.date == date_type.today(),
-                )
-                .order_by(JournalAlimentaire.heure)
-                .all()
-            )
-        except Exception as e:
-            logger.debug(f"Erreur récupération food logs: {e}")
-            return []
-
-    @avec_gestion_erreurs(default_return=None)
-    @avec_session_db
-    def sauvegarder_objectifs(
-        self,
-        user_id: int,
-        objectif_pas: int,
-        objectif_calories: int,
-        objectif_minutes: int,
-        db: Session | None = None,
-    ) -> bool:
-        """Sauvegarde les objectifs d'un utilisateur.
-
-        Args:
-            user_id: ID du profil utilisateur.
-            objectif_pas: Objectif de pas quotidien.
-            objectif_calories: Objectif de calories actives.
-            objectif_minutes: Objectif de minutes actives.
-            db: Session DB (injectée automatiquement).
-
-        Returns:
-            True si sauvegardé avec succès.
-        """
-        if db is None:
-            raise ValueError("Session DB requise")
-        try:
-            user = db.query(ProfilUtilisateur).filter_by(id=user_id).first()
-            if user:
-                user.objectif_pas_quotidien = objectif_pas
-                user.objectif_calories_brulees = objectif_calories
-                user.objectif_minutes_actives = objectif_minutes
-                db.commit()
-                logger.info("Objectifs mis à jour pour user_id=%d", user_id)
-                return True
-            return False
-        except Exception as e:
-            logger.error(f"Erreur sauvegarde objectifs: {e}")
-            return False
-
-    @avec_gestion_erreurs(default_return=None)
-    @avec_session_db
-    def ajouter_food_log(
-        self,
-        username: str,
-        repas: str,
-        description: str,
-        calories: int | None = None,
-        qualite: int = 3,
-        notes: str | None = None,
-        db: Session | None = None,
-    ) -> JournalAlimentaire:
-        """Ajoute un log alimentation.
-
-        Args:
-            username: Nom d'utilisateur.
-            repas: Type de repas ("petit_dejeuner", "dejeuner", "diner", "snack").
-            description: Description du repas.
-            calories: Calories estimées (optionnel).
-            qualite: Note de qualité 1-5 (défaut: 3).
-            notes: Notes additionnelles (optionnel).
-            db: Session DB (injectée automatiquement).
-
-        Returns:
-            JournalAlimentaire créé.
-
-        Raises:
-            ValueError: Si l'utilisateur n'existe pas et ne peut être créé.
-        """
-        if db is None:
-            raise ValueError("Session DB requise")
-
-        from src.services.integrations.garmin import get_or_create_user
-
-        user = db.query(ProfilUtilisateur).filter_by(username=username).first()
-        if not user:
-            display_name = "Anne" if username == "anne" else "Mathieu"
-            user = get_or_create_user(username, display_name, db=db)
-
-        log = JournalAlimentaire(
-            user_id=user.id,
-            date=date_type.today(),
-            heure=datetime.now(),
-            repas=repas,
-            description=description,
-            calories_estimees=calories if calories and calories > 0 else None,
-            qualite=qualite,
-            notes=notes or None,
-        )
-        db.add(log)
-        db.commit()
-        db.refresh(log)
-
-        logger.info(f"JournalAlimentaire ajouté pour {username}: {repas}")
-
-        # Emit event after successful commit
-        obtenir_bus().emettre(
-            "food_log.ajoute",
-            {"id": log.id, "username": username, "repas": repas, "qualite": qualite},
-            source="ServiceSuiviPerso",
-        )
-
-        return log
-
-
-# ═══════════════════════════════════════════════════════════
-# FACTORY
-# ═══════════════════════════════════════════════════════════
-
-
-@service_factory("suivi_perso", tags={"famille", "sante"})
-def obtenir_service_suivi_perso() -> ServiceSuiviPerso:
-    """Factory pour le service suivi perso (singleton via ServiceRegistry)."""
-    return ServiceSuiviPerso()
-
-
-# Alias anglais
-obtenir_service_suivi_perso = obtenir_service_suivi_perso
+"""Service Suivi Perso - Logique métier pour le suivi santé personnel.Opérations:- Récupération des données utilisateur (stats, activités, streak)- Gestion des logs alimentation"""import loggingfrom datetime import date as date_typefrom datetime import datetime, timedeltafrom typing import Any, TypedDictfrom sqlalchemy.orm import Sessionfrom src.core.constants import OBJECTIF_PAS_QUOTIDIEN_DEFAUTfrom src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_dbfrom src.core.models import (    ActiviteGarmin,    JournalAlimentaire,    ProfilUtilisateur,    ResumeQuotidienGarmin,)from src.core.monitoring import chronometrefrom src.services.core.events import obtenir_busfrom src.services.core.registry import service_factorylogger = logging.getLogger(__name__)class UserDataDict(TypedDict, total=False):    """Structure de données pour les infos utilisateur.    total=False car la structure peut être vide en cas d'erreur.    """    user: Any  # ProfilUtilisateur    summaries: list[Any]  # list[ResumeQuotidienGarmin]    activities: list[Any]  # list[ActiviteGarmin]    total_pas: int    total_calories: int    total_minutes: int    streak: int    garmin_connected: bool    objectif_pas: int    objectif_calories: intclass ServiceSuiviPerso:    """Service de suivi santé personnel (alimentation, stats).    Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable    car il ne fait que de la lecture/écriture spécifique au domaine via    @avec_session_db, pas de CRUD générique standard.    Encapsule toutes les opérations liées au suivi personnel:    - Données utilisateur agrégées (stats Garmin, streak)    - Logs alimentation (CRUD)    """    # ═══════════════════════════════════════════════════════════    # USER DATA    # ═══════════════════════════════════════════════════════════    @chronometre("famille.suivi_perso.user_data", seuil_alerte_ms=2000)    @avec_gestion_erreurs(default_return={})    @avec_cache(ttl=300)    @avec_session_db    def get_user_data(self, username: str, db: Session | None = None) -> UserDataDict:        """Récupère les données complètes d'un utilisateur (7 derniers jours).        Args:            username: Nom d'utilisateur (ex: "anne", "mathieu").            db: Session DB (injectée automatiquement).        Returns:            UserDataDict contenant:            - user: ProfilUtilisateur            - summaries: Liste ResumeQuotidienGarmin (7 jours)            - activities: Liste ActiviteGarmin (7 jours)            - total_pas: Total des pas            - total_calories: Total calories actives            - total_minutes: Total minutes actives            - streak: Jours consécutifs avec objectif atteint            - garmin_connected: Connexion Garmin active            - objectif_pas: Objectif quotidien de pas            - objectif_calories: Objectif calories brûlées        """        if db is None:            raise ValueError("Session DB requise")        from src.services.integrations.garmin import get_or_create_user        try:            user = db.query(ProfilUtilisateur).filter_by(username=username).first()            if not user:                # Créer l'utilisateur si inexistant                display_name = "Anne" if username == "anne" else "Mathieu"                user = get_or_create_user(username, display_name, db=db)            # Stats des 7 derniers jours            end_date = date_type.today()            start_date = end_date - timedelta(days=7)            summaries = (                db.query(ResumeQuotidienGarmin)                .filter(                    ResumeQuotidienGarmin.user_id == user.id,                    ResumeQuotidienGarmin.date >= start_date,                )                .all()            )            activities = (                db.query(ActiviteGarmin)                .filter(                    ActiviteGarmin.user_id == user.id,                    ActiviteGarmin.date_debut >= datetime.combine(start_date, datetime.min.time()),                )                .all()            )            # Calculer les stats            total_pas = sum(s.pas for s in summaries)            total_calories = sum(s.calories_actives for s in summaries)            total_minutes = sum(s.minutes_actives for s in summaries)            # Streak            streak = self._calculate_streak(user, summaries)            return {                "user": user,                "summaries": summaries,                "activities": activities,                "total_pas": total_pas,                "total_calories": total_calories,                "total_minutes": total_minutes,                "streak": streak,                "garmin_connected": user.garmin_connected,                "objectif_pas": user.objectif_pas_quotidien,                "objectif_calories": user.objectif_calories_brulees,            }        except Exception as e:            logger.error(f"Erreur chargement données utilisateur {username}: {e}")            return {}    def _calculate_streak(self, user: ProfilUtilisateur, summaries: list) -> int:        """Calcule le streak actuel (jours consécutifs objectif atteint).        Args:            user: Profil utilisateur avec objectif de pas.            summaries: Liste des résumés quotidiens.        Returns:            Nombre de jours consécutifs où l'objectif a été atteint.        """        if not summaries:            return 0        objectif = user.objectif_pas_quotidien or OBJECTIF_PAS_QUOTIDIEN_DEFAUT        summary_by_date = {s.date: s for s in summaries}        streak = 0        current_date = date_type.today()        for _ in range(60):  # Max 60 jours de recherche            summary = summary_by_date.get(current_date)            if summary and summary.pas >= objectif:                streak += 1                current_date -= timedelta(days=1)            else:                break        return streak    # ═══════════════════════════════════════════════════════════    # FOOD LOGS    # ═══════════════════════════════════════════════════════════    @avec_gestion_erreurs(default_return=[])    @avec_cache(ttl=300)    @avec_session_db    def get_food_logs_today(        self, username: str, db: Session | None = None    ) -> list[JournalAlimentaire]:        """Récupère les logs alimentation du jour.        Args:            username: Nom d'utilisateur.            db: Session DB (injectée automatiquement).        Returns:            Liste des JournalAlimentaire du jour, triée par heure.        """        if db is None:            raise ValueError("Session DB requise")        try:            user = db.query(ProfilUtilisateur).filter_by(username=username).first()            if not user:                return []            return (                db.query(JournalAlimentaire)                .filter(                    JournalAlimentaire.user_id == user.id,                    JournalAlimentaire.date == date_type.today(),                )                .order_by(JournalAlimentaire.heure)                .all()            )        except Exception as e:            logger.debug(f"Erreur récupération food logs: {e}")            return []    @avec_gestion_erreurs(default_return=None)    @avec_session_db    def sauvegarder_objectifs(        self,        user_id: int,        objectif_pas: int,        objectif_calories: int,        objectif_minutes: int,        db: Session | None = None,    ) -> bool:        """Sauvegarde les objectifs d'un utilisateur.        Args:            user_id: ID du profil utilisateur.            objectif_pas: Objectif de pas quotidien.            objectif_calories: Objectif de calories actives.            objectif_minutes: Objectif de minutes actives.            db: Session DB (injectée automatiquement).        Returns:            True si sauvegardé avec succès.        """        if db is None:            raise ValueError("Session DB requise")        try:            user = db.query(ProfilUtilisateur).filter_by(id=user_id).first()            if user:                user.objectif_pas_quotidien = objectif_pas                user.objectif_calories_brulees = objectif_calories                user.objectif_minutes_actives = objectif_minutes                db.commit()                logger.info("Objectifs mis à jour pour user_id=%d", user_id)                return True            return False        except Exception as e:            logger.error(f"Erreur sauvegarde objectifs: {e}")            return False    @avec_gestion_erreurs(default_return=None)    @avec_session_db    def ajouter_food_log(        self,        username: str,        repas: str,        description: str,        calories: int | None = None,        qualite: int = 3,        notes: str | None = None,        db: Session | None = None,    ) -> JournalAlimentaire:        """Ajoute un log alimentation.        Args:            username: Nom d'utilisateur.            repas: Type de repas ("petit_dejeuner", "dejeuner", "diner", "snack").            description: Description du repas.            calories: Calories estimées (optionnel).            qualite: Note de qualité 1-5 (défaut: 3).            notes: Notes additionnelles (optionnel).            db: Session DB (injectée automatiquement).        Returns:            JournalAlimentaire créé.        Raises:            ValueError: Si l'utilisateur n'existe pas et ne peut être créé.        """        if db is None:            raise ValueError("Session DB requise")        from src.services.integrations.garmin import get_or_create_user        user = db.query(ProfilUtilisateur).filter_by(username=username).first()        if not user:            display_name = "Anne" if username == "anne" else "Mathieu"            user = get_or_create_user(username, display_name, db=db)        log = JournalAlimentaire(            user_id=user.id,            date=date_type.today(),            heure=datetime.now(),            repas=repas,            description=description,            calories_estimees=calories if calories and calories > 0 else None,            qualite=qualite,            notes=notes or None,        )        db.add(log)        db.commit()        db.refresh(log)        logger.info(f"JournalAlimentaire ajouté pour {username}: {repas}")        # Emit event after successful commit        obtenir_bus().emettre(            "food_log.ajoute",            {"id": log.id, "username": username, "repas": repas, "qualite": qualite},            source="ServiceSuiviPerso",        )        return log# ═══════════════════════════════════════════════════════════# FACTORY# ═══════════════════════════════════════════════════════════@service_factory("suivi_perso", tags={"famille", "sante"})def obtenir_service_suivi_perso() -> ServiceSuiviPerso:    """Factory pour le service suivi perso (singleton via ServiceRegistry)."""    return ServiceSuiviPerso()# Alias anglaisobtenir_service_suivi_perso = obtenir_service_suivi_perso

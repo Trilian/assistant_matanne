@@ -1,4 +1,4 @@
-﻿"""
+"""
 Opérations de lecture pour les paris sportifs.
 
 Mixin extrait de ParisCrudService (Audit qualité — split >500 LOC).

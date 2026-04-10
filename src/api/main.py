@@ -1,4 +1,4 @@
-﻿"""
+"""
 API REST FastAPI pour l'Assistant Matanne - Version Refactorée.
 
 Point d'entrée principal de l'API avec les middlewares et routers.
@@ -54,25 +54,29 @@ from src.api.dependencies import require_role
 from src.api.prometheus import prometheus_router
 from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
-    assistant_router,
     admin_router,
     anti_gaspillage_router,
+    assistant_router,
     automations_router,
     batch_cooking_router,
+    bridges_router,
     calendriers_router,
     courses_router,
     dashboard_router,
     documents_router,
     export_router,
     famille_router,
-    habitat_router,
+    flux_utilisateur_router,
     garmin_router,
+    habitat_router,
     ia_avancee_router,
+    ia_bridges_router,
     ia_modules_router,
     inventaire_router,
     jeux_router,
     maison_router,
     planning_router,
+    predictions_router,
     preferences_router,
     rapports_router,
     recettes_router,
@@ -82,10 +86,6 @@ from src.api.routes import (
     utilitaires_router,
     voyages_router,
     webhooks_router,
-    predictions_router,
-    ia_bridges_router,
-    bridges_router,
-    flux_utilisateur_router,
 )
 from src.api.routes.auth import router as auth_router
 from src.api.routes.push import router as push_router
@@ -168,7 +168,6 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
         arreter_listener_invalidation_cache()
     except Exception:
         logger.debug("Listener invalidation cache déjà arrêté ou non initialisé")
-
 
 
 # ═══════════════════════════════════════════════════════════
@@ -335,9 +334,7 @@ Les endpoints sont protégés par une limitation de débit:
 )
 
 # CORS sécurisé
-_cors_origins = [
-    o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()
-]
+_cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
 _default_origins = [
     "http://localhost:3000",  # Next.js dev
     "http://localhost:8000",  # API local
@@ -352,9 +349,7 @@ else:
     _allowed_origins = _default_origins
 
 # Regex pour autoriser tous les previews Vercel du projet (URLs changeantes à chaque deploy)
-_cors_origin_regex = (
-    r"https://assistantfamilial(-[a-z0-9]+)*-matanne-projects\.vercel\.app"
-)
+_cors_origin_regex = r"https://assistantfamilial(-[a-z0-9]+)*-matanne-projects\.vercel\.app"
 
 app.add_middleware(
     CORSMiddleware,
@@ -703,13 +698,16 @@ app.include_router(ws_admin_logs_router)
 app.include_router(ws_admin_jobs_router)
 app.include_router(admin_router)
 
+
 # ── Endpoint public admin (hors router sécurisé) ──────────────────────────────
 # Le router admin a Depends(require_role("admin")) au niveau router → bloque tout.
 # /public/maintenance est en lecture seule pour le bandeau UI, sans auth requise.
 @app.get("/api/v1/admin/public/maintenance", tags=["Admin"], include_in_schema=False)
 async def maintenance_public() -> dict:
     from src.api.routes.admin_infra import get_maintenance_status
+
     return get_maintenance_status()
+
 
 # IA, Prédictions, Bridges
 app.include_router(predictions_router)

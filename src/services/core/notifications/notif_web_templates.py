@@ -105,7 +105,9 @@ class NotificationTemplatesMixin:
         )
         return self.envoyer_notification(user_id, notification)
 
-    def notifier_rappel_famille(self, user_id: str, titre: str, message: str, url: str = "/?module=famille"):
+    def notifier_rappel_famille(
+        self, user_id: str, titre: str, message: str, url: str = "/?module=famille"
+    ):
         """Notifie un rappel famille (activité, jalon, rendez-vous médical...)."""
         notification = NotificationPush(
             title=f"👨‍👩‍👧 {titre}",
@@ -120,7 +122,9 @@ class NotificationTemplatesMixin:
         )
         return self.envoyer_notification(user_id, notification)
 
-    def notifier_alerte_predictive_maison(self, user_id: str, titre: str, message: str, url: str = "/?module=maison"):
+    def notifier_alerte_predictive_maison(
+        self, user_id: str, titre: str, message: str, url: str = "/?module=maison"
+    ):
         """Alerte prédictive maison (garantie expirant, entretien préventif, énergie anormale...)."""
         notification = NotificationPush(
             title=f"🏠 {titre}",
@@ -143,7 +147,7 @@ class NotificationTemplatesMixin:
             body=f"{match_info} — Gain: {gain:.2f}€ (cote {cote:.2f})",
             notification_type=TypeNotification.RESULTAT_PARI_GAGNE,
             url="/?module=jeux.paris",
-            tag=f"pari_gagne_{int(gain*100)}",
+            tag=f"pari_gagne_{int(gain * 100)}",
             badge="+1",
             actions=[
                 {"action": "view", "title": "Voir le bilan"},
@@ -159,7 +163,7 @@ class NotificationTemplatesMixin:
             body=f"{match_info} — Mise perdue: {mise:.2f}€",
             notification_type=TypeNotification.RESULTAT_PARI_PERDU,
             url="/?module=jeux.performance",
-            tag=f"pari_perdu_{int(mise*100)}",
+            tag=f"pari_perdu_{int(mise * 100)}",
             actions=[
                 {"action": "view", "title": "Voir l'analyse"},
                 {"action": "dismiss", "title": "OK"},
@@ -177,7 +181,9 @@ class NotificationTemplatesMixin:
             if gain and gain > 0:
                 body = f"{nb_numeros_trouves} numéros trouvés{' + chance' if chance_trouvee else ''} — Gain: {gain:.2f}€"
             else:
-                body = f"{nb_numeros_trouves} numéros trouvés{' + chance' if chance_trouvee else ''}"
+                body = (
+                    f"{nb_numeros_trouves} numéros trouvés{' + chance' if chance_trouvee else ''}"
+                )
             notif_type = TypeNotification.RESULTAT_LOTO_GAIN
             tag = "loto_gain"
         elif nb_numeros_trouves >= 2:

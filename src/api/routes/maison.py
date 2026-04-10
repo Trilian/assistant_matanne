@@ -28,6 +28,7 @@ Préfixe parent : /api/v1/maison
 Pour routes/__init__.py, "maison_router": ".maison" reste inchangé.
 """
 
+import logging
 from datetime import date
 from typing import Any
 
@@ -45,14 +46,13 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 from src.services.core.backup.utils_serialization import model_to_dict
 from src.services.maison.schemas import AlerteMaison, BriefingMaison, TacheJour
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/maison", tags=["Maison"])
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# CONTEXTE MAISON 
+# CONTEXTE MAISON
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -64,7 +64,7 @@ async def obtenir_briefing_maison(
 ) -> BriefingMaison:
     """
     Obtient le briefing quotidien maison.
-    
+
     AgrÃ¨ge 6 sources de donnÃ©es:
     - Alertes (diagnostics, entretien)
     - TÃ¢ches du jour (mÃ©nage, entretien, projets, jardin)
@@ -72,7 +72,7 @@ async def obtenir_briefing_maison(
     - Projets actifs
     - Jardin contextuel
     - Cellier & Ã©nergie (anomalies)
-    
+
     Returns:
         Briefing maison contextuel
     """
@@ -108,12 +108,12 @@ async def obtenir_alertes_maison(
 ) -> list[AlerteMaison]:
     """
     Obtient toutes les alertes maison.
-    
+
     Retourne toutes les alertes (pas juste le top 8 du briefing):
 
     - Diagnostics immobiliers
     - Entretien saisonnier
-    
+
     Returns:
         Liste complÃ¨te des alertes triÃ©es par urgence
     """
@@ -575,9 +575,7 @@ async def astuces_domotique(
         with open(chemin, encoding="utf-8") as f:
             data = json.load(f)
         if categorie:
-            data["categories"] = [
-                c for c in data.get("categories", []) if c.get("id") == categorie
-            ]
+            data["categories"] = [c for c in data.get("categories", []) if c.get("id") == categorie]
         return data
 
     return await executer_async(_query)
@@ -596,11 +594,16 @@ async def liens_achat(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """GÃ©nÃ¨re des liens d'achat vers les marchands spÃ©cialisÃ©s par catÃ©gorie."""
-    from src.core.liens_achat import generer_liens_achat, categories_disponibles
+    from src.core.liens_achat import categories_disponibles, generer_liens_achat
 
     def _query():
         liens = generer_liens_achat(produit, categorie)
-        return {"produit": produit, "categorie": categorie, "liens": liens, "categories_disponibles": categories_disponibles()}
+        return {
+            "produit": produit,
+            "categorie": categorie,
+            "liens": liens,
+            "categories_disponibles": categories_disponibles(),
+        }
 
     return await executer_async(_query)
 
@@ -617,8 +620,8 @@ async def pieces_avec_objets(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne les piÃ¨ces de la maison avec leurs objets/Ã©quipements inventoriÃ©s."""
-    from src.core.models.temps_entretien import ObjetMaison
     from src.api.utils import executer_avec_session
+    from src.core.models.temps_entretien import ObjetMaison
 
     def _query():
         with executer_avec_session() as session:
@@ -632,21 +635,28 @@ async def pieces_avec_objets(
                 p = str(o.piece_id or "Non classÃ©")
                 if p not in par_piece:
                     par_piece[p] = []
-                par_piece[p].append({
-                    "id": o.id,
-                    "nom": o.nom,
-                    "categorie": o.categorie,
-                    "statut": o.statut,
-                    "marque": o.marque,
-                    "modele": o.modele,
-                    "date_achat": str(o.date_achat) if o.date_achat else None,
-                    "prix_achat": float(o.prix_achat) if o.prix_achat else None,
-                    "prix_remplacement_estime": float(o.prix_remplacement_estime) if o.prix_remplacement_estime else None,
-                    "notes": o.notes,
-                    "duree_garantie_mois": o.duree_garantie_mois,
-                    "sous_garantie": o.sous_garantie,
-                })
-            return {"pieces": [{"piece": k, "objets": v} for k, v in par_piece.items()], "total": len(objets)}
+                par_piece[p].append(
+                    {
+                        "id": o.id,
+                        "nom": o.nom,
+                        "categorie": o.categorie,
+                        "statut": o.statut,
+                        "marque": o.marque,
+                        "modele": o.modele,
+                        "date_achat": str(o.date_achat) if o.date_achat else None,
+                        "prix_achat": float(o.prix_achat) if o.prix_achat else None,
+                        "prix_remplacement_estime": float(o.prix_remplacement_estime)
+                        if o.prix_remplacement_estime
+                        else None,
+                        "notes": o.notes,
+                        "duree_garantie_mois": o.duree_garantie_mois,
+                        "sous_garantie": o.sous_garantie,
+                    }
+                )
+            return {
+                "pieces": [{"piece": k, "objets": v} for k, v in par_piece.items()],
+                "total": len(objets),
+            }
 
     return await executer_async(_query)
 
@@ -662,8 +672,8 @@ async def suggestions_renouvellement(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne les objets en fin de vie ou Ã  remplacer."""
-    from src.core.models.temps_entretien import ObjetMaison
     from src.api.utils import executer_avec_session
+    from src.core.models.temps_entretien import ObjetMaison
 
     def _query():
         with executer_avec_session() as session:
@@ -681,7 +691,9 @@ async def suggestions_renouvellement(
                         "statut": o.statut,
                         "categorie": o.categorie,
                         "piece_id": o.piece_id,
-                        "prix_remplacement_estime": float(o.prix_remplacement_estime) if o.prix_remplacement_estime else None,
+                        "prix_remplacement_estime": float(o.prix_remplacement_estime)
+                        if o.prix_remplacement_estime
+                        else None,
                         "marque": o.marque,
                         "modele": o.modele,
                         "duree_garantie_mois": o.duree_garantie_mois,
@@ -700,13 +712,12 @@ async def suggestions_renouvellement(
 # Chaque sous-routeur hérite du préfixe /api/v1/maison
 # et définit ses propres paths relatifs.
 # ═══════════════════════════════════════════════════════════
-from src.api.routes.maison_projets import router as _projets_router
 from src.api.routes.maison_entretien import router as _entretien_router
 from src.api.routes.maison_finances import router as _finances_router
 from src.api.routes.maison_jardin import router as _jardin_router
+from src.api.routes.maison_projets import router as _projets_router
 
 router.include_router(_projets_router, tags=["Maison — Projets"])
 router.include_router(_entretien_router, tags=["Maison — Entretien"])
 router.include_router(_finances_router, tags=["Maison — Finances"])
 router.include_router(_jardin_router, tags=["Maison — Jardin"])
-

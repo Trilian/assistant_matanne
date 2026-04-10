@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : Jardin saison -> Entretien automatique.
 
 Bridge inter-modules :
@@ -36,8 +36,8 @@ class JardinEntretienInteractionService:
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
     def generer_taches_saisonnieres_depuis_plantes(self, *, db=None) -> dict[str, Any]:
-        from src.core.models.temps_entretien import PlanteJardin
         from src.core.models import TacheEntretien
+        from src.core.models.temps_entretien import PlanteJardin
 
         mois = date_type.today().month
         plantes = db.query(PlanteJardin).all()

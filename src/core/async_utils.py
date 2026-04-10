@@ -27,7 +27,7 @@ _EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_pre
 atexit.register(_EXECUTOR.shutdown, wait=False)
 
 
-def executer_async(coro: Coroutine[object, object, T]) -> T:
+def executer_async[T](coro: Coroutine[object, object, T]) -> T:
     """Exécute une coroutine de manière sûre, compatible FastAPI.
 
     - S'il existe déjà un event loop running (FastAPI), utilise un thread

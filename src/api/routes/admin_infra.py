@@ -19,6 +19,12 @@ from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
 from .admin_shared import (
+    _FEATURE_FLAGS_PAR_DEFAUT,
+    _LABELS_JOBS,
+    _NAMESPACE_FEATURE_FLAGS,
+    _NAMESPACE_RUNTIME_CONFIG,
+    _RUNTIME_CONFIG_PAR_DEFAUT,
+    _VUES_SQL_AUTORISEES,
     ConfigImportRequest,
     DbImportRequest,
     FeatureFlagsUpdateRequest,
@@ -27,19 +33,14 @@ from .admin_shared import (
     RuntimeConfigUpdateRequest,
     SeedDataRequest,
     ServiceActionRunRequest,
-    _FEATURE_FLAGS_PAR_DEFAUT,
-    _LABELS_JOBS,
-    _NAMESPACE_FEATURE_FLAGS,
-    _NAMESPACE_RUNTIME_CONFIG,
-    _RUNTIME_CONFIG_PAR_DEFAUT,
-    _VUES_SQL_AUTORISEES,
     _admin_timestamps,
     _catalogue_actions_services,
     _cibles_resync,
     _ecrire_namespace_persistant,
-    _exporter_config_admin,
     _executer_action_service,
+    _exporter_config_admin,
     _importer_config_admin,
+    _journaliser_action_admin,
     _lire_namespace_persistant,
     _normaliser_nom_table,
     _resumer_api_metrics,
@@ -48,7 +49,6 @@ from .admin_shared import (
     _simuler_test_e2e_one_click,
     _verifier_limite_admin,
     est_mode_test_actif,
-    _journaliser_action_admin,
     router,
 )
 
@@ -87,8 +87,11 @@ async def coherence_db(
 
             # 2. Tables principales présentes
             tables_essentielles = [
-                "recettes", "articles_courses", "listes_courses",
-                "inventaire_items", "profils_utilisateurs",
+                "recettes",
+                "articles_courses",
+                "listes_courses",
+                "inventaire_items",
+                "profils_utilisateurs",
             ]
             try:
                 from sqlalchemy import text
@@ -99,7 +102,9 @@ async def coherence_db(
                         resultats.append({"check": f"table_{table}", "status": "ok"})
                     except Exception as exc:
                         erreurs.append(f"table_{table}: {exc}")
-                        resultats.append({"check": f"table_{table}", "status": "erreur", "detail": str(exc)})
+                        resultats.append(
+                            {"check": f"table_{table}", "status": "erreur", "detail": str(exc)}
+                        )
             except Exception as exc:
                 erreurs.append(f"vérification tables: {exc}")
 
@@ -114,11 +119,13 @@ async def coherence_db(
                         "WHERE lc.id IS NULL"
                     )
                 ).scalar()
-                resultats.append({
-                    "check": "articles_orphelins",
-                    "status": "ok" if (row or 0) == 0 else "avertissement",
-                    "detail": f"{row} article(s) orphelin(s)",
-                })
+                resultats.append(
+                    {
+                        "check": "articles_orphelins",
+                        "status": "ok" if (row or 0) == 0 else "avertissement",
+                        "detail": f"{row} article(s) orphelin(s)",
+                    }
+                )
             except Exception as exc:
                 logger.debug("Check articles orphelins ignoré: %s", exc)
 
@@ -149,25 +156,27 @@ async def exporter_db_json(
     from src.api.utils import executer_avec_session
 
     with executer_avec_session() as session:
-        rows = session.execute(
-            text(
-                """
+        rows = (
+            session.execute(
+                text(
+                    """
                 SELECT table_name
                 FROM information_schema.tables
                 WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
                 ORDER BY table_name
                 """
+                )
             )
-        ).mappings().all()
+            .mappings()
+            .all()
+        )
 
         tables = [str(row["table_name"]) for row in rows if row.get("table_name")]
         data: dict[str, list[dict[str, Any]]] = {}
 
         for table_name in tables:
             safe_table = _normaliser_nom_table(table_name)
-            records = session.execute(
-                text(f'SELECT * FROM "{safe_table}"')
-            ).mappings().all()
+            records = session.execute(text(f'SELECT * FROM "{safe_table}"')).mappings().all()
             data[safe_table] = [
                 {k: _serialiser_valeur_export_db(v) for k, v in dict(record).items()}
                 for record in records
@@ -211,7 +220,9 @@ async def importer_db_json(
         for table_name, records in body.tables.items():
             safe_table = _normaliser_nom_table(table_name)
             if not isinstance(records, list):
-                raise HTTPException(status_code=422, detail=f"Format invalide pour la table {safe_table}.")
+                raise HTTPException(
+                    status_code=422, detail=f"Format invalide pour la table {safe_table}."
+                )
 
             if not body.merge:
                 session.execute(text(f'TRUNCATE TABLE "{safe_table}" RESTART IDENTITY CASCADE'))
@@ -220,7 +231,9 @@ async def importer_db_json(
             for record in records:
                 if not isinstance(record, dict) or not record:
                     continue
-                colonnes = [k for k in record.keys() if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", str(k))]
+                colonnes = [
+                    k for k in record.keys() if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", str(k))
+                ]
                 if not colonnes:
                     continue
                 placeholders = ", ".join(f":{c}" for c in colonnes)
@@ -277,7 +290,9 @@ async def dashboard_admin(
             from src.core.caching import obtenir_cache
 
             cache_stats = (
-                obtenir_cache().obtenir_statistiques() if hasattr(obtenir_cache(), "obtenir_statistiques") else {}
+                obtenir_cache().obtenir_statistiques()
+                if hasattr(obtenir_cache(), "obtenir_statistiques")
+                else {}
             )
         except Exception:
             cache_stats = {}
@@ -299,16 +314,20 @@ async def dashboard_admin(
                 or 0
             )
 
-            rows = session.execute(
-                text(
-                    """
+            rows = (
+                session.execute(
+                    text(
+                        """
                     SELECT job_id, status, started_at, duration_ms
                     FROM job_executions
                     ORDER BY started_at DESC
                     LIMIT 8
                     """
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
             dernieres_executions_jobs = [
                 {
                     "job_id": str(r["job_id"]),
@@ -389,7 +408,9 @@ async def executer_action_service(
 
     flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
     if not bool(flags.get("admin.service_actions_enabled", True)):
-        raise HTTPException(status_code=403, detail="Les actions de service manuelles sont désactivées.")
+        raise HTTPException(
+            status_code=403, detail="Les actions de service manuelles sont désactivées."
+        )
 
     result = await executer_async(
         lambda: _executer_action_service(action_id, dry_run=dry_run, params=body.params)
@@ -510,6 +531,7 @@ async def basculer_mode_maintenance(
     )
     # Activation instantanée in-process (pas de délai de cache DB)
     from src.api.main import activer_maintenance
+
     activer_maintenance(body.enabled)
     _journaliser_action_admin(
         action="admin.maintenance.toggle",
@@ -668,7 +690,9 @@ async def comparer_config_admin(
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict[str, Any]:
     feature_flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
-    runtime_config = _lire_namespace_persistant(_NAMESPACE_RUNTIME_CONFIG, _RUNTIME_CONFIG_PAR_DEFAUT)
+    runtime_config = _lire_namespace_persistant(
+        _NAMESPACE_RUNTIME_CONFIG, _RUNTIME_CONFIG_PAR_DEFAUT
+    )
 
     return {
         "generated_at": datetime.now().isoformat(),
@@ -832,7 +856,10 @@ def _parser_commande_rapide(commande: str) -> dict[str, Any]:
         except Exception as e:
             return {"type": "error", "message": f"Erreur maintenance: {e}"}
 
-    return {"type": "error", "message": f"Commande inconnue: '{commande}'. Tapez 'help' pour l'aide."}
+    return {
+        "type": "error",
+        "message": f"Commande inconnue: '{commande}'. Tapez 'help' pour l'aide.",
+    }
 
 
 @router.post(
@@ -925,16 +952,20 @@ async def snapshot_live_admin(
     evenements_securite_1h = 0
     try:
         with executer_avec_session() as session:
-            rows = session.execute(
-                text(
-                    """
+            rows = (
+                session.execute(
+                    text(
+                        """
                     SELECT status, COUNT(*) AS total
                     FROM job_executions
                     WHERE started_at >= NOW() - INTERVAL '24 HOURS'
                     GROUP BY status
                     """
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
             for row in rows:
                 status = str(row["status"] or "unknown")
                 executions_recentes[status] = int(row["total"] or 0)
@@ -1189,17 +1220,15 @@ async def lire_vue_sql(
     offset = (page - 1) * page_size
 
     with executer_avec_session() as session:
-        total = int(
-            session.execute(text(f"SELECT COUNT(*) FROM {view_name}")).scalar() or 0
+        total = int(session.execute(text(f"SELECT COUNT(*) FROM {view_name}")).scalar() or 0)
+        rows = (
+            session.execute(
+                text(f"SELECT * FROM {view_name} ORDER BY 1 LIMIT :limit OFFSET :offset"),
+                {"limit": page_size, "offset": offset},
+            )
+            .mappings()
+            .all()
         )
-        rows = session.execute(
-            text(
-                f"SELECT * FROM {view_name} "
-                "ORDER BY 1 "
-                "LIMIT :limit OFFSET :offset"
-            ),
-            {"limit": page_size, "offset": offset},
-        ).mappings().all()
 
     items = [dict(row) for row in rows]
     return {

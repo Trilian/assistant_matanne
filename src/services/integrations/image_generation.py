@@ -75,7 +75,9 @@ class ImageGenerationService:
                     "modele": self._model,
                     "prompt": prompt,
                     "image_base64": None,
-                    "message": data.get("error") or data.get("estimated_time") or "Generation impossible",
+                    "message": data.get("error")
+                    or data.get("estimated_time")
+                    or "Generation impossible",
                 }
 
             encoded = base64.b64encode(response.content).decode("utf-8")

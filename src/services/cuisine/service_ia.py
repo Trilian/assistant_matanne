@@ -40,7 +40,6 @@ class ServiceInnovationsCuisine:
         return self._service().proposer_batch_cooking_intelligent(user_id=user_id)
 
 
-
 @service_factory("cuisine_innovations", tags={"cuisine", "ia"})
 def obtenir_service_innovations_cuisine() -> ServiceInnovationsCuisine:
     """Retourne la façade IA cuisine consolidée."""

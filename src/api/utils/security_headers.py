@@ -66,8 +66,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         else:
             # CSP strict pour les endpoints API (report-uri pour suivi des violations)
             response.headers["Content-Security-Policy"] = (
-                "default-src 'none'; frame-ancestors 'none'; "
-                "report-uri /api/v1/security/csp-report"
+                "default-src 'none'; frame-ancestors 'none'; report-uri /api/v1/security/csp-report"
             )
 
         return response

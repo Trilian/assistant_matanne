@@ -9,7 +9,10 @@ from ._helpers import _emoji_peremption, _extraire_mois_depuis_texte, _obtenir_u
 
 
 async def _envoyer_taches_maison(chat_id: str) -> None:
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
     from src.services.maison import obtenir_service_contexte_maison
 
     taches = obtenir_service_contexte_maison().obtenir_taches_jour()
@@ -37,7 +40,10 @@ async def _envoyer_resume_jardin(chat_id: str) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.habitat import TacheEntretien
     from src.core.models.temps_entretien import PlanteJardin
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     mois_courant = date.today().month
     mois_prochain = 1 if mois_courant == 12 else mois_courant + 1
@@ -55,7 +61,8 @@ async def _envoyer_resume_jardin(chat_id: str) -> None:
     recoltes = [
         plante
         for plante in plantes
-        if {mois_courant, mois_prochain} & _extraire_mois_depuis_texte(getattr(plante, "mois_recolte", None))
+        if {mois_courant, mois_prochain}
+        & _extraire_mois_depuis_texte(getattr(plante, "mois_recolte", None))
     ]
 
     if not taches and not recoltes:
@@ -68,7 +75,7 @@ async def _envoyer_resume_jardin(chat_id: str) -> None:
         lignes.append("<b>Prochaines tâches</b>")
         for tache in taches[:4]:
             echeance = (
-                tache.prochaine_fois.strftime('%d/%m')
+                tache.prochaine_fois.strftime("%d/%m")
                 if getattr(tache, "prochaine_fois", None)
                 else "à planifier"
             )
@@ -91,12 +98,17 @@ async def _envoyer_resume_jardin(chat_id: str) -> None:
 
 
 async def _envoyer_resume_energie(chat_id: str) -> None:
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
     from src.services.utilitaires import obtenir_energie_service
 
     totaux = obtenir_energie_service().totaux_annuels(date.today().year)
     if not totaux:
-        await envoyer_message_telegram(chat_id, "⚡ Aucun relevé énergie disponible pour le moment.")
+        await envoyer_message_telegram(
+            chat_id, "⚡ Aucun relevé énergie disponible pour le moment."
+        )
         return
 
     libelles = {
@@ -127,7 +139,10 @@ async def _envoyer_rappels_groupes(chat_id: str) -> None:
     from src.core.models.habitat import TacheEntretien
     from src.core.models.inventaire import ArticleInventaire
     from src.core.models.utilitaires import NoteMemo
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     aujourd_hui = date.today()
     maintenant = datetime.utcnow()
@@ -176,20 +191,26 @@ async def _envoyer_rappels_groupes(chat_id: str) -> None:
         lignes.append("")
         lignes.append("<b>Maison / entretien</b>")
         for tache in taches:
-            date_label = tache.prochaine_fois.strftime('%d/%m') if tache.prochaine_fois else "bientôt"
+            date_label = (
+                tache.prochaine_fois.strftime("%d/%m") if tache.prochaine_fois else "bientôt"
+            )
             lignes.append(f"• {html.escape(str(tache.nom))} — {date_label}")
     if peremptions:
         lignes.append("")
         lignes.append("<b>Inventaire</b>")
         for article in peremptions:
             nom = getattr(article, "nom", None) or f"Article #{article.id}"
-            date_label = article.date_peremption.strftime('%d/%m') if article.date_peremption else "sans date"
+            date_label = (
+                article.date_peremption.strftime("%d/%m")
+                if article.date_peremption
+                else "sans date"
+            )
             lignes.append(f"• {html.escape(str(nom))} — {date_label}")
     if notes:
         lignes.append("")
         lignes.append("<b>Notes & pense-bêtes</b>")
         for note in notes:
-            date_label = note.rappel_date.strftime('%d/%m %H:%M') if note.rappel_date else "à voir"
+            date_label = note.rappel_date.strftime("%d/%m %H:%M") if note.rappel_date else "à voir"
             lignes.append(f"• {html.escape(str(note.titre))} — {date_label}")
 
     await envoyer_message_interactif(
@@ -207,7 +228,10 @@ async def _envoyer_taches_projets(chat_id: str) -> None:
     """Envoie la liste des tâches de projet à faire, avec boutons valider/reporter."""
     from src.core.db import obtenir_contexte_db
     from src.core.models.maison import TacheProjet
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     with obtenir_contexte_db() as session:
         taches = (

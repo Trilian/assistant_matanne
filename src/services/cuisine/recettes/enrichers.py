@@ -86,7 +86,12 @@ class NutritionEnricher:
 
     def _charger_table_nutrition(self) -> dict[str, dict]:
         """Charge la table de référence nutritionnelle."""
-        fichier = Path(__file__).parent.parent.parent.parent.parent / "data" / "reference" / "nutrition_table.json"
+        fichier = (
+            Path(__file__).parent.parent.parent.parent.parent
+            / "data"
+            / "reference"
+            / "nutrition_table.json"
+        )
         if fichier.exists():
             with open(fichier, encoding="utf-8") as f:
                 return json.load(f)
@@ -149,7 +154,12 @@ class BioLocalTagger:
 
     def _charger_produits_saison(self) -> dict[str, list[int]]:
         """Charge produits_de_saison.json."""
-        fichier = Path(__file__).parent.parent.parent.parent.parent / "data" / "reference" / "produits_de_saison.json"
+        fichier = (
+            Path(__file__).parent.parent.parent.parent.parent
+            / "data"
+            / "reference"
+            / "produits_de_saison.json"
+        )
         if fichier.exists():
             with open(fichier, encoding="utf-8") as f:
                 data = json.load(f)
@@ -213,9 +223,7 @@ class RecipeClassifier:
         est_rapide = temps_total <= 30
 
         # Batch ?
-        compatible_batch = (
-            recipe.portions >= 6 or any(kw in texte for kw in self.BATCH_KEYWORDS)
-        )
+        compatible_batch = recipe.portions >= 6 or any(kw in texte for kw in self.BATCH_KEYWORDS)
 
         # Congelable ?
         congelable = any(kw in texte for kw in self.CONGELABLE_KEYWORDS)

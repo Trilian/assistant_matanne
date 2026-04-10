@@ -360,7 +360,7 @@ class BusEvenements:
         logger.info("📡 Bus d'événements repris")
 
     # ───────────────────────────────────────────────────────
-    # PERSISTENCE 
+    # PERSISTENCE
     # ───────────────────────────────────────────────────────
 
     def _persister_evenement(self, event: EvenementDomaine) -> None:

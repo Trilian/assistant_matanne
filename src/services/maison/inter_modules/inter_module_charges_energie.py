@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : Charges facture -> Energie analyse.
 
 Bridge inter-modules :
@@ -76,10 +76,14 @@ class ChargesEnergieInteractionService:
                     source="charges_energie",
                 )
             except Exception:
-                logger.debug("Emission evenement energie.anomalie_detectee impossible", exc_info=True)
+                logger.debug(
+                    "Emission evenement energie.anomalie_detectee impossible", exc_info=True
+                )
 
         details["message"] = (
-            "Anomalie detectee: analyse energie declenchee." if anomalie else "Pas d'anomalie detectee."
+            "Anomalie detectee: analyse energie declenchee."
+            if anomalie
+            else "Pas d'anomalie detectee."
         )
         return details
 

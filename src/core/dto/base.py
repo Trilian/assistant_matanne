@@ -76,7 +76,7 @@ class ResultatAction(BaseDTO):
         return cls(succes=False, message=message, **kwargs)
 
 
-class PaginatedResult(BaseDTO, Generic[T]):
+class PaginatedResult[T](BaseDTO):
     """Résultat paginé générique.
 
     Usage:

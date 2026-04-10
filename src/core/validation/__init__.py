@@ -65,6 +65,7 @@ class SanitiseurDonnees:
     def nettoyer_texte(texte: str) -> str:
         return nettoyer_texte(texte)
 
+
 __all__ = [
     # Sanitizer
     "NettoyeurEntrees",

@@ -40,6 +40,7 @@ class PlanningVoyageInteractionService(EventBusMixin):
             Dict avec message et nombre de plannings suspendus
         """
         from datetime import datetime
+
         from src.core.models import Planning
 
         try:
@@ -61,10 +62,7 @@ class PlanningVoyageInteractionService(EventBusMixin):
             # Suspendre chaque planning
             for planning in plannings_suspendre:
                 planning.statut = "suspendu"
-                planning.notes = (
-                    f"Suspendu automatiquement - Voyage {voyage_id} "
-                    f"({debut} au {fin})"
-                )
+                planning.notes = f"Suspendu automatiquement - Voyage {voyage_id} ({debut} au {fin})"
                 logger.info(f"📅 Planning {planning.id} suspendu pour voyage")
 
             db.commit()

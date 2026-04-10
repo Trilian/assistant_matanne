@@ -48,9 +48,7 @@ class EnergiecuisineInteractionService:
             fin_hc = datetime.strptime(heures_creuses["fin"], "%H:%M").time()
 
             # Vérifier si on est en heures creuses
-            en_heures_creuses = (
-                heure_actuelle >= debut_hc or heure_actuelle <= fin_hc
-            )
+            en_heures_creuses = heure_actuelle >= debut_hc or heure_actuelle <= fin_hc
 
             # Appareils recommandés pour les heures creuses
             appareils_recommandes = [

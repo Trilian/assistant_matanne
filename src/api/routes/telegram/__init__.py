@@ -4,11 +4,8 @@ Re-exporte ``router`` pour compatibilité avec ``main.py``.
 Re-exporte des fonctions internes pour compatibilité des tests existants.
 """
 
-from ._routes import router
-
-# Re-exports pour compatibilité des tests (test_webhooks_telegram_callbacks.py)
-from ._helpers import _extraire_id_depuis_callback, _normaliser_texte, _obtenir_url_app
 from ._callbacks import (
+    _obtenir_message_id,
     _traiter_callback_action_article,
     _traiter_callback_courses,
     _traiter_callback_menu,
@@ -16,9 +13,7 @@ from ._callbacks import (
     _traiter_callback_sondage_repas,
     _traiter_callback_toggle_article,
     _traiter_reponse_rapide_ok,
-    _obtenir_message_id,
 )
-from ._dispatcher import _dispatcher_commande_telegram
 from ._cuisine import (
     _ajouter_article_liste,
     _envoyer_courses_commande,
@@ -29,6 +24,7 @@ from ._cuisine import (
     _envoyer_repas_moment,
     _envoyer_resume_batch_cooking,
 )
+from ._dispatcher import _dispatcher_commande_telegram
 from ._famille import (
     _envoyer_activites_samedi,
     _envoyer_digest_commande,
@@ -37,6 +33,9 @@ from ._famille import (
     _envoyer_recap_journee,
     _envoyer_resume_weekend,
 )
+
+# Re-exports pour compatibilité des tests (test_webhooks_telegram_callbacks.py)
+from ._helpers import _extraire_id_depuis_callback, _normaliser_texte, _obtenir_url_app
 from ._maison import _envoyer_rappels_groupes, _envoyer_resume_energie, _envoyer_resume_jardin
 from ._outils import (
     _creer_note_rapide_telegram,
@@ -44,7 +43,12 @@ from ._outils import (
     _lancer_minuteur_telegram,
     _traiter_photo_frigo_telegram,
 )
-from ._schemas import COMMANDES_TELEGRAM, EnvoyerPlanningTelegramRequest, EnvoyerCoursesTelegramRequest
+from ._routes import router
+from ._schemas import (
+    COMMANDES_TELEGRAM,
+    EnvoyerCoursesTelegramRequest,
+    EnvoyerPlanningTelegramRequest,
+)
 
 __all__ = [
     "router",

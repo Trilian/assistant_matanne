@@ -131,14 +131,16 @@ class BridgesInterModulesService(CuisineBridgesMixin, FamilleBridgesMixin, Maiso
                 importable = False
                 erreur_import = exc.__class__.__name__
 
-            items.append({
-                **definition,
-                "statut": "consolide",
-                "mode": "compat_legacy",
-                "disponible": True,
-                "importable": importable,
-                "verification_import": "ok" if importable else f"warning:{erreur_import}",
-            })
+            items.append(
+                {
+                    **definition,
+                    "statut": "consolide",
+                    "mode": "compat_legacy",
+                    "disponible": True,
+                    "importable": importable,
+                    "verification_import": "ok" if importable else f"warning:{erreur_import}",
+                }
+            )
 
         total = len(items)
         groupes = sorted({str(item["groupe"]) for item in items})
@@ -178,11 +180,15 @@ def _on_jardin_recolte(event: EvenementDomaine) -> None:
                 f"{', '.join(r['nom'] for r in recettes[:3])}"
             )
             from src.services.core.events import obtenir_bus
-            obtenir_bus().emettre("bridge.recolte_recettes", {
-                "ingredient": nom,
-                "recettes": recettes[:5],
-                "nb_recettes": len(recettes),
-            })
+
+            obtenir_bus().emettre(
+                "bridge.recolte_recettes",
+                {
+                    "ingredient": nom,
+                    "recettes": recettes[:5],
+                    "nb_recettes": len(recettes),
+                },
+            )
     except Exception as e:
         logger.warning(f"Erreur bridge récolte→recettes: {e}")
 
@@ -210,12 +216,14 @@ def _on_batch_cooking_termine(event: EvenementDomaine) -> None:
 
         from src.services.integrations.telegram import envoyer_confirmation_batch_cooking
 
-        asyncio.run(envoyer_confirmation_batch_cooking(
-            nom_session=nom_session,
-            nb_recettes=nb_recettes,
-            photo_url=photo_url,
-            session_id=session_id,
-        ))
+        asyncio.run(
+            envoyer_confirmation_batch_cooking(
+                nom_session=nom_session,
+                nb_recettes=nb_recettes,
+                photo_url=photo_url,
+                session_id=session_id,
+            )
+        )
         logger.info(f"✅ Notification Telegram batch cooking #{session_id} envoyée")
     except Exception as e:
         logger.warning(f"Erreur bridge batch_cooking→Telegram: {e}")
@@ -241,4 +249,6 @@ def enregistrer_bridges_subscribers() -> None:
     bus.souscrire("budget.modifie", _on_budget_modifie)
     bus.souscrire("batch_cooking.termine", _on_batch_cooking_termine)
 
-    logger.info("✅ Bridges inter-modules enregistrés (jardin→recettes, budget→notification, batch_cooking→telegram)")
+    logger.info(
+        "✅ Bridges inter-modules enregistrés (jardin→recettes, budget→notification, batch_cooking→telegram)"
+    )

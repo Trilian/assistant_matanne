@@ -356,7 +356,7 @@ async def obtenir_db_async_securise() -> AsyncGenerator[AsyncSession | None, Non
 # ═══════════════════════════════════════════════════════════
 
 
-def avec_session_db_async(func: Callable[P, T]) -> Callable[P, T]:
+def avec_session_db_async[**P, T](func: Callable[P, T]) -> Callable[P, T]:
     """
     Décorateur qui injecte automatiquement une session async.
 

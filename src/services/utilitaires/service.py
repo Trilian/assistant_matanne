@@ -536,6 +536,3 @@ class EnergieService:
 def obtenir_energie_service() -> EnergieService:
     """Factory singleton EnergieService."""
     return EnergieService()
-
-
-

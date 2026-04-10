@@ -1,86 +1,1 @@
-"""
-Package Utilisateur - Services liés à l'utilisateur.
-
-Regroupe:
-- auth: Authentification Supabase
-- historique: Historique des actions utilisateur
-- preferences: Préférences utilisateur persistantes
-
-Usage:
-    from src.services.core.utilisateur import (
-        # Auth
-        AuthService, obtenir_auth_service, ProfilUtilisateur, AuthResult, Role, Permission,
-        afficher_login_form, afficher_user_menu, afficher_profile_settings,
-        require_authenticated, require_role,
-        # Historique
-        ActionHistoryService, obtenir_action_history_service,
-        ActionType, ActionEntry, ActionFilter, ActionStats,
-        # Préférences
-        UserPreferenceService, obtenir_user_preference_service,
-    )
-"""
-
-# ═══════════════════════════════════════════════════════════
-# AUTH - Authentification Supabase
-# ═══════════════════════════════════════════════════════════
-from .authentification import (
-    AuthResult,
-    AuthService,
-    Permission,
-    ProfilUtilisateur,
-    Role,
-    obtenir_auth_service,
-    obtenir_service_authentification,
-)
-
-# ═══════════════════════════════════════════════════════════
-# HISTORIQUE - Historique des actions utilisateur
-# ═══════════════════════════════════════════════════════════
-from .historique import (
-    ActionEntry,
-    ActionFilter,
-    ActionHistoryService,
-    ActionStats,
-    ActionType,
-    obtenir_action_history_service,
-    obtenir_service_historique_actions,
-)
-
-# ═══════════════════════════════════════════════════════════
-# PRÉFÉRENCES - Préférences utilisateur persistantes
-# ═══════════════════════════════════════════════════════════
-from .preferences import (
-    UserPreferenceService,
-    obtenir_user_preference_service,
-    obtenir_service_preferences_utilisateur,
-)
-from .profils import (
-    ProfilService,
-    obtenir_profil_service,
-)
-
-__all__ = [
-    # Auth
-    "AuthService",
-    "obtenir_auth_service",
-    "obtenir_service_authentification",
-    "ProfilUtilisateur",
-    "AuthResult",
-    "Role",
-    "Permission",
-    # Historique
-    "ActionHistoryService",
-    "obtenir_action_history_service",
-    "obtenir_service_historique_actions",
-    "ActionType",
-    "ActionEntry",
-    "ActionFilter",
-    "ActionStats",
-    # Préférences
-    "UserPreferenceService",
-    "obtenir_user_preference_service",
-    "obtenir_service_preferences_utilisateur",
-    # Profils
-    "ProfilService",
-    "obtenir_profil_service",
-]
+"""Package Utilisateur - Services liés à l'utilisateur.Regroupe:- auth: Authentification Supabase- historique: Historique des actions utilisateur- preferences: Préférences utilisateur persistantesUsage:    from src.services.core.utilisateur import (        # Auth        AuthService, obtenir_auth_service, ProfilUtilisateur, AuthResult, Role, Permission,        afficher_login_form, afficher_user_menu, afficher_profile_settings,        require_authenticated, require_role,        # Historique        ActionHistoryService, obtenir_action_history_service,        ActionType, ActionEntry, ActionFilter, ActionStats,        # Préférences        UserPreferenceService, obtenir_user_preference_service,    )"""# ═══════════════════════════════════════════════════════════# AUTH - Authentification Supabase# ═══════════════════════════════════════════════════════════from .authentification import (    AuthResult,    AuthService,    Permission,    ProfilUtilisateur,    Role,    obtenir_auth_service,    obtenir_service_authentification,)# ═══════════════════════════════════════════════════════════# HISTORIQUE - Historique des actions utilisateur# ═══════════════════════════════════════════════════════════from .historique import (    ActionEntry,    ActionFilter,    ActionHistoryService,    ActionStats,    ActionType,    obtenir_action_history_service,    obtenir_service_historique_actions,)# ═══════════════════════════════════════════════════════════# PRÉFÉRENCES - Préférences utilisateur persistantes# ═══════════════════════════════════════════════════════════from .preferences import (    UserPreferenceService,    obtenir_service_preferences_utilisateur,    obtenir_user_preference_service,)from .profils import (    ProfilService,    obtenir_profil_service,)__all__ = [    # Auth    "AuthService",    "obtenir_auth_service",    "obtenir_service_authentification",    "ProfilUtilisateur",    "AuthResult",    "Role",    "Permission",    # Historique    "ActionHistoryService",    "obtenir_action_history_service",    "obtenir_service_historique_actions",    "ActionType",    "ActionEntry",    "ActionFilter",    "ActionStats",    # Préférences    "UserPreferenceService",    "obtenir_user_preference_service",    "obtenir_service_preferences_utilisateur",    # Profils    "ProfilService",    "obtenir_profil_service",]

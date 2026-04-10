@@ -44,7 +44,9 @@ class PlansHabitatAIService(BaseAIService):
         self._multimodal = obtenir_multimodal_service()
         self._images = obtenir_service_generation_image()
 
-    def _charger_plan(self, session: Session, plan_id: int) -> tuple[PlanHabitat, list[PieceHabitat]]:
+    def _charger_plan(
+        self, session: Session, plan_id: int
+    ) -> tuple[PlanHabitat, list[PieceHabitat]]:
         plan = session.query(PlanHabitat).filter(PlanHabitat.id == plan_id).first()
         if plan is None:
             raise ValueError("Plan habitat introuvable")
@@ -94,7 +96,9 @@ class PlansHabitatAIService(BaseAIService):
         score_scenario = None
         if plan.scenario_id:
             try:
-                score_scenario = float(scenario_service.calculer_score_global(session, plan.scenario_id) or 0)
+                score_scenario = float(
+                    scenario_service.calculer_score_global(session, plan.scenario_id) or 0
+                )
             except Exception:
                 score_scenario = None
 
@@ -106,18 +110,23 @@ Budget estime actuel: {float(plan.budget_estime or 0)}
 Version: {plan.version}
 Score scenario associe: {score_scenario}
 Contraintes: {plan.contraintes or {}}
-Pieces: {[
-    {
-        'nom': piece.nom,
-        'type_piece': piece.type_piece,
-        'surface_m2': float(piece.surface_m2 or 0),
-        'meubles': piece.meubles or [],
-        'notes': piece.notes,
-    }
-    for piece in pieces
-]}
+Pieces: {
+            [
+                {
+                    "nom": piece.nom,
+                    "type_piece": piece.type_piece,
+                    "surface_m2": float(piece.surface_m2 or 0),
+                    "meubles": piece.meubles or [],
+                    "notes": piece.notes,
+                }
+                for piece in pieces
+            ]
+        }
 Analyse vision complementaire: {contexte_image or {}}
-Demande utilisateur: {prompt_utilisateur or 'Analyse globale avec optimisation circulation, budget et rangements.'}
+Demande utilisateur: {
+            prompt_utilisateur
+            or "Analyse globale avec optimisation circulation, budget et rangements."
+        }
 """
 
         system_prompt = """
@@ -171,7 +180,11 @@ Retourne uniquement un JSON avec:
             plan_id=plan.id,
             prompt_utilisateur=prompt_utilisateur or "Analyse automatique Habitat",
             analyse_ia=analyse.model_dump(),
-            image_generee_url=(f"generated://habitat-plan/{plan.id}/{plan.version}" if image and image.get("image_base64") else None),
+            image_generee_url=(
+                f"generated://habitat-plan/{plan.id}/{plan.version}"
+                if image and image.get("image_base64")
+                else None
+            ),
             acceptee=None,
         )
         session.add(historique)

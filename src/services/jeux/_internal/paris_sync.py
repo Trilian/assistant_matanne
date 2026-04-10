@@ -1,4 +1,4 @@
-﻿"""
+"""
 Synchronisation des paris sportifs avec les données API.
 
 Mixin extrait de ParisCrudService (Audit qualité — split >500 LOC).

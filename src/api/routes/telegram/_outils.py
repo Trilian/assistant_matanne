@@ -46,7 +46,9 @@ async def _creer_note_rapide_telegram(chat_id: str, texte_note: str) -> None:
 
     contenu = (texte_note or "").strip()
     if not contenu:
-        await envoyer_message_telegram(chat_id, "📝 Utilise <code>/note ton texte</code> pour créer un pense-bête.")
+        await envoyer_message_telegram(
+            chat_id, "📝 Utilise <code>/note ton texte</code> pour créer un pense-bête."
+        )
         return
 
     note = obtenir_notes_service().creer(
@@ -73,7 +75,8 @@ async def _notifier_rappel(chat_id: str, texte: str) -> None:
 
 async def _creer_rappel_telegram(chat_id: str, argument: str) -> None:
     """Crée un rappel programmé. Ex: /rappel sortir poubelles 20h30."""
-    from datetime import datetime, timedelta as td
+    from datetime import datetime
+    from datetime import timedelta as td
 
     from src.services.integrations.telegram import envoyer_message_telegram
 
@@ -191,7 +194,9 @@ def _extraire_points_photo(details: dict[str, Any]) -> list[str]:
     return points
 
 
-def _construire_reponse_photo_multi_usage(analyse: dict[str, Any]) -> tuple[str, list[dict[str, str]]]:
+def _construire_reponse_photo_multi_usage(
+    analyse: dict[str, Any],
+) -> tuple[str, list[dict[str, str]]]:
     """Formate la réponse Telegram en fonction du contexte détecté."""
 
     contexte = _normaliser_contexte_photo(str(analyse.get("contexte_detecte") or ""))
@@ -215,7 +220,10 @@ def _construire_reponse_photo_multi_usage(analyse: dict[str, Any]) -> tuple[str,
             "label": "Plante / jardin",
             "boutons": [
                 {"url": _obtenir_url_app("/maison/jardin"), "title": "🌱 Ouvrir le jardin"},
-                {"url": _obtenir_url_app("/ia-avancee/diagnostic-plante"), "title": "🔎 Diagnostic détaillé"},
+                {
+                    "url": _obtenir_url_app("/ia-avancee/diagnostic-plante"),
+                    "title": "🔎 Diagnostic détaillé",
+                },
                 {"id": "menu_principal", "title": "🏠 Menu principal"},
             ],
         },
@@ -241,7 +249,10 @@ def _construire_reponse_photo_multi_usage(analyse: dict[str, Any]) -> tuple[str,
             "titre": "📸 <b>Analyse photo</b>",
             "label": "Contexte varié",
             "boutons": [
-                {"url": _obtenir_url_app("/ia-avancee/analyse-photo"), "title": "🤖 Analyse avancée"},
+                {
+                    "url": _obtenir_url_app("/ia-avancee/analyse-photo"),
+                    "title": "🤖 Analyse avancée",
+                },
                 {"id": "menu_principal", "title": "🏠 Menu principal"},
             ],
         },
@@ -287,7 +298,9 @@ async def _traiter_photo_frigo_telegram(chat_id: str, photos: list[dict[str, obj
     await envoyer_message_telegram(chat_id, "📸 Photo reçue, j'analyse le contexte…")
     image_bytes = await telecharger_fichier_telegram(file_id)
     if not image_bytes:
-        await envoyer_message_telegram(chat_id, "📸 Analyse indisponible : téléchargement Telegram impossible.")
+        await envoyer_message_telegram(
+            chat_id, "📸 Analyse indisponible : téléchargement Telegram impossible."
+        )
         return
 
     analyse_multi: dict[str, Any] | None = None
@@ -306,7 +319,10 @@ async def _traiter_photo_frigo_telegram(chat_id: str, photos: list[dict[str, obj
     if contexte == "cuisine":
         resultat = await obtenir_photo_frigo_service().analyser_photo_frigo(image_bytes)
         if resultat.ingredients_detectes or resultat.recettes_db or resultat.recettes_suggerees:
-            ingredients = ", ".join(ingredient.nom for ingredient in resultat.ingredients_detectes[:6]) or "aucun"
+            ingredients = (
+                ", ".join(ingredient.nom for ingredient in resultat.ingredients_detectes[:6])
+                or "aucun"
+            )
             recettes = [recette.nom for recette in resultat.recettes_db[:3]] or [
                 recette.nom for recette in resultat.recettes_suggerees[:3]
             ]
@@ -327,7 +343,10 @@ async def _traiter_photo_frigo_telegram(chat_id: str, photos: list[dict[str, obj
                 boutons=[
                     {"id": "action_courses", "title": "🛒 Voir les courses"},
                     {"id": "action_planning", "title": "🍽️ Voir le planning"},
-                    {"url": _obtenir_url_app("/cuisine/recettes"), "title": "📖 Ouvrir les recettes"},
+                    {
+                        "url": _obtenir_url_app("/cuisine/recettes"),
+                        "title": "📖 Ouvrir les recettes",
+                    },
                 ],
             )
             return
@@ -338,11 +357,19 @@ async def _traiter_photo_frigo_telegram(chat_id: str, photos: list[dict[str, obj
         return
 
     resultat = await obtenir_photo_frigo_service().analyser_photo_frigo(image_bytes)
-    if not resultat.ingredients_detectes and not resultat.recettes_db and not resultat.recettes_suggerees:
-        await envoyer_message_telegram(chat_id, "📸 Je n'ai pas détecté assez d'éléments exploitables sur cette photo.")
+    if (
+        not resultat.ingredients_detectes
+        and not resultat.recettes_db
+        and not resultat.recettes_suggerees
+    ):
+        await envoyer_message_telegram(
+            chat_id, "📸 Je n'ai pas détecté assez d'éléments exploitables sur cette photo."
+        )
         return
 
-    ingredients = ", ".join(ingredient.nom for ingredient in resultat.ingredients_detectes[:6]) or "aucun"
+    ingredients = (
+        ", ".join(ingredient.nom for ingredient in resultat.ingredients_detectes[:6]) or "aucun"
+    )
     recettes = [recette.nom for recette in resultat.recettes_db[:3]] or [
         recette.nom for recette in resultat.recettes_suggerees[:3]
     ]

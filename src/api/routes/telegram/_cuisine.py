@@ -20,7 +20,10 @@ logger = logging.getLogger(__name__)
 async def _envoyer_planning_commande(chat_id: str) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.planning import Planning
-    from src.services.integrations.telegram import envoyer_message_interactif, sauvegarder_etat_conversation
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        sauvegarder_etat_conversation,
+    )
 
     aujourd_hui = date.today()
     lundi = aujourd_hui - timedelta(days=aujourd_hui.weekday())
@@ -52,7 +55,11 @@ async def _envoyer_planning_commande(chat_id: str) -> None:
         lignes = []
         for repas in repas_tries:
             type_repas = "Midi" if repas.type_repas == "dejeuner" else repas.type_repas.capitalize()
-            nom_recette = getattr(getattr(repas, "recette", None), "nom", None) or repas.notes or "Repas à préciser"
+            nom_recette = (
+                getattr(getattr(repas, "recette", None), "nom", None)
+                or repas.notes
+                or "Repas à préciser"
+            )
             lignes.append(
                 f"• {repas.date_repas.strftime('%a %d/%m')} {html.escape(type_repas)} : {html.escape(str(nom_recette))}"
             )
@@ -78,7 +85,10 @@ async def _envoyer_planning_commande(chat_id: str) -> None:
 async def _envoyer_courses_commande(chat_id: str, liste_id: int | None = None) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.courses import ArticleCourses
-    from src.services.integrations.telegram import envoyer_message_interactif, sauvegarder_etat_conversation
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        sauvegarder_etat_conversation,
+    )
 
     with obtenir_contexte_db() as session:
         liste = _selectionner_liste_courses(session, liste_id=liste_id)
@@ -103,9 +113,14 @@ async def _envoyer_courses_commande(chat_id: str, liste_id: int | None = None) -
         lignes = []
         boutons: list[dict[str, str]] = []
         for article in articles[:6]:
-            nom_article = getattr(getattr(article, "ingredient", None), "nom", None) or f"Article #{article.id}"
+            nom_article = (
+                getattr(getattr(article, "ingredient", None), "nom", None)
+                or f"Article #{article.id}"
+            )
             prefixe, statut = _resume_statut_article(article)
-            lignes.append(f"{prefixe} {html.escape(str(nom_article))} <i>({html.escape(statut)})</i>")
+            lignes.append(
+                f"{prefixe} {html.escape(str(nom_article))} <i>({html.escape(statut)})</i>"
+            )
 
             if article.achete:
                 boutons.append(
@@ -164,7 +179,10 @@ async def _envoyer_courses_commande(chat_id: str, liste_id: int | None = None) -
 async def _envoyer_repas_moment(chat_id: str, type_repas: str | None = None) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.planning import Repas
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     mapping = {
         "midi": "dejeuner",
@@ -181,19 +199,29 @@ async def _envoyer_repas_moment(chat_id: str, type_repas: str | None = None) -> 
         repas_liste = requete.order_by(Repas.type_repas.asc()).all()
 
     if not repas_liste:
-        libelle = "aujourd'hui" if not type_cible else ("ce midi" if type_cible == "dejeuner" else "ce soir")
+        libelle = (
+            "aujourd'hui"
+            if not type_cible
+            else ("ce midi" if type_cible == "dejeuner" else "ce soir")
+        )
         await envoyer_message_telegram(chat_id, f"🍽️ Aucun repas planifié {libelle}.")
         return
 
     lignes = []
     for repas in repas_liste:
         type_libelle = "Midi" if repas.type_repas == "dejeuner" else "Soir"
-        nom = getattr(getattr(repas, "recette", None), "nom", None) or repas.notes or "Repas à préciser"
+        nom = (
+            getattr(getattr(repas, "recette", None), "nom", None)
+            or repas.notes
+            or "Repas à préciser"
+        )
         lignes.append(f"• {type_libelle} : {html.escape(str(nom))}")
 
     await envoyer_message_interactif(
         destinataire=chat_id,
-        corps="🍽️ <b>Repas du jour</b>\n\n" + "\n".join(lignes) + "\n\nQu'est-ce qui vous ferait plaisir ?",
+        corps="🍽️ <b>Repas du jour</b>\n\n"
+        + "\n".join(lignes)
+        + "\n\nQu'est-ce qui vous ferait plaisir ?",
         boutons=[
             {"id": "repas_sondage:midi", "title": "☀️ Plutôt simple"},
             {"id": "repas_sondage:soir", "title": "🌙 Réconfortant"},
@@ -207,14 +235,13 @@ async def _envoyer_repas_moment(chat_id: str, type_repas: str | None = None) -> 
 async def _envoyer_inventaire_commande(chat_id: str) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.inventaire import ArticleInventaire
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     with obtenir_contexte_db() as session:
-        articles = (
-            session.query(ArticleInventaire)
-            .filter(ArticleInventaire.quantite > 0)
-            .all()
-        )
+        articles = session.query(ArticleInventaire).filter(ArticleInventaire.quantite > 0).all()
 
     articles_tries = sorted(
         articles,
@@ -242,7 +269,9 @@ async def _envoyer_inventaire_commande(chat_id: str) -> None:
             infos.append(str(article.emplacement))
         if getattr(article, "est_stock_bas", False):
             infos.append("stock bas")
-        lignes.append(f"{_emoji_peremption(peremption)} {html.escape(str(nom))} — {html.escape(' • '.join(filter(None, infos)))}")
+        lignes.append(
+            f"{_emoji_peremption(peremption)} {html.escape(str(nom))} — {html.escape(' • '.join(filter(None, infos)))}"
+        )
 
     lignes.append("")
     lignes.append("Légende : 🟢 OK • 🟡 à surveiller • 🔴 urgent")
@@ -261,7 +290,10 @@ async def _envoyer_inventaire_commande(chat_id: str) -> None:
 async def _envoyer_recette_commande(chat_id: str, recherche: str | None = None) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.recettes import Recette
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     terme = (recherche or "").strip()
     with obtenir_contexte_db() as session:
@@ -269,7 +301,9 @@ async def _envoyer_recette_commande(chat_id: str, recherche: str | None = None) 
         if terme:
             recette = (
                 requete.filter(Recette.nom.ilike(f"%{terme}%"))
-                .order_by(Recette.est_rapide.desc(), Recette.compatible_bebe.desc(), Recette.id.desc())
+                .order_by(
+                    Recette.est_rapide.desc(), Recette.compatible_bebe.desc(), Recette.id.desc()
+                )
                 .first()
             )
         else:
@@ -289,7 +323,11 @@ async def _envoyer_recette_commande(chat_id: str, recherche: str | None = None) 
         quantite = getattr(item, "quantite", None)
         unite = getattr(item, "unite", None) or ""
         prefixe = f"{float(quantite):g} " if quantite is not None else ""
-        ingredients.append(f"• {html.escape(prefixe + str(unite)).strip()} {html.escape(str(nom))}".replace("•  ", "• "))
+        ingredients.append(
+            f"• {html.escape(prefixe + str(unite)).strip()} {html.escape(str(nom))}".replace(
+                "•  ", "• "
+            )
+        )
 
     tags = ", ".join(recette.tags[:4]) if getattr(recette, "tags", None) else "familiale"
     lignes = [
@@ -319,7 +357,10 @@ async def _envoyer_resume_batch_cooking(chat_id: str) -> None:
     import html as html_mod
 
     from src.services.cuisine.batch_cooking import obtenir_service_batch_cooking
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     service = obtenir_service_batch_cooking()
     session_active = service.get_session_active()
@@ -333,7 +374,9 @@ async def _envoyer_resume_batch_cooking(chat_id: str) -> None:
 
     cible = session_active or prochaine
     if cible is None:
-        await envoyer_message_telegram(chat_id, "🍱 Aucun batch cooking en cours ou planifié pour le moment.")
+        await envoyer_message_telegram(
+            chat_id, "🍱 Aucun batch cooking en cours ou planifié pour le moment."
+        )
         return
 
     etat = getattr(cible, "statut", "planifiee")
@@ -374,7 +417,11 @@ async def _envoyer_repas_du_soir(chat_id: str) -> None:
         )
 
     if repas:
-        nom = repas.recette.nom if getattr(repas, "recette", None) else (repas.notes or "Repas du soir")
+        nom = (
+            repas.recette.nom
+            if getattr(repas, "recette", None)
+            else (repas.notes or "Repas du soir")
+        )
         await envoyer_message_telegram(chat_id, f"🍽️ Ce soir: <b>{nom}</b>.")
         return
 
@@ -449,8 +496,11 @@ async def _envoyer_quoi_manger(chat_id: str) -> None:
 
     try:
         with obtenir_contexte_db() as session:
-            resultat = obtenir_service_inventaire_planning_interaction().suggerer_recettes_selon_stock(
-                limite=5, db=session,
+            resultat = (
+                obtenir_service_inventaire_planning_interaction().suggerer_recettes_selon_stock(
+                    limite=5,
+                    db=session,
+                )
             )
     except Exception:
         logger.exception("Erreur suggestion recettes depuis stock")

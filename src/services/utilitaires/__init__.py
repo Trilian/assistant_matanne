@@ -8,6 +8,27 @@ Architecture:
     +-- inter_modules/          # Bridges inter-modules
 """
 
+from src.services.utilitaires.briefing_matinal import (
+    BriefingMatinalService,
+    obtenir_service_briefing_matinal,
+)
+from src.services.utilitaires.chat.assistant_proactif import (
+    AssistantProactifService,
+    obtenir_service_assistant_proactif,
+)
+from src.services.utilitaires.inter_modules.inter_module_chat_contexte import (
+    ChatContexteMultiModuleService,
+    obtenir_service_chat_contexte,
+)
+from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
+    ChatEventBusBridgeService,
+    enregistrer_chat_event_bus_subscribers,
+    obtenir_chat_event_bus_bridge,
+)
+from src.services.utilitaires.inter_modules.inter_module_dashboard_actions import (
+    DashboardActionsRapidesInteractionService,
+    get_dashboard_actions_rapides_service,
+)
 from src.services.utilitaires.service import (
     ContactsService,
     EnergieService,
@@ -23,27 +44,6 @@ from src.services.utilitaires.service import (
     obtenir_mots_de_passe_service,
     obtenir_notes_service,
     obtenir_presse_papiers_service,
-)
-from src.services.utilitaires.briefing_matinal import (
-    BriefingMatinalService,
-    obtenir_service_briefing_matinal,
-)
-from src.services.utilitaires.inter_modules.inter_module_chat_contexte import (
-    ChatContexteMultiModuleService,
-    obtenir_service_chat_contexte,
-)
-from src.services.utilitaires.chat.assistant_proactif import (
-    AssistantProactifService,
-    obtenir_service_assistant_proactif,
-)
-from src.services.utilitaires.inter_modules.inter_module_dashboard_actions import (
-    DashboardActionsRapidesInteractionService,
-    get_dashboard_actions_rapides_service,
-)
-from src.services.utilitaires.inter_modules.inter_module_chat_event_bus import (
-    ChatEventBusBridgeService,
-    enregistrer_chat_event_bus_subscribers,
-    obtenir_chat_event_bus_bridge,
 )
 
 __all__ = [
@@ -73,4 +73,3 @@ __all__ = [
     "obtenir_chat_event_bus_bridge",
     "enregistrer_chat_event_bus_subscribers",
 ]
-

@@ -255,7 +255,9 @@ async def score_ecologique(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.post("/analyse-nutritionnelle", response_model=AnalyseNutritionnelleResponse, responses=REPONSES_IA)
+@router.post(
+    "/analyse-nutritionnelle", response_model=AnalyseNutritionnelleResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def analyse_nutritionnelle(
     request: AnalyseNutritionnelleRequest,
@@ -274,7 +276,9 @@ async def analyse_nutritionnelle(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.post("/optimisation-energie", response_model=OptimisationEnergieResponse, responses=REPONSES_IA)
+@router.post(
+    "/optimisation-energie", response_model=OptimisationEnergieResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def optimisation_energie(
     request: OptimisationEnergieRequest,

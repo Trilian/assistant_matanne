@@ -75,9 +75,7 @@ class MaisonBridgesMixin:
         metiers = self._detecter_metiers_depuis_tache(tache)
         artisans: list[Artisan] = []
         for metier in metiers:
-            artisans.extend(
-                db.query(Artisan).filter(Artisan.metier.ilike(f"%{metier}%")).all()
-            )
+            artisans.extend(db.query(Artisan).filter(Artisan.metier.ilike(f"%{metier}%")).all())
 
         if not artisans and "artisan multi-services" not in metiers:
             artisans = db.query(Artisan).filter(Artisan.metier.ilike("%multi%")).all()
@@ -137,7 +135,9 @@ class MaisonBridgesMixin:
                 "nom": t.nom,
                 "prochaine_fois": str(t.prochaine_fois),
                 "en_retard": t.prochaine_fois < aujourd_hui if t.prochaine_fois else False,
-                "jours_restants": (t.prochaine_fois - aujourd_hui).days if t.prochaine_fois else None,
+                "jours_restants": (t.prochaine_fois - aujourd_hui).days
+                if t.prochaine_fois
+                else None,
                 "type": "entretien",
             }
             for t in taches
@@ -162,9 +162,7 @@ class MaisonBridgesMixin:
             return {}
 
         ingredient = (
-            db.query(Ingredient)
-            .filter(func.lower(Ingredient.nom) == element.nom.lower())
-            .first()
+            db.query(Ingredient).filter(func.lower(Ingredient.nom) == element.nom.lower()).first()
         )
 
         if ingredient is None:
@@ -239,33 +237,41 @@ class MaisonBridgesMixin:
         pluie = conditions_meteo.get("precipitations_mm", 0)
 
         if temp <= 0:
-            alertes.append({
-                "type": "gel",
-                "message": "🥶 Gel annoncé ! Protéger les plantes, purger les tuyaux extérieurs.",
-                "priorite": "haute",
-                "domaine": "jardin",
-            })
+            alertes.append(
+                {
+                    "type": "gel",
+                    "message": "🥶 Gel annoncé ! Protéger les plantes, purger les tuyaux extérieurs.",
+                    "priorite": "haute",
+                    "domaine": "jardin",
+                }
+            )
         if temp >= 35:
-            alertes.append({
-                "type": "canicule",
-                "message": "🌡️ Canicule ! Arroser le jardin tôt/tard, fermer les volets.",
-                "priorite": "haute",
-                "domaine": "jardin",
-            })
+            alertes.append(
+                {
+                    "type": "canicule",
+                    "message": "🌡️ Canicule ! Arroser le jardin tôt/tard, fermer les volets.",
+                    "priorite": "haute",
+                    "domaine": "jardin",
+                }
+            )
         if vent >= 80:
-            alertes.append({
-                "type": "vent_fort",
-                "message": "💨 Vent fort ! Rentrer les meubles de jardin, vérifier les fixations.",
-                "priorite": "moyenne",
-                "domaine": "exterieur",
-            })
+            alertes.append(
+                {
+                    "type": "vent_fort",
+                    "message": "💨 Vent fort ! Rentrer les meubles de jardin, vérifier les fixations.",
+                    "priorite": "moyenne",
+                    "domaine": "exterieur",
+                }
+            )
         if pluie >= 50:
-            alertes.append({
-                "type": "pluie_forte",
-                "message": "🌧️ Pluie forte ! Vérifier les gouttières et évacuations.",
-                "priorite": "moyenne",
-                "domaine": "maison",
-            })
+            alertes.append(
+                {
+                    "type": "pluie_forte",
+                    "message": "🌧️ Pluie forte ! Vérifier les gouttières et évacuations.",
+                    "priorite": "moyenne",
+                    "domaine": "maison",
+                }
+            )
 
         return alertes
 
@@ -287,7 +293,9 @@ class MaisonBridgesMixin:
             return {}
 
         date_realisation = tache.derniere_fois or date.today()
-        tokens = [mot for mot in (tache.nom or "").lower().replace("-", " ").split() if len(mot) >= 4]
+        tokens = [
+            mot for mot in (tache.nom or "").lower().replace("-", " ").split() if len(mot) >= 4
+        ]
         fiches = db.query(EntretienSaisonnier).all()
         fiches_cibles = [
             fiche
@@ -307,8 +315,21 @@ class MaisonBridgesMixin:
                 saison = "automne"
 
             categorie = (tache.categorie or "entretien").lower()
-            if categorie not in {"chauffage", "plomberie", "toiture", "jardin", "piscine", "securite"}:
-                categorie = "securite" if "secur" in categorie else "jardin" if "jardin" in categorie else "chauffage"
+            if categorie not in {
+                "chauffage",
+                "plomberie",
+                "toiture",
+                "jardin",
+                "piscine",
+                "securite",
+            }:
+                categorie = (
+                    "securite"
+                    if "secur" in categorie
+                    else "jardin"
+                    if "jardin" in categorie
+                    else "chauffage"
+                )
 
             fiche = EntretienSaisonnier(
                 nom=tache.nom,
@@ -354,12 +375,7 @@ class MaisonBridgesMixin:
         """P3-A4: Données pour le widget veille immobilière du dashboard."""
         from src.core.models.habitat_projet import AnnonceHabitat
 
-        annonces = (
-            db.query(AnnonceHabitat)
-            .order_by(AnnonceHabitat.id.desc())
-            .limit(5)
-            .all()
-        )
+        annonces = db.query(AnnonceHabitat).order_by(AnnonceHabitat.id.desc()).limit(5).all()
         nb_total = db.query(func.count(AnnonceHabitat.id)).scalar() or 0
 
         annonces_liste = [
@@ -395,36 +411,47 @@ class MaisonBridgesMixin:
 
         aujourd_hui = date.today()
         mois = aujourd_hui.month
-        saison_map = {1: "hiver", 2: "hiver", 3: "printemps", 4: "printemps", 5: "printemps",
-                      6: "été", 7: "été", 8: "été", 9: "automne", 10: "automne",
-                      11: "automne", 12: "hiver"}
+        saison_map = {
+            1: "hiver",
+            2: "hiver",
+            3: "printemps",
+            4: "printemps",
+            5: "printemps",
+            6: "été",
+            7: "été",
+            8: "été",
+            9: "automne",
+            10: "automne",
+            11: "automne",
+            12: "hiver",
+        }
         saison = saison_map[mois]
 
-        plantes = (
-            db.query(ElementJardin)
-            .filter(ElementJardin.statut != "retire")
-            .all()
-        )
+        plantes = db.query(ElementJardin).filter(ElementJardin.statut != "retire").all()
 
         activites = []
         prochaines_recoltes = []
 
         for plante in plantes:
             if plante.statut == "plante" or plante.statut == "actif":
-                activites.append({
-                    "element": plante.nom,
-                    "type_activite": "arrosage",
-                    "priorite": "haute" if saison in ("été", "printemps") else "normale",
-                    "conseil": f"Arroser {plante.nom} régulièrement" if saison == "été" else "",
-                })
+                activites.append(
+                    {
+                        "element": plante.nom,
+                        "type_activite": "arrosage",
+                        "priorite": "haute" if saison in ("été", "printemps") else "normale",
+                        "conseil": f"Arroser {plante.nom} régulièrement" if saison == "été" else "",
+                    }
+                )
 
             if plante.date_recolte_prevue and plante.date_recolte_prevue >= aujourd_hui:
                 jours_restants = (plante.date_recolte_prevue - aujourd_hui).days
-                prochaines_recoltes.append({
-                    "element": plante.nom,
-                    "date_recolte": plante.date_recolte_prevue.isoformat(),
-                    "jours_restants": jours_restants,
-                })
+                prochaines_recoltes.append(
+                    {
+                        "element": plante.nom,
+                        "date_recolte": plante.date_recolte_prevue.isoformat(),
+                        "jours_restants": jours_restants,
+                    }
+                )
 
         prochaines_recoltes.sort(key=lambda x: x["jours_restants"])
 
@@ -450,36 +477,41 @@ class MaisonBridgesMixin:
             delta = date.today() - jules.date_of_birth
             age_mois = delta.days // 30
 
-        plantes = (
-            db.query(ElementJardin)
-            .filter(ElementJardin.statut != "retire")
-            .all()
-        )
+        plantes = db.query(ElementJardin).filter(ElementJardin.statut != "retire").all()
         plantes_noms = [p.nom for p in plantes]
 
         activites = []
         for plante in plantes:
             if plante.statut in ("plante", "actif"):
-                activites.append({
-                    "activite": f"Arroser {plante.nom}",
-                    "difficulte": "facile",
-                    "duree_minutes": 10,
-                    "description": f"Arroser doucement {plante.nom} avec un petit arrosoir",
-                })
-            if plante.date_recolte_prevue and plante.date_recolte_prevue <= date.today() + timedelta(days=7):
-                activites.append({
-                    "activite": f"Récolter {plante.nom}",
-                    "difficulte": "facile",
-                    "duree_minutes": 15,
-                    "description": f"Cueillir {plante.nom} ensemble — montrer les couleurs et les formes",
-                })
+                activites.append(
+                    {
+                        "activite": f"Arroser {plante.nom}",
+                        "difficulte": "facile",
+                        "duree_minutes": 10,
+                        "description": f"Arroser doucement {plante.nom} avec un petit arrosoir",
+                    }
+                )
+            if (
+                plante.date_recolte_prevue
+                and plante.date_recolte_prevue <= date.today() + timedelta(days=7)
+            ):
+                activites.append(
+                    {
+                        "activite": f"Récolter {plante.nom}",
+                        "difficulte": "facile",
+                        "duree_minutes": 15,
+                        "description": f"Cueillir {plante.nom} ensemble — montrer les couleurs et les formes",
+                    }
+                )
 
-        activites.append({
-            "activite": "Observer les insectes",
-            "difficulte": "facile",
-            "duree_minutes": 10,
-            "description": "Chercher et observer les insectes dans le jardin",
-        })
+        activites.append(
+            {
+                "activite": "Observer les insectes",
+                "difficulte": "facile",
+                "duree_minutes": 10,
+                "description": "Chercher et observer les insectes dans le jardin",
+            }
+        )
 
         return {
             "activites": activites,

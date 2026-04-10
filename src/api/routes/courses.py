@@ -41,12 +41,12 @@ def _store_idempotency(key: str | None, result: Any) -> None:
 from src.api.dependencies import require_auth
 from src.api.schemas import (
     ArticleDriveResponse,
-    CourseItemBase,
-    CourseListCreate,
-    CheckoutCoursesResponse,
     CheckoutCoursesRequest,
+    CheckoutCoursesResponse,
     CorrespondanceDriveCreate,
     CorrespondanceDriveResponse,
+    CourseItemBase,
+    CourseListCreate,
     GenererCoursesRequest,
     GenererCoursesResponse,
     ListeCoursesResponse,
@@ -63,7 +63,6 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
 )
-
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
@@ -94,9 +93,6 @@ class FeedbackPredictionCoursesRequest(BaseModel):
 
     article_nom: str = Field(..., min_length=1, max_length=200)
     accepte: bool = Field(..., description="True si l'article a ete ajoute, False sinon")
-
-
-
 
 
 @router.get("", response_model=ReponsePaginee[ListeCoursesResume], responses=REPONSES_LISTE)
@@ -273,6 +269,7 @@ async def ajouter_article(
             magasin = donnees.magasin_cible
             if not magasin and donnees.categorie:
                 from src.core.constants import CATEGORIE_VERS_MAGASIN
+
                 magasin = CATEGORIE_VERS_MAGASIN.get(donnees.categorie.lower())
 
             article = ArticleCourses(
@@ -385,7 +382,7 @@ async def exporter_liste_texte(
             ]
 
             if group_by == "simple":
-                for a in sorted(articles, key=lambda x: (x.ingredient.nom if x.ingredient else "")):
+                for a in sorted(articles, key=lambda x: x.ingredient.nom if x.ingredient else ""):
                     nom = a.ingredient.nom if a.ingredient else "Article"
                     unite = (a.ingredient.unite if a.ingredient else "") or ""
                     qty = f"{a.quantite_necessaire:g} {unite}".strip()
@@ -399,7 +396,7 @@ async def exporter_liste_texte(
                 for categorie in sorted(groupes.keys()):
                     lignes.append(f"\n[{categorie}]")
                     for a in sorted(
-                        groupes[categorie], key=lambda x: (x.ingredient.nom if x.ingredient else "")
+                        groupes[categorie], key=lambda x: x.ingredient.nom if x.ingredient else ""
                     ):
                         nom = a.ingredient.nom if a.ingredient else "Article"
                         unite = (a.ingredient.unite if a.ingredient else "") or ""
@@ -432,11 +429,7 @@ async def generer_qr_partage_liste(
             if not liste:
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            articles = [
-                a
-                for a in (liste.articles or [])
-                if include_checked or not a.achete
-            ]
+            articles = [a for a in (liste.articles or []) if include_checked or not a.achete]
             lignes = [f"Courses - {liste.nom}"]
             for article in articles:
                 nom = article.ingredient.nom if article.ingredient else "Article"
@@ -507,7 +500,9 @@ async def modifier_liste(
 
 
 @router.put(
-    "/{liste_id:int}/items/{item_id:int}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE
+    "/{liste_id:int}/items/{item_id:int}",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_ECRITURE,
 )
 @gerer_exception_api
 async def modifier_article(
@@ -962,11 +957,13 @@ async def generer_depuis_planning(
                     continue
 
                 quantite_a_acheter = besoin - en_stock
-                articles_a_acheter.append({
-                    **ing,
-                    "quantite": quantite_a_acheter,
-                    "en_stock": en_stock,
-                })
+                articles_a_acheter.append(
+                    {
+                        **ing,
+                        "quantite": quantite_a_acheter,
+                        "en_stock": en_stock,
+                    }
+                )
 
             # 5) Créer la ListeCourses + ArticleCourses
             liste = ListeCourses(nom=donnees.nom_liste, archivee=False, etat="brouillon")
@@ -1084,7 +1081,9 @@ async def confirmer_courses(
     return await executer_async(_confirmer)
 
 
-@router.delete("/{liste_id:int}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/{liste_id:int}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -1202,7 +1201,7 @@ async def valider_courses(
 
     Puis archive la liste.
     """
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
 
     from src.core.models import ArticleInventaire
     from src.core.models.courses import ArticleCourses, HistoriqueAchats, ListeCourses
@@ -1270,7 +1269,11 @@ async def valider_courses(
                             hist.prix_dernier = float(art.prix_unitaire)
                             if hist.prix_moyen and hist.prix_moyen > 0:
                                 hist.prix_moyen = round(
-                                    ((hist.prix_moyen * max(hist.nb_achats - 1, 1)) + float(art.prix_unitaire)) / hist.nb_achats,
+                                    (
+                                        (hist.prix_moyen * max(hist.nb_achats - 1, 1))
+                                        + float(art.prix_unitaire)
+                                    )
+                                    / hist.nb_achats,
                                     2,
                                 )
                             else:
@@ -1283,8 +1286,12 @@ async def valider_courses(
                                 rayon_magasin=art.rayon_magasin,
                                 derniere_achat=now,
                                 nb_achats=1,
-                                prix_dernier=float(art.prix_unitaire) if art.prix_unitaire is not None else None,
-                                prix_moyen=float(art.prix_unitaire) if art.prix_unitaire is not None else None,
+                                prix_dernier=float(art.prix_unitaire)
+                                if art.prix_unitaire is not None
+                                else None,
+                                prix_moyen=float(art.prix_unitaire)
+                                if art.prix_unitaire is not None
+                                else None,
                             )
                         )
 
@@ -1329,9 +1336,7 @@ async def obtenir_suggestions_bio_local(
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             articles = (
-                session.query(ArticleCourses)
-                .filter(ArticleCourses.liste_id == liste_id)
-                .all()
+                session.query(ArticleCourses).filter(ArticleCourses.liste_id == liste_id).all()
             )
 
             # Charger les données de saison
@@ -1341,10 +1346,22 @@ async def obtenir_suggestions_bio_local(
                 produits_saison = json.loads(saison_path.read_text(encoding="utf-8"))
 
             from datetime import date
+
             mois_actuel = date.today().month
             mois_noms = [
-                "", "janvier", "février", "mars", "avril", "mai", "juin",
-                "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+                "",
+                "janvier",
+                "février",
+                "mars",
+                "avril",
+                "mai",
+                "juin",
+                "juillet",
+                "août",
+                "septembre",
+                "octobre",
+                "novembre",
+                "décembre",
             ]
             mois_str = mois_noms[mois_actuel]
 
@@ -1399,8 +1416,8 @@ async def obtenir_historique_prix_courses(
             historiques = (
                 session.query(HistoriqueAchats)
                 .filter(
-                    (HistoriqueAchats.prix_dernier.isnot(None)) |
-                    (HistoriqueAchats.prix_moyen.isnot(None))
+                    (HistoriqueAchats.prix_dernier.isnot(None))
+                    | (HistoriqueAchats.prix_moyen.isnot(None))
                 )
                 .order_by(HistoriqueAchats.derniere_achat.desc())
                 .limit(30)
@@ -1412,16 +1429,22 @@ async def obtenir_historique_prix_courses(
                 variation = None
                 if h.prix_dernier is not None and h.prix_moyen not in (None, 0):
                     variation = round(float(h.prix_dernier) - float(h.prix_moyen), 2)
-                items.append({
-                    "article_nom": h.article_nom,
-                    "categorie": h.categorie,
-                    "rayon_magasin": h.rayon_magasin,
-                    "derniere_achat": h.derniere_achat.isoformat() if h.derniere_achat else None,
-                    "prix_dernier": float(h.prix_dernier) if h.prix_dernier is not None else None,
-                    "prix_moyen": float(h.prix_moyen) if h.prix_moyen is not None else None,
-                    "variation": variation,
-                    "nb_achats": h.nb_achats,
-                })
+                items.append(
+                    {
+                        "article_nom": h.article_nom,
+                        "categorie": h.categorie,
+                        "rayon_magasin": h.rayon_magasin,
+                        "derniere_achat": h.derniere_achat.isoformat()
+                        if h.derniere_achat
+                        else None,
+                        "prix_dernier": float(h.prix_dernier)
+                        if h.prix_dernier is not None
+                        else None,
+                        "prix_moyen": float(h.prix_moyen) if h.prix_moyen is not None else None,
+                        "variation": variation,
+                        "nb_achats": h.nb_achats,
+                    }
+                )
 
             return {
                 "items": items,
@@ -1444,7 +1467,7 @@ async def obtenir_recurrents_suggeres(
     Se base sur l'historique d'achats pour suggérer les articles que l'utilisateur
     achète habituellement à une certaine fréquence.
     """
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
 
     from src.core.models.courses import HistoriqueAchats
 
@@ -1468,14 +1491,16 @@ async def obtenir_recurrents_suggeres(
                     continue
                 jours_depuis = (now - h.derniere_achat).days
                 if jours_depuis >= h.frequence_jours:
-                    suggestions.append({
-                        "article_nom": h.article_nom,
-                        "categorie": h.categorie,
-                        "frequence_jours": h.frequence_jours,
-                        "jours_depuis_dernier_achat": jours_depuis,
-                        "retard_jours": jours_depuis - h.frequence_jours,
-                        "nb_achats_total": h.nb_achats,
-                    })
+                    suggestions.append(
+                        {
+                            "article_nom": h.article_nom,
+                            "categorie": h.categorie,
+                            "frequence_jours": h.frequence_jours,
+                            "jours_depuis_dernier_achat": jours_depuis,
+                            "retard_jours": jours_depuis - h.frequence_jours,
+                            "nb_achats_total": h.nb_achats,
+                        }
+                    )
 
             # Trier par retard décroissant
             suggestions.sort(key=lambda x: x["retard_jours"], reverse=True)
@@ -1538,7 +1563,11 @@ async def optimiser_budget_courses_ia(
 
             for article in articles:
                 nom = article.ingredient.nom if getattr(article, "ingredient", None) else "Article"
-                rayon = (article.rayon_magasin or getattr(article.ingredient, "categorie", "Autre") or "Autre")
+                rayon = (
+                    article.rayon_magasin
+                    or getattr(article.ingredient, "categorie", "Autre")
+                    or "Autre"
+                )
                 rayon_key = str(rayon).lower()
                 cout_unitaire = estimation_par_rayon.get(rayon_key, estimation_par_rayon["autre"])
                 quantite = float(article.quantite_necessaire or 1.0)
@@ -1731,14 +1760,16 @@ async def obtenir_articles_par_magasin(
                 cle = a.magasin_cible or "non_assigne"
                 if cle not in groupes:
                     groupes[cle] = []
-                groupes[cle].append({
-                    "id": a.id,
-                    "nom": a.ingredient.nom if a.ingredient else "Article",
-                    "quantite": a.quantite_necessaire,
-                    "coche": a.achete,
-                    "categorie": a.rayon_magasin,
-                    "magasin_cible": a.magasin_cible,
-                })
+                groupes[cle].append(
+                    {
+                        "id": a.id,
+                        "nom": a.ingredient.nom if a.ingredient else "Article",
+                        "quantite": a.quantite_necessaire,
+                        "coche": a.achete,
+                        "categorie": a.rayon_magasin,
+                        "magasin_cible": a.magasin_cible,
+                    }
+                )
 
             return {
                 "liste_id": liste.id,
@@ -1880,7 +1911,11 @@ async def supprimer_correspondance_drive(
 
     def _delete() -> MessageResponse:
         with executer_avec_session() as session:
-            c = session.query(CorrespondanceDrive).filter(CorrespondanceDrive.id == correspondance_id).first()
+            c = (
+                session.query(CorrespondanceDrive)
+                .filter(CorrespondanceDrive.id == correspondance_id)
+                .first()
+            )
             if not c:
                 raise HTTPException(status_code=404, detail="Correspondance non trouvée")
             c.actif = False
@@ -1961,4 +1996,3 @@ async def obtenir_articles_drive(
             return resultats
 
     return await executer_async(_query)
-

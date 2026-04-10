@@ -1,4 +1,4 @@
-﻿"""
+"""
 
 Service Planning de Base (service de base)
 
@@ -14,61 +14,34 @@ Service Planning de Base (service de base)
 
 """
 
-
-
 import logging
-
 from datetime import date, timedelta
-
 from typing import Any
-
-
 
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from src.core.ai import obtenir_client_ia
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-
 from src.core.models import Planning, Repas
-
 from src.services.core.base import BaseAIService, BaseService, PlanningAIMixin
-
 from src.services.core.events import obtenir_bus
 
-
-
 from .nutrition import determine_protein_type
-
 from .planning_ia_mixin import PlanningIAGenerationMixin
-
 from .types import JourPlanning, ParametresEquilibre
-
-
 
 logger = logging.getLogger(__name__)
 
 
-
-
-
 class Cache:
-
     """Compatibilité tests legacy patchant `...planning.service.Cache`."""
 
-
-
     @staticmethod
-
     def invalider(pattern: str | None = None) -> None:
 
         from src.core.caching import obtenir_cache
 
-
-
         obtenir_cache().invalider(pattern=pattern)
-
-
-
 
 
 # ═══════════════════════════════════════════════════════════
@@ -78,15 +51,9 @@ class Cache:
 # ═══════════════════════════════════════════════════════════
 
 
-
-
-
 class ServicePlanning(
-
     BaseService[Planning], BaseAIService, PlanningAIMixin, PlanningIAGenerationMixin
-
 ):
-
     """
 
     Service complet pour le planning hebdomadaire.
@@ -113,35 +80,21 @@ class ServicePlanning(
 
     """
 
-
-
     def __init__(self):
 
         # MRO coopératif: tous les arguments passés via kwargs
 
         super().__init__(
-
             # Arguments pour BaseService
-
             model=Planning,
-
             cache_ttl=1800,
-
             # Arguments pour BaseAIService
-
             client=obtenir_client_ia(),
-
             cache_prefix="planning",
-
             default_ttl=1800,
-
             default_temperature=0.7,
-
             service_name="planning",
-
         )
-
-
 
     # ═══════════════════════════════════════════════════════════
 
@@ -149,26 +102,15 @@ class ServicePlanning(
 
     # ═══════════════════════════════════════════════════════════
 
-
-
     @avec_gestion_erreurs(default_return=None)
-
     @avec_cache(
-
         ttl=1800,
-
         key_func=lambda self, planning_id=None, **kw: f"planning_{planning_id or 'active'}",
-
     )
-
     @avec_session_db
-
     def get_planning(
-
         self, planning_id: int | None = None, db: Session | None = None
-
     ) -> Planning | None:
-
         """Get the active or specified planning with eager loading of meals and recettes.
 
 
@@ -189,84 +131,46 @@ class ServicePlanning(
 
         from sqlalchemy.orm import selectinload
 
-
-
         from src.core.models import Recette
 
-
-
         if planning_id:
-
             planning = (
-
                 db.query(Planning)
-
                 .options(
-
                     selectinload(Planning.repas)
-
                     .selectinload(Repas.recette)
-
                     .selectinload(Recette.versions)
-
                 )
-
                 .filter(Planning.id == planning_id)
-
                 .first()
-
             )
 
         else:
-
             planning = (
-
                 db.query(Planning)
-
                 .options(
-
                     selectinload(Planning.repas)
-
                     .selectinload(Repas.recette)
-
                     .selectinload(Recette.versions)
-
                 )
-
                 .filter(Planning.statut == "actif")
-
                 .order_by(Planning.semaine_debut.desc())
-
                 .first()
-
             )
 
-
-
         if not planning:
-
             logger.debug("ℹ️ Planning not found")
 
             return None
 
-
-
         return planning
 
-
-
     @avec_gestion_erreurs(default_return=None)
-
     @avec_cache(ttl=1800, key_func=lambda self, planning_id, **kw: f"planning_full_{planning_id}")
-
     @avec_session_db
-
     def get_planning_complet(
-
         self, planning_id: int, db: Session | None = None
-
     ) -> dict[str, Any] | None:
-
         """Récupère un planning avec tous ses repas.
 
 
@@ -292,86 +196,49 @@ class ServicePlanning(
         """
 
         planning = (
-
             db.query(Planning)
-
             .options(joinedload(Planning.repas).joinedload(Repas.recette))
-
             .filter(Planning.id == planning_id)
-
             .first()
-
         )
 
-
-
         if not planning:
-
             logger.warning(f"⚠️ Planning {planning_id} not found")
 
             return None
 
-
-
         repas_par_jour = {}
 
         for repas in planning.repas:
-
             jour_str = repas.date_repas.strftime("%Y-%m-%d")
 
             if jour_str not in repas_par_jour:
-
                 repas_par_jour[jour_str] = []
 
-
-
             repas_par_jour[jour_str].append(
-
                 {
-
                     "id": repas.id,
-
                     "type_repas": repas.type_repas,
-
                     "recette_id": repas.recette_id,
-
                     "recette_nom": repas.recette.nom if repas.recette else None,
-
                     "prepare": repas.prepare,
-
                     "notes": repas.notes,
-
                 }
-
             )
 
-
-
         result = {
-
             "id": planning.id,
-
             "nom": planning.nom,
-
             "semaine_debut": planning.semaine_debut.isoformat(),
-
             "semaine_fin": planning.semaine_fin.isoformat(),
-
             "actif": planning.statut == "actif",
-
             "genere_par_ia": planning.genere_par_ia,
-
             "repas_par_jour": repas_par_jour,
-
         }
-
-
 
         logger.info(f"✅ Retrieved planning {planning_id} with {len(repas_par_jour)} days")
 
         return result
-
-
 
     # ═══════════════════════════════════════════════════════════
 
@@ -385,30 +252,17 @@ class ServicePlanning(
 
     # ═══════════════════════════════════════════════════════════
 
-
-
     @avec_gestion_erreurs(default_return=None)
-
     @avec_session_db
-
     def creer_planning_avec_choix(
-
         self,
-
         semaine_debut: date,
-
         recettes_selection: dict[str, int],  # {jour_index: recette_id}
-
         repas_extras: dict[str, dict] | None = None,  # {slot_key: {entree, dessert, dessert_jules}}
-
         enfants_adaptes: list[int] | None = None,
-
         genere_par_ia: bool = False,
-
         db: Session | None = None,
-
     ) -> Planning | None:
-
         """Crée un planning à partir des choix de l'utilisateur.
 
 
@@ -433,181 +287,107 @@ class ServicePlanning(
 
         from src.core.models import Recette
 
-
-
         semaine_fin = semaine_debut + timedelta(days=6)
-
-
 
         # 1. Supprimer les anciens plannings pour cette semaine (remplacement réel)
 
-        anciens_plannings = (
-
-            db.query(Planning)
-
-            .filter(Planning.semaine_debut == semaine_debut)
-
-            .all()
-
-        )
+        anciens_plannings = db.query(Planning).filter(Planning.semaine_debut == semaine_debut).all()
 
         for p in anciens_plannings:
-
             db.delete(p)
 
             logger.info(f"Planning {p.id} supprimé (remplacé par nouveau)")
 
         db.flush()
 
-
-
         # 2. Créer le nouveau planning
 
         planning = Planning(
-
             nom=f"Planning {semaine_debut.strftime('%d/%m')}",
-
             semaine_debut=semaine_debut,
-
             semaine_fin=semaine_fin,
-
             statut="actif",
-
             genere_par_ia=genere_par_ia,
-
         )
 
         db.add(planning)
 
         db.flush()
 
-
-
         jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
-
-
         for idx, jour_name in enumerate(jours_semaine):
-
             date_jour = semaine_debut + timedelta(days=idx)
-
-
 
             type_repas_map = {"midi": "dejeuner", "soir": "diner"}
 
-
-
             for slot, type_db in type_repas_map.items():
-
                 slot_key = f"jour_{idx}_{slot}"
 
                 recette_id = recettes_selection.get(slot_key)
 
                 if not recette_id:
-
                     continue
-
-
 
                     recette = db.query(Recette).filter(Recette.id == recette_id).first()
 
                     if not recette:
-
                         logger.warning(f"⚠️ Recipe {recette_id} not found for {jour_name} {slot}")
 
                         continue
 
-
-
                     # Récupérer les extras (entrée/dessert)
 
                     extras = (repas_extras or {}).get(slot_key, {})
-
-
 
                     # Construire les notes (avec info réchauffé si applicable)
 
                     rechauffe_de = extras.get("_rechauffe_de")
 
                     if rechauffe_de:
-
                         import json as _json
 
-
-
                         notes_val = _json.dumps(
-
                             {"est_rechauffe": True, "rechauffe_de": rechauffe_de},
-
                             ensure_ascii=False,
-
                         )
 
                     else:
-
                         notes_val = f"{type_db.capitalize()} du {jour_name}"
 
-
-
                     repas = Repas(
-
                         planning_id=planning.id,
-
                         recette_id=recette.id,
-
                         date_repas=date_jour,
-
                         type_repas=type_db,
-
                         notes=notes_val,
-
                         entree=extras.get("entree"),
-
                         dessert=extras.get("dessert"),
-
                         dessert_jules=extras.get("dessert_jules"),
-
                     )
 
                     db.add(repas)
-
-
 
         db.commit()
 
         db.refresh(planning)
 
-
-
         nb_repas = len(planning.repas) if planning.repas else 0
 
         logger.info(
-
             f"✅ Created custom planning for {semaine_debut}: "
-
             f"{nb_repas} repas créés (attendu: {len(recettes_selection)})"
-
         )
-
-
 
         # Émettre événement domaine
 
         obtenir_bus().emettre(
-
             "planning.cree",
-
             {"planning_id": planning.id, "semaine_debut": str(semaine_debut)},
-
             source="planning",
-
         )
 
-
-
         return planning
-
-
 
     # ═══════════════════════════════════════════════════════════
 
@@ -615,22 +395,13 @@ class ServicePlanning(
 
     # ═══════════════════════════════════════════════════════════
 
-
-
     @avec_gestion_erreurs(default_return=[])
-
     @avec_session_db
-
     def agréger_courses_pour_planning(
-
         self,
-
         planning_id: int,
-
         db: Session | None = None,
-
     ) -> list[dict]:
-
         """Agrège les ingrédients de toutes les recettes du planning.
 
 
@@ -657,55 +428,35 @@ class ServicePlanning(
 
         from src.core.models import Planning, Recette
 
-
-
         planning = db.query(Planning).filter(Planning.id == planning_id).first()
 
-
-
         if not planning or not planning.repas:
-
             logger.warning(f"⚠️ Planning {planning_id} pas trouvé ou pas de repas")
 
             return []
-
-
 
         ingredients_aggregated = {}  # {nom: {quantite, unite, rayon, priorite, repas_count}}
 
         recettes_traitees: set[int] = set()
 
-
-
         def _ajouter_ingredients_recette(recette_id: int | None) -> None:
-
             """Charge et agrège les ingrédients d'une recette."""
 
             if not recette_id or recette_id in recettes_traitees:
-
                 return
 
             recettes_traitees.add(recette_id)
 
-
-
             recette = db.query(Recette).filter(Recette.id == recette_id).first()
 
             if not recette or not recette.ingredients:
-
                 return
 
-
-
             for recette_ingredient in recette.ingredients:
-
                 ingredient = recette_ingredient.ingredient
 
                 if not ingredient:
-
                     continue
-
-
 
                 nom = ingredient.nom
 
@@ -715,45 +466,31 @@ class ServicePlanning(
 
                 rayon = ingredient.categorie or "autre"
 
-
-
                 if nom not in ingredients_aggregated:
-
                     ingredients_aggregated[nom] = {
-
                         "nom": nom,
-
                         "quantite": quantite,
-
                         "unite": unite,
-
                         "rayon": rayon,
-
                         "priorite": "moyenne",
-
                         "repas_count": 1,
-
                     }
 
                 else:
-
                     if ingredients_aggregated[nom]["unite"] == unite:
-
                         ingredients_aggregated[nom]["quantite"] += quantite
 
                     ingredients_aggregated[nom]["repas_count"] += 1
 
-
-
         for repas in planning.repas:
-
             # Sauter les réchauffés
 
-            if repas.recette and repas.recette.nom and repas.recette.nom.lower().startswith("réchauffé"):
-
+            if (
+                repas.recette
+                and repas.recette.nom
+                and repas.recette.nom.lower().startswith("réchauffé")
+            ):
                 continue
-
-
 
             # Plat principal
 
@@ -771,59 +508,42 @@ class ServicePlanning(
 
             _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette_id", None))
 
-
-
             # Texte libre entrées/desserts → articles directs
 
             for champ in ("entree", "dessert", "dessert_jules"):
-
                 texte = getattr(repas, champ, None)
 
-                fk_field = f"{champ}_recette_id" if champ != "dessert_jules" else "dessert_jules_recette_id"
+                fk_field = (
+                    f"{champ}_recette_id"
+                    if champ != "dessert_jules"
+                    else "dessert_jules_recette_id"
+                )
 
                 fk = getattr(repas, fk_field, None)
 
                 if texte and not fk:
-
                     nom = texte.strip()
 
                     if nom and nom not in ingredients_aggregated:
-
                         ingredients_aggregated[nom] = {
-
                             "nom": nom,
-
                             "quantite": 1,
-
                             "unite": "pcs",
-
                             "rayon": "autre",
-
                             "priorite": "basse",
-
                             "repas_count": 1,
-
                         }
 
                     elif nom:
-
                         ingredients_aggregated[nom]["repas_count"] += 1
 
-
-
         courses_list = sorted(
-
             ingredients_aggregated.values(), key=lambda x: (x["rayon"], -x["quantite"])
-
         )
-
-
 
         logger.info(f"✅ Agrégé {len(courses_list)} ingrédients pour planning {planning_id}")
 
         return courses_list
-
-
 
     # ═══════════════════════════════════════════════════════════
 
@@ -831,18 +551,11 @@ class ServicePlanning(
 
     # ═══════════════════════════════════════════════════════════
 
-
-
     @avec_gestion_erreurs(default_return=[])
-
     @avec_session_db
-
     def get_historique_plannings(
-
         self, limit: int = 20, db: Session | None = None
-
     ) -> list[dict[str, Any]]:
-
         """Charge l'historique des plannings.
 
 
@@ -862,51 +575,29 @@ class ServicePlanning(
         """
 
         plannings = (
-
             db.query(Planning)
-
             .options(selectinload(Planning.repas))
-
             .order_by(Planning.semaine_debut.desc())
-
             .limit(limit)
-
             .all()
-
         )
 
         return [
-
             {
-
                 "id": p.id,
-
                 "nom": p.nom,
-
                 "debut": p.semaine_debut,
-
                 "fin": p.semaine_fin,
-
                 "actif": p.statut == "actif",
-
                 "genere_par_ia": p.genere_par_ia,
-
                 "nb_repas": len(p.repas) if hasattr(p, "repas") else 0,
-
             }
-
             for p in plannings
-
         ]
-
-
 
     # Alias
 
     obtenir_historique_plannings = get_historique_plannings
-
-
-
 
 
 # ═══════════════════════════════════════════════════════════
@@ -916,35 +607,20 @@ class ServicePlanning(
 # ═══════════════════════════════════════════════════════════
 
 
-
-
-
 from src.services.core.registry import service_factory
 
 
-
-
-
 @service_factory("planning", tags={"cuisine", "ia", "crud"})
-
 def obtenir_service_planning() -> ServicePlanning:
-
     """Obtenir l'instance globale de ServicePlanning (thread-safe via registre)."""
 
     return ServicePlanning()
 
 
-
-
-
 def obtenir_planning_service() -> ServicePlanning:
-
     """Factory for planning service (English alias)."""
 
     return obtenir_service_planning()
-
-
-
 
 
 # ═══════════════════════════════════════════════════════════
@@ -954,28 +630,15 @@ def obtenir_planning_service() -> ServicePlanning:
 # ═══════════════════════════════════════════════════════════
 
 
-
-
-
 __all__ = [
-
     # Classe principale
-
     "ServicePlanning",
-
     # Factory
-
     "obtenir_service_planning",
-
     "obtenir_planning_service",
-
 ]
-
-
-
 
 
 # ─── Aliases rétrocompatibilité  ───────────────────────────────
 
-obtenir_planning_service = obtenir_planning_service  # alias rétrocompatibilité 
-
+obtenir_planning_service = obtenir_planning_service  # alias rétrocompatibilité

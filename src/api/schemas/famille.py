@@ -8,7 +8,6 @@ from typing import Any, cast
 
 from pydantic import BaseModel, Field
 
-
 # ═══════════════════════════════════════════════════════════
 # ANNIVERSAIRES
 # ═══════════════════════════════════════════════════════════
@@ -18,8 +17,9 @@ class AnniversaireBase(BaseModel):
     nom_personne: str = Field(..., min_length=1, max_length=200)
     date_naissance: str = Field(..., description="Date au format YYYY-MM-DD")
     relation: str = Field(
-        ..., description="parent, enfant, grand_parent, oncle_tante, cousin, ami, collegue"
-        , max_length=50
+        ...,
+        description="parent, enfant, grand_parent, oncle_tante, cousin, ami, collegue",
+        max_length=50,
     )
     rappel_jours_avant: list[int] = Field(default=[7, 1, 0])
     idees_cadeaux: str | None = Field(None, max_length=1000)
@@ -129,10 +129,11 @@ class EvenementFamilialBase(BaseModel):
     titre: str = Field(..., min_length=1, max_length=200)
     date_evenement: str = Field(..., description="Date au format YYYY-MM-DD")
     type_evenement: str = Field(
-        ..., description="anniversaire, fete, vacances, rentree, tradition"
-        , max_length=50
+        ..., description="anniversaire, fete, vacances, rentree, tradition", max_length=50
     )
-    recurrence: str = Field(default="unique", description="annuelle, mensuelle, unique", max_length=30)
+    recurrence: str = Field(
+        default="unique", description="annuelle, mensuelle, unique", max_length=30
+    )
     rappel_jours_avant: int = 7
     notes: str | None = Field(None, max_length=1000)
     participants: list[str] | None = None
@@ -204,7 +205,7 @@ class EvenementsListeResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# CONTEXTE FAMILIAL 
+# CONTEXTE FAMILIAL
 # ═══════════════════════════════════════════════════════════
 
 
@@ -215,7 +216,9 @@ class MeteoActuelle(BaseModel):
     condition: str | None = None
     precipitation_mm: float | None = None
     vent_km_h: float | None = None
-    previsions_7j: list[dict[str, Any]] = Field(default_factory=lambda: cast(list[dict[str, Any]], []))
+    previsions_7j: list[dict[str, Any]] = Field(
+        default_factory=lambda: cast(list[dict[str, Any]], [])
+    )
 
 
 class JourSpecialResponse(BaseModel):
@@ -271,24 +274,38 @@ class AchatUrgent(BaseModel):
 
 class ContexteFamilialResponse(BaseModel):
     meteo: MeteoActuelle | None = None
-    jours_speciaux: list[JourSpecialResponse] = Field(default_factory=lambda: cast(list[JourSpecialResponse], []))
-    anniversaires_proches: list[AnniversaireContexte] = Field(default_factory=lambda: cast(list[AnniversaireContexte], []))
+    jours_speciaux: list[JourSpecialResponse] = Field(
+        default_factory=lambda: cast(list[JourSpecialResponse], [])
+    )
+    anniversaires_proches: list[AnniversaireContexte] = Field(
+        default_factory=lambda: cast(list[AnniversaireContexte], [])
+    )
     jules: JulesContexte | None = None
-    documents_expirants: list[DocumentExpirant] = Field(default_factory=lambda: cast(list[DocumentExpirant], []))
-    routines_du_moment: list[RoutineContexte] = Field(default_factory=lambda: cast(list[RoutineContexte], []))
-    activites_a_venir: list[ActiviteContexte] = Field(default_factory=lambda: cast(list[ActiviteContexte], []))
+    documents_expirants: list[DocumentExpirant] = Field(
+        default_factory=lambda: cast(list[DocumentExpirant], [])
+    )
+    routines_du_moment: list[RoutineContexte] = Field(
+        default_factory=lambda: cast(list[RoutineContexte], [])
+    )
+    activites_a_venir: list[ActiviteContexte] = Field(
+        default_factory=lambda: cast(list[ActiviteContexte], [])
+    )
     achats_urgents: list[AchatUrgent] = Field(default_factory=lambda: cast(list[AchatUrgent], []))
 
 
 # ═══════════════════════════════════════════════════════════
-# ACHATS FAMILLE 
+# ACHATS FAMILLE
 # ═══════════════════════════════════════════════════════════
 
 
 class AchatCreate(BaseModel):
     nom: str = Field(..., min_length=1, max_length=300)
-    categorie: str = Field(..., description="jules_vetements, jules_jouets, nous_jeux, maison, etc.", max_length=100)
-    priorite: str = Field(default="moyenne", description="urgent, haute, moyenne, basse, optionnel", max_length=30)
+    categorie: str = Field(
+        ..., description="jules_vetements, jules_jouets, nous_jeux, maison, etc.", max_length=100
+    )
+    priorite: str = Field(
+        default="moyenne", description="urgent, haute, moyenne, basse, optionnel", max_length=30
+    )
     prix_estime: float | None = None
     taille: str | None = Field(None, max_length=40)
     magasin: str | None = Field(None, max_length=200)
@@ -296,7 +313,9 @@ class AchatCreate(BaseModel):
     description: str | None = Field(None, max_length=1000)
     age_recommande_mois: int | None = None
     suggere_par: str | None = Field(None, max_length=100)
-    pour_qui: str = Field(default="famille", description="famille, jules, anne, mathieu", max_length=30)
+    pour_qui: str = Field(
+        default="famille", description="famille, jules, anne, mathieu", max_length=30
+    )
     a_revendre: bool = False
     prix_revente_estime: float | None = None
 
@@ -394,7 +413,7 @@ class AchatsListeResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS IA 
+# SUGGESTIONS IA
 # ═══════════════════════════════════════════════════════════
 
 
@@ -413,7 +432,9 @@ class SuggestionsWeekendRequest(BaseModel):
 class SuggestionsActivitesSimpleRequest(BaseModel):
     budget_max: float = Field(default=50.0, ge=0, le=500)
     duree_max_heures: float = Field(default=3.0, ge=0.5, le=12)
-    type_prefere: str = Field(default="les_deux", description="interieur, exterieur, les_deux", max_length=30)
+    type_prefere: str = Field(
+        default="les_deux", description="interieur, exterieur, les_deux", max_length=30
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -453,7 +474,12 @@ class SuggestionsSoireeRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {"budget": 90, "duree_heures": 4.0, "type_soiree": "cocooning", "region": "Île-de-France"}
+            "example": {
+                "budget": 90,
+                "duree_heures": 4.0,
+                "type_soiree": "cocooning",
+                "region": "Île-de-France",
+            }
         }
     }
 
@@ -467,7 +493,7 @@ class SuggestionAchatResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# RAPPELS 
+# RAPPELS
 # ═══════════════════════════════════════════════════════════
 
 
@@ -494,7 +520,7 @@ class RappelFamilleResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# CONFIG GARDE 
+# CONFIG GARDE
 # ═══════════════════════════════════════════════════════════
 
 
@@ -505,7 +531,9 @@ class SemainesFermetureCreche(BaseModel):
 
 
 class ConfigGardeRequest(BaseModel):
-    semaines_fermeture: list[SemainesFermetureCreche] = Field(default_factory=lambda: cast(list[SemainesFermetureCreche], []))
+    semaines_fermeture: list[SemainesFermetureCreche] = Field(
+        default_factory=lambda: cast(list[SemainesFermetureCreche], [])
+    )
     nom_creche: str = Field(default="", max_length=200)
     zone_academique: str = Field(default="B", description="Zone A, B ou C", max_length=1)
 
@@ -523,7 +551,9 @@ class ConfigGardeRequest(BaseModel):
 
 
 class ConfigGardeResponse(BaseModel):
-    semaines_fermeture: list[dict[str, Any]] = Field(default_factory=lambda: cast(list[dict[str, Any]], []))
+    semaines_fermeture: list[dict[str, Any]] = Field(
+        default_factory=lambda: cast(list[dict[str, Any]], [])
+    )
     nom_creche: str = ""
     zone_academique: str = "B"
     annee_courante: int | None = None
@@ -532,13 +562,24 @@ class ConfigGardeResponse(BaseModel):
 class PreferencesFamilleRequest(BaseModel):
     """Préférences personnelles des adultes (tailles, style, intérêts)."""
 
-    taille_vetements_anne: dict[str, Any] = Field(default_factory=dict, description="Ex: {tee_shirt: 'M', pantalon: '38', pointure: '39'}")
+    taille_vetements_anne: dict[str, Any] = Field(
+        default_factory=dict, description="Ex: {tee_shirt: 'M', pantalon: '38', pointure: '39'}"
+    )
     taille_vetements_mathieu: dict[str, Any] = Field(default_factory=dict)
-    style_achats_anne: dict[str, Any] = Field(default_factory=dict, description="Ex: {prefere_made_france: true, prefere_qualite: true, budget_piece_max: 80}")
+    style_achats_anne: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Ex: {prefere_made_france: true, prefere_qualite: true, budget_piece_max: 80}",
+    )
     style_achats_mathieu: dict[str, Any] = Field(default_factory=dict)
-    interets_gaming: list[str] = Field(default_factory=list, description="Ex: ['Nintendo Switch', 'jeux de société']")
-    interets_culture: list[str] = Field(default_factory=list, description="Ex: ['cinéma', 'expositions', 'concerts']")
-    equipement_activites: dict[str, Any] = Field(default_factory=dict, description="Équipements sportifs disponibles")
+    interets_gaming: list[str] = Field(
+        default_factory=list, description="Ex: ['Nintendo Switch', 'jeux de société']"
+    )
+    interets_culture: list[str] = Field(
+        default_factory=list, description="Ex: ['cinéma', 'expositions', 'concerts']"
+    )
+    equipement_activites: dict[str, Any] = Field(
+        default_factory=dict, description="Équipements sportifs disponibles"
+    )
 
 
 class PreferencesFamilleResponse(PreferencesFamilleRequest):
@@ -546,7 +587,7 @@ class PreferencesFamilleResponse(PreferencesFamilleRequest):
 
 
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS ACHATS ENRICHIES 
+# SUGGESTIONS ACHATS ENRICHIES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -579,7 +620,9 @@ class SuggestionsAchatsEnrichiesRequest(BaseModel):
 class AnnonceIBCRequest(BaseModel):
     nom: str = Field(..., min_length=1, max_length=200)
     description: str = Field(default="", max_length=1000)
-    etat_usage: str = Field(default="bon", description="neuf, excellent, bon, correct, usage", max_length=30)
+    etat_usage: str = Field(
+        default="bon", description="neuf, excellent, bon, correct, usage", max_length=30
+    )
     prix_cible: float | None = None
 
     model_config = {
@@ -603,12 +646,16 @@ class PrefillReventeResponse(BaseModel):
 
     achat_id: int
     plateforme: str = Field(..., description="plateforme de revente recommandée", max_length=30)
-    plateforme_libelle: str = Field(..., description="Libellé lisible pour la plateforme recommandée", max_length=50)
+    plateforme_libelle: str = Field(
+        ..., description="Libellé lisible pour la plateforme recommandée", max_length=50
+    )
     marque: str | None = Field(None, max_length=80)
     taille: str | None = Field(None, max_length=40)
     prix_suggere: float | None = None
     pour_qui: str = Field("famille", max_length=30)
-    raisons: list[str] = Field(default_factory=list, description="Explications du choix de plateforme et des préfills")
+    raisons: list[str] = Field(
+        default_factory=list, description="Explications du choix de plateforme et des préfills"
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -627,7 +674,7 @@ class PrefillReventeResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# JOURS SANS CRECHE 
+# JOURS SANS CRECHE
 # ═══════════════════════════════════════════════════════════
 
 
@@ -638,7 +685,7 @@ class JourSansCrecheResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# SEJOUR 
+# SEJOUR
 # ═══════════════════════════════════════════════════════════
 
 
@@ -661,7 +708,7 @@ class SuggestionsSejourRequest(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# BUDGET RÉSUMÉ 
+# BUDGET RÉSUMÉ
 # ═══════════════════════════════════════════════════════════
 
 

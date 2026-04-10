@@ -75,22 +75,19 @@ class JardinRecettesInteractionService:
                     "message": "Aucune récolte récente ni plante en période de récolte.",
                 }
         else:
-            noms_recolte = list({
-                a.plante.nom.lower()
-                for a in actions_recolte
-                if hasattr(a, "plante") and a.plante
-            })
+            noms_recolte = list(
+                {a.plante.nom.lower() for a in actions_recolte if hasattr(a, "plante") and a.plante}
+            )
 
         # Chercher des recettes existantes utilisant ces ingrédients
         from sqlalchemy import func
+
         from src.core.models import Ingredient
 
         recettes_trouvees = []
         for nom_produit in noms_recolte:
             ingredients = (
-                db.query(Ingredient)
-                .filter(func.lower(Ingredient.nom).contains(nom_produit))
-                .all()
+                db.query(Ingredient).filter(func.lower(Ingredient.nom).contains(nom_produit)).all()
             )
             ing_ids = [i.id for i in ingredients]
             if not ing_ids:
@@ -105,12 +102,14 @@ class JardinRecettesInteractionService:
             )
             for r in recettes:
                 if r.id not in {rt["id"] for rt in recettes_trouvees}:
-                    recettes_trouvees.append({
-                        "id": r.id,
-                        "nom": r.nom,
-                        "temps_total": (r.temps_preparation or 0) + (r.temps_cuisson or 0),
-                        "produit_jardin": nom_produit,
-                    })
+                    recettes_trouvees.append(
+                        {
+                            "id": r.id,
+                            "nom": r.nom,
+                            "temps_total": (r.temps_preparation or 0) + (r.temps_cuisson or 0),
+                            "produit_jardin": nom_produit,
+                        }
+                    )
 
         # Générer des suggestions IA si peu de résultats DB
         suggestions_ia = []
@@ -142,8 +141,8 @@ class JardinRecettesInteractionService:
             prompt = (
                 f"Je viens de récolter du jardin : {', '.join(produits)}. "
                 "Suggère 3 recettes familiales simples utilisant ces produits. "
-                "Réponds en JSON: [{\"nom\": \"...\", \"description\": \"...\", "
-                "\"temps_minutes\": 30, \"produits_jardin_utilises\": [\"...\"]}]"
+                'Réponds en JSON: [{"nom": "...", "description": "...", '
+                '"temps_minutes": 30, "produits_jardin_utilises": ["..."]}]'
             )
             response = client.generer_json(
                 prompt=prompt,
@@ -188,11 +187,7 @@ class JardinRecettesInteractionService:
 
         # Trouver ou créer le planning de la semaine prochaine
         lundi_prochain = date.today() + timedelta(days=(7 - date.today().weekday()))
-        planning = (
-            db.query(Planning)
-            .filter(Planning.semaine_debut == lundi_prochain)
-            .first()
-        )
+        planning = db.query(Planning).filter(Planning.semaine_debut == lundi_prochain).first()
         if not planning:
             planning = Planning(
                 semaine_debut=lundi_prochain,
@@ -232,9 +227,7 @@ class JardinRecettesInteractionService:
         db.add(repas)
         db.commit()
 
-        logger.info(
-            f"✅ Jardin→Planning: {recette.nom} planifié le {jour_libre} ({type_repas})"
-        )
+        logger.info(f"✅ Jardin→Planning: {recette.nom} planifié le {jour_libre} ({type_repas})")
 
         return {
             "ok": True,
@@ -258,9 +251,7 @@ class JardinRecettesInteractionService:
         return set()
 
 
-@service_factory(
-    "jardin_recettes_interaction", tags={"cuisine", "jardin", "recettes", "ia"}
-)
+@service_factory("jardin_recettes_interaction", tags={"cuisine", "jardin", "recettes", "ia"})
 def obtenir_service_jardin_recettes() -> JardinRecettesInteractionService:
     """Factory pour le bridge récolte jardin → recettes."""
     return JardinRecettesInteractionService()

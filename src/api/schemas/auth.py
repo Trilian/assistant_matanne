@@ -22,12 +22,18 @@ class RegisterRequest(BaseModel):
     """Requête d'inscription."""
 
     email: EmailStr = Field(..., description="Adresse email")
-    password: str = Field(..., description="Mot de passe (6 caractères min.)", min_length=8, max_length=200)
+    password: str = Field(
+        ..., description="Mot de passe (6 caractères min.)", min_length=8, max_length=200
+    )
     nom: str = Field(..., min_length=2, max_length=120, description="Nom de l'utilisateur")
 
     model_config = {
         "json_schema_extra": {
-            "example": {"email": "anne@example.com", "password": "MotDePasseFort!2026", "nom": "Anne"}
+            "example": {
+                "email": "anne@example.com",
+                "password": "MotDePasseFort!2026",
+                "nom": "Anne",
+            }
         }
     }
 
@@ -70,7 +76,9 @@ class TwoFactorEnableResponse(BaseModel):
 class TwoFactorVerifyRequest(BaseModel):
     """Requête de vérification 2FA."""
 
-    code: str = Field(..., min_length=6, max_length=8, description="Code TOTP 6 chiffres ou code backup")
+    code: str = Field(
+        ..., min_length=6, max_length=8, description="Code TOTP 6 chiffres ou code backup"
+    )
 
 
 class TwoFactorLoginRequest(BaseModel):
@@ -80,9 +88,7 @@ class TwoFactorLoginRequest(BaseModel):
     code: str = Field(..., min_length=6, max_length=8, description="Code TOTP ou code backup")
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"temp_token": "temp.jwt.token", "code": "123456"}
-        }
+        "json_schema_extra": {"example": {"temp_token": "temp.jwt.token", "code": "123456"}}
     }
 
 
@@ -93,9 +99,7 @@ class TwoFactorStatusResponse(BaseModel):
     backup_codes_remaining: int = 0
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"enabled": True, "backup_codes_remaining": 6}
-        }
+        "json_schema_extra": {"example": {"enabled": True, "backup_codes_remaining": 6}}
     }
 
 

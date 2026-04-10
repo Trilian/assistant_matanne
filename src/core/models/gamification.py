@@ -37,9 +37,7 @@ class PointsUtilisateur(Base):
 
     user = relationship("ProfilUtilisateur")
 
-    __table_args__ = (
-        UniqueConstraint("user_id", "semaine_debut", name="uq_points_user_semaine"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "semaine_debut", name="uq_points_user_semaine"),)
 
 
 class BadgeUtilisateur(Base):

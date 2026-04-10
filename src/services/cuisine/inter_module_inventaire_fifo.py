@@ -9,7 +9,7 @@ Connecte la gestion du stock à la rotation FIFO (Premier Entré, Premier Sorti)
 """
 
 import logging
-from datetime import datetime, date
+from datetime import date, datetime
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -73,16 +73,22 @@ class InventaireFIFOBridgeService:
             resultat = {
                 "ingredient_id": ingredient_id,
                 "article_prioritaire_id": article_prioritaire.id,
-                "date_entree": article_prioritaire.date_entree.isoformat() if article_prioritaire.date_entree else None,
+                "date_entree": article_prioritaire.date_entree.isoformat()
+                if article_prioritaire.date_entree
+                else None,
                 "quantite_en_stock": float(article_prioritaire.quantite),
-                "date_peremption": article_prioritaire.date_peremption.isoformat() if article_prioritaire.date_peremption else None,
+                "date_peremption": article_prioritaire.date_peremption.isoformat()
+                if article_prioritaire.date_peremption
+                else None,
                 "emplacement": article_prioritaire.emplacement,
                 "non_respect_fifo": non_respect,
                 "nombre_autres_articles": len(articles) - 1,
             }
 
             if non_respect:
-                logger.warning(f"⚠️ FIFO: {len(articles)} articles en stock pour ingrédient #{ingredient_id}")
+                logger.warning(
+                    f"⚠️ FIFO: {len(articles)} articles en stock pour ingrédient #{ingredient_id}"
+                )
                 # Émettre alert
                 from src.services.core.events import obtenir_bus
 
@@ -105,14 +111,17 @@ class InventaireFIFOBridgeService:
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def obtenir_articles_hors_ordre(self, limite: int = 10, db: Session | None = None) -> list[dict]:
+    def obtenir_articles_hors_ordre(
+        self, limite: int = 10, db: Session | None = None
+    ) -> list[dict]:
         """Liste les ingrédients où plusieurs articles sont en stock (risque FIFO).
 
         Returns:
             Liste des problèmes FIFO potentiels
         """
-        from src.core.models.inventaire import ArticleInventaire
         from sqlalchemy import func
+
+        from src.core.models.inventaire import ArticleInventaire
 
         try:
             # Chercher les ingrédients avec plusieurs articles
@@ -144,13 +153,19 @@ class InventaireFIFOBridgeService:
                             "ingredient_id": ingredient_id,
                             "nombre_articles": nombre,
                             "date_plus_ancien": plus_ancien.isoformat() if plus_ancien else None,
-                            "jours_depuis": (date.today() - plus_ancien.date()).days if plus_ancien else 0,
+                            "jours_depuis": (date.today() - plus_ancien.date()).days
+                            if plus_ancien
+                            else 0,
                             "articles": [
                                 {
                                     "id": a.id,
-                                    "date_entree": a.date_entree.isoformat() if a.date_entree else None,
+                                    "date_entree": a.date_entree.isoformat()
+                                    if a.date_entree
+                                    else None,
                                     "quantite": float(a.quantite),
-                                    "peremption": a.date_peremption.isoformat() if a.date_peremption else None,
+                                    "peremption": a.date_peremption.isoformat()
+                                    if a.date_peremption
+                                    else None,
                                 }
                                 for a in articles
                             ],

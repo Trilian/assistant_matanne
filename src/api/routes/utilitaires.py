@@ -66,14 +66,24 @@ class MessageChatRequest(BaseModel):
     """RequÃªte de message chat."""
 
     message: str = Field(..., min_length=1, max_length=2000, description="Message de l'utilisateur")
-    contexte: Literal["cuisine", "famille", "maison", "budget", "general", "nutrition", "jardin", "jeux", "planning", "inventaire"] = Field(
-        default="general", description="Contexte du chat"
-    )
+    contexte: Literal[
+        "cuisine",
+        "famille",
+        "maison",
+        "budget",
+        "general",
+        "nutrition",
+        "jardin",
+        "jeux",
+        "planning",
+        "inventaire",
+    ] = Field(default="general", description="Contexte du chat")
     historique: list[HistoriqueChatItem] = Field(
         default_factory=list, description="Messages prÃ©cÃ©dents [{role, contenu}]"
     )
     contexte_page: str | None = Field(
-        default=None, description="Chemin de la page courante pour adapter le contexte (ex: /cuisine/recettes)"
+        default=None,
+        description="Chemin de la page courante pour adapter le contexte (ex: /cuisine/recettes)",
     )
 
 
@@ -226,13 +236,12 @@ async def lister_notes(
                 safe = search.replace("%", "\\%").replace("_", "\\_")
                 query = query.filter(NoteMemo.titre.ilike(f"%{safe}%"))
 
-            items = query.order_by(
-                NoteMemo.epingle.desc(), NoteMemo.cree_le.desc()
-            ).all()
+            items = query.order_by(NoteMemo.epingle.desc(), NoteMemo.cree_le.desc()).all()
 
             if safe_tag:
                 items = [
-                    n for n in items
+                    n
+                    for n in items
                     if any(
                         str(t).strip().lower() == safe_tag
                         for t in (n.tags if isinstance(n.tags, list) else [])
@@ -283,7 +292,9 @@ async def lister_tags_notes(
 
             items = [
                 {"tag": tag, "count": count}
-                for tag, count in sorted(compteur.items(), key=lambda item: (-item[1], item[0].lower()))
+                for tag, count in sorted(
+                    compteur.items(), key=lambda item: (-item[1], item[0].lower())
+                )
             ]
             return {"items": items, "total": len(items)}
 
@@ -359,7 +370,9 @@ async def modifier_note(
     return await executer_async(_update)
 
 
-@router.delete("/notes/{note_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/notes/{note_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_note(
     note_id: int,
@@ -495,7 +508,9 @@ async def modifier_entree_journal(
     return await executer_async(_update)
 
 
-@router.delete("/journal/{entree_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/journal/{entree_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_entree_journal(
     entree_id: int,
@@ -633,7 +648,9 @@ async def modifier_contact(
     return await executer_async(_update)
 
 
-@router.delete("/contacts/{contact_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/contacts/{contact_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_contact(
     contact_id: int,
@@ -761,7 +778,9 @@ async def modifier_lien(
     return await executer_async(_update)
 
 
-@router.delete("/liens/{lien_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/liens/{lien_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_lien(
     lien_id: int,
@@ -895,7 +914,9 @@ async def modifier_mot_de_passe(
     return await executer_async(_update)
 
 
-@router.delete("/passwords/{mdp_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/passwords/{mdp_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_mot_de_passe(
     mdp_id: int,
@@ -939,9 +960,7 @@ async def lister_releves_energie(
             if annee:
                 query = query.filter(ReleveEnergie.annee == annee)
 
-            items = query.order_by(
-                ReleveEnergie.annee.desc(), ReleveEnergie.mois.desc()
-            ).all()
+            items = query.order_by(ReleveEnergie.annee.desc(), ReleveEnergie.mois.desc()).all()
 
             return {
                 "items": [
@@ -1028,7 +1047,9 @@ async def modifier_releve_energie(
     return await executer_async(_update)
 
 
-@router.delete("/energie/{releve_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/energie/{releve_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_releve_energie(
     releve_id: int,
@@ -1138,10 +1159,14 @@ async def modifier_minuteur(
 
     def _update():
         with executer_avec_session() as session:
-            row = session.query(MinuteurSession).filter(
-                MinuteurSession.id == minuteur_id,
-                MinuteurSession.user_id == user.get("sub", ""),
-            ).first()
+            row = (
+                session.query(MinuteurSession)
+                .filter(
+                    MinuteurSession.id == minuteur_id,
+                    MinuteurSession.user_id == user.get("sub", ""),
+                )
+                .first()
+            )
             if not row:
                 raise HTTPException(status_code=404, detail="Minuteur non trouvé")
             if body.label is not None:
@@ -1165,7 +1190,9 @@ async def modifier_minuteur(
     return await executer_async(_update)
 
 
-@router.delete("/minuteurs/{minuteur_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/minuteurs/{minuteur_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_minuteur(
     minuteur_id: int,
@@ -1176,10 +1203,14 @@ async def supprimer_minuteur(
 
     def _delete():
         with executer_avec_session() as session:
-            row = session.query(MinuteurSession).filter(
-                MinuteurSession.id == minuteur_id,
-                MinuteurSession.user_id == user.get("sub", ""),
-            ).first()
+            row = (
+                session.query(MinuteurSession)
+                .filter(
+                    MinuteurSession.id == minuteur_id,
+                    MinuteurSession.user_id == user.get("sub", ""),
+                )
+                .first()
+            )
             if not row:
                 raise HTTPException(status_code=404, detail="Minuteur non trouvé")
             session.delete(row)
@@ -1216,10 +1247,14 @@ async def auto_etiqueter_note(
 
     def _process():
         with executer_avec_session() as session:
-            note = session.query(Note).filter(
-                Note.id == note_id,
-                Note.user_id == user.get("sub", ""),
-            ).first()
+            note = (
+                session.query(Note)
+                .filter(
+                    Note.id == note_id,
+                    Note.user_id == user.get("sub", ""),
+                )
+                .first()
+            )
             if not note:
                 raise HTTPException(status_code=404, detail="Note non trouvée")
 
@@ -1243,7 +1278,9 @@ async def auto_etiqueter_note(
 class MemoVocalRequest(BaseModel):
     """Requête de classification d'un mémo vocal."""
 
-    texte: str = Field(..., min_length=1, max_length=2000, description="Texte transcrit par Web Speech API")
+    texte: str = Field(
+        ..., min_length=1, max_length=2000, description="Texte transcrit par Web Speech API"
+    )
 
 
 class MemoVocalResponse(BaseModel):
@@ -1276,4 +1313,3 @@ async def classifier_memo_vocal(
         return result.model_dump()
 
     return await executer_async(_process)
-

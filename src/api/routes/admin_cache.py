@@ -48,7 +48,12 @@ async def purger_cache(
                 utilisateur_id=str(user.get("id", "admin")),
                 details={"pattern": body.pattern, "nb_invalidees": nb},
             )
-            return {"status": "ok", "pattern": body.pattern, "nb_invalidees": nb, "message": "Cache purgé."}
+            return {
+                "status": "ok",
+                "pattern": body.pattern,
+                "nb_invalidees": nb,
+                "message": "Cache purgé.",
+            }
         except Exception as e:
             logger.warning("Impossible de purger le cache : %s", e)
             return {"status": "error", "pattern": body.pattern, "message": str(e)}

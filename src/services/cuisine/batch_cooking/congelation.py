@@ -347,9 +347,11 @@ def consommer_article_congele(article_id: int) -> bool:
 
     try:
         with obtenir_contexte_db() as session:
-            row = session.query(BatchCookingCongelation).filter(
-                BatchCookingCongelation.id == article_id
-            ).first()
+            row = (
+                session.query(BatchCookingCongelation)
+                .filter(BatchCookingCongelation.id == article_id)
+                .first()
+            )
             if row:
                 row.consomme = True
                 session.commit()
@@ -366,9 +368,11 @@ def supprimer_article_congele(article_id: int) -> bool:
 
     try:
         with obtenir_contexte_db() as session:
-            row = session.query(BatchCookingCongelation).filter(
-                BatchCookingCongelation.id == article_id
-            ).first()
+            row = (
+                session.query(BatchCookingCongelation)
+                .filter(BatchCookingCongelation.id == article_id)
+                .first()
+            )
             if row:
                 session.delete(row)
                 session.commit()

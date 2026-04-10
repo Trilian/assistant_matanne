@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-
 # ═══════════════════════════════════════════════════════════
 # PRÉDICTION COURSES (B4.1 / B5.4)
 # ═══════════════════════════════════════════════════════════
@@ -18,6 +17,7 @@ from pydantic import BaseModel, Field
 
 class PredictionArticle(BaseModel):
     """Article prédit par l'IA."""
+
     nom: str
     categorie: str = "Autre"
     rayon: str = "Autre"
@@ -31,12 +31,14 @@ class PredictionArticle(BaseModel):
 
 class PredictionCoursesResponse(BaseModel):
     """Réponse de prédiction de courses."""
+
     predictions: list[PredictionArticle] = []
     nb_total: int = 0
 
 
 class HabitudesAchatResponse(BaseModel):
     """Réponse analyse des habitudes d'achat."""
+
     nb_articles_suivis: int = 0
     nb_avec_frequence: int = 0
     frequence_moyenne_jours: float | None = None
@@ -45,6 +47,7 @@ class HabitudesAchatResponse(BaseModel):
 
 class EnregistrerAchatRequest(BaseModel):
     """Requête d'enregistrement d'achat."""
+
     article_nom: str = Field(..., min_length=1, max_length=200)
     categorie: str | None = Field(None, max_length=100)
     rayon: str | None = Field(None, max_length=100)
@@ -57,6 +60,7 @@ class EnregistrerAchatRequest(BaseModel):
 
 class PrevisionBudgetResponse(BaseModel):
     """Réponse de prévision budget."""
+
     mois: str
     jours_ecoules: int = 0
     jours_total: int = 0
@@ -71,6 +75,7 @@ class PrevisionBudgetResponse(BaseModel):
 
 class AnomalieBudget(BaseModel):
     """Anomalie budgétaire détectée."""
+
     categorie: str
     depense: float
     budget_ref: float
@@ -80,11 +85,13 @@ class AnomalieBudget(BaseModel):
 
 class CategoriserDepenseRequest(BaseModel):
     """Requête de catégorisation de dépense."""
+
     description: str = Field(..., min_length=1, max_length=500)
 
 
 class CategorieDepenseResponse(BaseModel):
     """Réponse de catégorisation de dépense."""
+
     categorie: str
     confiance: float
     source: str = "defaut"
@@ -97,6 +104,7 @@ class CategorieDepenseResponse(BaseModel):
 
 class ResumeHebdoResponse(BaseModel):
     """Réponse du résumé hebdomadaire."""
+
     resume_texte: str = ""
     points_forts: list[str] = []
     suggestions: list[str] = []
@@ -110,17 +118,20 @@ class ResumeHebdoResponse(BaseModel):
 
 class DiagnosticPhotoRequest(BaseModel):
     """Requête de diagnostic par photo."""
+
     image_base64: str = Field(..., min_length=10)
     description: str = Field("", max_length=1000)
 
 
 class DiagnosticTexteRequest(BaseModel):
     """Requête de diagnostic par texte."""
+
     description: str = Field(..., min_length=5, max_length=2000)
 
 
 class DiagnosticResponse(BaseModel):
     """Réponse de diagnostic maison."""
+
     diagnostic: str = ""
     gravite: str = "inconnue"
     actions_recommandees: list[dict] = []
@@ -144,6 +155,7 @@ class DiagnosticMaisonResponse(DiagnosticResponse):
 
 class PlanningAdapteResponse(BaseModel):
     """Réponse du planificateur adaptatif."""
+
     planning: list[dict] = []
     ingredients_a_acheter: list[str] = []
     ingredients_stock_utilises: list[str] = []
@@ -158,12 +170,14 @@ class PlanningAdapteResponse(BaseModel):
 
 class BatchCookingPlanRequest(BaseModel):
     """Requête batch cooking intelligent."""
+
     recettes: list[str] = Field(..., min_length=1, max_length=10)
     nb_personnes: int = Field(4, ge=1, le=20)
 
 
 class BatchCookingPlanResponse(BaseModel):
     """Réponse batch cooking intelligent."""
+
     temps_total_minutes: int = 0
     etapes: list[dict] = []
     appareils_utilises: list[str] = []
@@ -173,12 +187,14 @@ class BatchCookingPlanResponse(BaseModel):
 
 class ConseilJulesRequest(BaseModel):
     """Requête conseil développement Jules."""
+
     age_mois: int = Field(..., ge=0, le=240)
     jalons_atteints: list[str] = []
 
 
 class ConseilJulesResponse(BaseModel):
     """Réponse conseil développement Jules."""
+
     activites_recommandees: list[dict] = []
     jalons_attendus: list[dict] = []
     points_attention: list[str] = []
@@ -187,6 +203,7 @@ class ConseilJulesResponse(BaseModel):
 
 class ChecklistVoyageRequest(BaseModel):
     """Requête checklist voyage."""
+
     destination: str = Field(..., min_length=1, max_length=200)
     dates: str = Field(..., min_length=1, max_length=100)
     participants: list[str] = []
@@ -194,6 +211,7 @@ class ChecklistVoyageRequest(BaseModel):
 
 class ChecklistVoyageResponse(BaseModel):
     """Réponse checklist voyage."""
+
     categories: list[dict] = []
     rappels: list[dict] = []
     conseils_destination: list[str] = []
@@ -201,12 +219,14 @@ class ChecklistVoyageResponse(BaseModel):
 
 class ScoreEcologiqueRequest(BaseModel):
     """Requête score écologique."""
+
     ingredients: list[str] = Field(..., min_length=1)
     saison: str = ""
 
 
 class ScoreEcologiqueResponse(BaseModel):
     """Réponse score écologique."""
+
     score_global: float | None = None
     score_max: float = 10
     details: dict = {}
@@ -216,11 +236,13 @@ class ScoreEcologiqueResponse(BaseModel):
 
 class AnalyseNutritionnelleRequest(BaseModel):
     """Requête analyse nutritionnelle."""
+
     description_repas: str = Field(..., min_length=3, max_length=1000)
 
 
 class AnalyseNutritionnelleResponse(BaseModel):
     """Réponse analyse nutritionnelle."""
+
     calories_estimees: int | None = None
     macronutriments: dict = {}
     score_nutritionnel: float | None = None
@@ -231,12 +253,14 @@ class AnalyseNutritionnelleResponse(BaseModel):
 
 class OptimisationEnergieRequest(BaseModel):
     """Requête optimisation énergie."""
+
     releves: list[dict] = Field(..., min_length=1)
     meteo: dict | None = None
 
 
 class OptimisationEnergieResponse(BaseModel):
     """Réponse optimisation énergie."""
+
     prevision_prochaine_facture: dict | None = None
     tendance: str = ""
     variation_pct: float = 0
@@ -250,6 +274,7 @@ class OptimisationEnergieResponse(BaseModel):
 
 class DocumentExpireAlerte(BaseModel):
     """Document expiré ou expirant bientôt."""
+
     id: int
     titre: str
     categorie: str
@@ -262,6 +287,7 @@ class DocumentExpireAlerte(BaseModel):
 
 class DocumentsExpiresResponse(BaseModel):
     """Réponse documents expirés."""
+
     alertes: list[DocumentExpireAlerte]
     nb_expires: int = 0
     nb_bientot: int = 0
@@ -269,6 +295,7 @@ class DocumentsExpiresResponse(BaseModel):
 
 class PlanningUnifieItem(BaseModel):
     """Élément du planning unifié."""
+
     id: int
     nom: str
     prochaine_fois: str
@@ -279,6 +306,7 @@ class PlanningUnifieItem(BaseModel):
 
 class PlanningUnifieResponse(BaseModel):
     """Planning unifié multi-modules."""
+
     taches: list[PlanningUnifieItem]
     nb_total: int = 0
     nb_en_retard: int = 0
@@ -286,6 +314,7 @@ class PlanningUnifieResponse(BaseModel):
 
 class AlerteMeteoEntretien(BaseModel):
     """Alerte météo liée à l'entretien."""
+
     type: str
     message: str
     priorite: str = "moyenne"
@@ -294,6 +323,7 @@ class AlerteMeteoEntretien(BaseModel):
 
 class FeedbackSemaineRequest(BaseModel):
     """Requête feedback fin de semaine (B7.5)."""
+
     repas_consommes: list[dict] = []
     commentaires: str = ""
     note_globale: int = Field(5, ge=1, le=10)
@@ -306,6 +336,7 @@ class FeedbackSemaineRequest(BaseModel):
 
 class BudgetUnifieResponse(BaseModel):
     """Budget unifié charges maison + dépenses famille."""
+
     mois: int
     annee: int
     total_famille: float = 0
@@ -318,6 +349,7 @@ class BudgetUnifieResponse(BaseModel):
 
 class AnnonceImmoResume(BaseModel):
     """Annonce immobilière résumée pour le widget."""
+
     id: int
     titre: str
     prix: float
@@ -329,6 +361,7 @@ class AnnonceImmoResume(BaseModel):
 
 class WidgetVeilleImmoResponse(BaseModel):
     """Réponse widget veille immobilière."""
+
     dernieres_annonces: list[AnnonceImmoResume] = []
     nb_annonces_total: int = 0
     prix_moyen: float | None = None
@@ -337,6 +370,7 @@ class WidgetVeilleImmoResponse(BaseModel):
 
 class ActiviteJardinSaison(BaseModel):
     """Activité jardin saisonnière."""
+
     element: str
     type_activite: str
     priorite: str = "normale"
@@ -345,6 +379,7 @@ class ActiviteJardinSaison(BaseModel):
 
 class WidgetSaisonJardinResponse(BaseModel):
     """Réponse widget saison jardin."""
+
     saison: str
     activites: list[ActiviteJardinSaison] = []
     nb_plantes_actives: int = 0
@@ -353,6 +388,7 @@ class WidgetSaisonJardinResponse(BaseModel):
 
 class ImpactDemenagementResponse(BaseModel):
     """Réponse évaluation impact déménagement."""
+
     scenario_nom: str
     impacts: list[dict] = []
     score_global: float | None = None
@@ -362,6 +398,7 @@ class ImpactDemenagementResponse(BaseModel):
 
 class TerroirRecettesResponse(BaseModel):
     """Réponse recettes terroir local."""
+
     localisation: str
     region: str = ""
     recettes_suggerees: list[dict] = []
@@ -370,6 +407,7 @@ class TerroirRecettesResponse(BaseModel):
 
 class ActiviteJulesPotagerResponse(BaseModel):
     """Réponse activités Jules au potager."""
+
     activites: list[dict] = []
     plantes_disponibles: list[str] = []
     age_jules_mois: int | None = None
@@ -377,6 +415,7 @@ class ActiviteJulesPotagerResponse(BaseModel):
 
 class VerificationStockRecetteResponse(BaseModel):
     """Réponse vérification stock pour une recette."""
+
     recette_id: int
     recette_nom: str = ""
     ingredients_ok: list[dict] = []
@@ -386,6 +425,7 @@ class VerificationStockRecetteResponse(BaseModel):
 
 class HistoriqueModificationItem(BaseModel):
     """Élément de l'historique des modifications."""
+
     id: int
     entity_type: str
     entity_id: int
@@ -398,6 +438,7 @@ class HistoriqueModificationItem(BaseModel):
 
 class HistoriqueModificationsResponse(BaseModel):
     """Réponse historique des modifications."""
+
     items: list[HistoriqueModificationItem] = []
     nb_total: int = 0
 
@@ -409,6 +450,7 @@ class HistoriqueModificationsResponse(BaseModel):
 
 class RepasConflitItem(BaseModel):
     """Repas en conflit avec des tâches maison."""
+
     id: int
     type_repas: str
     recette_id: int | None = None
@@ -418,6 +460,7 @@ class RepasConflitItem(BaseModel):
 
 class ConflitPlanningItem(BaseModel):
     """Conflit détecté entre planning repas et tâches maison."""
+
     date: str
     repas: RepasConflitItem
     taches_maison: list[dict] = []
@@ -426,6 +469,7 @@ class ConflitPlanningItem(BaseModel):
 
 class ConflisFplanningResponse(BaseModel):
     """Réponse détection conflits planning."""
+
     periode: dict
     nb_conflits: int = 0
     conflits: list[ConflitPlanningItem] = []
@@ -437,6 +481,7 @@ class ConflisFplanningResponse(BaseModel):
 
 class MeteoConditions(BaseModel):
     """Conditions météo pour la suggestion de recettes."""
+
     temperature: float = 15.0
     precipitations_mm: float = 0.0
     description: str = ""
@@ -444,6 +489,7 @@ class MeteoConditions(BaseModel):
 
 class MeteoRecettesResponse(BaseModel):
     """Réponse météo → suggestions recettes."""
+
     conditions_meteo: dict
     conseil: str = ""
     emoji: str = "🍽️"
@@ -453,6 +499,7 @@ class MeteoRecettesResponse(BaseModel):
 
 class SuggestionCadeau(BaseModel):
     """Suggestion de cadeau d'anniversaire."""
+
     nom: str
     budget_estime: float
     categorie: str = "cadeau"
@@ -460,6 +507,7 @@ class SuggestionCadeau(BaseModel):
 
 class CadeauAnniversaireResponse(BaseModel):
     """Réponse suggestions cadeaux anniversaire IA."""
+
     anniversaire: dict
     budget_estime: float = 40.0
     depenses_mois_en_cours: float = 0.0

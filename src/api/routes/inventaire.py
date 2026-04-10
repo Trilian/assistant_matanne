@@ -439,10 +439,12 @@ async def scanner_codes_batch(
                     continue
                 vus.add(code)
                 if code in code_map:
-                    trouves.append({
-                        "code": code,
-                        "article": InventaireItemResponse.model_validate(code_map[code]),
-                    })
+                    trouves.append(
+                        {
+                            "code": code,
+                            "article": InventaireItemResponse.model_validate(code_map[code]),
+                        }
+                    )
                 else:
                     inconnus.append(code)
 
@@ -799,9 +801,7 @@ async def ajouter_articles_bulk(
                 quantite = float(art.get("quantite") or 1.0)
 
                 # Trouver ou crÃ©er l'ingrÃ©dient
-                ingredient = session.query(Ingredient).filter(
-                    Ingredient.nom == nom
-                ).first()
+                ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
                 if not ingredient:
                     ingredient = Ingredient(
                         nom=nom,
@@ -812,21 +812,25 @@ async def ajouter_articles_bulk(
                     session.flush()
 
                 # Trouver ou crÃ©er l'article inventaire
-                inv = session.query(ArticleInventaire).filter(
-                    ArticleInventaire.ingredient_id == ingredient.id
-                ).first()
+                inv = (
+                    session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.ingredient_id == ingredient.id)
+                    .first()
+                )
                 if inv:
                     inv.quantite = float(inv.quantite or 0) + quantite
                     if emplacement and not inv.emplacement:
                         inv.emplacement = emplacement
                     maj += 1
                 else:
-                    session.add(ArticleInventaire(
-                        ingredient_id=ingredient.id,
-                        quantite=quantite,
-                        quantite_min=1.0,
-                        emplacement=emplacement,
-                    ))
+                    session.add(
+                        ArticleInventaire(
+                            ingredient_id=ingredient.id,
+                            quantite=quantite,
+                            quantite_min=1.0,
+                            emplacement=emplacement,
+                        )
+                    )
                     crees += 1
 
             session.commit()
@@ -836,7 +840,6 @@ async def ajouter_articles_bulk(
             )
 
     return await executer_async(_bulk)
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -868,7 +871,9 @@ async def generer_qr_article(
 
     def _gen():
         with executer_avec_session() as session:
-            article = session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
+            article = (
+                session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
+            )
             if not article:
                 raise HTTPException(status_code=404, detail="Article non trouvÃ©")
 
@@ -918,7 +923,9 @@ async def scanner_qr_article(
 
     def _scan():
         with executer_avec_session() as session:
-            article = session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
+            article = (
+                session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
+            )
             if not article:
                 raise HTTPException(status_code=404, detail="Article non trouvÃ© via QR code")
 
@@ -936,14 +943,23 @@ async def scanner_qr_article(
                     "quantite": float(article.quantite) if article.quantite else 0,
                     "unite": article.unite,
                     "emplacement": article.emplacement,
-                    "date_peremption": str(article.date_peremption) if article.date_peremption else None,
+                    "date_peremption": str(article.date_peremption)
+                    if article.date_peremption
+                    else None,
                     "jours_avant_peremption": jours_peremption,
                 },
                 "actions": [
-                    {"label": "Consommer", "method": "PATCH", "url": f"/api/v1/inventaire/articles/{article_id}"},
-                    {"label": "Supprimer", "method": "DELETE", "url": f"/api/v1/inventaire/articles/{article_id}"},
+                    {
+                        "label": "Consommer",
+                        "method": "PATCH",
+                        "url": f"/api/v1/inventaire/articles/{article_id}",
+                    },
+                    {
+                        "label": "Supprimer",
+                        "method": "DELETE",
+                        "url": f"/api/v1/inventaire/articles/{article_id}",
+                    },
                 ],
             }
 
     return await executer_async(_scan)
-

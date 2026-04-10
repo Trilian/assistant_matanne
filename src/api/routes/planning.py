@@ -1,10 +1,11 @@
-﻿"""
+"""
 Routes API pour le planning.
 
 Gestion du planning de repas hebdomadaire : consultation, création,
 modification et suppression de repas planifiés.
 """
 
+import logging
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -22,20 +23,21 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
     REPONSES_CRUD_ECRITURE,
     REPONSES_CRUD_SUPPRESSION,
-    REPONSES_LISTE,
     REPONSES_IA,
+    REPONSES_LISTE,
 )
 from src.api.schemas.ia_transverses import PlanificationHebdoCompleteResponse
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
 
 
-@router.get("/planification-auto", response_model=PlanificationHebdoCompleteResponse, responses=REPONSES_IA)
+@router.get(
+    "/planification-auto", response_model=PlanificationHebdoCompleteResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def planification_automatique(
     user: dict[str, Any] = Depends(require_auth),
@@ -63,7 +65,9 @@ async def obtenir_planning_mensuel(
         if numero_mois < 1 or numero_mois > 12:
             raise ValueError
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail="Le paramètre 'mois' doit être au format YYYY-MM") from exc
+        raise HTTPException(
+            status_code=422, detail="Le paramètre 'mois' doit être au format YYYY-MM"
+        ) from exc
 
     debut_mois = date(annee, numero_mois, 1)
     if numero_mois == 12:
@@ -86,7 +90,9 @@ async def obtenir_planning_mensuel(
             for r in repas:
                 item = {
                     "id": r.id,
-                    "date_repas": r.date_repas.isoformat() if hasattr(r.date_repas, "isoformat") else str(r.date_repas),
+                    "date_repas": r.date_repas.isoformat()
+                    if hasattr(r.date_repas, "isoformat")
+                    else str(r.date_repas),
                     "type_repas": r.type_repas,
                     "recette_id": r.recette_id,
                     "recette_nom": r.recette.nom if getattr(r, "recette", None) else None,
@@ -212,15 +218,19 @@ async def obtenir_planning_semaine(
 
             # Récupérer les noms de recettes en une seule requête
             # (plat principal + entrée + dessert)
-            recette_ids = list({
-                rid
-                for r in repas
-                for rid in (r.recette_id, r.entree_recette_id, r.dessert_recette_id)
-                if rid is not None
-            })
+            recette_ids = list(
+                {
+                    rid
+                    for r in repas
+                    for rid in (r.recette_id, r.entree_recette_id, r.dessert_recette_id)
+                    if rid is not None
+                }
+            )
             recettes_map: dict[int, str] = {}
             if recette_ids:
-                for rec in session.query(Recette.id, Recette.nom).filter(Recette.id.in_(recette_ids)):
+                for rec in session.query(Recette.id, Recette.nom).filter(
+                    Recette.id.in_(recette_ids)
+                ):
                     recettes_map[rec.id] = rec.nom
 
             # Récupérer l'ID du planning actif (non archivé) pour la période
@@ -258,34 +268,44 @@ async def obtenir_planning_semaine(
                     "recette_nom": recette_nom,
                     "entree": getattr(r, "entree", None),
                     "entree_recette_id": getattr(r, "entree_recette_id", None),
-                    "entree_recette_nom": recettes_map.get(r.entree_recette_id) if r.entree_recette_id else None,
+                    "entree_recette_nom": recettes_map.get(r.entree_recette_id)
+                    if r.entree_recette_id
+                    else None,
                     "laitage": getattr(r, "laitage", None),
                     "dessert": getattr(r, "dessert", None),
                     "dessert_recette_id": getattr(r, "dessert_recette_id", None),
-                    "dessert_recette_nom": recettes_map.get(r.dessert_recette_id) if r.dessert_recette_id else None,
+                    "dessert_recette_nom": recettes_map.get(r.dessert_recette_id)
+                    if r.dessert_recette_id
+                    else None,
                 }
                 if jour not in planning_dict:
                     planning_dict[jour] = {}
                 planning_dict[jour][type_repas] = entry
 
-                repas_list.append({
-                    "id": r.id,
-                    "date_repas": jour,
-                    "type_repas": type_repas,
-                    "recette_id": r.recette_id,
-                    "recette_nom": recette_nom,
-                    "notes": getattr(r, "notes", None),
-                    "entree": getattr(r, "entree", None),
-                    "entree_recette_id": getattr(r, "entree_recette_id", None),
-                    "entree_recette_nom": recettes_map.get(r.entree_recette_id) if r.entree_recette_id else None,
-                    "laitage": getattr(r, "laitage", None),
-                    "dessert": getattr(r, "dessert", None),
-                    "dessert_recette_id": getattr(r, "dessert_recette_id", None),
-                    "dessert_recette_nom": recettes_map.get(r.dessert_recette_id) if r.dessert_recette_id else None,
-                    "plat_jules": getattr(r, "plat_jules", None),
-                    "notes_jules": getattr(r, "notes_jules", None),
-                    "adaptation_auto": getattr(r, "adaptation_auto", True),
-                })
+                repas_list.append(
+                    {
+                        "id": r.id,
+                        "date_repas": jour,
+                        "type_repas": type_repas,
+                        "recette_id": r.recette_id,
+                        "recette_nom": recette_nom,
+                        "notes": getattr(r, "notes", None),
+                        "entree": getattr(r, "entree", None),
+                        "entree_recette_id": getattr(r, "entree_recette_id", None),
+                        "entree_recette_nom": recettes_map.get(r.entree_recette_id)
+                        if r.entree_recette_id
+                        else None,
+                        "laitage": getattr(r, "laitage", None),
+                        "dessert": getattr(r, "dessert", None),
+                        "dessert_recette_id": getattr(r, "dessert_recette_id", None),
+                        "dessert_recette_nom": recettes_map.get(r.dessert_recette_id)
+                        if r.dessert_recette_id
+                        else None,
+                        "plat_jules": getattr(r, "plat_jules", None),
+                        "notes_jules": getattr(r, "notes_jules", None),
+                        "adaptation_auto": getattr(r, "adaptation_auto", True),
+                    }
+                )
 
             return {
                 "date_debut": date_debut.isoformat(),
@@ -563,7 +583,9 @@ async def valider_planning(
                 message="Planning validé",
                 id=planning_id,
                 data={
-                    "semaine_debut": planning.semaine_debut.isoformat() if planning.semaine_debut else None,
+                    "semaine_debut": planning.semaine_debut.isoformat()
+                    if planning.semaine_debut
+                    else None,
                     "etat": planning.etat,
                 },
             )
@@ -655,9 +677,7 @@ async def copier_planning(
 
             # Vérifier qu'il n'existe pas déjà un planning pour cette semaine
             existant = (
-                session.query(Planning)
-                .filter(Planning.semaine_debut == semaine_debut)
-                .first()
+                session.query(Planning).filter(Planning.semaine_debut == semaine_debut).first()
             )
             if existant:
                 raise HTTPException(
@@ -682,15 +702,15 @@ async def copier_planning(
             else:
                 delta_jours = 0
 
-            repas_source = (
-                session.query(Repas)
-                .filter(Repas.planning_id == planning_id)
-                .all()
-            )
+            repas_source = session.query(Repas).filter(Repas.planning_id == planning_id).all()
 
             nb_copies = 0
             for repas in repas_source:
-                nouvelle_date = repas.date_repas + timedelta(days=delta_jours) if repas.date_repas else semaine_debut
+                nouvelle_date = (
+                    repas.date_repas + timedelta(days=delta_jours)
+                    if repas.date_repas
+                    else semaine_debut
+                )
                 nouveau_repas = Repas(
                     planning_id=nouveau.id,
                     recette_id=repas.recette_id,
@@ -882,18 +902,24 @@ async def obtenir_alternatives_repas(
                     break
                 if cat not in seen_categories or len(result) < nb:
                     seen_categories.add(cat)
-                    result.append({
-                        "id": r.id,
-                        "nom": r.nom,
-                        "temps_total": r.temps_total,
-                        "difficulte": r.difficulte,
-                        "categorie": r.categorie,
-                        "tag_robot_cookeo": r.tag_robot_cookeo if hasattr(r, "tag_robot_cookeo") else False,
-                        "tag_robot_airfryer": r.tag_robot_airfryer if hasattr(r, "tag_robot_airfryer") else False,
-                        "tag_bio": r.tag_bio if hasattr(r, "tag_bio") else False,
-                        "tag_local": r.tag_local if hasattr(r, "tag_local") else False,
-                        "photo_url": r.photo_url if hasattr(r, "photo_url") else None,
-                    })
+                    result.append(
+                        {
+                            "id": r.id,
+                            "nom": r.nom,
+                            "temps_total": r.temps_total,
+                            "difficulte": r.difficulte,
+                            "categorie": r.categorie,
+                            "tag_robot_cookeo": r.tag_robot_cookeo
+                            if hasattr(r, "tag_robot_cookeo")
+                            else False,
+                            "tag_robot_airfryer": r.tag_robot_airfryer
+                            if hasattr(r, "tag_robot_airfryer")
+                            else False,
+                            "tag_bio": r.tag_bio if hasattr(r, "tag_bio") else False,
+                            "tag_local": r.tag_local if hasattr(r, "tag_local") else False,
+                            "photo_url": r.photo_url if hasattr(r, "photo_url") else None,
+                        }
+                    )
 
             return {
                 "repas_id": repas_id,
@@ -923,7 +949,9 @@ async def reset_circuit_breaker_ia(
     with cb._lock:
         cb._etat = EtatCircuit.FERME
         cb._echecs_consecutifs = 0
-    logger.info("[planning] Circuit breaker IA réinitialisé par %s: %s → closed", user.get("id"), etat_avant)
+    logger.info(
+        "[planning] Circuit breaker IA réinitialisé par %s: %s → closed", user.get("id"), etat_avant
+    )
     return MessageResponse(message=f"Circuit breaker réinitialisé ({etat_avant} → closed)")
 
 
@@ -968,7 +996,8 @@ async def generer_planning_ia(
     # Vérification anticipée : la clé Mistral doit être configurée
     try:
         from src.core.config import obtenir_parametres
-        obtenir_parametres().MISTRAL_API_KEY  # Lève ValueError si absente
+
+        _ = obtenir_parametres().MISTRAL_API_KEY  # Lève ValueError si absente
     except Exception:
         raise HTTPException(
             status_code=503,
@@ -991,9 +1020,10 @@ async def generer_planning_ia(
 
     def _generate():
         from sqlalchemy import func
+
+        from src.core.models import Recette
         from src.core.models.finances import Depense
         from src.core.models.inventaire import ArticleInventaire
-        from src.core.models import Recette
         from src.core.models.recettes import HistoriqueRecette
 
         # Enrichir les préférences avec signaux historiques + nutrition
@@ -1013,7 +1043,8 @@ async def generer_planning_ia(
                 )
                 if top_recettes:
                     preferences_enrichies["recettes_favorites"] = [
-                        {"nom": r.nom, "frequence": int(r.nb or 0)} for r in top_recettes[:5]  # Top 5 seulement
+                        {"nom": r.nom, "frequence": int(r.nb or 0)}
+                        for r in top_recettes[:5]  # Top 5 seulement
                     ]
         except Exception as e:
             logger.warning("[planning] Enrichissement recettes favorites ignoré: %s", e)
@@ -1060,7 +1091,9 @@ async def generer_planning_ia(
                             "quantite": float(item.quantite or 0),
                             "unite": item.unite,
                         }
-                        for item in inventaire_disponible[:15]  # Limité à 15 pour réduire la taille du prompt
+                        for item in inventaire_disponible[
+                            :15
+                        ]  # Limité à 15 pour réduire la taille du prompt
                         if item.nom
                     ]
         except Exception as e:
@@ -1070,7 +1103,9 @@ async def generer_planning_ia(
             with executer_avec_session() as session:
                 debut_budget = datetime.now(UTC).date() - timedelta(days=60)
                 depenses_alim = (
-                    session.query(func.sum(Depense.montant).label("total"), func.count(Depense.id).label("nb"))
+                    session.query(
+                        func.sum(Depense.montant).label("total"), func.count(Depense.id).label("nb")
+                    )
                     .filter(
                         Depense.categorie == "alimentation",
                         Depense.date >= debut_budget,
@@ -1082,7 +1117,9 @@ async def generer_planning_ia(
                 preferences_enrichies["budget_alimentation"] = {
                     "periode_jours": 60,
                     "depenses_total": round(total_budget, 2),
-                    "depense_moyenne": round(total_budget / nb_depenses, 2) if nb_depenses > 0 else 0,
+                    "depense_moyenne": round(total_budget / nb_depenses, 2)
+                    if nb_depenses > 0
+                    else 0,
                     "nb_transactions": nb_depenses,
                 }
         except Exception as e:
@@ -1093,12 +1130,18 @@ async def generer_planning_ia(
             import json
             from pathlib import Path
 
-            saison_path = Path(__file__).parent.parent.parent.parent / "data" / "reference" / "produits_de_saison.json"
+            saison_path = (
+                Path(__file__).parent.parent.parent.parent
+                / "data"
+                / "reference"
+                / "produits_de_saison.json"
+            )
             if saison_path.exists():
                 saison_data = json.loads(saison_path.read_text(encoding="utf-8"))
                 mois_actuel = today.month
                 produits_saison = [
-                    p["nom"] for p in saison_data.get("produits", [])
+                    p["nom"]
+                    for p in saison_data.get("produits", [])
                     if mois_actuel in p.get("mois", [])
                 ]
                 if produits_saison:
@@ -1116,12 +1159,20 @@ async def generer_planning_ia(
             )
         except ExceptionApp as e:
             tech_msg = getattr(e, "message", "") or ""
-            user_msg = getattr(e, "message_utilisateur", "Génération IA impossible. Réessayez plus tard.")
-            logger.warning("[planning] Exception métier depuis generer_planning_ia: %s — %s", type(e).__name__, tech_msg)
+            user_msg = getattr(
+                e, "message_utilisateur", "Génération IA impossible. Réessayez plus tard."
+            )
+            logger.warning(
+                "[planning] Exception métier depuis generer_planning_ia: %s — %s",
+                type(e).__name__,
+                tech_msg,
+            )
             logger.warning("[planning] Détail technique: %s", tech_msg)
             raise HTTPException(status_code=503, detail=user_msg) from e
         except Exception as e:
-            logger.error("[planning] Erreur inattendue depuis generer_planning_ia: %s", e, exc_info=True)
+            logger.error(
+                "[planning] Erreur inattendue depuis generer_planning_ia: %s", e, exc_info=True
+            )
             raise HTTPException(
                 status_code=503,
                 detail="Génération IA impossible. Réessayez plus tard.",
@@ -1129,8 +1180,7 @@ async def generer_planning_ia(
 
         if not planning_obj:
             raise HTTPException(
-                status_code=503,
-                detail="Impossible de générer le planning. Réessayez plus tard."
+                status_code=503, detail="Impossible de générer le planning. Réessayez plus tard."
             )
 
         # Reconstruire la réponse dans le même format que GET /semaine
@@ -1155,15 +1205,19 @@ async def generer_planning_ia(
 
             # Récupérer les noms de recettes en une seule requête
             # (plat principal + entrée + dessert)
-            recette_ids = list({
-                rid
-                for r in repas
-                for rid in (r.recette_id, r.entree_recette_id, r.dessert_recette_id)
-                if rid is not None
-            })
+            recette_ids = list(
+                {
+                    rid
+                    for r in repas
+                    for rid in (r.recette_id, r.entree_recette_id, r.dessert_recette_id)
+                    if rid is not None
+                }
+            )
             recettes_map: dict[int, str] = {}
             if recette_ids:
-                for rec in session.query(Recette.id, Recette.nom, Recette.calories, Recette.proteines, Recette.lipides).filter(Recette.id.in_(recette_ids)):
+                for rec in session.query(
+                    Recette.id, Recette.nom, Recette.calories, Recette.proteines, Recette.lipides
+                ).filter(Recette.id.in_(recette_ids)):
                     recettes_map[rec.id] = rec
 
             # Normalise les valeurs accentuées stockées en DB vers les valeurs
@@ -1187,7 +1241,9 @@ async def generer_planning_ia(
                 rec = recettes_map.get(r.recette_id) if r.recette_id else None
                 recette_nom = rec.nom if rec else None
                 rec_entree = recettes_map.get(r.entree_recette_id) if r.entree_recette_id else None
-                rec_dessert = recettes_map.get(r.dessert_recette_id) if r.dessert_recette_id else None
+                rec_dessert = (
+                    recettes_map.get(r.dessert_recette_id) if r.dessert_recette_id else None
+                )
                 type_repas = _TYPE_NORM.get(r.type_repas, r.type_repas)
                 entry: dict = {
                     "id": r.id,
@@ -1223,27 +1279,31 @@ async def generer_planning_ia(
 
                 planning_dict[jour][type_repas] = entry
 
-                repas_list.append({
-                    "id": r.id,
-                    "date_repas": jour,
-                    "type_repas": type_repas,
-                    "recette_id": r.recette_id,
-                    "recette_nom": recette_nom,
-                    "notes": getattr(r, "notes", None),
-                    "nutri_score": entry.get("nutri_score"),
-                    "entree": getattr(r, "entree", None),
-                    "entree_recette_id": getattr(r, "entree_recette_id", None),
-                    "entree_recette_nom": rec_entree.nom if rec_entree else None,
-                    "laitage": getattr(r, "laitage", None),
-                    "dessert": getattr(r, "dessert", None),
-                    "dessert_recette_id": getattr(r, "dessert_recette_id", None),
-                    "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,
-                    "plat_jules": getattr(r, "plat_jules", None),
-                    "notes_jules": getattr(r, "notes_jules", None),
-                    "adaptation_auto": getattr(r, "adaptation_auto", True),
-                })
+                repas_list.append(
+                    {
+                        "id": r.id,
+                        "date_repas": jour,
+                        "type_repas": type_repas,
+                        "recette_id": r.recette_id,
+                        "recette_nom": recette_nom,
+                        "notes": getattr(r, "notes", None),
+                        "nutri_score": entry.get("nutri_score"),
+                        "entree": getattr(r, "entree", None),
+                        "entree_recette_id": getattr(r, "entree_recette_id", None),
+                        "entree_recette_nom": rec_entree.nom if rec_entree else None,
+                        "laitage": getattr(r, "laitage", None),
+                        "dessert": getattr(r, "dessert", None),
+                        "dessert_recette_id": getattr(r, "dessert_recette_id", None),
+                        "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,
+                        "plat_jules": getattr(r, "plat_jules", None),
+                        "notes_jules": getattr(r, "notes_jules", None),
+                        "adaptation_auto": getattr(r, "adaptation_auto", True),
+                    }
+                )
 
-            ia_success = bool(getattr(planning_db, "genere_par_ia", False) if planning_db else False)
+            ia_success = bool(
+                getattr(planning_db, "genere_par_ia", False) if planning_db else False
+            )
             if not ia_success:
                 raise HTTPException(
                     status_code=503,
@@ -1340,7 +1400,8 @@ async def obtenir_suggestions_rapides(
                     categories_favorites = ["Salade", "Entrée froide", "Smoothie"]
 
             # Trier par popularité (nombre d'historiques) et varier
-            from sqlalchemy import func, case
+            from sqlalchemy import case, func
+
             from src.core.models.recettes import HistoriqueRecette
 
             query = query.outerjoin(
@@ -1418,9 +1479,7 @@ async def exporter_planning_ical(
 
     def _build_ical():
         with executer_avec_session() as session:
-            date_debut = datetime.now(UTC).replace(
-                hour=0, minute=0, second=0, microsecond=0
-            )
+            date_debut = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
             # Reculer au lundi de la semaine courante
             date_debut -= timedelta(days=date_debut.weekday())
             date_fin = date_debut + timedelta(weeks=semaines)
@@ -1527,6 +1586,7 @@ async def nutrition_hebdomadaire(
     - Signaux de carences probables + suggestions compensatoires
     """
     from datetime import date
+
     from src.core.models.planning import Repas
     from src.core.models.recettes import Recette
     from src.services.cuisine.nutrition import obtenir_service_nutrition
@@ -1589,21 +1649,23 @@ async def nutrition_hebdomadaire(
                 else:
                     sans_donnees += 1
 
-                par_jour[jour]["repas"].append({
-                    "id": repas.id,
-                    "type": repas.type_repas,
-                    "nom_recette": recette.nom if recette else None,
-                    "calories": int((recette.calories or 0) * facteur) if recette and recette.calories else None,
-                })
+                par_jour[jour]["repas"].append(
+                    {
+                        "id": repas.id,
+                        "type": repas.type_repas,
+                        "nom_recette": recette.nom if recette else None,
+                        "calories": int((recette.calories or 0) * facteur)
+                        if recette and recette.calories
+                        else None,
+                    }
+                )
 
             # Arrondis finaux
             totaux["proteines"] = round(totaux["proteines"], 1)
             totaux["lipides"] = round(totaux["lipides"], 1)
             totaux["glucides"] = round(totaux["glucides"], 1)
 
-            nb_jours_avec_donnees = sum(
-                1 for j in par_jour.values() if j["calories"] > 0
-            )
+            nb_jours_avec_donnees = sum(1 for j in par_jour.values() if j["calories"] > 0)
             moyenne_calories = (
                 round(totaux["calories"] / nb_jours_avec_donnees)
                 if nb_jours_avec_donnees > 0
@@ -1681,6 +1743,7 @@ async def obtenir_semaine_unifiee(
             recettes_map: dict[int, str] = {}
             if recette_ids:
                 from src.core.models.recettes import Recette as RecetteModel
+
                 for rec in session.query(RecetteModel.id, RecetteModel.nom).filter(
                     RecetteModel.id.in_(recette_ids)
                 ):
@@ -1738,5 +1801,3 @@ async def obtenir_semaine_unifiee(
             }
 
     return await executer_async(_query)
-
-

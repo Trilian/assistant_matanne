@@ -17,7 +17,11 @@ class CourseItemBase(BaseModel, NomValidatorMixin, QuantiteValidatorMixin):
     unite: str | None = Field(None, max_length=20)
     categorie: str | None = Field(None, max_length=100)
     coche: bool = False
-    magasin_cible: str | None = Field(None, max_length=50, description="Magasin cible (bio_coop, grand_frais, carrefour_drive, autre)")
+    magasin_cible: str | None = Field(
+        None,
+        max_length=50,
+        description="Magasin cible (bio_coop, grand_frais, carrefour_drive, autre)",
+    )
     prix_estime: float | None = Field(None, ge=0, description="Prix unitaire estimé ou observé")
 
     model_config = {
@@ -40,11 +44,7 @@ class CourseListCreate(BaseModel, NomValidatorMixin):
 
     nom: str = Field("Liste de courses", min_length=1, max_length=200)
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {"nom": "Courses semaine 15"}
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"nom": "Courses semaine 15"}}}
 
 
 class ListeCoursesResume(BaseModel):
@@ -99,7 +99,15 @@ class ListeCoursesResponse(BaseModel):
                 "etat": "brouillon",
                 "archivee": False,
                 "created_at": "2026-04-03T09:00:00",
-                "items": [{"id": 1, "nom": "Lait demi-écrémé", "quantite": 2, "coche": False, "categorie": "produits_frais"}],
+                "items": [
+                    {
+                        "id": 1,
+                        "nom": "Lait demi-écrémé",
+                        "quantite": 2,
+                        "coche": False,
+                        "categorie": "produits_frais",
+                    }
+                ],
             }
         }
     }
@@ -157,7 +165,16 @@ class CheckoutCoursesResponse(BaseModel):
                 "total_demandes": 3,
                 "total_traites": 3,
                 "total_inventaire_maj": 2,
-                "articles": [{"item_id": 1, "ingredient_nom": "Lait demi-écrémé", "statut": "ajoute_inventaire", "quantite_ajoutee": 2, "inventaire_article_id": 55, "coche": True}],
+                "articles": [
+                    {
+                        "item_id": 1,
+                        "ingredient_nom": "Lait demi-écrémé",
+                        "statut": "ajoute_inventaire",
+                        "quantite_ajoutee": 2,
+                        "inventaire_article_id": 55,
+                        "coche": True,
+                    }
+                ],
             }
         }
     }
@@ -172,7 +189,11 @@ class ScanBarcodeCheckoutRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {"barcode": "3274080005003", "quantite_achetee": 1, "idempotency_key": "scan-3274080005003-1"}
+            "example": {
+                "barcode": "3274080005003",
+                "quantite_achetee": 1,
+                "idempotency_key": "scan-3274080005003-1",
+            }
         }
     }
 
@@ -254,7 +275,15 @@ class GenererCoursesResponse(BaseModel):
                 "total_articles": 14,
                 "articles_en_stock": 3,
                 "contexte": {"nb_invites": 2, "evenements": ["brunch dimanche"]},
-                "articles": [{"nom": "Lait demi-écrémé", "quantite": 2, "unite": "briques", "rayon": "Produits frais", "en_stock": 0}],
+                "articles": [
+                    {
+                        "nom": "Lait demi-écrémé",
+                        "quantite": 2,
+                        "unite": "briques",
+                        "rayon": "Produits frais",
+                        "en_stock": 0,
+                    }
+                ],
                 "par_rayon": {"Produits frais": 4, "Épicerie": 6},
             }
         }

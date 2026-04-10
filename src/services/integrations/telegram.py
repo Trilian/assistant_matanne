@@ -1,4 +1,4 @@
-﻿"""
+"""
 Client Telegram via Bot API.
 
 100% gratuit — aucune limite de messages, pas de catégories payantes.
@@ -163,13 +163,9 @@ def _charger_compteur_db(destinataire: str) -> tuple[int, int]:
             envois = state.data.get("envois", [])
             now = time.time()
             heure_count = sum(
-                1 for e in envois
-                if e.get("dest") == destinataire and now - e.get("ts", 0) < 3600
+                1 for e in envois if e.get("dest") == destinataire and now - e.get("ts", 0) < 3600
             )
-            jour_count = sum(
-                1 for e in envois
-                if now - e.get("ts", 0) < 86400
-            )
+            jour_count = sum(1 for e in envois if now - e.get("ts", 0) < 86400)
             return heure_count, jour_count
     except Exception:
         return -1, -1
@@ -253,6 +249,7 @@ def _enregistrer_envoi(destinataire: str) -> None:
 # HELPERS TELEGRAM
 # ═══════════════════════════════════════════════════════════
 
+
 def _get_bot_url(method: str) -> str:
     """Construit l'URL de l'API Telegram Bot."""
     settings = obtenir_parametres()
@@ -282,6 +279,7 @@ def _build_inline_keyboard(boutons: list[dict[str, str]]) -> dict:
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS D'ENVOI PRINCIPALES
 # ═══════════════════════════════════════════════════════════
+
 
 async def envoyer_message_telegram(
     destinataire: str,
@@ -484,6 +482,7 @@ async def telecharger_fichier_telegram(file_id: str) -> bytes | None:
 # FONCTIONS MÉTIER
 # ═══════════════════════════════════════════════════════════
 
+
 async def envoyer_planning_semaine(
     planning_texte: str,
     planning_id: int | None = None,
@@ -507,7 +506,9 @@ async def envoyer_planning_semaine(
     if resume_ia:
         sections.append(f"🧠 <i>Lecture IA</i> : {resume_ia}")
     sections.append(planning_texte)
-    sections.append("Utilisez les boutons ci-dessous pour valider, modifier ou régénérer rapidement.")
+    sections.append(
+        "Utilisez les boutons ci-dessous pour valider, modifier ou régénérer rapidement."
+    )
     message = "\n\n".join(section for section in sections if section)
 
     # Callbacks avec planning_id pour cibler la bonne semaine (max 64 bytes par callback_data)
@@ -565,7 +566,7 @@ async def envoyer_liste_courses_partagee(
     liste_id: int | None = None,
 ) -> bool:
     """Envoie la liste de courses active via Telegram avec boutons interactifs.
-    
+
     Args:
         articles: Liste d'articles à afficher
         nom_liste: Nom de la liste (ex: "Courses lundi")
@@ -627,7 +628,9 @@ async def envoyer_suggestion_recette_du_jour(message: str) -> bool:
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
         return False
-    return await envoyer_message_telegram(chat_id, f"🍽️ <b>Suggestion recette du jour</b>\n\n{message}")
+    return await envoyer_message_telegram(
+        chat_id, f"🍽️ <b>Suggestion recette du jour</b>\n\n{message}"
+    )
 
 
 async def envoyer_alerte_diagnostic_maison(message: str) -> bool:
@@ -677,7 +680,9 @@ async def envoyer_bilan_nutrition_semaine(message: str) -> bool:
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
         return False
-    return await envoyer_message_telegram(chat_id, f"🥗 <b>Bilan nutrition semaine</b>\n\n{message}")
+    return await envoyer_message_telegram(
+        chat_id, f"🥗 <b>Bilan nutrition semaine</b>\n\n{message}"
+    )
 
 
 async def envoyer_rappel_entretien_maison(message: str) -> bool:
@@ -786,7 +791,9 @@ async def envoyer_digest_matinal() -> bool:
     if not sections:
         message = f"☀️ <b>Bonjour !</b> — {aujourd_hui.strftime('%A %d %B')}\n\nRien de spécial prévu aujourd'hui. Bonne journée !"
     else:
-        message = f"☀️ <b>Bonjour !</b> — {aujourd_hui.strftime('%A %d %B')}\n\n" + "\n\n".join(sections)
+        message = f"☀️ <b>Bonjour !</b> — {aujourd_hui.strftime('%A %d %B')}\n\n" + "\n\n".join(
+            sections
+        )
 
     return await envoyer_message_interactif(
         destinataire=chat_id,
@@ -819,6 +826,7 @@ async def envoyer_resume_mensuel_jeux(
         return False
 
     import calendar
+
     nom_mois = calendar.month_name[mois].capitalize()
     emoji_bilan = "📈" if bilan_net >= 0 else "📉"
     signe = "+" if bilan_net >= 0 else ""

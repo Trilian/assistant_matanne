@@ -10,12 +10,12 @@ from .circuit_breaker import (
     obtenir_circuit,
 )
 from .client import ClientIA, obtenir_client_ia
+from .embeddings import embedder_texte, embedder_texte_local, signature_ann, similarite_cosine
 from .parser import AnalyseurIA, analyser_liste_reponse
 from .rate_limit import RateLimitIA
 from .router import Fournisseur, RouteurIA, obtenir_routeur_ia
 from .streaming import StreamingMixin
 from .vision import VisionMixin
-from .embeddings import embedder_texte, embedder_texte_local, signature_ann, similarite_cosine
 
 __all__ = [
     "ClientIA",

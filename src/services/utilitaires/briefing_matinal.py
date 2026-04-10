@@ -111,11 +111,7 @@ class BriefingMatinalService(BaseAIService):
         from src.core.models import Repas
 
         aujourd_hui = date.today()
-        repas = (
-            db.query(Repas)
-            .filter(Repas.date_repas == aujourd_hui)
-            .all()
-        )
+        repas = db.query(Repas).filter(Repas.date_repas == aujourd_hui).all()
 
         if not repas:
             return {"message": "Aucun repas planifié aujourd'hui"}
@@ -177,8 +173,7 @@ class BriefingMatinalService(BaseAIService):
 
             return {
                 "taches_du_jour": [
-                    {"nom": t.nom, "priorite": getattr(t, "priorite", None)}
-                    for t in taches[:10]
+                    {"nom": t.nom, "priorite": getattr(t, "priorite", None)} for t in taches[:10]
                 ],
             }
         except Exception:
@@ -196,11 +191,13 @@ class BriefingMatinalService(BaseAIService):
         for anniv in tous:
             jours = getattr(anniv, "jours_restants", None)
             if jours is not None and 0 <= jours <= 7:
-                prochains.append({
-                    "nom": anniv.nom,
-                    "jours_restants": jours,
-                    "age": getattr(anniv, "age", None),
-                })
+                prochains.append(
+                    {
+                        "nom": anniv.nom,
+                        "jours_restants": jours,
+                        "age": getattr(anniv, "age", None),
+                    }
+                )
 
         if not prochains:
             return {}
@@ -243,6 +240,7 @@ class BriefingMatinalService(BaseAIService):
     def _section_budget(self, *, db=None) -> dict[str, Any]:
         """Résumé budget du mois en cours."""
         from sqlalchemy import extract, func
+
         from src.core.models import BudgetFamille
 
         aujourd_hui = date.today()
@@ -338,9 +336,7 @@ Termine par un petit mot d'encouragement."""
             logger.warning(f"Génération résumé narratif échouée: {e}")
             return "Bonne journée ! 🌤️"
 
-    def envoyer_briefing_notification(
-        self, user_id: str = "matanne"
-    ) -> dict[str, Any]:
+    def envoyer_briefing_notification(self, user_id: str = "matanne") -> dict[str, Any]:
         """Génère le briefing et l'envoie via notifications.
 
         Args:
@@ -408,8 +404,7 @@ def _formater_sections(sections: dict[str, Any]) -> str:
         repas = sections["repas"]
         if "repas_du_jour" in repas:
             repas_txt = ", ".join(
-                f"{r.get('type', 'repas')}: {r.get('recette', '?')}"
-                for r in repas["repas_du_jour"]
+                f"{r.get('type', 'repas')}: {r.get('recette', '?')}" for r in repas["repas_du_jour"]
             )
             parties.append(f"🍽️ Repas prévus : {repas_txt}")
         elif "message" in repas:
@@ -438,7 +433,9 @@ def _formater_sections(sections: dict[str, Any]) -> str:
     if "budget" in sections:
         budget = sections["budget"]
         if "total_mois" in budget:
-            parties.append(f"💰 Budget du mois : {budget['total_mois']}€ dépensés (jour {budget.get('jour_du_mois', '?')})")
+            parties.append(
+                f"💰 Budget du mois : {budget['total_mois']}€ dépensés (jour {budget.get('jour_du_mois', '?')})"
+            )
 
     if "jules" in sections:
         jules = sections["jules"]

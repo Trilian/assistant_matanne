@@ -537,7 +537,7 @@ Difficulty: {recette.difficulte}"""
     # NOUVELLES VERSIONS : SAISONNIÈRE, RAPIDE, RESTES
     # ═══════════════════════════════════════════════════════════
 
-    def _charger_recette_complete(self, recette_id: int, db: Session) -> "Recette":
+    def _charger_recette_complete(self, recette_id: int, db: Session) -> Recette:
         """Charge une recette avec ses ingrédients et étapes."""
         recette = (
             db.query(Recette)
@@ -552,7 +552,7 @@ Difficulty: {recette.difficulte}"""
             raise ErreurNonTrouve(f"Recipe {recette_id} not found")
         return recette
 
-    def _construire_contexte_recette(self, recette: "Recette") -> str:
+    def _construire_contexte_recette(self, recette: Recette) -> str:
         """Construit le contexte texte d'une recette pour les prompts IA."""
         ingredients_str = "\n".join(
             [f"- {ri.quantite} {ri.unite} {ri.ingredient.nom}" for ri in recette.ingredients]
@@ -589,7 +589,12 @@ Difficulté: {recette.difficulte}"""
 
         # Déterminer la saison actuelle
         mois = date.today().month
-        saisons = {(3, 4, 5): "printemps", (6, 7, 8): "été", (9, 10, 11): "automne", (12, 1, 2): "hiver"}
+        saisons = {
+            (3, 4, 5): "printemps",
+            (6, 7, 8): "été",
+            (9, 10, 11): "automne",
+            (12, 1, 2): "hiver",
+        }
         saison = next(v for k, v in saisons.items() if mois in k)
 
         # Vérifier si version existe déjà
@@ -612,7 +617,9 @@ Difficulté: {recette.difficulte}"""
             try:
                 data = json.loads(chemin_saison.read_text(encoding="utf-8"))
                 if saison in data:
-                    produits_saison = f"\nProduits de saison ({saison}): {', '.join(data[saison][:20])}"
+                    produits_saison = (
+                        f"\nProduits de saison ({saison}): {', '.join(data[saison][:20])}"
+                    )
             except Exception:
                 pass
 
@@ -635,7 +642,10 @@ Difficulté: {recette.difficulte}"""
             system_prompt=self.build_system_prompt(
                 role="Chef cuisinier spécialiste de la cuisine de saison",
                 expertise=["Produits de saison", "Cuisine locale", "Substitutions d'ingrédients"],
-                rules=["Toujours utiliser des produits frais de saison", f"Retourner saison='{saison}'"],
+                rules=[
+                    "Toujours utiliser des produits frais de saison",
+                    f"Retourner saison='{saison}'",
+                ],
             ),
         )
         if not version_data:
@@ -721,7 +731,11 @@ Difficulté: {recette.difficulte}"""
         db.commit()
         db.refresh(version)
 
-        logger.info("✅ Version rapide créée pour recette %s (%d min)", recette_id, version_data.temps_total_minutes)
+        logger.info(
+            "✅ Version rapide créée pour recette %s (%d min)",
+            recette_id,
+            version_data.temps_total_minutes,
+        )
         emettre_evenement_simple(
             "recette.modifie",
             {"recette_id": recette_id, "nom": "", "action": "version_rapide_creee"},
@@ -733,7 +747,10 @@ Difficulté: {recette.difficulte}"""
     @chronometre("ia.recettes.version_restes", seuil_alerte_ms=15000)
     @avec_session_db
     def generer_version_restes(
-        self, recette_id: int, ingredients_disponibles: list[str] | None = None, db: Session = None,
+        self,
+        recette_id: int,
+        ingredients_disponibles: list[str] | None = None,
+        db: Session = None,
     ) -> VersionRecette | None:
         """Génère une version à partir des restes/inventaire.
 
@@ -751,9 +768,12 @@ Difficulté: {recette.difficulte}"""
             try:
                 from src.core.models import ArticleInventaire
 
-                articles = db.query(ArticleInventaire).filter(
-                    ArticleInventaire.quantite > 0
-                ).limit(50).all()
+                articles = (
+                    db.query(ArticleInventaire)
+                    .filter(ArticleInventaire.quantite > 0)
+                    .limit(50)
+                    .all()
+                )
                 ingredients_disponibles = [a.nom for a in articles]
             except Exception:
                 ingredients_disponibles = []

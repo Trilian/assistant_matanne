@@ -254,4 +254,3 @@ RETOURNER UNIQUEMENT CE JSON (sans texte avant/après) :
 
         logger.info(f"✅ G1 — {len(suggestions)} recettes suggérées depuis stock")
         return suggestions
-

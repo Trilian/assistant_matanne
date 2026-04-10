@@ -4,6 +4,7 @@ Routes API Famille — Activités familiales et suggestions IA.
 Sous-routeur inclus dans famille.py.
 """
 
+import logging
 from datetime import date, datetime, timedelta
 from typing import Any
 
@@ -22,7 +23,6 @@ from src.api.schemas.errors import (
 from src.api.schemas.famille import SuggestionsSoireeRequest, SuggestionsWeekendRequest
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Famille"])
@@ -45,7 +45,8 @@ class ParamsSuggestionsActivites(BaseModel):
     duree_min: int = Field(default=30, ge=5, le=300, description="Durée minimum en minutes")
     duree_max: int = Field(default=120, ge=10, le=360, description="Durée maximum en minutes")
     preferences: list[str] | None = Field(
-        default=None, description="Tags de préférences (creatif, sportif, educatif, sensoriel, etc.)"
+        default=None,
+        description="Tags de préférences (creatif, sportif, educatif, sensoriel, etc.)",
     )
     nb_suggestions: int = Field(
         default=5, ge=1, le=10, description="Nombre de suggestions souhaitées"
@@ -62,6 +63,7 @@ class SuggestionActiviteSoirResponse(BaseModel):
     raison: str = Field(default="Suggestion générée à partir de la météo et de l'activité récente.")
     alternatives: list[str] = Field(default_factory=list)
     source: list[str] = Field(default_factory=lambda: ["météo", "activité Garmin récente"])
+
 
 # ═══════════════════════════════════════════════════════════
 
@@ -106,18 +108,18 @@ async def lister_activites(
             if cursor:
                 cursor_params = decoder_cursor(cursor)
                 query = appliquer_cursor_filter(
-                    query, 
-                    cursor_params, 
+                    query,
+                    cursor_params,
                     ActiviteFamille,
                     cursor_field="date_prevue",  # FIX B12: match l'ordre principal
-                    secondary_field="id"          # Stable tie-breaker
+                    secondary_field="id",  # Stable tie-breaker
                 )
                 items = query.limit(page_size + 1).all()
                 return construire_reponse_cursor(
                     items,
                     page_size,
-                    cursor_field="date_prevue",   # FIX B12: match l'ordre
-                    secondary_field="id",          # FIX B12: ti-breaker unique
+                    cursor_field="date_prevue",  # FIX B12: match l'ordre
+                    secondary_field="id",  # FIX B12: ti-breaker unique
                     serializer=None,
                 )
 
@@ -191,10 +193,10 @@ async def suggerer_activites_ia(
 ) -> dict[str, Any]:
     """
     Génère des suggestions d'activités personnalisées via IA.
-    
+
     Utilise JulesAIService avec parsing structuré pour retourner des activités
     adaptées à l'âge de l'enfant, la météo, le budget et les préférences.
-    
+
     **Paramètres**:
     - age_mois: Âge de l'enfant en mois (utilisé pour adapter les suggestions)
     - meteo: Type de météo ou lieu (pluie/soleil/mixte/interieur/exterieur)
@@ -202,8 +204,8 @@ async def suggerer_activites_ia(
     - duree_min/duree_max: Fourchette de durée souhaitée
     - preferences: Tags optionnels (creatif, sportif, educatif, sensoriel, etc.)
     - nb_suggestions: Nombre de suggestions (1-10)
-    
-    **Retour**: Liste structurée d'activités avec nom, description, durée, budget, 
+
+    **Retour**: Liste structurée d'activités avec nom, description, durée, budget,
     lieu, compétences, matériel nécessaire, niveau d'effort.
     """
     from src.services.famille.jules_ai import obtenir_jules_ai_service
@@ -219,7 +221,7 @@ async def suggerer_activites_ia(
             preferences=params.preferences,
             nb_suggestions=params.nb_suggestions,
         )
-        
+
         # Convertir Pydantic models en dicts pour JSON response
         return {
             "total": len(suggestions),
@@ -285,9 +287,19 @@ async def modifier_activite(
             if not activite:
                 raise HTTPException(status_code=404, detail="Activité non trouvée")
 
-            for champ in ("titre", "description", "type_activite", "date_prevue",
-                          "duree_heures", "lieu", "qui_participe", "cout_estime",
-                          "cout_reel", "statut", "notes"):
+            for champ in (
+                "titre",
+                "description",
+                "type_activite",
+                "date_prevue",
+                "duree_heures",
+                "lieu",
+                "qui_participe",
+                "cout_estime",
+                "cout_reel",
+                "statut",
+                "notes",
+            ):
                 if champ in payload:
                     setattr(activite, champ, payload[champ])
 
@@ -327,7 +339,7 @@ async def supprimer_activite(
 
 
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS IA 
+# SUGGESTIONS IA
 # ═══════════════════════════════════════════════════════════
 
 
@@ -357,7 +369,11 @@ async def suggerer_activite_soir(
             logger.debug("Suggestion soir: météo indisponible (%s)", exc)
 
         user_id_raw = user.get("id")
-        user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+        user_id = (
+            int(user_id_raw)
+            if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit()
+            else None
+        )
 
         nb_activites = 0
         duree_minutes = 0.0
@@ -385,7 +401,9 @@ async def suggerer_activite_soir(
                     "Respiration + lecture imagier",
                 ]
             else:
-                recommandation = "Marche récupération très légère de 15 à 20 minutes puis retour au calme."
+                recommandation = (
+                    "Marche récupération très légère de 15 à 20 minutes puis retour au calme."
+                )
                 alternatives = [
                     "Étirements dehors sur la terrasse",
                     "Balade poussette courte",
@@ -393,7 +411,11 @@ async def suggerer_activite_soir(
                 ]
             raison = "La charge Garmin récente est déjà soutenue : mieux vaut récupérer ce soir sans ajouter trop d'intensité."
         elif duree_minutes < 60 and nb_activites <= 1:
-            niveau = "dynamique" if pluie < 4 and (temperature is None or temperature >= 12) else "moderee"
+            niveau = (
+                "dynamique"
+                if pluie < 4 and (temperature is None or temperature >= 12)
+                else "moderee"
+            )
             if pluie >= 4 or (temperature is not None and temperature < 10):
                 recommandation = "Mini circuit cardio ou danse en intérieur pendant 15 minutes avant la routine du soir."
                 alternatives = [
@@ -402,7 +424,9 @@ async def suggerer_activite_soir(
                     "Parcours coussins + musique",
                 ]
             else:
-                recommandation = "Balade familiale de 25 à 30 minutes avant le dîner pour relancer l'énergie."
+                recommandation = (
+                    "Balade familiale de 25 à 30 minutes avant le dîner pour relancer l'énergie."
+                )
                 alternatives = [
                     "Petit tour vélo ou draisienne",
                     "Parc de proximité",
@@ -419,7 +443,9 @@ async def suggerer_activite_soir(
                     "Étirements famille 10 minutes",
                 ]
             else:
-                recommandation = "Sortie douce en extérieur puis temps calme à la maison pour garder le rythme."
+                recommandation = (
+                    "Sortie douce en extérieur puis temps calme à la maison pour garder le rythme."
+                )
                 alternatives = [
                     "Marche digestive",
                     "Jeu de ballon léger",
@@ -514,6 +540,5 @@ async def suggestions_soiree_ia(
 
 
 # ═══════════════════════════════════════════════════════════
-# ACHATS FAMILLE CRUD 
+# ACHATS FAMILLE CRUD
 # ═══════════════════════════════════════════════════════════
-

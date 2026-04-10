@@ -20,13 +20,13 @@ from sqlalchemy.orm import joinedload
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_gestion_erreurs
 from src.core.models import ArticleCourses, Planning, Recette, RecetteIngredient, Repas
+from src.services.rapports._couleurs import Couleur
 from src.services.rapports.types import (
     DonneesCoursesPDF,
     DonneesPlanningPDF,
     DonneesRecettePDF,
     RapportBudget,
 )
-from src.services.rapports._couleurs import Couleur
 
 logger = logging.getLogger(__name__)
 
@@ -497,6 +497,7 @@ class ServiceExportPDF:
         """
         from datetime import date, timedelta
         from decimal import Decimal
+
         from src.core.models.finances import Depense
 
         date_fin = date.today()
@@ -629,7 +630,9 @@ class ServiceExportPDF:
             cat_data = [["Catégorie", "Montant", "% du total"]]
             for categorie, montant in categories_triees:
                 emoji = emojis_categories.get(categorie, "📦")
-                pourcentage = (montant / data.depenses_total * 100) if data.depenses_total > 0 else 0
+                pourcentage = (
+                    (montant / data.depenses_total * 100) if data.depenses_total > 0 else 0
+                )
                 cat_data.append(
                     [
                         f"{emoji} {categorie.capitalize()}",
@@ -729,4 +732,3 @@ __all__ = [
     "ServiceExportPDF",
     "obtenir_service_export_pdf",
 ]
-

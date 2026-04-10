@@ -9,7 +9,6 @@ Deux familles de schémas :
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # ═══════════════════════════════════════════════════════════
 # SCHÉMA SIMPLIFIÉ (recettes DB → plan batch)
 # ═══════════════════════════════════════════════════════════

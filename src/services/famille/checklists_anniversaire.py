@@ -49,31 +49,76 @@ def _template_categorie_par_profil(profil: str) -> dict[str, list[dict[str, Any]
     if profil in {"tout_petit", "enfant", "pre_ado"}:
         return {
             "cadeau": [
-                {"libelle": "Cadeau principal", "budget_estime": 40.0, "priorite": "haute", "quand": "j-7"},
-                {"libelle": "Petit cadeau bonus", "budget_estime": 15.0, "priorite": "moyenne", "quand": "j-3"},
+                {
+                    "libelle": "Cadeau principal",
+                    "budget_estime": 40.0,
+                    "priorite": "haute",
+                    "quand": "j-7",
+                },
+                {
+                    "libelle": "Petit cadeau bonus",
+                    "budget_estime": 15.0,
+                    "priorite": "moyenne",
+                    "quand": "j-3",
+                },
             ],
             "activite": [
-                {"libelle": "Animation / activité ludique", "budget_estime": 35.0, "priorite": "moyenne", "quand": "j-7"},
+                {
+                    "libelle": "Animation / activité ludique",
+                    "budget_estime": 35.0,
+                    "priorite": "moyenne",
+                    "quand": "j-7",
+                },
             ],
             "repas": [
-                {"libelle": "Goûter + boissons", "budget_estime": 30.0, "priorite": "haute", "quand": "j-2"},
+                {
+                    "libelle": "Goûter + boissons",
+                    "budget_estime": 30.0,
+                    "priorite": "haute",
+                    "quand": "j-2",
+                },
             ],
             "decoration": [
-                {"libelle": "Ballons et décoration", "budget_estime": 20.0, "priorite": "moyenne", "quand": "j-3"},
+                {
+                    "libelle": "Ballons et décoration",
+                    "budget_estime": 20.0,
+                    "priorite": "moyenne",
+                    "quand": "j-3",
+                },
             ],
         }
     return {
         "cadeau": [
-            {"libelle": "Cadeau principal", "budget_estime": 60.0, "priorite": "haute", "quand": "j-7"},
+            {
+                "libelle": "Cadeau principal",
+                "budget_estime": 60.0,
+                "priorite": "haute",
+                "quand": "j-7",
+            },
         ],
         "repas": [
-            {"libelle": "Repas / dîner", "budget_estime": 80.0, "priorite": "haute", "quand": "j-3"},
+            {
+                "libelle": "Repas / dîner",
+                "budget_estime": 80.0,
+                "priorite": "haute",
+                "quand": "j-3",
+            },
         ],
         "organisation": [
-            {"libelle": "Invitations / coordination", "budget_estime": 0.0, "priorite": "moyenne", "quand": "j-14"},
+            {
+                "libelle": "Invitations / coordination",
+                "budget_estime": 0.0,
+                "priorite": "moyenne",
+                "quand": "j-14",
+            },
         ],
         "decoration": [
-            {"libelle": "Ambiance légère", "budget_estime": 20.0, "priorite": "basse", "quand": "j-2"},
+            {
+                "libelle": "Ambiance légère",
+                "budget_estime": 20.0,
+                "priorite": "basse",
+                "quand": "j-2",
+            },
         ],
     }
 
@@ -297,7 +342,9 @@ class ServiceChecklistsAnniversaire(BaseService[ChecklistAnniversaire]):
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def lister_checklists(self, anniversaire_id: int, *, db: Session | None = None) -> list[dict[str, Any]]:
+    def lister_checklists(
+        self, anniversaire_id: int, *, db: Session | None = None
+    ) -> list[dict[str, Any]]:
         if db is None:
             return []
         checklists = (
@@ -319,7 +366,9 @@ class ServiceChecklistsAnniversaire(BaseService[ChecklistAnniversaire]):
     ) -> dict[str, Any]:
         if db is None:
             return {}
-        checklist = db.query(ChecklistAnniversaire).filter(ChecklistAnniversaire.id == checklist_id).first()
+        checklist = (
+            db.query(ChecklistAnniversaire).filter(ChecklistAnniversaire.id == checklist_id).first()
+        )
         if not checklist:
             return {}
 
@@ -351,7 +400,11 @@ class ServiceChecklistsAnniversaire(BaseService[ChecklistAnniversaire]):
     ) -> dict[str, Any]:
         if db is None:
             return {}
-        item = db.query(ItemChecklistAnniversaire).filter(ItemChecklistAnniversaire.id == item_id).first()
+        item = (
+            db.query(ItemChecklistAnniversaire)
+            .filter(ItemChecklistAnniversaire.id == item_id)
+            .first()
+        )
         if not item:
             return {}
 
@@ -459,7 +512,9 @@ class ServiceChecklistsAnniversaire(BaseService[ChecklistAnniversaire]):
         items = (
             db.query(ItemChecklistAnniversaire)
             .filter(ItemChecklistAnniversaire.checklist_id == checklist.id)
-            .order_by(ItemChecklistAnniversaire.categorie.asc(), ItemChecklistAnniversaire.ordre.asc())
+            .order_by(
+                ItemChecklistAnniversaire.categorie.asc(), ItemChecklistAnniversaire.ordre.asc()
+            )
             .all()
         )
         items_ser = [self.serialiser_item(i) for i in items]

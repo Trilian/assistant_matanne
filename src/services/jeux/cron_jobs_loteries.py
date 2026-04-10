@@ -1,4 +1,4 @@
-﻿"""
+"""
 Cron jobs pour le module Loteries (Loto + Euromillions).
 
 2 jobs automatisés:
@@ -10,14 +10,14 @@ import csv
 import io
 import logging
 import zipfile
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Any
 
 from apscheduler.triggers.cron import CronTrigger
 
 from src.core.db import obtenir_contexte_db
 from src.core.exceptions import ErreurServiceIA
-from src.core.models.jeux import TirageLoto, TirageEuromillions, GrilleLoto, GrilleEuromillions
+from src.core.models.jeux import GrilleEuromillions, GrilleLoto, TirageEuromillions, TirageLoto
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +144,9 @@ def _scraper_tirages_loto() -> int:
             jackpot = None
             if jackpot_str:
                 try:
-                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", "")))
+                    jackpot = int(
+                        float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", ""))
+                    )
                 except (ValueError, TypeError):
                     pass
 
@@ -157,13 +159,15 @@ def _scraper_tirages_loto() -> int:
                 except (ValueError, TypeError):
                     pass
 
-            tirages_a_inserer.append({
-                "date_tirage": date_tirage,
-                "numeros": sorted(numeros),
-                "numero_chance": numero_chance,
-                "jackpot": jackpot,
-                "gagnants": gagnants,
-            })
+            tirages_a_inserer.append(
+                {
+                    "date_tirage": date_tirage,
+                    "numeros": sorted(numeros),
+                    "numero_chance": numero_chance,
+                    "jackpot": jackpot,
+                    "gagnants": gagnants,
+                }
+            )
         except (ValueError, KeyError, TypeError) as e:
             logger.debug(f"Ligne Loto ignorée : {e}")
             continue
@@ -172,9 +176,9 @@ def _scraper_tirages_loto() -> int:
     nb_inseres = 0
     with obtenir_contexte_db() as session:
         for t in tirages_a_inserer:
-            existant = session.query(TirageLoto).filter(
-                TirageLoto.date_tirage == t["date_tirage"]
-            ).first()
+            existant = (
+                session.query(TirageLoto).filter(TirageLoto.date_tirage == t["date_tirage"]).first()
+            )
             if existant:
                 continue
 
@@ -244,7 +248,9 @@ def _scraper_tirages_euromillions() -> int:
             jackpot = None
             if jackpot_str:
                 try:
-                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", "")))
+                    jackpot = int(
+                        float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", ""))
+                    )
                 except (ValueError, TypeError):
                     pass
 
@@ -260,14 +266,16 @@ def _scraper_tirages_euromillions() -> int:
             # My Million (optionnel)
             my_million = row.get("code_my_million", row.get("My Million", None))
 
-            tirages_a_inserer.append({
-                "date_tirage": date_tirage,
-                "numeros": sorted(numeros),
-                "etoiles": sorted(etoiles),
-                "jackpot": jackpot,
-                "gagnants": gagnants,
-                "my_million": str(my_million).strip() if my_million else None,
-            })
+            tirages_a_inserer.append(
+                {
+                    "date_tirage": date_tirage,
+                    "numeros": sorted(numeros),
+                    "etoiles": sorted(etoiles),
+                    "jackpot": jackpot,
+                    "gagnants": gagnants,
+                    "my_million": str(my_million).strip() if my_million else None,
+                }
+            )
         except (ValueError, KeyError, TypeError) as e:
             logger.debug(f"Ligne Euromillions ignorée : {e}")
             continue
@@ -276,9 +284,11 @@ def _scraper_tirages_euromillions() -> int:
     nb_inseres = 0
     with obtenir_contexte_db() as session:
         for t in tirages_a_inserer:
-            existant = session.query(TirageEuromillions).filter(
-                TirageEuromillions.date_tirage == t["date_tirage"]
-            ).first()
+            existant = (
+                session.query(TirageEuromillions)
+                .filter(TirageEuromillions.date_tirage == t["date_tirage"])
+                .first()
+            )
             if existant:
                 continue
 
@@ -313,9 +323,9 @@ def _scraper_tirages_euromillions() -> int:
 def backtest_grilles():
     """
     Effectue le backtest de toutes les grilles en attente.
-    
+
     Fréquence: 1×/jour à 22h (après scraping des tirages)
-    
+
     Implémente:
     - Comparaison grilles vs derniers tirages
     - Calcul rang (1, 2, 3, etc.) selon nb bons numéros
@@ -324,98 +334,100 @@ def backtest_grilles():
     - Stats utilisateurs (ROI, win rate)
     """
     logger.info("🔍 Début backtest grilles Loto + Euromillions")
-    
+
     try:
         with obtenir_contexte_db() as session:
             # Backtest Loto
-            grilles_loto = session.query(GrilleLoto).filter(
-                GrilleLoto.statut == "en_attente"
-            ).all()
-            
+            grilles_loto = session.query(GrilleLoto).filter(GrilleLoto.statut == "en_attente").all()
+
             nb_backtest_loto = 0
             for grille in grilles_loto:
                 # Trouver tirage correspondant
-                tirage = session.query(TirageLoto).filter(
-                    TirageLoto.date == grille.date_tirage
-                ).first()
-                
+                tirage = (
+                    session.query(TirageLoto).filter(TirageLoto.date == grille.date_tirage).first()
+                )
+
                 if not tirage:
                     continue
-                
+
                 # Comparer numéros
                 numeros_grille = set(grille.numeros)
                 numeros_tirage = set(tirage.numeros)
                 nb_bons = len(numeros_grille & numeros_tirage)
-                
+
                 # Chance
                 chance_ok = grille.numero_chance == tirage.numero_chance
-                
+
                 # Déterminer rang et gain
                 rang, gain = _calculer_rang_gain_loto(nb_bons, chance_ok)
-                
+
                 # Mettre à jour grille
                 grille.backtest = {
                     "rang": rang,
                     "nb_bons": nb_bons,
                     "chance_ok": chance_ok,
-                    "gain": gain
+                    "gain": gain,
                 }
-                
+
                 if gain > 0:
                     grille.statut = "gagnant"
                 else:
                     grille.statut = "perdant"
-                
+
                 nb_backtest_loto += 1
-            
+
             # Backtest Euromillions
-            grilles_euro = session.query(GrilleEuromillions).filter(
-                GrilleEuromillions.statut == "en_attente"
-            ).all()
-            
+            grilles_euro = (
+                session.query(GrilleEuromillions)
+                .filter(GrilleEuromillions.statut == "en_attente")
+                .all()
+            )
+
             nb_backtest_euro = 0
             for grille in grilles_euro:
-                tirage = session.query(TirageEuromillions).filter(
-                    TirageEuromillions.date == grille.date_tirage
-                ).first()
-                
+                tirage = (
+                    session.query(TirageEuromillions)
+                    .filter(TirageEuromillions.date == grille.date_tirage)
+                    .first()
+                )
+
                 if not tirage:
                     continue
-                
+
                 # Numéros
                 numeros_grille = set(grille.numeros)
                 numeros_tirage = set(tirage.numeros)
                 nb_bons_numeros = len(numeros_grille & numeros_tirage)
-                
+
                 # Étoiles
                 etoiles_grille = set(grille.etoiles)
                 etoiles_tirage = set(tirage.etoiles)
                 nb_bonnes_etoiles = len(etoiles_grille & etoiles_tirage)
-                
+
                 # Rang et gain
                 rang, gain = _calculer_rang_gain_euromillions(nb_bons_numeros, nb_bonnes_etoiles)
-                
+
                 grille.backtest = {
                     "rang": rang,
                     "nb_bons_numeros": nb_bons_numeros,
                     "nb_bonnes_etoiles": nb_bonnes_etoiles,
-                    "gain": gain
+                    "gain": gain,
                 }
-                
+
                 if gain > 0:
                     grille.statut = "gagnant"
                 else:
                     grille.statut = "perdant"
-                
+
                 nb_backtest_euro += 1
-            
+
             session.commit()
-            
+
             logger.info(
                 f"✅ Backtest terminé: {nb_backtest_loto} grilles Loto, "
                 f"{nb_backtest_euro} grilles Euromillions"
             )
-    
+
     except Exception as e:
         logger.error(f"❌ Erreur backtest grilles: {e}", exc_info=True)
 
@@ -423,7 +435,7 @@ def backtest_grilles():
 def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]:
     """
     Calcule le rang et le gain Loto selon barème FDJ.
-    
+
     Rang 1: 5 bons + chance
     Rang 2: 5 bons
     Rang 3: 4 bons + chance
@@ -432,7 +444,7 @@ def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]
     Rang 6: 3 bons
     Rang 7: 2 bons + chance
     Rang 8: 2 bons
-    
+
     Returns:
         (rang, gain_estimé)
     """
@@ -456,10 +468,12 @@ def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]
         return (0, 0.0)
 
 
-def _calculer_rang_gain_euromillions(nb_bons_numeros: int, nb_bonnes_etoiles: int) -> tuple[int, float]:
+def _calculer_rang_gain_euromillions(
+    nb_bons_numeros: int, nb_bonnes_etoiles: int
+) -> tuple[int, float]:
     """
     Calcule le rang et le gain Euromillions selon barème FDJ.
-    
+
     Rang 1: 5N + 2E
     Rang 2: 5N + 1E
     Rang 3: 5N + 0E
@@ -470,7 +484,7 @@ def _calculer_rang_gain_euromillions(nb_bons_numeros: int, nb_bonnes_etoiles: in
     Rang 8: 3N + 0E ou 1N + 2E
     Rang 9: 2N + 1E
     Rang 10: 2N + 0E
-    
+
     Returns:
         (rang, gain_estimé)
     """
@@ -484,14 +498,17 @@ def _calculer_rang_gain_euromillions(nb_bons_numeros: int, nb_bonnes_etoiles: in
         return (4, 1_000.0)
     elif nb_bons_numeros == 4 and nb_bonnes_etoiles == 1:
         return (5, 100.0)
-    elif (nb_bons_numeros == 4 and nb_bonnes_etoiles == 0) or \
-         (nb_bons_numeros == 3 and nb_bonnes_etoiles == 2):
+    elif (nb_bons_numeros == 4 and nb_bonnes_etoiles == 0) or (
+        nb_bons_numeros == 3 and nb_bonnes_etoiles == 2
+    ):
         return (6, 20.0)
-    elif (nb_bons_numeros == 2 and nb_bonnes_etoiles == 2) or \
-         (nb_bons_numeros == 3 and nb_bonnes_etoiles == 1):
+    elif (nb_bons_numeros == 2 and nb_bonnes_etoiles == 2) or (
+        nb_bons_numeros == 3 and nb_bonnes_etoiles == 1
+    ):
         return (7, 10.0)
-    elif (nb_bons_numeros == 3 and nb_bonnes_etoiles == 0) or \
-         (nb_bons_numeros == 1 and nb_bonnes_etoiles == 2):
+    elif (nb_bons_numeros == 3 and nb_bonnes_etoiles == 0) or (
+        nb_bons_numeros == 1 and nb_bonnes_etoiles == 2
+    ):
         return (8, 5.0)
     elif nb_bons_numeros == 2 and nb_bonnes_etoiles == 1:
         return (9, 3.0)
@@ -509,7 +526,7 @@ def _calculer_rang_gain_euromillions(nb_bons_numeros: int, nb_bonnes_etoiles: in
 def configurer_jobs_loteries(scheduler: Any) -> None:
     """
     Configure les 2 cron jobs Loteries dans APScheduler.
-    
+
     Args:
         scheduler: Instance APScheduler
     """
@@ -520,10 +537,10 @@ def configurer_jobs_loteries(scheduler: Any) -> None:
         id="scraper_resultats_fdj",
         name="Scraper résultats FDJ (Loto + Euromillions)",
         replace_existing=True,
-        max_instances=1
+        max_instances=1,
     )
     logger.info("✅ Job 'Scraper résultats FDJ' configuré (21h30 quotidien)")
-    
+
     # Job 2: Backtest grilles - 1×/jour à 22h
     scheduler.add_job(
         backtest_grilles,
@@ -531,6 +548,6 @@ def configurer_jobs_loteries(scheduler: Any) -> None:
         id="backtest_grilles",
         name="Backtest grilles Loto + Euromillions",
         replace_existing=True,
-        max_instances=1
+        max_instances=1,
     )
     logger.info("✅ Job 'Backtest grilles' configuré (22h quotidien)")

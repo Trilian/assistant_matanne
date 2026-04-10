@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : Entretien -> Courses.
 
 Bridge inter-modules :

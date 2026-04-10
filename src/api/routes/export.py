@@ -5,15 +5,15 @@ Génération de documents PDF via le service ServiceExportPDF.
 Export JSON multi-domaine et restauration via ExportService.
 """
 
+import base64
+import logging
 from typing import Any
 
-import logging
-import base64
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
 from src.api.dependencies import require_auth
-from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_CRUD_CREATION
+from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE
 from src.api.utils import executer_async, gerer_exception_api
 from src.services.rapports.export import obtenir_service_export_pdf
 
@@ -32,8 +32,12 @@ async def exporter_pdf(
         description="Type d'export: courses, planning, recette, budget",
     ),
     id_ressource: int | None = Query(None, description="ID optionnel de la ressource"),
-    envoyer_email: bool = Query(False, description="Envoyer le PDF par email au lieu de le télécharger"),
-    email: str | None = Query(None, description="Adresse email destinataire (requis si envoyer_email=True)"),
+    envoyer_email: bool = Query(
+        False, description="Envoyer le PDF par email au lieu de le télécharger"
+    ),
+    email: str | None = Query(
+        None, description="Adresse email destinataire (requis si envoyer_email=True)"
+    ),
     user: dict[str, Any] = Depends(require_auth),
 ):
     """
@@ -94,10 +98,12 @@ async def exporter_pdf(
             to=email,
             subject=f"📄 Export {type_export} — Matanne",
             html=f"<p>Votre export <strong>{type_export}</strong> est en pièce jointe.</p>",
-            attachments=[{
-                "filename": f"{nom_fichier}.pdf",
-                "content": pdf_b64,
-            }],
+            attachments=[
+                {
+                    "filename": f"{nom_fichier}.pdf",
+                    "content": pdf_b64,
+                }
+            ],
         )
         if not ok:
             raise HTTPException(status_code=500, detail="Échec de l'envoi par email")
@@ -136,11 +142,7 @@ async def lister_domaines_export(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les domaines de données disponibles pour l'export."""
-    return {
-        "domaines": [
-            {"id": k, "label": v} for k, v in _DOMAINES_EXPORT.items()
-        ]
-    }
+    return {"domaines": [{"id": k, "label": v} for k, v in _DOMAINES_EXPORT.items()]}
 
 
 @router.get("/json", responses=REPONSES_CRUD_LECTURE)
@@ -177,6 +179,7 @@ async def exporter_json(
 
     def _export():
         from src.services.utilitaires.export.export_service import ExportService
+
         service = ExportService()
         if mot_de_passe:
             return service.exporter_json_chiffre(domaines_list, mot_de_passe)
@@ -185,6 +188,7 @@ async def exporter_json(
     resultat = await executer_async(_export)
 
     from fastapi.responses import Response
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     if mot_de_passe:
         return Response(
@@ -232,7 +236,11 @@ async def restaurer_depuis_json(
 
     **Usage recommandé** : restaurer sur une instance vierge ou après backup.
     """
-    if file.content_type not in ("application/json", "application/gzip", "application/octet-stream"):
+    if file.content_type not in (
+        "application/json",
+        "application/gzip",
+        "application/octet-stream",
+    ):
         logger.warning(
             "Import restauration: content-type inattendu '%s' (fichier: %s)",
             file.content_type,
@@ -245,12 +253,15 @@ async def restaurer_depuis_json(
 
     # Déchiffrer si nécessaire
     if mot_de_passe:
+
         def _dechiffrer():
             from src.services.utilitaires.export.export_service import ExportService
+
             try:
                 return ExportService.dechiffrer_json(contenu, mot_de_passe).encode("utf-8")
             except ValueError as exc:
                 raise HTTPException(status_code=422, detail=str(exc)) from exc
+
         contenu = await executer_async(_dechiffrer)
 
     domaines_list = [d.strip() for d in domaines.split(",") if d.strip()] if domaines else None
@@ -263,7 +274,9 @@ async def restaurer_depuis_json(
         service = obtenir_service_backup()
 
         # Écrire dans un fichier temporaire car ServiceBackup travaille avec des paths
-        import tempfile, os
+        import os
+        import tempfile
+
         suffix = ".json.gz" if contenu[:2] == b"\x1f\x8b" else ".json"
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(contenu)
@@ -282,7 +295,9 @@ async def restaurer_depuis_json(
     result = await executer_async(_restore)
 
     if result is None:
-        raise HTTPException(status_code=422, detail="Échec de la restauration. Vérifiez le format du fichier.")
+        raise HTTPException(
+            status_code=422, detail="Échec de la restauration. Vérifiez le format du fichier."
+        )
 
     return {
         "success": result.success,
@@ -336,4 +351,3 @@ async def exporter_backup_personnel(
         filename=zip_path.name,
         headers={"Content-Disposition": f'attachment; filename="{zip_path.name}"'},
     )
-

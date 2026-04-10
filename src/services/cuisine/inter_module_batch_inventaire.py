@@ -64,7 +64,9 @@ class BatchInventaireInteractionService:
             ingredients = db.query(RecetteIngredient).filter_by(recette_id=recette_id).all()
 
             for ing in ingredients:
-                article = db.query(ArticleInventaire).filter_by(ingredient_id=ing.ingredient_id).first()
+                article = (
+                    db.query(ArticleInventaire).filter_by(ingredient_id=ing.ingredient_id).first()
+                )
                 if not article:
                     ingredients_manquants.append(ing.ingredient_id)
                     continue
@@ -85,13 +87,12 @@ class BatchInventaireInteractionService:
                         quantite_avant=quantite_avant,
                         quantite_apres=nouvelle_quantite,
                         notes=(
-                            f"Déduction batch cooking session #{session_id} "
-                            f"(recette #{recette_id})"
+                            f"Déduction batch cooking session #{session_id} (recette #{recette_id})"
                         ),
                     )
                 )
                 lignes_maj += 1
-                quantite_totale_deduite += (quantite_avant - nouvelle_quantite)
+                quantite_totale_deduite += quantite_avant - nouvelle_quantite
 
         db.commit()
 

@@ -46,7 +46,9 @@ class PushSubscriptionRequest(BaseModel):
 class PushUnsubscribeRequest(BaseModel):
     """Demande de suppression d'abonnement."""
 
-    endpoint: str = Field(..., description="URL de l'endpoint à supprimer", min_length=10, max_length=500)
+    endpoint: str = Field(
+        ..., description="URL de l'endpoint à supprimer", min_length=10, max_length=500
+    )
 
     model_config = {
         "json_schema_extra": {

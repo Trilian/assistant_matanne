@@ -138,7 +138,8 @@ class InsightsAnalyticsService(BaseAIService):
                 insights.repas_planifies = int(
                     session.query(func.count(Repas.id))
                     .filter(Repas.planning_id.in_(planning_ids))
-                    .scalar() or 0
+                    .scalar()
+                    or 0
                 )
                 insights.repas_cuisines = int(
                     session.query(func.count(Repas.id))
@@ -146,11 +147,13 @@ class InsightsAnalyticsService(BaseAIService):
                         Repas.planning_id.in_(planning_ids),
                         Repas.statut == "cuisine",
                     )
-                    .scalar() or 0
+                    .scalar()
+                    or 0
                 )
                 if insights.repas_planifies > 0:
                     insights.taux_realisation_repas = round(
-                        insights.repas_cuisines / insights.repas_planifies * 100, 1,
+                        insights.repas_cuisines / insights.repas_planifies * 100,
+                        1,
                     )
 
             # Période précédente pour tendance
@@ -165,7 +168,8 @@ class InsightsAnalyticsService(BaseAIService):
                 nb_prec = int(
                     session.query(func.count(Repas.id))
                     .filter(Repas.planning_id.in_(p_ids_prec))
-                    .scalar() or 0
+                    .scalar()
+                    or 0
                 )
 
             if nb_prec > 0:
@@ -202,7 +206,8 @@ class InsightsAnalyticsService(BaseAIService):
                 total_completions = sum(r.nb_completions or 0 for r in routines)
                 jours = (date_fin - date_debut).days or 1
                 insights.taux_completion_routines = round(
-                    min(total_completions / (len(routines) * jours) * 100, 100.0), 1,
+                    min(total_completions / (len(routines) * jours) * 100, 100.0),
+                    1,
                 )
 
     def _collecter_metriques_jardin(
@@ -217,9 +222,7 @@ class InsightsAnalyticsService(BaseAIService):
 
             from src.core.models.temps_entretien import ActionPlante, PlanteJardin
 
-            insights.plantes_actives = int(
-                session.query(func.count(PlanteJardin.id)).scalar() or 0
-            )
+            insights.plantes_actives = int(session.query(func.count(PlanteJardin.id)).scalar() or 0)
             insights.recoltes_count = int(
                 session.query(func.count(ActionPlante.id))
                 .filter(

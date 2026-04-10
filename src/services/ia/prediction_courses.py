@@ -22,9 +22,7 @@ class PredictionCoursesService:
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def predire_prochaine_liste(
-        self, limite: int = 30, db: Session | None = None
-    ) -> list[dict]:
+    def predire_prochaine_liste(self, limite: int = 30, db: Session | None = None) -> list[dict]:
         """Prédit les articles à acheter en analysant la fréquence d'achat.
 
         Algorithme :
@@ -57,7 +55,9 @@ class PredictionCoursesService:
             if not h.derniere_achat or not h.frequence_jours:
                 continue
 
-            derniere = h.derniere_achat.date() if hasattr(h.derniere_achat, 'date') else h.derniere_achat
+            derniere = (
+                h.derniere_achat.date() if hasattr(h.derniere_achat, "date") else h.derniere_achat
+            )
             prochaine_date_estimee = derniere + timedelta(days=h.frequence_jours)
 
             # Article à acheter cette semaine ou déjà en retard
@@ -65,17 +65,19 @@ class PredictionCoursesService:
                 jours_retard = (aujourd_hui - prochaine_date_estimee).days
                 confiance = min(0.95, 0.5 + (h.nb_achats * 0.05))
 
-                predictions.append({
-                    "nom": h.article_nom,
-                    "categorie": h.categorie or "Autre",
-                    "rayon": h.rayon_magasin or "Autre",
-                    "frequence_jours": h.frequence_jours,
-                    "dernier_achat": str(derniere),
-                    "prochaine_date_estimee": str(prochaine_date_estimee),
-                    "jours_retard": max(0, jours_retard),
-                    "confiance": round(confiance, 2),
-                    "nb_achats": h.nb_achats,
-                })
+                predictions.append(
+                    {
+                        "nom": h.article_nom,
+                        "categorie": h.categorie or "Autre",
+                        "rayon": h.rayon_magasin or "Autre",
+                        "frequence_jours": h.frequence_jours,
+                        "dernier_achat": str(derniere),
+                        "prochaine_date_estimee": str(prochaine_date_estimee),
+                        "jours_retard": max(0, jours_retard),
+                        "confiance": round(confiance, 2),
+                        "nb_achats": h.nb_achats,
+                    }
+                )
 
         # Trier par confiance décroissante puis retard
         predictions.sort(key=lambda x: (-x["confiance"], -x["jours_retard"]))
@@ -95,7 +97,8 @@ class PredictionCoursesService:
         avec_frequence = (
             db.query(func.count(HistoriqueAchats.id))
             .filter(HistoriqueAchats.frequence_jours.isnot(None))
-            .scalar() or 0
+            .scalar()
+            or 0
         )
         freq_moyenne = (
             db.query(func.avg(HistoriqueAchats.frequence_jours))
@@ -120,29 +123,29 @@ class PredictionCoursesService:
             "nb_articles_suivis": total,
             "nb_avec_frequence": avec_frequence,
             "frequence_moyenne_jours": round(float(freq_moyenne), 1) if freq_moyenne else None,
-            "top_categories": [
-                {"categorie": cat, "nb_articles": nb} for cat, nb in top_categories
-            ],
+            "top_categories": [{"categorie": cat, "nb_articles": nb} for cat, nb in top_categories],
         }
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
     def enregistrer_achat(
-        self, article_nom: str, categorie: str | None = None,
-        rayon: str | None = None, db: Session | None = None
+        self,
+        article_nom: str,
+        categorie: str | None = None,
+        rayon: str | None = None,
+        db: Session | None = None,
     ) -> dict | None:
         """Enregistre un achat et met à jour la fréquence d'achat.
 
         Returns:
             Dict avec les infos mises à jour
         """
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
+
         from src.core.models.courses import HistoriqueAchats
 
         existant = (
-            db.query(HistoriqueAchats)
-            .filter(HistoriqueAchats.article_nom == article_nom)
-            .first()
+            db.query(HistoriqueAchats).filter(HistoriqueAchats.article_nom == article_nom).first()
         )
 
         maintenant = datetime.now(UTC)
@@ -199,4 +202,3 @@ class PredictionCoursesService:
 def obtenir_service_prediction_courses() -> PredictionCoursesService:
     """Factory singleton pour le service de prédiction de courses."""
     return PredictionCoursesService()
-

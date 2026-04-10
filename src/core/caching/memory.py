@@ -65,7 +65,8 @@ class CacheMemoireN1:
 
             # Éviction LRU combinée: nombre d'entrées ET budget mémoire.
             while self._cache and (
-                len(self._cache) > self.max_entries or self._current_size_bytes > self.max_size_bytes
+                len(self._cache) > self.max_entries
+                or self._current_size_bytes > self.max_size_bytes
             ):
                 _, entree_evincée = self._cache.popitem(last=False)
                 self._current_size_bytes -= self._estimer_taille_entree(entree_evincée)
@@ -127,7 +128,11 @@ class CacheMemoireN1:
             "size_bytes": self._current_size_bytes,
             "max_size_bytes": self.max_size_bytes,
             "usage_memory_percent": (
-                self._current_size_bytes / self.max_size_bytes * 100 if self.max_size_bytes > 0 else 0
+                self._current_size_bytes / self.max_size_bytes * 100
+                if self.max_size_bytes > 0
+                else 0
             ),
-            "usage_percent": len(self._cache) / self.max_entries * 100 if self.max_entries > 0 else 0,
+            "usage_percent": len(self._cache) / self.max_entries * 100
+            if self.max_entries > 0
+            else 0,
         }

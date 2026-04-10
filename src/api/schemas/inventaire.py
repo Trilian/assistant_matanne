@@ -254,11 +254,7 @@ class ScanBatchRequest(BaseModel):
         description="Liste de codes-barres (max 50)",
     )
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {"codes": ["3270190204302", "3017620422003"]}
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"codes": ["3270190204302", "3017620422003"]}}}
 
 
 class ArticleBatchTrouve(BaseModel):
@@ -295,11 +291,11 @@ class ScanBatchResponse(BaseModel):
                             "categorie": "frais",
                             "nutriscore": "A",
                             "ecoscore": "B",
-                            "nova_group": 1
-                        }
+                            "nova_group": 1,
+                        },
                     }
                 ],
-                "inconnus": ["0000000000000"]
+                "inconnus": ["0000000000000"],
             }
         }
     }

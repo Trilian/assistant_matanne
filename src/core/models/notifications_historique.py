@@ -51,7 +51,9 @@ class HistoriqueNotification(TimestampMixin, Base):
     titre: Mapped[str] = mapped_column(String(500))
     message: Mapped[str] = mapped_column(Text)
     type_evenement: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    categorie: Mapped[str] = mapped_column(String(50), default="autres")  # rappels, alertes, resumes
+    categorie: Mapped[str] = mapped_column(
+        String(50), default="autres"
+    )  # rappels, alertes, resumes
 
     # Métadonnées de suivi
     lu: Mapped[bool] = mapped_column(Boolean, default=False)

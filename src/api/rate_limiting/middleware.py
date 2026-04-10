@@ -4,8 +4,7 @@ Middleware FastAPI pour la limitation de débit.
 
 import os
 
-from fastapi import HTTPException
-from fastapi import Request, Response
+from fastapi import HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.api.security_logs import journaliser_evenement_securite
@@ -80,8 +79,9 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
             )
         except HTTPException as exc:
             if exc.status_code == 429:
-                from src.api.dependencies import extraire_ip_client
                 from starlette.responses import JSONResponse as _JSONResponse
+
+                from src.api.dependencies import extraire_ip_client
 
                 client_ip = extraire_ip_client(request)
                 journaliser_evenement_securite(

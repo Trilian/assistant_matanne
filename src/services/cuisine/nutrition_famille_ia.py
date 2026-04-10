@@ -5,13 +5,13 @@ Basé sur données Garmin + recettes planifiées + profils individuels.
 """
 
 from datetime import datetime
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
-
 
 # ── Modèles Pydantic ──
 
@@ -41,9 +41,7 @@ class BilanNutritionFamille(BaseModel):
     anomalies: list[str] = Field(..., description="Anomalies santé possibles")
     points_forts: list[str] = Field(..., description="Points forts du groupe")
     recommendations_globales: list[str] = Field(..., description="Recommendations pour la famille")
-    recommendations_individualisees: dict = Field(
-        ..., description="Recommendations par personne"
-    )
+    recommendations_individualisees: dict = Field(..., description="Recommendations par personne")
 
 
 class NutritionFamilleAIService(BaseAIService):
@@ -80,7 +78,7 @@ class NutritionFamilleAIService(BaseAIService):
         age_ans: int,
         sexe: Literal["M", "F"],
         activite_niveau: Literal["sedentaire", "leger", "modere", "actif", "tres_actif"],
-        donnees_garmin_semaine: Optional[dict] = None,
+        donnees_garmin_semaine: dict | None = None,
         recettes_semaine: list[str] = None,
         objectif_sante: str = "maintien",
     ) -> DonneesNutritionnelles:
@@ -99,7 +97,11 @@ class NutritionFamilleAIService(BaseAIService):
         Returns:
             DonneesNutritionnelles avec bilan
         """
-        garmin_str = f"Garmin: {donnees_garmin_semaine}" if donnees_garmin_semaine else "Aucune donnée Garmin"
+        garmin_str = (
+            f"Garmin: {donnees_garmin_semaine}"
+            if donnees_garmin_semaine
+            else "Aucune donnée Garmin"
+        )
         recettes_str = f"Recettes: {', '.join(recettes_semaine[:5])}" if recettes_semaine else ""
 
         prompt = f"""Analyse nutrition pour {personne_nom}:
@@ -140,7 +142,9 @@ Format JSON."""
 
     async def bilan_nutrition_famille(
         self,
-        membres_donnees: list[dict],  # [{"nom": "Pierre", "age": 12, "activite": "modere", ...}, ...]
+        membres_donnees: list[
+            dict
+        ],  # [{"nom": "Pierre", "age": 12, "activite": "modere", ...}, ...]
         recettes_planifiees: list[str],
         periode_jours: int = 7,
     ) -> BilanNutritionFamille:
@@ -226,7 +230,7 @@ Format JSON avec structure claire."""
             Adaptations par personne (portions, simplifications, etc)
         """
         membres_str = "\n".join(
-            f"- {m['nom']}: {m.get('age_mois', m.get('age_ans', 30)*12)} mois equiv"
+            f"- {m['nom']}: {m.get('age_mois', m.get('age_ans', 30) * 12)} mois equiv"
             for m in membres_famille
         )
 
@@ -270,8 +274,7 @@ Format JSON par personne."""
         """
         recettes_str = "\n".join(f"- {r}" for r in semaine_planifiee)
         profils_str = "\n".join(
-            f"- {p['nom']}: {p['age']}ans, {p.get('objectif', 'maintien')}"
-            for p in profils_famille
+            f"- {p['nom']}: {p['age']}ans, {p.get('objectif', 'maintien')}" for p in profils_famille
         )
 
         prompt = f"""Recommande équilibrage nutritionnel:
@@ -303,10 +306,7 @@ Sois concis et actionnable."""
         periode_jours: int = 7,
     ):
         """Stream du bilan familial."""
-        membres_str = "\n".join(
-            f"- {m['nom']}: {m['age']}ans"
-            for m in membres_donnees
-        )
+        membres_str = "\n".join(f"- {m['nom']}: {m['age']}ans" for m in membres_donnees)
 
         prompt = f"""Bilan nutrition familiale ({periode_jours}j):
 {membres_str}

@@ -301,11 +301,7 @@ class NotificationPersistenceMixin:
         Utilisé par les cron jobs pour accéder aux abonnés sans dépendre
         du cache mémoire `_subscriptions` (vide après redémarrage du service).
         """
-        return (
-            db.query(PushSubscriptionModel)
-            .filter(PushSubscriptionModel.actif.is_(True))
-            .all()
-        )
+        return db.query(PushSubscriptionModel).filter(PushSubscriptionModel.actif.is_(True)).all()
 
     # ═══════════════════════════════════════════════════════════
     # ALIAS RÉTROCOMPATIBILITÉ

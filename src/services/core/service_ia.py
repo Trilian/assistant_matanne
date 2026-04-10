@@ -27,7 +27,9 @@ class ServiceInnovationsCore:
     def obtenir_mode_pilote_automatique(self, *, user_id: int | None = None) -> Any:
         return self._service().obtenir_mode_pilote_automatique(user_id=user_id)
 
-    def configurer_mode_pilote_automatique(self, *, user_id: int | None = None, actif: bool, niveau_autonomie: str) -> Any:
+    def configurer_mode_pilote_automatique(
+        self, *, user_id: int | None = None, actif: bool, niveau_autonomie: str
+    ) -> Any:
         return self._service().configurer_mode_pilote_automatique(
             user_id=user_id,
             actif=actif,

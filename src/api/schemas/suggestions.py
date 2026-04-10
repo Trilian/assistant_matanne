@@ -15,7 +15,9 @@ class SuggestionRecetteItem(BaseModel):
     nom: str = Field(description="Nom de la recette suggérée", max_length=200)
     description: str | None = Field(None, description="Description courte", max_length=500)
     temps_preparation: int | None = Field(None, description="Temps de préparation en minutes")
-    raison: str | None = Field(None, description="Justification IA de la suggestion", max_length=300)
+    raison: str | None = Field(
+        None, description="Justification IA de la suggestion", max_length=300
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -110,7 +112,7 @@ class PhotoFrigoResponse(BaseModel):
             "example": {
                 "ingredients_detectes": [
                     {"nom": "Courgette", "quantite_estimee": "2 pièces", "confiance": 0.94},
-                    {"nom": "Crème fraîche", "quantite_estimee": "1 pot", "confiance": 0.81}
+                    {"nom": "Crème fraîche", "quantite_estimee": "1 pot", "confiance": 0.81},
                 ],
                 "recettes_suggerees": [
                     {

@@ -8,7 +8,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-
 # ═══════════════════════════════════════════════════════════
 # CALENDRIERS EXTERNES
 # ═══════════════════════════════════════════════════════════
@@ -105,7 +104,16 @@ class EvenementsAujourdhuiResponse(BaseModel):
         "json_schema_extra": {
             "example": {
                 "date": "2026-04-03",
-                "items": [{"id": 15, "titre": "Vaccin Jules", "date_debut": "2026-04-03T09:30:00", "date_fin": "2026-04-03T10:00:00", "lieu": "Cabinet Dr Martin", "all_day": False}]
+                "items": [
+                    {
+                        "id": 15,
+                        "titre": "Vaccin Jules",
+                        "date_debut": "2026-04-03T09:30:00",
+                        "date_fin": "2026-04-03T10:00:00",
+                        "lieu": "Cabinet Dr Martin",
+                        "all_day": False,
+                    }
+                ],
             }
         }
     }

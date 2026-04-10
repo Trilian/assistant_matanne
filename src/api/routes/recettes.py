@@ -27,8 +27,8 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_ECRITURE,
     REPONSES_CRUD_LECTURE,
     REPONSES_CRUD_SUPPRESSION,
-    REPONSES_LISTE,
     REPONSES_IA,
+    REPONSES_LISTE,
 )
 from src.api.schemas.ia_transverses import (
     IdeeRepasSoirRequest,
@@ -78,7 +78,9 @@ async def mange_ce_soir(
     return result or SuggestionRepasSoirResponse()
 
 
-@router.get("/patterns-alimentaires", response_model=PatternsAlimentairesResponse, responses=REPONSES_IA)
+@router.get(
+    "/patterns-alimentaires", response_model=PatternsAlimentairesResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def obtenir_patterns_alimentaires(
     periode_jours: int = Query(90, ge=30, le=365),
@@ -90,7 +92,9 @@ async def obtenir_patterns_alimentaires(
     return result or PatternsAlimentairesResponse()
 
 
-@router.get("/garmin-repas-adaptatif", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
+@router.get(
+    "/garmin-repas-adaptatif", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def obtenir_repas_adaptatif_garmin(
     user: dict[str, Any] = Depends(require_auth),
@@ -98,7 +102,11 @@ async def obtenir_repas_adaptatif_garmin(
     """Alias métier pour l'adaptation des repas à la dépense Garmin."""
     service = obtenir_service_innovations_cuisine()
     user_id_raw = user.get("id")
-    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    user_id = (
+        int(user_id_raw)
+        if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit()
+        else None
+    )
     result = service.proposer_repas_adapte_garmin(user_id=user_id)
     return result or SuggestionRepasSoirResponse()
 
@@ -125,7 +133,8 @@ async def detecter_doublons_recettes(
                 ingredients_source = {
                     _normaliser(getattr(item.ingredient, "nom", None))
                     for item in (recette_source.ingredients or [])
-                    if getattr(item, "ingredient", None) and _normaliser(getattr(item.ingredient, "nom", None))
+                    if getattr(item, "ingredient", None)
+                    and _normaliser(getattr(item.ingredient, "nom", None))
                 }
                 nom_source = _normaliser(recette_source.nom)
 
@@ -134,7 +143,8 @@ async def detecter_doublons_recettes(
                     ingredients_proches = {
                         _normaliser(getattr(item.ingredient, "nom", None))
                         for item in (recette_proche.ingredients or [])
-                        if getattr(item, "ingredient", None) and _normaliser(getattr(item.ingredient, "nom", None))
+                        if getattr(item, "ingredient", None)
+                        and _normaliser(getattr(item.ingredient, "nom", None))
                     }
 
                     score_nom = SequenceMatcher(None, nom_source, nom_proche).ratio()
@@ -253,6 +263,7 @@ def _sauvegarder_etapes(session, recette_id: int, instructions: list[str]) -> No
 def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
     """SÃ©rialise une Recette ORM en RecetteResponse avec relations."""
     from sqlalchemy import func as sql_func
+
     from src.core.models import HistoriqueRecette, RecetteIngredient
     from src.core.models.user_preferences import RetourRecette
 
@@ -360,7 +371,6 @@ async def lister_recettes(
         }
         ```
     """
-    from sqlalchemy import func
 
     from src.core.models import Recette
     from src.core.models.recettes import HistoriqueRecette
@@ -391,8 +401,7 @@ async def lister_recettes(
                 .all()
             )
             historique_par_recette = {
-                recette_id: derniere_cuisson
-                for recette_id, derniere_cuisson in historiques
+                recette_id: derniere_cuisson for recette_id, derniere_cuisson in historiques
             }
 
             # SÃ©rialisation basique (sans relations) pour la liste
@@ -452,8 +461,9 @@ async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(requir
         }
         ```
     """
-    from src.core.models import Recette
     from sqlalchemy.orm import joinedload
+
+    from src.core.models import Recette
 
     def _query():
         with executer_avec_session() as session:
@@ -586,9 +596,7 @@ async def modifier_recette(
             session.query(RecetteIngredient).filter(
                 RecetteIngredient.recette_id == recette_id
             ).delete()
-            session.query(EtapeRecette).filter(
-                EtapeRecette.recette_id == recette_id
-            ).delete()
+            session.query(EtapeRecette).filter(EtapeRecette.recette_id == recette_id).delete()
 
             _sauvegarder_ingredients(session, recette_id, donnees.ingredients)
             _sauvegarder_etapes(session, recette_id, donnees.instructions)
@@ -663,13 +671,14 @@ async def modifier_partiellement_recette(
                     RecetteIngredient.recette_id == recette_id
                 ).delete()
                 from src.api.schemas.recettes import IngredientItem
-                items = [IngredientItem(**i) if isinstance(i, dict) else i for i in ingredients_data]
+
+                items = [
+                    IngredientItem(**i) if isinstance(i, dict) else i for i in ingredients_data
+                ]
                 _sauvegarder_ingredients(session, recette_id, items)
 
             if instructions_data is not None:
-                session.query(EtapeRecette).filter(
-                    EtapeRecette.recette_id == recette_id
-                ).delete()
+                session.query(EtapeRecette).filter(EtapeRecette.recette_id == recette_id).delete()
                 _sauvegarder_etapes(session, recette_id, instructions_data)
 
             session.commit()
@@ -794,7 +803,8 @@ async def recettes_saisonnieres(
                 if nb_total == 0:
                     continue
                 nb_saison = sum(
-                    1 for ing in ingredients
+                    1
+                    for ing in ingredients
                     if any(ps in (ing.nom or "").lower() for ps in produits_saison)
                 )
                 if nb_saison > 0:
@@ -805,7 +815,7 @@ async def recettes_saisonnieres(
 
             total = len(scored)
             start = (page - 1) * page_size
-            page_items = scored[start:start + page_size]
+            page_items = scored[start : start + page_size]
 
             return {
                 "items": [
@@ -847,8 +857,19 @@ async def calendrier_saisonnier() -> dict[str, Any]:
 
     # Construire la vue par mois (1-12)
     mois_noms = [
-        "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+        "",
+        "Janvier",
+        "Février",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet",
+        "Août",
+        "Septembre",
+        "Octobre",
+        "Novembre",
+        "Décembre",
     ]
 
     calendrier = []
@@ -857,16 +878,20 @@ async def calendrier_saisonnier() -> dict[str, Any]:
         for _saison, items in INGREDIENTS_SAISON_ENRICHI.items():
             for ing in items:
                 if mois in ing.pic_mois:
-                    ingredients_mois.append({
-                        "nom": ing.nom,
-                        "categorie": ing.categorie,
-                        "bio_local": ing.bio_local_courant,
-                    })
-        calendrier.append({
-            "mois": mois,
-            "nom": mois_noms[mois],
-            "ingredients": ingredients_mois,
-        })
+                    ingredients_mois.append(
+                        {
+                            "nom": ing.nom,
+                            "categorie": ing.categorie,
+                            "bio_local": ing.bio_local_courant,
+                        }
+                    )
+        calendrier.append(
+            {
+                "mois": mois,
+                "nom": mois_noms[mois],
+                "ingredients": ingredients_mois,
+            }
+        )
 
     paires = [
         {
@@ -898,8 +923,8 @@ async def suggestions_recettes_depuis_jardin(
     Returns:
         Dict avec liste des récoltes et recettes suggérées compatibles
     """
-    from src.services.maison import obtenir_jardin_service
     from src.services.cuisine.suggestions import obtenir_service_suggestions
+    from src.services.maison import obtenir_jardin_service
 
     def _get_suggestions():
         with executer_avec_session() as session:
@@ -911,7 +936,8 @@ async def suggestions_recettes_depuis_jardin(
                     "nom": r.nom if hasattr(r, "nom") else str(r),
                     "date": str(getattr(r, "date_recolte_prevue", "")),
                     "quantite_kg": getattr(r, "quantite_disponible_kg", 1),
-                } for r in recoltes
+                }
+                for r in recoltes
             ]
 
             service_suggestions = obtenir_service_suggestions()
@@ -1016,42 +1042,41 @@ async def importer_recette_url(
 ) -> dict[str, Any]:
     """
     Importe une recette depuis une URL.
-    
+
     Supporte les sites populaires (Marmiton, CuisineAZ, etc.) ainsi que
     les pages gÃ©nÃ©riques via extraction IA.
-    
+
     Args:
         url: URL complÃ¨te de la recette
         user: Utilisateur authentifiÃ©
-    
+
     Returns:
         Recette crÃ©Ã©e avec donnÃ©es importÃ©es
-    
+
     Raises:
         HTTPException 422: URL invalide ou recette non trouvÃ©e
         HTTPException 500: Erreur lors de l'import
     """
     from src.core.models import Recette
-    from src.services.cuisine.recettes.import_url import obtenir_recipe_import_service
     from src.services.cuisine.recettes.enrichers import (
         ImportedIngredient,
         ImportedRecipe,
         get_recipe_enricher,
     )
-    
+    from src.services.cuisine.recettes.import_url import obtenir_recipe_import_service
+
     def _import():
         # Import via service
         import_service = obtenir_recipe_import_service()
         result = import_service.import_from_url(url, use_ai_fallback=True)
-        
+
         if not result.success:
             raise HTTPException(
-                status_code=422,
-                detail=f"Impossible d'importer la recette: {result.error}"
+                status_code=422, detail=f"Impossible d'importer la recette: {result.error}"
             )
-        
+
         recipe_data = result.recipe
-        
+
         # Convertir en ImportedRecipe pour enrichissement
         imported_recipe = ImportedRecipe(
             nom=recipe_data.nom,
@@ -1070,11 +1095,11 @@ async def importer_recette_url(
             ],
             etapes=recipe_data.etapes or [],
         )
-        
+
         # Enrichir automatiquement
         enricher = get_recipe_enricher()
         enrichment = enricher.enrich(imported_recipe)
-        
+
         # CrÃ©er la recette en DB
         with executer_avec_session() as session:
             # CrÃ©er recette principale avec enrichissement
@@ -1108,7 +1133,7 @@ async def importer_recette_url(
             )
             session.add(recette)
             session.flush()
-            
+
             # Ajouter ingrÃ©dients via helper (find-or-create Ingredient + RecetteIngredient)
             from src.api.schemas.recettes import IngredientItem
 
@@ -1122,15 +1147,15 @@ async def importer_recette_url(
                 if ing_data.nom
             ]
             _sauvegarder_ingredients(session, recette.id, ing_items)
-            
+
             # Ajouter Ã©tapes
             _sauvegarder_etapes(session, recette.id, recipe_data.etapes or [])
-            
+
             session.commit()
             session.refresh(recette)
-            
+
             return _serialiser_recette(recette, session, user)
-    
+
     return await executer_async(_import)
 
 
@@ -1146,18 +1171,22 @@ async def importer_recettes_lot(
     for url in urls[:10]:
         try:
             recette = await importer_recette_url(url=url, user=user)
-            resultats.append({
-                "url": url,
-                "succes": True,
-                "recette_id": recette.id,
-                "nom": recette.nom,
-            })
+            resultats.append(
+                {
+                    "url": url,
+                    "succes": True,
+                    "recette_id": recette.id,
+                    "nom": recette.nom,
+                }
+            )
         except HTTPException as exc:
-            resultats.append({
-                "url": url,
-                "succes": False,
-                "erreur": exc.detail,
-            })
+            resultats.append(
+                {
+                    "url": url,
+                    "succes": False,
+                    "erreur": exc.detail,
+                }
+            )
 
     return {
         "total": len(resultats),
@@ -1175,62 +1204,59 @@ async def importer_recette_pdf(
 ) -> dict[str, Any]:
     """
     Importe une recette depuis un fichier PDF.
-    
+
     Utilise PyPDF2 pour extraire le texte et l'enrichit automatiquement
     (nutrition, bio/local, classification, robots).
-    
+
     Args:
         file: Fichier PDF uploadÃ©
         user: Utilisateur authentifiÃ©
-    
+
     Returns:
         Recette crÃ©Ã©e avec donnÃ©es extraites et enrichies
-    
+
     Raises:
         HTTPException 422: Fichier invalide ou non PDF
         HTTPException 500: Erreur lors de l'extraction
     """
     import tempfile
     from pathlib import Path
-    
+
     from src.core.models import Recette
-    from src.services.cuisine.recettes.importer import RecipeImporter
     from src.services.cuisine.recettes.enrichers import (
         ImportedIngredient,
         ImportedRecipe,
         get_recipe_enricher,
     )
-    
+    from src.services.cuisine.recettes.importer import RecipeImporter
+
     def _import():
         # VÃ©rifier type de fichier
-        if not file.filename.lower().endswith('.pdf'):
-            raise HTTPException(
-                status_code=422,
-                detail="Seuls les fichiers PDF sont acceptÃ©s"
-            )
-        
+        if not file.filename.lower().endswith(".pdf"):
+            raise HTTPException(status_code=422, detail="Seuls les fichiers PDF sont acceptÃ©s")
+
         # Sauvegarder temporairement le fichier
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
             tmp.write(file.file.read())
             tmp_path = tmp.name
-        
+
         try:
             # Extraire avec PyPDF2
             raw_data = RecipeImporter.from_pdf(tmp_path)
-            
+
             if not raw_data or not raw_data.get("nom"):
                 raise HTTPException(
-                    status_code=422,
-                    detail="Impossible d'extraire une recette du PDF"
+                    status_code=422, detail="Impossible d'extraire une recette du PDF"
                 )
-            
+
             # Convertir en ImportedRecipe pour l'enrichissement
             # Les ingrÃ©dients sont des strings simples, on parse basiquement
             imported_ingredients = []
             for ing_str in raw_data.get("ingredients", []):
                 # Pattern simple: "250g farine" -> 250, g, farine
                 import re
-                match = re.match(r'(\d+(?:\.\d+)?)\s*([a-z]+)?\s*(.+)', ing_str.strip())
+
+                match = re.match(r"(\d+(?:\.\d+)?)\s*([a-z]+)?\s*(.+)", ing_str.strip())
                 if match:
                     qty, unit, name = match.groups()
                     imported_ingredients.append(
@@ -1242,10 +1268,8 @@ async def importer_recette_pdf(
                     )
                 else:
                     # Pas de quantitÃ© dÃ©tectÃ©e, juste le nom
-                    imported_ingredients.append(
-                        ImportedIngredient(nom=ing_str.strip())
-                    )
-            
+                    imported_ingredients.append(ImportedIngredient(nom=ing_str.strip()))
+
             recipe = ImportedRecipe(
                 nom=raw_data.get("nom", "Recette PDF"),
                 description=raw_data.get("description", ""),
@@ -1255,11 +1279,11 @@ async def importer_recette_pdf(
                 ingredients=imported_ingredients,
                 etapes=raw_data.get("etapes", []),
             )
-            
+
             # Enrichir la recette
             enricher = get_recipe_enricher()
             enrichment = enricher.enrich(recipe)
-            
+
             # CrÃ©er en DB
             with executer_avec_session() as session:
                 recette = Recette(
@@ -1292,10 +1316,10 @@ async def importer_recette_pdf(
                 )
                 session.add(recette)
                 session.flush()
-                
+
                 # IngrÃ©dients
                 from src.api.schemas.recettes import IngredientItem
-                
+
                 ing_items = [
                     IngredientItem(
                         nom=ing.nom,
@@ -1305,19 +1329,19 @@ async def importer_recette_pdf(
                     for ing in recipe.ingredients
                 ]
                 _sauvegarder_ingredients(session, recette.id, ing_items)
-                
+
                 # Ã‰tapes
                 _sauvegarder_etapes(session, recette.id, recipe.etapes)
-                
+
                 session.commit()
                 session.refresh(recette)
-                
+
                 return _serialiser_recette(recette, session, user)
-                
+
         finally:
             # Nettoyer le fichier temporaire
             Path(tmp_path).unlink(missing_ok=True)
-    
+
     return await executer_async(_import)
 
 
@@ -1348,9 +1372,7 @@ async def ajouter_favori(recette_id: int, user: dict[str, Any] = Depends(require
             if retour:
                 retour.feedback = "like"
             else:
-                retour = RetourRecette(
-                    user_id=user_id, recette_id=recette_id, feedback="like"
-                )
+                retour = RetourRecette(user_id=user_id, recette_id=recette_id, feedback="like")
                 session.add(retour)
             session.commit()
             from src.services.core.event_bus_mixin import emettre_evenement_simple
@@ -1494,7 +1516,9 @@ async def generer_version_jules(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.post("/generer-depuis-photo", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/generer-depuis-photo", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def generer_recette_depuis_photo(
     image: UploadFile = File(..., description="Photo du plat ou de la recette"),
@@ -1532,7 +1556,7 @@ async def generer_recette_depuis_photo(
             with executer_avec_session() as session:
                 db_recette = Recette(
                     nom=recette_extraite.nom,
-                    description=f"Recette gÃ©nÃ©rÃ©e depuis photo",
+                    description="Recette gÃ©nÃ©rÃ©e depuis photo",
                     temps_preparation=_parse_minutes(recette_extraite.temps_preparation),
                     temps_cuisson=_parse_minutes(recette_extraite.temps_cuisson),
                     portions=4,
@@ -1544,6 +1568,7 @@ async def generer_recette_depuis_photo(
                 session.flush()
 
                 from src.api.schemas.recettes import IngredientItem
+
                 ing_items = [
                     IngredientItem(
                         nom=ing.nom,
@@ -1570,6 +1595,7 @@ def _parse_minutes(valeur: str | None) -> int:
     if not valeur:
         return 0
     import re
+
     valeur = valeur.lower()
     h = re.search(r"(\d+)\s*h", valeur)
     m = re.search(r"(\d+)\s*(?:min|mn|m\b)", valeur)
@@ -1611,10 +1637,7 @@ async def recette_surprise(
                 saison = "automne"
 
             # Articles en stock (noms normalisÃ©s)
-            stocks = {
-                a.nom.lower()
-                for a in session.query(ArticleInventaire.nom).all()
-            }
+            stocks = {a.nom.lower() for a in session.query(ArticleInventaire.nom).all()}
 
             # Toutes les recettes avec leurs ingrÃ©dients
             recettes = session.query(RecetteORM).all()
@@ -1622,17 +1645,11 @@ async def recette_surprise(
                 raise HTTPException(status_code=404, detail="Aucune recette disponible")
 
             # Filtrer par saison si des tags existent
-            candidates = [
-                r for r in recettes
-                if saison in (r.tags or []) or not r.tags
-            ] or recettes
+            candidates = [r for r in recettes if saison in (r.tags or []) or not r.tags] or recettes
 
             # PrÃ©fÃ©rer les recettes dont des ingrÃ©dients sont en stock
             def _score(r: RecetteORM) -> int:
-                return sum(
-                    1 for ing in (r.ingredients or [])
-                    if ing.nom.lower() in stocks
-                )
+                return sum(1 for ing in (r.ingredients or []) if ing.nom.lower() in stocks)
 
             candidates.sort(key=_score, reverse=True)
             # Prendre parmi le top 5 des meilleures correspondances
@@ -1641,5 +1658,3 @@ async def recette_surprise(
             return _serialiser_recette(recette, session, user)
 
     return await executer_async(_query)
-
-

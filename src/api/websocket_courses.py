@@ -302,7 +302,9 @@ async def _persist_change(liste_id: int, action: str, data: dict[str, Any]) -> N
 
             def _toggle():
                 with executer_avec_session() as session:
-                    article = session.query(ArticleCourses).filter(ArticleCourses.id == item_id).first()
+                    article = (
+                        session.query(ArticleCourses).filter(ArticleCourses.id == item_id).first()
+                    )
                     if article:
                         article.achete = checked
                         article.achete_le = datetime.now(UTC) if checked else None
@@ -315,10 +317,14 @@ async def _persist_change(liste_id: int, action: str, data: dict[str, Any]) -> N
 
             def _remove():
                 with executer_avec_session() as session:
-                    article = session.query(ArticleCourses).filter(
-                        ArticleCourses.id == item_id,
-                        ArticleCourses.liste_id == liste_id,
-                    ).first()
+                    article = (
+                        session.query(ArticleCourses)
+                        .filter(
+                            ArticleCourses.id == item_id,
+                            ArticleCourses.liste_id == liste_id,
+                        )
+                        .first()
+                    )
                     if article:
                         session.delete(article)
                         session.commit()
@@ -356,10 +362,14 @@ async def _persist_change(liste_id: int, action: str, data: dict[str, Any]) -> N
 
             def _update():
                 with executer_avec_session() as session:
-                    article = session.query(ArticleCourses).filter(
-                        ArticleCourses.id == item_id,
-                        ArticleCourses.liste_id == liste_id,
-                    ).first()
+                    article = (
+                        session.query(ArticleCourses)
+                        .filter(
+                            ArticleCourses.id == item_id,
+                            ArticleCourses.liste_id == liste_id,
+                        )
+                        .first()
+                    )
                     if article:
                         if "quantite" in updates:
                             article.quantite_necessaire = updates["quantite"]
@@ -390,7 +400,7 @@ async def _persist_change(liste_id: int, action: str, data: dict[str, Any]) -> N
 
 
 # ═══════════════════════════════════════════════════════════
-# FALLBACK HTTP POLLING 
+# FALLBACK HTTP POLLING
 # ═══════════════════════════════════════════════════════════
 
 # Séquence de changements par liste pour le polling HTTP

@@ -22,7 +22,9 @@ class AnomalieJardin(BaseModel):
     """Anomalie détectée dans le jardin."""
 
     plante: str = Field("", description="Nom de la plante concernée")
-    type_anomalie: str = Field("", description="Type : maladie, stress_hydrique, carence, nuisible, gel")
+    type_anomalie: str = Field(
+        "", description="Type : maladie, stress_hydrique, carence, nuisible, gel"
+    )
     severite: str = Field("faible", description="Sévérité : faible, moyenne, elevee")
     description: str = Field("", description="Description du problème détecté")
     action_recommandee: str = Field("", description="Action corrective recommandée")
@@ -87,7 +89,7 @@ class JardinAnomaliesIAService(BaseAIService):
 
         prompt = f"""Analyse l'état de ce jardin familial et détecte les anomalies potentielles.
 
-Saison : {saison or 'non précisée'}
+Saison : {saison or "non précisée"}
 
 Plantes :
 {plantes_desc}

@@ -4,14 +4,14 @@ Service IA dédié à l'optimisation du planning des repas.
 Spécialisé dans l'optimisation nutritionnelle, variété et simplification.
 """
 
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.base.async_utils import sync_wrapper
 from src.services.core.registry import service_factory
-
 
 # ── Modèles Pydantic ──
 
@@ -73,9 +73,7 @@ class PlanningAIService(BaseAIService):
             service_name="planning_ia",
         )
 
-    async def analyser_variete_semaine(
-        self, planning_repas: list[dict]
-    ) -> AnalyseVariete:
+    async def analyser_variete_semaine(self, planning_repas: list[dict]) -> AnalyseVariete:
         """
         Analyse la variété du planning de la semaine.
 
@@ -123,7 +121,7 @@ Format JSON."""
     async def optimiser_nutrition_semaine(
         self,
         planning_repas: list[dict],
-        restrictions: Optional[list[str]] = None,
+        restrictions: list[str] | None = None,
     ) -> OptimisationNutrition:
         """
         Optimise la nutrition du planning.
@@ -203,7 +201,6 @@ Identifie:
 5. Charge globale (léger/normal/chargé)
 
 Format JSON."""
-
 
         result = await self.call_with_dict_parsing(
             prompt=prompt,

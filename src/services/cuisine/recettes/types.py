@@ -16,7 +16,9 @@ class RecetteSuggestion(BaseModel):
 
     nom: str = Field(..., min_length=3, max_length=200)
     description: str = Field(..., min_length=10)
-    raison: str | None = Field(None, max_length=300, description="Justification IA de la suggestion")
+    raison: str | None = Field(
+        None, max_length=300, description="Justification IA de la suggestion"
+    )
     temps_preparation: int = Field(..., gt=0, le=300)
     temps_cuisson: int = Field(..., ge=0, le=300)
     portions: int = Field(4, gt=0, le=20)

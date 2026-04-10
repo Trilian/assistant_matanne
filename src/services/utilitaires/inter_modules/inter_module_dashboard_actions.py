@@ -47,16 +47,22 @@ class DashboardActionsRapidesInteractionService:
             if "budget" in anomalie_type:
                 # Anomalie budget → lien vers page budget
                 action_type = data.get("action", "revoir")
-                link = f"/app/famille/budget?anomalie={action_type}&montant={data.get('montant', 0)}"
+                link = (
+                    f"/app/famille/budget?anomalie={action_type}&montant={data.get('montant', 0)}"
+                )
                 action = {
                     "type": "budget_anomaly",
                     "label": f"Budget: {data.get('categorie', 'N/A')} dépassé",
-                    "urgence": "haute" if data.get("pourcentage_depassement", 0) > 20 else "standard",
+                    "urgence": "haute"
+                    if data.get("pourcentage_depassement", 0) > 20
+                    else "standard",
                 }
 
             elif "inventaire" in anomalie_type or "stock" in anomalie_type:
                 # Anomalie stock → lien vers inventaire
-                link = f"/app/cuisine/inventaire?filtre=critique&quantite_min={data.get('seuil', 1)}"
+                link = (
+                    f"/app/cuisine/inventaire?filtre=critique&quantite_min={data.get('seuil', 1)}"
+                )
                 action = {
                     "type": "stock_alert",
                     "label": f"Stock: {data.get('article', 'article')} critique",
@@ -77,7 +83,7 @@ class DashboardActionsRapidesInteractionService:
                 link = f"/app/planning?action=optimiser&semaine={data.get('semaine', 'actuelle')}"
                 action = {
                     "type": "planning_optimization",
-                    "label": f"Planning: Variété insuffisante la semaine",
+                    "label": "Planning: Variété insuffisante la semaine",
                     "urgence": "moyen",
                 }
 
@@ -109,12 +115,14 @@ class DashboardActionsRapidesInteractionService:
                 }
 
             if link and action:
-                deeplinks.append({
-                    "anomalie_type": anomalie_type,
-                    "deeplink": link,
-                    "action": action,
-                    "data_contexte": data,
-                })
+                deeplinks.append(
+                    {
+                        "anomalie_type": anomalie_type,
+                        "deeplink": link,
+                        "action": action,
+                        "data_contexte": data,
+                    }
+                )
 
         logger.info(f"✅ Deep links générés: {len(deeplinks)} liens d'action rapide créés")
 
@@ -181,14 +189,26 @@ class DashboardActionsRapidesInteractionService:
 
                 ingredient_id = anomalie_data.get("article_id")  # Parfois nommé article_id
                 if not ingredient_id:
-                    return {"action_id": action_id, "statut": "error", "message": "Article non trouvé"}
+                    return {
+                        "action_id": action_id,
+                        "statut": "error",
+                        "message": "Article non trouvé",
+                    }
 
                 # Ajouter à la liste de courses par défaut (ID 1)
-                article = db.query(ArticleCourses).filter(ArticleCourses.ingredient_id == ingredient_id).first()
+                article = (
+                    db.query(ArticleCourses)
+                    .filter(ArticleCourses.ingredient_id == ingredient_id)
+                    .first()
+                )
                 if not article:
                     liste = db.query(ListeCourses).filter(ListeCourses.id == 1).first()
                     if not liste:
-                        return {"action_id": action_id, "statut": "error", "message": "Liste de courses non trouvée"}
+                        return {
+                            "action_id": action_id,
+                            "statut": "error",
+                            "message": "Liste de courses non trouvée",
+                        }
 
                     # Créer un nouvel article de courses
                     article = ArticleCourses(
@@ -204,7 +224,7 @@ class DashboardActionsRapidesInteractionService:
                     return {
                         "action_id": action_id,
                         "statut": "success",
-                        "message": f"Article ajouté à la liste de courses",
+                        "message": "Article ajouté à la liste de courses",
                     }
                 else:
                     return {

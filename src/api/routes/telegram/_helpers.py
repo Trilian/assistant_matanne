@@ -103,7 +103,9 @@ def _construire_message_aide() -> str:
     for commande, description in COMMANDES_TELEGRAM:
         lignes.append(f"• <code>{html.escape(commande)}</code> — {html.escape(description)}")
     lignes.append("")
-    lignes.append("Réponse rapide: envoyez <b>OK</b> après un planning ou une liste pour valider l'action proposée.")
+    lignes.append(
+        "Réponse rapide: envoyez <b>OK</b> après un planning ou une liste pour valider l'action proposée."
+    )
     return "\n".join(lignes)
 
 

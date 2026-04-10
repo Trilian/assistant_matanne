@@ -61,9 +61,7 @@ def _obtenir_profil_par_email(email: str):
 
         with obtenir_contexte_db() as session:
             profil = (
-                session.query(ProfilUtilisateur)
-                .filter(ProfilUtilisateur.email == email)
-                .first()
+                session.query(ProfilUtilisateur).filter(ProfilUtilisateur.email == email).first()
             )
             if profil:
                 # Détacher l'objet de la session pour pouvoir l'utiliser après
@@ -91,7 +89,10 @@ def _obtenir_profil_par_id(user_id: str):
                 try:
                     profil = session.get(ProfilUtilisateur, int(user_id))
                 except (ValueError, TypeError):
-                    logger.debug("user_id '%s' n'est pas un id numérique, recherche secondaire ignorée", user_id)
+                    logger.debug(
+                        "user_id '%s' n'est pas un id numérique, recherche secondaire ignorée",
+                        user_id,
+                    )
             if profil:
                 session.expunge(profil)
             return profil
@@ -108,9 +109,7 @@ def _maj_profil_2fa(email: str, **kwargs):
 
         with obtenir_contexte_db() as session:
             profil = (
-                session.query(ProfilUtilisateur)
-                .filter(ProfilUtilisateur.email == email)
-                .first()
+                session.query(ProfilUtilisateur).filter(ProfilUtilisateur.email == email).first()
             )
             if profil:
                 for k, v in kwargs.items():
@@ -339,14 +338,11 @@ async def inscription(request: RegisterRequest):
 
         return TokenResponse(access_token=token)
 
-
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Erreur inscription: {e}")
-        raise HTTPException(
-            status_code=400, detail="Impossible de créer le compte"
-        ) from e
+        raise HTTPException(status_code=400, detail="Impossible de créer le compte") from e
 
 
 # ═══════════════════════════════════════════════════════════
@@ -412,6 +408,7 @@ async def renvoyer_verification_email(request: LoginRequest):
         logger.warning("Erreur envoi email vérification pour %s : %s", request.email, e)
 
     return {"message": "Email de vérification envoyé."}
+
 
 @router.post(
     "/refresh",

@@ -25,8 +25,8 @@ from src.api.schemas.ia_modules import (
     EstimationProjetMaisonRequest,
     EstimationRoiHabitatResponse,
     OptimisationNutritionPlanningRequest,
-    PredictionEnergieResponse,
     PredictionConsommationRequest,
+    PredictionEnergieResponse,
     SuggestionSimplificationPlanningRequest,
 )
 from src.api.utils import executer_avec_session, gerer_exception_api
@@ -38,7 +38,11 @@ from src.services.integrations.habitudes_ia import AnalyseHabitude
 from src.services.integrations.meteo_impact_ai import MeteoContexte
 from src.services.inventaire.ia_service import PredictionConsommation
 from src.services.maison.ia.projets_ia_service import EstimationProjet
-from src.services.planning.ia_service import AnalyseVariete, OptimisationNutrition, SimplificationSemaine
+from src.services.planning.ia_service import (
+    AnalyseVariete,
+    OptimisationNutrition,
+    SimplificationSemaine,
+)
 from src.services.utilitaires.meteo_service import MeteoService
 
 router = APIRouter(prefix="/api/v1/ia/modules", tags=["IA"])
@@ -342,7 +346,9 @@ async def predire_consommation_energie(
         scores.append(score)
 
         derniere_conso = float(points[-1].get("conso", 0.0) or 0.0) if points else 0.0
-        avant_derniere = float(points[-2].get("conso", 0.0) or 0.0) if len(points) > 1 else derniere_conso
+        avant_derniere = (
+            float(points[-2].get("conso", 0.0) or 0.0) if len(points) > 1 else derniere_conso
+        )
 
         if avant_derniere > 0 and derniere_conso > avant_derniere * 1.08:
             tendance = "hausse"
@@ -402,8 +408,12 @@ async def obtenir_calendrier_semis_personnalise(
 
     meteo = MeteoService(lat=latitude, lon=longitude, ville=region).obtenir_meteo()
     previsions = list(meteo.previsions or [])
-    temp_moy_max = round(sum(p.temp_max for p in previsions[:7]) / max(1, min(7, len(previsions))), 1)
-    temp_moy_min = round(sum(p.temp_min for p in previsions[:7]) / max(1, min(7, len(previsions))), 1)
+    temp_moy_max = round(
+        sum(p.temp_max for p in previsions[:7]) / max(1, min(7, len(previsions))), 1
+    )
+    temp_moy_min = round(
+        sum(p.temp_min for p in previsions[:7]) / max(1, min(7, len(previsions))), 1
+    )
     pluie_7j = round(sum(float(p.precip_mm or 0.0) for p in previsions[:7]), 1)
 
     a_semer: list[dict[str, Any]] = []
@@ -506,7 +516,9 @@ async def estimer_roi_habitat(
         "Comparer au moins 3 devis avant engagement pour sécuriser la marge de ROI.",
     ]
     if roi < 0:
-        recommandations.append("Réduire le périmètre des travaux ou phaser le projet pour améliorer le ROI.")
+        recommandations.append(
+            "Réduire le périmètre des travaux ou phaser le projet pour améliorer le ROI."
+        )
 
     return EstimationRoiHabitatResponse(
         prix_m2_reference=round(prix_m2, 2),
@@ -544,7 +556,9 @@ async def comparer_devis_artisans(
         note_artisan = float(getattr(artisan, "note", 3) or 3)
         delai = int(getattr(devis, "delai_travaux_jours", 30) or 30)
         ratio_prix = (mediane_montant / montant) if montant > 0 else 0.0
-        score = round((ratio_prix * 50.0) + (note_artisan * 8.0) + max(0.0, 20.0 - (delai / 3.0)), 1)
+        score = round(
+            (ratio_prix * 50.0) + (note_artisan * 8.0) + max(0.0, 20.0 - (delai / 3.0)), 1
+        )
         devis_lus.append(
             {
                 "devis_id": devis.id,
@@ -636,12 +650,25 @@ async def detecter_anomalies_jardin(
 
         service = get_jardin_anomalies_ia_service()
         from datetime import date as date_type
-        mois_saisons = {1: "hiver", 2: "hiver", 3: "printemps", 4: "printemps",
-                        5: "printemps", 6: "ete", 7: "ete", 8: "ete",
-                        9: "automne", 10: "automne", 11: "automne", 12: "hiver"}
+
+        mois_saisons = {
+            1: "hiver",
+            2: "hiver",
+            3: "printemps",
+            4: "printemps",
+            5: "printemps",
+            6: "ete",
+            7: "ete",
+            8: "ete",
+            9: "automne",
+            10: "automne",
+            11: "automne",
+            12: "hiver",
+        }
         saison = mois_saisons.get(date_type.today().month, "")
         result = service.detecter_anomalies(plantes=plantes, saison=saison)
         return result.model_dump()
 
     from src.api.utils import executer_async
+
     return await executer_async(_query)

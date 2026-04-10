@@ -8,7 +8,7 @@ from typing import Any, TypeVar
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def avec_session_db(func: F) -> F:
+def avec_session_db[F: Callable[..., Any]](func: F) -> F:
     """
     Décorateur unifié pour gestion de session DB.
 

@@ -169,9 +169,7 @@ def _construire_robots_section(robots_user: list[str]) -> str:
     for r in robots_user:
         info = ROBOTS_INFO.get(r, {})
         parallel = (
-            "peut fonctionner en parallèle"
-            if info.get("peut_parallele")
-            else "UNE tâche à la fois"
+            "peut fonctionner en parallèle" if info.get("peut_parallele") else "UNE tâche à la fois"
         )
         nom = _sanitiser_texte(info.get("nom", r), 50)
         robots_txt.append(f"  - {nom} ({parallel})")
@@ -214,9 +212,7 @@ def _fusionner_resultats(resultats: list[dict]) -> dict:
         session = r.get("session", {})
         duree = session.get("duree_estimee_minutes", 0)
         merged["session"]["duree_estimee_minutes"] += duree
-        merged["session"]["conseils_organisation"].extend(
-            session.get("conseils_organisation", [])
-        )
+        merged["session"]["conseils_organisation"].extend(session.get("conseils_organisation", []))
         merged["recettes"].extend(r.get("recettes", []))
         merged["moments_jules"].extend(r.get("moments_jules", []))
 
@@ -270,12 +266,12 @@ class BatchCookingIAMixin:
         nb_recettes = _compter_recettes(planning_data)
         logger.info(
             "Batch cooking: %d recettes, session=%s, jules=%s",
-            nb_recettes, type_session, avec_jules,
+            nb_recettes,
+            type_session,
+            avec_jules,
         )
 
-        prompt = _construire_prompt_detail(
-            planning_data, type_session, avec_jules, robots_section
-        )
+        prompt = _construire_prompt_detail(planning_data, type_session, avec_jules, robots_section)
 
         # Tentative 1 : appel unique
         result = self._appel_ia_detail(prompt, max_tokens=_MAX_TOKENS)
@@ -298,7 +294,9 @@ class BatchCookingIAMixin:
             for i, chunk in enumerate(chunks):
                 logger.info(
                     "Génération chunk %d/%d: %d recettes",
-                    i + 1, len(chunks), _compter_recettes(chunk),
+                    i + 1,
+                    len(chunks),
+                    _compter_recettes(chunk),
                 )
                 chunk_prompt = _construire_prompt_detail(
                     chunk, type_session, avec_jules, robots_section
@@ -327,7 +325,9 @@ class BatchCookingIAMixin:
         if not self._client:
             return None
 
-        logger.info("Appel IA batch cooking: prompt=%d chars, max_tokens=%d", len(prompt), max_tokens)
+        logger.info(
+            "Appel IA batch cooking: prompt=%d chars, max_tokens=%d", len(prompt), max_tokens
+        )
 
         response = self._client.generer_json(
             prompt=prompt,
@@ -460,7 +460,9 @@ RÈGLES:
         )
 
         if result:
-            logger.info("✅ Plan batch cooking généré: %d min estimées", result.duree_totale_estimee)
+            logger.info(
+                "✅ Plan batch cooking généré: %d min estimées", result.duree_totale_estimee
+            )
 
         return result
 
@@ -526,7 +528,9 @@ RÈGLES:
         Returns:
             Dict avec timeline optimisée, recettes sélectionnées, temps estimé
         """
-        from datetime import date as date_type, timedelta
+        from datetime import date as date_type
+        from datetime import timedelta
+
         from src.core.models import Planning, Recette, Repas
 
         if not robots_user:
@@ -548,11 +552,7 @@ RÈGLES:
             return {"ok": False, "message": "Aucun planning actif trouvé."}
 
         # Récupérer les recettes du planning
-        repas = (
-            db.query(Repas)
-            .filter(Repas.planning_id == planning.id)
-            .all()
-        )
+        repas = db.query(Repas).filter(Repas.planning_id == planning.id).all()
         recette_ids = list({r.recette_id for r in repas if r.recette_id})
         if not recette_ids:
             return {"ok": False, "message": "Aucune recette dans le planning."}
@@ -571,27 +571,29 @@ RÈGLES:
 
         # Estimer les temps
         temps_total = sum(
-            (r.temps_preparation or 0) + (r.temps_cuisson or 0)
-            for r in recettes_batch
+            (r.temps_preparation or 0) + (r.temps_cuisson or 0) for r in recettes_batch
         )
 
         # Construire le contexte pour l'IA
         recettes_info = []
         for r in recettes_batch:
             robots_recette = r.robots_compatibles or []
-            recettes_info.append({
-                "nom": r.nom,
-                "prep_min": r.temps_preparation or 0,
-                "cuisson_min": r.temps_cuisson or 0,
-                "portions": r.portions or 4,
-                "congelable": bool(r.congelable),
-                "robots_compatibles": robots_recette,
-            })
+            recettes_info.append(
+                {
+                    "nom": r.nom,
+                    "prep_min": r.temps_preparation or 0,
+                    "cuisson_min": r.temps_cuisson or 0,
+                    "portions": r.portions or 4,
+                    "congelable": bool(r.congelable),
+                    "robots_compatibles": robots_recette,
+                }
+            )
 
         robots_section = _construire_robots_section(robots_user)
         jules_txt = (
             "Jules (19 mois) est présent. Prévoir des tâches simples pour lui."
-            if avec_jules else "Session solo."
+            if avec_jules
+            else "Session solo."
         )
 
         prompt = f"""Expert batch cooking. Optimise cette session familiale.

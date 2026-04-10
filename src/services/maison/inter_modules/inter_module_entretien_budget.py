@@ -45,8 +45,8 @@ class EntretienBudgetBridgeService:
         """
         from datetime import date
 
-        from src.core.models.habitat import TacheEntretien
         from src.core.models.finances import DepenseMaison
+        from src.core.models.habitat import TacheEntretien
         from src.services.core.events import obtenir_bus
 
         try:
@@ -89,7 +89,9 @@ class EntretienBudgetBridgeService:
 
             db.commit()
 
-            logger.info(f"✅ Dépense entretien créée (#{depense.id}, {montant_reel}€) pour tâche #{tache_id}")
+            logger.info(
+                f"✅ Dépense entretien créée (#{depense.id}, {montant_reel}€) pour tâche #{tache_id}"
+            )
 
             return {
                 "depense_id": depense.id,
@@ -106,7 +108,9 @@ class EntretienBudgetBridgeService:
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def obtenir_depenses_par_entretien(self, limite: int = 10, db: Session | None = None) -> list[dict]:
+    def obtenir_depenses_par_entretien(
+        self, limite: int = 10, db: Session | None = None
+    ) -> list[dict]:
         """Liste les dépenses maison récentes liées à l'entretien.
 
         Returns:

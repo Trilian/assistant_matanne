@@ -93,7 +93,9 @@ def obtenir_info_robot(robot_id: str) -> dict:
     Returns:
         Dictionnaire avec nom, emoji, parallele
     """
-    return ROBOTS_DISPONIBLES.get(robot_id, {"nom": robot_id, "emoji": "🔧", "peut_parallele": True})
+    return ROBOTS_DISPONIBLES.get(
+        robot_id, {"nom": robot_id, "emoji": "🔧", "peut_parallele": True}
+    )
 
 
 def obtenir_nom_robot(robot_id: str) -> str:

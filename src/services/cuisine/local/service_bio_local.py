@@ -16,9 +16,9 @@ from datetime import date
 from pathlib import Path
 
 from .producteurs import (
+    PRODUCTEURS_DEFAUT,
     GuideLocal,
     Producteur,
-    PRODUCTEURS_DEFAUT,
     generer_guide_local,
     trouver_producteurs,
 )
@@ -157,9 +157,7 @@ def analyser_articles_bio_local(
         )
 
         # Saisonnalité
-        info.en_saison = verifier_saisonnalite(
-            nom, mois_actuel, produits_saison
-        )
+        info.en_saison = verifier_saisonnalite(nom, mois_actuel, produits_saison)
 
         # Producteurs locaux
         matches = trouver_producteurs(nom, producteurs, bio_seulement=False)

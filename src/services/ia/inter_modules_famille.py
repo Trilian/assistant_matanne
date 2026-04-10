@@ -21,7 +21,9 @@ class FamilleBridgesMixin:
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def documents_expires_alertes(self, jours_avant: int = 30, db: Session | None = None) -> list[dict]:
+    def documents_expires_alertes(
+        self, jours_avant: int = 30, db: Session | None = None
+    ) -> list[dict]:
         """Liste les documents qui expirent bientôt ou sont déjà expirés."""
         from src.core.models import DocumentFamille
 
@@ -47,8 +49,12 @@ class FamilleBridgesMixin:
                 "date_expiration": str(d.date_expiration),
                 "jours_restants": d.jours_avant_expiration,
                 "est_expire": d.est_expire,
-                "niveau": "critique" if d.est_expire else (
-                    "urgent" if d.jours_avant_expiration and d.jours_avant_expiration <= 7 else "attention"
+                "niveau": "critique"
+                if d.est_expire
+                else (
+                    "urgent"
+                    if d.jours_avant_expiration and d.jours_avant_expiration <= 7
+                    else "attention"
                 ),
             }
             for d in documents
@@ -58,21 +64,24 @@ class FamilleBridgesMixin:
 
     def verifier_anomalies_budget_et_notifier(self) -> list[dict]:
         """Vérifie les anomalies budgétaires et émet des événements."""
-        from src.services.ia.prevision_budget import obtenir_service_prevision_budget
         from src.services.core.events import obtenir_bus
+        from src.services.ia.prevision_budget import obtenir_service_prevision_budget
 
         service = obtenir_service_prevision_budget()
         anomalies = service.detecter_anomalies_budget(seuil_pct=80)
 
         bus = obtenir_bus()
         for anomalie in anomalies:
-            bus.emettre("budget.depassement", {
-                "categorie": anomalie["categorie"],
-                "depense": anomalie["depense"],
-                "budget_ref": anomalie["budget_ref"],
-                "pourcentage": anomalie["pourcentage"],
-                "niveau": anomalie["niveau"],
-            })
+            bus.emettre(
+                "budget.depassement",
+                {
+                    "categorie": anomalie["categorie"],
+                    "depense": anomalie["depense"],
+                    "budget_ref": anomalie["budget_ref"],
+                    "pourcentage": anomalie["pourcentage"],
+                    "niveau": anomalie["niveau"],
+                },
+            )
 
         return anomalies
 
@@ -90,7 +99,11 @@ class FamilleBridgesMixin:
         from src.core.models.recettes import Recette
 
         anniversaires = sorted(
-            [a for a in db.query(AnniversaireFamille).all() if 0 <= a.jours_restants <= jours_horizon],
+            [
+                a
+                for a in db.query(AnniversaireFamille).all()
+                if 0 <= a.jours_restants <= jours_horizon
+            ],
             key=lambda anniversaire: anniversaire.jours_restants,
         )
         if not anniversaires:
@@ -121,8 +134,20 @@ class FamilleBridgesMixin:
         ]
         if not suggestions:
             suggestions = [
-                {"id": None, "nom": "Gâteau maison festif", "categorie": "Dessert", "type_repas": "dessert", "temps_total": 90},
-                {"id": None, "nom": "Buffet apéritif familial", "categorie": "Plat", "type_repas": "dîner", "temps_total": 45},
+                {
+                    "id": None,
+                    "nom": "Gâteau maison festif",
+                    "categorie": "Dessert",
+                    "type_repas": "dessert",
+                    "temps_total": 90,
+                },
+                {
+                    "id": None,
+                    "nom": "Buffet apéritif familial",
+                    "categorie": "Plat",
+                    "type_repas": "dîner",
+                    "temps_total": 45,
+                },
             ]
 
         return {
@@ -214,7 +239,9 @@ class FamilleBridgesMixin:
         repartition: dict[str, float] = {}
         for ligne in lignes:
             categorie = ligne.categorie or "autre"
-            repartition[categorie] = round(repartition.get(categorie, 0.0) + float(ligne.montant or 0), 2)
+            repartition[categorie] = round(
+                repartition.get(categorie, 0.0) + float(ligne.montant or 0), 2
+            )
 
         return {
             "mois": mois_cible,
@@ -263,7 +290,9 @@ class FamilleBridgesMixin:
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
-    def budget_unifie(self, mois: int | None = None, annee: int | None = None, db: Session | None = None) -> dict:
+    def budget_unifie(
+        self, mois: int | None = None, annee: int | None = None, db: Session | None = None
+    ) -> dict:
         """P3-A2: Agrège budget famille + charges maison en vue unifiée."""
         from src.core.models.famille import BudgetFamille
         from src.core.models.finances import DepenseMaison
@@ -283,7 +312,9 @@ class FamilleBridgesMixin:
         details_famille: dict[str, float] = {}
         for ligne in lignes_famille:
             cat = ligne.categorie or "autre"
-            details_famille[cat] = round(details_famille.get(cat, 0.0) + float(ligne.montant or 0), 2)
+            details_famille[cat] = round(
+                details_famille.get(cat, 0.0) + float(ligne.montant or 0), 2
+            )
         total_famille = round(sum(details_famille.values()), 2)
 
         lignes_maison = (
@@ -317,7 +348,9 @@ class FamilleBridgesMixin:
         )
         total_prec = total_prec_famille + total_prec_maison
         total_unifie = round(total_famille + total_maison, 2)
-        evolution_pct = round(((total_unifie - total_prec) / total_prec) * 100, 1) if total_prec > 0 else None
+        evolution_pct = (
+            round(((total_unifie - total_prec) / total_prec) * 100, 1) if total_prec > 0 else None
+        )
 
         return {
             "mois": mois_cible,
@@ -325,8 +358,12 @@ class FamilleBridgesMixin:
             "total_famille": total_famille,
             "total_maison": total_maison,
             "total_unifie": total_unifie,
-            "details_famille": [{"categorie": k, "montant": v} for k, v in sorted(details_famille.items())],
-            "details_maison": [{"categorie": k, "montant": v} for k, v in sorted(details_maison.items())],
+            "details_famille": [
+                {"categorie": k, "montant": v} for k, v in sorted(details_famille.items())
+            ],
+            "details_maison": [
+                {"categorie": k, "montant": v} for k, v in sorted(details_maison.items())
+            ],
             "evolution_pct": evolution_pct,
         }
 
@@ -357,21 +394,25 @@ class FamilleBridgesMixin:
             if enfant.date_of_birth:
                 delta = date.today() - enfant.date_of_birth
                 age_mois = delta.days // 30
-            impacts.append({
-                "domaine": "enfant",
-                "sujet": enfant.name,
-                "detail": f"Changement d'environnement pour {enfant.name}"
-                + (f" ({age_mois} mois)" if age_mois else ""),
-                "severite": "moyenne",
-            })
+            impacts.append(
+                {
+                    "domaine": "enfant",
+                    "sujet": enfant.name,
+                    "detail": f"Changement d'environnement pour {enfant.name}"
+                    + (f" ({age_mois} mois)" if age_mois else ""),
+                    "severite": "moyenne",
+                }
+            )
 
         for act in activites:
-            impacts.append({
-                "domaine": "activite",
-                "sujet": act.titre if hasattr(act, "titre") else str(act),
-                "detail": "Activité potentiellement à réorganiser après déménagement",
-                "severite": "faible",
-            })
+            impacts.append(
+                {
+                    "domaine": "activite",
+                    "sujet": act.titre if hasattr(act, "titre") else str(act),
+                    "detail": "Activité potentiellement à réorganiser après déménagement",
+                    "severite": "faible",
+                }
+            )
 
         notes = [float(c.note) for c in criteres if c.note is not None]
         score_global = round(sum(notes) / len(notes), 1) if notes else None
@@ -380,10 +421,14 @@ class FamilleBridgesMixin:
             "scenario_nom": scenario.nom,
             "impacts": impacts,
             "score_global": score_global,
-            "recommandation": "Scénario favorable" if score_global and score_global >= 7 else "À évaluer en détail",
+            "recommandation": "Scénario favorable"
+            if score_global and score_global >= 7
+            else "À évaluer en détail",
             "details": {
                 "budget_estime": float(scenario.budget_estime) if scenario.budget_estime else None,
-                "surface_m2": float(scenario.surface_finale_m2) if scenario.surface_finale_m2 else None,
+                "surface_m2": float(scenario.surface_finale_m2)
+                if scenario.surface_finale_m2
+                else None,
                 "nb_chambres": scenario.nb_chambres,
                 "avantages": scenario.avantages or [],
                 "inconvenients": scenario.inconvenients or [],
@@ -404,14 +449,18 @@ class FamilleBridgesMixin:
         from src.core.models.famille import AnniversaireFamille, BudgetFamille
 
         if anniversaire_id:
-            anniversaire = db.query(AnniversaireFamille).filter(
-                AnniversaireFamille.id == anniversaire_id,
-                AnniversaireFamille.actif.is_(True),
-            ).first()
+            anniversaire = (
+                db.query(AnniversaireFamille)
+                .filter(
+                    AnniversaireFamille.id == anniversaire_id,
+                    AnniversaireFamille.actif.is_(True),
+                )
+                .first()
+            )
         else:
-            anniversaires = db.query(AnniversaireFamille).filter(
-                AnniversaireFamille.actif.is_(True)
-            ).all()
+            anniversaires = (
+                db.query(AnniversaireFamille).filter(AnniversaireFamille.actif.is_(True)).all()
+            )
             proches = sorted(
                 [a for a in anniversaires if 0 <= a.jours_restants <= jours_horizon],
                 key=lambda a: a.jours_restants,
@@ -451,45 +500,82 @@ class FamilleBridgesMixin:
 
         if age < 3:
             suggestions_par_profil = [
-                {"nom": "Éveil sensoriel — tapis d'éveil", "budget_estime": 35, "categorie": "jouet"},
+                {
+                    "nom": "Éveil sensoriel — tapis d'éveil",
+                    "budget_estime": 35,
+                    "categorie": "jouet",
+                },
                 {"nom": "Coffret livres en tissu", "budget_estime": 20, "categorie": "livre"},
                 {"nom": "Hochet en bois naturel", "budget_estime": 15, "categorie": "jouet"},
                 {"nom": "Coffret de bain bébé", "budget_estime": 25, "categorie": "soin"},
             ]
         elif age < 6:
             suggestions_par_profil = [
-                {"nom": "Jeu de construction Duplo/Lego", "budget_estime": 40, "categorie": "jouet"},
+                {
+                    "nom": "Jeu de construction Duplo/Lego",
+                    "budget_estime": 40,
+                    "categorie": "jouet",
+                },
                 {"nom": "Vélo ou trottinette adaptée", "budget_estime": 60, "categorie": "sport"},
-                {"nom": "Abonnement médiathèque + livres", "budget_estime": 25, "categorie": "livre"},
-                {"nom": "Kit peinture / activités créatives", "budget_estime": 20, "categorie": "créatif"},
+                {
+                    "nom": "Abonnement médiathèque + livres",
+                    "budget_estime": 25,
+                    "categorie": "livre",
+                },
+                {
+                    "nom": "Kit peinture / activités créatives",
+                    "budget_estime": 20,
+                    "categorie": "créatif",
+                },
             ]
         elif age < 12:
             suggestions_par_profil = [
                 {"nom": "Jeu de société famille", "budget_estime": 35, "categorie": "jeu"},
                 {"nom": "Livre de la série préférée", "budget_estime": 15, "categorie": "livre"},
-                {"nom": "Activité sportive (stage, cours)", "budget_estime": 50, "categorie": "sport"},
+                {
+                    "nom": "Activité sportive (stage, cours)",
+                    "budget_estime": 50,
+                    "categorie": "sport",
+                },
                 {"nom": "Kit LEGO thématique", "budget_estime": 45, "categorie": "jouet"},
             ]
         elif relation in ("ami", "collègue"):
             suggestions_par_profil = [
-                {"nom": "Coffret thé ou café artisanal", "budget_estime": 20, "categorie": "gastronomie"},
+                {
+                    "nom": "Coffret thé ou café artisanal",
+                    "budget_estime": 20,
+                    "categorie": "gastronomie",
+                },
                 {"nom": "Livre de cuisine ou romans", "budget_estime": 18, "categorie": "livre"},
-                {"nom": "Bon cadeau restaurant/spa", "budget_estime": 30, "categorie": "experience"},
+                {
+                    "nom": "Bon cadeau restaurant/spa",
+                    "budget_estime": 30,
+                    "categorie": "experience",
+                },
                 {"nom": "Objet déco personnalisé", "budget_estime": 25, "categorie": "maison"},
             ]
         else:
             suggestions_par_profil = [
-                {"nom": "Bon cadeau expérience (sortie, atelier)", "budget_estime": budget_estime, "categorie": "experience"},
-                {"nom": "Coffret gastronomie / dégustation", "budget_estime": 40, "categorie": "gastronomie"},
+                {
+                    "nom": "Bon cadeau expérience (sortie, atelier)",
+                    "budget_estime": budget_estime,
+                    "categorie": "experience",
+                },
+                {
+                    "nom": "Coffret gastronomie / dégustation",
+                    "budget_estime": 40,
+                    "categorie": "gastronomie",
+                },
                 {"nom": "Livre coup de cœur", "budget_estime": 20, "categorie": "livre"},
-                {"nom": "Loisir ou hobby (selon centres d'intérêt)", "budget_estime": budget_estime, "categorie": "loisir"},
+                {
+                    "nom": "Loisir ou hobby (selon centres d'intérêt)",
+                    "budget_estime": budget_estime,
+                    "categorie": "loisir",
+                },
             ]
 
         cadeaux_recents = {c.get("cadeau", "").lower() for c in historique[-3:]}
-        suggestions = [
-            s for s in suggestions_par_profil
-            if s["nom"].lower() not in cadeaux_recents
-        ]
+        suggestions = [s for s in suggestions_par_profil if s["nom"].lower() not in cadeaux_recents]
 
         return {
             "anniversaire": {

@@ -25,8 +25,8 @@ from src.core.models import (
     RecetteIngredient,
     Repas,
 )
-from src.services.rapports.types import RapportPlanning
 from src.services.rapports._couleurs import Couleur
+from src.services.rapports.types import RapportPlanning
 
 logger = logging.getLogger(__name__)
 

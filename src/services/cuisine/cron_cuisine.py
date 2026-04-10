@@ -1,4 +1,4 @@
-﻿"""
+"""
 Cron jobs pour le module Cuisine.
 
 6 jobs automatisés :
@@ -48,7 +48,9 @@ def analyser_peremptions_matin():
                 .all()
             )
 
-            expires = [a for a in a_risque if a.date_peremption and a.date_peremption <= aujourd_hui]
+            expires = [
+                a for a in a_risque if a.date_peremption and a.date_peremption <= aujourd_hui
+            ]
             bientot = [a for a in a_risque if a.date_peremption and a.date_peremption > aujourd_hui]
 
             if expires:
@@ -89,7 +91,9 @@ def analyser_peremptions_matin():
             if expires or bientot:
                 _notifier_peremptions(expires, bientot)
 
-            logger.info(f"✅ Analyse péremptions terminée : {len(expires)} expirés, {len(bientot)} à risque")
+            logger.info(
+                f"✅ Analyse péremptions terminée : {len(expires)} expirés, {len(bientot)} à risque"
+            )
 
     except Exception as e:
         logger.error(f"❌ Erreur analyse péremptions : {e}", exc_info=True)
@@ -240,27 +244,29 @@ def _ajouter_stocks_bas_aux_courses(stocks_bas: list) -> None:
             )
             if ingredient_id:
                 quantite = max(article.quantite_min - article.quantite, 1)
-                service.create({
-                    "ingredient_id": ingredient_id,
-                    "quantite_necessaire": quantite,
-                    "priorite": "haute",
-                    "rayon_magasin": article.categorie or "Autre",
-                    "notes": f"Ajout auto — stock bas ({article.quantite}/{article.quantite_min})",
-                    "suggere_par_ia": False,
-                })
+                service.create(
+                    {
+                        "ingredient_id": ingredient_id,
+                        "quantite_necessaire": quantite,
+                        "priorite": "haute",
+                        "rayon_magasin": article.categorie or "Autre",
+                        "notes": f"Ajout auto — stock bas ({article.quantite}/{article.quantite_min})",
+                        "suggere_par_ia": False,
+                    }
+                )
                 nb_ajoutes += 1
 
         if nb_ajoutes > 0:
             logger.info(f"🛒 {nb_ajoutes} article(s) ajouté(s) automatiquement aux courses")
 
             # Notifier l'utilisateur
-            from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+            from src.services.core.notifications.notif_dispatcher import (
+                get_dispatcher_notifications,
+            )
 
             dispatcher = get_dispatcher_notifications()
             noms = ", ".join(a.nom for a in stocks_bas[:5] if a.nom)
-            message = (
-                f"🛒 {nb_ajoutes} article(s) en stock bas ajouté(s) aux courses : {noms}"
-            )
+            message = f"🛒 {nb_ajoutes} article(s) en stock bas ajouté(s) aux courses : {noms}"
             for user_id in _obtenir_user_ids():
                 dispatcher.envoyer_evenement(
                     user_id=user_id,
@@ -304,8 +310,7 @@ def generer_rapport_mensuel_cuisine():
     try:
         from sqlalchemy import func
 
-        from src.core.models import Recette, Repas
-        from src.core.models import ArticleInventaire
+        from src.core.models import ArticleInventaire, Recette, Repas
         from src.core.models.courses import HistoriqueAchats
 
         with obtenir_contexte_db() as session:
@@ -398,10 +403,11 @@ def _notifier_rappel_mi_semaine(nb_repas: int, creneaux_total: int) -> None:
 def entrainer_ml_satisfaction() -> None:
     """Reconstruit le modèle ML de satisfaction à partir des feedbacks récents."""
     try:
+        import re
+
         from src.core.models.recettes import Recette
         from src.core.models.user_preferences import RetourRecette
         from src.services.cuisine.suggestions.ml_satisfaction import ScoreSatisfactionRepas
-        import re
 
         with obtenir_contexte_db() as session:
             # Joindre RetourRecette + Recette pour construire le dataset
@@ -422,15 +428,17 @@ def entrainer_ml_satisfaction() -> None:
                 note = int(match.group(1))
                 nb_ingredients = len(recette.ingredients) if recette.ingredients else 5
 
-                historique.append({
-                    "note": note,
-                    "nb_ingredients": nb_ingredients,
-                    "temps_preparation": recette.temps_preparation or 30,
-                    "temps_cuisson": recette.temps_cuisson or 0,
-                    "categorie": recette.categorie or "Autre",
-                    "date": str(retour.cree_le.date()) if retour.cree_le else "",
-                    "nb_personnes": recette.portions or 4,
-                })
+                historique.append(
+                    {
+                        "note": note,
+                        "nb_ingredients": nb_ingredients,
+                        "temps_preparation": recette.temps_preparation or 30,
+                        "temps_cuisson": recette.temps_cuisson or 0,
+                        "categorie": recette.categorie or "Autre",
+                        "date": str(retour.cree_le.date()) if retour.cree_le else "",
+                        "nb_personnes": recette.portions or 4,
+                    }
+                )
 
         if not historique:
             logger.info("🤖 ML satisfaction : aucun feedback trouvé, entraînement ignoré")

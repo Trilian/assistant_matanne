@@ -24,14 +24,10 @@ class ErrorResponse(BaseModel):
 
     detail: str = Field(description="Message d'erreur descriptif", max_length=500)
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {"detail": "Recette non trouvée"}
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"detail": "Recette non trouvée"}}}
 
 
-class ReponsePaginee(BaseModel, Generic[T]):
+class ReponsePaginee[T](BaseModel):
     """Réponse paginée générique."""
 
     items: list[T]
@@ -56,6 +52,10 @@ class MessageResponse(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {"message": "Élément créé avec succès", "id": 42, "details": {"source": "api"}}
+            "example": {
+                "message": "Élément créé avec succès",
+                "id": 42,
+                "details": {"source": "api"},
+            }
         }
     }

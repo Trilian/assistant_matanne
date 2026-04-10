@@ -185,4 +185,3 @@ async def tester_webhook(
         raise HTTPException(status_code=404, detail="Webhook non trouvÃ©")
 
     return result
-

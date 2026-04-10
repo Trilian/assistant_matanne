@@ -39,7 +39,9 @@ class ServiceInnovationsRapports:
     def calculer_score_eco_responsable(self) -> Any:
         return self._service().calculer_score_eco_responsable()
 
-    def generer_carte_visuelle_partageable(self, *, type_carte: str, titre: str | None = None) -> Any:
+    def generer_carte_visuelle_partageable(
+        self, *, type_carte: str, titre: str | None = None
+    ) -> Any:
         return self._service().generer_carte_visuelle_partageable(
             type_carte=type_carte,
             titre=titre,

@@ -47,7 +47,7 @@ _IGNORED_METHODS = frozenset(
 )
 
 
-def sync_wrapper(async_method: Callable[P, Awaitable[T]]) -> Callable[P, T]:
+def sync_wrapper[**P, T](async_method: Callable[P, Awaitable[T]]) -> Callable[P, T]:
     """
     Décorateur qui crée automatiquement une version synchrone d'une méthode async.
 
@@ -98,7 +98,7 @@ def sync_wrapper(async_method: Callable[P, Awaitable[T]]) -> Callable[P, T]:
     return sync_method
 
 
-def make_sync_alias(
+def make_sync_alias[**P, T](
     async_method: Callable[P, Awaitable[T]], suffix: str = "_sync"
 ) -> Callable[P, T]:
     """
@@ -210,7 +210,7 @@ class ServiceMeta(type):
 # ═══════════════════════════════════════════════════════════
 
 
-def dual_api(cls: type[T]) -> type[T]:
+def dual_api[T](cls: type[T]) -> type[T]:
     """
     Décorateur de classe qui génère les versions sync des méthodes async.
 
@@ -259,7 +259,7 @@ def dual_api(cls: type[T]) -> type[T]:
 # ═══════════════════════════════════════════════════════════
 
 
-def run_sync(coro: Awaitable[T]) -> T:
+def run_sync[T](coro: Awaitable[T]) -> T:
     """
     Exécute une coroutine de manière synchrone.
 

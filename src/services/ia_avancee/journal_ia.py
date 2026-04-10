@@ -50,7 +50,9 @@ def generer_journal_familial_pdf(service: Any) -> RapportMensuelPdfResponse | No
     )
 
 
-def generer_rapport_mensuel_pdf(service: Any, mois: str | None = None) -> RapportMensuelPdfResponse | None:
+def generer_rapport_mensuel_pdf(
+    service: Any, mois: str | None = None
+) -> RapportMensuelPdfResponse | None:
     """Rapport mensuel PDF consolide avec narratif IA."""
     mois_ref = mois or date.today().strftime("%Y-%m")
     bilan = service.generer_resume_mensuel_ia()

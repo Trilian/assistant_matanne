@@ -696,7 +696,9 @@ class CoteHistorique(CreeLeMixin, Base):
     match_id: Mapped[int] = mapped_column(Integer, ForeignKey("jeux_matchs.id"), nullable=False)
 
     bookmaker: Mapped[str] = mapped_column(String(100), nullable=False)
-    marche: Mapped[str] = mapped_column(String(50), nullable=False, default="1")  # "1", "N", "2", "over_2.5"
+    marche: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="1"
+    )  # "1", "N", "2", "over_2.5"
 
     cote: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     cote_domicile: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -710,7 +712,6 @@ class CoteHistorique(CreeLeMixin, Base):
 
     def __repr__(self) -> str:
         return f"<Cote {self.bookmaker} {self.marche}={self.cote} @ {self.timestamp}>"
-
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -732,4 +733,3 @@ class BankrollHistorique(CreeLeMixin, Base):
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<BankrollHistorique(user={self.user_id}, montant={self.montant})>"
-

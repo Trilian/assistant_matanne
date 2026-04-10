@@ -13,8 +13,8 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     DateTime,
-    Integer,
     Index,
+    Integer,
     String,
     Text,
 )
@@ -128,7 +128,9 @@ class LogSecurite(CreeLeMixin, Base):
     ip: Mapped[str | None] = mapped_column(String(45))
     user_agent: Mapped[str | None] = mapped_column(String(500))
     details: Mapped[dict | None] = mapped_column(JSONB, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=datetime.utcnow
+    )
 
     __table_args__ = (
         Index("ix_logs_securite_created_at", "created_at"),
@@ -137,7 +139,9 @@ class LogSecurite(CreeLeMixin, Base):
     )
 
     def __repr__(self) -> str:
-        return f"<LogSecurite(id={self.id}, event_type='{self.event_type}', user_id='{self.user_id}')>"
+        return (
+            f"<LogSecurite(id={self.id}, event_type='{self.event_type}', user_id='{self.user_id}')>"
+        )
 
 
 # ═══════════════════════════════════════════════════════════

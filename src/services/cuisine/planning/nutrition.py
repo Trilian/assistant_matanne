@@ -162,14 +162,10 @@ def is_balanced_week(
         issues.append(f"Pas assez de poisson ({balance['poisson']}/{poisson_cible_total})")
 
     if balance["viande_rouge"] > viande_rouge_max:
-        issues.append(
-            f"Trop de viande rouge ({balance['viande_rouge']}/{viande_rouge_max} max)"
-        )
+        issues.append(f"Trop de viande rouge ({balance['viande_rouge']}/{viande_rouge_max} max)")
 
     if balance["vegetarien"] > vegetarien_max:
-        issues.append(
-            f"Trop de repas végétariens ({balance['vegetarien']}/{vegetarien_max} max)"
-        )
+        issues.append(f"Trop de repas végétariens ({balance['vegetarien']}/{vegetarien_max} max)")
 
     if balance["vegetarien"] < 1:
         issues.append("Pas de repas végétarien")

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-
 COMMANDES_TELEGRAM: tuple[tuple[str, str], ...] = (
     ("/planning", "Afficher le planning repas de la semaine"),
     ("/courses", "Afficher la liste de courses avec actions rapides"),
@@ -55,7 +54,9 @@ class EnvoyerCoursesMagasinRequest(BaseModel):
     """Payload pour l'envoi d'une sous-liste de courses par magasin via Telegram."""
 
     liste_id: int
-    magasin: str = Field(..., min_length=1, max_length=50, description="Magasin cible (bio_coop, grand_frais, etc.)")
+    magasin: str = Field(
+        ..., min_length=1, max_length=50, description="Magasin cible (bio_coop, grand_frais, etc.)"
+    )
     nom_liste: str | None = None
 
 

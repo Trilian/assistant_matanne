@@ -68,7 +68,9 @@ class VeilleHabitatService:
     def _slug(self, value: str) -> str:
         return quote(value.lower().replace(" ", "-"))
 
-    def _construire_url_source(self, source: str, critere: CritereImmoHabitat, ville: str) -> str | None:
+    def _construire_url_source(
+        self, source: str, critere: CritereImmoHabitat, ville: str
+    ) -> str | None:
         budget_min = int(float(critere.budget_min or 0)) if critere.budget_min else 0
         budget_max = int(float(critere.budget_max or 0)) if critere.budget_max else 0
         pieces = critere.nb_pieces_min or 0
@@ -254,7 +256,11 @@ class VeilleHabitatService:
 
         for element in elements:
             anchor = element.find("a", href=True)
-            titre = anchor.get_text(" ", strip=True) if anchor else element.get_text(" ", strip=True)[:120]
+            titre = (
+                anchor.get_text(" ", strip=True)
+                if anchor
+                else element.get_text(" ", strip=True)[:120]
+            )
             if len(titre) < 8:
                 continue
 
@@ -270,7 +276,9 @@ class VeilleHabitatService:
                     url_source=urljoin(url, anchor["href"]) if anchor else url,
                     titre=titre[:500],
                     prix=self._normaliser_prix(prix_match.group(1) if prix_match else None),
-                    surface_m2=self._normaliser_nombre(surface_match.group(1) if surface_match else None),
+                    surface_m2=self._normaliser_nombre(
+                        surface_match.group(1) if surface_match else None
+                    ),
                     nb_pieces=int(pieces_match.group(1)) if pieces_match else None,
                     code_postal=cp_match.group(1) if cp_match else None,
                     description_brute=texte[:1500],
@@ -280,7 +288,9 @@ class VeilleHabitatService:
 
     def _scraper_url(self, source: str, url: str, limite: int) -> list[AnnonceScrapee]:
         try:
-            with httpx.Client(timeout=20.0, follow_redirects=True, headers={"User-Agent": self.USER_AGENT}) as client:
+            with httpx.Client(
+                timeout=20.0, follow_redirects=True, headers={"User-Agent": self.USER_AGENT}
+            ) as client:
                 response = client.get(url)
             response.raise_for_status()
             html = response.text
@@ -352,7 +362,9 @@ class VeilleHabitatService:
             .limit(30)
             .all()
         )
-        valeurs = [float(item.prix_m2_secteur) for item in existantes if item.prix_m2_secteur is not None]
+        valeurs = [
+            float(item.prix_m2_secteur) for item in existantes if item.prix_m2_secteur is not None
+        ]
         if valeurs:
             return float(median(valeurs))
         if annonce.prix and annonce.surface_m2 and annonce.surface_m2 > 0:
@@ -414,7 +426,9 @@ class VeilleHabitatService:
                 if sources and source not in {item.lower() for item in sources}:
                     continue
                 sources_utilisees.add(source)
-                stats_sources.setdefault(source, {"source": source, "url": url, "annonces": 0, "alertes": 0})
+                stats_sources.setdefault(
+                    source, {"source": source, "url": url, "annonces": 0, "alertes": 0}
+                )
                 for scraped in self._scraper_url(source, url, limite_par_source):
                     stats_sources[source]["annonces"] += 1
                     hash_dedup = self._construire_hash(scraped)
@@ -447,7 +461,8 @@ class VeilleHabitatService:
                         "nb_pieces": scraped.nb_pieces,
                         "ville": scraped.ville,
                         "code_postal": scraped.code_postal,
-                        "departement": scraped.departement or (scraped.code_postal[:2] if scraped.code_postal else None),
+                        "departement": scraped.departement
+                        or (scraped.code_postal[:2] if scraped.code_postal else None),
                         "photos": scraped.photos or [],
                         "description_brute": scraped.description_brute,
                         "score_pertinence": score,
@@ -466,7 +481,9 @@ class VeilleHabitatService:
                             setattr(annonce, key, value)
                         annonces_maj += 1
 
-                    if score >= float(critere.seuil_alerte) or (ecart_prix_pct is not None and ecart_prix_pct <= -10):
+                    if score >= float(critere.seuil_alerte) or (
+                        ecart_prix_pct is not None and ecart_prix_pct <= -10
+                    ):
                         stats_sources[source]["alertes"] += 1
                         alerts.append(
                             {
@@ -484,7 +501,11 @@ class VeilleHabitatService:
 
         if envoyer_alertes and alerts:
             dispatcher = get_dispatcher_notifications()
-            top_alerts = sorted(alerts, key=lambda item: (item["score"], -(item.get("ecart_prix_pct") or 0)), reverse=True)[:3]
+            top_alerts = sorted(
+                alerts,
+                key=lambda item: (item["score"], -(item.get("ecart_prix_pct") or 0)),
+                reverse=True,
+            )[:3]
             lines = [
                 f"{item['titre']} ({item.get('ville') or 'ville inconnue'}) - score {item['score']:.2f}"
                 for item in top_alerts
@@ -574,8 +595,16 @@ class VeilleHabitatService:
             prix = float(annonce.prix) if annonce.prix is not None else None
             groupe["nb_annonces"] += 1
             groupe["score_max"] = max(groupe["score_max"], float(annonce.score_pertinence or 0))
-            groupe["prix_min"] = prix if groupe["prix_min"] is None else min(groupe["prix_min"], prix or groupe["prix_min"])
-            groupe["prix_max"] = prix if groupe["prix_max"] is None else max(groupe["prix_max"], prix or groupe["prix_max"])
+            groupe["prix_min"] = (
+                prix
+                if groupe["prix_min"] is None
+                else min(groupe["prix_min"], prix or groupe["prix_min"])
+            )
+            groupe["prix_max"] = (
+                prix
+                if groupe["prix_max"] is None
+                else max(groupe["prix_max"], prix or groupe["prix_max"])
+            )
 
         for groupe in groupes.values():
             geo = self._enrichir_localisation(groupe.get("ville"), groupe.get("code_postal"))
@@ -584,7 +613,11 @@ class VeilleHabitatService:
             groupe["latitude"] = geo.get("latitude")
             groupe["longitude"] = geo.get("longitude")
 
-        return sorted(groupes.values(), key=lambda item: (item["score_max"], item["nb_annonces"]), reverse=True)
+        return sorted(
+            groupes.values(),
+            key=lambda item: (item["score_max"], item["nb_annonces"]),
+            reverse=True,
+        )
 
 
 @service_factory("habitat_veille", tags={"habitat", "scraping", "immo"})

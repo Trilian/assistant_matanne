@@ -4,6 +4,7 @@ Routes API Famille â€” Budget familial.
 Sous-routeur inclus dans famille.py.
 """
 
+import logging
 from datetime import date
 from typing import Any
 
@@ -20,7 +21,6 @@ from src.api.schemas.errors import (
 )
 from src.api.utils import gerer_exception_api
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Famille"])
@@ -38,6 +38,7 @@ async def executer_async(func):
     from src.api.routes import famille as famille_routes
 
     return await famille_routes.executer_async(func)
+
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BUDGET FAMILIAL
@@ -191,9 +192,7 @@ async def supprimer_depense(
 
     def _query():
         with executer_avec_session() as session:
-            depense = (
-                session.query(BudgetFamille).filter(BudgetFamille.id == depense_id).first()
-            )
+            depense = session.query(BudgetFamille).filter(BudgetFamille.id == depense_id).first()
             if not depense:
                 raise HTTPException(status_code=404, detail="DÃ©pense non trouvÃ©e")
             session.delete(depense)
@@ -246,7 +245,9 @@ def _charger_historique_budget_6_mois(session: Any) -> list[dict[str, Any]]:
         )
 
         par_cat = {cat: float(total) for cat, total in depenses_mois}
-        historique.append({"mois": m, "annee": a, "total": sum(par_cat.values()), "par_categorie": par_cat})
+        historique.append(
+            {"mois": m, "annee": a, "total": sum(par_cat.values()), "par_categorie": par_cat}
+        )
 
     historique.reverse()
     return historique
@@ -287,9 +288,9 @@ async def analyse_budget_ia(
     # Enrichir avec les dÃ©penses maison (vue consolidÃ©e)
     depenses_maison: dict[str, float] = {}
     try:
-        from src.services.maison import obtenir_depenses_crud_service
-
         from datetime import datetime as _dt
+
+        from src.services.maison import obtenir_depenses_crud_service
 
         svc_maison = obtenir_depenses_crud_service()
         deps = svc_maison.get_depenses_mois(_dt.now().month, _dt.now().year)
@@ -402,9 +403,7 @@ async def anomalies_budget(
 
     donnees = await executer_async(_query)
     service = obtenir_budget_ai_service()
-    anomalies = service.detecter_anomalies(
-        donnees["depenses_courant"], donnees["moyennes"]
-    )
+    anomalies = service.detecter_anomalies(donnees["depenses_courant"], donnees["moyennes"])
 
     return {"anomalies": [a.model_dump() for a in anomalies]}
 
@@ -437,9 +436,7 @@ async def resume_budget_mois(
                 )
                 .all()
             )
-            total_courant = sum(
-                (a.prix_reel or a.prix_estime or 0) for a in achats_courant
-            )
+            total_courant = sum((a.prix_reel or a.prix_estime or 0) for a in achats_courant)
 
             # Calcul dÃ©but du mois prÃ©cÃ©dent
             if today.month == 1:
@@ -458,9 +455,7 @@ async def resume_budget_mois(
                 )
                 .all()
             )
-            total_prec = sum(
-                (a.prix_reel or a.prix_estime or 0) for a in achats_prec
-            )
+            total_prec = sum((a.prix_reel or a.prix_estime or 0) for a in achats_prec)
 
             variation = None
             if total_prec and total_prec > 0:
@@ -486,4 +481,3 @@ async def resume_budget_mois(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONFIG GARDE
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-

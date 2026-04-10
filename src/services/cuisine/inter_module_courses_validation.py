@@ -91,7 +91,10 @@ class CoursesValidationBridgeService:
                     ingredient = db.query(Ingredient).filter_by(id=article.ingredient_id).first()
                     if ingredient:
                         # Vérifier si cet ingrédient était planifié
-                        planifie = any(ing_name.lower() == ingredient.nom.lower() for ing_name, _ in ingredients_planifies)
+                        planifie = any(
+                            ing_name.lower() == ingredient.nom.lower()
+                            for ing_name, _ in ingredients_planifies
+                        )
 
                         if not planifie and ingredient.nom:
                             # C'est une substitution (acheté mais pas planifié directement)
@@ -100,7 +103,9 @@ class CoursesValidationBridgeService:
                                     "article_id": article.id,
                                     "ingredient_acheté": ingredient.nom,
                                     "type": "nouveau_ingredient",
-                                    "date_achat": article.achete_le.isoformat() if article.achete_le else None,
+                                    "date_achat": article.achete_le.isoformat()
+                                    if article.achete_le
+                                    else None,
                                     "rayon": article.rayon_magasin,
                                     "quantite": article.quantite_necessaire,
                                 }
@@ -164,7 +169,11 @@ class CoursesValidationBridgeService:
                 "achetes": achetes,
                 "non_achetes": non_achetes,
                 "taux_completion": round(taux_completion, 1),
-                "etat": "complète" if non_achetes == 0 else "en cours" if achetes > 0 else "pas commencée",
+                "etat": "complète"
+                if non_achetes == 0
+                else "en cours"
+                if achetes > 0
+                else "pas commencée",
             }
 
         except Exception as e:

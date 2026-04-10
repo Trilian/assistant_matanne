@@ -58,7 +58,9 @@ class VoyagesBudgetInteractionService:
             description = f"Voyage {voyage.titre} ({voyage.destination})"
 
             # Déduplication simple par description
-            existe = db.query(BudgetFamille).filter(BudgetFamille.description == description).first()
+            existe = (
+                db.query(BudgetFamille).filter(BudgetFamille.description == description).first()
+            )
             if existe:
                 continue
 

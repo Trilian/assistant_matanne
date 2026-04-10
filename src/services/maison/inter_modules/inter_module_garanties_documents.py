@@ -26,7 +26,10 @@ class GarantiesDocumentsInteractionService:
     @staticmethod
     def _calculer_jours_restants_garantie(objet: Any) -> int | None:
         """Retourne le nombre de jours restants de garantie pour un objet."""
-        if getattr(objet, "date_achat", None) is None or getattr(objet, "duree_garantie_mois", None) is None:
+        if (
+            getattr(objet, "date_achat", None) is None
+            or getattr(objet, "duree_garantie_mois", None) is None
+        ):
             return None
 
         try:
@@ -75,9 +78,7 @@ class GarantiesDocumentsInteractionService:
         notes_existantes = (document.notes or "").strip()
         if note_liaison not in notes_existantes:
             document.notes = (
-                f"{notes_existantes}\n{note_liaison}".strip()
-                if notes_existantes
-                else note_liaison
+                f"{notes_existantes}\n{note_liaison}".strip() if notes_existantes else note_liaison
             )
 
         if not document.membre_famille:
@@ -151,7 +152,9 @@ class GarantiesDocumentsInteractionService:
                     "categorie": document.categorie,
                     "fichier_nom": document.fichier_nom,
                     "fichier_url": document.fichier_url,
-                    "date_document": document.date_document.isoformat() if document.date_document else None,
+                    "date_document": document.date_document.isoformat()
+                    if document.date_document
+                    else None,
                     "tags": document.tags or [],
                 }
                 for document in documents

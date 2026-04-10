@@ -47,9 +47,7 @@ class ConnectionManager:
                 "connected_at": datetime.now(UTC).isoformat(),
             }
 
-        logger.info(
-            f"WS {self.resource_type}: {username} ({user_id}) connecté à #{resource_id}"
-        )
+        logger.info(f"WS {self.resource_type}: {username} ({user_id}) connecté à #{resource_id}")
 
         await self.broadcast(
             resource_id,
@@ -67,8 +65,7 @@ class ConnectionManager:
             {
                 "type": "users_list",
                 "users": [
-                    {"user_id": uid, **info}
-                    for uid, info in self._users[resource_id].items()
+                    {"user_id": uid, **info} for uid, info in self._users[resource_id].items()
                 ],
             },
         )
@@ -76,9 +73,7 @@ class ConnectionManager:
     async def disconnect(self, resource_id: int, user_id: str) -> None:
         """Déconnecte un utilisateur."""
         async with self._lock:
-            username = (
-                self._users[resource_id].get(user_id, {}).get("username", "Inconnu")
-            )
+            username = self._users[resource_id].get(user_id, {}).get("username", "Inconnu")
             self._connexions[resource_id].pop(user_id, None)
             self._users[resource_id].pop(user_id, None)
 
@@ -87,9 +82,7 @@ class ConnectionManager:
             if not self._users[resource_id]:
                 del self._users[resource_id]
 
-        logger.info(
-            f"WS {self.resource_type}: {username} ({user_id}) déconnecté de #{resource_id}"
-        )
+        logger.info(f"WS {self.resource_type}: {username} ({user_id}) déconnecté de #{resource_id}")
 
         await self.broadcast(
             resource_id,
@@ -116,15 +109,11 @@ class ConnectionManager:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def send_personal(
-        self, websocket: WebSocket, message: dict[str, Any]
-    ) -> None:
+    async def send_personal(self, websocket: WebSocket, message: dict[str, Any]) -> None:
         """Envoie un message à un client spécifique."""
         await self._safe_send(websocket, message)
 
-    async def _safe_send(
-        self, websocket: WebSocket, message: dict[str, Any]
-    ) -> None:
+    async def _safe_send(self, websocket: WebSocket, message: dict[str, Any]) -> None:
         """Envoie un message avec gestion d'erreur."""
         try:
             await websocket.send_json(message)
@@ -133,10 +122,7 @@ class ConnectionManager:
 
     def get_connected_users(self, resource_id: int) -> list[dict[str, Any]]:
         """Retourne la liste des utilisateurs connectés."""
-        return [
-            {"user_id": uid, **info}
-            for uid, info in self._users.get(resource_id, {}).items()
-        ]
+        return [{"user_id": uid, **info} for uid, info in self._users.get(resource_id, {}).items()]
 
     def get_connection_count(self, resource_id: int) -> int:
         """Retourne le nombre de connexions pour une ressource."""

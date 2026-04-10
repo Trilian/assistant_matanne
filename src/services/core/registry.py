@@ -42,46 +42,25 @@ Usage:
 
 """
 
-
-
 from __future__ import annotations
 
-
-
-import functools
-
-import importlib
-
 import ast
-
+import functools
+import importlib
 import logging
-
 import threading
-
 import time
-
-from pathlib import Path
-
 from collections import defaultdict
-
 from collections.abc import Callable
-
 from dataclasses import dataclass, field
-
 from datetime import datetime
-
+from pathlib import Path
 from typing import Any, TypeVar
-
-
 
 logger = logging.getLogger(__name__)
 
 
-
 T = TypeVar("T")
-
-
-
 
 
 # ═══════════════════════════════════════════════════════════
@@ -91,16 +70,9 @@ T = TypeVar("T")
 # ═══════════════════════════════════════════════════════════
 
 
-
-
-
 @dataclass
-
 class _ServiceEntry:
-
     """Entrée dans le registre pour un service."""
-
-
 
     name: str
 
@@ -119,9 +91,6 @@ class _ServiceEntry:
     tags: set[str] = field(default_factory=set)
 
 
-
-
-
 # ═══════════════════════════════════════════════════════════
 
 # SERVICE REGISTRY — Thread-safe avec double-checked locking
@@ -129,11 +98,7 @@ class _ServiceEntry:
 # ═══════════════════════════════════════════════════════════
 
 
-
-
-
 class ServiceRegistry:
-
     """
 
     Registre centralisé de services.
@@ -178,8 +143,6 @@ class ServiceRegistry:
 
     """
 
-
-
     # Mapping tag → Protocol pour validation automatique (PEP 544)
 
     # Note: Protocols retirés (dead code). Mapping conservé pour compatibilité
@@ -187,8 +150,6 @@ class ServiceRegistry:
     # si des protocols sont réintroduits à l'avenir.
 
     _PROTOCOL_PAR_TAG: dict[str, str] = {}
-
-
 
     def __init__(self):
 
@@ -200,28 +161,18 @@ class ServiceRegistry:
 
         self._index_lazy_construit = False
 
-
-
     # ───────────────────────────────────────────────────────
 
     # ENREGISTREMENT
 
     # ───────────────────────────────────────────────────────
 
-
-
     def enregistrer(
-
         self,
-
         nom: str,
-
         factory: type | Callable[[], Any],
-
         tags: set[str] | None = None,
-
     ) -> None:
-
         """
 
         Enregistre une factory de service.
@@ -245,43 +196,27 @@ class ServiceRegistry:
         """
 
         with self._global_lock:
-
             if nom in self._entries and self._entries[nom].instance is not None:
-
                 logger.warning(f"⚠️ Service '{nom}' déjà instancié, ré-enregistrement ignoré")
 
                 return
 
-
-
             factory_name = getattr(factory, "__name__", type(factory).__name__)
 
             self._entries[nom] = _ServiceEntry(
-
                 name=nom,
-
                 factory=factory,
-
                 tags=tags or set(),
-
             )
 
             logger.debug(f"📦 Service enregistré: {nom} ({factory_name})")
 
-
-
     def enregistrer_instance(
-
         self,
-
         nom: str,
-
         instance: Any,
-
         tags: set[str] | None = None,
-
     ) -> None:
-
         """
 
         Enregistre une instance pré-créée.
@@ -303,22 +238,14 @@ class ServiceRegistry:
         """
 
         with self._global_lock:
-
             self._entries[nom] = _ServiceEntry(
-
                 name=nom,
-
                 instance=instance,
-
                 created_at=datetime.now(),
-
                 tags=tags or set(),
-
             )
 
             logger.debug(f"📦 Instance enregistrée: {nom} ({type(instance).__name__})")
-
-
 
     # Alias anglais
 
@@ -326,18 +253,13 @@ class ServiceRegistry:
 
     register_instance = enregistrer_instance
 
-
-
     # ───────────────────────────────────────────────────────
 
     # OBTENTION — Double-checked locking
 
     # ───────────────────────────────────────────────────────
 
-
-
     def obtenir(self, nom: str) -> Any:
-
         """
 
         Obtient un service par son nom (lazy, thread-safe).
@@ -373,57 +295,38 @@ class ServiceRegistry:
         entry = self._entries.get(nom)
 
         if entry is None:
-
             self._essayer_enregistrement_lazy(nom)
 
             entry = self._entries.get(nom)
 
-
-
         if entry is None:
-
             raise KeyError(
-
                 f"Service '{nom}' non enregistré. "
-
                 f"Services disponibles: {list(self._entries.keys())}"
-
             )
-
-
 
         # Fast path — vérification sans lock
 
         if entry.instance is not None:
-
             with entry.lock:
-
                 entry.access_count += 1
 
                 entry.last_accessed = datetime.now()
 
             return entry.instance
 
-
-
         # Slow path — double-checked locking
 
         with entry.lock:
-
             # Re-vérifier après obtention du lock
 
             if entry.instance is None:
-
                 if entry.factory is None:
-
                     raise ValueError(f"Service '{nom}' n'a ni instance ni factory")
-
-
 
                 start = time.perf_counter()
 
                 try:
-
                     entry.instance = entry.factory()
 
                     entry.created_at = datetime.now()
@@ -431,24 +334,16 @@ class ServiceRegistry:
                     duration_ms = (time.perf_counter() - start) * 1000
 
                     logger.info(
-
                         f"📦 Service créé: {nom} ({entry.factory.__name__}) — {duration_ms:.1f}ms"
-
                     )
 
                 except Exception as e:
-
                     logger.error(
-
                         f"❌ Erreur création service '{nom}': {e}",
-
                         exc_info=True,
-
                     )
 
                     raise
-
-
 
             entry.access_count += 1
 
@@ -456,10 +351,7 @@ class ServiceRegistry:
 
             return entry.instance
 
-
-
     def _essayer_enregistrement_lazy(self, nom_service: str) -> None:
-
         """Tente d'enregistrer un service manquant via import lazy des modules services.
 
 
@@ -471,60 +363,36 @@ class ServiceRegistry:
         """
 
         if nom_service in self._entries:
-
             return
 
-
-
         if not self._index_lazy_construit:
-
             self._construire_index_lazy_factories()
-
-
 
         modules_candidats = self._index_lazy_factories.get(nom_service, [])
 
         if not modules_candidats:
-
             return
 
-
-
         for module_name in modules_candidats:
-
             if nom_service in self._entries:
-
                 return
 
-
-
             try:
-
                 importlib.import_module(module_name)
 
             except Exception:
-
                 # Les modules non importables ne doivent pas bloquer la découverte.
 
                 logger.debug("Import lazy ignoré pour %s", module_name, exc_info=True)
 
-
-
         if nom_service in self._entries:
-
             logger.debug("Service '%s' enregistré via import lazy ciblé", nom_service)
 
-
-
     def _construire_index_lazy_factories(self) -> None:
-
         """Construit un index service_factory(name) -> module Python sans importer les modules."""
 
         if self._index_lazy_construit:
-
             return
-
-
 
         racine_repo = Path(__file__).resolve().parents[3]
 
@@ -532,102 +400,62 @@ class ServiceRegistry:
 
         index: dict[str, list[str]] = {}
 
-
-
         if not racine_services.exists():
-
             self._index_lazy_construit = True
 
             self._index_lazy_factories = index
 
             return
 
-
-
         for fichier in racine_services.rglob("*.py"):
-
             if fichier.name == "__init__.py":
-
                 continue
 
-
-
             try:
-
                 code = fichier.read_text(encoding="utf-8")
 
                 arbre = ast.parse(code)
 
             except Exception:
-
                 continue
-
-
 
             services_trouves: set[str] = set()
 
-
-
             for noeud in ast.walk(arbre):
-
                 if not isinstance(noeud, ast.Call):
-
                     continue
-
-
 
                 est_factory = False
 
                 if isinstance(noeud.func, ast.Name) and noeud.func.id == "service_factory":
-
                     est_factory = True
 
                 elif isinstance(noeud.func, ast.Attribute) and noeud.func.attr == "service_factory":
-
                     est_factory = True
 
-
-
                 if not est_factory or not noeud.args:
-
                     continue
-
-
 
                 premier_arg = noeud.args[0]
 
                 if isinstance(premier_arg, ast.Constant) and isinstance(premier_arg.value, str):
-
                     services_trouves.add(premier_arg.value)
 
-
-
             if not services_trouves:
-
                 continue
-
-
 
             relatif = fichier.relative_to(racine_repo).with_suffix("")
 
             module_name = ".".join(relatif.parts)
 
-
-
             for nom_service in services_trouves:
-
                 index.setdefault(nom_service, []).append(module_name)
-
-
 
         self._index_lazy_factories = index
 
         self._index_lazy_construit = True
 
-
-
     def obtenir_type(self, nom: str, type_attendu: type[T]) -> T:
-
         """
 
         Obtient un service avec vérification de type.
@@ -651,23 +479,16 @@ class ServiceRegistry:
         instance = self.obtenir(nom)
 
         if not isinstance(instance, type_attendu):
-
             raise TypeError(
-
                 f"Service '{nom}' est {type(instance).__name__}, attendu {type_attendu.__name__}"
-
             )
 
         return instance
-
-
 
     # Alias anglais
 
     get = obtenir
     get_typed = obtenir_type
-
-
 
     # ───────────────────────────────────────────────────────
 
@@ -675,45 +496,29 @@ class ServiceRegistry:
 
     # ───────────────────────────────────────────────────────
 
-
-
     def par_tag(self, tag: str) -> dict[str, Any]:
-
         """Retourne tous les services avec un tag donné."""
 
         return {
-
             name: self.obtenir(name) for name, entry in self._entries.items() if tag in entry.tags
-
         }
 
-
-
     def est_enregistre(self, nom: str) -> bool:
-
         """Vérifie si un service est enregistré."""
 
         return nom in self._entries
 
-
-
     def est_instancie(self, nom: str) -> bool:
-
         """Vérifie si un service est déjà instancié."""
 
         entry = self._entries.get(nom)
 
         return entry is not None and entry.instance is not None
 
-
-
     def lister(self) -> list[str]:
-
         """Liste les noms de tous les services enregistrés."""
 
         return list(self._entries.keys())
-
-
 
     # Alias anglais
 
@@ -723,18 +528,13 @@ class ServiceRegistry:
 
     is_instantiated = est_instancie
 
-
-
     # ───────────────────────────────────────────────────────
 
     # HEALTH CHECK
 
     # ───────────────────────────────────────────────────────
 
-
-
     def health_check_global(self) -> dict[str, Any]:
-
         """
 
         Health check de tous les services instanciés.
@@ -753,77 +553,48 @@ class ServiceRegistry:
 
         erreurs = 0
 
-
-
         for name, entry in self._entries.items():
-
             if entry.instance is None:
-
                 results[name] = {"status": "not_instantiated"}
 
                 continue
 
-
-
             total += 1
-
-
 
             # Vérifier si le service a un health_check
 
             if hasattr(entry.instance, "health_check"):
-
                 try:
-
                     health = entry.instance.health_check()
 
                     results[name] = {
-
                         "status": health.status.value if hasattr(health, "status") else "healthy",
-
                         "details": health,
-
                     }
 
                     healthy += 1
 
                 except Exception as e:
-
                     results[name] = {
-
                         "status": "unhealthy",
-
                         "error": str(e),
-
                     }
 
                     erreurs += 1
 
             else:
-
                 results[name] = {"status": "healthy", "note": "no health_check method"}
 
                 healthy += 1
 
-
-
         return {
-
             "global_status": "healthy" if erreurs == 0 else "degraded",
-
             "total_services": len(self._entries),
-
             "instantiated": total,
-
             "healthy": healthy,
-
             "erreurs": erreurs,
-
             "services": results,
-
         }
-
-
 
     # ───────────────────────────────────────────────────────
 
@@ -831,45 +602,25 @@ class ServiceRegistry:
 
     # ───────────────────────────────────────────────────────
 
-
-
     def obtenir_metriques(self) -> dict[str, Any]:
-
         """Retourne les métriques d'utilisation du registre."""
 
         return {
-
             "total_enregistres": len(self._entries),
-
             "total_instancies": sum(1 for e in self._entries.values() if e.instance is not None),
-
             "services": {
-
                 name: {
-
                     "instancié": entry.instance is not None,
-
                     "créé_le": (entry.created_at.isoformat() if entry.created_at else None),
-
                     "accès": entry.access_count,
-
                     "dernier_accès": (
-
                         entry.last_accessed.isoformat() if entry.last_accessed else None
-
                     ),
-
                     "tags": list(entry.tags),
-
                 }
-
                 for name, entry in self._entries.items()
-
             },
-
         }
-
-
 
     # ───────────────────────────────────────────────────────
 
@@ -877,10 +628,7 @@ class ServiceRegistry:
 
     # ───────────────────────────────────────────────────────
 
-
-
     def reinitialiser(self, nom: str | None = None) -> None:
-
         """
 
         Réinitialise un service ou tous les services.
@@ -898,13 +646,10 @@ class ServiceRegistry:
         """
 
         if nom:
-
             entry = self._entries.get(nom)
 
             if entry:
-
                 with entry.lock:
-
                     entry.instance = None
 
                     entry.created_at = None
@@ -912,24 +657,17 @@ class ServiceRegistry:
                     logger.info(f"📦 Service réinitialisé: {nom}")
 
         else:
-
             with self._global_lock:
-
                 for entry in self._entries.values():
-
                     entry.instance = None
 
                     entry.created_at = None
 
                 logger.info("📦 Tous les services réinitialisés")
 
-
-
     # Alias anglais
 
     reset = reinitialiser
-
-
 
     # ───────────────────────────────────────────────────────
 
@@ -937,16 +675,10 @@ class ServiceRegistry:
 
     # ───────────────────────────────────────────────────────
 
-
-
     def valider_protocols(
-
         self,
-
         validations: dict[str, list[type]] | None = None,
-
     ) -> dict[str, list[str]]:
-
         """
 
         Valide que les services instanciés respectent les Protocols attendus.
@@ -1003,82 +735,58 @@ class ServiceRegistry:
 
         violations: dict[str, list[str]] = {}
 
-
-
         if validations is None:
-
             # Validation par défaut: pas de protocols communs à vérifier
 
             # (les protocols PEP 544 ont été retirés car jamais utilisés)
 
             common_checks: list[type] = []
 
-
-
             # Résoudre les Protocols liés aux tags (Audit §9.3 — ADOPTER PEP 544)
 
             _tag_protocol_map: dict[str, type] = {}
 
             try:
-
                 from src.services.core.base import protocols as _proto_mod
 
-
-
                 for tag, proto_name in self._PROTOCOL_PAR_TAG.items():
-
                     proto_cls = getattr(_proto_mod, proto_name, None)
 
                     if proto_cls is not None:
-
                         _tag_protocol_map[tag] = proto_cls
 
             except ImportError:
-
                 pass
 
-
-
             for nom, entry in self._entries.items():
-
                 if entry.instance is None:
-
                     continue
 
                 service_violations = []
 
                 for proto in common_checks:
-
                     if not isinstance(entry.instance, proto):
-
                         service_violations.append(f"ne satisfait pas {proto.__name__}")
 
                 # Vérifier les Protocols par tag
 
                 for tag in entry.tags:
-
                     proto_cls = _tag_protocol_map.get(tag)
 
                     if proto_cls is not None and not isinstance(entry.instance, proto_cls):
-
                         service_violations.append(f"tag '{tag}' requiert {proto_cls.__name__}")
 
                 if service_violations:
-
                     violations[nom] = service_violations
 
         else:
-
             for nom, protocols in validations.items():
-
                 if not self.est_enregistre(nom):
-
                     violations[nom] = [f"service '{nom}' non enregistré"]
 
                     continue
 
                 if not self.est_instancie(nom):
-
                     continue  # Pas encore instancié, skip
 
                 service = self.obtenir(nom)
@@ -1086,39 +794,24 @@ class ServiceRegistry:
                 service_violations = []
 
                 for proto in protocols:
-
                     if not isinstance(service, proto):
-
                         service_violations.append(f"ne satisfait pas {proto.__name__}")
 
                 if service_violations:
-
                     violations[nom] = service_violations
 
-
-
         if violations:
-
             for nom, msgs in violations.items():
-
                 logger.warning(f"⚠️ Service '{nom}': {', '.join(msgs)}")
 
         else:
-
             logger.debug("✅ Tous les services valident leurs Protocols")
 
-
-
         return violations
-
-
 
     # Alias anglais
 
     validate_protocols = valider_protocols
-
-
-
 
 
 # ═══════════════════════════════════════════════════════════
@@ -1128,51 +821,33 @@ class ServiceRegistry:
 # ═══════════════════════════════════════════════════════════
 
 
-
 _registre_lock = threading.Lock()
 
 _registre_instance: ServiceRegistry | None = None
 
 
-
-
-
 def obtenir_registre() -> ServiceRegistry:
-
     """Obtient le registre global de services (thread-safe)."""
 
     global _registre_instance
 
     if _registre_instance is None:
-
         with _registre_lock:
-
             if _registre_instance is None:
-
                 _registre_instance = ServiceRegistry()
 
     return _registre_instance
 
 
-
-
-
 def get_registry() -> ServiceRegistry:
-
     """Alias anglais pour obtenir_registre."""
 
     return obtenir_registre()
 
 
-
-
-
 # Raccourci pour accès direct
 
 registre = obtenir_registre()
-
-
-
 
 
 # ═══════════════════════════════════════════════════════════
@@ -1182,17 +857,10 @@ registre = obtenir_registre()
 # ═══════════════════════════════════════════════════════════
 
 
-
-
-
 def service_factory(
-
     nom: str,
-
     tags: set[str] | None = None,
-
 ) -> Callable:
-
     """Décorateur pour enregistrer une factory dans le registre.
 
 
@@ -1255,8 +923,6 @@ def service_factory(
 
     """
 
-
-
     def decorator(func: Callable) -> Callable:
 
         # Enregistrer la factory dans le registre global
@@ -1265,14 +931,10 @@ def service_factory(
 
         _registre.enregistrer(nom, func, tags=tags)
 
-
-
         @functools.wraps(func)
-
         def wrapper(*args: Any, **kwargs: Any) -> Any:
 
             if args or kwargs:
-
                 # Appel avec arguments explicites — bypass singleton registre
 
                 return func(*args, **kwargs)
@@ -1281,29 +943,15 @@ def service_factory(
 
             return _registre.obtenir(nom)
 
-
-
         return wrapper
-
-
 
     return decorator
 
 
-
-
-
 __all__ = [
-
     "ServiceRegistry",
-
     "registre",
-
     "obtenir_registre",
-
     "get_registry",
-
     "service_factory",
-
 ]
-

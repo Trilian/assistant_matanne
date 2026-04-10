@@ -27,13 +27,13 @@ from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
 from .admin_shared import (
+    _LABELS_JOBS,
     JobInfoResponse,
-    JobsBulkRequest,
     JobRunAllRequest,
     JobRunRequest,
+    JobsBulkRequest,
     JobScheduleUpdateRequest,
     JobsSimulationJourneeRequest,
-    _LABELS_JOBS,
     _ajouter_log_job,
     _extraire_jobs_matin,
     _job_logs,
@@ -45,6 +45,7 @@ from .admin_shared import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 @router.get(
     "/bridges/status",
@@ -179,84 +180,98 @@ async def statut_bridges(
                     "bridge": "inter_module_inventaire_planning.py",
                     "intitule": "Stock -> Planning recettes",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_inventaire_planning",
-                        fromlist=["obtenir_service_inventaire_planning_interaction"],
-                    )
-                    .obtenir_service_inventaire_planning_interaction()
-                    .suggerer_recettes_selon_stock(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_inventaire_planning",
+                            fromlist=["obtenir_service_inventaire_planning_interaction"],
+                        )
+                        .obtenir_service_inventaire_planning_interaction()
+                        .suggerer_recettes_selon_stock(db=session)
+                    ),
                 },
                 {
                     "id": "P5-02",
                     "bridge": "inter_module_jules_nutrition.py",
                     "intitule": "Jules profil -> Planning nutrition",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_jules_nutrition",
-                        fromlist=["obtenir_service_jules_nutrition_interaction"],
-                    )
-                    .obtenir_service_jules_nutrition_interaction()
-                    .adapter_planning_nutrition_jules(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_jules_nutrition",
+                            fromlist=["obtenir_service_jules_nutrition_interaction"],
+                        )
+                        .obtenir_service_jules_nutrition_interaction()
+                        .adapter_planning_nutrition_jules(db=session)
+                    ),
                 },
                 {
                     "id": "P5-03",
                     "bridge": "inter_module_saison_menu.py",
                     "intitule": "Produits de saison -> Planning IA",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_saison_menu",
-                        fromlist=["obtenir_service_saison_menu_interaction"],
-                    )
-                    .obtenir_service_saison_menu_interaction()
-                    .obtenir_contexte_saisonnier_planning(),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_saison_menu",
+                            fromlist=["obtenir_service_saison_menu_interaction"],
+                        )
+                        .obtenir_service_saison_menu_interaction()
+                        .obtenir_contexte_saisonnier_planning()
+                    ),
                 },
                 {
                     "id": "P5-04",
                     "bridge": "inter_module_meteo_activites.py",
                     "intitule": "Météo -> Activités famille",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.famille.inter_module_meteo_activites",
-                        fromlist=["obtenir_service_meteo_activites_interaction"],
-                    )
-                    .obtenir_service_meteo_activites_interaction()
-                    .suggerer_activites_selon_meteo(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.famille.inter_module_meteo_activites",
+                            fromlist=["obtenir_service_meteo_activites_interaction"],
+                        )
+                        .obtenir_service_meteo_activites_interaction()
+                        .suggerer_activites_selon_meteo(db=session)
+                    ),
                 },
                 {
                     "id": "P5-05",
                     "bridge": "inter_module_entretien_courses.py",
                     "intitule": "Entretien -> Courses",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.maison.inter_modules.inter_module_entretien_courses",
-                        fromlist=["obtenir_service_entretien_courses_interaction"],
-                    )
-                    .obtenir_service_entretien_courses_interaction()
-                    .suggerer_produits_entretien_pour_courses(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.maison.inter_modules.inter_module_entretien_courses",
+                            fromlist=["obtenir_service_entretien_courses_interaction"],
+                        )
+                        .obtenir_service_entretien_courses_interaction()
+                        .suggerer_produits_entretien_pour_courses(db=session)
+                    ),
                 },
                 {
                     "id": "P5-06",
                     "bridge": "inter_module_charges_energie.py",
                     "intitule": "Charges facture -> Analyse énergie",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.maison.inter_modules.inter_module_charges_energie",
-                        fromlist=["obtenir_service_charges_energie_interaction"],
-                    )
-                    .obtenir_service_charges_energie_interaction()
-                    .detecter_hausse_et_declencher_analyse(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.maison.inter_modules.inter_module_charges_energie",
+                            fromlist=["obtenir_service_charges_energie_interaction"],
+                        )
+                        .obtenir_service_charges_energie_interaction()
+                        .detecter_hausse_et_declencher_analyse(db=session)
+                    ),
                 },
                 {
                     "id": "P5-07",
                     "bridge": "inter_module_weekend_courses.py",
                     "intitule": "Weekend activités -> Courses",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.famille.inter_module_weekend_courses",
-                        fromlist=["obtenir_service_weekend_courses_interaction"],
-                    )
-                    .obtenir_service_weekend_courses_interaction()
-                    .suggerer_fournitures_weekend(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.famille.inter_module_weekend_courses",
+                            fromlist=["obtenir_service_weekend_courses_interaction"],
+                        )
+                        .obtenir_service_weekend_courses_interaction()
+                        .suggerer_fournitures_weekend(db=session)
+                    ),
                 },
                 {
                     "id": "P5-08",
@@ -276,60 +291,70 @@ async def statut_bridges(
                     "bridge": "inter_module_inventaire_planning.py",
                     "intitule": "Inventaire -> Planning",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_inventaire_planning",
-                        fromlist=["obtenir_service_inventaire_planning_interaction"],
-                    )
-                    .obtenir_service_inventaire_planning_interaction()
-                    .suggerer_recettes_selon_stock(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_inventaire_planning",
+                            fromlist=["obtenir_service_inventaire_planning_interaction"],
+                        )
+                        .obtenir_service_inventaire_planning_interaction()
+                        .suggerer_recettes_selon_stock(db=session)
+                    ),
                 },
                 {
                     "id": "P5-10",
                     "bridge": "inter_module_inventaire_planning.py",
                     "intitule": "Anti-gaspillage -> Courses",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_inventaire_planning",
-                        fromlist=["obtenir_service_inventaire_planning_interaction"],
-                    )
-                    .obtenir_service_inventaire_planning_interaction()
-                    .exclure_articles_surplus_des_courses(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_inventaire_planning",
+                            fromlist=["obtenir_service_inventaire_planning_interaction"],
+                        )
+                        .obtenir_service_inventaire_planning_interaction()
+                        .exclure_articles_surplus_des_courses(db=session)
+                    ),
                 },
                 {
                     "id": "P5-11",
                     "bridge": "inter_module_inventaire_planning.py",
                     "intitule": "Batch cooking -> Planning",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_inventaire_planning",
-                        fromlist=["obtenir_service_inventaire_planning_interaction"],
-                    )
-                    .obtenir_service_inventaire_planning_interaction()
-                    .bloquer_jours_batch_dans_planning(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_inventaire_planning",
+                            fromlist=["obtenir_service_inventaire_planning_interaction"],
+                        )
+                        .obtenir_service_inventaire_planning_interaction()
+                        .bloquer_jours_batch_dans_planning(db=session)
+                    ),
                 },
                 {
                     "id": "P5-12",
                     "bridge": "inter_module_inventaire_planning.py",
                     "intitule": "Nutrition -> Planning",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_inventaire_planning",
-                        fromlist=["obtenir_service_inventaire_planning_interaction"],
-                    )
-                    .obtenir_service_inventaire_planning_interaction()
-                    .analyser_equilibre_nutritionnel_planning(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_inventaire_planning",
+                            fromlist=["obtenir_service_inventaire_planning_interaction"],
+                        )
+                        .obtenir_service_inventaire_planning_interaction()
+                        .analyser_equilibre_nutritionnel_planning(db=session)
+                    ),
                 },
                 {
                     "id": "P5-13",
                     "bridge": "inter_module_inventaire_planning.py",
                     "intitule": "Feedback recette -> Suggestions IA",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.cuisine.inter_module_inventaire_planning",
-                        fromlist=["obtenir_service_inventaire_planning_interaction"],
-                    )
-                    .obtenir_service_inventaire_planning_interaction()
-                    .filtrer_recettes_mal_notees(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.cuisine.inter_module_inventaire_planning",
+                            fromlist=["obtenir_service_inventaire_planning_interaction"],
+                        )
+                        .obtenir_service_inventaire_planning_interaction()
+                        .filtrer_recettes_mal_notees(db=session)
+                    ),
                 },
                 {
                     "id": "P5-14",
@@ -375,12 +400,14 @@ async def statut_bridges(
                     "bridge": "inter_module_charges_energie.py",
                     "intitule": "Charges augmentation -> Diagnostic énergie",
                     "type_check": "smoke",
-                    "callable": lambda: __import__(
-                        "src.services.maison.inter_modules.inter_module_charges_energie",
-                        fromlist=["obtenir_service_charges_energie_interaction"],
-                    )
-                    .obtenir_service_charges_energie_interaction()
-                    .detecter_hausse_et_declencher_analyse(db=session),
+                    "callable": lambda: (
+                        __import__(
+                            "src.services.maison.inter_modules.inter_module_charges_energie",
+                            fromlist=["obtenir_service_charges_energie_interaction"],
+                        )
+                        .obtenir_service_charges_energie_interaction()
+                        .detecter_hausse_et_declencher_analyse(db=session)
+                    ),
                 },
             ]
 
@@ -474,14 +501,16 @@ async def lister_jobs(
         jobs = []
         for job in _demarreur._scheduler.get_jobs():
             prochain = job.next_run_time
-            jobs.append({
-                "id": job.id,
-                "nom": _LABELS_JOBS.get(job.id, job.name or job.id),
-                "schedule": str(job.trigger),
-                "prochain_run": prochain.isoformat() if prochain else None,
-                "dernier_run": None,  # APScheduler ne stocke pas le dernier run
-                "statut": "actif" if prochain else "inactif",
-            })
+            jobs.append(
+                {
+                    "id": job.id,
+                    "nom": _LABELS_JOBS.get(job.id, job.name or job.id),
+                    "schedule": str(job.trigger),
+                    "prochain_run": prochain.isoformat() if prochain else None,
+                    "dernier_run": None,  # APScheduler ne stocke pas le dernier run
+                    "statut": "actif" if prochain else "inactif",
+                }
+            )
         return jobs
     except Exception as e:
         logger.warning("Impossible de lister les jobs : %s", e)
@@ -544,7 +573,12 @@ async def executer_job(
         action="admin.job.run",
         entite_type="job",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"job_id": job_id, "dry_run": effective_dry_run, "force": effective_force, "params": custom_params},
+        details={
+            "job_id": job_id,
+            "dry_run": effective_dry_run,
+            "force": effective_force,
+            "params": custom_params,
+        },
     )
     return result
 
@@ -590,7 +624,11 @@ async def executer_tous_les_jobs(
                         "message": str(sortie.get("message", "")),
                     }
                 )
-                _ajouter_log_job(job_id, "succes" if statut in {"ok", "dry_run", "success"} else "erreur", str(sortie))
+                _ajouter_log_job(
+                    job_id,
+                    "succes" if statut in {"ok", "dry_run", "success"} else "erreur",
+                    str(sortie),
+                )
             except Exception as exc:
                 resultats.append(
                     {
@@ -609,7 +647,9 @@ async def executer_tous_les_jobs(
             "jobs_cibles": jobs_disponibles,
             "total": len(resultats),
             "succes": len([r for r in resultats if r["status"] in {"ok", "dry_run", "success"}]),
-            "echecs": len([r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]),
+            "echecs": len(
+                [r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]
+            ),
             "items": resultats,
         }
 
@@ -645,6 +685,7 @@ async def modifier_schedule_job(
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict[str, Any]:
     from apscheduler.triggers.cron import CronTrigger
+
     from src.services.core.cron.jobs import _demarreur
 
     if _demarreur is None or not _demarreur._scheduler.running:
@@ -656,7 +697,9 @@ async def modifier_schedule_job(
 
     parties = body.cron.split()
     if len(parties) != 5:
-        raise HTTPException(status_code=422, detail="Format cron invalide. Attendu: 'm h dom mon dow'")
+        raise HTTPException(
+            status_code=422, detail="Format cron invalide. Attendu: 'm h dom mon dow'"
+        )
 
     minute, heure, jour, mois, jour_semaine = parties
     nouveau_trigger = CronTrigger(
@@ -681,7 +724,9 @@ async def modifier_schedule_job(
         "status": "ok",
         "job_id": job_id,
         "schedule": str(job_mis_a_jour.trigger) if job_mis_a_jour else str(nouveau_trigger),
-        "prochain_run": job_mis_a_jour.next_run_time.isoformat() if job_mis_a_jour and job_mis_a_jour.next_run_time else None,
+        "prochain_run": job_mis_a_jour.next_run_time.isoformat()
+        if job_mis_a_jour and job_mis_a_jour.next_run_time
+        else None,
     }
 
 
@@ -689,7 +734,7 @@ async def modifier_schedule_job(
     "/jobs/run-morning-batch",
     response_model=AdminJobsRunAllResponse,
     responses=REPONSES_AUTH_ADMIN,
-    summary='Lancer tous les jobs du matin',
+    summary="Lancer tous les jobs du matin",
     description="Exécute en séquence les jobs planifiés entre 06:00 et 09:00.",
 )
 @gerer_exception_api
@@ -715,20 +760,28 @@ async def executer_jobs_matin(
                     relancer_exception=True,
                 )
                 statut = str(sortie.get("status", "ok"))
-                resultats.append({
-                    "job_id": job_id,
-                    "status": statut,
-                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
-                    "message": str(sortie.get("message", "")),
-                })
-                _ajouter_log_job(job_id, "succes" if statut in {"ok", "dry_run", "success"} else "erreur", str(sortie))
+                resultats.append(
+                    {
+                        "job_id": job_id,
+                        "status": statut,
+                        "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                        "message": str(sortie.get("message", "")),
+                    }
+                )
+                _ajouter_log_job(
+                    job_id,
+                    "succes" if statut in {"ok", "dry_run", "success"} else "erreur",
+                    str(sortie),
+                )
             except Exception as exc:
-                resultats.append({
-                    "job_id": job_id,
-                    "status": "failure",
-                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
-                    "message": str(exc),
-                })
+                resultats.append(
+                    {
+                        "job_id": job_id,
+                        "status": "failure",
+                        "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                        "message": str(exc),
+                    }
+                )
                 _ajouter_log_job(job_id, "erreur", str(exc))
                 if not body.continuer_sur_erreur:
                     break
@@ -738,7 +791,9 @@ async def executer_jobs_matin(
             "jobs_cibles": jobs_matin,
             "total": len(resultats),
             "succes": len([r for r in resultats if r["status"] in {"ok", "dry_run", "success"}]),
-            "echecs": len([r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]),
+            "echecs": len(
+                [r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]
+            ),
             "items": resultats,
         }
 
@@ -756,7 +811,7 @@ async def executer_jobs_matin(
     "/jobs/simulate-day",
     response_model=AdminSimulationJourneeResponse,
     responses=REPONSES_AUTH_ADMIN,
-    summary='Simuler une journée de jobs',
+    summary="Simuler une journée de jobs",
     description="Exécute séquentiellement les jobs disponibles d'une journée type en mode dry-run.",
 )
 @gerer_exception_api
@@ -767,7 +822,11 @@ async def simuler_journee_jobs(
     from src.api.utils import executer_async
 
     def _run() -> dict[str, Any]:
-        from src.services.core.cron.jobs import _demarreur, executer_job_par_id, lister_jobs_disponibles
+        from src.services.core.cron.jobs import (
+            _demarreur,
+            executer_job_par_id,
+            lister_jobs_disponibles,
+        )
 
         if body.date_reference:
             date_reference = datetime.fromisoformat(body.date_reference.replace("Z", "+00:00"))
@@ -789,16 +848,24 @@ async def simuler_journee_jobs(
                 if not body.inclure_jobs_inactifs and job.next_run_time is None:
                     continue
                 try:
-                    prochain = job.trigger.get_next_fire_time(None, fenetre_debut - timedelta(seconds=1))
+                    prochain = job.trigger.get_next_fire_time(
+                        None, fenetre_debut - timedelta(seconds=1)
+                    )
                 except Exception:
                     prochain = None
                 if prochain is not None:
-                    prochain_compare = prochain.replace(tzinfo=None) if getattr(prochain, "tzinfo", None) else prochain
+                    prochain_compare = (
+                        prochain.replace(tzinfo=None)
+                        if getattr(prochain, "tzinfo", None)
+                        else prochain
+                    )
                     if fenetre_debut <= prochain_compare <= fenetre_fin:
                         ids_planifies.append(job.id)
 
             if ids_planifies:
-                jobs_cibles = [job_id for job_id in jobs_disponibles if job_id in set(ids_planifies)]
+                jobs_cibles = [
+                    job_id for job_id in jobs_disponibles if job_id in set(ids_planifies)
+                ]
 
         for job_id in jobs_cibles:
             debut = time.perf_counter()
@@ -810,19 +877,23 @@ async def simuler_journee_jobs(
                     triggered_by_user_id=str(user.get("id", "admin")),
                     relancer_exception=True,
                 )
-                resultats.append({
-                    "job_id": job_id,
-                    "status": str(sortie.get("status", "ok")),
-                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
-                    "message": str(sortie.get("message", "")),
-                })
+                resultats.append(
+                    {
+                        "job_id": job_id,
+                        "status": str(sortie.get("status", "ok")),
+                        "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                        "message": str(sortie.get("message", "")),
+                    }
+                )
             except Exception as exc:
-                resultats.append({
-                    "job_id": job_id,
-                    "status": "failure",
-                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
-                    "message": str(exc),
-                })
+                resultats.append(
+                    {
+                        "job_id": job_id,
+                        "status": "failure",
+                        "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                        "message": str(exc),
+                    }
+                )
                 if not body.continuer_sur_erreur:
                     break
 
@@ -838,7 +909,9 @@ async def simuler_journee_jobs(
             "ended_at": datetime.now().isoformat(),
             "total": len(resultats),
             "succes": len([r for r in resultats if r["status"] in {"ok", "dry_run", "success"}]),
-            "echecs": len([r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]),
+            "echecs": len(
+                [r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]
+            ),
             "items": resultats,
         }
 
@@ -874,18 +947,22 @@ async def logs_job(
     logs_persistes: list[dict[str, Any]] = []
     try:
         with executer_avec_session() as session:
-            logs_rows = session.execute(
-                text(
-                    """
+            logs_rows = (
+                session.execute(
+                    text(
+                        """
                     SELECT started_at, ended_at, duration_ms, status, error_message, output_logs
                     FROM job_executions
                     WHERE job_id = :job_id
                     ORDER BY started_at DESC
                     LIMIT 50
                     """
-                ),
-                {"job_id": job_id},
-            ).mappings().all()
+                    ),
+                    {"job_id": job_id},
+                )
+                .mappings()
+                .all()
+            )
         logs_persistes = [
             {
                 "timestamp": row["started_at"].isoformat() if row["started_at"] else None,
@@ -922,7 +999,9 @@ async def historique_jobs(
     page: int = Query(1, ge=1),
     par_page: int = Query(25, ge=1, le=200),
     job_id: str | None = Query(None, description="Filtrer par identifiant de job"),
-    status: str | None = Query(None, description="Filtrer par statut (success/failure/dry_run/...)"),
+    status: str | None = Query(
+        None, description="Filtrer par statut (success/failure/dry_run/...)"
+    ),
     depuis: datetime | None = Query(None, description="Date de début (ISO 8601)"),
     jusqu_a: datetime | None = Query(None, description="Date de fin (ISO 8601)"),
     user: dict[str, Any] = Depends(require_role("admin")),
@@ -958,9 +1037,10 @@ async def historique_jobs(
             or 0
         )
 
-        rows = session.execute(
-            text(
-                f"""
+        rows = (
+            session.execute(
+                text(
+                    f"""
                 SELECT
                     id,
                     job_id,
@@ -978,9 +1058,12 @@ async def historique_jobs(
                 ORDER BY started_at DESC, id DESC
                 LIMIT :limit OFFSET :offset
                 """
-            ),
-            params,
-        ).mappings().all()
+                ),
+                params,
+            )
+            .mappings()
+            .all()
+        )
 
     items = [
         {
@@ -1028,10 +1111,14 @@ async def relancer_job_depuis_historique(
         _verifier_limite_jobs(str(user.get("id", "admin")))
 
     with executer_avec_session() as session:
-        row = session.execute(
-            text("SELECT id, job_id FROM job_executions WHERE id = :id LIMIT 1"),
-            {"id": execution_id},
-        ).mappings().first()
+        row = (
+            session.execute(
+                text("SELECT id, job_id FROM job_executions WHERE id = :id LIMIT 1"),
+                {"id": execution_id},
+            )
+            .mappings()
+            .first()
+        )
 
     if not row:
         raise HTTPException(status_code=404, detail=f"Exécution #{execution_id} introuvable")
@@ -1042,7 +1129,12 @@ async def relancer_job_depuis_historique(
         action="admin.jobs.retry_from_history",
         entite_type="job_execution",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"execution_id": execution_id, "job_id": job_id, "dry_run": dry_run, "force": force},
+        details={
+            "execution_id": execution_id,
+            "job_id": job_id,
+            "dry_run": dry_run,
+            "force": force,
+        },
     )
     return result
 
@@ -1066,18 +1158,22 @@ async def comparer_dry_run_vs_reel(
     par_job: dict[str, dict[str, Any]] = {}
 
     with executer_avec_session() as session:
-        rows = session.execute(
-            text(
-                """
+        rows = (
+            session.execute(
+                text(
+                    """
                 SELECT job_id, job_name, status, started_at, duration_ms, error_message
                 FROM job_executions
                 WHERE started_at >= :debut
                 ORDER BY started_at DESC
                 LIMIT 5000
                 """
-            ),
-            {"debut": debut},
-        ).mappings().all()
+                ),
+                {"debut": debut},
+            )
+            .mappings()
+            .all()
+        )
 
     for row in rows:
         job_id = str(row["job_id"])
@@ -1108,13 +1204,17 @@ async def comparer_dry_run_vs_reel(
         run = v["run"]
         if not dry and not run:
             continue
-        items.append({
-            **v,
-            "comparaison": {
-                "delta_duration_ms": (run["duration_ms"] - dry["duration_ms"]) if dry and run else None,
-                "status_coherent": (run["status"] in {"ok", "success"}) if run else None,
-            },
-        })
+        items.append(
+            {
+                **v,
+                "comparaison": {
+                    "delta_duration_ms": (run["duration_ms"] - dry["duration_ms"])
+                    if dry and run
+                    else None,
+                    "status_coherent": (run["status"] in {"ok", "success"}) if run else None,
+                },
+            }
+        )
 
     items_sorted = sorted(
         items,
@@ -1128,6 +1228,3 @@ async def comparer_dry_run_vs_reel(
         "total": len(items_sorted),
         "items": items_sorted,
     }
-
-
-

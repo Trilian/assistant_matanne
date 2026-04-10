@@ -27,7 +27,11 @@ def _resoudre_user_id(session, user: dict[str, Any]) -> int:
 
     profil = None
     if user.get("email"):
-        profil = session.query(ProfilUtilisateur).filter(ProfilUtilisateur.email == user["email"]).first()
+        profil = (
+            session.query(ProfilUtilisateur)
+            .filter(ProfilUtilisateur.email == user["email"])
+            .first()
+        )
     if profil is None:
         profil = session.query(ProfilUtilisateur).order_by(ProfilUtilisateur.id.asc()).first()
     if profil is None:
@@ -54,7 +58,9 @@ async def obtenir_statut_garmin(user: dict[str, Any] = Depends(require_auth)) ->
     return await executer_async(_query)
 
 
-@router.post("/connect-url", response_model=GarminConnectUrlResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/connect-url", response_model=GarminConnectUrlResponse, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def creer_url_connexion_garmin(
     callback_url: str = Query("oob"),
@@ -69,7 +75,9 @@ async def creer_url_connexion_garmin(
     return {"authorization_url": authorization_url, "request_token": request_token}
 
 
-@router.post("/complete", response_model=GarminConnectCompleteResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/complete", response_model=GarminConnectCompleteResponse, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def terminer_connexion_garmin(
     payload: dict[str, str],
@@ -85,9 +93,13 @@ async def terminer_connexion_garmin(
         with executer_avec_session() as session:
             user_id = _resoudre_user_id(session, user)
             service = obtenir_garmin_service()
-            succes = service.complete_authorization(user_id=user_id, oauth_verifier=oauth_verifier, db=session)
+            succes = service.complete_authorization(
+                user_id=user_id, oauth_verifier=oauth_verifier, db=session
+            )
             if not succes:
-                raise HTTPException(status_code=400, detail="Impossible de terminer la connexion Garmin")
+                raise HTTPException(
+                    status_code=400, detail="Impossible de terminer la connexion Garmin"
+                )
             return {"connected": True, "message": "Garmin connectÃ©"}
 
     return await executer_async(_query)
@@ -109,7 +121,9 @@ async def synchroniser_garmin(
             if isinstance(result, dict):
                 return {
                     "status": "success" if result.get("synced") else "error",
-                    "activities_synced": result.get("activites", result.get("activities_synced", 0)),
+                    "activities_synced": result.get(
+                        "activites", result.get("activities_synced", 0)
+                    ),
                 }
             return {"status": "success", "activities_synced": 0}
 
@@ -133,7 +147,9 @@ async def obtenir_stats_garmin(
     return await executer_async(_query)
 
 
-@router.post("/disconnect", response_model=GarminDisconnectResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/disconnect", response_model=GarminDisconnectResponse, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def deconnecter_garmin(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     from src.services.integrations.garmin.service import obtenir_garmin_service
@@ -148,7 +164,11 @@ async def deconnecter_garmin(user: dict[str, Any] = Depends(require_auth)) -> di
     return await executer_async(_query)
 
 
-@router.get("/recommandation-diner", response_model=GarminRecommandationDinerResponse, responses=REPONSES_CRUD_LECTURE)
+@router.get(
+    "/recommandation-diner",
+    response_model=GarminRecommandationDinerResponse,
+    responses=REPONSES_CRUD_LECTURE,
+)
 @gerer_exception_api
 async def recommander_diner_selon_activite(
     calories_brulees: int = Query(0, ge=0, le=3000),

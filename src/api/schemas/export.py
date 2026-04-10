@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-
 TYPES_EXPORT_VALIDES = {"courses", "planning", "recette", "budget"}
 
 
@@ -15,9 +14,7 @@ class ExportPDFRequest(BaseModel):
     id_ressource: int | None = None
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"type_export": "planning", "id_ressource": 12}
-        }
+        "json_schema_extra": {"example": {"type_export": "planning", "id_ressource": 12}}
     }
 
 

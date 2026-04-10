@@ -34,7 +34,7 @@ class DiagnosticMaisonService(BaseAIService):
             Dict avec diagnostic, gravite, actions_recommandees, cout_estime
         """
         prompt = f"""Analyse cette photo d'un problème maison.
-{f'Description utilisateur: {description}' if description else ''}
+{f"Description utilisateur: {description}" if description else ""}
 
 Diagnostique le problème et réponds en JSON:
 {{
@@ -120,4 +120,3 @@ Diagnostique le problème et réponds en JSON:
 def obtenir_service_diagnostic_maison() -> DiagnosticMaisonService:
     """Factory singleton."""
     return DiagnosticMaisonService()
-

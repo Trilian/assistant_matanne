@@ -6,11 +6,10 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
-
 
 # ═══════════════════════════════════════════════════════════
 # ÉQUIPES
@@ -363,7 +362,7 @@ class ResumeMensuelResponse(BaseModel):
 # ═══════════════════════════════════════════════════════════
 
 
-class StrategieGrille(str, Enum):
+class StrategieGrille(StrEnum):
     STATISTIQUE = "statistique"
     ALEATOIRE = "aleatoire"
     IA = "ia"

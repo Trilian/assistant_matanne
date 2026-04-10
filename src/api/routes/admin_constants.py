@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 # ═══════════════════════════════════════════════════════════
 # LABELS JOBS
 # ═══════════════════════════════════════════════════════════
@@ -71,15 +70,27 @@ _NOTIFICATION_TEMPLATES: dict[str, list[dict[str, str]]] = {
     "telegram": [
         {"id": "recette_du_jour", "label": "Suggestion recette du jour", "trigger": "CRON 11:30"},
         {"id": "diagnostic_maison", "label": "Alerte diagnostic maison", "trigger": "Événement"},
-        {"id": "resume_weekend", "label": "Résumé weekend suggestions", "trigger": "CRON ven 18:00"},
+        {
+            "id": "resume_weekend",
+            "label": "Résumé weekend suggestions",
+            "trigger": "CRON ven 18:00",
+        },
         {"id": "budget_depassement", "label": "Alerte budget dépassement", "trigger": "Événement"},
         {"id": "bilan_nutrition", "label": "Bilan nutrition semaine", "trigger": "CRON dim 20:30"},
         {"id": "rappel_entretien", "label": "Rappel entretien maison", "trigger": "CRON quotidien"},
         {"id": "commande_vocale", "label": "Commande vocale rapide", "trigger": "À la demande"},
     ],
     "email": [
-        {"id": "rapport_famille_mensuel_complet", "label": "Rapport mensuel famille complet", "trigger": "Mensuel 1er 09:00"},
-        {"id": "rapport_maison_trimestriel", "label": "Rapport trimestriel maison", "trigger": "Trimestriel"},
+        {
+            "id": "rapport_famille_mensuel_complet",
+            "label": "Rapport mensuel famille complet",
+            "trigger": "Mensuel 1er 09:00",
+        },
+        {
+            "id": "rapport_maison_trimestriel",
+            "label": "Rapport trimestriel maison",
+            "trigger": "Trimestriel",
+        },
     ],
 }
 

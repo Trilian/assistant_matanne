@@ -299,6 +299,7 @@ class ArticleAchat(Base):
 # ACHATS FAMILLE (table principale)
 # ═══════════════════════════════════════════════════════════
 
+
 class AchatFamille(Base):
     """Achat familial enrichi (liste d'achats).
 
@@ -350,7 +351,9 @@ class AchatFamille(Base):
     notes: Mapped[str | None] = mapped_column(Text)
 
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
-    modifie_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
+    modifie_le: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
     def __repr__(self) -> str:
         return f"<AchatFamille(nom={self.nom}, categorie={self.categorie}, pour_qui={self.pour_qui}, achete={self.achete})>"
@@ -510,7 +513,9 @@ class ChecklistAnniversaire(CreeLeMixin, Base):
     )
 
     def __repr__(self) -> str:
-        return f"<ChecklistAnniversaire(id={self.id}, anniv={self.anniversaire_id}, nom='{self.nom}')>"
+        return (
+            f"<ChecklistAnniversaire(id={self.id}, anniv={self.anniversaire_id}, nom='{self.nom}')>"
+        )
 
 
 class ItemChecklistAnniversaire(CreeLeMixin, Base):

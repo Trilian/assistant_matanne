@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Innovations — fonctionnalités avancées et IA.
 
 Service central regroupant les fonctionnalités d'innovation :
@@ -14,13 +14,13 @@ Hérite de BaseAIService pour rate limiting + cache + circuit breaker auto.
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import logging
-import secrets
-import base64
 import os
 import re
+import secrets
 from datetime import UTC, date, datetime, timedelta
 from io import BytesIO
 from typing import Any
@@ -33,72 +33,82 @@ from src.core.validation.sanitizer import NettoyeurEntrees
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
+from . import bien_etre, cuisine_ia, energie_ia
 from .famille_score import calculer_score_famille_hebdo as calculer_score_famille_hebdo_module
 from .journal_ia import (
     generer_journal_familial_auto as generer_journal_familial_auto_module,
+)
+from .journal_ia import (
     generer_journal_familial_pdf as generer_journal_familial_pdf_module,
+)
+from .journal_ia import (
     generer_rapport_mensuel_pdf as generer_rapport_mensuel_pdf_module,
 )
 from .pilote_auto import (
     configurer_mode_pilote_automatique as configurer_mode_pilote_automatique_module,
+)
+from .pilote_auto import (
     lire_config_mode_pilote as lire_config_mode_pilote_module,
+)
+from .pilote_auto import (
     normaliser_niveau_autonomie as normaliser_niveau_autonomie_module,
+)
+from .pilote_auto import (
     obtenir_mode_pilote_automatique as obtenir_mode_pilote_automatique_module,
+)
+from .pilote_auto import (
     proposer_repas_adapte_garmin as proposer_repas_adapte_garmin_module,
 )
-from . import bien_etre
-from . import cuisine_ia
-from . import energie_ia
 from .types_transverses import (
-    AlertesContextuellesResponse,
-    JournalFamilialAutoResponse,
-    ModePiloteAutomatiqueResponse,
-    RapportMensuelPdfResponse,
-    ScoreFamilleHebdoResponse,
-    DimensionScoreFamille,
     ActionPiloteAutomatique,
+    AlertesContextuellesResponse,
     AnalyseTendancesLotoResponse,
     AnomalieEnergieDetail,
     AnomaliesEnergieResponse,
     ApprentissageHabitudesResponse,
+    ApprentissagePreferencesResponse,
+    BatchCookingIntelligentResponse,
     BilanAnnuelResponse,
+    BlocPlanificationAuto,
+    CarteMagazineTablette,
+    CarteVisuellePartageableResponse,
     CoachRoutinesResponse,
+    CommandeTelegram,
     ComparateurEnergieResponse,
     ContactEnrichi,
     CriteresVeilleEmploi,
     DimensionBienEtre,
+    DimensionScoreFamille,
     DonneesInviteResponse,
+    EnergieTempsReelResponse,
     EnrichissementContactsResponse,
+    EtapeBatchIntelligente,
+    InsightQuotidien,
+    InsightsQuotidiensResponse,
+    JournalFamilialAutoResponse,
     LienInviteResponse,
+    MeteoContextuelleResponse,
+    MeteoImpactModule,
+    ModePiloteAutomatiqueResponse,
+    ModeTabletteMagazineResponse,
+    ModeVacancesResponse,
     OffreEmploi,
     OffreEnergieAlternative,
     PatternsAlimentairesResponse,
+    PlanificationHebdoCompleteResponse,
     PlanningJulesAdaptatifResponse,
+    PreferenceApprise,
+    RapportMensuelPdfResponse,
     ResumeMensuelIAResponse,
     SaisonnaliteIntelligenteResponse,
-    ScoreEcoResponsableResponse,
     ScoreBienEtreResponse,
+    ScoreEcoResponsableResponse,
+    ScoreFamilleHebdoResponse,
     SectionBilanAnnuel,
     SuggestionRepasSoirResponse,
+    TelegramConversationnelResponse,
     TendanceLoto,
     VeilleEmploiResponse,
-    InsightQuotidien,
-    InsightsQuotidiensResponse,
-    MeteoContextuelleResponse,
-    MeteoImpactModule,
-    ModeVacancesResponse,
-    ApprentissagePreferencesResponse,
-    BatchCookingIntelligentResponse,
-    BlocPlanificationAuto,
-    CarteMagazineTablette,
-    CarteVisuellePartageableResponse,
-    CommandeTelegram,
-    EnergieTempsReelResponse,
-    EtapeBatchIntelligente,
-    ModeTabletteMagazineResponse,
-    PlanificationHebdoCompleteResponse,
-    PreferenceApprise,
-    TelegramConversationnelResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -180,10 +190,14 @@ class InnovationsService(BaseAIService):
     def coach_routines_ia(self) -> CoachRoutinesResponse | None:
         """Coach routines : identifie les blocages routines et propose des ajustements."""
         score, retard = self._score_routines_detail()
-        blocages = [
-            "Trop de routines au même moment",
-            "Créneaux du soir surchargés",
-        ] if retard else []
+        blocages = (
+            [
+                "Trop de routines au même moment",
+                "Créneaux du soir surchargés",
+            ]
+            if retard
+            else []
+        )
         ajustements = [
             "Décaler 1 routine du soir au matin",
             "Limiter à 3 routines prioritaires par journée",
@@ -227,9 +241,27 @@ Retourne un JSON avec:
     def generer_planning_jules_adaptatif(self) -> PlanningJulesAdaptatifResponse | None:
         """Planning Jules : planning d'activités Jules ajusté âge + historique."""
         activites = [
-            {"titre": "Parcours motricité", "moment": "matin", "duree_minutes": 25, "en_interieur": True, "raison": "Développer coordination"},
-            {"titre": "Sortie parc", "moment": "après-midi", "duree_minutes": 60, "en_interieur": False, "raison": "Dépense physique"},
-            {"titre": "Lecture imagier", "moment": "soir", "duree_minutes": 15, "en_interieur": True, "raison": "Stimulation du langage"},
+            {
+                "titre": "Parcours motricité",
+                "moment": "matin",
+                "duree_minutes": 25,
+                "en_interieur": True,
+                "raison": "Développer coordination",
+            },
+            {
+                "titre": "Sortie parc",
+                "moment": "après-midi",
+                "duree_minutes": 60,
+                "en_interieur": False,
+                "raison": "Dépense physique",
+            },
+            {
+                "titre": "Lecture imagier",
+                "moment": "soir",
+                "duree_minutes": 15,
+                "en_interieur": True,
+                "raison": "Stimulation du langage",
+            },
         ]
         return PlanningJulesAdaptatifResponse(
             semaine_reference=date.today().isoformat(),
@@ -240,7 +272,12 @@ Retourne un JSON avec:
             ],
         )
 
-    @avec_cache(ttl=3600, key_func=lambda self, prix_kwh_actuel_eur, abonnement_mensuel_eur: f"p9_comparateur_{prix_kwh_actuel_eur}_{abonnement_mensuel_eur}")
+    @avec_cache(
+        ttl=3600,
+        key_func=lambda self, prix_kwh_actuel_eur, abonnement_mensuel_eur: (
+            f"p9_comparateur_{prix_kwh_actuel_eur}_{abonnement_mensuel_eur}"
+        ),
+    )
     @avec_gestion_erreurs(default_return=None)
     def comparer_fournisseurs_energie(
         self,
@@ -298,7 +335,9 @@ Retourne un JSON avec:
         return AlertesContextuellesResponse(nb_alertes=len(alertes), alertes=alertes)
 
     @avec_gestion_erreurs(default_return=None)
-    def obtenir_mode_pilote_automatique(self, user_id: int | None = None) -> ModePiloteAutomatiqueResponse | None:
+    def obtenir_mode_pilote_automatique(
+        self, user_id: int | None = None
+    ) -> ModePiloteAutomatiqueResponse | None:
         """E1 : mode pilote automatique (propositions + validations)."""
         return obtenir_mode_pilote_automatique_module(self, user_id=user_id)
 
@@ -328,7 +367,9 @@ Retourne un JSON avec:
         return generer_journal_familial_pdf_module(self)
 
     @avec_gestion_erreurs(default_return=None)
-    def generer_rapport_mensuel_pdf(self, mois: str | None = None) -> RapportMensuelPdfResponse | None:
+    def generer_rapport_mensuel_pdf(
+        self, mois: str | None = None
+    ) -> RapportMensuelPdfResponse | None:
         """E9 : rapport mensuel PDF consolide avec narratif IA."""
         return generer_rapport_mensuel_pdf_module(self, mois=mois)
 
@@ -403,7 +444,10 @@ Retourne un JSON avec:
 
         return self.obtenir_mode_vacances(user_id=user_id)
 
-    @avec_cache(ttl=43200, key_func=lambda self, limite: f"insights_quotidiens_{limite}_{date.today().isoformat()}")
+    @avec_cache(
+        ttl=43200,
+        key_func=lambda self, limite: f"insights_quotidiens_{limite}_{date.today().isoformat()}",
+    )
     @avec_gestion_erreurs(default_return=None)
     def generer_insights_quotidiens(self, limite: int = 2) -> InsightsQuotidiensResponse | None:
         """Insights IA : génère 1-2 insights IA proactifs par jour (anti-spam)."""
@@ -493,7 +537,9 @@ Retourne un JSON avec:
                 module="cuisine",
                 impact="Adapter les menus à la météo du jour",
                 actions_recommandees=[
-                    "Favoriser repas frais et hydratants" if est_chaud else "Prévoir repas chauds de saison",
+                    "Favoriser repas frais et hydratants"
+                    if est_chaud
+                    else "Prévoir repas chauds de saison",
                     "Ajouter des produits de saison dans les courses",
                 ],
             )
@@ -503,7 +549,9 @@ Retourne un JSON avec:
                 module="famille",
                 impact="Arbitrer activités intérieur/extérieur",
                 actions_recommandees=[
-                    "Prévoir activité intérieure" if est_pluvieux else "Programmer une sortie extérieure",
+                    "Prévoir activité intérieure"
+                    if est_pluvieux
+                    else "Programmer une sortie extérieure",
                     "Adapter la durée des sorties selon la température",
                 ],
             )
@@ -537,9 +585,13 @@ Retourne un JSON avec:
             modules=modules,
         )
 
-    @avec_cache(ttl=3600, key_func=lambda self, user_id: f"preferences_apprises_{user_id or 'anon'}")
+    @avec_cache(
+        ttl=3600, key_func=lambda self, user_id: f"preferences_apprises_{user_id or 'anon'}"
+    )
     @avec_gestion_erreurs(default_return=None)
-    def analyser_preferences_apprises(self, user_id: str | None = None) -> ApprentissagePreferencesResponse | None:
+    def analyser_preferences_apprises(
+        self, user_id: str | None = None
+    ) -> ApprentissagePreferencesResponse | None:
         """Apprentissage préférences : apprend des préférences stables et active leur influence après 2+ semaines."""
         semaines_analysees, favoris, a_eviter = self._analyser_preferences_apprises(user_id=user_id)
         influence_active = semaines_analysees >= 2 and bool(favoris or a_eviter)
@@ -550,13 +602,19 @@ Retourne un JSON avec:
         if a_eviter:
             ajustements.append("Diminuer la frequence des categories avec feedback negatif")
         if influence_active:
-            ajustements.append("Appliquer les ponderations de preferences aux suggestions hebdomadaires")
+            ajustements.append(
+                "Appliquer les ponderations de preferences aux suggestions hebdomadaires"
+            )
         else:
-            ajustements.append("Collecte en cours: davantage de feedback est necessaire pour personnaliser")
+            ajustements.append(
+                "Collecte en cours: davantage de feedback est necessaire pour personnaliser"
+            )
 
         # Persister les préférences apprises en DB
         if user_id and (favoris or a_eviter):
-            self._persister_preferences_apprises(user_id, semaines_analysees, favoris, a_eviter, influence_active)
+            self._persister_preferences_apprises(
+                user_id, semaines_analysees, favoris, a_eviter, influence_active
+            )
 
         return ApprentissagePreferencesResponse(
             semaines_analysees=semaines_analysees,
@@ -566,15 +624,29 @@ Retourne un JSON avec:
             ajustements_suggestions=ajustements,
         )
 
-    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"planification_auto_{user_id or 'anon'}_{date.today().isoformat()}")
+    @avec_cache(
+        ttl=1800,
+        key_func=lambda self, user_id: (
+            f"planification_auto_{user_id or 'anon'}_{date.today().isoformat()}"
+        ),
+    )
     @avec_gestion_erreurs(default_return=None)
-    def generer_planification_hebdo_complete(self, user_id: str | None = None) -> PlanificationHebdoCompleteResponse | None:
+    def generer_planification_hebdo_complete(
+        self, user_id: str | None = None
+    ) -> PlanificationHebdoCompleteResponse | None:
         """Planification auto : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
         return cuisine_ia.generer_planification_hebdo_complete(self, user_id)
 
-    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"batch_intelligent_{user_id or 'anon'}_{date.today().isoformat()}")
+    @avec_cache(
+        ttl=1800,
+        key_func=lambda self, user_id: (
+            f"batch_intelligent_{user_id or 'anon'}_{date.today().isoformat()}"
+        ),
+    )
     @avec_gestion_erreurs(default_return=None)
-    def proposer_batch_cooking_intelligent(self, user_id: str | None = None) -> BatchCookingIntelligentResponse | None:
+    def proposer_batch_cooking_intelligent(
+        self, user_id: str | None = None
+    ) -> BatchCookingIntelligentResponse | None:
         """Batch cooking IA : propose un plan batch cooking cohérent avec le planning de semaine."""
         return cuisine_ia.proposer_batch_cooking_intelligent(self, user_id)
 
@@ -585,7 +657,9 @@ Retourne un JSON avec:
         titre: str | None = None,
     ) -> CarteVisuellePartageableResponse | None:
         """Carte visuelle : génère une carte visuelle exportable au format image (SVG base64)."""
-        type_normalise = type_carte if type_carte in {"planning", "recette", "batch", "maison"} else "planning"
+        type_normalise = (
+            type_carte if type_carte in {"planning", "recette", "batch", "maison"} else "planning"
+        )
         titre_carte = _sanitiser(titre or f"Carte {type_normalise}", 120)
         lignes = self._contenu_carte_visuelle(type_carte=type_normalise)
         svg = self._generer_svg_carte_visuelle(titre=titre_carte, lignes=lignes)
@@ -610,7 +684,9 @@ Retourne un JSON avec:
 
     @avec_cache(ttl=1800, key_func=lambda self: "telegram_conversationnel")
     @avec_gestion_erreurs(default_return=None)
-    def obtenir_capacites_telegram_conversationnelles(self) -> TelegramConversationnelResponse | None:
+    def obtenir_capacites_telegram_conversationnelles(
+        self,
+    ) -> TelegramConversationnelResponse | None:
         """Telegram conversationnel : expose les commandes textuelles Telegram opérationnelles."""
         commandes = [
             CommandeTelegram(commande="menu", action="Planning semaine"),
@@ -630,8 +706,10 @@ Retourne un JSON avec:
             commandes=commandes,
         )
 
-
-    @avec_cache(ttl=300, key_func=lambda self: f"s23_energie_temps_reel_{datetime.now(UTC).strftime('%Y%m%d%H%M')}")
+    @avec_cache(
+        ttl=300,
+        key_func=lambda self: f"s23_energie_temps_reel_{datetime.now(UTC).strftime('%Y%m%d%H%M')}",
+    )
     @avec_gestion_erreurs(default_return=None)
     def obtenir_tableau_bord_energie_temps_reel(self) -> EnergieTempsReelResponse | None:
         """Énergie temps-réel : tableau énergie temps-réel (Linky si connecté, sinon estimation)."""
@@ -768,7 +846,6 @@ Règles :
             system_prompt="Tu es un analyste statistique spécialisé en loterie. Rappelle systématiquement que le loto est un jeu de hasard pur.",
         )
 
-
     # ═══════════════════════════════════════════════════════════
     # 10.8 — VEILLE EMPLOI HABITAT
     # ═══════════════════════════════════════════════════════════
@@ -789,9 +866,9 @@ Règles :
 
         prompt = f"""Simule une veille emploi avec les critères suivants :
 - Domaine : {criteres.domaine}
-- Mots-clés : {', '.join(criteres.mots_cles)}
-- Type contrat : {', '.join(criteres.type_contrat)}
-- Mode travail : {', '.join(criteres.mode_travail)}
+- Mots-clés : {", ".join(criteres.mots_cles)}
+- Type contrat : {", ".join(criteres.type_contrat)}
+- Mode travail : {", ".join(criteres.mode_travail)}
 - Rayon : {criteres.rayon_km} km
 
 Retourne un JSON avec des offres réalistes :
@@ -924,11 +1001,20 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         try:
             with obtenir_contexte_db() as session:
                 from sqlalchemy import func
+
                 from src.core.models import BudgetFamille, Recette, Repas
 
                 debut = date.today().replace(day=1)
-                nb_repas = session.query(func.count(Repas.id)).filter(Repas.date_repas >= debut).scalar() or 0
-                depenses = session.query(func.sum(BudgetFamille.montant)).filter(BudgetFamille.date >= debut).scalar() or 0
+                nb_repas = (
+                    session.query(func.count(Repas.id)).filter(Repas.date_repas >= debut).scalar()
+                    or 0
+                )
+                depenses = (
+                    session.query(func.sum(BudgetFamille.montant))
+                    .filter(BudgetFamille.date >= debut)
+                    .scalar()
+                    or 0
+                )
                 nb_recettes = session.query(func.count(Recette.id)).scalar() or 0
 
                 return (
@@ -966,6 +1052,7 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         try:
             with obtenir_contexte_db() as session:
                 from sqlalchemy import extract, func
+
                 from src.core.models import HistoriqueRecette
 
                 rows = (
@@ -1012,6 +1099,7 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         try:
             with obtenir_contexte_db() as session:
                 from sqlalchemy import func
+
                 from src.core.models import BudgetFamille, Recette, Repas
                 from src.core.models.projets import Projet
 
@@ -1023,7 +1111,8 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
                 nb_repas = (
                     session.query(func.count(Repas.id))
                     .filter(Repas.date_repas >= debut, Repas.date_repas <= fin)
-                    .scalar() or 0
+                    .scalar()
+                    or 0
                 )
                 sections.append(f"Repas planifiés en {annee}: {nb_repas}")
 
@@ -1031,15 +1120,15 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
                 depenses = (
                     session.query(func.sum(BudgetFamille.montant))
                     .filter(BudgetFamille.date >= debut, BudgetFamille.date <= fin)
-                    .scalar() or 0
+                    .scalar()
+                    or 0
                 )
                 sections.append(f"Total dépenses {annee}: {depenses}€")
 
                 # Projets maison terminés
                 nb_projets = (
-                    session.query(func.count(Projet.id))
-                    .filter(Projet.statut == "terminé")
-                    .scalar() or 0
+                    session.query(func.count(Projet.id)).filter(Projet.statut == "terminé").scalar()
+                    or 0
                 )
                 sections.append(f"Projets maison terminés: {nb_projets}")
 
@@ -1131,7 +1220,11 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
             logger.debug("Selection taches maison indisponible", exc_info=True)
 
         if not taches:
-            taches = ["Cuisine: nettoyage complet", "Salle de bain: entretien", "Salon: rangement express"]
+            taches = [
+                "Cuisine: nettoyage complet",
+                "Salle de bain: entretien",
+                "Salon: rangement express",
+            ]
         return taches[:limite]
 
     def _proposer_taches_jardin_hebdo(self, semaine_fin: date, limite: int = 4) -> list[str]:
@@ -1143,12 +1236,19 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
 
                 zones = (
                     session.query(ZoneJardin)
-                    .filter(ZoneJardin.date_prochaine_action.isnot(None), ZoneJardin.date_prochaine_action <= semaine_fin)
+                    .filter(
+                        ZoneJardin.date_prochaine_action.isnot(None),
+                        ZoneJardin.date_prochaine_action <= semaine_fin,
+                    )
                     .order_by(ZoneJardin.date_prochaine_action.asc())
                     .limit(limite)
                     .all()
                 )
-                actions = [f"{z.nom}: {z.prochaine_action}" for z in zones if getattr(z, "prochaine_action", None)]
+                actions = [
+                    f"{z.nom}: {z.prochaine_action}"
+                    for z in zones
+                    if getattr(z, "prochaine_action", None)
+                ]
         except Exception:
             logger.debug("Selection taches jardin indisponible", exc_info=True)
 
@@ -1172,9 +1272,12 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         try:
             with obtenir_contexte_db() as session:
                 from sqlalchemy import func
-                from src.core.models import RetourRecette, Recette
 
-                query = session.query(RetourRecette).join(Recette, Recette.id == RetourRecette.recette_id)
+                from src.core.models import Recette, RetourRecette
+
+                query = session.query(RetourRecette).join(
+                    Recette, Recette.id == RetourRecette.recette_id
+                )
                 if user_id:
                     query = query.filter(RetourRecette.user_id == user_id)
 
@@ -1203,8 +1306,18 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
                     likes = likes.filter(RetourRecette.user_id == user_id)
                     dislikes = dislikes.filter(RetourRecette.user_id == user_id)
 
-                likes_rows = likes.group_by(Recette.categorie).order_by(func.count(RetourRecette.id).desc()).limit(3).all()
-                dislikes_rows = dislikes.group_by(Recette.categorie).order_by(func.count(RetourRecette.id).desc()).limit(3).all()
+                likes_rows = (
+                    likes.group_by(Recette.categorie)
+                    .order_by(func.count(RetourRecette.id).desc())
+                    .limit(3)
+                    .all()
+                )
+                dislikes_rows = (
+                    dislikes.group_by(Recette.categorie)
+                    .order_by(func.count(RetourRecette.id).desc())
+                    .limit(3)
+                    .all()
+                )
 
                 favoris = [
                     PreferenceApprise(
@@ -1249,8 +1362,22 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
                     prefs.preferences_apprises = {
                         "semaines_analysees": semaines_analysees,
                         "influence_active": influence_active,
-                        "favoris": [{"categorie": f.categorie, "valeur": f.valeur, "score": f.score_confiance} for f in favoris],
-                        "a_eviter": [{"categorie": e.categorie, "valeur": e.valeur, "score": e.score_confiance} for e in a_eviter],
+                        "favoris": [
+                            {
+                                "categorie": f.categorie,
+                                "valeur": f.valeur,
+                                "score": f.score_confiance,
+                            }
+                            for f in favoris
+                        ],
+                        "a_eviter": [
+                            {
+                                "categorie": e.categorie,
+                                "valeur": e.valeur,
+                                "score": e.score_confiance,
+                            }
+                            for e in a_eviter
+                        ],
                         "mis_a_jour": datetime.now(UTC).isoformat(),
                     }
                     session.commit()
@@ -1356,6 +1483,7 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
     def _generer_pdf_simple(self, titre: str, sections: list[tuple[str, list[str]]]) -> str:
         """Genere un PDF simple et retourne son contenu en base64."""
         import base64
+
         from reportlab.lib.pagesizes import A4
         from reportlab.pdfgen import canvas
 
@@ -1377,7 +1505,7 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
             pdf.drawString(40, y, section_titre[:90])
             y -= 16
             pdf.setFont("Helvetica", 10)
-            for ligne in (lignes or ["-"]):
+            for ligne in lignes or ["-"]:
                 if y < 80:
                     pdf.showPage()
                     y = 800
@@ -1394,7 +1522,7 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
 
     def _collecter_repas_invite(self, session: Any) -> list[dict]:
         """Collecte les repas de la semaine pour un invité."""
-        from src.core.models import Repas, Planning
+        from src.core.models import Planning, Repas
 
         today = date.today()
         fin_semaine = today + timedelta(days=7)
@@ -1427,20 +1555,13 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         from src.core.models.famille import Routine
 
         routines = session.query(Routine).filter(Routine.actif.is_(True)).all()
-        return [
-            {"nom": r.nom, "categorie": getattr(r, "categorie", "")}
-            for r in routines
-        ]
+        return [{"nom": r.nom, "categorie": getattr(r, "categorie", "")} for r in routines]
 
     def _collecter_profil_enfant_invite(self, session: Any) -> dict:
         """Collecte le profil enfant pour un invité."""
         from src.core.models import ProfilEnfant
 
-        enfant = (
-            session.query(ProfilEnfant)
-            .filter(ProfilEnfant.actif.is_(True))
-            .first()
-        )
+        enfant = session.query(ProfilEnfant).filter(ProfilEnfant.actif.is_(True)).first()
         if not enfant:
             return {}
         return {
@@ -1454,9 +1575,7 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
             from src.core.models.contacts import ContactFamille
 
             contacts = (
-                session.query(ContactFamille)
-                .filter(ContactFamille.categorie == "urgence")
-                .all()
+                session.query(ContactFamille).filter(ContactFamille.categorie == "urgence").all()
             )
             return [
                 {

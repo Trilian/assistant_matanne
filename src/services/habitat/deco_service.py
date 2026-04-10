@@ -46,13 +46,13 @@ class DecoHabitatService(BaseAIService):
 
         prompt = f"""
 Projet deco Habitat: {projet.nom_piece}
-Style existant: {projet.style or 'non defini'}
+Style existant: {projet.style or "non defini"}
 Budget prevu: {float(projet.budget_prevu or 0)}
 Budget depense: {float(projet.budget_depense or 0)}
 Palette actuelle: {projet.palette_couleurs or []}
 Inspirations actuelles: {projet.inspirations or []}
-Notes: {projet.notes or ''}
-Brief: {brief or 'Créer une version réaliste, chaleureuse et durable.'}
+Notes: {projet.notes or ""}
+Brief: {brief or "Créer une version réaliste, chaleureuse et durable."}
 """
         system_prompt = """
 Tu es decorateur d'interieur et acheteur travaux.

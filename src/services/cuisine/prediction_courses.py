@@ -40,17 +40,23 @@ class ServicePredictionCourses:
         mois = now.month
         hiver = {11, 12, 1, 2}
         ete = {6, 7, 8}
-        if mois in hiver and any(k in nom or k in cat for k in ["soupe", "potage", "raclette", "fondue"]):
+        if mois in hiver and any(
+            k in nom or k in cat for k in ["soupe", "potage", "raclette", "fondue"]
+        ):
             boost += 0.08
             raisons.append("saisonnalite_hiver")
-        if mois in ete and any(k in nom or k in cat for k in ["salade", "glace", "barbecue", "grillade"]):
+        if mois in ete and any(
+            k in nom or k in cat for k in ["salade", "glace", "barbecue", "grillade"]
+        ):
             boost += 0.08
             raisons.append("saisonnalite_ete")
 
         # Evenements declares (anniversaire, fete, invites...)
-        for ev in (evenements or []):
+        for ev in evenements or []:
             ev_l = ev.lower()
-            if any(k in ev_l for k in ["anniversaire", "fete", "soir", "invite", "apero", "barbecue"]):
+            if any(
+                k in ev_l for k in ["anniversaire", "fete", "soir", "invite", "apero", "barbecue"]
+            ):
                 boost += 0.06
                 raisons.append("evenement_festif")
                 break
@@ -129,12 +135,14 @@ class ServicePredictionCourses:
             fiabilite = min(1.0, (h.nb_achats or 0) / 10.0)
             confiance = round((retard_ratio * 0.7) + (fiabilite * 0.3), 3)
 
-            boost_contexte, multiplicateur_quantite, raisons_contexte = self._calculer_boost_contexte(
-                article_nom=nom,
-                categorie=h.categorie,
-                now=now,
-                evenements=evenements,
-                nb_invites=nb_invites,
+            boost_contexte, multiplicateur_quantite, raisons_contexte = (
+                self._calculer_boost_contexte(
+                    article_nom=nom,
+                    categorie=h.categorie,
+                    now=now,
+                    evenements=evenements,
+                    nb_invites=nb_invites,
+                )
             )
 
             confiance_contextualisee = round(min(1.0, confiance + boost_contexte), 3)
@@ -257,8 +265,9 @@ class ServicePredictionCourses:
         # Récupérer le planning de la semaine si contexte non fourni
         if not contexte_planning:
             try:
-                from src.core.models.planning import Repas
                 from sqlalchemy.orm import joinedload
+
+                from src.core.models.planning import Repas
 
                 aujourd_hui = date.today()
                 fin_semaine = date.fromordinal(
@@ -281,9 +290,8 @@ class ServicePredictionCourses:
             except Exception:
                 logger.debug("Impossible de charger le planning pour les prédictions IA")
 
-        prompt = (
-            "Voici les articles les plus achetés par cette famille:\n"
-            + "\n".join(articles_frequents[:30])
+        prompt = "Voici les articles les plus achetés par cette famille:\n" + "\n".join(
+            articles_frequents[:30]
         )
         if contexte_planning:
             prompt += f"\n\n{contexte_planning}"
@@ -310,6 +318,7 @@ class ServicePredictionCourses:
             )
 
             import json
+
             suggestions_brutes = json.loads(
                 reponse.strip().removeprefix("```json").removesuffix("```").strip()
             )
@@ -348,23 +357,25 @@ class ServicePredictionCourses:
         noms_vus = {p["article_nom"].lower() for p in predictions_historique}
         for p_ia in predictions_ia:
             if p_ia["article_nom"].lower() not in noms_vus:
-                predictions_historique.append({
-                    **p_ia,
-                    "confiance": 0.5,
-                    "confiance_contextualisee": 0.55,
-                    "frequence_jours": 0,
-                    "jours_depuis_dernier_achat": 0,
-                    "retard_jours": 0,
-                    "sur_liste_active": False,
-                    "ingredient_id": None,
-                    "quantite_suggeree": 1.0,
-                    "unite_suggeree": "pcs",
-                    "contexte_applique": {
-                        "nb_invites": nb_invites,
-                        "evenements": evenements or [],
-                        "raisons": [p_ia.get("raison", "suggestion_ia")],
-                    },
-                })
+                predictions_historique.append(
+                    {
+                        **p_ia,
+                        "confiance": 0.5,
+                        "confiance_contextualisee": 0.55,
+                        "frequence_jours": 0,
+                        "jours_depuis_dernier_achat": 0,
+                        "retard_jours": 0,
+                        "sur_liste_active": False,
+                        "ingredient_id": None,
+                        "quantite_suggeree": 1.0,
+                        "unite_suggeree": "pcs",
+                        "contexte_applique": {
+                            "nb_invites": nb_invites,
+                            "evenements": evenements or [],
+                            "raisons": [p_ia.get("raison", "suggestion_ia")],
+                        },
+                    }
+                )
                 noms_vus.add(p_ia["article_nom"].lower())
 
         return predictions_historique[:limite]
@@ -374,5 +385,3 @@ class ServicePredictionCourses:
 def obtenir_service_prediction_courses() -> ServicePredictionCourses:
     """Factory singleton du service prediction courses."""
     return ServicePredictionCourses()
-
-

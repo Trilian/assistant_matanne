@@ -4,15 +4,15 @@ Service IA pour l'assistance aux projets maison.
 Estimation complexité/timeline, budget prévisionnel, matching artisans.
 """
 
-from datetime import datetime
 import inspect
+from datetime import datetime
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
-
 
 # ── Modèles Pydantic ──
 
@@ -21,15 +21,13 @@ class EstimationProjet(BaseModel):
     """Estimation pour un projet maison"""
 
     projet_nom: str = Field(..., description="Nom du projet")
-    complexite: Literal["simple", "moyen", "complex"] = Field(
-        ..., description="Complexité estimée"
-    )
+    complexite: Literal["simple", "moyen", "complex"] = Field(..., description="Complexité estimée")
     temps_jours: int = Field(..., ge=1, description="Durée estimée en jours de travail")
     est_diy: bool = Field(..., description="Peut être fait en DIY")
     competences_requises: list[str] = Field(..., description="Compétences nécessaires")
     materiaux_principaux: list[str] = Field(..., description="Matériaux à acheter")
     budget_materialisation: float = Field(..., ge=0, description="Budget matériaux estimé")
-    budget_main_oeuvre: Optional[float] = Field(
+    budget_main_oeuvre: float | None = Field(
         None, ge=0, description="Budget main d'oeuvre si artisan"
     )
     budget_total_min: float = Field(..., ge=0, description="Budget min total")
@@ -45,9 +43,7 @@ class MatchingArtisan(BaseModel):
 
     type_metier: str = Field(..., description="Type de métier (ex: électricien, plombier)")
     specialites_requises: list[str] = Field(..., description="Spécialités nécessaires")
-    certificat_recommande: Optional[str] = Field(
-        None, description="Certification recommandée"
-    )
+    certificat_recommande: str | None = Field(None, description="Certification recommandée")
     nb_references: int = Field(..., ge=0, description="Nombre de références typiques")
     criteres_selection: list[str] = Field(..., description="Critères de sélection pertinents")
     questions_entretien: list[str] = Field(..., description="Questions à poser aux artisans")
@@ -77,7 +73,7 @@ class ProjetsMaisonAIService(BaseAIService):
     async def estimer_projet(
         self,
         projet_description: str,
-        surface_m2: Optional[float] = None,
+        surface_m2: float | None = None,
         type_maison: str = "maison_2020",  # "maison_ancien", "maison_2020", "appart"
         contraintes: list[str] = None,
     ) -> EstimationProjet:
@@ -137,7 +133,9 @@ Format JSON détaillé."""
             competences_requises=result.get("competences_requises", []),
             materiaux_principaux=result.get("materiaux_principaux", []),
             budget_materialisation=float(result.get("budget_materialisation", 500)),
-            budget_main_oeuvre=float(result.get("budget_main_oeuvre") or 0) if result.get("budget_main_oeuvre") else None,
+            budget_main_oeuvre=float(result.get("budget_main_oeuvre") or 0)
+            if result.get("budget_main_oeuvre")
+            else None,
             budget_total_min=float(result.get("budget_total_min", 500)),
             budget_total_max=float(result.get("budget_total_max", 2000)),
             risques=result.get("risques", []),
@@ -237,7 +235,7 @@ Format JSON."""
     async def matcher_artisans(
         self,
         type_travaux: str,
-        projet_specificicites: Optional[str] = None,
+        projet_specificicites: str | None = None,
     ) -> MatchingArtisan:
         """
         Tire le profil idéal de l'artisan.
@@ -251,7 +249,7 @@ Format JSON."""
         """
         prompt = f"""Profile l'artisan idéal pour:
 Type: {type_travaux}
-Spécificités: {projet_specificicites or 'générique'}
+Spécificités: {projet_specificicites or "générique"}
 
 Fournis:
 1. Type de métier/statut
@@ -321,12 +319,12 @@ Format JSON."""
     def stream_estimation_projet(
         self,
         projet_description: str,
-        surface_m2: Optional[float] = None,
+        surface_m2: float | None = None,
     ):
         """Stream d'estimation détaillée."""
         prompt = f"""Estime ce projet:
 {projet_description}
-{f'Surface: {surface_m2}m²' if surface_m2 else ''}
+{f"Surface: {surface_m2}m²" if surface_m2 else ""}
 
 Complexité, timeline, budget, DIY possible, risques, étapes, recommandations."""
 

@@ -180,4 +180,3 @@ class MesureCroissance(CreeLeMixin, Base):
             f"<MesureCroissance(id={self.id}, date={self.date_mesure}, "
             f"poids={self.poids_kg}kg, taille={self.taille_cm}cm)>"
         )
-

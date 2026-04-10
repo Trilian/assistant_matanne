@@ -87,9 +87,7 @@ class NutritionEnrichmentService:
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def enrichir_recette(
-        self, recette_id: int, db: Session | None = None
-    ) -> dict[str, Any] | None:
+    def enrichir_recette(self, recette_id: int, db: Session | None = None) -> dict[str, Any] | None:
         """Enrichit une recette avec les données nutritionnelles OpenFoodFacts.
 
         Pour chaque ingrédient de la recette :
@@ -112,9 +110,7 @@ class NutritionEnrichmentService:
             return None
 
         ingredients = (
-            db.query(RecetteIngredient)
-            .filter(RecetteIngredient.recette_id == recette_id)
-            .all()
+            db.query(RecetteIngredient).filter(RecetteIngredient.recette_id == recette_id).all()
         )
 
         if not ingredients:
@@ -172,12 +168,14 @@ class NutritionEnrichmentService:
             if any(kw in origine_lower for kw in LOCAL_KEYWORDS):
                 nb_local += 1
 
-            details.append({
-                "ingredient": ingredient.nom,
-                "status": "enrichi",
-                "calories": round(cal, 1),
-                "nutriscore": nutr.nutriscore,
-            })
+            details.append(
+                {
+                    "ingredient": ingredient.nom,
+                    "status": "enrichi",
+                    "calories": round(cal, 1),
+                    "nutriscore": nutr.nutriscore,
+                }
+            )
 
         if nb_enrichis == 0:
             logger.info(f"Recette {recette_id}: aucun ingrédient enrichi")
@@ -219,9 +217,7 @@ class NutritionEnrichmentService:
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db
-    def enrichir_batch(
-        self, limite: int = 50, db: Session | None = None
-    ) -> dict[str, Any] | None:
+    def enrichir_batch(self, limite: int = 50, db: Session | None = None) -> dict[str, Any] | None:
         """Enrichit en batch les recettes qui n'ont pas encore de données nutritionnelles.
 
         Args:
@@ -300,7 +296,11 @@ class NutritionEnrichmentService:
                 {
                     "objectif": "Augmenter l'apport energetique qualite",
                     "ingredients": ["legumineuses", "cereales completes", "huile d'olive", "oeufs"],
-                    "idees_recettes": ["dahl lentilles coco", "salade pois chiches quinoa", "omelette legumes"],
+                    "idees_recettes": [
+                        "dahl lentilles coco",
+                        "salade pois chiches quinoa",
+                        "omelette legumes",
+                    ],
                 }
             )
 
@@ -316,7 +316,11 @@ class NutritionEnrichmentService:
                 {
                     "objectif": "Renforcer les proteines",
                     "ingredients": ["poisson", "oeufs", "lentilles", "yaourt grec", "tofu"],
-                    "idees_recettes": ["bowl lentilles saumon", "omelette complete", "curry tofu pois chiches"],
+                    "idees_recettes": [
+                        "bowl lentilles saumon",
+                        "omelette complete",
+                        "curry tofu pois chiches",
+                    ],
                 }
             )
 
@@ -332,7 +336,11 @@ class NutritionEnrichmentService:
                 {
                     "objectif": "Remonter les glucides complexes",
                     "ingredients": ["riz complet", "avoine", "pommes de terre", "patate douce"],
-                    "idees_recettes": ["buddha bowl riz complet", "porridge avoine", "gratin patate douce"],
+                    "idees_recettes": [
+                        "buddha bowl riz complet",
+                        "porridge avoine",
+                        "gratin patate douce",
+                    ],
                 }
             )
 
@@ -348,7 +356,11 @@ class NutritionEnrichmentService:
                 {
                     "objectif": "Ajouter des lipides de qualite",
                     "ingredients": ["huile d'olive", "noix", "avocat", "sardines"],
-                    "idees_recettes": ["salade avocat noix", "tartines sardines citron", "pates pesto maison"],
+                    "idees_recettes": [
+                        "salade avocat noix",
+                        "tartines sardines citron",
+                        "pates pesto maison",
+                    ],
                 }
             )
 

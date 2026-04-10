@@ -1,4 +1,4 @@
-﻿"""Fonctions energie extraites du service innovations."""
+"""Fonctions energie extraites du service innovations."""
 
 from __future__ import annotations
 
@@ -54,6 +54,7 @@ def detecter_anomalies_energie(service) -> AnomaliesEnergieResponse | None:
         recommandations=recommandations,
     )
 
+
 def comparer_fournisseurs_energie(
     self,
     prix_kwh_actuel_eur: float = 0.2516,
@@ -87,13 +88,19 @@ def comparer_fournisseurs_energie(
             2,
         )
 
-    economie = round(max(0.0, cout_actuel - min((o.cout_annuel_estime_eur for o in offres), default=cout_actuel)), 2)
+    economie = round(
+        max(
+            0.0, cout_actuel - min((o.cout_annuel_estime_eur for o in offres), default=cout_actuel)
+        ),
+        2,
+    )
     return ComparateurEnergieResponse(
         consommation_annuelle_kwh=conso,
         cout_actuel_estime_eur=cout_actuel,
         economie_max_estimee_eur=economie,
         offres=offres,
     )
+
 
 def calculer_score_eco_responsable(service) -> ScoreEcoResponsableResponse | None:
     """P9-10 : calcule un score écologique mensuel."""
@@ -111,6 +118,7 @@ def calculer_score_eco_responsable(service) -> ScoreEcoResponsableResponse | Non
             "Suivre les pics de consommation hebdomadaires",
         ],
     )
+
 
 def obtenir_tableau_bord_energie_temps_reel(service) -> EnergieTempsReelResponse | None:
     """Énergie temps-réel : tableau énergie temps-réel (Linky si connecté, sinon estimation)."""
@@ -133,7 +141,8 @@ def obtenir_tableau_bord_energie_temps_reel(service) -> EnergieTempsReelResponse
             session.query(func.sum(ReleveEnergie.consommation))
             .filter(
                 ReleveEnergie.type_energie == "electricite",
-                ReleveEnergie.annee == (aujourd_hui.year if aujourd_hui.month > 1 else aujourd_hui.year - 1),
+                ReleveEnergie.annee
+                == (aujourd_hui.year if aujourd_hui.month > 1 else aujourd_hui.year - 1),
                 ReleveEnergie.mois == (aujourd_hui.month - 1 if aujourd_hui.month > 1 else 12),
             )
             .scalar()
@@ -142,7 +151,9 @@ def obtenir_tableau_bord_energie_temps_reel(service) -> EnergieTempsReelResponse
     consommation_mois = float(conso_mois or 0.0)
     consommation_mois_prec = float(conso_mois_prec or 0.0)
     jours_ecoules = max(1, date.today().day)
-    consommation_jour = round(consommation_mois / jours_ecoules, 2) if consommation_mois > 0 else None
+    consommation_jour = (
+        round(consommation_mois / jours_ecoules, 2) if consommation_mois > 0 else None
+    )
 
     puissance_linky = service._lire_puissance_linky_configuree()
     linky_connecte = puissance_linky is not None
@@ -178,12 +189,14 @@ def obtenir_tableau_bord_energie_temps_reel(service) -> EnergieTempsReelResponse
         alertes=alertes,
     )
 
+
 def _score_risque_energie_simple(service) -> float:
     """Score de risque énergie simplifié (0 faible risque, 100 risque élevé)."""
     data = service.detecter_anomalies_energie()
     if not data:
         return 40.0
     return data.score_risque
+
 
 def _lire_puissance_linky_configuree(service) -> float | None:
     """Lit une puissance Linky instantanée depuis la configuration (intégration best-effort)."""
@@ -199,11 +212,13 @@ def _lire_puissance_linky_configuree(service) -> float | None:
     except ValueError:
         return None
 
+
 def _consommation_annuelle_kwh(service) -> float:
     """Estime la consommation annuelle kWh à partir des relevés."""
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models.utilitaires import ReleveEnergie
 
             annee = date.today().year

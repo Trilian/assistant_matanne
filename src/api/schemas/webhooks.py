@@ -19,7 +19,9 @@ class WebhookCreate(BaseModel):
         description="Patterns d'événements à écouter (ex: ['recette.*', 'courses.generees'])",
         min_length=1,
     )
-    description: str | None = Field(None, description="Description libre du webhook", max_length=300)
+    description: str | None = Field(
+        None, description="Description libre du webhook", max_length=300
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -57,7 +59,9 @@ class WebhookResponse(BaseModel):
     id: int
     url: str
     evenements: list[str]
-    secret: str = Field(description="Clé HMAC-SHA256 (affichée uniquement à la création)", max_length=128)
+    secret: str = Field(
+        description="Clé HMAC-SHA256 (affichée uniquement à la création)", max_length=128
+    )
     actif: bool
     description: str | None = Field(None, max_length=300)
     derniere_livraison: datetime | None = None

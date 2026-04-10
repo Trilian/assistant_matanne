@@ -167,14 +167,16 @@ async def lister_photos(
             if not name or name.startswith("."):
                 continue
             path = f"{prefix}{name}"
-            photos.append({
-                "id": name,
-                "nom": name,
-                "url": client.storage.from_("photos").get_public_url(path),
-                "path": path,
-                "taille": item.get("metadata", {}).get("size", 0),
-                "date_upload": item.get("created_at", ""),
-            })
+            photos.append(
+                {
+                    "id": name,
+                    "nom": name,
+                    "url": client.storage.from_("photos").get_public_url(path),
+                    "path": path,
+                    "taille": item.get("metadata", {}).get("size", 0),
+                    "date_upload": item.get("created_at", ""),
+                }
+            )
         return {"items": photos, "total": len(photos)}
     except HTTPException:
         raise

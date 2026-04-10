@@ -6,6 +6,51 @@ Centralise tous les schémas de validation et sérialisation.
 
 # Base et mixins
 # Auth
+# Admin
+from .admin import (
+    AdminAuditLogsResponse,
+    AdminAuditStatsResponse,
+    AdminBridgesStatusResponse,
+    AdminCoherenceDBResponse,
+    AdminConfigExportResponse,
+    AdminDryRunCompareResponse,
+    AdminEventResponse,
+    AdminEventsListResponse,
+    AdminExportDBResponse,
+    AdminHistoriqueNotificationsResponse,
+    AdminImportDBResponse,
+    AdminJobHealthResponse,
+    AdminJobHistoriqueResponse,
+    AdminJobLogsResponse,
+    AdminJobResume,
+    AdminJobScheduleModifie,
+    AdminJobsRunAllResponse,
+    AdminNotificationTestAllResponse,
+    AdminNotificationTestResponse,
+    AdminPreviewTemplateResponse,
+    AdminQueueNotificationsResponse,
+    AdminSanteServicesResponse,
+    AdminSchemaDiffResponse,
+    AdminSimulationJourneeResponse,
+    AdminSimulerNotificationResponse,
+    AdminTemplatesNotificationsResponse,
+)
+
+# Anti-Gaspillage
+from .anti_gaspillage import (
+    ArticlePerissable,
+    ReponseAntiGaspillage,
+    ScoreAntiGaspillage,
+)
+
+# Assistant
+from .assistant import (
+    ChatIAResponse,
+    CommandeVocaleResponse,
+    ExecIntentGoogleAssistantResponse,
+    ExemplesCommandeVocaleResponse,
+    IntentsGoogleAssistantResponse,
+)
 from .auth import (
     LoginRequest,
     LoginResponse,
@@ -25,6 +70,29 @@ from .base import (
     TypeRepasValidator,
 )
 
+# Batch Cooking
+from .batch_cooking import (
+    ConfigBatchResponse,
+    EtapeBatchResponse,
+    GenererSessionDepuisPlanningRequest,
+    GenererSessionDepuisPlanningResponse,
+    PreparationBatchResponse,
+    SessionBatchCreate,
+    SessionBatchPatch,
+    SessionBatchResponse,
+)
+
+# Calendriers
+from .calendriers import (
+    CalendrierDetailResponse,
+    CalendrierResponse,
+    EvenementDetailResponse,
+    EvenementJourResponse,
+    EvenementResponse,
+    EvenementsAujourdhuiResponse,
+    EvenementsSemaineResponse,
+)
+
 # Common
 from .common import (
     ErrorResponse,
@@ -34,9 +102,9 @@ from .common import (
 
 # Courses
 from .courses import (
+    ArticleDriveResponse,
     ArticleGenereResume,
     ArticleResponse,
-    ArticleDriveResponse,
     CheckoutArticleRequest,
     CheckoutArticleResult,
     CheckoutCoursesRequest,
@@ -51,6 +119,20 @@ from .courses import (
     ListeCoursesResume,
     ScanBarcodeCheckoutRequest,
     ScanBarcodeCheckoutResponse,
+)
+
+# Dashboard
+from .dashboard import (
+    DonneesTableauBord,
+    ResumeBudget,
+    StatistiquesRapides,
+)
+
+# Documents
+from .documents import (
+    DocumentCreate,
+    DocumentPatch,
+    DocumentResponse,
 )
 
 # Error responses OpenAPI
@@ -74,132 +156,34 @@ from .errors import (
     combiner_reponses,
 )
 
+# Export
+from .export import (
+    TYPES_EXPORT_VALIDES,
+    ExportPDFRequest,
+    ExportPDFResponse,
+)
+
+# Garmin
+from .garmin import (
+    GarminConnectCompleteResponse,
+    GarminConnectUrlResponse,
+    GarminDisconnectResponse,
+    GarminRecommandationDinerResponse,
+    GarminStatsResponse,
+    GarminStatusResponse,
+    GarminSyncResponse,
+)
+
 # Inventaire
 from .inventaire import (
-    ArticleConsolideResponse,
     ArticleBatchTrouve,
+    ArticleConsolideResponse,
     InventaireItemBase,
     InventaireItemCreate,
     InventaireItemResponse,
     InventaireItemUpdate,
     ScanBatchRequest,
     ScanBatchResponse,
-)
-
-# Planning
-from .planning import (
-    GenererPlanningRequest,
-    PlanningSemaineResponse,
-    RepasBase,
-    RepasCreate,
-    RepasRapideSuggestion,
-    RepasResponse,
-)
-
-# Push
-from .push import (
-    PushStatusResponse,
-    PushSubscriptionKeys,
-    PushSubscriptionRequest,
-    PushSubscriptionResponse,
-    PushUnsubscribeRequest,
-)
-
-# Recettes
-from .recettes import (
-    RecetteBase,
-    RecetteCreate,
-    RecettePatch,
-    RecetteResponse,
-)
-
-# Suggestions IA
-from .suggestions import (
-    AdaptationRecetteResponse,
-    SuggestionRecetteItem,
-    SuggestionsPlanningResponse,
-    SuggestionsRecettesResponse,
-    SubstitutionIngredientResponse,
-)
-
-# Anti-Gaspillage
-from .anti_gaspillage import (
-    ArticlePerissable,
-    ReponseAntiGaspillage,
-    ScoreAntiGaspillage,
-)
-
-# Batch Cooking
-from .batch_cooking import (
-    ConfigBatchResponse,
-    EtapeBatchResponse,
-    GenererSessionDepuisPlanningRequest,
-    GenererSessionDepuisPlanningResponse,
-    PreparationBatchResponse,
-    SessionBatchCreate,
-    SessionBatchPatch,
-    SessionBatchResponse,
-)
-
-# Dashboard
-from .dashboard import (
-    DonneesTableauBord,
-    ResumeBudget,
-    StatistiquesRapides,
-)
-
-# Documents
-from .documents import (
-    DocumentCreate,
-    DocumentPatch,
-    DocumentResponse,
-)
-
-# Préférences
-from .preferences import (
-    PreferencesCreate,
-    PreferencesPatch,
-    PreferencesResponse,
-)
-
-# Utilitaires
-from .utilitaires import (
-    ContactCreate,
-    ContactPatch,
-    ContactResponse,
-    EnergieCreate,
-    EnergiePatch,
-    EnergieResponse,
-    JournalCreate,
-    JournalPatch,
-    JournalResponse,
-    LienCreate,
-    LienPatch,
-    LienResponse,
-    MotDePasseCreate,
-    MotDePassePatch,
-    MotDePasseResponse,
-    NoteCreate,
-    NotePatch,
-    NoteResponse,
-)
-
-# Calendriers
-from .calendriers import (
-    CalendrierDetailResponse,
-    CalendrierResponse,
-    EvenementDetailResponse,
-    EvenementJourResponse,
-    EvenementResponse,
-    EvenementsAujourdhuiResponse,
-    EvenementsSemaineResponse,
-)
-
-# Export
-from .export import (
-    ExportPDFRequest,
-    ExportPDFResponse,
-    TYPES_EXPORT_VALIDES,
 )
 
 # Jeux
@@ -213,8 +197,8 @@ from .jeux import (
     MatchResponse,
     PariCreate,
     PariPatch,
-    PariResume,
     PariResponse,
+    PariResume,
     PredictionMatch,
     StatistiquesParis,
     TirageLotoResponse,
@@ -284,34 +268,69 @@ from .maison import (
     TraitementNuisibleResponse,
 )
 
-# Admin
-from .admin import (
-    AdminAuditLogsResponse,
-    AdminAuditStatsResponse,
-    AdminBridgesStatusResponse,
-    AdminConfigExportResponse,
-    AdminCoherenceDBResponse,
-    AdminDryRunCompareResponse,
-    AdminEventResponse,
-    AdminEventsListResponse,
-    AdminExportDBResponse,
-    AdminHistoriqueNotificationsResponse,
-    AdminImportDBResponse,
-    AdminJobHealthResponse,
-    AdminJobHistoriqueResponse,
-    AdminJobLogsResponse,
-    AdminJobResume,
-    AdminJobScheduleModifie,
-    AdminJobsRunAllResponse,
-    AdminNotificationTestAllResponse,
-    AdminNotificationTestResponse,
-    AdminPreviewTemplateResponse,
-    AdminQueueNotificationsResponse,
-    AdminSanteServicesResponse,
-    AdminSchemaDiffResponse,
-    AdminSimulerNotificationResponse,
-    AdminSimulationJourneeResponse,
-    AdminTemplatesNotificationsResponse,
+# Planning
+from .planning import (
+    GenererPlanningRequest,
+    PlanningSemaineResponse,
+    RepasBase,
+    RepasCreate,
+    RepasRapideSuggestion,
+    RepasResponse,
+)
+
+# Préférences
+from .preferences import (
+    PreferencesCreate,
+    PreferencesPatch,
+    PreferencesResponse,
+)
+
+# Push
+from .push import (
+    PushStatusResponse,
+    PushSubscriptionKeys,
+    PushSubscriptionRequest,
+    PushSubscriptionResponse,
+    PushUnsubscribeRequest,
+)
+
+# Recettes
+from .recettes import (
+    RecetteBase,
+    RecetteCreate,
+    RecettePatch,
+    RecetteResponse,
+)
+
+# Suggestions IA
+from .suggestions import (
+    AdaptationRecetteResponse,
+    SubstitutionIngredientResponse,
+    SuggestionRecetteItem,
+    SuggestionsPlanningResponse,
+    SuggestionsRecettesResponse,
+)
+
+# Utilitaires
+from .utilitaires import (
+    ContactCreate,
+    ContactPatch,
+    ContactResponse,
+    EnergieCreate,
+    EnergiePatch,
+    EnergieResponse,
+    JournalCreate,
+    JournalPatch,
+    JournalResponse,
+    LienCreate,
+    LienPatch,
+    LienResponse,
+    MotDePasseCreate,
+    MotDePassePatch,
+    MotDePasseResponse,
+    NoteCreate,
+    NotePatch,
+    NoteResponse,
 )
 
 # Voyages
@@ -323,26 +342,6 @@ from .voyages import (
     VoyageResume,
     VoyageTemplateItem,
     VoyageToggleChecklistResponse,
-)
-
-# Garmin
-from .garmin import (
-    GarminConnectCompleteResponse,
-    GarminConnectUrlResponse,
-    GarminDisconnectResponse,
-    GarminRecommandationDinerResponse,
-    GarminStatsResponse,
-    GarminStatusResponse,
-    GarminSyncResponse,
-)
-
-# Assistant
-from .assistant import (
-    ChatIAResponse,
-    CommandeVocaleResponse,
-    ExecIntentGoogleAssistantResponse,
-    ExemplesCommandeVocaleResponse,
-    IntentsGoogleAssistantResponse,
 )
 
 __all__ = [

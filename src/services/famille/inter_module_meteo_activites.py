@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : Meteo -> Activites famille.
 
 Bridge inter-modules :
@@ -8,7 +8,8 @@ Bridge inter-modules :
 from __future__ import annotations
 
 import logging
-from datetime import date as date_type, timedelta
+from datetime import date as date_type
+from datetime import timedelta
 from typing import Any
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
@@ -31,7 +32,9 @@ class MeteoActivitesInteractionService:
 
         for prev in meteo.previsions[:jours_horizon]:
             date_iso = getattr(prev, "date", None)
-            pluie = (getattr(prev, "precip_mm", 0) or 0) > 1 or (getattr(prev, "precip_proba", 0) or 0) >= 60
+            pluie = (getattr(prev, "precip_mm", 0) or 0) > 1 or (
+                getattr(prev, "precip_proba", 0) or 0
+            ) >= 60
             if pluie:
                 suggestions.append(
                     {

@@ -11,8 +11,8 @@ sans faire de requêtes DB à chaque appel.
 
 import logging
 from datetime import datetime
-from typing import Any
 from functools import lru_cache
+from typing import Any
 
 from sqlalchemy.orm import Session
 
@@ -49,8 +49,9 @@ class ChatEventBusBridgeService:
         Returns:
             Contexte planning mis à jour
         """
-        from src.core.models.planning import PlanificationRepas
         from datetime import date, timedelta
+
+        from src.core.models.planning import PlanificationRepas
 
         try:
             aujourd_hui = date.today()
@@ -93,21 +94,19 @@ class ChatEventBusBridgeService:
 
         try:
             articles_non_achetes = (
-                db.query(ArticleCourses)
-                .filter(ArticleCourses.achete.is_(False))
-                .count()
+                db.query(ArticleCourses).filter(ArticleCourses.achete.is_(False)).count()
             )
 
             articles_achetes = (
-                db.query(ArticleCourses)
-                .filter(ArticleCourses.achete.is_(True))
-                .count()
+                db.query(ArticleCourses).filter(ArticleCourses.achete.is_(True)).count()
             )
 
             contexte = {
                 "non_achetes": articles_non_achetes,
                 "achetes": articles_achetes,
-                "taux_completion": round(articles_achetes / (articles_achetes + articles_non_achetes) * 100, 1)
+                "taux_completion": round(
+                    articles_achetes / (articles_achetes + articles_non_achetes) * 100, 1
+                )
                 if (articles_achetes + articles_non_achetes) > 0
                 else 0,
                 "timestamp_maj": datetime.utcnow().isoformat(),
@@ -131,8 +130,9 @@ class ChatEventBusBridgeService:
         Returns:
             Contexte inventaire mis à jour
         """
-        from src.core.models.inventaire import ArticleInventaire
         from datetime import date
+
+        from src.core.models.inventaire import ArticleInventaire
 
         try:
             articles = db.query(ArticleInventaire).filter(ArticleInventaire.quantite > 0).all()
@@ -168,8 +168,9 @@ class ChatEventBusBridgeService:
         Returns:
             Contexte budget mis à jour
         """
-        from src.core.models.finances import DepenseMaison
         from datetime import date
+
+        from src.core.models.finances import DepenseMaison
 
         try:
             aujourd_hui = date.today()

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour l'IA avancée — routing IA avancée.
 
 14 endpoints IA proactifs et contextuels :
@@ -119,7 +119,12 @@ async def suggestions_achats(
     result = service.suggerer_achats(jours=jours)
     if result is None:
         return SuggestionsAchatsResponse()
-    _historiser_suggestion(user.get("sub", ""), "suggestions_achats", "cuisine", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "suggestions_achats",
+        "cuisine",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -148,7 +153,12 @@ async def planning_adaptatif(
     )
     if result is None:
         return PlanningAdaptatif()
-    _historiser_suggestion(user.get("sub", ""), "planning_adaptatif", "planning", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "planning_adaptatif",
+        "planning",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -175,7 +185,12 @@ async def diagnostic_plante(
     result = service.diagnostiquer_plante_photo(image_bytes)
     if result is None:
         raise HTTPException(status_code=503, detail="Diagnostic plante indisponible.")
-    _historiser_suggestion(user.get("sub", ""), "diagnostic_plante", "maison", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "diagnostic_plante",
+        "maison",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -200,7 +215,12 @@ async def prevision_depenses(
     result = service.prevoir_depenses_fin_mois()
     if result is None:
         return PrevisionDepenses()
-    _historiser_suggestion(user.get("sub", ""), "prevision_depenses", "finances", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "prevision_depenses",
+        "finances",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -232,7 +252,12 @@ async def idees_cadeaux(
     )
     if result is None:
         return IdeesCadeauxResponse()
-    _historiser_suggestion(user.get("sub", ""), "idees_cadeaux", "famille", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "idees_cadeaux",
+        "famille",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -263,7 +288,12 @@ async def analyse_photo_multi(
     result = service.analyser_photo_multi_usage(image_bytes)
     if result is None:
         raise HTTPException(status_code=503, detail="Analyse photo indisponible.")
-    _historiser_suggestion(user.get("sub", ""), "analyse_photo", "multi", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "analyse_photo",
+        "multi",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -288,7 +318,12 @@ async def optimisation_routines(
     result = service.optimiser_routines()
     if result is None:
         return OptimisationRoutinesResponse()
-    _historiser_suggestion(user.get("sub", ""), "optimisation_routines", "famille", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "optimisation_routines",
+        "famille",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -315,7 +350,12 @@ async def analyse_document(
     result = service.analyser_document_photo(image_bytes)
     if result is None:
         raise HTTPException(status_code=503, detail="Analyse document indisponible.")
-    _historiser_suggestion(user.get("sub", ""), "analyse_document", "outils", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "analyse_document",
+        "outils",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -343,7 +383,12 @@ async def estimation_travaux(
     result = service.estimer_travaux_photo(image_bytes, description=description)
     if result is None:
         raise HTTPException(status_code=503, detail="Estimation travaux indisponible.")
-    _historiser_suggestion(user.get("sub", ""), "estimation_travaux", "maison", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "estimation_travaux",
+        "maison",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -374,7 +419,12 @@ async def planning_voyage(
     )
     if result is None:
         raise HTTPException(status_code=503, detail="Génération planning voyage indisponible.")
-    _historiser_suggestion(user.get("sub", ""), "planning_voyage", "famille", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "planning_voyage",
+        "famille",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -399,7 +449,12 @@ async def recommandations_energie(
     result = service.recommander_economies_energie()
     if result is None:
         return RecommandationsEnergieResponse()
-    _historiser_suggestion(user.get("sub", ""), "recommandations_energie", "maison", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "recommandations_energie",
+        "maison",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -424,7 +479,12 @@ async def prediction_pannes(
     result = service.predire_pannes()
     if result is None:
         return PredictionsPannesResponse()
-    _historiser_suggestion(user.get("sub", ""), "prediction_pannes", "maison", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "prediction_pannes",
+        "maison",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -449,7 +509,12 @@ async def suggestions_proactives(
     result = service.generer_suggestions_proactives()
     if result is None:
         return SuggestionsProactivesResponse()
-    _historiser_suggestion(user.get("sub", ""), "suggestions_proactives", "multi", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "suggestions_proactives",
+        "multi",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -475,7 +540,12 @@ async def adaptations_meteo(
     result = service.adapter_planning_meteo(body.previsions_meteo)
     if result is None:
         return AdaptationsMeteoResponse()
-    _historiser_suggestion(user.get("sub", ""), "adaptations_meteo", "planning", result.model_dump() if hasattr(result, "model_dump") else None)
+    _historiser_suggestion(
+        user.get("sub", ""),
+        "adaptations_meteo",
+        "planning",
+        result.model_dump() if hasattr(result, "model_dump") else None,
+    )
     return result
 
 
@@ -504,6 +574,7 @@ async def pilote_auto_status(
 
 class PiloteAutoToggleRequest(BaseModel):
     """Requête d'activation/désactivation du pilote automatique."""
+
     actif: bool = True
     niveau_autonomie: str = "validation_requise"
 

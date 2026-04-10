@@ -18,7 +18,9 @@ class ConseilAbonnement(BaseModel):
 
     titre: str = Field(..., description="Titre court du conseil")
     detail: str = Field(..., description="Explication détaillée")
-    economies_estimees_eur: Optional[float] = Field(None, ge=0, description="Économies estimées par mois")
+    economies_estimees_eur: float | None = Field(
+        None, ge=0, description="Économies estimées par mois"
+    )
     priorite: str = Field(..., description="haute | moyenne | basse")
     categorie: str = Field(..., description="Type de contrat concerné")
 
@@ -50,7 +52,11 @@ class AbonnementsIAService(BaseAIService):
             Rapport avec conseils, économies estimées et contrats à renégocier
         """
         if not abonnements:
-            return {"conseils": [], "economies_potentielles_eur": 0, "resume": "Aucun abonnement à analyser."}
+            return {
+                "conseils": [],
+                "economies_potentielles_eur": 0,
+                "resume": "Aucun abonnement à analyser.",
+            }
 
         liste_txt = "\n".join(
             f"- {a.get('type_abonnement', 'inconnu')} ({a.get('fournisseur', 'N/A')}): "

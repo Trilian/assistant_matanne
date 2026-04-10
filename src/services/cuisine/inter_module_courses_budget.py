@@ -73,7 +73,9 @@ class CoursesBudgetInteractionService:
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
-    def estimer_budget_courses_mensuel(self, *, mois: int | None = None, annee: int | None = None, db=None) -> dict[str, Any]:
+    def estimer_budget_courses_mensuel(
+        self, *, mois: int | None = None, annee: int | None = None, db=None
+    ) -> dict[str, Any]:
         """Calcule le total des dépenses courses/alimentation du mois.
 
         Args:
@@ -85,6 +87,7 @@ class CoursesBudgetInteractionService:
             Dict avec total_mois, nb_achats, moyenne_par_achat
         """
         from sqlalchemy import extract, func
+
         from src.core.models import BudgetFamille
 
         mois = mois or date_type.today().month

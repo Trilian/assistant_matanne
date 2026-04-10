@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service Recettes Unifié (service unifié)
 
 ✅ Utilise @avec_session_db et @avec_cache
@@ -579,4 +579,4 @@ __all__ = [
 
 
 # ─── Aliases rétrocompatibilité  ───────────────────────────────
-get_recipes_service = obtenir_recipes_service  # alias rétrocompatibilité 
+get_recipes_service = obtenir_recipes_service  # alias rétrocompatibilité

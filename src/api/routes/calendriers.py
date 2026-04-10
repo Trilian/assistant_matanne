@@ -41,7 +41,9 @@ async def lister_zones_calendrier_scolaire(
 @gerer_exception_api
 async def activer_calendrier_scolaire_auto(
     zone: str = Query(..., description="Zone scolaire A, B ou C"),
-    ajuster_planning: bool = Query(True, description="Creer/mettre a jour les evenements planning vacances"),
+    ajuster_planning: bool = Query(
+        True, description="Creer/mettre a jour les evenements planning vacances"
+    ),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Active l'import auto du calendrier scolaire pour une zone."""
@@ -141,7 +143,9 @@ async def lister_evenements(
             if all_day is not None:
                 query = query.filter(EvenementCalendrier.all_day == all_day)
 
-            query = query.order_by(EvenementCalendrier.date_debut.asc(), EvenementCalendrier.id.asc())
+            query = query.order_by(
+                EvenementCalendrier.date_debut.asc(), EvenementCalendrier.id.asc()
+            )
 
             # Pagination cursor-based
             if cursor:
@@ -151,14 +155,11 @@ async def lister_evenements(
                     cursor_params,
                     EvenementCalendrier,
                     cursor_field="date_debut",
-                    secondary_field="id"
+                    secondary_field="id",
                 )
                 items = query.limit(page_size + 1).all()
                 return construire_reponse_cursor(
-                    items,
-                    page_size,
-                    cursor_field="date_debut",
-                    secondary_field="id"
+                    items, page_size, cursor_field="date_debut", secondary_field="id"
                 )
 
             # Pagination offset
@@ -197,6 +198,7 @@ async def evenements_aujourdhui(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Récupère les événements du jour."""
+
     def _query():
         with executer_avec_session() as session:
             from datetime import timedelta
@@ -369,7 +371,9 @@ async def creer_calendrier(
     provider: str = Query(..., description="Provider (ical_url)"),
     url: str | None = Query(None, description="URL iCal si provider=ical_url"),
     sync_interval_minutes: int = Query(60, description="Intervalle de sync en minutes"),
-    sync_direction: str = Query("import", description="Direction sync: import, export, bidirectional"),
+    sync_direction: str = Query(
+        "import", description="Direction sync: import, export, bidirectional"
+    ),
     user: dict[str, Any] = Depends(require_auth),
 ):
     """CrÃ©e un nouveau calendrier externe (iCal par URL)."""
@@ -407,7 +411,9 @@ async def creer_calendrier(
     return await executer_async(_create)
 
 
-@router.delete("/{calendrier_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete(
+    "/{calendrier_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION
+)
 @gerer_exception_api
 async def supprimer_calendrier(
     calendrier_id: int,
@@ -578,10 +584,10 @@ async def synchroniser_planning_vers_google(
     Pour chaque repas du planning actif, crÃ©e un Ã©vÃ©nement Google Calendar
     avec l'heure appropriÃ©e (dÃ©jeuner 12h, dÃ®ner 19h, etc.).
     """
-    from src.services.integrations.google_calendar import synchroniser_planning_google
+    from datetime import date, timedelta
 
     from src.core.models.planning import Planning, Repas
-    from datetime import date, timedelta
+    from src.services.integrations.google_calendar import synchroniser_planning_google
 
     def _collect():
         with executer_avec_session() as session:
@@ -617,4 +623,3 @@ async def synchroniser_planning_vers_google(
 
     result = await synchroniser_planning_google(repas_list)
     return result
-

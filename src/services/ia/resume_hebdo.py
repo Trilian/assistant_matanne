@@ -36,9 +36,8 @@ class ResumeHebdoService(BaseAIService):
         Returns:
             Dict avec repas, taches, budget, activites, etc.
         """
-        from src.core.models import BudgetFamille
+        from src.core.models import BudgetFamille, TacheEntretien
         from src.core.models.planning import Repas
-        from src.core.models import TacheEntretien
 
         aujourd_hui = date.today()
         lundi = aujourd_hui - timedelta(days=aujourd_hui.weekday())
@@ -46,9 +45,7 @@ class ResumeHebdoService(BaseAIService):
 
         # Repas de la semaine
         repas = (
-            db.query(Repas)
-            .filter(Repas.date_repas >= lundi, Repas.date_repas <= dimanche)
-            .all()
+            db.query(Repas).filter(Repas.date_repas >= lundi, Repas.date_repas <= dimanche).all()
         )
         repas_prepares = sum(1 for r in repas if r.prepare)
 
@@ -60,7 +57,8 @@ class ResumeHebdoService(BaseAIService):
                 TacheEntretien.prochaine_fois >= lundi,
                 TacheEntretien.prochaine_fois <= dimanche,
             )
-            .scalar() or 0
+            .scalar()
+            or 0
         )
 
         # Budget semaine
@@ -70,7 +68,8 @@ class ResumeHebdoService(BaseAIService):
                 BudgetFamille.date >= lundi,
                 BudgetFamille.date <= dimanche,
             )
-            .scalar() or 0
+            .scalar()
+            or 0
         )
 
         return {
@@ -106,10 +105,10 @@ class ResumeHebdoService(BaseAIService):
 
         prompt = f"""Génère un résumé familial de la semaine en français.
 
-Données de la semaine ({donnees.get('periode', 'cette semaine')}):
-- Repas planifiés: {donnees['repas']['planifies']}, préparés: {donnees['repas']['prepares']}
-- Tâches entretien terminées: {donnees['taches_entretien_faites']}
-- Dépenses semaine: {donnees['budget']['depenses_semaine']:.2f}€
+Données de la semaine ({donnees.get("periode", "cette semaine")}):
+- Repas planifiés: {donnees["repas"]["planifies"]}, préparés: {donnees["repas"]["prepares"]}
+- Tâches entretien terminées: {donnees["taches_entretien_faites"]}
+- Dépenses semaine: {donnees["budget"]["depenses_semaine"]:.2f}€
 
 Réponds en JSON:
 {{
@@ -151,4 +150,3 @@ Réponds en JSON:
 def obtenir_service_resume_hebdo() -> ResumeHebdoService:
     """Factory singleton pour le service de résumé hebdomadaire (module IA)."""
     return ResumeHebdoService()
-

@@ -33,6 +33,7 @@ from .admin_shared import (
 
 logger = logging.getLogger(__name__)
 
+
 @router.get(
     "/audit-logs",
     response_model=AdminAuditLogsResponse,
@@ -89,7 +90,6 @@ async def lister_logs_securite(
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict[str, Any]:
     """Expose un flux dédié sécurité pour le dashboard admin."""
-    from sqlalchemy import text
 
     from src.api.utils import executer_avec_session
 
@@ -101,7 +101,9 @@ async def lister_logs_securite(
         conditions.append("event_type = :event_type")
         params["event_type"] = event_type
     else:
-        conditions.append("(event_type LIKE 'auth.%' OR event_type LIKE 'rate_limit.%' OR event_type LIKE 'admin.%')")
+        conditions.append(
+            "(event_type LIKE 'auth.%' OR event_type LIKE 'rate_limit.%' OR event_type LIKE 'admin.%')"
+        )
 
     if depuis:
         conditions.append("created_at >= :depuis")
@@ -121,18 +123,22 @@ async def lister_logs_securite(
             or 0
         )
 
-        rows = session.execute(
-            text(
-                f"""
+        rows = (
+            session.execute(
+                text(
+                    f"""
                 SELECT id, created_at, event_type, user_id, ip, user_agent, details
                 FROM logs_securite
                 WHERE {where_clause}
                 ORDER BY created_at DESC
                 LIMIT :limit OFFSET :offset
                 """
-            ),
-            params,
-        ).mappings().all()
+                ),
+                params,
+            )
+            .mappings()
+            .all()
+        )
 
     items = [
         {
@@ -204,18 +210,22 @@ async def exporter_audit_csv(
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Timestamp", "Action", "Source", "Utilisateur", "Entité", "ID Entité", "Détails"])
+    writer.writerow(
+        ["Timestamp", "Action", "Source", "Utilisateur", "Entité", "ID Entité", "Détails"]
+    )
 
     for e in resultat.entrees:
-        writer.writerow([
-            e.timestamp.isoformat(),
-            e.action,
-            e.source,
-            e.utilisateur_id or "",
-            e.entite_type,
-            str(e.entite_id) if e.entite_id else "",
-            str(e.details) if e.details else "",
-        ])
+        writer.writerow(
+            [
+                e.timestamp.isoformat(),
+                e.action,
+                e.source,
+                e.utilisateur_id or "",
+                e.entite_type,
+                str(e.entite_id) if e.entite_id else "",
+                str(e.details) if e.details else "",
+            ]
+        )
 
     output.seek(0)
     return StreamingResponse(
@@ -401,5 +411,3 @@ async def rejouer_evenement_admin(
         "total": len(replayes),
         "handlers_notifies": total_handlers,
     }
-
-

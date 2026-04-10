@@ -13,8 +13,8 @@ from pydantic import BaseModel, Field, field_validator
 
 from .base import IdentifiedResponse, NomValidatorMixin
 
-
 # Projets
+
 
 class ProjetCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=200)
@@ -24,6 +24,7 @@ class ProjetCreate(BaseModel, NomValidatorMixin):
     date_debut: _dt.date | None = None
     date_fin_prevue: _dt.date | None = None
 
+
 class ProjetPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     description: str | None = None
@@ -32,6 +33,7 @@ class ProjetPatch(BaseModel):
     date_debut: _dt.date | None = None
     date_fin_prevue: _dt.date | None = None
     date_fin_reelle: _dt.date | None = None
+
 
 class ProjetResponse(IdentifiedResponse):
     nom: str
@@ -43,7 +45,9 @@ class ProjetResponse(IdentifiedResponse):
     date_fin_reelle: _dt.date | None = None
     taches_count: int = 0
 
+
 # Entretien
+
 
 class TacheEntretienCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=200)
@@ -55,6 +59,7 @@ class TacheEntretienCreate(BaseModel, NomValidatorMixin):
     responsable: str | None = Field(None, max_length=100)
     priorite: str | None = Field(None, max_length=50)
 
+
 class TacheEntretienPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     description: str | None = None
@@ -65,6 +70,7 @@ class TacheEntretienPatch(BaseModel):
     responsable: str | None = Field(None, max_length=100)
     priorite: str | None = Field(None, max_length=50)
     fait: bool | None = None
+
 
 class TacheEntretienResponse(IdentifiedResponse):
     nom: str
@@ -79,7 +85,9 @@ class TacheEntretienResponse(IdentifiedResponse):
     priorite: str | None = None
     fait: bool = False
 
+
 # Jardin
+
 
 class ElementJardinCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=200)
@@ -90,6 +98,7 @@ class ElementJardinCreate(BaseModel, NomValidatorMixin):
     date_recolte_prevue: _dt.date | None = None
     notes: str | None = None
 
+
 class ElementJardinPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     type: str | None = Field(None, max_length=100)
@@ -98,6 +107,7 @@ class ElementJardinPatch(BaseModel):
     date_plantation: _dt.date | None = None
     date_recolte_prevue: _dt.date | None = None
     notes: str | None = None
+
 
 class ElementJardinResponse(IdentifiedResponse):
     nom: str
@@ -108,7 +118,9 @@ class ElementJardinResponse(IdentifiedResponse):
     date_recolte_prevue: _dt.date | None = None
     notes: str | None = None
 
+
 # Stocks
+
 
 class StockCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=200)
@@ -133,6 +145,7 @@ class StockCreate(BaseModel, NomValidatorMixin):
         }
     }
 
+
 class StockPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     categorie: str | None = Field(None, max_length=100)
@@ -141,6 +154,7 @@ class StockPatch(BaseModel):
     seuil_alerte: float | None = Field(None, ge=0)
     emplacement: str | None = Field(None, max_length=200)
     prix_unitaire: float | None = Field(None, ge=0)
+
 
 class StockResponse(IdentifiedResponse):
     nom: str = Field(max_length=200)
@@ -168,7 +182,9 @@ class StockResponse(IdentifiedResponse):
         }
     }
 
+
 # Meubles
+
 
 class MeubleCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=200)
@@ -180,6 +196,7 @@ class MeubleCreate(BaseModel, NomValidatorMixin):
     statut: str | None = Field(None, max_length=50)
     notes: str | None = None
 
+
 class MeublePatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     piece: str | None = Field(None, max_length=100)
@@ -189,6 +206,7 @@ class MeublePatch(BaseModel):
     priorite: str | None = Field(None, max_length=50)
     statut: str | None = Field(None, max_length=50)
     notes: str | None = None
+
 
 class MeubleResponse(IdentifiedResponse):
     nom: str
@@ -200,13 +218,16 @@ class MeubleResponse(IdentifiedResponse):
     statut: str | None = None
     notes: str | None = None
 
+
 class BudgetMeublesResponse(BaseModel):
     total_estime: float = 0
     prix_max: float = 0
     par_piece: dict[str, float] = {}
     nb_meubles: int = 0
 
+
 # Cellier
+
 
 class ArticleCellierCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=200)
@@ -220,6 +241,7 @@ class ArticleCellierCreate(BaseModel, NomValidatorMixin):
     code_barre: str | None = Field(None, max_length=50)
     notes: str | None = None
 
+
 class ArticleCellierPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     categorie: str | None = Field(None, max_length=100)
@@ -231,6 +253,7 @@ class ArticleCellierPatch(BaseModel):
     prix_unitaire: float | None = Field(None, ge=0)
     code_barre: str | None = Field(None, max_length=50)
     notes: str | None = None
+
 
 class ArticleCellierResponse(IdentifiedResponse):
     nom: str
@@ -244,12 +267,14 @@ class ArticleCellierResponse(IdentifiedResponse):
     code_barre: str | None = None
     notes: str | None = None
 
+
 class AlertePeremptionResponse(BaseModel):
     id: int
     nom: str
     date_peremption: _dt.date
     jours_restants: int
     quantite: float
+
 
 class StatsCellierResponse(BaseModel):
     total_articles: int = 0
@@ -258,7 +283,9 @@ class StatsCellierResponse(BaseModel):
     articles_perimes: int = 0
     articles_bientot_perimes: int = 0
 
+
 # Abonnements
+
 
 class AbonnementCreate(BaseModel):
     type_abonnement: str = Field(..., max_length=50)
@@ -287,6 +314,7 @@ class AbonnementCreate(BaseModel):
         }
     }
 
+
 class AbonnementPatch(BaseModel):
     type_abonnement: str | None = Field(None, max_length=50)
     fournisseur: str | None = Field(None, max_length=200)
@@ -297,6 +325,7 @@ class AbonnementPatch(BaseModel):
     meilleur_prix_trouve: float | None = Field(None, ge=0)
     fournisseur_alternatif: str | None = Field(None, max_length=200)
     notes: str | None = Field(None, max_length=1000)
+
 
 class AbonnementResponse(IdentifiedResponse):
     type_abonnement: str = Field(max_length=50)
@@ -326,12 +355,15 @@ class AbonnementResponse(IdentifiedResponse):
         }
     }
 
+
 class ResumeAbonnements(BaseModel):
     total_mensuel: float = 0
     total_annuel: float = 0
     par_type: dict[str, float] = {}
 
+
 # Artisans
+
 
 class ArtisanCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=200)
@@ -342,6 +374,7 @@ class ArtisanCreate(BaseModel, NomValidatorMixin):
     note_satisfaction: int | None = Field(None, ge=1, le=5)
     commentaire: str | None = None
 
+
 class ArtisanPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     metier: str | None = Field(None, max_length=100)
@@ -350,6 +383,7 @@ class ArtisanPatch(BaseModel):
     adresse: str | None = None
     note_satisfaction: int | None = Field(None, ge=1, le=5)
     commentaire: str | None = None
+
 
 class ArtisanResponse(IdentifiedResponse):
     nom: str
@@ -361,6 +395,7 @@ class ArtisanResponse(IdentifiedResponse):
     commentaire: str | None = None
     dernier_passage: _dt.date | None = None
 
+
 class InterventionCreate(BaseModel):
     artisan_id: int
     date: _dt.date
@@ -369,12 +404,14 @@ class InterventionCreate(BaseModel):
     etat: str | None = Field(None, max_length=50)
     notes: str | None = None
 
+
 class InterventionPatch(BaseModel):
     date: _dt.date | None = None
     description: str | None = Field(None, max_length=500)
     cout: float | None = Field(None, ge=0)
     etat: str | None = Field(None, max_length=50)
     notes: str | None = None
+
 
 class InterventionResponse(IdentifiedResponse):
     artisan_id: int
@@ -384,13 +421,16 @@ class InterventionResponse(IdentifiedResponse):
     etat: str | None = None
     notes: str | None = None
 
+
 class StatsArtisansResponse(BaseModel):
     total_artisans: int = 0
     par_metier: dict[str, int] = {}
     depenses_totales: float = 0
     total_interventions: int = 0
 
+
 # Diagnostics & Estimations
+
 
 class DiagnosticCreate(BaseModel):
     type_diagnostic: str = Field(..., max_length=100)
@@ -401,6 +441,7 @@ class DiagnosticCreate(BaseModel):
     document_url: str | None = Field(None, max_length=500)
     notes: str | None = None
 
+
 class DiagnosticPatch(BaseModel):
     type_diagnostic: str | None = Field(None, max_length=100)
     date_realisation: _dt.date | None = None
@@ -409,6 +450,7 @@ class DiagnosticPatch(BaseModel):
     resultat: str | None = None
     document_url: str | None = Field(None, max_length=500)
     notes: str | None = None
+
 
 class DiagnosticResponse(IdentifiedResponse):
     type_diagnostic: str
@@ -419,6 +461,7 @@ class DiagnosticResponse(IdentifiedResponse):
     document_url: str | None = None
     notes: str | None = None
 
+
 class EstimationCreate(BaseModel):
     date: _dt.date
     valeur_estimee: float = Field(..., gt=0)
@@ -426,6 +469,7 @@ class EstimationCreate(BaseModel):
     surface_m2: float | None = Field(None, gt=0)
     prix_m2: float | None = Field(None, gt=0)
     notes: str | None = None
+
 
 class EstimationPatch(BaseModel):
     date: _dt.date | None = None
@@ -435,6 +479,7 @@ class EstimationPatch(BaseModel):
     prix_m2: float | None = Field(None, gt=0)
     notes: str | None = None
 
+
 class EstimationResponse(IdentifiedResponse):
     date: _dt.date
     valeur_estimee: float
@@ -443,7 +488,9 @@ class EstimationResponse(IdentifiedResponse):
     prix_m2: float | None = None
     notes: str | None = None
 
+
 # Eco-Tips
+
 
 class ActionEcoCreate(BaseModel):
     titre: str = Field(..., max_length=200)
@@ -460,6 +507,7 @@ class ActionEcoCreate(BaseModel):
             raise ValueError("Le titre ne peut pas \u00eatre vide")
         return v.strip()
 
+
 class ActionEcoPatch(BaseModel):
     titre: str | None = Field(None, max_length=200)
     description: str | None = None
@@ -468,6 +516,7 @@ class ActionEcoPatch(BaseModel):
     economie_estimee: float | None = Field(None, ge=0)
     actif: bool | None = None
     date_debut: _dt.date | None = None
+
 
 class ActionEcoResponse(IdentifiedResponse):
     titre: str
@@ -478,7 +527,9 @@ class ActionEcoResponse(IdentifiedResponse):
     actif: bool = True
     date_debut: _dt.date | None = None
 
+
 # Depenses Maison
+
 
 class DepenseMaisonCreate(BaseModel):
     libelle: str = Field(..., max_length=200)
@@ -496,6 +547,7 @@ class DepenseMaisonCreate(BaseModel):
             raise ValueError("Le libell\u00e9 ne peut pas \u00eatre vide")
         return v.strip()
 
+
 class DepenseMaisonPatch(BaseModel):
     libelle: str | None = Field(None, max_length=200)
     montant: float | None = Field(None, gt=0)
@@ -504,6 +556,7 @@ class DepenseMaisonPatch(BaseModel):
     fournisseur: str | None = Field(None, max_length=200)
     recurrence: str | None = Field(None, max_length=50)
     notes: str | None = None
+
 
 class DepenseMaisonResponse(IdentifiedResponse):
     libelle: str
@@ -514,6 +567,7 @@ class DepenseMaisonResponse(IdentifiedResponse):
     recurrence: str | None = None
     notes: str | None = None
 
+
 class StatsDepensesResponse(BaseModel):
     total_mois: float = 0
     total_annee: float = 0
@@ -521,7 +575,9 @@ class StatsDepensesResponse(BaseModel):
     delta_mois_precedent: float = 0
     par_categorie: dict[str, float] = {}
 
+
 # Nuisibles
+
 
 class TraitementNuisibleCreate(BaseModel):
     type_nuisible: str = Field(..., max_length=100)
@@ -532,6 +588,7 @@ class TraitementNuisibleCreate(BaseModel):
     efficacite: str | None = Field(None, max_length=50)
     notes: str | None = None
 
+
 class TraitementNuisiblePatch(BaseModel):
     type_nuisible: str | None = Field(None, max_length=100)
     zone: str | None = Field(None, max_length=200)
@@ -540,6 +597,7 @@ class TraitementNuisiblePatch(BaseModel):
     date_prochain: _dt.date | None = None
     efficacite: str | None = Field(None, max_length=50)
     notes: str | None = None
+
 
 class TraitementNuisibleResponse(IdentifiedResponse):
     type_nuisible: str
@@ -550,12 +608,15 @@ class TraitementNuisibleResponse(IdentifiedResponse):
     efficacite: str | None = None
     notes: str | None = None
 
+
 # Devis
+
 
 class LigneDevisCreate(BaseModel):
     description: str = Field(..., max_length=500)
     quantite: float = Field(..., gt=0)
     prix_unitaire: float = Field(..., ge=0)
+
 
 class LigneDevisResponse(BaseModel):
     id: int
@@ -564,6 +625,7 @@ class LigneDevisResponse(BaseModel):
     quantite: float
     prix_unitaire: float
     total: float
+
 
 class DevisCreate(BaseModel):
     projet_id: int | None = None
@@ -577,6 +639,7 @@ class DevisCreate(BaseModel):
     notes: str | None = None
     lignes: list[LigneDevisCreate] | None = None
 
+
 class DevisPatch(BaseModel):
     artisan_nom: str | None = Field(None, max_length=200)
     montant_ht: float | None = Field(None, ge=0)
@@ -586,6 +649,7 @@ class DevisPatch(BaseModel):
     statut: str | None = Field(None, max_length=50)
     fichier_url: str | None = Field(None, max_length=500)
     notes: str | None = None
+
 
 class DevisResponse(IdentifiedResponse):
     projet_id: int | None = None
@@ -599,7 +663,9 @@ class DevisResponse(IdentifiedResponse):
     notes: str | None = None
     lignes: list[LigneDevisResponse] | None = None
 
+
 # Entretien saisonnier
+
 
 class EntretienSaisonnierCreate(BaseModel):
     tache: str = Field(..., max_length=200)
@@ -614,6 +680,7 @@ class EntretienSaisonnierCreate(BaseModel):
             raise ValueError("La t\u00e2che ne peut pas \u00eatre vide")
         return v.strip()
 
+
 class EntretienSaisonnierPatch(BaseModel):
     tache: str | None = Field(None, max_length=200)
     saison: str | None = Field(None, max_length=50)
@@ -621,6 +688,7 @@ class EntretienSaisonnierPatch(BaseModel):
     fait: bool | None = None
     date_realisation: _dt.date | None = None
     notes: str | None = None
+
 
 class EntretienSaisonnierResponse(IdentifiedResponse):
     tache: str
@@ -630,7 +698,9 @@ class EntretienSaisonnierResponse(IdentifiedResponse):
     date_realisation: _dt.date | None = None
     notes: str | None = None
 
+
 # Releves compteurs
+
 
 class ReleveCompteurCreate(BaseModel):
     type_compteur: str = Field(..., max_length=100)
@@ -638,11 +708,13 @@ class ReleveCompteurCreate(BaseModel):
     date_releve: _dt.date
     notes: str | None = None
 
+
 class ReleveCompteurPatch(BaseModel):
     type_compteur: str | None = Field(None, max_length=100)
     valeur: float | None = None
     date_releve: _dt.date | None = None
     notes: str | None = None
+
 
 class ReleveCompteurResponse(IdentifiedResponse):
     type_compteur: str
@@ -650,7 +722,9 @@ class ReleveCompteurResponse(IdentifiedResponse):
     date_releve: _dt.date
     notes: str | None = None
 
+
 # Visualisation plan
+
 
 class PieceCreate(BaseModel, NomValidatorMixin):
     nom: str = Field(..., max_length=100)
@@ -662,6 +736,7 @@ class PieceCreate(BaseModel, NomValidatorMixin):
     largeur: float | None = Field(None, gt=0)
     hauteur: float | None = Field(None, gt=0)
 
+
 class PiecePatch(BaseModel):
     nom: str | None = Field(None, max_length=100)
     etage: int | None = None
@@ -671,6 +746,7 @@ class PiecePatch(BaseModel):
     position_y: float | None = None
     largeur: float | None = Field(None, gt=0)
     hauteur: float | None = Field(None, gt=0)
+
 
 class ObjetCreate(BaseModel, NomValidatorMixin):
     piece_id: int
@@ -683,6 +759,7 @@ class ObjetCreate(BaseModel, NomValidatorMixin):
     marque: str | None = Field(None, max_length=100)
     modele: str | None = Field(None, max_length=100)
 
+
 class ObjetPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     type: str | None = Field(None, max_length=100)
@@ -693,6 +770,7 @@ class ObjetPatch(BaseModel):
     marque: str | None = Field(None, max_length=100)
     modele: str | None = Field(None, max_length=100)
 
+
 class PieceResponse(IdentifiedResponse):
     nom: str
     etage: int = 0
@@ -702,6 +780,7 @@ class PieceResponse(IdentifiedResponse):
     position_y: float | None = None
     largeur: float | None = None
     hauteur: float | None = None
+
 
 class ObjetResponse(IdentifiedResponse):
     piece_id: int
@@ -715,7 +794,9 @@ class ObjetResponse(IdentifiedResponse):
     modele: str | None = None
     sous_garantie: bool | None = None
 
+
 # Hub Stats
+
 
 class StatsHubMaisonResponse(BaseModel):
     projets_en_cours: int = 0
@@ -725,7 +806,9 @@ class StatsHubMaisonResponse(BaseModel):
     articles_perimes: int = 0
     diagnostics_expirant: int = 0
 
+
 # Briefing Maison (contexte quotidien)
+
 
 class AlerteMaisonResponse(BaseModel):
     type: str = Field(max_length=50)
@@ -750,6 +833,7 @@ class AlerteMaisonResponse(BaseModel):
         }
     }
 
+
 class TacheJourResponse(BaseModel):
     nom: str = Field(max_length=200)
     categorie: str = Field("entretien", max_length=50)
@@ -759,6 +843,7 @@ class TacheJourResponse(BaseModel):
     fait: bool = False
     id_source: int | None = None
 
+
 class MeteoResumeResponse(BaseModel):
     temperature_min: float | None = None
     temperature_max: float | None = None
@@ -766,6 +851,7 @@ class MeteoResumeResponse(BaseModel):
     precipitation_mm: float = 0
     impact_jardin: str | None = Field(None, max_length=300)
     impact_menage: str | None = Field(None, max_length=300)
+
 
 class BriefingMaisonResponse(BaseModel):
     date: _dt.date
@@ -789,10 +875,37 @@ class BriefingMaisonResponse(BaseModel):
                 "date": "2026-04-03",
                 "resume": "Journée calme avec un point entretien et une alerte stock.",
                 "taches_jour": ["Sortir les poubelles", "Vérifier le filtre chaudière"],
-                "taches_jour_detail": [{"nom": "Vérifier le filtre chaudière", "categorie": "entretien", "duree_estimee_min": 20, "priorite": "haute", "source": "routine", "fait": False, "id_source": 8}],
-                "alertes": [{"type": "entretien", "niveau": "attention", "titre": "Filtre chaudière à vérifier", "message": "Le filtre chaudière dépasse la fréquence recommandée.", "action_suggeree": "Planifier une vérification ce week-end", "date_limite": "2026-04-12", "metadata": {"piece": "buanderie"}}],
+                "taches_jour_detail": [
+                    {
+                        "nom": "Vérifier le filtre chaudière",
+                        "categorie": "entretien",
+                        "duree_estimee_min": 20,
+                        "priorite": "haute",
+                        "source": "routine",
+                        "fait": False,
+                        "id_source": 8,
+                    }
+                ],
+                "alertes": [
+                    {
+                        "type": "entretien",
+                        "niveau": "attention",
+                        "titre": "Filtre chaudière à vérifier",
+                        "message": "Le filtre chaudière dépasse la fréquence recommandée.",
+                        "action_suggeree": "Planifier une vérification ce week-end",
+                        "date_limite": "2026-04-12",
+                        "metadata": {"piece": "buanderie"},
+                    }
+                ],
                 "meteo_impact": "Temps sec, bon créneau pour arroser le jardin en soirée.",
-                "meteo": {"temperature_min": 8, "temperature_max": 17, "description": "éclaircies", "precipitation_mm": 0, "impact_jardin": "Arrosage utile", "impact_menage": None},
+                "meteo": {
+                    "temperature_min": 8,
+                    "temperature_max": 17,
+                    "description": "éclaircies",
+                    "precipitation_mm": 0,
+                    "impact_jardin": "Arrosage utile",
+                    "impact_menage": None,
+                },
                 "projets_actifs": ["Réaménagement chambre Jules"],
                 "priorites": ["Racheter du liquide vaisselle"],
                 "eco_score_jour": 78,
@@ -803,6 +916,7 @@ class BriefingMaisonResponse(BaseModel):
             }
         }
     }
+
 
 class PreferencesMenageRequest(BaseModel):
     jours_off: list[str] = Field(default_factory=list)
@@ -821,10 +935,12 @@ class PreferencesMenageRequest(BaseModel):
         }
     }
 
+
 class PlanningSemaineResponse(BaseModel):
     date_debut: _dt.date
     jours: dict[str, list[TacheJourResponse]] = Field(default_factory=dict)
     duree_totale_min: int = 0
+
 
 class FicheTacheResponse(BaseModel):
     nom: str

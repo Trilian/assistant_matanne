@@ -47,7 +47,9 @@ class MoteurAutomationsService:
         db.flush()
         return liste
 
-    def _declenche_stock_bas(self, declencheur: dict[str, Any], db: Session) -> list[ArticleInventaire]:
+    def _declenche_stock_bas(
+        self, declencheur: dict[str, Any], db: Session
+    ) -> list[ArticleInventaire]:
         seuil = float(declencheur.get("seuil", 1))
         article_nom = (declencheur.get("article") or "").strip().lower()
 
@@ -63,7 +65,9 @@ class MoteurAutomationsService:
                 filtres.append(item)
         return filtres
 
-    def _declenche_peremption_proche(self, declencheur: dict[str, Any], db: Session) -> list[ArticleInventaire]:
+    def _declenche_peremption_proche(
+        self, declencheur: dict[str, Any], db: Session
+    ) -> list[ArticleInventaire]:
         jours = int(declencheur.get("jours", 3) or 3)
         limite = datetime.now(UTC).date() + timedelta(days=max(1, jours))
         return (
@@ -77,7 +81,9 @@ class MoteurAutomationsService:
             .all()
         )
 
-    def _declenche_budget_depassement(self, declencheur: dict[str, Any], db: Session) -> list[dict[str, Any]]:
+    def _declenche_budget_depassement(
+        self, declencheur: dict[str, Any], db: Session
+    ) -> list[dict[str, Any]]:
         seuil = float(declencheur.get("seuil", 300) or 300)
         maintenant = datetime.now(UTC)
         debut_mois = maintenant.date().replace(day=1)
@@ -116,7 +122,9 @@ class MoteurAutomationsService:
         except Exception:
             return []
 
-    def _declenche_anniversaire_proche(self, declencheur: dict[str, Any], db: Session) -> list[AnniversaireFamille]:
+    def _declenche_anniversaire_proche(
+        self, declencheur: dict[str, Any], db: Session
+    ) -> list[AnniversaireFamille]:
         jours = int(declencheur.get("jours", 7) or 7)
         aujourd_hui = datetime.now(UTC).date()
         limite = aujourd_hui + timedelta(days=max(1, jours))
@@ -143,7 +151,9 @@ class MoteurAutomationsService:
             .all()
         )
 
-    def _declenche_garmin_inactivite(self, declencheur: dict[str, Any], db: Session) -> list[dict[str, Any]]:
+    def _declenche_garmin_inactivite(
+        self, declencheur: dict[str, Any], db: Session
+    ) -> list[dict[str, Any]]:
         jours = int(declencheur.get("jours", 3) or 3)
         seuil = datetime.now(UTC) - timedelta(days=max(1, jours))
         rows = (
@@ -157,7 +167,9 @@ class MoteurAutomationsService:
             if derniere is None or derniere < seuil
         ]
 
-    def _declenche_document_expiration(self, declencheur: dict[str, Any], db: Session) -> list[DocumentFamille]:
+    def _declenche_document_expiration(
+        self, declencheur: dict[str, Any], db: Session
+    ) -> list[DocumentFamille]:
         jours = int(declencheur.get("jours", 30) or 30)
         limite = datetime.now(UTC).date() + timedelta(days=max(1, jours))
         return (
@@ -336,7 +348,9 @@ class MoteurAutomationsService:
         )
         return 1
 
-    def _executer_action_creer_tache_maison(self, action: dict[str, Any], db: Session, user_id: int) -> int:
+    def _executer_action_creer_tache_maison(
+        self, action: dict[str, Any], db: Session, user_id: int
+    ) -> int:
         db.add(
             TacheEntretien(
                 nom=str(action.get("nom", "Tâche automation")),
@@ -501,7 +515,9 @@ class MoteurAutomationsService:
             return self._declenche_batch_termine(declencheur, db)
         raise ValueError(f"Déclencheur non supporté: {type_declencheur}")
 
-    def _executer_une_regle(self, regle: AutomationRegle, db: Session, *, dry_run: bool = False) -> dict[str, Any]:
+    def _executer_une_regle(
+        self, regle: AutomationRegle, db: Session, *, dry_run: bool = False
+    ) -> dict[str, Any]:
         declencheur = regle.declencheur or {}
         action = regle.action or {}
 
@@ -531,7 +547,9 @@ class MoteurAutomationsService:
             executed = self._executer_action_notifier(
                 {
                     "titre": action.get("titre", "Suggestions recettes"),
-                    "message": action.get("message", "Des ingrédients déclenchent une suggestion recette."),
+                    "message": action.get(
+                        "message", "Des ingrédients déclenchent une suggestion recette."
+                    ),
                 },
                 items,
                 regle.user_id,
@@ -643,7 +661,12 @@ class MoteurAutomationsService:
 
         db.rollback()
         executed_count = sum(1 for r in results if r.get("success") and r.get("executed", 0) > 0)
-        return {"executed": executed_count, "results": results, "total": len(results), "dry_run": True}
+        return {
+            "executed": executed_count,
+            "results": results,
+            "total": len(results),
+            "dry_run": True,
+        }
 
     @avec_gestion_erreurs(default_return={"success": False, "message": "automation introuvable"})
     @avec_session_db
@@ -676,4 +699,3 @@ class MoteurAutomationsService:
 @service_factory("moteur_automations", tags={"automations", "utilitaires"})
 def obtenir_moteur_automations_service() -> MoteurAutomationsService:
     return MoteurAutomationsService()
-

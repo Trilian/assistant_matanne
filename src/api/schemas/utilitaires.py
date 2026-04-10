@@ -8,7 +8,6 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # ═══════════════════════════════════════════════════════════
 # NOTES
 # ═══════════════════════════════════════════════════════════
@@ -298,7 +297,9 @@ class MotDePasseBase(BaseModel):
     nom: str = Field(..., min_length=1, max_length=200)
     categorie: str = Field("autre", max_length=50)
     identifiant: str | None = Field(None, max_length=200)
-    valeur: str = Field(..., min_length=1, max_length=500, description="Valeur en clair (chiffrée au stockage)")
+    valeur: str = Field(
+        ..., min_length=1, max_length=500, description="Valeur en clair (chiffrée au stockage)"
+    )
     notes: str | None = Field(None, max_length=1000)
 
     model_config = {

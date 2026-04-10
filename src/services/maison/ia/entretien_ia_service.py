@@ -13,7 +13,6 @@ from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
-
 Saison = Literal["printemps", "été", "automne", "hiver"]
 
 

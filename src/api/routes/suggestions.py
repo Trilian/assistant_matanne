@@ -13,9 +13,13 @@ from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
-from src.api.schemas import AdaptationRecetteResponse, SuggestionsPlanningResponse, SuggestionsRecettesResponse
+from src.api.schemas import (
+    AdaptationRecetteResponse,
+    SuggestionsPlanningResponse,
+    SuggestionsRecettesResponse,
+)
 from src.api.schemas.errors import REPONSES_IA
-from src.api.utils import gerer_exception_api, executer_async, executer_avec_session
+from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
 
@@ -26,7 +30,7 @@ def _verifier_ia_configuree() -> None:
 
     try:
         params = obtenir_parametres()
-        params.MISTRAL_API_KEY  # Raises ValueError if not set
+        _ = params.MISTRAL_API_KEY  # Raises ValueError if not set
     except (ValueError, Exception):
         raise HTTPException(
             status_code=503,
@@ -57,7 +61,6 @@ def _detecter_type_repas(contexte: str) -> str:
     if any(k in c for k in ("midi", "dejeuner", "déjeuner", "lunch")):
         return "dejeuner"
     return "diner"
-
 
 
 class AdaptationRecetteRequest(BaseModel):
@@ -126,7 +129,11 @@ async def suggest_recettes(
 
     service = obtenir_service_recettes()
 
-    difficulte = "facile" if any(k in contexte.lower() for k in ("rapide", "express", "vite", "simple")) else "moyen"
+    difficulte = (
+        "facile"
+        if any(k in contexte.lower() for k in ("rapide", "express", "vite", "simple"))
+        else "moyen"
+    )
 
     suggestions = service.generer_recettes_ia(
         type_repas=_detecter_type_repas(contexte),
@@ -218,7 +225,9 @@ async def suggest_planning(
 @gerer_exception_api
 async def analyser_photo_frigo(
     file: UploadFile = File(..., description="Photo du frigo (JPEG/PNG, max 10MB)"),
-    zone: str = Query("frigo", pattern="^(frigo|placard|congelateur)$", description="Zone analysÃ©e"),
+    zone: str = Query(
+        "frigo", pattern="^(frigo|placard|congelateur)$", description="Zone analysÃ©e"
+    ),
     zones: list[str] | None = Query(
         None,
         description="Zones Ã  analyser en multi-zone (frigo, placard, congelateur)",
@@ -378,7 +387,8 @@ async def adaptation_recette(
                 "tags": list(sub.tags),
                 "note": sub.note,
                 "disponible_en_stock": any(
-                    sub.ingredient_substitut.lower() in stock.lower() or stock.lower() in sub.ingredient_substitut.lower()
+                    sub.ingredient_substitut.lower() in stock.lower()
+                    or stock.lower() in sub.ingredient_substitut.lower()
                     for stock in stock_disponible
                 ),
             }
@@ -452,6 +462,7 @@ async def statut_predictions(
 # G1 — Recette express depuis le stock actuel
 # ══════════════════════════════════════════════════════════════════
 
+
 @router.get(
     "/depuis-stock",
     responses=REPONSES_IA,
@@ -460,7 +471,9 @@ async def statut_predictions(
 @gerer_exception_api
 async def suggerer_recettes_depuis_stock(
     max_resultats: int = Query(3, ge=1, le=6, description="Nombre max de suggestions"),
-    temps_max_min: int = Query(45, ge=10, le=120, description="Temps de préparation maximum (minutes)"),
+    temps_max_min: int = Query(
+        45, ge=10, le=120, description="Temps de préparation maximum (minutes)"
+    ),
     user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ) -> dict:
@@ -476,11 +489,7 @@ async def suggerer_recettes_depuis_stock(
 
         with executer_avec_session() as session:
             # Récupérer les ingrédients en stock (quantité > 0)
-            articles = (
-                session.query(ArticleInventaire)
-                .filter(ArticleInventaire.quantite > 0)
-                .all()
-            )
+            articles = session.query(ArticleInventaire).filter(ArticleInventaire.quantite > 0).all()
             ingredients_en_stock = [
                 {
                     "nom": a.nom or "inconnu",
@@ -492,7 +501,11 @@ async def suggerer_recettes_depuis_stock(
             ]
 
         if not ingredients_en_stock:
-            return {"suggestions": [], "nb_ingredients_stock": 0, "message": "Aucun ingrédient en stock détecté."}
+            return {
+                "suggestions": [],
+                "nb_ingredients_stock": 0,
+                "message": "Aucun ingrédient en stock détecté.",
+            }
 
         service = obtenir_service_recettes()
         suggestions = service.suggerer_depuis_inventaire(
@@ -506,4 +519,3 @@ async def suggerer_recettes_depuis_stock(
         }
 
     return await executer_async(_query)
-

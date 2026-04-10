@@ -57,9 +57,7 @@ class PlanningJardinInteractionService:
         # Approximation robuste: une plante est considérée utilisée si une récolte
         # a été enregistrée sur la période analysée.
         recoltes_recentes = (
-            db.query(ActionPlante.plante_id)
-            .filter(ActionPlante.type_action == "recolte")
-            .all()
+            db.query(ActionPlante.plante_id).filter(ActionPlante.type_action == "recolte").all()
         )
         plantes_utilisees = {plante_id for (plante_id,) in recoltes_recentes}
 
@@ -71,22 +69,28 @@ class PlanningJardinInteractionService:
             est_utilisee = plante.id in plantes_utilisees
 
             if not est_utilisee:
-                recoltes_non_utilisees.append({
-                    "plante_id": plante.id,
-                    "nom": getattr(plante, 'nom', 'Inconnue'),
-                    "quantite_recolte": 1,
-                    "unite": getattr(plante, 'unite', None) or "kg",
-                    "risque_perte": "moyen",
-                })
+                recoltes_non_utilisees.append(
+                    {
+                        "plante_id": plante.id,
+                        "nom": getattr(plante, "nom", "Inconnue"),
+                        "quantite_recolte": 1,
+                        "unite": getattr(plante, "unite", None) or "kg",
+                        "risque_perte": "moyen",
+                    }
+                )
             else:
                 recoltes_utilisees += 1
 
-        taux_utilisation = (recoltes_utilisees / len(plantes_au_jardin) * 100) if plantes_au_jardin else 0.0
+        taux_utilisation = (
+            (recoltes_utilisees / len(plantes_au_jardin) * 100) if plantes_au_jardin else 0.0
+        )
 
         # Générer recommandations
         recommandations = []
         if taux_utilisation < 50:
-            recommandations.append("⚠️ Moins de 50% des récoltes utilisées — envisager de réduire la production")
+            recommandations.append(
+                "⚠️ Moins de 50% des récoltes utilisées — envisager de réduire la production"
+            )
         if len(recoltes_non_utilisees) > 3:
             recommandations.append("📋 Intégrer davantage les productions existantes au planning")
         if any(r["risque_perte"] == "élevé" for r in recoltes_non_utilisees):
@@ -147,7 +151,7 @@ class PlanningJardinInteractionService:
                 f"✅ Production ajustée pour {plante.nom}: "
                 f"{ancien_surface:.1f}m² → {nouvelle_surface:.1f}m² (facteur {facteur_ajustement})"
             )
-            message = f"Ajustement recolte pour {plante.nom} appliqué sur la zone." 
+            message = f"Ajustement recolte pour {plante.nom} appliqué sur la zone."
         else:
             logger.info(
                 f"ℹ️ Ajustement recommandé pour {plante.nom}: "

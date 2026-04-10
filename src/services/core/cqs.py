@@ -75,7 +75,7 @@ class CommandProtocol(Protocol[T]):
 # ═══════════════════════════════════════════════════════════
 
 
-class QueryService(ABC, Generic[T]):
+class QueryService[T](ABC):
     """
     Service en lecture seule.
 
@@ -215,7 +215,7 @@ class QueryService(ABC, Generic[T]):
 # ═══════════════════════════════════════════════════════════
 
 
-class CommandService(ABC, Generic[T]):
+class CommandService[T](ABC):
     """
     Service d'écriture avec émission automatique d'événements.
 

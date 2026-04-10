@@ -48,9 +48,7 @@ class DocumentsNotificationsInteractionService:
 
         # Documents avec date d'expiration
         documents = (
-            db.query(DocumentFamille)
-            .filter(DocumentFamille.date_expiration.isnot(None))
-            .all()
+            db.query(DocumentFamille).filter(DocumentFamille.date_expiration.isnot(None)).all()
         )
 
         documents_verifies = len(documents)
@@ -64,18 +62,14 @@ class DocumentsNotificationsInteractionService:
             # Vérifier si on est sur un seuil d'alerte
             for seuil in SEUILS_ALERTE_JOURS:
                 if jours_restants == seuil:
-                    alerte = self._envoyer_alerte_document(
-                        user_id, doc, jours_restants
-                    )
+                    alerte = self._envoyer_alerte_document(user_id, doc, jours_restants)
                     if alerte:
                         alertes_envoyees.append(alerte)
                     break
 
             # Document déjà expiré
             if jours_restants < 0 and jours_restants >= -1:
-                alerte = self._envoyer_alerte_document(
-                    user_id, doc, jours_restants, expire=True
-                )
+                alerte = self._envoyer_alerte_document(user_id, doc, jours_restants, expire=True)
                 if alerte:
                     alertes_envoyees.append(alerte)
 
@@ -188,19 +182,27 @@ class DocumentsNotificationsInteractionService:
             if not doc.date_expiration:
                 continue
             jours = (doc.date_expiration - aujourd_hui).days
-            urgence = "expire" if jours < 0 else ("urgent" if jours <= 7 else ("attention" if jours <= 30 else "info"))
-            result.append({
-                "nom": doc.nom,
-                "type_document": doc.type_document,
-                "date_expiration": doc.date_expiration.isoformat(),
-                "jours_restants": jours,
-                "urgence": urgence,
-            })
+            urgence = (
+                "expire"
+                if jours < 0
+                else ("urgent" if jours <= 7 else ("attention" if jours <= 30 else "info"))
+            )
+            result.append(
+                {
+                    "nom": doc.nom,
+                    "type_document": doc.type_document,
+                    "date_expiration": doc.date_expiration.isoformat(),
+                    "jours_restants": jours,
+                    "urgence": urgence,
+                }
+            )
 
         return result
 
 
-@service_factory("documents_notifications_interaction", tags={"famille", "notifications", "documents"})
+@service_factory(
+    "documents_notifications_interaction", tags={"famille", "notifications", "documents"}
+)
 def obtenir_service_documents_notifications() -> DocumentsNotificationsInteractionService:
     """Factory pour le service Documents → Notifications."""
     return DocumentsNotificationsInteractionService()

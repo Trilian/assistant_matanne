@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query
 
 from src.api.dependencies import require_auth
-from src.api.schemas.errors import REPONSES_LISTE, REPONSES_CRUD_LECTURE
+from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/anti-gaspillage", tags=["Anti-Gaspillage"])
@@ -90,9 +90,7 @@ async def obtenir_anti_gaspillage(
                 # Trouver les IDs d'ingrédients correspondant aux articles urgents
                 ingredients_urgents = (
                     session.query(Ingredient.id, Ingredient.nom)
-                    .filter(
-                        func.lower(Ingredient.nom).in_(noms_urgents)
-                    )
+                    .filter(func.lower(Ingredient.nom).in_(noms_urgents))
                     .all()
                 )
                 ingredient_ids = [i.id for i in ingredients_urgents]
@@ -122,9 +120,7 @@ async def obtenir_anti_gaspillage(
                                 "id": r.id,
                                 "nom": r.nom,
                                 "ingredients_utilises": [n for n in noms if n],
-                                "temps_total": (
-                                    (r.temps_preparation or 0) + (r.temps_cuisson or 0)
-                                )
+                                "temps_total": ((r.temps_preparation or 0) + (r.temps_cuisson or 0))
                                 or None,
                                 "difficulte": r.difficulte,
                             }
@@ -152,16 +148,17 @@ async def suggestions_ia_anti_gaspillage(
 ) -> dict[str, Any]:
     """
     Génère des suggestions IA pour éviter le gaspillage.
-    
+
     Analyse les produits urgents et génère:
     - Recettes créatives utilisant ces produits
     - Conseils de conservation
     - Idées de transformation (congélation, confiture, etc.)
-    
+
     Returns:
         Suggestions IA pour réduire le gaspillage
     """
     import logging
+
     logger_local = logging.getLogger(__name__)
 
     from src.services.cuisine.suggestions.anti_gaspillage import obtenir_produits_urgents
@@ -276,14 +273,16 @@ async def obtenir_historique_gaspillage(
                 sauves = max(0, a_utiliser - perimes)
                 score_sem = max(0, 100 - (perimes * 10))
 
-                historique_semaines.append({
-                    "debut": debut_sem.isoformat(),
-                    "fin": fin_sem.isoformat(),
-                    "score": score_sem,
-                    "articles_perimes": perimes,
-                    "articles_sauves": sauves,
-                    "economie": round(sauves * 3.5, 2),
-                })
+                historique_semaines.append(
+                    {
+                        "debut": debut_sem.isoformat(),
+                        "fin": fin_sem.isoformat(),
+                        "score": score_sem,
+                        "articles_perimes": perimes,
+                        "articles_sauves": sauves,
+                        "economie": round(sauves * 3.5, 2),
+                    }
+                )
 
             scores = [s["score"] for s in historique_semaines]
             score_moyen = round(sum(scores) / len(scores)) if scores else 0
@@ -368,4 +367,3 @@ async def obtenir_historique_gaspillage(
             }
 
     return await executer_async(_query)
-

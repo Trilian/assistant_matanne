@@ -323,6 +323,3 @@ class ImportService:
 def obtenir_import_service() -> ImportService:
     """Factory singleton ImportService."""
     return ImportService()
-
-
-

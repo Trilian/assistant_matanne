@@ -19,7 +19,14 @@ class ArticlePerissable(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {"id": 4, "nom": "Yaourts nature", "date_peremption": "2026-04-05", "jours_restants": 2, "quantite": 4, "unite": "pots"}
+            "example": {
+                "id": 4,
+                "nom": "Yaourts nature",
+                "date_peremption": "2026-04-05",
+                "jours_restants": 2,
+                "quantite": 4,
+                "unite": "pots",
+            }
         }
     }
 
@@ -35,7 +42,13 @@ class RecetteRescue(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {"id": 12, "nom": "Clafoutis aux fruits", "ingredients_utilises": ["yaourts", "pommes"], "temps_total": 40, "difficulte": "facile"}
+            "example": {
+                "id": 12,
+                "nom": "Clafoutis aux fruits",
+                "ingredients_utilises": ["yaourts", "pommes"],
+                "temps_total": 40,
+                "difficulte": "facile",
+            }
         }
     }
 
@@ -50,7 +63,12 @@ class ScoreAntiGaspillage(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {"score": 82, "articles_perimes_mois": 1, "articles_sauves_mois": 7, "economie_estimee": 18.5}
+            "example": {
+                "score": 82,
+                "articles_perimes_mois": 1,
+                "articles_sauves_mois": 7,
+                "economie_estimee": 18.5,
+            }
         }
     }
 
@@ -65,9 +83,31 @@ class ReponseAntiGaspillage(BaseModel):
     model_config = {
         "json_schema_extra": {
             "example": {
-                "score": {"score": 82, "articles_perimes_mois": 1, "articles_sauves_mois": 7, "economie_estimee": 18.5},
-                "articles_urgents": [{"id": 4, "nom": "Yaourts nature", "date_peremption": "2026-04-05", "jours_restants": 2, "quantite": 4, "unite": "pots"}],
-                "recettes_rescue": [{"id": 12, "nom": "Clafoutis aux fruits", "ingredients_utilises": ["yaourts", "pommes"], "temps_total": 40, "difficulte": "facile"}],
+                "score": {
+                    "score": 82,
+                    "articles_perimes_mois": 1,
+                    "articles_sauves_mois": 7,
+                    "economie_estimee": 18.5,
+                },
+                "articles_urgents": [
+                    {
+                        "id": 4,
+                        "nom": "Yaourts nature",
+                        "date_peremption": "2026-04-05",
+                        "jours_restants": 2,
+                        "quantite": 4,
+                        "unite": "pots",
+                    }
+                ],
+                "recettes_rescue": [
+                    {
+                        "id": 12,
+                        "nom": "Clafoutis aux fruits",
+                        "ingredients_utilises": ["yaourts", "pommes"],
+                        "temps_total": 40,
+                        "difficulte": "facile",
+                    }
+                ],
             }
         }
     }

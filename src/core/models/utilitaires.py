@@ -387,9 +387,7 @@ class MinuteurSession(TimestampMixin, Base):
     terminee: Mapped[bool] = mapped_column(Boolean, default=False)
     active: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
 
-    __table_args__ = (
-        CheckConstraint("duree_secondes > 0", name="ck_minuteur_duree_positive"),
-    )
+    __table_args__ = (CheckConstraint("duree_secondes > 0", name="ck_minuteur_duree_positive"),)
 
     def __repr__(self) -> str:
         return f"<MinuteurSession(id={self.id}, label='{self.label}', active={self.active})>"

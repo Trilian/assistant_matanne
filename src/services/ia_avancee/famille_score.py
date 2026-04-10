@@ -23,6 +23,7 @@ def calculer_score_famille_hebdo(service: Any) -> ScoreFamilleHebdoResponse | No
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models.famille import ActiviteFamille
             from src.core.models.habitat import TacheEntretien
 

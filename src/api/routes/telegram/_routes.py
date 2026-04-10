@@ -66,7 +66,9 @@ async def envoyer_planning_telegram(
                 raise HTTPException(status_code=404, detail="Planning non trouvé")
 
             lignes = []
-            repas_tries = sorted(planning.repas, key=lambda item: (item.date_repas, item.type_repas))
+            repas_tries = sorted(
+                planning.repas, key=lambda item: (item.date_repas, item.type_repas)
+            )
             noms_recettes: list[str] = []
             for repas in repas_tries:
                 nom_recette = None
@@ -230,7 +232,9 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
         message_id = message_info.get("message_id")
 
         if not chat_id or not data or not callback_query_id:
-            logger.warning(f"Callback incomplet: chat_id={chat_id}, data={data}, id={callback_query_id}")
+            logger.warning(
+                f"Callback incomplet: chat_id={chat_id}, data={data}, id={callback_query_id}"
+            )
             return MessageResponse(message="invalid_callback", id=0)
 
         logger.info(f"Callback Telegram reçu: {data} (msg_id={message_id})")
@@ -289,7 +293,11 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
         if await _dispatcher_commande_telegram(chat_id, texte, commande):
             return MessageResponse(message="ok", id=0)
 
-    if "ce soir" in normalise or "qu'est-ce qu'on mange" in normalise or "quest ce quon mange" in normalise:
+    if (
+        "ce soir" in normalise
+        or "qu'est-ce qu'on mange" in normalise
+        or "quest ce quon mange" in normalise
+    ):
         await _envoyer_repas_du_soir(chat_id)
     elif normalise.startswith("ajoute ") or normalise.startswith("ajouter "):
         await _ajouter_article_liste(chat_id, _extraire_article_depuis_commande(texte))

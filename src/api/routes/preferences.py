@@ -5,23 +5,23 @@ CRUD pour les préférences alimentaires, robots, magasins.
 W4 : ajout endpoints préférences canaux de notification.
 """
 
+import logging
 from typing import Any, cast
 
-import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_ECRITURE, REPONSES_CRUD_LECTURE, REPONSES_IA
-from src.api.schemas.preferences import (
-    PreferencesCreate,
-    PreferencesPatch,
-    PreferencesNotificationsUpdate,
-)
 from src.api.schemas.ia_transverses import (
     ApprentissageHabitudesResponse,
     ApprentissagePreferencesResponse,
     ModePiloteAutomatiqueResponse,
     ModePiloteConfigurationRequest,
+)
+from src.api.schemas.preferences import (
+    PreferencesCreate,
+    PreferencesNotificationsUpdate,
+    PreferencesPatch,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.core.service_ia import obtenir_service_innovations_core
@@ -48,7 +48,11 @@ async def lire_mode_pilote(
     """Alias métier pour la lecture du mode pilote automatique."""
     service = obtenir_service_innovations_core()
     user_id_raw = user.get("id")
-    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    user_id = (
+        int(user_id_raw)
+        if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit()
+        else None
+    )
     result = service.obtenir_mode_pilote_automatique(user_id=user_id)
     return result or ModePiloteAutomatiqueResponse()
 
@@ -62,7 +66,11 @@ async def configurer_mode_pilote(
     """Alias métier pour la configuration du mode pilote automatique."""
     service = obtenir_service_innovations_core()
     user_id_raw = user.get("id")
-    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    user_id = (
+        int(user_id_raw)
+        if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit()
+        else None
+    )
     result = service.configurer_mode_pilote_automatique(
         user_id=user_id,
         actif=body.actif,
@@ -81,6 +89,7 @@ async def preferences_apprises(
     user_id = str(user.get("id") or "")
     result = service.analyser_preferences_apprises(user_id=user_id)
     return result or ApprentissagePreferencesResponse()
+
 
 logger = logging.getLogger(__name__)
 
@@ -264,17 +273,11 @@ def _notif_to_dict(prefs: Any, user_id: str) -> dict[str, Any]:
     modules_actifs: dict[str, Any] = dict(prefs.modules_actifs or {})
     notifications_brut = modules_actifs.get("notifications_par_module") or {}
     notifications_par_module_source: dict[str, Any] = (
-        cast(dict[str, Any], notifications_brut)
-        if isinstance(notifications_brut, dict)
-        else {}
+        cast(dict[str, Any], notifications_brut) if isinstance(notifications_brut, dict) else {}
     )
     notifications_par_module = {
         **_NOTIFICATIONS_MODULES_DEFAULTS,
-        **{
-            k: bool(v)
-            for k, v in notifications_par_module_source.items()
-            if isinstance(k, str)
-        },
+        **{k: bool(v) for k, v in notifications_par_module_source.items() if isinstance(k, str)},
     }
     return {
         "user_id": user_id,
@@ -371,6 +374,7 @@ async def modifier_preferences_notifications(
                     # Stocker comme string "HH:MM", conversion en Time si possible
                     try:
                         from datetime import time as _time
+
                         h, m = str(value).split(":")
                         setattr(prefs, key, _time(int(h), int(m)))
                     except Exception as e:
@@ -426,8 +430,10 @@ async def activer_mode_vacances(
     Returns:
         Statut du mode vacances + checklist générée
     """
+
     def _activer():
         from datetime import datetime
+
         from src.core.models.notifications import PreferenceNotification
 
         with executer_avec_session() as session:
@@ -445,26 +451,54 @@ async def activer_mode_vacances(
             modules_actifs["mode_vacances"] = True
             if date_depart:
                 try:
-                    modules_actifs["vacances_depart"] = datetime.strptime(date_depart, "%Y-%m-%d").isoformat()
+                    modules_actifs["vacances_depart"] = datetime.strptime(
+                        date_depart, "%Y-%m-%d"
+                    ).isoformat()
                 except (ValueError, TypeError):
-                    logger.warning("Format date_depart invalide: %s (attendu YYYY-MM-DD)", date_depart)
+                    logger.warning(
+                        "Format date_depart invalide: %s (attendu YYYY-MM-DD)", date_depart
+                    )
             if date_retour:
                 try:
-                    modules_actifs["vacances_retour"] = datetime.strptime(date_retour, "%Y-%m-%d").isoformat()
+                    modules_actifs["vacances_retour"] = datetime.strptime(
+                        date_retour, "%Y-%m-%d"
+                    ).isoformat()
                 except (ValueError, TypeError):
-                    logger.warning("Format date_retour invalide: %s (attendu YYYY-MM-DD)", date_retour)
+                    logger.warning(
+                        "Format date_retour invalide: %s (attendu YYYY-MM-DD)", date_retour
+                    )
 
             prefs.modules_actifs = modules_actifs
             session.commit()
 
             # Générer checklist
             checklist = [
-                {"tache": "Fermer tous les robinets intérieurs", "categorie": "eau", "priorite": "haute"},
-                {"tache": "Vérifier la porte d'entrée", "categorie": "securite", "priorite": "haute"},
-                {"tache": "Éteindre appareils électriques", "categorie": "electricite", "priorite": "moyenne"},
-                {"tache": "Vider le frigo (destockage)", "categorie": "cuisine", "priorite": "moyenne"},
+                {
+                    "tache": "Fermer tous les robinets intérieurs",
+                    "categorie": "eau",
+                    "priorite": "haute",
+                },
+                {
+                    "tache": "Vérifier la porte d'entrée",
+                    "categorie": "securite",
+                    "priorite": "haute",
+                },
+                {
+                    "tache": "Éteindre appareils électriques",
+                    "categorie": "electricite",
+                    "priorite": "moyenne",
+                },
+                {
+                    "tache": "Vider le frigo (destockage)",
+                    "categorie": "cuisine",
+                    "priorite": "moyenne",
+                },
                 {"tache": "Arroser les plantes", "categorie": "jardin", "priorite": "moyenne"},
-                {"tache": "Fermer les volets (optionnel)", "categorie": "securite", "priorite": "basse"},
+                {
+                    "tache": "Fermer les volets (optionnel)",
+                    "categorie": "securite",
+                    "priorite": "basse",
+                },
             ]
 
             return {
@@ -493,6 +527,7 @@ async def desactiver_mode_vacances(
     Returns:
         Statut updated
     """
+
     def _desactiver():
         from src.core.models.notifications import PreferenceNotification
 
@@ -519,4 +554,3 @@ async def desactiver_mode_vacances(
             }
 
     return await executer_async(_desactiver)
-

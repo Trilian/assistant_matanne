@@ -5,15 +5,16 @@ Calcul déterministe (sans IA) d'un score de pertinence pour chaque suggestion
 en fonction du contexte familial courant.
 """
 
+from dataclasses import dataclass, field
+
 from src.services.core.registry import service_factory
 from src.services.core.scoring import BaseScoringService
 
 
-from dataclasses import dataclass, field
-
 @dataclass
 class SuggestionScoree:
     """Suggestion enrichie avec score de pertinence."""
+
     score_pertinence: float = 0.5
     raison_suggestion: str = "Suggestion générale"
     sources_score: list[str] = field(default_factory=list)
@@ -40,7 +41,9 @@ class ScoringPertinenceService(BaseScoringService):
 
         # Anniversaire proche (J-14)
         anniversaires = contexte.get("anniversaires") or []
-        if any(int(a.get("jours_restants", 99)) <= 14 for a in anniversaires if isinstance(a, dict)):
+        if any(
+            int(a.get("jours_restants", 99)) <= 14 for a in anniversaires if isinstance(a, dict)
+        ):
             score += self.FACTEURS["anniversaire_proche"]
             sources.append("anniversaire proche")
 
@@ -55,8 +58,12 @@ class ScoringPertinenceService(BaseScoringService):
         type_activite = suggestion.get("type_activite") or suggestion.get("type") or ""
         if meteo and type_activite:
             temps = str(meteo.get("description") or meteo.get("temps") or "").lower()
-            exterieur = any(k in type_activite.lower() for k in ["extérieur", "exterieur", "plein_air", "sport"])
-            interieur = any(k in type_activite.lower() for k in ["intérieur", "interieur", "maison", "culture"])
+            exterieur = any(
+                k in type_activite.lower() for k in ["extérieur", "exterieur", "plein_air", "sport"]
+            )
+            interieur = any(
+                k in type_activite.lower() for k in ["intérieur", "interieur", "maison", "culture"]
+            )
             pluie = any(k in temps for k in ["pluie", "orage", "nuage"])
             beau = any(k in temps for k in ["soleil", "clair", "beau"])
             if (exterieur and beau) or (interieur and pluie):
@@ -93,17 +100,27 @@ class ScoringPertinenceService(BaseScoringService):
         for s in suggestions:
             try:
                 scored = self.scorer_suggestion(s, contexte)
-                resultats.append({
-                    **s,
-                    "score_pertinence": scored.score_pertinence,
-                    "raison_suggestion": scored.raison_suggestion,
-                    "sources_score": scored.sources_score,
-                })
+                resultats.append(
+                    {
+                        **s,
+                        "score_pertinence": scored.score_pertinence,
+                        "raison_suggestion": scored.raison_suggestion,
+                        "sources_score": scored.sources_score,
+                    }
+                )
             except Exception as exc:  # noqa: BLE001
                 import logging
+
                 logger = logging.getLogger(__name__)
                 logger.warning("Scoring échoué pour suggestion '%s': %s", s.get("titre", "?"), exc)
-                resultats.append({**s, "score_pertinence": 0.5, "raison_suggestion": "Suggestion générale", "sources_score": []})
+                resultats.append(
+                    {
+                        **s,
+                        "score_pertinence": 0.5,
+                        "raison_suggestion": "Suggestion générale",
+                        "sources_score": [],
+                    }
+                )
         return sorted(resultats, key=lambda x: x.get("score_pertinence", 0), reverse=True)
 
 

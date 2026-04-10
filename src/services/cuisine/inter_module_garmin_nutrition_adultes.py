@@ -42,7 +42,7 @@ class GarminNutritionAdultesInteractionService:
                 - niveau_activite: Niveau détecté (sédentaire/modéré/actif)
                 - details: Explications et sources données
         """
-        from src.core.models.users import ResumeQuotidienGarmin, ProfilUtilisateur
+        from src.core.models.users import ProfilUtilisateur, ResumeQuotidienGarmin
 
         # Récupérer le profil utilisateur
         profil_utilisateur = db.query(ProfilUtilisateur).first()
@@ -67,8 +67,10 @@ class GarminNutritionAdultesInteractionService:
         # Récupérer les données Garmin les plus récentes (dernier jour)
         donnees_garmin = (
             db.query(ResumeQuotidienGarmin)
-            .filter(ResumeQuotidienGarmin.user_id == profil_utilisateur.id, 
-                    ResumeQuotidienGarmin.date >= date_type.today())
+            .filter(
+                ResumeQuotidienGarmin.user_id == profil_utilisateur.id,
+                ResumeQuotidienGarmin.date >= date_type.today(),
+            )
             .order_by(ResumeQuotidienGarmin.id.desc())
             .first()
         )
@@ -113,7 +115,7 @@ class GarminNutritionAdultesInteractionService:
 
         return {
             "profile_utilisateur_id": profil_utilisateur.id,
-            "nom_profil": getattr(profil_utilisateur, 'email', 'Utilisateur'),
+            "nom_profil": getattr(profil_utilisateur, "email", "Utilisateur"),
             "calories_recommended": calories_total,
             "calories_base": calories_base,
             "calories_bonus_activite": calories_bonus,

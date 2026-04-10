@@ -62,7 +62,11 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
                 "planning": None,
                 "courses": None,
                 "actions_suivantes": [
-                    {"action": "generer_planning_ia", "label": "Générer un planning IA", "url": "/api/v1/suggestions/planning"},
+                    {
+                        "action": "generer_planning_ia",
+                        "label": "Générer un planning IA",
+                        "url": "/api/v1/suggestions/planning",
+                    },
                 ],
             }
 
@@ -109,7 +113,11 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
                 },
                 "courses": None,
                 "actions_suivantes": [
-                    {"action": "generer_courses", "label": "Générer la liste de courses", "url": f"/api/v1/courses/generer-depuis-planning/{planning.id}"},
+                    {
+                        "action": "generer_courses",
+                        "label": "Générer la liste de courses",
+                        "url": f"/api/v1/courses/generer-depuis-planning/{planning.id}",
+                    },
                 ],
             }
 
@@ -136,26 +144,50 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
             }
 
         # Étape 3: Vérifier l'état du checkout
-        nb_articles = len(liste.articles) if hasattr(liste, 'articles') else 0
-        nb_coches = sum(1 for a in (liste.articles or []) if a.achete) if hasattr(liste, 'articles') else 0
+        nb_articles = len(liste.articles) if hasattr(liste, "articles") else 0
+        nb_coches = (
+            sum(1 for a in (liste.articles or []) if a.achete) if hasattr(liste, "articles") else 0
+        )
 
         if nb_coches < nb_articles:
             return {
                 "etape_actuelle": "faire_courses",
                 "planning": {"id": planning.id, "semaine": str(planning.semaine_debut)},
-                "courses": {"id": liste.id, "articles": nb_articles, "coches": nb_coches, "progression": round(nb_coches / max(nb_articles, 1) * 100)},
+                "courses": {
+                    "id": liste.id,
+                    "articles": nb_articles,
+                    "coches": nb_coches,
+                    "progression": round(nb_coches / max(nb_articles, 1) * 100),
+                },
                 "actions_suivantes": [
-                    {"action": "voir_liste", "label": "Ouvrir la liste de courses", "url": f"/cuisine/courses"},
-                    {"action": "checkout_auto", "label": "Tout cocher et valider", "url": f"/api/v1/courses/{liste.id}/valider"},
+                    {
+                        "action": "voir_liste",
+                        "label": "Ouvrir la liste de courses",
+                        "url": "/cuisine/courses",
+                    },
+                    {
+                        "action": "checkout_auto",
+                        "label": "Tout cocher et valider",
+                        "url": f"/api/v1/courses/{liste.id}/valider",
+                    },
                 ],
             }
 
         return {
             "etape_actuelle": "termine",
             "planning": {"id": planning.id, "semaine": str(planning.semaine_debut)},
-            "courses": {"id": liste.id, "articles": nb_articles, "coches": nb_coches, "progression": 100},
+            "courses": {
+                "id": liste.id,
+                "articles": nb_articles,
+                "coches": nb_coches,
+                "progression": 100,
+            },
             "actions_suivantes": [
-                {"action": "feedback", "label": "Donner son avis sur la semaine", "url": "/api/v1/ia/feedback-semaine"},
+                {
+                    "action": "feedback",
+                    "label": "Donner son avis sur la semaine",
+                    "url": "/api/v1/ia/feedback-semaine",
+                },
             ],
         }
 
@@ -175,27 +207,21 @@ def generer_digest_quotidien() -> dict:
     Returns:
         Dict avec les sections du digest.
     """
-    from src.core.models.maison import Routine, TacheRoutine, TacheEntretien
+    from src.core.models.maison import Routine, TacheEntretien, TacheRoutine
     from src.core.models.planning import Repas
 
     aujourd_hui = date.today()
 
     with obtenir_contexte_db() as session:
         # Repas du jour
-        repas = (
-            session.query(Repas)
-            .filter(Repas.date_repas == aujourd_hui)
-            .all()
-        )
-        repas_data = [{"type": r.type_repas, "recette": r.recette_nom or "Non défini"} for r in repas]
+        repas = session.query(Repas).filter(Repas.date_repas == aujourd_hui).all()
+        repas_data = [
+            {"type": r.type_repas, "recette": r.recette_nom or "Non défini"} for r in repas
+        ]
 
         # Routines du jour
         jour_semaine = aujourd_hui.strftime("%A").lower()
-        routines = (
-            session.query(Routine)
-            .filter(Routine.actif.is_(True))
-            .all()
-        )
+        routines = session.query(Routine).filter(Routine.actif.is_(True)).all()
         routines_jour = []
         for r in routines:
             jours = r.jour_semaine or ""
@@ -209,10 +235,12 @@ def generer_digest_quotidien() -> dict:
                     .all()
                 )
                 if taches:
-                    routines_jour.append({
-                        "routine": r.nom,
-                        "taches_restantes": len(taches),
-                    })
+                    routines_jour.append(
+                        {
+                            "routine": r.nom,
+                            "taches_restantes": len(taches),
+                        }
+                    )
 
         # Tâches entretien du jour
         taches_entretien = (
@@ -224,7 +252,9 @@ def generer_digest_quotidien() -> dict:
             .limit(5)
             .all()
         )
-        entretien_data = [{"nom": t.nom, "priorite": t.priorite or "normale"} for t in taches_entretien]
+        entretien_data = [
+            {"nom": t.nom, "priorite": t.priorite or "normale"} for t in taches_entretien
+        ]
 
         return {
             "date": str(aujourd_hui),

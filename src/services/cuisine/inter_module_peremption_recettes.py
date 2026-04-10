@@ -77,15 +77,15 @@ class PeremptionRecettesInteractionService:
                 "quantite": a.quantite,
                 "unite": getattr(a, "unite", ""),
                 "date_peremption": a.date_peremption.isoformat() if a.date_peremption else None,
-                "jours_restants": (a.date_peremption - aujourd_hui).days if a.date_peremption else None,
+                "jours_restants": (a.date_peremption - aujourd_hui).days
+                if a.date_peremption
+                else None,
             }
             for a in expirants
         ]
 
         # Chercher des recettes contenant ces ingrédients
-        recettes_trouvees = self._chercher_recettes_par_ingredients(
-            db, noms_expirants, limite
-        )
+        recettes_trouvees = self._chercher_recettes_par_ingredients(db, noms_expirants, limite)
 
         # Si pas assez de recettes en base, tenter l'IA
         if len(recettes_trouvees) < limite:
@@ -113,6 +113,7 @@ class PeremptionRecettesInteractionService:
     ) -> list[dict[str, Any]]:
         """Cherche en base des recettes contenant les ingrédients expirants."""
         from sqlalchemy import func
+
         from src.core.models import Recette
         from src.core.models.recettes import Ingredient, RecetteIngredient
 
@@ -144,9 +145,7 @@ class PeremptionRecettesInteractionService:
             logger.warning(f"Recherche recettes par ingrédients échouée: {e}")
             return []
 
-    def _suggerer_via_ia(
-        self, noms_ingredients: list[str], limite: int
-    ) -> list[dict[str, Any]]:
+    def _suggerer_via_ia(self, noms_ingredients: list[str], limite: int) -> list[dict[str, Any]]:
         """Utilise l'IA pour suggérer des recettes avec les ingrédients expirants."""
         try:
             from src.services.utilitaires.chat.chat_ai import obtenir_chat_ai_service

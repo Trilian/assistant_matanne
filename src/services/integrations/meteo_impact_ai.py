@@ -10,13 +10,13 @@ Crée des connexions intelligentes entre météo et:
 """
 
 from datetime import datetime
+from typing import Literal, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
-
 
 # ── Modèles Pydantic ──
 
@@ -24,9 +24,13 @@ from src.services.core.registry import service_factory
 class ImpactMeteo(BaseModel):
     """Impact météo sur un domaine"""
 
-    domaine: str = Field(..., description="Domaine affecté (jardin/activités/cuisine/énergie/entretien)")
+    domaine: str = Field(
+        ..., description="Domaine affecté (jardin/activités/cuisine/énergie/entretien)"
+    )
     type_impact: str = Field(..., description="Type d'impact")
-    severite: Literal["faible", "moyen", "important"] = Field(..., description="Sévérité de l'impact")
+    severite: Literal["faible", "moyen", "important"] = Field(
+        ..., description="Sévérité de l'impact"
+    )
     recommandation: str = Field(..., description="Recommandation d'action")
     urgence: bool = Field(..., description="True si action urgente")
 
@@ -113,7 +117,7 @@ Format JSON par jour avec: conditions, temp min/max, humidité, %pluie, vent, im
         conditions: str,
         temperature: tuple[float, float],  # (min, max)
         public: str = "famille",  # "enfants", "adultes", "famille"
-        budget: Optional[float] = None,
+        budget: float | None = None,
     ) -> str:
         """
         Suggère des activités adaptées à la météo.
@@ -202,8 +206,7 @@ Sois détaillé et pratique."""
             Prédictions consommation et recommandations
         """
         previsions_str = "\n".join(
-            f"{p['date']}: {p['temp_min']}-{p['temp_max']}°C"
-            for p in previsions_7j
+            f"{p['date']}: {p['temp_min']}-{p['temp_max']}°C" for p in previsions_7j
         )
 
         prompt = f"""Prédit consommation énergie pour {type_chauffage}:

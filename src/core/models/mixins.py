@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mixins de timestamps pour les modèles SQLAlchemy.
 
 Fournit des mixins réutilisables pour les colonnes de date de création

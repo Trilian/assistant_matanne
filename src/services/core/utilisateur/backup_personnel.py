@@ -134,9 +134,7 @@ class ServiceBackupPersonnel:
 
     @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
     @avec_session_db
-    def exporter_donnees_utilisateur(
-        self, user_id: str, db: Session = None
-    ) -> Path:
+    def exporter_donnees_utilisateur(self, user_id: str, db: Session = None) -> Path:
         """
         Exporte toutes les données d'un utilisateur dans un fichier ZIP.
 
@@ -162,9 +160,7 @@ class ServiceBackupPersonnel:
 
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             # JSON complet
-            json_content = json.dumps(
-                export_data, ensure_ascii=False, indent=2, default=str
-            )
+            json_content = json.dumps(export_data, ensure_ascii=False, indent=2, default=str)
             zf.writestr("donnees.json", json_content)
 
             # CSV par catégorie
@@ -175,9 +171,7 @@ class ServiceBackupPersonnel:
                 writer = csv.DictWriter(csv_buffer, fieldnames=rows[0].keys())
                 writer.writeheader()
                 for row in rows:
-                    writer.writerow(
-                        {k: str(v) if v is not None else "" for k, v in row.items()}
-                    )
+                    writer.writerow({k: str(v) if v is not None else "" for k, v in row.items()})
                 zf.writestr(f"{categorie}.csv", csv_buffer.getvalue())
 
             # Métadonnées

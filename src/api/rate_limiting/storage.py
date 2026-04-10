@@ -31,7 +31,7 @@ class StockageLimitationDebit:
     anciennes (sans entrées récentes) sont supprimées.
     """
 
-    # Seuil maximal de clés en mémoire 
+    # Seuil maximal de clés en mémoire
     MAX_CLES_DEFAUT = 50_000
 
     def __init__(self, max_cles: int = MAX_CLES_DEFAUT):

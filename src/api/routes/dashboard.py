@@ -1,9 +1,10 @@
-﻿"""
+"""
 Routes API pour le tableau de bord.
 
 AgrÃ©gation des donnÃ©es de tous les modules pour la page d'accueil.
 """
 
+import logging
 from datetime import date, timedelta
 from typing import Any
 
@@ -13,7 +14,6 @@ from sqlalchemy import func
 
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
-from src.api.schemas.errors import REPONSES_IA, REPONSES_LISTE
 from src.api.schemas.dashboard import (
     DashboardBudgetUnifieResponse,
     DashboardConfigResponse,
@@ -22,6 +22,7 @@ from src.api.schemas.dashboard import (
     DashboardScoreEcologiqueResponse,
     ScoreFoyerResponse,
 )
+from src.api.schemas.errors import REPONSES_IA, REPONSES_LISTE
 from src.api.schemas.ia_transverses import (
     AlertesContextuellesResponse,
     InsightsQuotidiensResponse,
@@ -31,13 +32,14 @@ from src.api.schemas.ia_transverses import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.core.service_ia import obtenir_service_innovations_core
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Tableau de bord"])
 
 
-@router.get("/alertes-contextuelles", response_model=AlertesContextuellesResponse, responses=REPONSES_IA)
+@router.get(
+    "/alertes-contextuelles", response_model=AlertesContextuellesResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def obtenir_alertes_contextuelles(
     user: dict[str, Any] = Depends(require_auth),
@@ -48,7 +50,9 @@ async def obtenir_alertes_contextuelles(
     return result or AlertesContextuellesResponse()
 
 
-@router.get("/insights-quotidiens", response_model=InsightsQuotidiensResponse, responses=REPONSES_IA)
+@router.get(
+    "/insights-quotidiens", response_model=InsightsQuotidiensResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def obtenir_insights_quotidiens(
     limite: int = Query(2, ge=1, le=2, description="1 ou 2 insights maximum par jour"),
@@ -94,7 +98,11 @@ async def obtenir_meteo_contextuelle(
     return result or MeteoContextuelleResponse()
 
 
-@router.get("/telegram-conversationnel", response_model=TelegramConversationnelResponse, responses=REPONSES_IA)
+@router.get(
+    "/telegram-conversationnel",
+    response_model=TelegramConversationnelResponse,
+    responses=REPONSES_IA,
+)
 @gerer_exception_api
 async def obtenir_telegram_conversationnel(
     user: dict[str, Any] = Depends(require_auth),
@@ -293,7 +301,9 @@ def _calculer_score_ecologique(session: Any) -> dict[str, Any]:
     if score_produits is not None and score_produits < 65:
         leviers.append("Favoriser plus de produits avec un éco-score A/B dans l'inventaire.")
     if not leviers:
-        leviers.append("Maintenir le rythme actuel: les indicateurs écologiques restent bien orientés.")
+        leviers.append(
+            "Maintenir le rythme actuel: les indicateurs écologiques restent bien orientés."
+        )
 
     return {
         "score_global": score_global,
@@ -336,16 +346,14 @@ async def obtenir_tableau_bord(
         with executer_avec_session() as session:
             from src.core.models import (
                 ActiviteFamille,
+                AnnonceHabitat,
                 ArticleInventaire,
                 BudgetFamille,
+                ProjetDecoHabitat,
                 Recette,
                 Repas,
                 StockMaison,
                 TacheEntretien,
-            )
-            from src.core.models import (
-                AnnonceHabitat,
-                ProjetDecoHabitat,
                 ZoneJardinHabitat,
             )
 
@@ -431,8 +439,7 @@ async def obtenir_tableau_bord(
                     session.query(ArticleInventaire)
                     .filter(
                         ArticleInventaire.date_peremption.isnot(None),
-                        ArticleInventaire.date_peremption
-                        <= aujourd_hui + timedelta(days=7),
+                        ArticleInventaire.date_peremption <= aujourd_hui + timedelta(days=7),
                         ArticleInventaire.date_peremption >= aujourd_hui,
                     )
                     .order_by(ArticleInventaire.date_peremption.asc())
@@ -466,11 +473,7 @@ async def obtenir_tableau_bord(
                 .scalar()
                 or 0
             )
-            budget_deco = (
-                session.query(func.sum(ProjetDecoHabitat.budget_depense))
-                .scalar()
-                or 0
-            )
+            budget_deco = session.query(func.sum(ProjetDecoHabitat.budget_depense)).scalar() or 0
             zones_jardin = session.query(func.count(ZoneJardinHabitat.id)).scalar() or 0
             if habitat_alertes > 0:
                 alertes.append(
@@ -516,17 +519,21 @@ async def obtenir_tableau_bord(
                     or 0
                 )
                 if docs_expires > 0:
-                    alertes.append({
-                        "type": "document_expire",
-                        "message": f"{docs_expires} document(s) expiré(s) à renouveler",
-                        "urgence": "haute",
-                    })
+                    alertes.append(
+                        {
+                            "type": "document_expire",
+                            "message": f"{docs_expires} document(s) expiré(s) à renouveler",
+                            "urgence": "haute",
+                        }
+                    )
                 if docs_bientot > 0:
-                    alertes.append({
-                        "type": "document_bientot",
-                        "message": f"{docs_bientot} document(s) expirent dans les 30 jours",
-                        "urgence": "moyenne",
-                    })
+                    alertes.append(
+                        {
+                            "type": "document_bientot",
+                            "message": f"{docs_bientot} document(s) expirent dans les 30 jours",
+                            "urgence": "moyenne",
+                        }
+                    )
             except Exception as e:
                 logger.warning("[dashboard] Alertes documents non chargées: %s", e)
 
@@ -541,9 +548,7 @@ async def obtenir_tableau_bord(
                 },
                 "budget_mois": {
                     "total_mois": float(budget_total),
-                    "par_categorie": {
-                        cat: float(total) for cat, total in budget_par_cat
-                    },
+                    "par_categorie": {cat: float(total) for cat, total in budget_par_cat},
                 },
                 "habitat": {
                     "alertes": int(habitat_alertes),
@@ -566,7 +571,9 @@ async def obtenir_tableau_bord(
     return await executer_async(_query)
 
 
-@router.get("/budget-unifie", response_model=DashboardBudgetUnifieResponse, responses=REPONSES_LISTE)
+@router.get(
+    "/budget-unifie", response_model=DashboardBudgetUnifieResponse, responses=REPONSES_LISTE
+)
 @gerer_exception_api
 async def obtenir_budget_unifie(
     user: dict[str, Any] = Depends(require_auth),
@@ -608,11 +615,7 @@ async def obtenir_dashboard_cuisine(
             fin_semaine = debut_semaine + timedelta(days=6)
 
             # Repas du jour avec nom de recette
-            repas_jour = (
-                session.query(Repas)
-                .filter(Repas.date_repas == aujourd_hui)
-                .all()
-            )
+            repas_jour = session.query(Repas).filter(Repas.date_repas == aujourd_hui).all()
             repas_aujourd_hui = [
                 {
                     "type_repas": r.type_repas,
@@ -656,10 +659,7 @@ async def obtenir_dashboard_cuisine(
                         (ArticleInventaire.quantite <= ArticleInventaire.quantite_min)
                         | (
                             ArticleInventaire.date_peremption.isnot(None)
-                            & (
-                                ArticleInventaire.date_peremption
-                                <= aujourd_hui + timedelta(days=7)
-                            )
+                            & (ArticleInventaire.date_peremption <= aujourd_hui + timedelta(days=7))
                         )
                     )
                     .scalar()
@@ -678,7 +678,9 @@ async def obtenir_dashboard_cuisine(
             score_anti_gaspillage = 100
             if total_inventaire > 0:
                 articles_a_risque = alertes_inventaire
-                score_anti_gaspillage = max(0, round(100 - (articles_a_risque / total_inventaire * 100)))
+                score_anti_gaspillage = max(
+                    0, round(100 - (articles_a_risque / total_inventaire * 100))
+                )
 
             # Repas Jules aujourd'hui (adaptations bÃ©bÃ©)
             repas_jules = [
@@ -874,12 +876,12 @@ async def sauvegarder_config_dashboard(
 
 
 @router.get(
-    "/alertes-contextuelles",
+    "/alertes-meteo-contextuelles",
     responses=REPONSES_LISTE,
     summary="Alertes mÃ©tÃ©o contextuelles cross-modules",
 )
 @gerer_exception_api
-async def obtenir_alertes_contextuelles(
+async def obtenir_alertes_meteo_contextuelles(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne des alertes mÃ©tÃ©o/action cross-modules pour les 48h Ã  venir."""
@@ -988,6 +990,7 @@ async def obtenir_anomalies_financieres(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Detecte les anomalies de depenses du mois vs N-1/N-2."""
+
     def _query() -> dict[str, Any]:
         from src.services.dashboard.anomalies_financieres import (
             obtenir_service_anomalies_financieres,
@@ -1124,8 +1127,6 @@ async def obtenir_tendances_ia(
     return await executer_async(_query)
 
 
-
-
 # B8: Documents expirés — widget dashboard
 # ═══════════════════════════════════════════════════════════
 
@@ -1183,26 +1184,25 @@ async def obtenir_documents_expirants(
                 else:
                     severite = "info"
 
-                items.append({
-                    "id": doc.id,
-                    "titre": doc.titre,
-                    "categorie": doc.categorie,
-                    "membre_famille": doc.membre_famille,
-                    "date_expiration": doc.date_expiration.isoformat(),
-                    "jours_restants": jours_restants,
-                    "est_expire": est_expire,
-                    "severite": severite,
-                })
+                items.append(
+                    {
+                        "id": doc.id,
+                        "titre": doc.titre,
+                        "categorie": doc.categorie,
+                        "membre_famille": doc.membre_famille,
+                        "date_expiration": doc.date_expiration.isoformat(),
+                        "jours_restants": jours_restants,
+                        "est_expire": est_expire,
+                        "severite": severite,
+                    }
+                )
 
             return {
                 "items": items,
                 "total": len(items),
                 "nb_expires": nb_expires,
                 "nb_bientot": nb_bientot,
-                "message": (
-                    f"{nb_expires} document(s) expiré(s), "
-                    f"{nb_bientot} expirent bientôt."
-                ),
+                "message": (f"{nb_expires} document(s) expiré(s), {nb_bientot} expirent bientôt."),
             }
 
     return await executer_async(_query)
@@ -1216,7 +1216,9 @@ async def obtenir_documents_expirants(
 class WidgetActionRequest(BaseModel):
     widget_id: str = Field(..., description="Identifiant du widget (ex: 'courses', 'planning')")
     action: str = Field(..., description="Type d'action (ex: 'marquer_vu', 'snooze', 'refresh')")
-    donnees: dict[str, Any] = Field(default_factory=dict, description="Données optionnelles de l'action")
+    donnees: dict[str, Any] = Field(
+        default_factory=dict, description="Données optionnelles de l'action"
+    )
 
 
 @router.post(
@@ -1407,4 +1409,3 @@ async def obtenir_points_famille(
         }
 
     return await executer_async(_query)
-

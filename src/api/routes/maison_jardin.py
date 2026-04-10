@@ -4,6 +4,7 @@ Routes API Maison â€” Jardin, stocks et nuisibles.
 Sous-routeur inclus dans maison.py.
 """
 
+import logging
 from datetime import date
 from typing import Any
 
@@ -20,7 +21,6 @@ from src.api.schemas.errors import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.core.backup.utils_serialization import model_to_dict
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Maison"])
@@ -155,8 +155,15 @@ async def modifier_element_jardin(
             if not element:
                 raise HTTPException(status_code=404, detail="Ã‰lÃ©ment non trouvÃ©")
 
-            for champ in ("nom", "type", "location", "statut", "date_plantation",
-                          "date_recolte_prevue", "notes"):
+            for champ in (
+                "nom",
+                "type",
+                "location",
+                "statut",
+                "date_plantation",
+                "date_recolte_prevue",
+                "notes",
+            ):
                 if champ in payload:
                     setattr(element, champ, payload[champ])
 
@@ -213,8 +220,9 @@ async def suggestions_ia_jardin(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """TÃ¢ches saisonniÃ¨res du jardin gÃ©nÃ©rÃ©es par IA (conseils pratiques pour la saison en cours)."""
-    from src.services.maison.jardin_service import obtenir_jardin_service
     import asyncio
+
+    from src.services.maison.jardin_service import obtenir_jardin_service
 
     service = obtenir_jardin_service()
     conseils_bruts = await service.generer_conseils_saison()
@@ -226,7 +234,7 @@ async def suggestions_ia_jardin(
         # Nettoyer les puces/numÃ©ros en dÃ©but de ligne
         for prefix in ("- ", "â€¢ ", "* "):
             if ligne.startswith(prefix):
-                ligne = ligne[len(prefix):]
+                ligne = ligne[len(prefix) :]
         if ligne and not ligne.endswith(":"):
             taches.append({"tache": ligne, "saison": service.obtenir_saison_actuelle()})
 
@@ -328,8 +336,15 @@ async def modifier_stock(
             if not stock:
                 raise HTTPException(status_code=404, detail="Stock non trouvÃ©")
 
-            for champ in ("nom", "categorie", "quantite", "unite", "seuil_alerte",
-                          "emplacement", "prix_unitaire"):
+            for champ in (
+                "nom",
+                "categorie",
+                "quantite",
+                "unite",
+                "seuil_alerte",
+                "emplacement",
+                "prix_unitaire",
+            ):
                 if champ in payload:
                     setattr(stock, champ, payload[champ])
 
@@ -390,8 +405,19 @@ async def obtenir_calendrier_semis(
     mois_courant = mois or date.today().month
 
     NOMS_MOIS = [
-        "", "Janvier", "FÃ©vrier", "Mars", "Avril", "Mai", "Juin",
-        "Juillet", "AoÃ»t", "Septembre", "Octobre", "Novembre", "DÃ©cembre",
+        "",
+        "Janvier",
+        "FÃ©vrier",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet",
+        "AoÃ»t",
+        "Septembre",
+        "Octobre",
+        "Novembre",
+        "DÃ©cembre",
     ]
 
     # Charger le catalogue de plantes
@@ -422,11 +448,29 @@ async def obtenir_calendrier_semis(
         recolte = plante.get("mois_recolte", plante.get("recolte", []))
 
         if mois_courant in semis:
-            a_semer.append({"nom": nom, "type": plante.get("type", ""), "details": plante.get("notes_semis", "")})
+            a_semer.append(
+                {
+                    "nom": nom,
+                    "type": plante.get("type", ""),
+                    "details": plante.get("notes_semis", ""),
+                }
+            )
         if mois_courant in plantation:
-            a_planter.append({"nom": nom, "type": plante.get("type", ""), "details": plante.get("notes_plantation", "")})
+            a_planter.append(
+                {
+                    "nom": nom,
+                    "type": plante.get("type", ""),
+                    "details": plante.get("notes_plantation", ""),
+                }
+            )
         if mois_courant in recolte:
-            a_recolter.append({"nom": nom, "type": plante.get("type", ""), "details": plante.get("notes_recolte", "")})
+            a_recolter.append(
+                {
+                    "nom": nom,
+                    "type": plante.get("type", ""),
+                    "details": plante.get("notes_recolte", ""),
+                }
+            )
 
     return {
         "mois": mois_courant,
@@ -520,6 +564,3 @@ async def supprimer_traitement_nuisible(
         return MessageResponse(message="Traitement supprimÃ©")
 
     return await executer_async(_query)
-
-
-

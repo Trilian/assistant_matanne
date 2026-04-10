@@ -26,9 +26,23 @@ class TagsProposes(BaseModel):
 
 
 TAGS_DISPONIBLES = [
-    "courses", "recette", "cuisine", "maison", "jardin", "entretien",
-    "jules", "famille", "budget", "sante", "voyage", "travaux",
-    "administratif", "idee", "rappel", "urgent", "projet",
+    "courses",
+    "recette",
+    "cuisine",
+    "maison",
+    "jardin",
+    "entretien",
+    "jules",
+    "famille",
+    "budget",
+    "sante",
+    "voyage",
+    "travaux",
+    "administratif",
+    "idee",
+    "rappel",
+    "urgent",
+    "projet",
 ]
 
 
@@ -61,7 +75,7 @@ class NotesIAService(BaseAIService):
 
         prompt = f"""Analyse cette note familiale et propose les tags les plus pertinents.
 
-Tags disponibles : {', '.join(TAGS_DISPONIBLES)}
+Tags disponibles : {", ".join(TAGS_DISPONIBLES)}
 
 Règles :
 - Retourne entre 1 et 4 tags maximum

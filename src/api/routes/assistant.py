@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 import os
+import re
 from datetime import date, timedelta
 from typing import Any
 
@@ -14,7 +14,6 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
-from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE
 from src.api.schemas.assistant import (
     ChatIAResponse,
     CommandeVocaleResponse,
@@ -22,6 +21,7 @@ from src.api.schemas.assistant import (
     ExemplesCommandeVocaleResponse,
     IntentsGoogleAssistantResponse,
 )
+from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 logger = logging.getLogger(__name__)
@@ -142,14 +142,12 @@ def _extraire_payload_google_assistant(payload: dict[str, Any]) -> tuple[str, di
         or {}
     )
 
-    langue = (
-        payload.get("languageCode")
-        or query_result.get("languageCode")
-        or "fr-FR"
-    )
+    langue = payload.get("languageCode") or query_result.get("languageCode") or "fr-FR"
 
     if not isinstance(intent, str) or not intent.strip():
-        raise HTTPException(status_code=400, detail="Intent manquant dans le payload Google Assistant")
+        raise HTTPException(
+            status_code=400, detail="Intent manquant dans le payload Google Assistant"
+        )
 
     if not isinstance(slots, dict):
         slots = {}

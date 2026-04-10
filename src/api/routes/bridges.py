@@ -174,7 +174,11 @@ async def budget_unifie(
     return service.budget_unifie(mois=mois, annee=annee)
 
 
-@router.get("/impact-demenagement/{scenario_id}", response_model=ImpactDemenagementResponse, responses=REPONSES_LISTE)
+@router.get(
+    "/impact-demenagement/{scenario_id}",
+    response_model=ImpactDemenagementResponse,
+    responses=REPONSES_LISTE,
+)
 @gerer_exception_api
 async def impact_demenagement(
     scenario_id: int,
@@ -187,7 +191,9 @@ async def impact_demenagement(
     return service.impact_demenagement(scenario_id=scenario_id)
 
 
-@router.get("/widget-veille-immo", response_model=WidgetVeilleImmoResponse, responses=REPONSES_LISTE)
+@router.get(
+    "/widget-veille-immo", response_model=WidgetVeilleImmoResponse, responses=REPONSES_LISTE
+)
 @gerer_exception_api
 async def widget_veille_immo(
     user: dict = Depends(require_auth),
@@ -199,7 +205,9 @@ async def widget_veille_immo(
     return service.widget_veille_immo()
 
 
-@router.get("/widget-saison-jardin", response_model=WidgetSaisonJardinResponse, responses=REPONSES_LISTE)
+@router.get(
+    "/widget-saison-jardin", response_model=WidgetSaisonJardinResponse, responses=REPONSES_LISTE
+)
 @gerer_exception_api
 async def widget_saison_jardin(
     user: dict = Depends(require_auth),
@@ -223,7 +231,11 @@ async def activites_jules_potager(
     return service.activites_jules_potager()
 
 
-@router.get("/verification-stock-recette/{recette_id}", response_model=VerificationStockRecetteResponse, responses=REPONSES_LISTE)
+@router.get(
+    "/verification-stock-recette/{recette_id}",
+    response_model=VerificationStockRecetteResponse,
+    responses=REPONSES_LISTE,
+)
 @gerer_exception_api
 async def verification_stock_recette(
     recette_id: int,
@@ -270,7 +282,9 @@ async def meteo_recettes(
 @router.get("/anniversaire-cadeau-ia", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def anniversaire_cadeau_ia(
-    anniversaire_id: int | None = Query(None, description="ID de l'anniversaire (défaut: prochain)"),
+    anniversaire_id: int | None = Query(
+        None, description="ID de l'anniversaire (défaut: prochain)"
+    ),
     jours_horizon: int = Query(30, ge=1, le=90, description="Horizon de recherche si pas d'ID"),
     user: dict = Depends(require_auth),
 ):
@@ -311,12 +325,15 @@ async def batch_cooking_termine(
     try:
         from src.services.core.events import obtenir_bus
 
-        obtenir_bus().emettre("batch_cooking.termine", {
-            "session_id": session_id,
-            "nom_session": nom_session,
-            "nb_recettes": nb_recettes,
-            "photo_url": photo_url,
-        })
+        obtenir_bus().emettre(
+            "batch_cooking.termine",
+            {
+                "session_id": session_id,
+                "nom_session": nom_session,
+                "nb_recettes": nb_recettes,
+                "photo_url": photo_url,
+            },
+        )
     except Exception:
         pass
 

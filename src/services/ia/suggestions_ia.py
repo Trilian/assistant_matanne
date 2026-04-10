@@ -40,7 +40,7 @@ class SuggestionsIAService(BaseAIService):
         """
         prompt = f"""Crée un plan de batch cooking optimisé pour {nb_personnes} personnes.
 
-Recettes à préparer: {', '.join(recettes)}
+Recettes à préparer: {", ".join(recettes)}
 
 Optimise l'ordre des étapes pour utiliser les appareils en parallèle.
 Réponds en JSON:
@@ -72,7 +72,9 @@ Réponds en JSON:
 
         return {"temps_total_minutes": 0, "etapes": [], "erreur": "IA indisponible"}
 
-    def conseil_developpement_jules(self, age_mois: int, jalons_atteints: list[str] | None = None) -> dict:
+    def conseil_developpement_jules(
+        self, age_mois: int, jalons_atteints: list[str] | None = None
+    ) -> dict:
         """Conseils de développement proactifs pour Jules basés sur l'âge (B4.8).
 
         Args:
@@ -173,8 +175,8 @@ Réponds en JSON:
         """
         prompt = f"""Évalue le score écologique de ce repas.
 
-Ingrédients: {', '.join(ingredients)}
-Saison actuelle: {saison or 'non précisée'}
+Ingrédients: {", ".join(ingredients)}
+Saison actuelle: {saison or "non précisée"}
 
 Critères: saisonnalité, distance transport, impact protéines, emballages.
 Réponds en JSON:
@@ -216,7 +218,7 @@ Réponds en JSON:
         prompt = f"""Analyse ces relevés d'énergie et prédit la prochaine facture.
 
 Relevés récents: {releves}
-Météo prévue: {meteo or 'non disponible'}
+Météo prévue: {meteo or "non disponible"}
 
 Réponds en JSON:
 {{
@@ -288,4 +290,3 @@ Réponds en JSON:
 def obtenir_service_suggestions_ia() -> SuggestionsIAService:
     """Factory singleton."""
     return SuggestionsIAService()
-

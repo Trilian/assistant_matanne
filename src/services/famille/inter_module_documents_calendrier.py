@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : Documents expirants -> Calendrier.
 
 Bridge inter-modules :
@@ -53,7 +53,10 @@ class DocumentsCalendrierInteractionService:
 
             existe = (
                 db.query(EvenementPlanning)
-                .filter(EvenementPlanning.titre == titre, EvenementPlanning.type_event == "administratif")
+                .filter(
+                    EvenementPlanning.titre == titre,
+                    EvenementPlanning.type_event == "administratif",
+                )
                 .first()
             )
             if existe:

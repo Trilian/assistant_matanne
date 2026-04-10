@@ -1,4 +1,4 @@
-﻿"""Fonctions cuisine/repas extraites du service innovations."""
+"""Fonctions cuisine/repas extraites du service innovations."""
 
 from __future__ import annotations
 
@@ -61,6 +61,7 @@ def suggerer_repas_ce_soir(
         alternatives=alternatives,
     )
 
+
 def analyser_patterns_alimentaires(
     self,
     periode_jours: int = 90,
@@ -78,6 +79,7 @@ def analyser_patterns_alimentaires(
         categories_sous_representees=["légumineuses", "poisson"],
         recommandations=recommandations,
     )
+
 
 def appliquer_saisonnalite_intelligente(service) -> SaisonnaliteIntelligenteResponse | None:
     """P9-11 : produit des adaptations transverses selon la saison."""
@@ -99,7 +101,10 @@ def appliquer_saisonnalite_intelligente(service) -> SaisonnaliteIntelligenteResp
         ajustements_energie=energie,
     )
 
-def generer_planification_hebdo_complete(service, user_id: str | None = None) -> PlanificationHebdoCompleteResponse | None:
+
+def generer_planification_hebdo_complete(
+    service, user_id: str | None = None
+) -> PlanificationHebdoCompleteResponse | None:
     """Planification auto : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
     semaine_debut = service._prochaine_semaine_lundi()
     semaine_fin = semaine_debut + timedelta(days=6)
@@ -122,12 +127,18 @@ def generer_planification_hebdo_complete(service, user_id: str | None = None) ->
         resume="Planning complet genere automatiquement pour la semaine cible.",
     )
 
-def proposer_batch_cooking_intelligent(service, user_id: str | None = None) -> BatchCookingIntelligentResponse | None:
+
+def proposer_batch_cooking_intelligent(
+    service, user_id: str | None = None
+) -> BatchCookingIntelligentResponse | None:
     """Batch cooking IA : propose un plan batch cooking cohérent avec le planning de semaine."""
     recettes = service._recettes_batch_cibles(limite=4)
     if not recettes:
         recettes = [
-            "Base legumes rotis", "Poulet effiloche", "Riz complet", "Compote sans sucre ajoute",
+            "Base legumes rotis",
+            "Poulet effiloche",
+            "Riz complet",
+            "Compote sans sucre ajoute",
         ]
 
     date_session = service._prochaine_date_batch()
@@ -155,6 +166,7 @@ def proposer_batch_cooking_intelligent(service, user_id: str | None = None) -> B
         etapes=etapes,
         conseils=conseils,
     )
+
 
 def obtenir_mode_tablette_magazine(service) -> ModeTabletteMagazineResponse | None:
     """Mode tablette : fournit une vue magazine condensée pour écran tablette."""
@@ -188,6 +200,7 @@ def obtenir_mode_tablette_magazine(service) -> ModeTabletteMagazineResponse | No
         cartes=cartes,
     )
 
+
 def _recettes_rapides(service, temps_disponible_min: int) -> list[dict[str, Any]]:
     """Récupère des recettes rapides compatibles avec le temps disponible."""
     try:
@@ -211,11 +224,13 @@ def _recettes_rapides(service, temps_disponible_min: int) -> list[dict[str, Any]
     except Exception:
         return []
 
+
 def _patterns_recettes(service, periode_jours: int) -> tuple[list[str], float]:
     """Calcule les top recettes et un score de diversité simplifié."""
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models import HistoriqueRecette, Recette
 
             debut = date.today() - timedelta(days=periode_jours)
@@ -236,11 +251,13 @@ def _patterns_recettes(service, periode_jours: int) -> tuple[list[str], float]:
     except Exception:
         return [], 0.0
 
+
 def _score_recettes_eco(service) -> float:
     """Score écologique côté cuisine basé sur bio/local."""
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models import Recette
 
             total = session.query(func.count(Recette.id)).scalar() or 0
@@ -249,11 +266,13 @@ def _score_recettes_eco(service) -> float:
             eco = (
                 session.query(func.count(Recette.id))
                 .filter((Recette.est_bio.is_(True)) | (Recette.est_local.is_(True)))
-                .scalar() or 0
+                .scalar()
+                or 0
             )
             return round((float(eco) / float(total)) * 100.0, 1)
     except Exception:
         return 50.0
+
 
 def _saison_courante(service) -> str:
     """Détermine la saison courante."""
@@ -265,6 +284,7 @@ def _saison_courante(service) -> str:
     if mois in (6, 7, 8):
         return "été"
     return "automne"
+
 
 def _recettes_de_saison(service, saison: str) -> list[str]:
     """Récupère quelques recettes adaptées à la saison."""
@@ -281,6 +301,7 @@ def _recettes_de_saison(service, saison: str) -> list[str]:
             return [str(r[0]) for r in rows]
     except Exception:
         return []
+
 
 def _jours_depuis_repas_poisson(service) -> int:
     """Retourne le nombre de jours depuis le dernier repas poisson (max 365)."""
@@ -301,11 +322,12 @@ def _jours_depuis_repas_poisson(service) -> int:
     except Exception:
         return 365
 
+
 def _collecter_articles_courses(service, liste_id: int | None = None) -> list[str]:
     """Collecte les articles de la liste de courses active."""
     try:
         with obtenir_contexte_db() as session:
-            from src.core.models import ArticleCourses, ListeCourses, Ingredient
+            from src.core.models import ArticleCourses, Ingredient, ListeCourses
 
             query = session.query(ListeCourses).filter(ListeCourses.archivee.is_(False))
             if liste_id:
@@ -321,13 +343,16 @@ def _collecter_articles_courses(service, liste_id: int | None = None) -> list[st
             )
             noms = []
             for a in articles:
-                ingredient = session.query(Ingredient).filter(Ingredient.id == a.ingredient_id).first()
+                ingredient = (
+                    session.query(Ingredient).filter(Ingredient.id == a.ingredient_id).first()
+                )
                 if ingredient:
                     noms.append(ingredient.nom)
             return noms
     except Exception:
         logger.warning("Erreur collecte articles courses", exc_info=True)
         return []
+
 
 def _prochaine_semaine_lundi(service) -> date:
     """Retourne la date du prochain lundi (semaine cible)."""
@@ -336,6 +361,7 @@ def _prochaine_semaine_lundi(service) -> date:
     if delta == 0:
         delta = 7
     return today + timedelta(days=delta)
+
 
 def _proposer_repas_semaine(service, semaine_debut: date, limite: int = 7) -> list[str]:
     """Construit une proposition de repas pour la semaine cible."""
@@ -366,6 +392,7 @@ def _proposer_repas_semaine(service, semaine_debut: date, limite: int = 7) -> li
         ]
     return repas[:limite]
 
+
 def _proposer_courses_depuis_repas(service, repas: list[str]) -> list[str]:
     """Crée une liste de courses simple basée sur les repas prévus."""
     base = ["fruits de saison", "legumes frais", "yaourts nature", "oeufs", "riz", "huile d'olive"]
@@ -375,11 +402,12 @@ def _proposer_courses_depuis_repas(service, repas: list[str]) -> list[str]:
         base.append("lait de coco")
     return base[:10]
 
+
 def _recettes_batch_cibles(service, limite: int = 4) -> list[str]:
     """Extrait les recettes les plus pertinentes pour une session batch."""
     try:
         with obtenir_contexte_db() as session:
-            from src.core.models import Repas, Recette
+            from src.core.models import Recette, Repas
 
             start = service._prochaine_semaine_lundi()
             end = start + timedelta(days=6)
@@ -402,6 +430,7 @@ def _recettes_batch_cibles(service, limite: int = 4) -> list[str]:
         logger.debug("Extraction recettes batch cible indisponible", exc_info=True)
         return []
 
+
 def _prochaine_date_batch(service) -> date:
     """Détermine la prochaine date optimale de batch cooking."""
     fallback = service._prochaine_semaine_lundi() - timedelta(days=1)
@@ -409,7 +438,9 @@ def _prochaine_date_batch(service) -> date:
         with obtenir_contexte_db() as session:
             from src.core.models.batch_cooking import ConfigBatchCooking
 
-            config = session.query(ConfigBatchCooking).order_by(ConfigBatchCooking.id.desc()).first()
+            config = (
+                session.query(ConfigBatchCooking).order_by(ConfigBatchCooking.id.desc()).first()
+            )
             if not config or not config.jours_batch:
                 return fallback
 
@@ -423,6 +454,7 @@ def _prochaine_date_batch(service) -> date:
             return today + timedelta(days=delta)
     except Exception:
         return fallback
+
 
 def _scraper_prix_marche_ingredient(service, nom_ingredient: str) -> tuple[float | None, str]:
     """Scrape un prix indicatif d'un ingrédient via OpenFoodFacts (best-effort)."""
@@ -458,6 +490,7 @@ def _scraper_prix_marche_ingredient(service, nom_ingredient: str) -> tuple[float
         logger.debug("Scraping prix indisponible pour %s", nom_ingredient, exc_info=True)
 
     return None, "historique"
+
 
 def _extraire_prix_float(service, valeur: str) -> float | None:
     """Extrait un montant numérique depuis une chaîne de prix libre."""

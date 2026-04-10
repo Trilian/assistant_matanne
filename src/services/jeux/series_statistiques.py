@@ -13,14 +13,14 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
-from scipy import stats
 import numpy as np
+from scipy import stats
+from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
 from src.core.exceptions import ErreurBaseDeDonnees
 from src.core.logging import logger
-from src.core.models import PariSportif, Match
-from sqlalchemy.orm import Session
+from src.core.models import Match, PariSportif
 
 
 @dataclass
@@ -149,7 +149,9 @@ class SeriesStatistiquesService:
             type_pattern="regression_moyenne",
         )
 
-    def test_hot_hand_fallacy(self, paris: list[PariSportif], seuil_p: float = 0.05) -> ResultatTest:
+    def test_hot_hand_fallacy(
+        self, paris: list[PariSportif], seuil_p: float = 0.05
+    ) -> ResultatTest:
         """
         Test runs pour détecter le biais de la "main chaude" (hot hand fallacy).
 
@@ -295,7 +297,10 @@ class SeriesStatistiquesService:
         mediane_mise = np.median(mises)
 
         # Tableau 2x2: [après gain: élevée, faible] [après perte: élevée, faible]
-        table = [[0, 0], [0, 0]]  # [[apres_gain_eleve, apres_gain_faible], [apres_perte_eleve, apres_perte_faible]]
+        table = [
+            [0, 0],
+            [0, 0],
+        ]  # [[apres_gain_eleve, apres_gain_faible], [apres_perte_eleve, apres_perte_faible]]
 
         for i in range(1, len(paris_termines)):
             pari_actuel = paris_termines[i]
@@ -326,8 +331,12 @@ class SeriesStatistiquesService:
 
         if alerte:
             # Analyser la direction de la dépendance
-            pct_eleve_apres_perte = table[1][0] / (table[1][0] + table[1][1]) * 100 if sum(table[1]) > 0 else 0
-            pct_eleve_apres_gain = table[0][0] / (table[0][0] + table[0][1]) * 100 if sum(table[0]) > 0 else 0
+            pct_eleve_apres_perte = (
+                table[1][0] / (table[1][0] + table[1][1]) * 100 if sum(table[1]) > 0 else 0
+            )
+            pct_eleve_apres_gain = (
+                table[0][0] / (table[0][0] + table[0][1]) * 100 if sum(table[0]) > 0 else 0
+            )
 
             if pct_eleve_apres_perte > pct_eleve_apres_gain + 10:
                 message = (

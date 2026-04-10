@@ -10,8 +10,7 @@ Chat conversationnel avec contexte familial:
 """
 
 import logging
-from typing import Any
-from typing import Literal
+from typing import Any, Literal
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
@@ -19,7 +18,18 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-ContexteChat = Literal["cuisine", "famille", "maison", "budget", "general", "nutrition", "jardin", "jeux", "planning", "inventaire"]
+ContexteChat = Literal[
+    "cuisine",
+    "famille",
+    "maison",
+    "budget",
+    "general",
+    "nutrition",
+    "jardin",
+    "jeux",
+    "planning",
+    "inventaire",
+]
 
 # Mapping page → contexte IA pour le chat contextuel
 MAPPING_PAGE_CONTEXTE: dict[str, str] = {
@@ -97,34 +107,73 @@ Sois pratique et aide à optimiser les stocks.""",
 ACTIONS_RAPIDES: dict[str, list[dict[str, str]]] = {
     "cuisine": [
         {"label": "Idées repas semaine", "message": "Suggère un menu pour la semaine"},
-        {"label": "Que faire avec mes restes ?", "message": "Comment utiliser les restes du frigo ?"},
-        {"label": "Recette rapide ce soir", "message": "Propose une recette rapide pour ce soir (30 min max)"},
+        {
+            "label": "Que faire avec mes restes ?",
+            "message": "Comment utiliser les restes du frigo ?",
+        },
+        {
+            "label": "Recette rapide ce soir",
+            "message": "Propose une recette rapide pour ce soir (30 min max)",
+        },
     ],
     "famille": [
-        {"label": "Activités pour Jules", "message": "Suggère des activités adaptées pour un enfant de 3 ans"},
+        {
+            "label": "Activités pour Jules",
+            "message": "Suggère des activités adaptées pour un enfant de 3 ans",
+        },
         {"label": "Idées week-end", "message": "Que faire en famille ce week-end ?"},
         {"label": "Routine du soir", "message": "Aide-moi à créer une routine du coucher efficace"},
     ],
     "maison": [
-        {"label": "Entretien saisonnier", "message": "Quelles tâches d'entretien faire ce mois-ci ?"},
-        {"label": "Projets DIY faciles", "message": "Propose un projet bricolage facile pour le week-end"},
+        {
+            "label": "Entretien saisonnier",
+            "message": "Quelles tâches d'entretien faire ce mois-ci ?",
+        },
+        {
+            "label": "Projets DIY faciles",
+            "message": "Propose un projet bricolage facile pour le week-end",
+        },
         {"label": "Conseils jardin", "message": "Que planter dans le jardin en ce moment ?"},
     ],
     "budget": [
-        {"label": "Astuces économies", "message": "Donne-moi 5 astuces pour économiser au quotidien"},
+        {
+            "label": "Astuces économies",
+            "message": "Donne-moi 5 astuces pour économiser au quotidien",
+        },
         {"label": "Budget courses", "message": "Comment réduire le budget courses alimentaires ?"},
-        {"label": "Analyser mes dépenses", "message": "Comment mieux organiser mon budget familial ?"},
+        {
+            "label": "Analyser mes dépenses",
+            "message": "Comment mieux organiser mon budget familial ?",
+        },
     ],
     "general": [
-        {"label": "Organiser ma semaine", "message": "Aide-moi à organiser ma semaine efficacement"},
+        {
+            "label": "Organiser ma semaine",
+            "message": "Aide-moi à organiser ma semaine efficacement",
+        },
         {"label": "Idées sortie famille", "message": "Propose des sorties en famille pas chères"},
-        {"label": "Conseils quotidien", "message": "Donne un conseil du jour pour une famille épanouie"},
+        {
+            "label": "Conseils quotidien",
+            "message": "Donne un conseil du jour pour une famille épanouie",
+        },
     ],
     "nutrition": [
-        {"label": "Analyser mon repas", "message": "Analyse la valeur nutritionnelle de ce repas pour moi"},
-        {"label": "Équilibre de la semaine", "message": "Comment équilibrer mon planning repas cette semaine ?"},
-        {"label": "Astuces pour Jules", "message": "Conseils nutrition pour un enfant de 3 ans qui refuse les légumes"},
-        {"label": "Réduire sucre ajouté", "message": "Comment réduire le sucre dans mes recettes familiales ?"},
+        {
+            "label": "Analyser mon repas",
+            "message": "Analyse la valeur nutritionnelle de ce repas pour moi",
+        },
+        {
+            "label": "Équilibre de la semaine",
+            "message": "Comment équilibrer mon planning repas cette semaine ?",
+        },
+        {
+            "label": "Astuces pour Jules",
+            "message": "Conseils nutrition pour un enfant de 3 ans qui refuse les légumes",
+        },
+        {
+            "label": "Réduire sucre ajouté",
+            "message": "Comment réduire le sucre dans mes recettes familiales ?",
+        },
     ],
 }
 
@@ -227,9 +276,7 @@ Réponds de manière cohérente avec la conversation précédente."""
         """Envoie un message IA avec contexte cross-modules injecte (IA4)."""
         system_prompt = SYSTEM_PROMPTS.get(contexte, SYSTEM_PROMPTS["general"])
         contexte_txt = (
-            f"Contexte metier disponible (JSON): {contexte_metier}\n\n"
-            if contexte_metier
-            else ""
+            f"Contexte metier disponible (JSON): {contexte_metier}\n\n" if contexte_metier else ""
         )
 
         prompt = f"{contexte_txt}Utilisateur: {message}"
@@ -265,6 +312,3 @@ Réponds de manière cohérente avec la conversation précédente."""
 def obtenir_chat_ai_service() -> ChatAIService:
     """Factory singleton pour ChatAIService."""
     return ChatAIService()
-
-
-

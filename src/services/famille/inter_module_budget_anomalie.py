@@ -110,13 +110,15 @@ class BudgetAnomalieNotificationService:
             hausse_pct = ((montant_courant - montant_prec) / montant_prec) * 100
 
             if hausse_pct >= seuil_pct:
-                anomalies.append({
-                    "categorie": cat,
-                    "montant_courant": round(montant_courant, 2),
-                    "montant_precedent": round(montant_prec, 2),
-                    "hausse_pct": round(hausse_pct, 1),
-                    "ecart": round(montant_courant - montant_prec, 2),
-                })
+                anomalies.append(
+                    {
+                        "categorie": cat,
+                        "montant_courant": round(montant_courant, 2),
+                        "montant_precedent": round(montant_prec, 2),
+                        "hausse_pct": round(hausse_pct, 1),
+                        "ecart": round(montant_courant - montant_prec, 2),
+                    }
+                )
 
         # Envoyer notifications si anomalies détectées
         notifications_envoyees = 0
@@ -189,9 +191,7 @@ class BudgetAnomalieNotificationService:
             logger.warning(f"Événement anomalie budget échoué: {e}")
 
 
-@service_factory(
-    "budget_anomalie_notification", tags={"budget", "notifications", "anomalie"}
-)
+@service_factory("budget_anomalie_notification", tags={"budget", "notifications", "anomalie"})
 def obtenir_service_budget_anomalie() -> BudgetAnomalieNotificationService:
     """Factory pour le bridge budget anomalie → notifications."""
     return BudgetAnomalieNotificationService()

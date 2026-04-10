@@ -23,7 +23,7 @@ class CuisineBridgesMixin:
     @avec_session_db
     def recolte_vers_recettes(self, element_nom: str, db: Session | None = None) -> list[dict]:
         """Cherche des recettes utilisant un ingrédient récolté au jardin."""
-        from src.core.models.recettes import Recette, Ingredient
+        from src.core.models.recettes import Ingredient, Recette
 
         recettes = (
             db.query(Recette)
@@ -161,7 +161,9 @@ class CuisineBridgesMixin:
             )
 
             if article:
-                article.quantite_necessaire = float(article.quantite_necessaire or 0) + quantite_a_acheter
+                article.quantite_necessaire = (
+                    float(article.quantite_necessaire or 0) + quantite_a_acheter
+                )
                 if not article.rayon_magasin:
                     article.rayon_magasin = row.categorie or "Autre"
                 nb_articles += 1
@@ -208,11 +210,17 @@ class CuisineBridgesMixin:
         from src.core.models import SessionBatchCooking
         from src.core.models.planning import Repas
 
-        session_batch = db.query(SessionBatchCooking).filter(SessionBatchCooking.id == session_id).first()
+        session_batch = (
+            db.query(SessionBatchCooking).filter(SessionBatchCooking.id == session_id).first()
+        )
         if not session_batch:
             return {}
 
-        recette_ids = [int(recette_id) for recette_id in (session_batch.recettes_selectionnees or []) if recette_id]
+        recette_ids = [
+            int(recette_id)
+            for recette_id in (session_batch.recettes_selectionnees or [])
+            if recette_id
+        ]
         if not session_batch.planning_id or not recette_ids:
             return {
                 "session_id": session_batch.id,
@@ -235,12 +243,16 @@ class CuisineBridgesMixin:
             .all()
         )
 
-        note_batch = f"Préparé en batch le {(session_batch.date_session or date.today()).isoformat()}"
+        note_batch = (
+            f"Préparé en batch le {(session_batch.date_session or date.today()).isoformat()}"
+        )
         nb_mis_a_jour = 0
         for repas_item in repas:
             repas_item.prepare = True
             if note_batch not in (repas_item.notes or ""):
-                repas_item.notes = note_batch if not repas_item.notes else f"{repas_item.notes}\n{note_batch}"
+                repas_item.notes = (
+                    note_batch if not repas_item.notes else f"{repas_item.notes}\n{note_batch}"
+                )
             nb_mis_a_jour += 1
 
         db.commit()
@@ -290,7 +302,9 @@ class CuisineBridgesMixin:
             .first()
         )
         if retour is None:
-            retour = RetourRecette(user_id=utilisateur, recette_id=recette_id, feedback=feedback_normalise)
+            retour = RetourRecette(
+                user_id=utilisateur, recette_id=recette_id, feedback=feedback_normalise
+            )
             db.add(retour)
         else:
             retour.feedback = feedback_normalise
@@ -315,18 +329,28 @@ class CuisineBridgesMixin:
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
-    def terroir_vers_recettes(self, localisation: str | None = None, db: Session | None = None) -> dict:
+    def terroir_vers_recettes(
+        self, localisation: str | None = None, db: Session | None = None
+    ) -> dict:
         """P3-A1: Suggère des recettes régionales basées sur la localisation du foyer."""
         from src.core.models.habitat_projet import CritereImmoHabitat
         from src.core.models.recettes import Recette
 
         region = localisation
         if not region:
-            critere = db.query(CritereImmoHabitat).filter(CritereImmoHabitat.actif.is_(True)).first()
+            critere = (
+                db.query(CritereImmoHabitat).filter(CritereImmoHabitat.actif.is_(True)).first()
+            )
             if critere and critere.villes:
-                region = critere.villes[0] if isinstance(critere.villes, list) else str(critere.villes)
+                region = (
+                    critere.villes[0] if isinstance(critere.villes, list) else str(critere.villes)
+                )
             elif critere and critere.departements:
-                dep = critere.departements[0] if isinstance(critere.departements, list) else str(critere.departements)
+                dep = (
+                    critere.departements[0]
+                    if isinstance(critere.departements, list)
+                    else str(critere.departements)
+                )
                 region = dep
 
         if not region:
@@ -421,11 +445,11 @@ class CuisineBridgesMixin:
         db: Session | None = None,
     ) -> dict:
         """E1: Détecte les conflits entre planning repas et tâches maison."""
+        from datetime import timedelta
+
         from src.core.models.habitat import TacheEntretien
         from src.core.models.planning import Planning, Repas
         from src.core.models.recettes import Recette
-
-        from datetime import timedelta
 
         aujourd_hui = date.today()
         horizon = aujourd_hui + timedelta(days=nb_jours)
@@ -454,22 +478,20 @@ class CuisineBridgesMixin:
         suggestions = []
 
         if planning:
-            repas_liste = (
-                db.query(Repas)
-                .filter(Repas.planning_id == planning.id)
-                .all()
-            )
+            repas_liste = db.query(Repas).filter(Repas.planning_id == planning.id).all()
 
             taches_par_date: dict[date, list[dict]] = {}
             for tache in taches:
                 if tache.prochaine_fois:
                     d = tache.prochaine_fois
-                    taches_par_date.setdefault(d, []).append({
-                        "id": tache.id,
-                        "nom": tache.nom,
-                        "categorie": tache.categorie or "maison",
-                        "priorite": tache.priorite if hasattr(tache, "priorite") else "normale",
-                    })
+                    taches_par_date.setdefault(d, []).append(
+                        {
+                            "id": tache.id,
+                            "nom": tache.nom,
+                            "categorie": tache.categorie or "maison",
+                            "priorite": tache.priorite if hasattr(tache, "priorite") else "normale",
+                        }
+                    )
 
             for repas in repas_liste:
                 if not repas.date_repas:
@@ -514,9 +536,7 @@ class CuisineBridgesMixin:
                         f"+ {len(taches_jour)} tâche(s) maison → préférer un repas rapide ou préparer en avance."
                     )
 
-        nb_taches_libres = len(taches) - len({
-            c["date"] for c in conflits
-        })
+        nb_taches_libres = len(taches) - len({c["date"] for c in conflits})
 
         return {
             "periode": {"debut": aujourd_hui.isoformat(), "fin": horizon.isoformat()},
@@ -550,8 +570,18 @@ class CuisineBridgesMixin:
         est_tres_chaud = temp > 28
 
         if est_froid or est_pluvieux:
-            mots_chauds = ["soupe", "potage", "gratin", "tajine", "pot-au-feu",
-                           "velouté", "ragoût", "daube", "blanquette", "mijoté"]
+            mots_chauds = [
+                "soupe",
+                "potage",
+                "gratin",
+                "tajine",
+                "pot-au-feu",
+                "velouté",
+                "ragoût",
+                "daube",
+                "blanquette",
+                "mijoté",
+            ]
             label_contexte = "Temps froid/pluvieux 🌧️"
             conseil = "Comfort food recommandé — repas chaud et réconfortant"
             emoji = "🍲"
@@ -580,16 +610,26 @@ class CuisineBridgesMixin:
                 recettes = (
                     db.query(Recette)
                     .filter(
-                        func.lower(Recette.categorie).in_([
-                            "soupe", "plat", "plat chaud", "entrée chaude"
-                        ])
+                        func.lower(Recette.categorie).in_(
+                            ["soupe", "plat", "plat chaud", "entrée chaude"]
+                        )
                     )
                     .limit(8)
                     .all()
                 )
         elif est_tres_chaud:
-            mots_frais = ["salade", "gazpacho", "taboulé", "carpaccio", "tartare",
-                          "ceviche", "wrap", "smoothie", "glace", "sorbet"]
+            mots_frais = [
+                "salade",
+                "gazpacho",
+                "taboulé",
+                "carpaccio",
+                "tartare",
+                "ceviche",
+                "wrap",
+                "smoothie",
+                "glace",
+                "sorbet",
+            ]
             label_contexte = "Grosse chaleur ☀️🔥"
             conseil = "Fraîcheur en priorité — pas de cuisson longue"
             emoji = "🥗"
@@ -599,7 +639,9 @@ class CuisineBridgesMixin:
                 .filter(
                     func.lower(Recette.nom).op("~")("|".join(mots_frais))
                     | func.lower(Recette.description).op("~")("|".join(mots_frais))
-                    | func.lower(Recette.categorie).in_(["salade", "entrée froide", "dessert frais"])
+                    | func.lower(Recette.categorie).in_(
+                        ["salade", "entrée froide", "dessert frais"]
+                    )
                 )
                 .limit(8)
                 .all()

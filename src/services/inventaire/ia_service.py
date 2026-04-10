@@ -6,12 +6,12 @@ Déplacé depuis les services partagés vers la couche services dédiée.
 
 from datetime import datetime, timedelta
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
-
 
 # ── Modèles Pydantic pour structures IA ──
 
@@ -110,15 +110,15 @@ Propose:
             consommation_hebdo_kg=float(result.get("consommation_hebdo_kg", consommation_hebdo_kg)),
             stock_actuel_kg=stock_actuel_kg,
             jours_autonomie=int(
-                (stock_actuel_kg / max(consommation_hebdo_kg, 0.01)) * 7 if consommation_hebdo_kg > 0 else 999
+                (stock_actuel_kg / max(consommation_hebdo_kg, 0.01)) * 7
+                if consommation_hebdo_kg > 0
+                else 999
             ),
             seuil_reapprovisionnement_kg=float(result.get("seuil_kg", consommation_hebdo_kg * 3)),
             raison=result.get("raison", "Calcul basé sur historique"),
         )
 
-    def analyse_rotation_fifo(
-        self, ingredients_peremption: list[dict]
-    ) -> list[ScoreRotationFIFO]:
+    def analyse_rotation_fifo(self, ingredients_peremption: list[dict]) -> list[ScoreRotationFIFO]:
         """
         Analyse la rotation FIFO optimale.
 
@@ -171,7 +171,7 @@ Format: JSON liste"""
 Articles bas:
 {chr(10).join(f"- {a['nom']}: {a['stock']}L/{a['seuil']}L min" for a in articles_bas_stock)}
 
-Courses planifiées: {'Oui, dans 2-3 jours' if budget_courses_proche else 'Non, urgence peut-être'}
+Courses planifiées: {"Oui, dans 2-3 jours" if budget_courses_proche else "Non, urgence peut-être"}
 
 Message court (1-2 lignes) qui décrit l'urgence et propose une action."""
 

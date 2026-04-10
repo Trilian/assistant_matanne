@@ -182,6 +182,7 @@ def _verifier_ia() -> SanteComposant:
         # Exposer le modèle Mistral configuré
         try:
             from src.core.config import obtenir_parametres
+
             stats["modele"] = obtenir_parametres().MISTRAL_MODEL
         except Exception:
             pass
@@ -189,6 +190,7 @@ def _verifier_ia() -> SanteComposant:
         # Vérifier l'état du circuit breaker
         try:
             from src.core.ai.circuit_breaker import EtatCircuit, obtenir_circuit
+
             cb = obtenir_circuit("ai_planning", seuil_echecs=5, delai_reset=60.0)
             cb_stats = cb.obtenir_statistiques()
             etat_cb = cb_stats.get("etat", "unknown")

@@ -14,9 +14,7 @@ _JOURS_WEEKDAY = {
 }
 
 
-def obtenir_debut_semaine(
-    date_ref: date | datetime | None = None, jour_debut: int = 0
-) -> date:
+def obtenir_debut_semaine(date_ref: date | datetime | None = None, jour_debut: int = 0) -> date:
     """
     Retourne le début de la semaine contenant la date.
 

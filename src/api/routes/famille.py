@@ -25,6 +25,7 @@ Préfixe parent : /api/v1/famille
 Pour routes/__init__.py, "famille_router": ".famille" reste inchangé.
 """
 
+import logging
 from datetime import date
 from inspect import isawaitable
 from typing import Any
@@ -33,31 +34,31 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
-from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
+from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.common import MessageResponse, ReponsePaginee
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
     REPONSES_CRUD_ECRITURE,
     REPONSES_CRUD_LECTURE,
     REPONSES_CRUD_SUPPRESSION,
-    REPONSES_LISTE,
     REPONSES_IA,
+    REPONSES_LISTE,
 )
 from src.api.schemas.famille import (
     AchatCreate,
     AchatPatch,
     AchatResponse,
     AchatsListeResponse,
-    AnnonceIBCRequest,
-    AnnonceIBCResponse,
     AnniversaireCreate,
+    AnniversairePatch,
     AnniversaireResponse,
     AnniversairesListeResponse,
+    AnnonceIBCRequest,
+    AnnonceIBCResponse,
     ChecklistAnniversaireItemCreate,
     ChecklistAnniversaireItemPatch,
     ChecklistAnniversaireSyncRequest,
-    AnniversairePatch,
     ConfigGardeRequest,
     ConfigGardeResponse,
     ContexteFamilialResponse,
@@ -74,10 +75,10 @@ from src.api.schemas.famille import (
     RoutineCompletionResponse,
     RoutineResponse,
     SuggestionAchatResponse,
-    SuggestionsActivitesSimpleRequest,
     SuggestionsAchatsEnrichiesRequest,
-    SuggestionsSoireeRequest,
+    SuggestionsActivitesSimpleRequest,
     SuggestionsSejourRequest,
+    SuggestionsSoireeRequest,
     SuggestionsWeekendRequest,
 )
 from src.api.schemas.ia_transverses import (
@@ -94,7 +95,6 @@ from src.api.schemas.ia_transverses import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.famille.service_ia import obtenir_service_innovations_famille
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/famille", tags=["Famille"])
@@ -111,7 +111,11 @@ async def coach_routines_ia(
     return result or CoachRoutinesResponse()
 
 
-@router.get("/planning-jules-adaptatif", response_model=PlanningJulesAdaptatifResponse, responses=REPONSES_IA)
+@router.get(
+    "/planning-jules-adaptatif",
+    response_model=PlanningJulesAdaptatifResponse,
+    responses=REPONSES_IA,
+)
 @gerer_exception_api
 async def planning_jules_adaptatif(
     user: dict[str, Any] = Depends(require_auth),
@@ -159,7 +163,9 @@ async def modifier_mode_vacances(
         actif=body.actif,
         checklist_voyage_auto=body.checklist_voyage_auto,
     )
-    return result or ModeVacancesResponse(actif=body.actif, checklist_voyage_auto=body.checklist_voyage_auto)
+    return result or ModeVacancesResponse(
+        actif=body.actif, checklist_voyage_auto=body.checklist_voyage_auto
+    )
 
 
 @router.get("/tableau-sante-foyer", response_model=ScoreBienEtreResponse, responses=REPONSES_IA)
@@ -173,7 +179,9 @@ async def tableau_sante_foyer(
     return result or ScoreBienEtreResponse()
 
 
-@router.get("/enrichissement-contacts", response_model=EnrichissementContactsResponse, responses=REPONSES_IA)
+@router.get(
+    "/enrichissement-contacts", response_model=EnrichissementContactsResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def obtenir_enrichissement_contacts(
     user: dict[str, Any] = Depends(require_auth),
@@ -225,7 +233,8 @@ class ParamsSuggestionsActivites(BaseModel):
     duree_min: int = Field(default=30, ge=5, le=300, description="Durée minimum en minutes")
     duree_max: int = Field(default=120, ge=10, le=360, description="Durée maximum en minutes")
     preferences: list[str] | None = Field(
-        default=None, description="Tags de préférences (creatif, sportif, educatif, sensoriel, etc.)"
+        default=None,
+        description="Tags de préférences (creatif, sportif, educatif, sensoriel, etc.)",
     )
     nb_suggestions: int = Field(
         default=5, ge=1, le=10, description="Nombre de suggestions souhaitées"
@@ -330,7 +339,9 @@ async def lister_routines(
     return await executer_async(_query)
 
 
-@router.get("/routines/{routine_id}", response_model=RoutineResponse, responses=REPONSES_CRUD_LECTURE)
+@router.get(
+    "/routines/{routine_id}", response_model=RoutineResponse, responses=REPONSES_CRUD_LECTURE
+)
 @gerer_exception_api
 async def obtenir_routine(
     routine_id: int,
@@ -383,7 +394,9 @@ async def creer_routine(
     return await executer_async(_query)
 
 
-@router.patch("/routines/{routine_id}", response_model=RoutineResponse, responses=REPONSES_CRUD_LECTURE)
+@router.patch(
+    "/routines/{routine_id}", response_model=RoutineResponse, responses=REPONSES_CRUD_LECTURE
+)
 @gerer_exception_api
 async def modifier_routine(
     routine_id: int,
@@ -499,9 +512,7 @@ async def lister_anniversaires(
 
     def _query():
         with executer_avec_session() as session:
-            query = session.query(AnniversaireFamille).filter(
-                AnniversaireFamille.actif == actif
-            )
+            query = session.query(AnniversaireFamille).filter(AnniversaireFamille.actif == actif)
             if relation:
                 query = query.filter(AnniversaireFamille.relation == relation)
 
@@ -513,7 +524,11 @@ async def lister_anniversaires(
     return await executer_async(_query)
 
 
-@router.get("/anniversaires/{anniversaire_id}", response_model=AnniversaireResponse, responses=REPONSES_CRUD_LECTURE)
+@router.get(
+    "/anniversaires/{anniversaire_id}",
+    response_model=AnniversaireResponse,
+    responses=REPONSES_CRUD_LECTURE,
+)
 @gerer_exception_api
 async def obtenir_anniversaire(
     anniversaire_id: int,
@@ -524,9 +539,11 @@ async def obtenir_anniversaire(
 
     def _query():
         with executer_avec_session() as session:
-            a = session.query(AnniversaireFamille).filter(
-                AnniversaireFamille.id == anniversaire_id
-            ).first()
+            a = (
+                session.query(AnniversaireFamille)
+                .filter(AnniversaireFamille.id == anniversaire_id)
+                .first()
+            )
             if not a:
                 raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
             return _serialiser_anniversaire(a)
@@ -534,7 +551,12 @@ async def obtenir_anniversaire(
     return await executer_async(_query)
 
 
-@router.post("/anniversaires", status_code=201, response_model=AnniversaireResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/anniversaires",
+    status_code=201,
+    response_model=AnniversaireResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
 @gerer_exception_api
 async def creer_anniversaire(
     donnees: AnniversaireCreate,
@@ -561,7 +583,11 @@ async def creer_anniversaire(
     return await executer_async(_query)
 
 
-@router.patch("/anniversaires/{anniversaire_id}", response_model=AnniversaireResponse, responses=REPONSES_CRUD_ECRITURE)
+@router.patch(
+    "/anniversaires/{anniversaire_id}",
+    response_model=AnniversaireResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
 @gerer_exception_api
 async def modifier_anniversaire(
     anniversaire_id: int,
@@ -573,9 +599,11 @@ async def modifier_anniversaire(
 
     def _query():
         with executer_avec_session() as session:
-            a = session.query(AnniversaireFamille).filter(
-                AnniversaireFamille.id == anniversaire_id
-            ).first()
+            a = (
+                session.query(AnniversaireFamille)
+                .filter(AnniversaireFamille.id == anniversaire_id)
+                .first()
+            )
             if not a:
                 raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
 
@@ -603,9 +631,11 @@ async def supprimer_anniversaire(
 
     def _query():
         with executer_avec_session() as session:
-            a = session.query(AnniversaireFamille).filter(
-                AnniversaireFamille.id == anniversaire_id
-            ).first()
+            a = (
+                session.query(AnniversaireFamille)
+                .filter(AnniversaireFamille.id == anniversaire_id)
+                .first()
+            )
             if not a:
                 raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
 
@@ -627,7 +657,9 @@ async def apercu_checklist_auto_anniversaire(
 
     def _query():
         service = obtenir_service_checklists_anniversaire()
-        preview = service.generer_apercu_auto(anniversaire_id=anniversaire_id, user_id=user.get("id"))
+        preview = service.generer_apercu_auto(
+            anniversaire_id=anniversaire_id, user_id=user.get("id")
+        )
         if not preview:
             raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
         return preview
@@ -802,9 +834,7 @@ async def lister_evenements_familiaux(
 
     def _query():
         with executer_avec_session() as session:
-            query = session.query(EvenementFamilial).filter(
-                EvenementFamilial.actif == actif
-            )
+            query = session.query(EvenementFamilial).filter(EvenementFamilial.actif == actif)
             if type_evenement:
                 query = query.filter(EvenementFamilial.type_evenement == type_evenement)
 
@@ -814,7 +844,12 @@ async def lister_evenements_familiaux(
     return await executer_async(_query)
 
 
-@router.post("/evenements", status_code=201, response_model=EvenementFamilialResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/evenements",
+    status_code=201,
+    response_model=EvenementFamilialResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
 @gerer_exception_api
 async def creer_evenement_familial(
     donnees: EvenementFamilialCreate,
@@ -842,7 +877,11 @@ async def creer_evenement_familial(
     return await executer_async(_query)
 
 
-@router.patch("/evenements/{evenement_id}", response_model=EvenementFamilialResponse, responses=REPONSES_CRUD_ECRITURE)
+@router.patch(
+    "/evenements/{evenement_id}",
+    response_model=EvenementFamilialResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
 @gerer_exception_api
 async def modifier_evenement_familial(
     evenement_id: int,
@@ -854,9 +893,11 @@ async def modifier_evenement_familial(
 
     def _query():
         with executer_avec_session() as session:
-            e = session.query(EvenementFamilial).filter(
-                EvenementFamilial.id == evenement_id
-            ).first()
+            e = (
+                session.query(EvenementFamilial)
+                .filter(EvenementFamilial.id == evenement_id)
+                .first()
+            )
             if not e:
                 raise HTTPException(status_code=404, detail="Événement non trouvé")
 
@@ -884,9 +925,11 @@ async def supprimer_evenement_familial(
 
     def _query():
         with executer_avec_session() as session:
-            e = session.query(EvenementFamilial).filter(
-                EvenementFamilial.id == evenement_id
-            ).first()
+            e = (
+                session.query(EvenementFamilial)
+                .filter(EvenementFamilial.id == evenement_id)
+                .first()
+            )
             if not e:
                 raise HTTPException(status_code=404, detail="Événement non trouvé")
 
@@ -925,7 +968,7 @@ async def obtenir_resume_hebdomadaire(
 
 
 # ═══════════════════════════════════════════════════════════
-# CONTEXTE FAMILIAL 
+# CONTEXTE FAMILIAL
 # ═══════════════════════════════════════════════════════════
 
 
@@ -942,8 +985,6 @@ async def obtenir_contexte_familial(
         return service.obtenir_contexte()
 
     return await executer_async(_query)
-
-
 
 
 def _serialiser_achat(a) -> dict:  # noqa: ANN001
@@ -974,7 +1015,9 @@ def _serialiser_achat(a) -> dict:  # noqa: ANN001
 async def lister_achats_famille(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),
     achete: bool | None = Query(None, description="Filtrer sur l'état acheté (true/false)"),
-    pour_qui: str | None = Query(None, description="Filtrer par destinataire: famille, jules, anne, mathieu"),
+    pour_qui: str | None = Query(
+        None, description="Filtrer par destinataire: famille, jules, anne, mathieu"
+    ),
     a_revendre: bool | None = Query(None, description="Filtrer sur les articles à revendre"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -1006,7 +1049,9 @@ async def lister_achats_famille(
     return await executer_async(_query)
 
 
-@router.post("/achats", status_code=201, response_model=AchatResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/achats", status_code=201, response_model=AchatResponse, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def creer_achat(
     payload: AchatCreate,
@@ -1155,7 +1200,11 @@ async def suggestions_achats_enrichies(
     return await executer_async(_query)
 
 
-@router.post("/achats/{achat_id}/annonce-lbc", response_model=AnnonceIBCResponse, responses=REPONSES_CRUD_LECTURE)
+@router.post(
+    "/achats/{achat_id}/annonce-lbc",
+    response_model=AnnonceIBCResponse,
+    responses=REPONSES_CRUD_LECTURE,
+)
 @gerer_exception_api
 async def generer_annonce_lbc(
     achat_id: int,
@@ -1196,7 +1245,11 @@ async def marquer_achat_vendu(
     return await executer_async(_query)
 
 
-@router.get("/achats/{achat_id}/prefill-revente", response_model=PrefillReventeResponse, responses=REPONSES_CRUD_LECTURE)
+@router.get(
+    "/achats/{achat_id}/prefill-revente",
+    response_model=PrefillReventeResponse,
+    responses=REPONSES_CRUD_LECTURE,
+)
 @gerer_exception_api
 async def prefill_revente_achat(
     achat_id: int,
@@ -1243,7 +1296,10 @@ async def prefill_revente_achat(
 
                     if not taille and tailles_prefs:
                         if "chaussures" in categorie:
-                            taille = str(tailles_prefs.get("pointure", "") or prefs_data.get("pointure_jules", ""))
+                            taille = str(
+                                tailles_prefs.get("pointure", "")
+                                or prefs_data.get("pointure_jules", "")
+                            )
                         else:
                             taille = (
                                 tailles_prefs.get("haut")
@@ -1263,9 +1319,7 @@ async def prefill_revente_achat(
 
             # Prix conseillé
             base_prix = achat.prix_reel or achat.prix_estime
-            prix_suggere = (
-                round(float(base_prix) * 0.4, 2) if base_prix else None
-            )
+            prix_suggere = round(float(base_prix) * 0.4, 2) if base_prix else None
             if prix_suggere:
                 raisons.append(f"Prix conseillé : {prix_suggere}€ (40% du prix d'achat)")
 
@@ -1283,9 +1337,11 @@ async def prefill_revente_achat(
     return await executer_async(_query)
 
 
-
-
-@router.patch("/routines/{routine_id}/completer", response_model=RoutineCompletionResponse, responses=REPONSES_CRUD_ECRITURE)
+@router.patch(
+    "/routines/{routine_id}/completer",
+    response_model=RoutineCompletionResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
 @gerer_exception_api
 async def completer_routine(
     routine_id: int,
@@ -1308,8 +1364,6 @@ async def completer_routine(
             }
 
     return await executer_async(_query)
-
-
 
 
 @router.get("/config/garde", response_model=ConfigGardeResponse, responses=REPONSES_CRUD_LECTURE)
@@ -1371,13 +1425,12 @@ async def lire_preferences_famille(
     """Lit les préférences familiales (tailles, style achats, intérêts)."""
 
     def _query():
-        from src.core.models.user_preferences import PreferenceUtilisateur
         from sqlalchemy import select as sa_select
 
+        from src.core.models.user_preferences import PreferenceUtilisateur
+
         with executer_avec_session() as session:
-            pref = session.execute(
-                sa_select(PreferenceUtilisateur)
-            ).scalar_one_or_none()
+            pref = session.execute(sa_select(PreferenceUtilisateur)).scalar_one_or_none()
             if pref is None:
                 return PreferencesFamilleResponse()
             return PreferencesFamilleResponse(
@@ -1402,13 +1455,12 @@ async def sauvegarder_preferences_famille(
     """Sauvegarde les préférences familiales (tailles, style achats, intérêts)."""
 
     def _query():
-        from src.core.models.user_preferences import PreferenceUtilisateur
         from sqlalchemy import select as sa_select
 
+        from src.core.models.user_preferences import PreferenceUtilisateur
+
         with executer_avec_session() as session:
-            pref = session.execute(
-                sa_select(PreferenceUtilisateur)
-            ).scalar_one_or_none()
+            pref = session.execute(sa_select(PreferenceUtilisateur)).scalar_one_or_none()
             if pref is None:
                 pref = PreferenceUtilisateur(user_id="matanne")
                 session.add(pref)
@@ -1430,7 +1482,11 @@ async def sauvegarder_preferences_famille(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/planning/jours-sans-creche", response_model=PlanningJoursSansCrecheResponse, responses=REPONSES_LISTE)
+@router.get(
+    "/planning/jours-sans-creche",
+    response_model=PlanningJoursSansCrecheResponse,
+    responses=REPONSES_LISTE,
+)
 @gerer_exception_api
 async def jours_sans_creche(
     mois: str | None = Query(None, description="Mois YYYY-MM. Par défaut: mois courant"),
@@ -1455,10 +1511,7 @@ async def jours_sans_creche(
         jours_du_mois = [j for j in tous_jours if j.date_jour.month == mo]
         return {
             "mois": f"{annee:04d}-{mo:02d}",
-            "jours": [
-                {"date": j.date_jour.isoformat(), "label": j.nom}
-                for j in jours_du_mois
-            ],
+            "jours": [{"date": j.date_jour.isoformat(), "label": j.nom} for j in jours_du_mois],
             "total": len(jours_du_mois),
         }
 
@@ -1516,15 +1569,18 @@ async def convertir_weekend_en_activite(
 
 
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS IA ACHATS 
+# SUGGESTIONS IA ACHATS
 # ═══════════════════════════════════════════════════════════
 
 
 class SuggestionsAchatsRequest(BaseModel):
     """Demande de suggestions d'achats/cadeaux IA."""
+
     type: str = Field(..., description="'anniversaire' | 'jalon' | 'saison'")
     nom: str | None = Field(None, description="Prénom de la personne (pour anniversaire)")
-    age: int | None = Field(None, ge=0, description="Âge en années (anniversaire) ou mois (jalon/saison)")
+    age: int | None = Field(
+        None, ge=0, description="Âge en années (anniversaire) ou mois (jalon/saison)"
+    )
     relation: str | None = Field(None, description="parent, ami, etc. (pour anniversaire)")
     budget_max: float = Field(default=50.0, ge=5, le=500)
     historique_cadeaux: list[str] | None = None
@@ -1564,7 +1620,9 @@ async def suggestions_achats_ia(
 
     if payload.type == "anniversaire":
         if not payload.nom or payload.age is None:
-            raise HTTPException(status_code=422, detail="'nom' et 'age' requis pour les suggestions d'anniversaire")
+            raise HTTPException(
+                status_code=422, detail="'nom' et 'age' requis pour les suggestions d'anniversaire"
+            )
         suggestions = await service.suggerer_cadeaux_anniversaire(
             nom=payload.nom,
             age=payload.age,
@@ -1574,7 +1632,9 @@ async def suggestions_achats_ia(
         )
     elif payload.type == "jalon":
         if payload.age is None or not payload.prochains_jalons:
-            raise HTTPException(status_code=422, detail="'age' (en mois) et 'prochains_jalons' requis")
+            raise HTTPException(
+                status_code=422, detail="'age' (en mois) et 'prochains_jalons' requis"
+            )
         suggestions = await service.suggerer_achats_jalon(
             age_mois=payload.age,
             prochains_jalons=payload.prochains_jalons,
@@ -1588,7 +1648,9 @@ async def suggestions_achats_ia(
             tailles=payload.tailles,
         )
     else:
-        raise HTTPException(status_code=422, detail="type doit être 'anniversaire', 'jalon' ou 'saison'")
+        raise HTTPException(
+            status_code=422, detail="type doit être 'anniversaire', 'jalon' ou 'saison'"
+        )
 
     return {"suggestions": suggestions, "total": len(suggestions), "type": payload.type}
 
@@ -1618,8 +1680,10 @@ async def suggestions_achats_auto(
         suggestions_jalons: list[dict[str, Any]] = []
         suggestions_saison: list[dict[str, Any]] = []
 
-        anniversaires = (contexte.get("anniversaires_proches") or [])
-        anniversaire_cible = next((a for a in anniversaires if (a.get("jours_restants") or 99) <= 14), None)
+        anniversaires = contexte.get("anniversaires_proches") or []
+        anniversaire_cible = next(
+            (a for a in anniversaires if (a.get("jours_restants") or 99) <= 14), None
+        )
         if anniversaire_cible:
             suggestions_anniversaire = await service_ia.suggerer_cadeaux_anniversaire(
                 nom=anniversaire_cible.get("nom_personne", "Proche"),
@@ -1663,7 +1727,7 @@ async def suggestions_achats_auto(
 
 
 # ═══════════════════════════════════════════════════════════
-# RAPPELS FAMILLE 
+# RAPPELS FAMILLE
 # ═══════════════════════════════════════════════════════════
 
 
@@ -1832,7 +1896,9 @@ async def importer_contacts(
                         telephone=(ligne.get("telephone") or ligne.get("phone") or "")[:20] or None,
                         email=(ligne.get("email") or ligne.get("Email") or "")[:200] or None,
                         adresse=(ligne.get("adresse") or ligne.get("address") or "")[:500] or None,
-                        categorie=(ligne.get("categorie") or ligne.get("category") or "importé")[:50],
+                        categorie=(ligne.get("categorie") or ligne.get("category") or "importé")[
+                            :50
+                        ],
                     )
                     session.add(contact)
                     contacts_importes.append(nom)
@@ -1869,7 +1935,16 @@ async def exporter_contacts(
                 writer = csv.writer(output)
                 writer.writerow(["nom", "categorie", "telephone", "email", "adresse", "notes"])
                 for c in contacts:
-                    writer.writerow([c.nom, c.categorie, c.telephone or "", c.email or "", c.adresse or "", c.notes or ""])
+                    writer.writerow(
+                        [
+                            c.nom,
+                            c.categorie,
+                            c.telephone or "",
+                            c.email or "",
+                            c.adresse or "",
+                            c.notes or "",
+                        ]
+                    )
                 return Response(
                     content=output.getvalue(),
                     media_type="text/csv",
@@ -1911,9 +1986,9 @@ async def exporter_contacts(
 # Chaque sous-routeur hérite du préfixe /api/v1/famille
 # et définit ses propres paths relatifs.
 # ═══════════════════════════════════════════════════════════
-from src.api.routes.famille_jules import router as _jules_router
-from src.api.routes.famille_budget import router as _budget_router
 from src.api.routes.famille_activites import router as _activites_router
+from src.api.routes.famille_budget import router as _budget_router
+from src.api.routes.famille_jules import router as _jules_router
 
 router.include_router(_jules_router, tags=["Famille — Jules"])
 router.include_router(_budget_router, tags=["Famille — Budget"])

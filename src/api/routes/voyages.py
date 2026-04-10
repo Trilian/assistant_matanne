@@ -15,10 +15,10 @@ from src.api.schemas.voyages import (
     VoyageGenererCoursesResponse,
     VoyagePlanifieIAResponse,
     VoyageResume,
+    VoyagesListeResponse,
     VoyageTemplateItem,
     VoyageTemplatesListeResponse,
     VoyageToggleChecklistResponse,
-    VoyagesListeResponse,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
@@ -67,7 +67,9 @@ async def lister_templates_voyage(user: dict[str, Any] = Depends(require_auth)) 
 
 @router.post("", response_model=VoyageCreateResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
-async def creer_voyage(payload: dict[str, Any], user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+async def creer_voyage(
+    payload: dict[str, Any], user: dict[str, Any] = Depends(require_auth)
+) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
 
     def _query():
@@ -82,7 +84,9 @@ async def creer_voyage(payload: dict[str, Any], user: dict[str, Any] = Depends(r
 
 @router.get("/{voyage_id}", response_model=VoyageDetailResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
-async def detail_voyage(voyage_id: int, user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+async def detail_voyage(
+    voyage_id: int, user: dict[str, Any] = Depends(require_auth)
+) -> dict[str, Any]:
     from src.services.famille.voyage import obtenir_service_voyage
 
     def _query():
@@ -118,7 +122,9 @@ async def detail_voyage(voyage_id: int, user: dict[str, Any] = Depends(require_a
     return await executer_async(_query)
 
 
-@router.post("/planifier-ia", response_model=VoyagePlanifieIAResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/planifier-ia", response_model=VoyagePlanifieIAResponse, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def planifier_voyage_ia(
     payload: dict[str, Any],
@@ -191,8 +197,7 @@ async def planifier_voyage_ia(
 
         templates = service.obtenir_templates()
         templates_eligibles = [
-            t for t in templates
-            if not t.type_voyage or type_voyage in (t.type_voyage or "")
+            t for t in templates if not t.type_voyage or type_voyage in (t.type_voyage or "")
         ]
 
         checklists_creees = []
@@ -219,7 +224,11 @@ async def planifier_voyage_ia(
     return await executer_async(_query)
 
 
-@router.post("/{voyage_id}/generer-courses", response_model=VoyageGenererCoursesResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/{voyage_id}/generer-courses",
+    response_model=VoyageGenererCoursesResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
 @gerer_exception_api
 async def generer_courses_depuis_voyage(
     voyage_id: int,
@@ -244,7 +253,11 @@ async def generer_courses_depuis_voyage(
     return await executer_async(_query)
 
 
-@router.post("/{voyage_id}/checklists/{checklist_id}/toggle", response_model=VoyageToggleChecklistResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/{voyage_id}/checklists/{checklist_id}/toggle",
+    response_model=VoyageToggleChecklistResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
 @gerer_exception_api
 async def cocher_article_checklist(
     voyage_id: int,

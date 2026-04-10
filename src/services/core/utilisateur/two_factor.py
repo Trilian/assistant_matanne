@@ -97,9 +97,7 @@ class ServiceDeuxFacteurs:
         """
         return [hashlib.sha256(c.encode()).hexdigest() for c in codes]
 
-    def verifier_code_backup(
-        self, code: str, codes_hashes: list[str]
-    ) -> tuple[bool, list[str]]:
+    def verifier_code_backup(self, code: str, codes_hashes: list[str]) -> tuple[bool, list[str]]:
         """Vérifie un code backup et le consume (usage unique).
 
         Args:

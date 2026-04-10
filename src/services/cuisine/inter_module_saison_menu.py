@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : Produits de saison -> Planning IA.
 
 Bridge inter-modules :

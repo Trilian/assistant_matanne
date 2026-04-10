@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def gerer_exception_api(func: F) -> F:
+def gerer_exception_api[F: Callable[..., Any]](func: F) -> F:
     """
     Décorateur pour gérer les exceptions dans les routes API.
 

@@ -1,4 +1,4 @@
-﻿"""Routes admin — Opérations (Services Health, Schéma SQL).
+"""Routes admin — Opérations (Services Health, Schéma SQL).
 
 Les endpoints suivants ont été déplacés dans des modules dédiés :
 - admin_notifications.py : Notifications (test, templates, simulation, historique, queue)
@@ -109,5 +109,3 @@ async def obtenir_schema_diff_admin(
         return diff
 
     return await executer_async(_diff)
-
-

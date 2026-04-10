@@ -193,6 +193,7 @@ def valider_token_api(token: str) -> UtilisateurToken | None:
     Returns:
         UtilisateurToken si valide, None sinon
     """
+
     def _decoder(cle: str) -> dict:
         return jwt.decode(
             token,

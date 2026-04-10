@@ -29,7 +29,9 @@ class DVFHabitatService:
         self._resources_cache: list[dict[str, Any]] | None = None
 
     def _client(self) -> httpx.Client:
-        return httpx.Client(timeout=20.0, headers={"User-Agent": self.USER_AGENT}, follow_redirects=True)
+        return httpx.Client(
+            timeout=20.0, headers={"User-Agent": self.USER_AGENT}, follow_redirects=True
+        )
 
     def _coerce_float(self, value: Any) -> float | None:
         if value in (None, ""):
@@ -161,11 +163,27 @@ class DVFHabitatService:
         surface_min_m2: float | None = None,
         limite: int = 180,
     ) -> dict[str, Any]:
-        departement_effectif = self._normaliser_departement(departement or (code_postal[:3] if code_postal and code_postal.startswith(("97", "98")) else code_postal[:2] if code_postal else None)) or "74"
+        departement_effectif = (
+            self._normaliser_departement(
+                departement
+                or (
+                    code_postal[:3]
+                    if code_postal and code_postal.startswith(("97", "98"))
+                    else code_postal[:2]
+                    if code_postal
+                    else None
+                )
+            )
+            or "74"
+        )
         resource = self._trouver_resource(departement_effectif)
         if not resource:
             return {
-                "source": {"dataset_id": self.DATASET_ID, "resource_id": None, "resource_title": None},
+                "source": {
+                    "dataset_id": self.DATASET_ID,
+                    "resource_id": None,
+                    "resource_title": None,
+                },
                 "query": {
                     "departement": departement_effectif,
                     "commune": commune,
@@ -193,9 +211,17 @@ class DVFHabitatService:
             if transaction is not None
         ]
 
-        prix_m2_values = [item["prix_m2"] for item in transactions if item.get("prix_m2") is not None]
-        valeurs = [item["valeur_fonciere"] for item in transactions if item.get("valeur_fonciere") is not None]
-        surfaces = [item["surface_m2"] for item in transactions if item.get("surface_m2") is not None]
+        prix_m2_values = [
+            item["prix_m2"] for item in transactions if item.get("prix_m2") is not None
+        ]
+        valeurs = [
+            item["valeur_fonciere"]
+            for item in transactions
+            if item.get("valeur_fonciere") is not None
+        ]
+        surfaces = [
+            item["surface_m2"] for item in transactions if item.get("surface_m2") is not None
+        ]
 
         buckets: dict[str, list[dict[str, Any]]] = {}
         repartition_types: dict[str, list[dict[str, Any]]] = {}
@@ -208,19 +234,27 @@ class DVFHabitatService:
         historique = []
         for mois, items in sorted(buckets.items()):
             prix_m2_mois = [item["prix_m2"] for item in items if item.get("prix_m2") is not None]
-            valeurs_mois = [item["valeur_fonciere"] for item in items if item.get("valeur_fonciere") is not None]
+            valeurs_mois = [
+                item["valeur_fonciere"] for item in items if item.get("valeur_fonciere") is not None
+            ]
             historique.append(
                 {
                     "mois": mois,
                     "transactions": len(items),
                     "prix_m2_median": round(median(prix_m2_mois), 2) if prix_m2_mois else None,
-                    "prix_m2_moyen": round(sum(prix_m2_mois) / len(prix_m2_mois), 2) if prix_m2_mois else None,
-                    "valeur_moyenne": round(sum(valeurs_mois) / len(valeurs_mois), 2) if valeurs_mois else None,
+                    "prix_m2_moyen": round(sum(prix_m2_mois) / len(prix_m2_mois), 2)
+                    if prix_m2_mois
+                    else None,
+                    "valeur_moyenne": round(sum(valeurs_mois) / len(valeurs_mois), 2)
+                    if valeurs_mois
+                    else None,
                 }
             )
 
         repartition = []
-        for type_name, items in sorted(repartition_types.items(), key=lambda entry: len(entry[1]), reverse=True):
+        for type_name, items in sorted(
+            repartition_types.items(), key=lambda entry: len(entry[1]), reverse=True
+        ):
             prix_m2_type = [item["prix_m2"] for item in items if item.get("prix_m2") is not None]
             repartition.append(
                 {
@@ -231,8 +265,12 @@ class DVFHabitatService:
             )
 
         dernier_point = historique[-1] if historique else None
-        commune_label = commune or next((str(item.get("commune")) for item in transactions if item.get("commune")), None)
-        code_postal_label = code_postal or next((str(item.get("code_postal")) for item in transactions if item.get("code_postal")), None)
+        commune_label = commune or next(
+            (str(item.get("commune")) for item in transactions if item.get("commune")), None
+        )
+        code_postal_label = code_postal or next(
+            (str(item.get("code_postal")) for item in transactions if item.get("code_postal")), None
+        )
 
         return {
             "source": {
@@ -251,7 +289,9 @@ class DVFHabitatService:
             "resume": {
                 "nb_transactions": len(transactions),
                 "prix_m2_median": round(median(prix_m2_values), 2) if prix_m2_values else None,
-                "prix_m2_moyen": round(sum(prix_m2_values) / len(prix_m2_values), 2) if prix_m2_values else None,
+                "prix_m2_moyen": round(sum(prix_m2_values) / len(prix_m2_values), 2)
+                if prix_m2_values
+                else None,
                 "valeur_mediane": round(median(valeurs), 2) if valeurs else None,
                 "surface_mediane": round(median(surfaces), 2) if surfaces else None,
                 "dernier_mois": dernier_point,

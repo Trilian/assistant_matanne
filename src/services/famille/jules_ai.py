@@ -5,12 +5,12 @@ Déplacé depuis src/modules/famille/jules/ai_service.py vers la couche services
 """
 
 from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
-
 
 # ── Modèles Pydantic pour suggestions structurées ──
 
@@ -22,9 +22,7 @@ class SuggestionActivite(BaseModel):
     description: str = Field(..., description="Description courte de l'activité")
     duree_minutes: int = Field(..., ge=5, le=180, description="Durée estimée en minutes")
     budget: float = Field(..., ge=0, description="Budget estimé en euros")
-    lieu: Literal["interieur", "exterieur", "mixte"] = Field(
-        ..., description="Lieu de l'activité"
-    )
+    lieu: Literal["interieur", "exterieur", "mixte"] = Field(..., description="Lieu de l'activité")
     competences: list[str] = Field(..., description="Compétences développées")
     materiel: list[str] = Field(default_factory=list, description="Matériel nécessaire")
     niveau_effort: Literal["faible", "moyen", "eleve"] = Field(
@@ -193,7 +191,7 @@ Jouets sûrs, éducatifs et adaptés à cet âge."""
     ) -> list[SuggestionActivite]:
         """
         Suggère des activités enrichies avec paramètres avancés.
-        
+
         Args:
             age_mois: Âge de l'enfant en mois
             meteo: Type de météo ("pluie", "soleil", "nuageux", "mixte")
@@ -202,7 +200,7 @@ Jouets sûrs, éducatifs et adaptés à cet âge."""
             duree_max: Durée maximum souhaitée en minutes
             preferences: Tags de préférences (ex: ["creatif", "sportif", "educatif"])
             nb_suggestions: Nombre de suggestions à retourner
-            
+
         Returns:
             Liste de suggestions d'activités structurées
         """
@@ -245,7 +243,7 @@ Pour chaque activité, fournis:
 
 Activités adaptées à cet âge, sûres, stimulantes et faciles à réaliser."""
 
-        system_prompt = """Tu es expert en développement de la petite enfance et activités Montessori. 
+        system_prompt = """Tu es expert en développement de la petite enfance et activités Montessori.
 Réponds UNIQUEMENT avec du JSON valide, sans markdown ni texte supplémentaire.
 Assure-toi que les activités sont sécuritaires, adaptées à l'âge et faciles à mettre en place."""
 
@@ -279,14 +277,10 @@ Assure-toi que les activités sont sécuritaires, adaptées à l'âge et faciles
             Texte de coaching hebdomadaire formaté
         """
         jalons_txt = (
-            f"\nJalons récents atteints : {', '.join(jalons_recents)}"
-            if jalons_recents
-            else ""
+            f"\nJalons récents atteints : {', '.join(jalons_recents)}" if jalons_recents else ""
         )
         preoc_txt = (
-            f"\nPréoccupations parentales : {', '.join(preoccupations)}"
-            if preoccupations
-            else ""
+            f"\nPréoccupations parentales : {', '.join(preoccupations)}" if preoccupations else ""
         )
 
         prompt = f"""Jules a {age_mois} mois aujourd'hui.{jalons_txt}{preoc_txt}
@@ -318,4 +312,3 @@ Ton bienveillant, positif et pratique. Tutoie les parents (vous êtes parents de
 def obtenir_jules_ai_service() -> JulesAIService:
     """Factory singleton pour JulesAIService."""
     return JulesAIService()
-

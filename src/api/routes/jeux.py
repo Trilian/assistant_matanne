@@ -24,10 +24,10 @@ from src.api.schemas.ia_transverses import AnalyseTendancesLotoResponse
 from src.api.utils import gerer_exception_api
 from src.services.jeux.service_ia import obtenir_service_innovations_jeux
 
-from .jeux_paris import router as paris_router
-from .jeux_loto import router as loto_router
-from .jeux_euromillions import router as euromillions_router
 from .jeux_dashboard import router as dashboard_router
+from .jeux_euromillions import router as euromillions_router
+from .jeux_loto import router as loto_router
+from .jeux_paris import router as paris_router
 
 router = APIRouter(prefix="/api/v1/jeux", tags=["Jeux"])
 
@@ -42,6 +42,7 @@ async def tendances_loto(
     service = obtenir_service_innovations_jeux()
     result = service.analyser_tendances_loto(type_jeu=jeu)
     return result or AnalyseTendancesLotoResponse()
+
 
 router.include_router(paris_router, tags=["Jeux — Paris"])
 router.include_router(loto_router, tags=["Jeux — Loto"])

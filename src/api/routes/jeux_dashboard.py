@@ -6,6 +6,7 @@ car le prefixe /api/v1/jeux est defini dans jeux.py (agregateur).
 
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
@@ -23,17 +24,10 @@ from src.api.schemas.errors import (
 )
 from src.api.schemas.jeux import AnalyseIARequest, GenererGrilleRequest
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-
-
-
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -48,11 +42,13 @@ async def dashboard_jeux(
 ) -> dict[str, Any]:
     """Dashboard agrÃ©gÃ© : opportunitÃ©s, matchs du jour, budget, KPIs."""
     from sqlalchemy import func
+
     from src.core.models import Match, PariSportif
     from src.services.jeux import (
         obtenir_loto_data_service,
         obtenir_series_service,
     )
+
     def _query():
         with executer_avec_session() as session:
             series_svc = obtenir_series_service()
@@ -137,7 +133,9 @@ async def dashboard_jeux(
             nb_paris, total_mise, total_gain = stats or (0, 0, 0)
             total_mise_f = float(total_mise)
             total_gain_f = float(total_gain)
-            roi_mois = ((total_gain_f - total_mise_f) / total_mise_f * 100) if total_mise_f > 0 else 0.0
+            roi_mois = (
+                ((total_gain_f - total_mise_f) / total_mise_f * 100) if total_mise_f > 0 else 0.0
+            )
             resolus = (
                 session.query(func.count(PariSportif.id))
                 .filter(
@@ -174,20 +172,8 @@ async def dashboard_jeux(
                 "kpis": kpis,
                 "analyse_ia": None,
             }
+
     return await executer_async(_query)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @router.get("/stats/personnelles/{user_id}")
@@ -205,34 +191,25 @@ async def obtenir_stats_personnelles(
     - Meilleurs patterns
     - Ã‰volution mensuelle
     """
+
     def _query():
         from src.services.jeux.stats_personnelles import StatsPersonnellesService
+
         service = StatsPersonnellesService()
         roi_data = service.calculer_roi_global(user_id, jours=periode)
         winrate_data = service.calculer_win_rate(user_id, jours=periode)
-        patterns_data = service.analyser_patterns_gagnants(user_id, jours=periode * 3)  # 3Ã— pÃ©riode pour patterns
+        patterns_data = service.analyser_patterns_gagnants(
+            user_id, jours=periode * 3
+        )  # 3Ã— pÃ©riode pour patterns
         evolution_data = service.obtenir_evolution_mensuelle(user_id, mois=6)
         return {
             "roi": roi_data,
             "win_rate": winrate_data,
             "patterns": patterns_data,
-            "evolution": evolution_data["evolution"]
+            "evolution": evolution_data["evolution"],
         }
+
     return await executer_async(_query)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -306,13 +283,15 @@ async def performance_jeux(
                 cumul_bankroll += benefice_m
                 roi_m = ((gain_f - mise_f) / mise_f * 100) if mise_f > 0 else 0.0
                 label = f"{int(annee)}-{int(mois_num):02d}"
-                par_mois.append({
-                    "mois": label,
-                    "roi": round(roi_m, 1),
-                    "nb_paris": nb,
-                    "benefice": round(benefice_m, 2),
-                    "bankroll_cumul": round(cumul_bankroll, 2),
-                })
+                par_mois.append(
+                    {
+                        "mois": label,
+                        "roi": round(roi_m, 1),
+                        "nb_paris": nb,
+                        "benefice": round(benefice_m, 2),
+                        "bankroll_cumul": round(cumul_bankroll, 2),
+                    }
+                )
                 if best_roi is None or roi_m > best_roi:
                     best_roi, best_mois = roi_m, label
                 if worst_roi is None or roi_m < worst_roi:
@@ -400,7 +379,9 @@ async def performance_jeux(
 @router.get("/performance/confiance", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def performance_par_confiance(
-    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois Ã  analyser (dÃ©faut: 6)"),
+    mois: int | None = Query(
+        None, ge=1, le=24, description="Nombre de mois Ã  analyser (dÃ©faut: 6)"
+    ),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Distribution taux de rÃ©ussite par tranche de confiance IA (0-25%, 25-50%, 50-75%, 75-100%)."""
@@ -454,12 +435,14 @@ async def performance_par_confiance(
             for tranche, vals in tranches.items():
                 nb = vals["nb"]
                 gag = vals["gagnes"]
-                result.append({
-                    "tranche": tranche,
-                    "nb": nb,
-                    "gagnes": gag,
-                    "taux": round(gag / nb * 100, 1) if nb > 0 else 0.0,
-                })
+                result.append(
+                    {
+                        "tranche": tranche,
+                        "nb": nb,
+                        "gagnes": gag,
+                        "taux": round(gag / nb * 100, 1) if nb > 0 else 0.0,
+                    }
+                )
             return {"tranches": result, "total": sum(t["nb"] for t in result)}
 
     return await executer_async(_query)
@@ -573,6 +556,7 @@ async def analyse_ia(
 ) -> dict[str, Any]:
     """DÃ©clenche une analyse IA (paris ou loto)."""
     from src.services.jeux import obtenir_jeux_ai_service
+
     def _query():
         svc = obtenir_jeux_ai_service()
         if payload.type == "paris":
@@ -593,11 +577,8 @@ async def analyse_ia(
             "confiance": result.confiance,
             "genere_le": result.genere_le.isoformat() if result.genere_le else None,
         }
+
     return await executer_async(_query)
-
-
-
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -707,4 +688,3 @@ async def marquer_notification_lue(
         return MessageResponse(message="Notification marquÃ©e comme lue")
 
     return await executer_async(_query)
-

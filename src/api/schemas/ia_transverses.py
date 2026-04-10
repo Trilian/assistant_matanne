@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-
 # ── Requests ──
 
 
@@ -60,7 +59,11 @@ class LienInviteRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {"nom_invite": "Mamie", "modules": ["repas", "contacts_urgence"], "duree_heures": 72}
+            "example": {
+                "nom_invite": "Mamie",
+                "modules": ["repas", "contacts_urgence"],
+                "duree_heures": 72,
+            }
         }
     }
 
@@ -72,9 +75,7 @@ class IdeeRepasSoirRequest(BaseModel):
     humeur: str = Field("rapide", min_length=2, max_length=50)
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"temps_disponible_min": 25, "humeur": "réconfort"}
-        }
+        "json_schema_extra": {"example": {"temps_disponible_min": 25, "humeur": "réconfort"}}
     }
 
 
@@ -102,9 +103,7 @@ class ModePiloteConfigurationRequest(BaseModel):
     )
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"actif": True, "niveau_autonomie": "validation_requise"}
-        }
+        "json_schema_extra": {"example": {"actif": True, "niveau_autonomie": "validation_requise"}}
     }
 
 
@@ -118,9 +117,7 @@ class ModeVacancesConfigurationRequest(BaseModel):
     )
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"actif": True, "checklist_voyage_auto": True}
-        }
+        "json_schema_extra": {"example": {"actif": True, "checklist_voyage_auto": True}}
     }
 
 
@@ -131,49 +128,46 @@ class CarteVisuelleRequest(BaseModel):
     titre: str | None = Field(None, min_length=2, max_length=120)
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"type_carte": "planning", "titre": "Menus de la semaine"}
-        }
+        "json_schema_extra": {"example": {"type_carte": "planning", "titre": "Menus de la semaine"}}
     }
 
 
 # ── Responses (re-exports depuis types) ──
 
 from src.services.ia_avancee.types_central import (  # noqa: E402
-    ModePiloteAutomatiqueResponse,
-    ScoreFamilleHebdoResponse,
-    JournalFamilialAutoResponse,
-    RapportMensuelPdfResponse,
-    BatchCookingIntelligentResponse,
-    CarteVisuellePartageableResponse,
-    ModeTabletteMagazineResponse,
-    PlanificationHebdoCompleteResponse,
-    ApprentissagePreferencesResponse,
     AlertesContextuellesResponse,
     AnalyseTendancesLotoResponse,
     AnomaliesEnergieResponse,
     ApprentissageHabitudesResponse,
+    ApprentissagePreferencesResponse,
+    BatchCookingIntelligentResponse,
     BilanAnnuelResponse,
+    CarteVisuellePartageableResponse,
     CoachRoutinesResponse,
     ComparateurEnergieResponse,
     DonneesInviteResponse,
+    EnergieTempsReelResponse,
     EnrichissementContactsResponse,
+    InsightsQuotidiensResponse,
+    JournalFamilialAutoResponse,
     LienInviteResponse,
+    MeteoContextuelleResponse,
+    ModePiloteAutomatiqueResponse,
+    ModeTabletteMagazineResponse,
+    ModeVacancesResponse,
     PatternsAlimentairesResponse,
+    PlanificationHebdoCompleteResponse,
     PlanningJulesAdaptatifResponse,
+    RapportMensuelPdfResponse,
     ResumeMensuelIAResponse,
     SaisonnaliteIntelligenteResponse,
-    ScoreEcoResponsableResponse,
     ScoreBienEtreResponse,
+    ScoreEcoResponsableResponse,
+    ScoreFamilleHebdoResponse,
     SuggestionRepasSoirResponse,
-    VeilleEmploiResponse,
-    InsightsQuotidiensResponse,
-    MeteoContextuelleResponse,
-    ModeVacancesResponse,
-    EnergieTempsReelResponse,
     TelegramConversationnelResponse,
+    VeilleEmploiResponse,
 )
-
 
 __all__ = [
     "BilanAnnuelRequest",

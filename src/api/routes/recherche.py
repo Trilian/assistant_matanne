@@ -20,42 +20,47 @@ router = APIRouter(prefix="/api/v1/recherche", tags=["Recherche"])
 async def recherche_globale(
     q: str = Query(..., min_length=2, description="Terme de recherche minimum 2 caractères"),
     limit: int = Query(20, ge=1, le=100, description="Nombre maximum de résultats"),
-    types: str | None = Query(None, description="Filtre optionnel CSV par type: recette,projet,note,..."),
+    types: str | None = Query(
+        None, description="Filtre optionnel CSV par type: recette,projet,note,..."
+    ),
     user: dict[str, Any] = Depends(require_auth),
 ) -> list[dict[str, Any]]:
     """
     Recherche globale à travers toutes les entités.
-    
+
     Recherche dans : recettes, projets maison, activités famille, notes, contacts.
-    
+
     Args:
         q: Terme de recherche (min 2 caractères)
         limit: Maximum de résultats (défaut: 20)
         user: Utilisateur authentifié
-    
+
     Returns:
         Liste de résultats avec type, id, titre, description, url
     """
     import logging
+
     from src.core.models import (
-        Recette,
-        Projet,
         ActiviteFamille,
-        NoteMemo,
         ContactFamille,
+        NoteMemo,
+        Projet,
+        Recette,
         TacheEntretien,
     )
 
     _logger = logging.getLogger(__name__)
-    
+
     def _search() -> list[dict[str, Any]]:
         resultats: list[dict[str, Any]] = []
-        
+
         with executer_avec_session() as session:
             # Pattern de recherche (fuzzy - insensible à la casse)
             terme = q.strip().lower()
             pattern = f"%{terme}%"
-            types_demandes = {item.strip().lower() for item in (types or "").split(",") if item.strip()}
+            types_demandes = {
+                item.strip().lower() for item in (types or "").split(",") if item.strip()
+            }
             quota_par_type = max(2, limit // 6)
 
             def _ajouter_resultat(resultat: dict[str, Any]) -> None:
@@ -77,16 +82,18 @@ async def recherche_globale(
                 .all()
             )
             for r in recettes:
-                _ajouter_resultat({
-                    "type": "recette",
-                    "id": r.id,
-                    "titre": r.nom,
-                    "description": r.description or f"{r.temps_total}min • {r.portions} pers",
-                    "url": f"/cuisine/recettes/{r.id}",
-                    "categorie": r.categorie,
-                    "icone": "📖",
-                })
-            
+                _ajouter_resultat(
+                    {
+                        "type": "recette",
+                        "id": r.id,
+                        "titre": r.nom,
+                        "description": r.description or f"{r.temps_total}min • {r.portions} pers",
+                        "url": f"/cuisine/recettes/{r.id}",
+                        "categorie": r.categorie,
+                        "icone": "📖",
+                    }
+                )
+
             # 2. Projets maison
             projets = (
                 session.query(Projet)
@@ -100,16 +107,18 @@ async def recherche_globale(
                 .all()
             )
             for p in projets:
-                _ajouter_resultat({
-                    "type": "projet",
-                    "id": p.id,
-                    "titre": p.nom,
-                    "description": p.description or f"Statut: {p.statut}",
-                    "url": f"/maison/projets",
-                    "statut": p.statut,
-                    "icone": "🔨",
-                })
-            
+                _ajouter_resultat(
+                    {
+                        "type": "projet",
+                        "id": p.id,
+                        "titre": p.nom,
+                        "description": p.description or f"Statut: {p.statut}",
+                        "url": "/maison/projets",
+                        "statut": p.statut,
+                        "icone": "🔨",
+                    }
+                )
+
             # 3. Activités famille (ActiviteFamille — titre + description)
             try:
                 activites = (
@@ -124,17 +133,19 @@ async def recherche_globale(
                     .all()
                 )
                 for a in activites:
-                    _ajouter_resultat({
-                        "type": "activite",
-                        "id": a.id,
-                        "titre": a.titre,
-                        "description": a.description or f"{a.type_activite}",
-                        "url": "/famille/activites",
-                        "icone": "🎯",
-                    })
+                    _ajouter_resultat(
+                        {
+                            "type": "activite",
+                            "id": a.id,
+                            "titre": a.titre,
+                            "description": a.description or f"{a.type_activite}",
+                            "url": "/famille/activites",
+                            "icone": "🎯",
+                        }
+                    )
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête activités famille: %s", e)
-            
+
             # 4. Notes / mémos
             try:
                 notes = (
@@ -149,17 +160,21 @@ async def recherche_globale(
                     .all()
                 )
                 for n in notes:
-                    _ajouter_resultat({
-                        "type": "note",
-                        "id": n.id,
-                        "titre": n.titre,
-                        "description": (n.contenu[:100] + "...") if n.contenu and len(n.contenu) > 100 else n.contenu,
-                        "url": "/outils/notes",
-                        "icone": "📝",
-                    })
+                    _ajouter_resultat(
+                        {
+                            "type": "note",
+                            "id": n.id,
+                            "titre": n.titre,
+                            "description": (n.contenu[:100] + "...")
+                            if n.contenu and len(n.contenu) > 100
+                            else n.contenu,
+                            "url": "/outils/notes",
+                            "icone": "📝",
+                        }
+                    )
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête notes mémos: %s", e)
-            
+
             # 5. Contacts famille (ContactFamille — nom, email, telephone)
             try:
                 contacts = (
@@ -175,14 +190,16 @@ async def recherche_globale(
                     .all()
                 )
                 for c in contacts:
-                    _ajouter_resultat({
-                        "type": "contact",
-                        "id": c.id,
-                        "titre": c.nom,
-                        "description": c.email or c.telephone or c.categorie,
-                        "url": "/famille/contacts",
-                        "icone": "👤",
-                    })
+                    _ajouter_resultat(
+                        {
+                            "type": "contact",
+                            "id": c.id,
+                            "titre": c.nom,
+                            "description": c.email or c.telephone or c.categorie,
+                            "url": "/famille/contacts",
+                            "icone": "👤",
+                        }
+                    )
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête contacts famille: %s", e)
 
@@ -203,14 +220,16 @@ async def recherche_globale(
                     .all()
                 )
                 for p in plantes:
-                    _ajouter_resultat({
-                        "type": "plante",
-                        "id": p.id,
-                        "titre": p.nom,
-                        "description": p.variete or f"État: {p.etat}",
-                        "url": "/maison/jardin",
-                        "icone": "🌱",
-                    })
+                    _ajouter_resultat(
+                        {
+                            "type": "plante",
+                            "id": p.id,
+                            "titre": p.nom,
+                            "description": p.variete or f"État: {p.etat}",
+                            "url": "/maison/jardin",
+                            "icone": "🌱",
+                        }
+                    )
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête plantes jardin: %s", e)
 
@@ -225,20 +244,22 @@ async def recherche_globale(
                         or_(
                             DocumentFamille.titre.ilike(pattern),
                             DocumentFamille.notes.ilike(pattern),
-                        )
+                        ),
                     )
                     .limit(quota_par_type)
                     .all()
                 )
                 for d in documents:
-                    _ajouter_resultat({
-                        "type": "document",
-                        "id": d.id,
-                        "titre": d.titre,
-                        "description": f"{d.categorie} — {d.membre_famille or ''}".strip(" — "),
-                        "url": "/famille/documents",
-                        "icone": "📁",
-                    })
+                    _ajouter_resultat(
+                        {
+                            "type": "document",
+                            "id": d.id,
+                            "titre": d.titre,
+                            "description": d.categorie + (f" — {d.membre_famille}" if d.membre_famille else ""),
+                            "url": "/famille/documents",
+                            "icone": "📁",
+                        }
+                    )
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête documents famille: %s", e)
 
@@ -259,14 +280,16 @@ async def recherche_globale(
                     .all()
                 )
                 for abo in abonnements:
-                    _ajouter_resultat({
-                        "type": "abonnement",
-                        "id": abo.id,
-                        "titre": abo.fournisseur,
-                        "description": abo.type_abonnement or "Abonnement maison",
-                        "url": "/maison/abonnements",
-                        "icone": "📄",
-                    })
+                    _ajouter_resultat(
+                        {
+                            "type": "abonnement",
+                            "id": abo.id,
+                            "titre": abo.fournisseur,
+                            "description": abo.type_abonnement or "Abonnement maison",
+                            "url": "/maison/abonnements",
+                            "icone": "📄",
+                        }
+                    )
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête abonnements: %s", e)
 
@@ -285,14 +308,16 @@ async def recherche_globale(
                     .all()
                 )
                 for tache in taches:
-                    _ajouter_resultat({
-                        "type": "entretien",
-                        "id": tache.id,
-                        "titre": tache.nom,
-                        "description": tache.description or tache.categorie or "Tâche maison",
-                        "url": "/maison/entretien",
-                        "icone": "🧰",
-                    })
+                    _ajouter_resultat(
+                        {
+                            "type": "entretien",
+                            "id": tache.id,
+                            "titre": tache.nom,
+                            "description": tache.description or tache.categorie or "Tâche maison",
+                            "url": "/maison/entretien",
+                            "icone": "🧰",
+                        }
+                    )
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête entretien maison: %s", e)
 
@@ -314,5 +339,5 @@ async def recherche_globale(
 
         resultats_tries: list[dict[str, Any]] = sorted(resultats, key=_score_resultat, reverse=True)
         return resultats_tries[:limit]
-    
+
     return await executer_async(_search)

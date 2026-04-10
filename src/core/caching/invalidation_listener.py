@@ -79,7 +79,7 @@ def _boucle_listener(timeout_s: float, delai_reconnexion_s: float) -> None:
                 dbapi_conn.set_isolation_level(0)
             except Exception:
                 try:
-                    setattr(dbapi_conn, "autocommit", True)
+                    dbapi_conn.autocommit = True
                 except Exception:
                     logger.debug("Autocommit non modifiable pour LISTEN", exc_info=True)
 

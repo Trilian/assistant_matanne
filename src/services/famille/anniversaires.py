@@ -14,47 +14,25 @@ Opérations:
 
 """
 
-
-
 import logging
-
 from datetime import date as date_type
-
 from typing import Any, TypedDict
 
-
-
 from sqlalchemy import func
-
 from sqlalchemy.orm import Session
 
-
-
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-
 from src.core.models import AnniversaireFamille
-
 from src.core.monitoring import chronometre
-
 from src.services.core.base import BaseService
-
 from src.services.core.events import obtenir_bus
-
 from src.services.core.registry import service_factory
-
-
 
 logger = logging.getLogger(__name__)
 
 
-
-
-
 class ProchainAnniversaireDict(TypedDict):
-
     """Prochain anniversaire avec informations calculées."""
-
-
 
     id: int
 
@@ -69,11 +47,7 @@ class ProchainAnniversaireDict(TypedDict):
     jours_restants: int
 
 
-
-
-
 class ServiceAnniversaires(BaseService[AnniversaireFamille]):
-
     """Service de gestion des anniversaires famille.
 
 
@@ -82,13 +56,9 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 
     """
 
-
-
     def __init__(self):
 
         super().__init__(model=AnniversaireFamille, cache_ttl=3600)
-
-
 
     # ═══════════════════════════════════════════════════════════
 
@@ -96,46 +66,28 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 
     # ═══════════════════════════════════════════════════════════
 
-
-
     @chronometre("anniversaires.liste", seuil_alerte_ms=1000)
-
     @avec_cache(ttl=3600)
-
     @avec_gestion_erreurs(default_return=[])
-
     @avec_session_db
-
     def obtenir_anniversaires(self, *, db: Session | None = None) -> list[AnniversaireFamille]:
-
         """Récupère tous les anniversaires."""
 
         if db is None:
-
             return []
 
         return (
-
             db.query(AnniversaireFamille).order_by(AnniversaireFamille.date_naissance.asc()).all()
-
         )
 
-
-
     @avec_gestion_erreurs(default_return=None)
-
     @avec_session_db
-
     def ajouter_anniversaire(
-
         self, data: dict[str, Any], *, db: Session | None = None
-
     ) -> AnniversaireFamille | None:
-
         """Ajoute un anniversaire."""
 
         if db is None:
-
             return None
 
         anniversaire = AnniversaireFamille(**data)
@@ -149,45 +101,30 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
         logger.info("Anniversaire ajouté: %s", anniversaire.nom)
 
         obtenir_bus().emettre(
-
             "anniversaires.ajoute",
-
             {"anniversaire_id": anniversaire.id, "nom": anniversaire.nom},
-
             source="ServiceAnniversaires",
-
         )
 
         return anniversaire
 
-
-
     @avec_gestion_erreurs(default_return=False)
-
     @avec_session_db
-
     def modifier_anniversaire(
-
         self, anniversaire_id: int, data: dict[str, Any], *, db: Session | None = None
-
     ) -> bool:
-
         """Modifie un anniversaire existant."""
 
         if db is None:
-
             return False
 
         anniv = db.query(AnniversaireFamille).get(anniversaire_id)
 
         if not anniv:
-
             return False
 
         for key, value in data.items():
-
             if hasattr(anniv, key):
-
                 setattr(anniv, key, value)
 
         db.commit()
@@ -196,18 +133,12 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 
         return True
 
-
-
     @avec_gestion_erreurs(default_return=False)
-
     @avec_session_db
-
     def supprimer_anniversaire(self, anniversaire_id: int, *, db: Session | None = None) -> bool:
-
         """Supprime un anniversaire."""
 
         if db is None:
-
             return False
 
         deleted = db.query(AnniversaireFamille).filter_by(id=anniversaire_id).delete()
@@ -216,34 +147,22 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 
         return deleted > 0
 
-
-
     # ═══════════════════════════════════════════════════════════
 
     # PROCHAINS ANNIVERSAIRES
 
     # ═══════════════════════════════════════════════════════════
 
-
-
     @chronometre("anniversaires.prochains", seuil_alerte_ms=1000)
-
     @avec_cache(ttl=3600)
-
     @avec_gestion_erreurs(default_return=[])
-
     @avec_session_db
-
     def obtenir_prochains(
-
         self, *, jours: int = 90, db: Session | None = None
-
     ) -> list[ProchainAnniversaireDict]:
-
         """Récupère les anniversaires arrivant dans les prochains jours."""
 
         if db is None:
-
             return []
 
         tous = db.query(AnniversaireFamille).all()
@@ -252,83 +171,49 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 
         prochains: list[ProchainAnniversaireDict] = []
 
-
-
         for anniv in tous:
-
             jours_restants = anniv.jours_restants
 
             if jours_restants is not None and jours_restants <= jours:
-
                 prochains.append(
-
                     ProchainAnniversaireDict(
-
                         id=anniv.id,
-
                         nom=anniv.nom,
-
                         relation=anniv.relation,
-
                         date_naissance=anniv.date_naissance.isoformat(),
-
                         age=anniv.age or 0,
-
                         jours_restants=jours_restants,
-
                     )
-
                 )
 
                 if jours_restants in (30, 14, 7, 1):
-
                     try:
-
                         obtenir_bus().emettre(
-
                             "anniversaire.proche",
-
                             {
-
                                 "anniversaire_id": anniv.id,
-
                                 "nom": anniv.nom,
-
                                 "jours_restants": jours_restants,
-
                             },
-
                             source="ServiceAnniversaires",
-
                         )
 
                     except Exception:
-
                         pass
 
-
-
         return sorted(prochains, key=lambda a: a["jours_restants"])
-
-
 
     # Compatibility aliases expected by older UI code
 
     def lister_prochains(self, *, limite: int = 90, db: Session | None = None):
-
         """Alias historique for `obtenir_prochains` (old callers expect `lister_prochains`)."""
 
         return self.obtenir_prochains(jours=limite, db=db)
 
-
-
     def lister_anniversaires(self, *, db: Session | None = None):
-
         """Alias for `obtenir_anniversaires` to support older callers."""
 
         return self.obtenir_anniversaires(db=db)
-
-
 
     # ═══════════════════════════════════════════════════════════
 
@@ -336,38 +221,24 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 
     # ═══════════════════════════════════════════════════════════
 
-
-
     @avec_gestion_erreurs(default_return=False)
-
     @avec_session_db
-
     def ajouter_cadeau(
-
         self,
-
         anniversaire_id: int,
-
         annee: int,
-
         cadeau: str,
-
         *,
-
         db: Session | None = None,
-
     ) -> bool:
-
         """Ajoute un cadeau à l'historique d'un anniversaire."""
 
         if db is None:
-
             return False
 
         anniv = db.query(AnniversaireFamille).get(anniversaire_id)
 
         if not anniv:
-
             return False
 
         historique = list(anniv.historique_cadeaux or [])
@@ -383,9 +254,6 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
         return True
 
 
-
-
-
 # ═══════════════════════════════════════════════════════════
 
 # FACTORY
@@ -393,14 +261,8 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
 # ═══════════════════════════════════════════════════════════
 
 
-
-
-
 @service_factory("anniversaires", tags={"famille"})
-
 def obtenir_service_anniversaires() -> ServiceAnniversaires:
-
     """Factory pour le service anniversaires (singleton via ServiceRegistry)."""
 
     return ServiceAnniversaires()
-

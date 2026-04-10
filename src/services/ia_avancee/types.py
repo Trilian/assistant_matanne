@@ -1,4 +1,4 @@
-﻿"""
+"""
 Schémas Pydantic pour les services IA avancée (modules IA avancée).
 
 Types de réponse utilisés par les 14 services IA.
@@ -7,7 +7,6 @@ Types de réponse utilisés par les 14 services IA.
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-
 
 # ═══════════════════════════════════════════════════════════
 # 6.1 — Suggestions achats IA

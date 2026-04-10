@@ -1,4 +1,4 @@
-﻿"""
+"""
 Schémas Pydantic pour les routes IA avancée (routing IA avancée).
 
 Réexporte les types du service + ajoute les schémas de requête API.

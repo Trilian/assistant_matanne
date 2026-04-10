@@ -318,4 +318,3 @@ def obtenir_service_openfoodfacts() -> OpenFoodFactsService:
 def obtenir_openfoodfacts_service() -> OpenFoodFactsService:
     """Factory pour obtenir le service OpenFoodFacts (alias anglais)."""
     return obtenir_service_openfoodfacts()
-

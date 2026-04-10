@@ -153,18 +153,27 @@ async def synchroniser_planning_google(repas_list: list[dict]) -> dict:
                     repas_date = date.fromisoformat(repas_date)
 
                 # Horaires par type de repas
-                heures = {"petit_dejeuner": (7, 8), "dejeuner": (12, 13), "gouter": (16, 17), "diner": (19, 20)}
+                heures = {
+                    "petit_dejeuner": (7, 8),
+                    "dejeuner": (12, 13),
+                    "gouter": (16, 17),
+                    "diner": (19, 20),
+                }
                 h_debut, h_fin = heures.get(repas.get("type_repas", "dejeuner"), (12, 13))
 
                 event = {
                     "summary": f"🍽️ {repas.get('recette_nom', repas.get('notes', 'Repas'))}",
                     "description": repas.get("notes", ""),
                     "start": {
-                        "dateTime": datetime(repas_date.year, repas_date.month, repas_date.day, h_debut).isoformat(),
+                        "dateTime": datetime(
+                            repas_date.year, repas_date.month, repas_date.day, h_debut
+                        ).isoformat(),
                         "timeZone": "Europe/Paris",
                     },
                     "end": {
-                        "dateTime": datetime(repas_date.year, repas_date.month, repas_date.day, h_fin).isoformat(),
+                        "dateTime": datetime(
+                            repas_date.year, repas_date.month, repas_date.day, h_fin
+                        ).isoformat(),
                         "timeZone": "Europe/Paris",
                     },
                     "colorId": "9",  # Bleuet

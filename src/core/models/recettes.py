@@ -421,10 +421,12 @@ class HistoriqueRecette(CreeLeMixin, Base):
     def __repr__(self) -> str:
         return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_preparation})>"
 
+
 # Charger explicitement les modèles liés définis dans d'autres fichiers.
 # Cela évite les erreurs de résolution SQLAlchemy en environnement lazy/serverless.
 from .inventaire import ArticleInventaire  # noqa: E402,F401
 from .user_preferences import RetourRecette  # noqa: E402,F401
+
 
 class RepasBatch(CreeLeMixin, Base):
     """Recette préparée en batch cooking.

@@ -105,6 +105,7 @@ async def get_routines_streak(user: dict = Depends(require_auth)):
     def _query():
         raw = calculer_streak_routines()
         return {str(k): v for k, v in raw.items()}
+
     return await executer_async(_query)
 
 
@@ -119,6 +120,7 @@ async def get_energie_comparaison(
 
     def _query():
         return comparaison_energie_n_vs_n1(type_energie=type_energie)
+
     return await executer_async(_query)
 
 
@@ -130,6 +132,7 @@ async def get_suggestions_entretien_age(user: dict = Depends(require_auth)):
 
     def _query():
         return suggestions_entretien_par_age_equipement()
+
     return await executer_async(_query)
 
 
@@ -144,6 +147,7 @@ async def get_flux_cuisine(
 
     def _query():
         return flux_cuisine_3_clics(planning_id=planning_id)
+
     return await executer_async(_query)
 
 
@@ -155,6 +159,7 @@ async def get_digest_quotidien(user: dict = Depends(require_auth)):
 
     def _query():
         return generer_digest_quotidien()
+
     return await executer_async(_query)
 
 
@@ -166,6 +171,7 @@ async def post_marquer_fait(tache_id: int, user: dict = Depends(require_auth)):
 
     def _query():
         return marquer_tache_fait_avec_prochaine(tache_id=tache_id)
+
     return await executer_async(_query)
 
 
@@ -179,7 +185,6 @@ async def post_feedback_semaine(
     from src.services.ia.flux_utilisateur import enregistrer_feedback_semaine
 
     def _query():
-        return enregistrer_feedback_semaine(
-            feedbacks=[fb.model_dump() for fb in request.feedbacks]
-        )
+        return enregistrer_feedback_semaine(feedbacks=[fb.model_dump() for fb in request.feedbacks])
+
     return await executer_async(_query)

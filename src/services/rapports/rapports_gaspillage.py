@@ -19,8 +19,8 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ArticleInventaire
-from src.services.rapports.types import AnalyseGaspillage
 from src.services.rapports._couleurs import Couleur
+from src.services.rapports.types import AnalyseGaspillage
 
 logger = logging.getLogger(__name__)
 

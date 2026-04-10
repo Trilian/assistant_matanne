@@ -4,6 +4,7 @@ Routes API Famille — Jules (profils enfants, jalons, coaching).
 Sous-routeur inclus dans famille.py.
 """
 
+import logging
 from datetime import date
 from typing import Any
 
@@ -21,7 +22,6 @@ from src.api.schemas.errors import (
 from src.api.schemas.famille import SuggestionsActivitesSimpleRequest
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Famille"])
@@ -249,7 +249,7 @@ async def supprimer_jalon(
 # ═══════════════════════════════════════════════════════════
 # ACTIVITÉS FAMILIALES
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS ACTIVITÉS SIMPLIFIÉES 
+# SUGGESTIONS ACTIVITÉS SIMPLIFIÉES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -287,7 +287,9 @@ async def suggestions_activites_auto(
                 elif "dur" in low and any(c.isdigit() for c in ligne):
                     chiffres = "".join(c if c.isdigit() else " " for c in ligne).split()
                     if chiffres:
-                        duree_minutes = int(chiffres[0]) * 60 if "heure" in low else int(chiffres[0])
+                        duree_minutes = (
+                            int(chiffres[0]) * 60 if "heure" in low else int(chiffres[0])
+                        )
                 elif "météo" in low or "meteo" in low:
                     lieu = "exterieur" if "extérieur" in low or "exterieur" in low else "interieur"
 
@@ -336,8 +338,7 @@ async def suggestions_activites_auto(
         from datetime import timedelta
 
         journee_libre = any(
-            j.date_jour <= date.today() + timedelta(days=3)
-            and j.type in ("ferie", "creche")
+            j.date_jour <= date.today() + timedelta(days=3) and j.type in ("ferie", "creche")
             for j in prochains
         )
 
@@ -354,7 +355,9 @@ async def suggestions_activites_auto(
                 for p in jardin_svc.obtenir_recoltes_proches():
                     jardin_activites.append({"type": "recolte", "nom": getattr(p, "nom", str(p))})
         except Exception as e:
-            logger.warning("[famille] Activités jardin non chargées pour suggestions weekend: %s", e)
+            logger.warning(
+                "[famille] Activités jardin non chargées pour suggestions weekend: %s", e
+            )
         prompt_extra = ""
         if journee_libre:
             prompt_extra = " C'est une journée libre (férié ou crèche fermée), propose des activités pour une journée complète."
@@ -381,7 +384,9 @@ async def suggestions_activites_auto(
         # Fallback: utiliser le service weekend IA
         from src.services.famille.weekend_ai import obtenir_weekend_ai_service
 
-        meteo_enrichi = meteo_txt + (" " + type_effectif if type_effectif != "les_deux" else "") + prompt_extra
+        meteo_enrichi = (
+            meteo_txt + (" " + type_effectif if type_effectif != "les_deux" else "") + prompt_extra
+        )
         weekend_service = obtenir_weekend_ai_service()
         resultat = await weekend_service.suggerer_activites(
             meteo=meteo_enrichi,
@@ -471,6 +476,7 @@ async def suggestions_activites_jules_contextuelles(
 
     return await executer_async(_query)
 
+
 # ═══════════════════════════════════════════════════════════
 # JULES — ALIMENTS EXCLUS
 # ═══════════════════════════════════════════════════════════
@@ -482,16 +488,15 @@ async def lire_aliments_exclus_jules(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne la liste des aliments exclus pour Jules."""
-    from src.core.models.user_preferences import PreferenceUtilisateur
     from sqlalchemy import select as sa_select
+
+    from src.core.models.user_preferences import PreferenceUtilisateur
 
     def _query():
         with executer_avec_session() as session:
             user_id = user.get("sub", user.get("id", "dev"))
             pref = session.execute(
-                sa_select(PreferenceUtilisateur).where(
-                    PreferenceUtilisateur.user_id == user_id
-                )
+                sa_select(PreferenceUtilisateur).where(PreferenceUtilisateur.user_id == user_id)
             ).scalar_one_or_none()
             return {
                 "aliments_exclus_jules": pref.aliments_exclus_jules if pref else [],
@@ -511,8 +516,9 @@ async def mettre_a_jour_aliments_exclus_jules(
 
     Body: {"aliments_exclus_jules": ["sel", "miel", ...]}
     """
-    from src.core.models.user_preferences import PreferenceUtilisateur
     from sqlalchemy import select as sa_select
+
+    from src.core.models.user_preferences import PreferenceUtilisateur
 
     aliments = payload.get("aliments_exclus_jules", [])
     if not isinstance(aliments, list):
@@ -522,9 +528,7 @@ async def mettre_a_jour_aliments_exclus_jules(
         with executer_avec_session() as session:
             user_id = user.get("sub", user.get("id", "dev"))
             pref = session.execute(
-                sa_select(PreferenceUtilisateur).where(
-                    PreferenceUtilisateur.user_id == user_id
-                )
+                sa_select(PreferenceUtilisateur).where(PreferenceUtilisateur.user_id == user_id)
             ).scalar_one_or_none()
             if pref is None:
                 pref = PreferenceUtilisateur(user_id=user_id)
@@ -554,11 +558,12 @@ async def obtenir_nutrition_jules(
     - Portions adaptées sur le planning actif
     - Aliments exclus
     """
+    from sqlalchemy import select as sa_select
+
     from src.core.models.user_preferences import PreferenceUtilisateur
     from src.services.cuisine.inter_module_jules_nutrition import (
         obtenir_service_jules_nutrition_interaction,
     )
-    from sqlalchemy import select as sa_select
 
     def _query() -> dict[str, Any]:
         service = obtenir_service_jules_nutrition_interaction()
@@ -568,9 +573,7 @@ async def obtenir_nutrition_jules(
         with executer_avec_session() as session:
             user_id = user.get("sub", user.get("id", "dev"))
             pref = session.execute(
-                sa_select(PreferenceUtilisateur).where(
-                    PreferenceUtilisateur.user_id == user_id
-                )
+                sa_select(PreferenceUtilisateur).where(PreferenceUtilisateur.user_id == user_id)
             ).scalar_one_or_none()
             aliments_exclus = pref.aliments_exclus_jules if pref else []
 
@@ -603,17 +606,16 @@ async def obtenir_coaching_hebdo_jules(
     Retourne un bilan développemental, 3 activités et un conseil alimentation
     adaptés à l'âge actuel de Jules.
     """
+    from sqlalchemy import select as sa_select
+
     from src.core.models.user_preferences import PreferenceUtilisateur
     from src.services.famille.jules_ai import obtenir_jules_ai_service
-    from sqlalchemy import select as sa_select
 
     def _query():
         with executer_avec_session() as session:
             user_id = user.get("sub", user.get("id", "dev"))
             pref = session.execute(
-                sa_select(PreferenceUtilisateur).where(
-                    PreferenceUtilisateur.user_id == user_id
-                )
+                sa_select(PreferenceUtilisateur).where(PreferenceUtilisateur.user_id == user_id)
             ).scalar_one_or_none()
             age_mois = pref.jules_age_mois if pref else 19
 
@@ -755,7 +757,9 @@ async def obtenir_timeline_famille(
                 )
 
             # 5) Matchs mémorables (ROI >= 30% ou gain >= 50)
-            paris = session.query(PariSportif).order_by(PariSportif.cree_le.desc()).limit(limite).all()
+            paris = (
+                session.query(PariSportif).order_by(PariSportif.cree_le.desc()).limit(limite).all()
+            )
             for p in paris:
                 mise = float(p.mise or 0)
                 gain = float(p.gain or 0)
@@ -768,7 +772,9 @@ async def obtenir_timeline_famille(
                     {
                         "id": f"jeux-{p.id}",
                         "categorie": "jeux",
-                        "date": p.cree_le.date().isoformat() if p.cree_le else date.today().isoformat(),
+                        "date": p.cree_le.date().isoformat()
+                        if p.cree_le
+                        else date.today().isoformat(),
                         "titre": f"Pari {p.type_pari} ({p.prediction})",
                         "description": p.notes,
                         "meta": {
@@ -877,4 +883,3 @@ async def obtenir_aujourd_hui_histoire(
             }
 
     return await executer_async(_query)
-

@@ -263,8 +263,11 @@ RULES:
 
         # Log de debug pour voir la réponse
         if not planning_data:
-            logger.warning(f"⚠️ Aucune donnée IA reçue pour le planning {semaine_debut} — l'appel Mistral n'a pas produit de résultat parsable.")
+            logger.warning(
+                f"⚠️ Aucune donnée IA reçue pour le planning {semaine_debut} — l'appel Mistral n'a pas produit de résultat parsable."
+            )
             from src.core.exceptions import ErreurServiceIA
+
             raise ErreurServiceIA(
                 "Aucune donnée retournée par Mistral pour la génération du planning",
                 message_utilisateur="L'IA n'a pas pu générer le planning. Vérifiez la clé Mistral ou réessayez.",
@@ -305,13 +308,15 @@ RULES:
                     if jour_data.petit_dejeuner_est_recette
                     else None
                 )
-                db.add(Repas(
-                    planning_id=planning.id,
-                    date_repas=date_jour,
-                    type_repas="petit_dejeuner",
-                    notes=jour_data.petit_dejeuner,
-                    recette_id=recette_pdj_id,
-                ))
+                db.add(
+                    Repas(
+                        planning_id=planning.id,
+                        date_repas=date_jour,
+                        type_repas="petit_dejeuner",
+                        notes=jour_data.petit_dejeuner,
+                        recette_id=recette_pdj_id,
+                    )
+                )
 
             # Déjeuner — plat = toujours une recette stub
             recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner)
@@ -325,18 +330,20 @@ RULES:
                 if jour_data.dejeuner_dessert and jour_data.dejeuner_dessert_est_recette
                 else None
             )
-            db.add(Repas(
-                planning_id=planning.id,
-                date_repas=date_jour,
-                type_repas="dejeuner",
-                notes=jour_data.dejeuner,
-                recette_id=recette_dej_id,
-                entree=jour_data.dejeuner_entree,
-                entree_recette_id=entree_dej_recette_id,
-                laitage=jour_data.dejeuner_laitage,
-                dessert=jour_data.dejeuner_dessert,
-                dessert_recette_id=dessert_dej_recette_id,
-            ))
+            db.add(
+                Repas(
+                    planning_id=planning.id,
+                    date_repas=date_jour,
+                    type_repas="dejeuner",
+                    notes=jour_data.dejeuner,
+                    recette_id=recette_dej_id,
+                    entree=jour_data.dejeuner_entree,
+                    entree_recette_id=entree_dej_recette_id,
+                    laitage=jour_data.dejeuner_laitage,
+                    dessert=jour_data.dejeuner_dessert,
+                    dessert_recette_id=dessert_dej_recette_id,
+                )
+            )
 
             # Goûter (optionnel)
             if jour_data.gouter:
@@ -345,13 +352,15 @@ RULES:
                     if jour_data.gouter_est_recette
                     else None
                 )
-                db.add(Repas(
-                    planning_id=planning.id,
-                    date_repas=date_jour,
-                    type_repas="gouter",
-                    notes=jour_data.gouter,
-                    recette_id=recette_gouter_id,
-                ))
+                db.add(
+                    Repas(
+                        planning_id=planning.id,
+                        date_repas=date_jour,
+                        type_repas="gouter",
+                        notes=jour_data.gouter,
+                        recette_id=recette_gouter_id,
+                    )
+                )
 
             # Dîner — plat = toujours une recette stub
             recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner)
@@ -365,18 +374,20 @@ RULES:
                 if jour_data.diner_dessert and jour_data.diner_dessert_est_recette
                 else None
             )
-            db.add(Repas(
-                planning_id=planning.id,
-                date_repas=date_jour,
-                type_repas="diner",
-                notes=jour_data.diner,
-                recette_id=recette_din_id,
-                entree=jour_data.diner_entree,
-                entree_recette_id=entree_din_recette_id,
-                laitage=jour_data.diner_laitage,
-                dessert=jour_data.diner_dessert,
-                dessert_recette_id=dessert_din_recette_id,
-            ))
+            db.add(
+                Repas(
+                    planning_id=planning.id,
+                    date_repas=date_jour,
+                    type_repas="diner",
+                    notes=jour_data.diner,
+                    recette_id=recette_din_id,
+                    entree=jour_data.diner_entree,
+                    entree_recette_id=entree_din_recette_id,
+                    laitage=jour_data.diner_laitage,
+                    dessert=jour_data.diner_dessert,
+                    dessert_recette_id=dessert_din_recette_id,
+                )
+            )
 
         db.commit()
         db.refresh(planning)

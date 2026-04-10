@@ -6,6 +6,7 @@ car le prefixe /api/v1/jeux est defini dans jeux.py (agregateur).
 
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
@@ -21,16 +22,22 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
 )
-from src.api.schemas.jeux import AnalyseIARequest, AnalyseGrilleLotoResponse, GenererGrilleRequest, GrilleGenereeResponse, GrilleIAPondereeResponse, GrilleLotoResponse, NumeroRetardResponse, StatsLotoResponse, TirageLotoResponse
+from src.api.schemas.jeux import (
+    AnalyseGrilleLotoResponse,
+    AnalyseIARequest,
+    GenererGrilleRequest,
+    GrilleGenereeResponse,
+    GrilleIAPondereeResponse,
+    GrilleLotoResponse,
+    NumeroRetardResponse,
+    StatsLotoResponse,
+    TirageLotoResponse,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -90,6 +97,7 @@ async def lister_grilles_loto(
 ) -> dict[str, Any]:
     """Liste les grilles de loto jouÃ©es."""
     from src.core.models import GrilleLoto
+
     def _query():
         with executer_avec_session() as session:
             query = session.query(GrilleLoto)
@@ -109,13 +117,8 @@ async def lister_grilles_loto(
                     for g in grilles
                 ],
             }
+
     return await executer_async(_query)
-
-
-
-
-
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -142,7 +145,9 @@ async def stats_loto(
         if stats and stats.numeros_principaux:
             for num, stat in stats.numeros_principaux.items():
                 frequences[num] = stat.frequence
-            sorted_nums = sorted(stats.numeros_principaux.items(), key=lambda x: x[1].frequence, reverse=True)
+            sorted_nums = sorted(
+                stats.numeros_principaux.items(), key=lambda x: x[1].frequence, reverse=True
+            )
             chauds = [n for n, _ in sorted_nums[:10]]
             froids = [n for n, _ in sorted_nums[-10:]]
 
@@ -170,7 +175,9 @@ async def stats_loto(
     return await executer_async(_query)
 
 
-@router.get("/loto/numeros-retard", response_model=list[NumeroRetardResponse], responses=REPONSES_LISTE)
+@router.get(
+    "/loto/numeros-retard", response_model=list[NumeroRetardResponse], responses=REPONSES_LISTE
+)
 @gerer_exception_api
 async def numeros_retard_loto(
     seuil: float = Query(2.0, ge=0),
@@ -178,6 +185,7 @@ async def numeros_retard_loto(
 ) -> dict[str, Any]:
     """NumÃ©ros en retard avec value >= seuil."""
     from src.services.jeux import obtenir_loto_data_service
+
     def _query():
         svc = obtenir_loto_data_service()
         retard = svc.obtenir_numeros_en_retard(seuil_value=seuil)
@@ -194,13 +202,8 @@ async def numeros_retard_loto(
                 for n in (retard or [])
             ]
         }
+
     return await executer_async(_query)
-    
-
-        
-        
-        
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -208,7 +211,9 @@ async def numeros_retard_loto(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.post("/loto/generer-grille", response_model=GrilleGenereeResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/loto/generer-grille", response_model=GrilleGenereeResponse, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def generer_grille_loto(
     payload: GenererGrilleRequest,
@@ -216,7 +221,9 @@ async def generer_grille_loto(
 ) -> dict[str, Any]:
     """GÃ©nÃ¨re une grille Loto (statistique, alÃ©atoire ou IA)."""
     import random
+
     from src.services.jeux import obtenir_loto_data_service
+
     def _query():
         strategie = payload.strategie.value
         if strategie == "aleatoire":
@@ -240,7 +247,7 @@ async def generer_grille_loto(
                 w = 0.1
             weights.append(w)
         numeros = []
-        available = list(zip(nums, weights))
+        available = list(zip(nums, weights, strict=False))
         for _ in range(5):
             chosen = random.choices(
                 [x[0] for x in available],
@@ -263,6 +270,7 @@ async def generer_grille_loto(
         result = {"numeros": sorted(numeros), "special": [chance], "strategie": strategie}
         if payload.sauvegarder:
             from src.services.jeux import obtenir_loto_crud_service
+
             loto_svc = obtenir_loto_crud_service()
             loto_svc.sauvegarder_grille(
                 numeros=sorted(numeros),
@@ -270,19 +278,20 @@ async def generer_grille_loto(
                 strategie=strategie,
             )
         return result
+
     return await executer_async(_query)
 
 
-
-
-
-
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# GÃ‰NÃ‰RATION & ANALYSE IA AVANCÃ‰E 
+# GÃ‰NÃ‰RATION & ANALYSE IA AVANCÃ‰E
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.post("/loto/generer-grille-ia-ponderee", response_model=GrilleIAPondereeResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/loto/generer-grille-ia-ponderee",
+    response_model=GrilleIAPondereeResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
 @gerer_exception_api
 async def generer_grille_ia_ponderee(
     mode: str = Query("equilibre", pattern="^(chauds|froids|equilibre)$"),
@@ -291,13 +300,17 @@ async def generer_grille_ia_ponderee(
 ) -> dict[str, Any]:
     """
     GÃ©nÃ¨re une grille Loto intelligente avec Mistral IA.
-    
+
     Modes:
     - chauds: privilÃ©gie les numÃ©ros sortis rÃ©cemment (frÃ©quents)
     - froids: privilÃ©gie les numÃ©ros en retard (Ã©cart Ã©levÃ©)
     - equilibre: mix des deux stratÃ©gies (recommandÃ©)
     """
-    from src.services.jeux import obtenir_jeux_ai_service, obtenir_loto_crud_service, obtenir_loto_data_service
+    from src.services.jeux import (
+        obtenir_jeux_ai_service,
+        obtenir_loto_crud_service,
+        obtenir_loto_data_service,
+    )
 
     def _query():
         # RÃ©cupÃ©rer les statistiques
@@ -344,7 +357,11 @@ async def generer_grille_ia_ponderee(
     return await executer_async(_query)
 
 
-@router.post("/loto/analyser-grille", response_model=AnalyseGrilleLotoResponse, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/loto/analyser-grille",
+    response_model=AnalyseGrilleLotoResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
 @gerer_exception_api
 async def analyser_grille_joueur(
     numeros: list[int] = Query(..., description="5 numÃ©ros de 1 Ã  49"),
@@ -353,6 +370,7 @@ async def analyser_grille_joueur(
 ) -> dict[str, Any]:
     """Analyse une grille Loto avec critique IA Mistral."""
     from src.services.jeux import obtenir_jeux_ai_service, obtenir_loto_data_service
+
     # Validation
     if len(numeros) != 5:
         raise HTTPException(status_code=400, detail="Exactement 5 numÃ©ros requis")
@@ -360,6 +378,7 @@ async def analyser_grille_joueur(
         raise HTTPException(status_code=400, detail="NumÃ©ros doivent Ãªtre entre 1 et 49")
     if len(set(numeros)) != 5:
         raise HTTPException(status_code=400, detail="Pas de numÃ©ros en double")
+
     def _query():
         # Stats
         data_svc = obtenir_loto_data_service()
@@ -382,4 +401,5 @@ async def analyser_grille_joueur(
             "recommandations": analyse.get("recommandations", []),
             "appreciation": analyse.get("appreciation", "Grille analysÃ©e."),
         }
+
     return await executer_async(_query)

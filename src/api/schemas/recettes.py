@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field, field_validator
 
 from .base import IdentifiedResponse, NomValidatorMixin
 
-
 # ═══════════════════════════════════════════════════════════
 # SOUS-SCHÉMAS INGRÉDIENTS & ÉTAPES
 # ═══════════════════════════════════════════════════════════
@@ -20,9 +19,7 @@ class IngredientItem(BaseModel):
     unite: str = Field("pièce", max_length=30)
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"nom": "Courgette", "quantite": 2, "unite": "pièce"}
-        }
+        "json_schema_extra": {"example": {"nom": "Courgette", "quantite": 2, "unite": "pièce"}}
     }
 
 
@@ -140,11 +137,11 @@ class RecetteCreate(RecetteBase):
                 "categorie": "plat",
                 "ingredients": [
                     {"nom": "Courgette", "quantite": 3, "unite": "pièce"},
-                    {"nom": "Crème fraîche", "quantite": 20, "unite": "cl"}
+                    {"nom": "Crème fraîche", "quantite": 20, "unite": "cl"},
                 ],
                 "instructions": [
                     "Préchauffer le four à 180°C.",
-                    "Cuire 30 minutes jusqu'à coloration."
+                    "Cuire 30 minutes jusqu'à coloration.",
                 ],
                 "tags": ["été", "végétarien"],
             }
@@ -191,7 +188,7 @@ class RecettePatch(BaseModel):
                 "temps_cuisson": 35,
                 "instructions": [
                     "Préchauffer le four à 180°C.",
-                    "Cuire jusqu'à ce que le dessus soit doré."
+                    "Cuire jusqu'à ce que le dessus soit doré.",
                 ],
                 "tags": ["batch cooking"],
             }
@@ -227,7 +224,13 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
                 "difficulte": "facile",
                 "categorie": "plat",
                 "ingredients": [
-                    {"id": 1, "nom": "Courgette", "quantite": 3, "unite": "pièce", "optionnel": False}
+                    {
+                        "id": 1,
+                        "nom": "Courgette",
+                        "quantite": 3,
+                        "unite": "pièce",
+                        "optionnel": False,
+                    }
                 ],
                 "etapes": [
                     {

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : profil Jules -> planning nutrition.
 
 Bridge inter-modules :
@@ -9,7 +9,8 @@ Bridge inter-modules :
 from __future__ import annotations
 
 import logging
-from datetime import date as date_type, timedelta
+from datetime import date as date_type
+from datetime import timedelta
 from typing import Any
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
@@ -49,7 +50,11 @@ class JulesNutritionInteractionService:
         """Produit des recommandations nutritionnelles à partir du profil actuel de Jules."""
         from src.core.models import ProfilEnfant
 
-        jules = db.query(ProfilEnfant).filter(ProfilEnfant.name == "Jules", ProfilEnfant.actif.is_(True)).first()
+        jules = (
+            db.query(ProfilEnfant)
+            .filter(ProfilEnfant.name == "Jules", ProfilEnfant.actif.is_(True))
+            .first()
+        )
         if not jules:
             return {"recommandations": [], "message": "Profil Jules introuvable."}
 
@@ -57,13 +62,21 @@ class JulesNutritionInteractionService:
         recommandations = []
 
         if age_mois < 12:
-            recommandations.append("Conserver des textures très souples et introduire les nouveautés progressivement.")
+            recommandations.append(
+                "Conserver des textures très souples et introduire les nouveautés progressivement."
+            )
         elif age_mois < 24:
-            recommandations.append("Maintenir des textures adaptées et proposer des repas variés sur la semaine.")
+            recommandations.append(
+                "Maintenir des textures adaptées et proposer des repas variés sur la semaine."
+            )
         else:
-            recommandations.append("Prévoir des portions enfant simples, variées et faciles à partager avec la famille.")
+            recommandations.append(
+                "Prévoir des portions enfant simples, variées et faciles à partager avec la famille."
+            )
 
-        recommandations.append("Respecter les aliments exclus et éviter le sel ajouté dans la version Jules.")
+        recommandations.append(
+            "Respecter les aliments exclus et éviter le sel ajouté dans la version Jules."
+        )
         recommandations.append(f"Horizon de planification nutritionnelle: {jours_horizon} jours.")
 
         return {
@@ -95,7 +108,11 @@ class JulesNutritionInteractionService:
         """Ajuste automatiquement portion_ajustee sur les repas planifiés selon l'âge de Jules."""
         from src.core.models import Planning, ProfilEnfant, Repas
 
-        jules = db.query(ProfilEnfant).filter(ProfilEnfant.name == "Jules", ProfilEnfant.actif.is_(True)).first()
+        jules = (
+            db.query(ProfilEnfant)
+            .filter(ProfilEnfant.name == "Jules", ProfilEnfant.actif.is_(True))
+            .first()
+        )
         if not jules:
             return {"repas_mis_a_jour": 0, "message": "Profil Jules introuvable."}
 

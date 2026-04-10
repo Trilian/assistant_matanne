@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service inter-modules : Inventaire/Batch/Nutrition/Feedback -> Planning recettes.
 
 Bridge inter-modules :
@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from datetime import date as date_type, timedelta
+from datetime import date as date_type
+from datetime import timedelta
 from typing import Any
 
 from sqlalchemy import case, func
@@ -75,7 +76,9 @@ class InventairePlanningInteractionService:
                 }
             )
 
-        scores.sort(key=lambda s: (s["couverture_stock_pct"], s["ingredients_couverts"]), reverse=True)
+        scores.sort(
+            key=lambda s: (s["couverture_stock_pct"], s["ingredients_couverts"]), reverse=True
+        )
         return {
             "recettes": scores[:limite],
             "message": f"{len(scores[:limite])} recette(s) priorisee(s) selon le stock.",

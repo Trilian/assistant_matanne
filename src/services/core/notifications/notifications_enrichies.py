@@ -33,14 +33,14 @@ class HandlersTelegramEnrichis:
     @staticmethod
     async def envoyer_flux_courses_semaine(sender: str) -> bool:
         """E.1: Envoie la liste de courses pour la semaine via Telegram.
-        
+
         Template:
         ðŸ›’ Courses semaine du [xx/xx]
-        
+
         â€¢ Article 1 (rayon)
         â€¢ Article 2 (rayon)
         ...
-        
+
         [Bouton] Ajouter... [Bouton] Ã‰diter entire liste
         """
         try:
@@ -48,7 +48,7 @@ class HandlersTelegramEnrichis:
 
             with obtenir_contexte_db() as session:
                 # RÃ©cupÃ©rer la liste de courses active
-                from src.core.models.courses import ListeCourses, ArticleCourses
+                from src.core.models.courses import ArticleCourses, ListeCourses
 
                 today = date.today()
                 liste_active = (
@@ -87,14 +87,14 @@ class HandlersTelegramEnrichis:
     @staticmethod
     async def envoyer_rappel_activite_jules(sender: str) -> bool:
         """E.2: Envoie un rappel d'activité pour Jules via Telegram.
-        
+
         Template:
         ðŸ‘¶ ActivitÃ© Jules de [jour]
-        
+
         ðŸŽ¯ [ActivitÃ©] - [durÃ©e]
         ðŸ“ Lieu: [lieu]
         ðŸ•’ Heure: [heure]
-        
+
         Suggestion IA: [conseil dÃ©veloppement]
         """
         try:
@@ -132,13 +132,13 @@ class HandlersTelegramEnrichis:
     @staticmethod
     async def envoyer_resultats_paris(sender: str) -> bool:
         """E.3: Envoie résultats des paris sportifs via Telegram.
-        
+
         Template:
         âš½ RÃ©sultats matchs
-        
+
         [Match 1] [Score] âœ…/âŒ [P&L]
         [Match 2] [Score] âœ…/âŒ [P&L]
-        
+
         ðŸ’° Total: [bilan]
         """
         try:
@@ -219,9 +219,7 @@ class ServiceNotificationsEnrichis:
             logger.error(f"E.4 Erreur lecture prefs: {e}")
             return self._prefs_par_defaut()
 
-    def mettre_a_jour_preferences(
-        self, user_id: str, updates: dict[str, Any]
-    ) -> bool:
+    def mettre_a_jour_preferences(self, user_id: str, updates: dict[str, Any]) -> bool:
         """Met Ã  jour les prÃ©fÃ©rences (E.4)."""
         try:
             from src.core.models.notifications import PreferenceNotification
@@ -259,9 +257,9 @@ class ServiceNotificationsEnrichis:
         canal: str,
         titre: str,
         message: str,
-        type_evenement: Optional[str] = None,
+        type_evenement: str | None = None,
         categorie: str = "autres",
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> bool:
         """Enregistre une notification dans l'historique (E.5)."""
         try:

@@ -8,7 +8,11 @@ from typing import Any
 
 from src.core.db import obtenir_contexte_db
 
-from .types_central import ActionPiloteAutomatique, ModePiloteAutomatiqueResponse, SuggestionRepasSoirResponse
+from .types_central import (
+    ActionPiloteAutomatique,
+    ModePiloteAutomatiqueResponse,
+    SuggestionRepasSoirResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +90,9 @@ def configurer_mode_pilote_automatique(
     return service.obtenir_mode_pilote_automatique(user_id=user_id)
 
 
-def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) -> ModePiloteAutomatiqueResponse | None:
+def obtenir_mode_pilote_automatique(
+    service: Any, user_id: int | None = None
+) -> ModePiloteAutomatiqueResponse | None:
     """Mode pilote automatique (propositions + validations)."""
     actif, niveau_autonomie = lire_config_mode_pilote(service, user_id)
     if not actif:
@@ -104,6 +110,7 @@ def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) ->
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models import ArticleCourses, ListeCourses, Planning, Repas
             from src.core.models.famille import Routine
 
@@ -111,7 +118,10 @@ def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) ->
             nb_repas = 0
             if planning_actif:
                 nb_repas = int(
-                    session.query(func.count(Repas.id)).filter(Repas.planning_id == planning_actif.id).scalar() or 0
+                    session.query(func.count(Repas.id))
+                    .filter(Repas.planning_id == planning_actif.id)
+                    .scalar()
+                    or 0
                 )
             if nb_repas < 14:
                 actions.append(
@@ -134,7 +144,8 @@ def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) ->
                 nb_articles = int(
                     session.query(func.count(ArticleCourses.id))
                     .filter(ArticleCourses.liste_id == liste.id, ArticleCourses.coche.is_(False))
-                    .scalar() or 0
+                    .scalar()
+                    or 0
                 )
                 if nb_articles < 8:
                     actions.append(
@@ -184,7 +195,9 @@ def obtenir_mode_pilote_automatique(service: Any, user_id: int | None = None) ->
     )
 
 
-def proposer_repas_adapte_garmin(service: Any, user_id: int | None = None) -> SuggestionRepasSoirResponse | None:
+def proposer_repas_adapte_garmin(
+    service: Any, user_id: int | None = None
+) -> SuggestionRepasSoirResponse | None:
     """Adapte la proposition de repas selon la depense Garmin du jour."""
     calories_brulees = 0
     try:
@@ -194,7 +207,9 @@ def proposer_repas_adapte_garmin(service: Any, user_id: int | None = None) -> Su
 
             profil_id = user_id
             if not profil_id:
-                profil = session.query(ProfilUtilisateur).order_by(ProfilUtilisateur.id.asc()).first()
+                profil = (
+                    session.query(ProfilUtilisateur).order_by(ProfilUtilisateur.id.asc()).first()
+                )
                 profil_id = profil.id if profil else None
 
             if profil_id:
@@ -236,7 +251,8 @@ def proposer_repas_adapte_garmin(service: Any, user_id: int | None = None) -> Su
                     f"avec cible <= {cible_max} kcal."
                 ),
                 temps_total_estime_min=int(
-                    (recette_principale.temps_preparation or 0) + (recette_principale.temps_cuisson or 0)
+                    (recette_principale.temps_preparation or 0)
+                    + (recette_principale.temps_cuisson or 0)
                 ),
                 alternatives=alternatives,
             )

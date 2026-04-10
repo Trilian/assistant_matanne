@@ -537,6 +537,3 @@ def obtenir_service_codes_barres() -> BarcodeService:
 def obtenir_barcode_service() -> BarcodeService:
     """Factory pour obtenir le service Barcode (alias anglais)."""
     return obtenir_service_codes_barres()
-
-
-

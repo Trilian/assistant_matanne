@@ -12,7 +12,9 @@ from pydantic import BaseModel, Field
 class CommandeVocaleResponse(BaseModel):
     """Résultat de l'interprétation d'une commande vocale."""
 
-    action: str = Field(description="courses.ajout | routine.creation | planning.resume | incomprise")
+    action: str = Field(
+        description="courses.ajout | routine.creation | planning.resume | incomprise"
+    )
     message: str = ""
     details: dict[str, Any] = Field(default_factory=dict)
 

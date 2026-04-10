@@ -37,7 +37,9 @@ class GarminHealthInteractionService:
         Returns:
             Dict avec macros ajustées et recommandations
         """
-        from datetime import datetime, date as date_type
+        from datetime import date as date_type
+        from datetime import datetime
+
         from sqlalchemy import func
 
         try:
@@ -74,7 +76,7 @@ class GarminHealthInteractionService:
                     f"Objectif du jour: {int(calories_cible)} kcal"
                 ),
                 "recommandation": (
-                    f"Ajustez le dîner: +{int(calories_brulees/2)} kcal pour compenser "
+                    f"Ajustez le dîner: +{int(calories_brulees / 2)} kcal pour compenser "
                     "(protéines et glucides complexes)"
                 ),
             }
@@ -160,18 +162,24 @@ class GarminHealthInteractionService:
                 },
                 "resume": {
                     "activite": (
-                        "✅ Excellente" if score_activite >= 80
-                        else "🟡 Bonne" if score_activite >= 60
+                        "✅ Excellente"
+                        if score_activite >= 80
+                        else "🟡 Bonne"
+                        if score_activite >= 60
                         else "⚠️ À améliorer"
                     ),
                     "sommeil": (
-                        "✅ Bon" if score_sommeil >= 80
-                        else "🟡 Acceptable" if score_sommeil >= 60
+                        "✅ Bon"
+                        if score_sommeil >= 80
+                        else "🟡 Acceptable"
+                        if score_sommeil >= 60
                         else "⚠️ Insuffisant"
                     ),
                     "nutrition": (
-                        "✅ Équilibrée" if score_nutrition_famille >= 90
-                        else "🟡 Acceptable" if score_nutrition_famille >= 80
+                        "✅ Équilibrée"
+                        if score_nutrition_famille >= 90
+                        else "🟡 Acceptable"
+                        if score_nutrition_famille >= 80
                         else "⚠️ À vérifier"
                     ),
                 },

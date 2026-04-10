@@ -19,16 +19,16 @@ from src.api.schemas.batch_cooking import (
     SessionBatchPatch,
     SessionBatchResponse,
 )
-from src.api.schemas.errors import REPONSES_IA
-from src.api.schemas.ia_transverses import BatchCookingIntelligentResponse
 from src.api.schemas.common import MessageResponse, ReponsePaginee
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
     REPONSES_CRUD_ECRITURE,
     REPONSES_CRUD_LECTURE,
     REPONSES_CRUD_SUPPRESSION,
+    REPONSES_IA,
     REPONSES_LISTE,
 )
+from src.api.schemas.ia_transverses import BatchCookingIntelligentResponse
 from src.api.utils import (
     construire_reponse_paginee,
     executer_async,
@@ -171,7 +171,9 @@ async def generer_session_depuis_planning(
                 recettes_batch = recettes_objs
 
             # Calculer durée totale (temps_preparation + temps_cuisson)
-            duree_estimee = sum(r.temps_preparation + (r.temps_cuisson or 0) for r in recettes_batch)
+            duree_estimee = sum(
+                r.temps_preparation + (r.temps_cuisson or 0) for r in recettes_batch
+            )
 
             # Identifier robots compatibles (au moins une recette)
             robots_utilises = []
@@ -229,9 +231,11 @@ async def obtenir_session(
 
     def _query():
         with executer_avec_session() as session:
-            s = session.query(SessionBatchCooking).filter(
-                SessionBatchCooking.id == session_id
-            ).first()
+            s = (
+                session.query(SessionBatchCooking)
+                .filter(SessionBatchCooking.id == session_id)
+                .first()
+            )
             if not s:
                 raise HTTPException(status_code=404, detail="Session non trouvée")
 
@@ -283,7 +287,9 @@ async def creer_session(
     return await executer_async(_create)
 
 
-@router.patch("/{session_id}", response_model=SessionBatchResponse, responses=REPONSES_CRUD_ECRITURE)
+@router.patch(
+    "/{session_id}", response_model=SessionBatchResponse, responses=REPONSES_CRUD_ECRITURE
+)
 @gerer_exception_api
 async def modifier_session(
     session_id: int,
@@ -295,9 +301,11 @@ async def modifier_session(
 
     def _update():
         with executer_avec_session() as session:
-            s = session.query(SessionBatchCooking).filter(
-                SessionBatchCooking.id == session_id
-            ).first()
+            s = (
+                session.query(SessionBatchCooking)
+                .filter(SessionBatchCooking.id == session_id)
+                .first()
+            )
             if not s:
                 raise HTTPException(status_code=404, detail="Session non trouvée")
 
@@ -345,9 +353,11 @@ async def supprimer_session(
 
     def _delete():
         with executer_avec_session() as session:
-            s = session.query(SessionBatchCooking).filter(
-                SessionBatchCooking.id == session_id
-            ).first()
+            s = (
+                session.query(SessionBatchCooking)
+                .filter(SessionBatchCooking.id == session_id)
+                .first()
+            )
             if not s:
                 raise HTTPException(status_code=404, detail="Session non trouvée")
 
@@ -430,7 +440,9 @@ async def consommer_preparation(
             if not prep:
                 raise HTTPException(status_code=404, detail="Préparation non trouvée")
             if prep.consomme:
-                raise HTTPException(status_code=400, detail="Préparation déjà entièrement consommée")
+                raise HTTPException(
+                    status_code=400, detail="Préparation déjà entièrement consommée"
+                )
 
             restant = prep.consommer_portion(portions)
             session.commit()

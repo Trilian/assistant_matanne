@@ -175,7 +175,9 @@ class ClientIA(VisionMixin, StreamingMixin):
                     delai_effectif = retry_after if 0 < retry_after <= 10 else 2
                     logger.warning(
                         "[RATE LIMIT] Quota Mistral 429 — attente %ss avant retry (tentative %s/%s)",
-                        delai_effectif, tentative + 1, max_tentatives,
+                        delai_effectif,
+                        tentative + 1,
+                        max_tentatives,
                     )
                     if tentative < max_tentatives - 1:
                         await asyncio.sleep(delai_effectif)
@@ -184,7 +186,11 @@ class ClientIA(VisionMixin, StreamingMixin):
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur=(
                             "Limite de requêtes Mistral atteinte. "
-                            + (f"Réessayez dans {retry_after}s." if retry_after else "Réessayez dans quelques secondes.")
+                            + (
+                                f"Réessayez dans {retry_after}s."
+                                if retry_after
+                                else "Réessayez dans quelques secondes."
+                            )
                         ),
                     ) from e
                 if tentative == max_tentatives - 1:

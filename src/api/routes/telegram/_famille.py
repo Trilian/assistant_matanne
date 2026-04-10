@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 async def _envoyer_resume_jules(chat_id: str) -> None:
     from src.services.famille.contexte import ContexteFamilleService
     from src.services.famille.jules import obtenir_service_jules
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     service = obtenir_service_jules()
     date_naissance = service.get_date_naissance_jules()
@@ -24,7 +27,7 @@ async def _envoyer_resume_jules(chat_id: str) -> None:
 
     age_mois = service.get_age_mois()
     prochains_jalons = ContexteFamilleService()._prochains_jalons_developpement(age_mois)
-    lignes = [f"👶 <b>Jules</b>", f"Âge: <b>{age_mois} mois</b>"]
+    lignes = ["👶 <b>Jules</b>", f"Âge: <b>{age_mois} mois</b>"]
     if prochains_jalons:
         lignes.append("")
         lignes.append("Prochains jalons probables:")
@@ -45,7 +48,10 @@ async def _envoyer_resume_budget(chat_id: str) -> None:
 
     from src.core.db import obtenir_contexte_db
     from src.core.models.famille import BudgetFamille
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     aujourd_hui = date.today()
     with obtenir_contexte_db() as session:
@@ -74,7 +80,7 @@ async def _envoyer_resume_budget(chat_id: str) -> None:
         await envoyer_message_telegram(chat_id, "💰 Aucune dépense enregistrée ce mois-ci.")
         return
 
-    lignes = [f"💰 <b>Budget du mois</b>", f"Total dépensé: <b>{round(float(total), 2)}€</b>"]
+    lignes = ["💰 <b>Budget du mois</b>", f"Total dépensé: <b>{round(float(total), 2)}€</b>"]
     if top_categories:
         lignes.append("")
         lignes.append("Top catégories:")
@@ -149,7 +155,10 @@ async def _envoyer_projection_budget_telegram(chat_id: str) -> None:
         destinataire=chat_id,
         corps="\n".join(lignes),
         boutons=[
-            {"url": _obtenir_url_app("/ia-avancee/prevision-depenses"), "title": "📊 Voir le détail"},
+            {
+                "url": _obtenir_url_app("/ia-avancee/prevision-depenses"),
+                "title": "📊 Voir le détail",
+            },
             {"id": "menu_famille", "title": "👶 Menu Famille"},
         ],
     )
@@ -251,7 +260,9 @@ async def _envoyer_recap_journee(chat_id: str) -> None:
 
 
 async def _envoyer_meteo_telegram(chat_id: str) -> None:
-    from src.services.famille.inter_module_meteo_activites import obtenir_service_meteo_activites_interaction
+    from src.services.famille.inter_module_meteo_activites import (
+        obtenir_service_meteo_activites_interaction,
+    )
     from src.services.integrations.telegram import envoyer_message_interactif
     from src.services.utilitaires.meteo_service import obtenir_meteo_service
 
@@ -315,7 +326,7 @@ async def _envoyer_resume_weekend(chat_id: str) -> None:
                 heure = getattr(activite, "heure_debut", None)
                 cout = getattr(activite, "cout_estime", None)
                 if heure:
-                    details.append(heure.strftime('%H:%M'))
+                    details.append(heure.strftime("%H:%M"))
                 if isinstance(cout, int | float) and cout:
                     details.append(f"{float(cout):.0f}€")
                 lignes.append(f"• {' — '.join(details)}")
@@ -358,13 +369,18 @@ async def _envoyer_resume_weekend(chat_id: str) -> None:
 
 async def _envoyer_rapport_hebdo(chat_id: str) -> None:
     from src.services.famille.resume_hebdo import obtenir_service_resume_hebdo
-    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+    )
 
     try:
         resume = obtenir_service_resume_hebdo().generer_resume_semaine_sync()
     except Exception as exc:
         logger.warning("Impossible de générer le résumé hebdo Telegram: %s", exc)
-        await envoyer_message_telegram(chat_id, "📋 Le résumé hebdo n'est pas disponible pour le moment.")
+        await envoyer_message_telegram(
+            chat_id, "📋 Le résumé hebdo n'est pas disponible pour le moment."
+        )
         return
 
     lignes = [

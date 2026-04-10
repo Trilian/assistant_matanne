@@ -4,6 +4,7 @@ Routes API Maison â€” Entretien, routines et mÃ©nage.
 Sous-routeur inclus dans maison.py.
 """
 
+import logging
 from datetime import date
 from typing import Any
 
@@ -21,7 +22,6 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 from src.services.core.backup.utils_serialization import model_to_dict
 from src.services.maison.schemas import TacheJour
 
-import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Maison"])
@@ -122,9 +122,7 @@ async def enregistrer_repetition(
             if not routine:
                 raise HTTPException(status_code=404, detail="Routine non trouvÃ©e")
 
-            query = session.query(TacheRoutine).filter(
-                TacheRoutine.routine_id == routine_id
-            )
+            query = session.query(TacheRoutine).filter(TacheRoutine.routine_id == routine_id)
             if tache_ids:
                 query = query.filter(TacheRoutine.id.in_(tache_ids))
 
@@ -252,8 +250,18 @@ async def modifier_tache_entretien(
             if not tache:
                 raise HTTPException(status_code=404, detail="TÃ¢che non trouvÃ©e")
 
-            for champ in ("nom", "description", "categorie", "piece", "frequence_jours",
-                          "prochaine_fois", "duree_minutes", "responsable", "priorite", "fait"):
+            for champ in (
+                "nom",
+                "description",
+                "categorie",
+                "piece",
+                "frequence_jours",
+                "prochaine_fois",
+                "duree_minutes",
+                "responsable",
+                "priorite",
+                "fait",
+            ):
                 if champ in payload:
                     setattr(tache, champ, payload[champ])
 
@@ -262,6 +270,7 @@ async def modifier_tache_entretien(
                 tache.derniere_fois = date.today()
                 if tache.frequence_jours:
                     from datetime import timedelta
+
                     tache.prochaine_fois = date.today() + timedelta(days=tache.frequence_jours)
                     tache.fait = False  # Reset pour la prochaine occurrence
 
@@ -281,7 +290,9 @@ async def modifier_tache_entretien(
                 "nom": tache.nom,
                 "fait": tache.fait,
                 "derniere_fois": tache.derniere_fois.isoformat() if tache.derniere_fois else None,
-                "prochaine_fois": tache.prochaine_fois.isoformat() if tache.prochaine_fois else None,
+                "prochaine_fois": tache.prochaine_fois.isoformat()
+                if tache.prochaine_fois
+                else None,
                 "suggestion_artisans": suggestion_artisans,
             }
 
@@ -353,9 +364,7 @@ async def obtenir_sante_appareils(
                 par_zone[zone]["total_taches"] += 1
 
                 en_retard = (
-                    t.prochaine_fois is not None
-                    and t.prochaine_fois < aujourd_hui
-                    and not t.fait
+                    t.prochaine_fois is not None and t.prochaine_fois < aujourd_hui and not t.fait
                 )
 
                 if en_retard:
@@ -376,9 +385,7 @@ async def obtenir_sante_appareils(
             for zone_data in par_zone.values():
                 total = zone_data["total_taches"]
                 if total > 0:
-                    zone_data["score_sante"] = round(
-                        (zone_data["taches_a_jour"] / total) * 100
-                    )
+                    zone_data["score_sante"] = round((zone_data["taches_a_jour"] / total) * 100)
 
             # Score global
             total_taches = sum(z["total_taches"] for z in par_zone.values())
@@ -631,7 +638,9 @@ async def creer_tache_ponctuelle(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@router.post("/menage/planning-semaine-ia/regenerer", status_code=200, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/menage/planning-semaine-ia/regenerer", status_code=200, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def regenerer_planning_ia(
     payload: dict[str, Any],
@@ -650,7 +659,9 @@ async def regenerer_planning_ia(
     return await executer_async(_query)
 
 
-@router.post("/menage/taches/{tache_id}/completer", status_code=200, responses=REPONSES_CRUD_CREATION)
+@router.post(
+    "/menage/taches/{tache_id}/completer", status_code=200, responses=REPONSES_CRUD_CREATION
+)
 @gerer_exception_api
 async def completer_tache_menage(
     tache_id: str,
@@ -839,7 +850,15 @@ async def modifier_routine(
             routine = session.query(Routine).filter(Routine.id == routine_id).first()
             if not routine:
                 raise HTTPException(status_code=404, detail="Routine non trouvÃ©e")
-            for champ in ("nom", "description", "categorie", "frequence", "actif", "moment_journee", "jour_semaine"):
+            for champ in (
+                "nom",
+                "description",
+                "categorie",
+                "frequence",
+                "actif",
+                "moment_journee",
+                "jour_semaine",
+            ):
                 if champ in payload:
                     setattr(routine, champ, payload[champ])
             session.commit()
@@ -889,8 +908,8 @@ async def lister_toutes_taches_routines(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste toutes les tÃ¢ches de toutes les routines (pour associer Ã  un objet)."""
-    from src.core.models.maison import TacheRoutine, Routine
     from src.api.utils import executer_avec_session
+    from src.core.models.maison import Routine, TacheRoutine
 
     def _query():
         with executer_avec_session() as session:
@@ -926,10 +945,11 @@ async def creer_routine_ia(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """GÃ©nÃ¨re et crÃ©e une routine personnalisÃ©e via l'IA."""
-    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
-    from src.core.models.maison import Routine, TacheRoutine
-    from src.api.utils import executer_avec_session
     import json
+
+    from src.api.utils import executer_avec_session
+    from src.core.models.maison import Routine, TacheRoutine
+    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
 
     nom = payload.get("nom", "")
     description = payload.get("description", "")
@@ -963,7 +983,9 @@ async def creer_routine_ia(
                     except Exception as e:
                         logger.warning("[maison] Parsing rÃ©ponse IA routine Ã©chouÃ©: %s", e)
         except Exception as e:
-            logger.warning("[maison] GÃ©nÃ©ration IA routine Ã©chouÃ©e, valeurs dÃ©faut utilisÃ©es: %s", e)
+            logger.warning(
+                "[maison] GÃ©nÃ©ration IA routine Ã©chouÃ©e, valeurs dÃ©faut utilisÃ©es: %s", e
+            )
 
         with executer_avec_session() as session:
             routine = Routine(
@@ -979,7 +1001,7 @@ async def creer_routine_ia(
             for i, t in enumerate(taches_ia[:8]):
                 tache = TacheRoutine(
                     routine_id=routine.id,
-                    nom=t.get("nom", f"TÃ¢che {i+1}"),
+                    nom=t.get("nom", f"TÃ¢che {i + 1}"),
                     ordre=t.get("ordre", i + 1),
                 )
                 session.add(tache)
@@ -1002,8 +1024,8 @@ async def dupliquer_routine(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Duplique une routine existante et toutes ses tÃ¢ches."""
-    from src.core.models.maison import Routine, TacheRoutine
     from src.api.utils import executer_avec_session
+    from src.core.models.maison import Routine, TacheRoutine
 
     def _query():
         with executer_avec_session() as session:
@@ -1020,15 +1042,19 @@ async def dupliquer_routine(
             )
             session.add(nouvelle)
             session.flush()
-            taches_source = session.query(TacheRoutine).filter(TacheRoutine.routine_id == routine_id).all()
+            taches_source = (
+                session.query(TacheRoutine).filter(TacheRoutine.routine_id == routine_id).all()
+            )
             for t in taches_source:
-                session.add(TacheRoutine(
-                    routine_id=nouvelle.id,
-                    nom=t.nom,
-                    description=t.description,
-                    ordre=t.ordre,
-                    heure_prevue=t.heure_prevue,
-                ))
+                session.add(
+                    TacheRoutine(
+                        routine_id=nouvelle.id,
+                        nom=t.nom,
+                        description=t.description,
+                        ordre=t.ordre,
+                        heure_prevue=t.heure_prevue,
+                    )
+                )
             session.commit()
             return {
                 "id": nouvelle.id,
@@ -1048,8 +1074,8 @@ async def lister_taches_routine(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les tÃ¢ches d'une routine."""
-    from src.core.models.maison import TacheRoutine
     from src.api.utils import executer_avec_session
+    from src.core.models.maison import TacheRoutine
 
     def _query():
         with executer_avec_session() as session:
@@ -1086,8 +1112,8 @@ async def ajouter_tache_routine(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Ajoute une tÃ¢che Ã  une routine existante."""
-    from src.core.models.maison import Routine, TacheRoutine
     from src.api.utils import executer_avec_session
+    from src.core.models.maison import Routine, TacheRoutine
 
     nom = payload.get("nom", "").strip()
     if not nom:
@@ -1099,7 +1125,9 @@ async def ajouter_tache_routine(
             if not routine:
                 raise HTTPException(status_code=404, detail="Routine introuvable")
             # Calculer le prochain ordre
-            count = session.query(TacheRoutine).filter(TacheRoutine.routine_id == routine_id).count()
+            count = (
+                session.query(TacheRoutine).filter(TacheRoutine.routine_id == routine_id).count()
+            )
             tache = TacheRoutine(
                 routine_id=routine_id,
                 nom=nom,
@@ -1110,7 +1138,12 @@ async def ajouter_tache_routine(
             session.add(tache)
             session.commit()
             session.refresh(tache)
-            return {"id": tache.id, "nom": tache.nom, "ordre": tache.ordre, "routine_id": routine_id}
+            return {
+                "id": tache.id,
+                "nom": tache.nom,
+                "ordre": tache.ordre,
+                "routine_id": routine_id,
+            }
 
     return await executer_async(_query)
 
@@ -1123,15 +1156,19 @@ async def supprimer_tache_routine(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Supprime une tÃ¢che d'une routine."""
-    from src.core.models.maison import TacheRoutine
     from src.api.utils import executer_avec_session
+    from src.core.models.maison import TacheRoutine
 
     def _query():
         with executer_avec_session() as session:
-            tache = session.query(TacheRoutine).filter(
-                TacheRoutine.id == tache_id,
-                TacheRoutine.routine_id == routine_id,
-            ).first()
+            tache = (
+                session.query(TacheRoutine)
+                .filter(
+                    TacheRoutine.id == tache_id,
+                    TacheRoutine.routine_id == routine_id,
+                )
+                .first()
+            )
             if not tache:
                 raise HTTPException(status_code=404, detail="TÃ¢che introuvable")
             session.delete(tache)
@@ -1154,8 +1191,8 @@ async def associer_routine_objet(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Associe un objet/Ã©quipement Ã  une tÃ¢che de routine (via notes)."""
-    from src.core.models.temps_entretien import ObjetMaison
     from src.api.utils import executer_avec_session
+    from src.core.models.temps_entretien import ObjetMaison
 
     tache_routine_id = payload.get("tache_routine_id")
 
@@ -1168,8 +1205,11 @@ async def associer_routine_objet(
             notes_actuelles = objet.notes or ""
             # Remplacer ou ajouter la rÃ©fÃ©rence de routine
             import re
+
             if re.search(r"routine_tache:\d+", notes_actuelles):
-                objet.notes = re.sub(r"routine_tache:\d+", note_routine or "", notes_actuelles).strip()
+                objet.notes = re.sub(
+                    r"routine_tache:\d+", note_routine or "", notes_actuelles
+                ).strip()
             elif note_routine:
                 objet.notes = f"{notes_actuelles} {note_routine}".strip()
             session.commit()
@@ -1219,9 +1259,7 @@ async def synchroniser_taches_vers_planning(
             # Synchroniser les tÃ¢ches d'entretien
             if taches_ids:
                 taches = (
-                    session.query(TacheEntretien)
-                    .filter(TacheEntretien.id.in_(taches_ids))
-                    .all()
+                    session.query(TacheEntretien).filter(TacheEntretien.id.in_(taches_ids)).all()
                 )
                 for t in taches:
                     date_cible = t.prochaine_fois or date.today()
@@ -1238,11 +1276,7 @@ async def synchroniser_taches_vers_planning(
 
             # Synchroniser les projets
             if projets_ids:
-                projets = (
-                    session.query(ProjetMaison)
-                    .filter(ProjetMaison.id.in_(projets_ids))
-                    .all()
-                )
+                projets = session.query(ProjetMaison).filter(ProjetMaison.id.in_(projets_ids)).all()
                 for p in projets:
                     date_cible = p.date_fin_prevue or date.today()
                     try:
@@ -1285,5 +1319,3 @@ async def obtenir_suggestions_routines_saisonieres(
         return service.suggestions_saisonieres()
 
     return await executer_async(_fn)
-
-

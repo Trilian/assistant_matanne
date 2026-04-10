@@ -50,13 +50,13 @@ Usage:
             query = session.query(Item).order_by(Item.cree_le.desc(), Item.id.desc())
 
             if decoded:
-                query = appliquer_cursor_filter(query, decoded, Item, 
+                query = appliquer_cursor_filter(query, decoded, Item,
                                                cursor_field="cree_le",
                                                secondary_field="id")
 
             items = query.limit(limit + 1).all()
 
-        return construire_reponse_cursor(items, limit, 
+        return construire_reponse_cursor(items, limit,
                                         cursor_field="cree_le",
                                         secondary_field="id")
 """
@@ -88,7 +88,7 @@ class CursorInfo(BaseModel):
     has_more: bool = Field(description="Indique s'il y a plus de résultats")
 
 
-class ReponseCursorPaginee(BaseModel, Generic[T]):
+class ReponseCursorPaginee[T](BaseModel):
     """Réponse paginée avec curseur.
 
     Alternative à ReponsePaginee pour les grandes collections.
@@ -354,17 +354,17 @@ def valider_cursor_config(
 ) -> None:
     """
     Valide et log un averissement si la configuration du curseur est potentiellement instable.
-    
+
     IMPORTANT: Cette fonction aide à détecter les problèmes B12 (tri instable).
     - cursor_field doit être única (généralement "id" ou "cree_le")
     - secondary_field doit être différent et unique (généralement "id" si cursor_field != "id")
-    
+
     Args:
         cursor_field: Le champ utilisé pour le curseur
         secondary_field: Le champ de départ (doit être unique)
         model_class: La classe du modèle SQLAlchemy
         route_name: Nom optionnel de la route pour le log
-    
+
     Example:
         valider_cursor_config("date_prevue", "id", ActiviteFamille, "/api/v1/activites")
     """
@@ -389,12 +389,12 @@ def appliquer_cursor_filter_avec_tri_stable(
 ) -> tuple:
     """
     Applique le filtre de curseur et valide que le tri est stable.
-    
+
     Version améliorée de appliquer_cursor_filter qui:
     1. Valide la configuration du curseur (detecte B12)
     2. Log un averissement si le secondaire_field n'est pas passé
     3. Retourne (query_modifiee, validation_ok: bool)
-    
+
     Args:
         query: Requête SQLAlchemy
         cursor: Paramètres du curseur (optionnel)
@@ -402,17 +402,17 @@ def appliquer_cursor_filter_avec_tri_stable(
         cursor_field: Champ principal du curseur
         secondary_field: Champ unique pour tri stable (généralement 'id')
         log_warnings: Si True, log les averissements B12
-    
+
     Returns:
         Tuple (query_modifiee, validation_ok)
-    
+
     Example:
         query = session.query(Activite).order_by(
-            Activite.date_prevue.desc(), 
+            Activite.date_prevue.desc(),
             Activite.id.desc()  ← Important pour stabilité!
         )
         query, is_valid = appliquer_cursor_filter_avec_tri_stable(
-            query, 
+            query,
             cursor_params,
             Activite,
             cursor_field="date_prevue",
@@ -422,8 +422,10 @@ def appliquer_cursor_filter_avec_tri_stable(
     # Valider la configuration
     if log_warnings and (not secondary_field or secondary_field == cursor_field):
         valider_cursor_config(cursor_field, secondary_field, model_class)
-        return appliquer_cursor_filter(query, cursor, model_class, cursor_field, secondary_field), False
-    
+        return appliquer_cursor_filter(
+            query, cursor, model_class, cursor_field, secondary_field
+        ), False
+
     # Appliquer le filtre normal
     query = appliquer_cursor_filter(query, cursor, model_class, cursor_field, secondary_field)
     return query, True

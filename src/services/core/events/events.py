@@ -385,6 +385,7 @@ class EvenementInventaireModificationImportante:
     nb_articles_impactes: int = 0
     source_declenchement: str = ""
 
+
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS JEUX
 # ═══════════════════════════════════════════════════════════

@@ -92,11 +92,7 @@ def calculer_streak_routines() -> dict:
     from src.core.models.maison import Routine, TacheRoutine
 
     with obtenir_contexte_db() as session:
-        routines = (
-            session.query(Routine)
-            .filter(Routine.actif.is_(True))
-            .all()
-        )
+        routines = session.query(Routine).filter(Routine.actif.is_(True)).all()
 
         resultats = {}
 
@@ -116,7 +112,9 @@ def calculer_streak_routines() -> dict:
 
             for tache in taches:
                 if tache.fait_le:
-                    jours_completes.add(tache.fait_le.date() if hasattr(tache.fait_le, 'date') else tache.fait_le)
+                    jours_completes.add(
+                        tache.fait_le.date() if hasattr(tache.fait_le, "date") else tache.fait_le
+                    )
 
             if not jours_completes:
                 resultats[routine.id] = {
@@ -178,7 +176,8 @@ def comparaison_energie_n_vs_n1(type_energie: str = "electricite") -> dict:
     Returns:
         Dict avec mois, valeurs N, valeurs N-1, et écarts en %.
     """
-    from sqlalchemy import func, extract
+    from sqlalchemy import extract, func
+
     from src.core.models.maison import DepenseMaison
 
     annee_n = date.today().year
@@ -191,8 +190,18 @@ def comparaison_energie_n_vs_n1(type_energie: str = "electricite") -> dict:
 
         comparaison = []
         mois_noms = [
-            "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-            "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+            "Janvier",
+            "Février",
+            "Mars",
+            "Avril",
+            "Mai",
+            "Juin",
+            "Juillet",
+            "Août",
+            "Septembre",
+            "Octobre",
+            "Novembre",
+            "Décembre",
         ]
 
         for mois in range(1, 13):
@@ -203,14 +212,20 @@ def comparaison_energie_n_vs_n1(type_energie: str = "electricite") -> dict:
             if val_n1 > 0:
                 ecart_pct = round((val_n - val_n1) / val_n1 * 100, 1)
 
-            comparaison.append({
-                "mois": mois,
-                "mois_nom": mois_noms[mois - 1],
-                "annee_n": round(val_n, 2),
-                "annee_n1": round(val_n1, 2),
-                "ecart_pct": ecart_pct,
-                "tendance": "hausse" if ecart_pct > 5 else "baisse" if ecart_pct < -5 else "stable",
-            })
+            comparaison.append(
+                {
+                    "mois": mois,
+                    "mois_nom": mois_noms[mois - 1],
+                    "annee_n": round(val_n, 2),
+                    "annee_n1": round(val_n1, 2),
+                    "ecart_pct": ecart_pct,
+                    "tendance": "hausse"
+                    if ecart_pct > 5
+                    else "baisse"
+                    if ecart_pct < -5
+                    else "stable",
+                }
+            )
 
         total_n = sum(c["annee_n"] for c in comparaison)
         total_n1 = sum(c["annee_n1"] for c in comparaison)
@@ -230,6 +245,7 @@ def comparaison_energie_n_vs_n1(type_energie: str = "electricite") -> dict:
 def _requete_mensuelle(session, type_energie: str, annee: int) -> dict[int, float]:
     """Requête de consommation mensuelle pour une année."""
     from sqlalchemy import func
+
     from src.core.models.maison import DepenseMaison
 
     rows = (
@@ -296,18 +312,20 @@ def suggestions_entretien_par_age_equipement() -> list[dict]:
 
             if seuil and age >= seuil * 0.8:
                 priorite = "haute" if age >= seuil else "moyenne"
-                suggestions.append({
-                    "equipement": objet.nom,
-                    "categorie": objet.categorie,
-                    "age_annees": round(age, 1),
-                    "seuil_revision": seuil,
-                    "suggestion": (
-                        f"Équipement '{objet.nom}' a {age:.0f} ans "
-                        f"(seuil révision: {seuil} ans). "
-                        f"Prévoir une révision ou anticiper le remplacement."
-                    ),
-                    "priorite": priorite,
-                })
+                suggestions.append(
+                    {
+                        "equipement": objet.nom,
+                        "categorie": objet.categorie,
+                        "age_annees": round(age, 1),
+                        "seuil_revision": seuil,
+                        "suggestion": (
+                            f"Équipement '{objet.nom}' a {age:.0f} ans "
+                            f"(seuil révision: {seuil} ans). "
+                            f"Prévoir une révision ou anticiper le remplacement."
+                        ),
+                        "priorite": priorite,
+                    }
+                )
 
     suggestions.sort(key=lambda s: s["age_annees"], reverse=True)
     return suggestions

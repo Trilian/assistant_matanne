@@ -405,9 +405,7 @@ class ServiceConflits:
                 for act in activites:
                     heure_fin = None
                     if act.heure_debut and act.duree_heures:
-                        heure_fin = _ajouter_duree(
-                            act.heure_debut, int(act.duree_heures * 60)
-                        )
+                        heure_fin = _ajouter_duree(act.heure_debut, int(act.duree_heures * 60))
                     participants = [p.lower() for p in (act.qui_participe or [])]
                     event = {
                         "titre": act.titre,

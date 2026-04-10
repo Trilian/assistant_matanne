@@ -32,6 +32,7 @@ from .admin_helpers import (  # noqa: F401
     _catalogue_actions_services,
     _cibles_resync,
     _construire_pdf_audit,
+    _ecrire_namespace_persistant,
     _executer_action_service,
     _exporter_config_admin,
     _extraire_jobs_matin,
@@ -42,7 +43,6 @@ from .admin_helpers import (  # noqa: F401
     _serialiser_valeur_export_db,
     _simuler_flux_admin,
     _simuler_test_e2e_one_click,
-    _ecrire_namespace_persistant,
     est_mode_test_actif,
 )
 from .admin_schemas import (  # noqa: F401
@@ -58,8 +58,8 @@ from .admin_schemas import (  # noqa: F401
     JobInfoResponse,
     JobRunAllRequest,
     JobRunRequest,
-    JobScheduleUpdateRequest,
     JobsBulkRequest,
+    JobScheduleUpdateRequest,
     JobsSimulationJourneeRequest,
     MaintenanceModeRequest,
     NotificationSimulationRequest,
@@ -79,9 +79,13 @@ _ADMIN_RATE_LIMIT = 10  # requêtes par minute
 _admin_timestamps: dict[str, collections.deque[float]] = {}
 
 
-async def _verifier_limite_admin(user: dict[str, Any] = Depends(require_role("admin"))) -> dict[str, Any]:
+async def _verifier_limite_admin(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
     """Dépendance de rate limiting pour tous les endpoints admin (10 req/min)."""
-    if os.getenv("ENVIRONMENT", "").lower() in {"test", "testing"} or os.getenv("PYTEST_CURRENT_TEST"):
+    if os.getenv("ENVIRONMENT", "").lower() in {"test", "testing"} or os.getenv(
+        "PYTEST_CURRENT_TEST"
+    ):
         return user
 
     user_id = user.get("id", "unknown")

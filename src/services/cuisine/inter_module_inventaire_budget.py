@@ -6,7 +6,8 @@ Service qui agrège les achats par catégorie alimentaire + endpoint budget pré
 """
 
 import logging
-from datetime import date as date_type, timedelta
+from datetime import date as date_type
+from datetime import timedelta
 from typing import Any
 
 from sqlalchemy import func
@@ -92,13 +93,15 @@ class InventaireBudgetInteractionService:
 
             # Si moins de 2 semaines de couverture, article à renouveler
             if semaines_couverture < 2:
-                items_a_renouveler.append({
-                    "article_id": article.id,
-                    "nom": article.nom,
-                    "quantite_actuelle": article.quantite,
-                    "semaines_couverture": round(semaines_couverture, 2),
-                    "estimation_cout_renouvellement": round(prix_unitaire * 10, 2),
-                })
+                items_a_renouveler.append(
+                    {
+                        "article_id": article.id,
+                        "nom": article.nom,
+                        "quantite_actuelle": article.quantite,
+                        "semaines_couverture": round(semaines_couverture, 2),
+                        "estimation_cout_renouvellement": round(prix_unitaire * 10, 2),
+                    }
+                )
 
             # Ajouter au budget de la catégorie (coût pour renouveller stock faible)
             if cat not in budget_par_cat:
@@ -106,7 +109,11 @@ class InventaireBudgetInteractionService:
             budget_par_cat[cat] += prix_unitaire
 
         budget_total = sum(budget_par_cat.values())
-        taux_couverture = (len(articles_en_stock) - len(items_a_renouveler)) / len(articles_en_stock) if articles_en_stock else 0.0
+        taux_couverture = (
+            (len(articles_en_stock) - len(items_a_renouveler)) / len(articles_en_stock)
+            if articles_en_stock
+            else 0.0
+        )
 
         logger.info(
             f"✅ Inventaire→Budget: Budget prévisionnel estimé à {budget_total}€ "
@@ -157,10 +164,14 @@ class InventaireBudgetInteractionService:
             .all()
         )
 
-        depenses_par_cat = {cat: {"montant": montant, "nb_tickets": count} for cat, montant, count in resultats}
+        depenses_par_cat = {
+            cat: {"montant": montant, "nb_tickets": count} for cat, montant, count in resultats
+        }
         total = sum(item["montant"] for item in depenses_par_cat.values())
 
-        logger.info(f"✅ Agrégation achats: {total}€ sur {jours_lookback} jours, {len(depenses_par_cat)} catégories.")
+        logger.info(
+            f"✅ Agrégation achats: {total}€ sur {jours_lookback} jours, {len(depenses_par_cat)} catégories."
+        )
 
         return {
             "periode_jours": jours_lookback,

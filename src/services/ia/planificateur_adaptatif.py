@@ -52,12 +52,7 @@ class PlanificateurAdaptatifService(BaseAIService):
             saison = "hiver"
 
         # Stocks disponibles
-        stocks = (
-            db.query(ArticleInventaire)
-            .filter(ArticleInventaire.quantite > 0)
-            .limit(50)
-            .all()
-        )
+        stocks = db.query(ArticleInventaire).filter(ArticleInventaire.quantite > 0).limit(50).all()
         ingredients_dispo = [
             {"nom": s.nom, "quantite": s.quantite, "unite": getattr(s, "unite", "pièce")}
             for s in stocks
@@ -99,8 +94,8 @@ class PlanificateurAdaptatifService(BaseAIService):
 
 Contexte:
 - Saison: {saison}
-- Ingrédients en stock: {', '.join(ingredients[:20]) if ingredients else 'stock vide'}
-- Articles en stock bas: {', '.join(contexte.get('stocks_bas', [])) or 'aucun'}
+- Ingrédients en stock: {", ".join(ingredients[:20]) if ingredients else "stock vide"}
+- Articles en stock bas: {", ".join(contexte.get("stocks_bas", [])) or "aucun"}
 - Nombre de jours: {nb_jours}
 
 Génère un planning de {nb_jours} repas (déjeuner + dîner) qui:
@@ -152,4 +147,3 @@ Réponds en JSON:
 def obtenir_service_planificateur_adaptatif() -> PlanificateurAdaptatifService:
     """Factory singleton."""
     return PlanificateurAdaptatifService()
-

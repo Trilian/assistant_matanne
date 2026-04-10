@@ -6,8 +6,8 @@ IM9: Photo → diagnostic → artisans en 3 étapes
 
 import logging
 
-from src.core.decorators import avec_session_db
 from src.core.ai import obtenir_client_ia
+from src.core.decorators import avec_session_db
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
@@ -104,8 +104,9 @@ Fournis un diagnostic JSON avec:
         Returns:
             Dict avec id_projet et détails du projet créé
         """
-        from src.core.models import ProjetMaison
         from datetime import datetime, timedelta
+
+        from src.core.models import ProjetMaison
 
         try:
             # Créer le projet
@@ -144,7 +145,7 @@ Fournis un diagnostic JSON avec:
                 "priorite": priorite,
                 "budget_estime": projet.budget_estime,
                 "artisans_requestus": artisans_str,
-                "message": f"Projet de réparation créé et prêt pour chercher des artisans",
+                "message": "Projet de réparation créé et prêt pour chercher des artisans",
             }
 
         except Exception as e:

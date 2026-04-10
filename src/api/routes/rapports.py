@@ -79,7 +79,9 @@ async def journal_familial_ia(
     return result or JournalFamilialAutoResponse()
 
 
-@router.get("/journal-familial/pdf", response_model=RapportMensuelPdfResponse, responses=REPONSES_IA)
+@router.get(
+    "/journal-familial/pdf", response_model=RapportMensuelPdfResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def journal_familial_pdf_ia(
     user: dict[str, Any] = Depends(require_auth),
@@ -157,7 +159,9 @@ async def score_bien_etre_ia(
     return result or ScoreBienEtreResponse()
 
 
-@router.get("/score-eco-responsable", response_model=ScoreEcoResponsableResponse, responses=REPONSES_IA)
+@router.get(
+    "/score-eco-responsable", response_model=ScoreEcoResponsableResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def score_eco_responsable_ia(
     user: dict[str, Any] = Depends(require_auth),
@@ -168,7 +172,9 @@ async def score_eco_responsable_ia(
     return result or ScoreEcoResponsableResponse()
 
 
-@router.post("/carte-visuelle", response_model=CarteVisuellePartageableResponse, responses=REPONSES_IA)
+@router.post(
+    "/carte-visuelle", response_model=CarteVisuellePartageableResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def carte_visuelle_ia(
     body: CarteVisuelleRequest,
@@ -176,11 +182,15 @@ async def carte_visuelle_ia(
 ):
     """Alias métier de la carte visuelle partageable."""
     service = obtenir_service_innovations_rapports()
-    result = service.generer_carte_visuelle_partageable(type_carte=body.type_carte, titre=body.titre)
+    result = service.generer_carte_visuelle_partageable(
+        type_carte=body.type_carte, titre=body.titre
+    )
     return result or CarteVisuellePartageableResponse(type_carte=body.type_carte)
 
 
-@router.get("/mode-tablette-magazine", response_model=ModeTabletteMagazineResponse, responses=REPONSES_IA)
+@router.get(
+    "/mode-tablette-magazine", response_model=ModeTabletteMagazineResponse, responses=REPONSES_IA
+)
 @gerer_exception_api
 async def mode_tablette_magazine_ia(
     user: dict[str, Any] = Depends(require_auth),
@@ -249,8 +259,9 @@ async def bilan_fin_de_mois(
         ```
     """
     from datetime import date, timedelta
-    from src.services.core.base import BaseAIService
+
     from src.core.ai import obtenir_client_ia
+    from src.services.core.base import BaseAIService
 
     now = date.today()
     mois_cible = mois if mois > 0 else now.month
@@ -329,6 +340,7 @@ async def telecharger_bilan_pdf(
         Fichier PDF du bilan mensuel
     """
     from datetime import date, timedelta
+
     from fastapi import HTTPException
     from fastapi.responses import FileResponse
 

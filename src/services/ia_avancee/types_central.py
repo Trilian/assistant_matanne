@@ -1,11 +1,10 @@
-﻿"""
+"""
 Types Pydantic pour les services Innovations.
 """
 
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-
 
 # ═══════════════════════════════════════════════════════════
 # 10.4 — BILAN ANNUEL IA

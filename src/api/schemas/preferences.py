@@ -139,7 +139,9 @@ class PreferencesNotificationsBase(BaseModel):
     stock_alerte: bool = True
     meteo_alerte: bool = True
     budget_alerte: bool = True
-    canal_prefere: str = Field("push", description="Canal par défaut (push|ntfy|email|telegram)", max_length=20)
+    canal_prefere: str = Field(
+        "push", description="Canal par défaut (push|ntfy|email|telegram)", max_length=20
+    )
     canaux_par_categorie: CanauxParCategorie = Field(default_factory=CanauxParCategorie)
     notifications_par_module: dict[str, bool] = Field(
         default_factory=lambda: {
@@ -278,21 +280,21 @@ class PreferencesNotificationsResponse(PreferencesNotificationsBase):
                 "canaux_par_categorie": {
                     "rappels": ["push", "telegram"],
                     "alertes": ["push", "email", "telegram"],
-                    "resumes": ["email", "telegram"]
+                    "resumes": ["email", "telegram"],
                 },
                 "notifications_par_module": {
                     "cuisine": True,
                     "famille": True,
                     "maison": True,
                     "planning": True,
-                    "jeux": True
+                    "jeux": True,
                 },
                 "quiet_hours_start": "22:00",
                 "quiet_hours_end": "07:00",
                 "max_par_heure": 5,
                 "mode_digest": False,
                 "mode_vacances": False,
-                "checklist_voyage_auto": True
+                "checklist_voyage_auto": True,
             }
         }
     }

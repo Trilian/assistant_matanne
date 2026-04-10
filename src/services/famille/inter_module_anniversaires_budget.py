@@ -38,7 +38,9 @@ class AnniversairesBudgetInteractionService:
                 continue
 
             description = f"Reservation budget anniversaire J-14: {anniv.nom}"
-            existe = db.query(BudgetFamille).filter(BudgetFamille.description == description).first()
+            existe = (
+                db.query(BudgetFamille).filter(BudgetFamille.description == description).first()
+            )
             if existe:
                 continue
 

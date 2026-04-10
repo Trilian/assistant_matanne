@@ -33,46 +33,54 @@ def calculer_score_bien_etre(service) -> ScoreBienEtreResponse | None:
 
     # Dimension Sport (poids 30%)
     score_sport = service._calculer_score_sport()
-    dimensions.append(DimensionBienEtre(
-        nom="Sport & Activité Physique",
-        score=score_sport,
-        poids=0.30,
-        detail=service._detail_sport(score_sport),
-        tendance=service._evaluer_tendance("sport"),
-    ))
+    dimensions.append(
+        DimensionBienEtre(
+            nom="Sport & Activité Physique",
+            score=score_sport,
+            poids=0.30,
+            detail=service._detail_sport(score_sport),
+            tendance=service._evaluer_tendance("sport"),
+        )
+    )
     scores.append(score_sport * 0.30)
 
     # Dimension Nutrition (poids 25%)
     score_nutrition = service._calculer_score_nutrition()
-    dimensions.append(DimensionBienEtre(
-        nom="Nutrition & Alimentation",
-        score=score_nutrition,
-        poids=0.25,
-        detail=service._detail_nutrition(score_nutrition),
-        tendance=service._evaluer_tendance("nutrition"),
-    ))
+    dimensions.append(
+        DimensionBienEtre(
+            nom="Nutrition & Alimentation",
+            score=score_nutrition,
+            poids=0.25,
+            detail=service._detail_nutrition(score_nutrition),
+            tendance=service._evaluer_tendance("nutrition"),
+        )
+    )
     scores.append(score_nutrition * 0.25)
 
     # Dimension Budget (poids 25%)
     score_budget = service._calculer_score_budget()
-    dimensions.append(DimensionBienEtre(
-        nom="Équilibre Financier",
-        score=score_budget,
-        poids=0.25,
-        detail=service._detail_budget(score_budget),
-        tendance=service._evaluer_tendance("budget"),
-    ))
+    dimensions.append(
+        DimensionBienEtre(
+            nom="Équilibre Financier",
+            score=score_budget,
+            poids=0.25,
+            detail=service._detail_budget(score_budget),
+            tendance=service._evaluer_tendance("budget"),
+        )
+    )
     scores.append(score_budget * 0.25)
 
     # Dimension Routines (poids 20%)
     score_routines = service._calculer_score_routines()
-    dimensions.append(DimensionBienEtre(
-        nom="Régularité & Routines",
-        score=score_routines,
-        poids=0.20,
-        detail=service._detail_routines(score_routines),
-        tendance=service._evaluer_tendance("routines"),
-    ))
+    dimensions.append(
+        DimensionBienEtre(
+            nom="Régularité & Routines",
+            score=score_routines,
+            poids=0.20,
+            detail=service._detail_routines(score_routines),
+            tendance=service._evaluer_tendance("routines"),
+        )
+    )
     scores.append(score_routines * 0.20)
 
     score_global = round(sum(scores), 1)
@@ -89,19 +97,17 @@ def calculer_score_bien_etre(service) -> ScoreBienEtreResponse | None:
         conseils=conseils,
     )
 
+
 def _calculer_score_sport(service) -> float:
     """Score sport basé sur Garmin (0-100)."""
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models.garmin import DonneesGarmin
 
             semaine = date.today() - timedelta(days=7)
-            donnees = (
-                session.query(DonneesGarmin)
-                .filter(DonneesGarmin.date >= semaine)
-                .all()
-            )
+            donnees = session.query(DonneesGarmin).filter(DonneesGarmin.date >= semaine).all()
             if not donnees:
                 return 50.0
 
@@ -112,18 +118,19 @@ def _calculer_score_sport(service) -> float:
     except Exception:
         return 50.0
 
+
 def _calculer_score_nutrition(service) -> float:
     """Score nutrition basé sur le planning repas (0-100)."""
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models import Repas
 
             semaine = date.today() - timedelta(days=7)
             nb_repas = (
-                session.query(func.count(Repas.id))
-                .filter(Repas.date_repas >= semaine)
-                .scalar() or 0
+                session.query(func.count(Repas.id)).filter(Repas.date_repas >= semaine).scalar()
+                or 0
             )
             # 21 repas/semaine (3/jour) = 100
             score = min(100, (nb_repas / 21) * 100)
@@ -131,18 +138,21 @@ def _calculer_score_nutrition(service) -> float:
     except Exception:
         return 50.0
 
+
 def _calculer_score_budget(service) -> float:
     """Score budget basé sur les dépassements (0-100)."""
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models import BudgetFamille
 
             mois_courant = date.today().replace(day=1)
             total = (
                 session.query(func.sum(BudgetFamille.montant))
                 .filter(BudgetFamille.date >= mois_courant)
-                .scalar() or 0
+                .scalar()
+                or 0
             )
             # Moins de dépenses = meilleur score (heuristique simple)
             score = max(0, 100 - min(100, total / 50))
@@ -150,17 +160,17 @@ def _calculer_score_budget(service) -> float:
     except Exception:
         return 60.0
 
+
 def _calculer_score_routines(service) -> float:
     """Score routines basé sur l'accomplissement (0-100)."""
     try:
         with obtenir_contexte_db() as session:
             from sqlalchemy import func
+
             from src.core.models.famille import Routine
 
             routines_actives = (
-                session.query(func.count(Routine.id))
-                .filter(Routine.actif.is_(True))
-                .scalar() or 0
+                session.query(func.count(Routine.id)).filter(Routine.actif.is_(True)).scalar() or 0
             )
             if routines_actives == 0:
                 return 50.0
@@ -169,6 +179,7 @@ def _calculer_score_routines(service) -> float:
             return round(float(score), 1)
     except Exception:
         return 50.0
+
 
 def _detail_sport(service, score: float) -> str:
     if score >= 80:
@@ -179,6 +190,7 @@ def _detail_sport(service, score: float) -> str:
         return "Activité modérée, essayez de bouger plus"
     return "Activité insuffisante, fixez-vous un objectif de pas quotidien"
 
+
 def _detail_nutrition(service, score: float) -> str:
     if score >= 80:
         return "Planning repas bien rempli et équilibré"
@@ -187,6 +199,7 @@ def _detail_nutrition(service, score: float) -> str:
     if score >= 40:
         return "Planning repas incomplet, planifiez davantage"
     return "Peu de repas planifiés, utilisez le planificateur IA"
+
 
 def _detail_budget(service, score: float) -> str:
     if score >= 80:
@@ -197,6 +210,7 @@ def _detail_budget(service, score: float) -> str:
         return "Budget tendu, surveillez vos dépenses"
     return "Budget dépassé, réduisez les dépenses non essentielles"
 
+
 def _detail_routines(service, score: float) -> str:
     if score >= 80:
         return "Routines régulières et bien suivies"
@@ -206,9 +220,11 @@ def _detail_routines(service, score: float) -> str:
         return "Quelques routines à consolider"
     return "Peu de routines actives, créez-en pour structurer votre quotidien"
 
+
 def _evaluer_tendance(service, dimension: str) -> str:
     """Évalue la tendance d'une dimension (simplifié)."""
     return "stable"
+
 
 def _evaluer_niveau(service, score: float) -> str:
     if score >= 80:
@@ -218,6 +234,7 @@ def _evaluer_niveau(service, score: float) -> str:
     if score >= 40:
         return "moyen"
     return "attention"
+
 
 def _generer_conseils(service, dimensions: list[DimensionBienEtre]) -> list[str]:
     """Génère des conseils basés sur les dimensions les plus faibles."""
@@ -229,6 +246,7 @@ def _generer_conseils(service, dimensions: list[DimensionBienEtre]) -> list[str]
     if not conseils:
         conseils.append("Continuez ainsi, votre bien-être familial est excellent !")
     return conseils
+
 
 def _generer_conseils_score_famille(service, dimensions: list[DimensionScoreFamille]) -> list[str]:
     """Conseils ciblés pour le score famille hebdo."""

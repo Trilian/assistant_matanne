@@ -44,7 +44,11 @@ def executer_job_rappels_jardin_saisonniers(
                 plantes = [cast(dict[str, Any], p) for p in catalogue if isinstance(p, dict)]
             elif isinstance(catalogue, dict):
                 brut = catalogue.get("plantes", [])
-                plantes = [cast(dict[str, Any], p) for p in brut if isinstance(p, dict)] if isinstance(brut, list) else []
+                plantes = (
+                    [cast(dict[str, Any], p) for p in brut if isinstance(p, dict)]
+                    if isinstance(brut, list)
+                    else []
+                )
             else:
                 plantes = []
 
@@ -78,7 +82,9 @@ def executer_job_rappels_jardin_saisonniers(
                 if plantes_db:
                     rappels.append("\n🌱 Vos plantes actives:")
                     for p in plantes_db:
-                        rappels.append(f"  • {p.nom} ({p.type_plante or 'non classé'}) — {p.emplacement or '?'}")
+                        rappels.append(
+                            f"  • {p.nom} ({p.type_plante or 'non classé'}) — {p.emplacement or '?'}"
+                        )
         except Exception:
             logger.debug("Table plantes_jardin non disponible")
 
@@ -253,8 +259,15 @@ def executer_job_backup_auto_hebdo_json() -> None:
             "total_rows": total_rows,
         }
 
-        filepath.write_text(json.dumps(backup_payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        logger.info("D7: Backup JSON créé: %s (%d lignes, %d tables)", filename, total_rows, len(export_data))
+        filepath.write_text(
+            json.dumps(backup_payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        logger.info(
+            "D7: Backup JSON créé: %s (%d lignes, %d tables)",
+            filename,
+            total_rows,
+            len(export_data),
+        )
 
         # Envoyer email de confirmation backup
         try:

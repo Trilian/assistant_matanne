@@ -6,6 +6,7 @@ car le prefixe /api/v1/jeux est defini dans jeux.py (agregateur).
 
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
@@ -23,7 +24,6 @@ from src.api.schemas.errors import (
 )
 from src.api.schemas.jeux import AnalyseIARequest, GenererGrilleRequest
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -150,18 +150,18 @@ async def lister_matchs(
             if cursor:
                 cursor_params = decoder_cursor(cursor)
                 query = appliquer_cursor_filter(
-                    query, 
-                    cursor_params, 
+                    query,
+                    cursor_params,
                     Match,
                     cursor_field="date_match",  # FIX B12: match l'ordre principal
-                    secondary_field="id"        # Stable tie-breaker
+                    secondary_field="id",  # Stable tie-breaker
                 )
                 items = query.limit(page_size + 1).all()
                 return construire_reponse_cursor(
-                    items, 
-                    page_size, 
+                    items,
+                    page_size,
                     cursor_field="date_match",  # FIX B12: match l'ordre
-                    secondary_field="id"        # FIX B12: ti-breaker unique
+                    secondary_field="id",  # FIX B12: ti-breaker unique
                 )
 
             # Pagination offset
@@ -279,12 +279,13 @@ async def lister_matchs_expert(
 ) -> dict[str, Any]:
     """
     Liste les matchs avec filtres avancÃ©s pour la vue Expert.
-    
+
     Filtre par championnat, dates, EV, confiance IA, patterns statistiques.
     Retourne toutes les donnÃ©es nÃ©cessaires pour l'analyse experte.
     """
-    from src.core.models import Match, Equipe
-    from sqlalchemy import or_, and_, func
+    from sqlalchemy import and_, func, or_
+
+    from src.core.models import Equipe, Match
 
     def _query():
         with executer_avec_session() as session:
@@ -371,31 +372,41 @@ async def lister_matchs_expert(
                 elif ev is not None and ev > 0.08:
                     pattern_detecte = "high_ev"
 
-                matchs_data.append({
-                    "id": m.id,
-                    "equipe_domicile": m.equipe_domicile.nom if m.equipe_domicile else "?",
-                    "equipe_exterieur": m.equipe_exterieur.nom if m.equipe_exterieur else "?",
-                    "date_match": m.date_match.isoformat(),
-                    "championnat": m.championnat,
-                    "cote_domicile": float(m.cote_domicile) if m.cote_domicile else None,
-                    "cote_nul": float(m.cote_nul) if m.cote_nul else None,
-                    "cote_exterieur": float(m.cote_exterieur) if m.cote_exterieur else None,
-                    "ev": float(ev) if ev is not None else None,
-                    "prediction_ia": m.prediction_resultat,
-                    "proba_ia": (
-                        float(m.prediction_proba_dom)
-                        if m.prediction_resultat == "domicile"
-                        else float(m.prediction_proba_nul)
-                        if m.prediction_resultat == "nul"
-                        else float(m.prediction_proba_ext)
-                        if m.prediction_resultat == "exterieur"
-                        else None
-                    ) if m.prediction_resultat else None,
-                    "confiance_ia": float(m.prediction_confiance) if m.prediction_confiance else None,
-                    "pattern_detecte": pattern_detecte,
-                    "forme_domicile": m.equipe_domicile.forme_recente if m.equipe_domicile else None,
-                    "forme_exterieur": m.equipe_exterieur.forme_recente if m.equipe_exterieur else None,
-                })
+                matchs_data.append(
+                    {
+                        "id": m.id,
+                        "equipe_domicile": m.equipe_domicile.nom if m.equipe_domicile else "?",
+                        "equipe_exterieur": m.equipe_exterieur.nom if m.equipe_exterieur else "?",
+                        "date_match": m.date_match.isoformat(),
+                        "championnat": m.championnat,
+                        "cote_domicile": float(m.cote_domicile) if m.cote_domicile else None,
+                        "cote_nul": float(m.cote_nul) if m.cote_nul else None,
+                        "cote_exterieur": float(m.cote_exterieur) if m.cote_exterieur else None,
+                        "ev": float(ev) if ev is not None else None,
+                        "prediction_ia": m.prediction_resultat,
+                        "proba_ia": (
+                            float(m.prediction_proba_dom)
+                            if m.prediction_resultat == "domicile"
+                            else float(m.prediction_proba_nul)
+                            if m.prediction_resultat == "nul"
+                            else float(m.prediction_proba_ext)
+                            if m.prediction_resultat == "exterieur"
+                            else None
+                        )
+                        if m.prediction_resultat
+                        else None,
+                        "confiance_ia": float(m.prediction_confiance)
+                        if m.prediction_confiance
+                        else None,
+                        "pattern_detecte": pattern_detecte,
+                        "forme_domicile": m.equipe_domicile.forme_recente
+                        if m.equipe_domicile
+                        else None,
+                        "forme_exterieur": m.equipe_exterieur.forme_recente
+                        if m.equipe_exterieur
+                        else None,
+                    }
+                )
 
             return {
                 "items": matchs_data,
@@ -426,45 +437,48 @@ async def obtenir_bankroll(
 
     def _query():
         manager = get_bankroll_manager()
-        
+
         # Calculer bankroll actuelle
         bankroll_actuelle = manager.calculer_bankroll_actuelle(
-            user_id=user_id,
-            bankroll_initiale=bankroll_initiale
+            user_id=user_id, bankroll_initiale=bankroll_initiale
         )
-        
+
         # Obtenir historique
         historique = manager.obtenir_historique_bankroll(
-            user_id=user_id,
-            bankroll_initiale=bankroll_initiale,
-            jours=jours
+            user_id=user_id, bankroll_initiale=bankroll_initiale, jours=jours
         )
-        
+
         # Calculer variation et ROI
         variation_totale = bankroll_actuelle - bankroll_initiale
-        
+
         # Calculer ROI depuis les paris
         with executer_avec_session() as session:
-            from src.core.models import PariSportif
             from sqlalchemy import func
-            
-            total_mises = session.query(func.coalesce(func.sum(PariSportif.mise), 0)).filter(
-                PariSportif.user_id == user_id
-            ).scalar() or 0
-            
-            total_gains = session.query(func.coalesce(func.sum(PariSportif.gain), 0)).filter(
-                PariSportif.user_id == user_id,
-                PariSportif.statut == "gagne"
-            ).scalar() or 0
-            
+
+            from src.core.models import PariSportif
+
+            total_mises = (
+                session.query(func.coalesce(func.sum(PariSportif.mise), 0))
+                .filter(PariSportif.user_id == user_id)
+                .scalar()
+                or 0
+            )
+
+            total_gains = (
+                session.query(func.coalesce(func.sum(PariSportif.gain), 0))
+                .filter(PariSportif.user_id == user_id, PariSportif.statut == "gagne")
+                .scalar()
+                or 0
+            )
+
             roi = manager.calculer_roi(total_mises, total_gains)
-        
+
         return {
             "bankroll_actuelle": bankroll_actuelle,
             "bankroll_initiale": bankroll_initiale,
             "variation_totale": variation_totale,
             "roi": roi,
-            "historique": historique
+            "historique": historique,
         }
 
     return await executer_async(_query)
@@ -484,14 +498,11 @@ async def suggerer_mise_kelly(
 
     def _query():
         manager = get_bankroll_manager()
-        
+
         suggestion = manager.suggerer_mise(
-            bankroll=bankroll,
-            edge=edge,
-            cote=cote,
-            confiance_ia=confiance_ia
+            bankroll=bankroll, edge=edge, cote=cote, confiance_ia=confiance_ia
         )
-        
+
         return {
             "mise_suggeree": suggestion.mise_suggeree,
             "mise_kelly_complete": suggestion.mise_kelly_complete,
@@ -499,7 +510,7 @@ async def suggerer_mise_kelly(
             "edge": suggestion.edge,
             "pourcentage_bankroll": suggestion.pourcentage_bankroll,
             "confiance": suggestion.confiance,
-            "message": suggestion.message
+            "message": suggestion.message,
         }
 
     return await executer_async(_query)
@@ -624,7 +635,7 @@ async def analyser_patterns_utilisateur(
 ) -> dict[str, Any]:
     """
     Analyse les patterns de paris de l'utilisateur pour dÃ©tecter les biais cognitifs.
-    
+
     Retourne:
     - regression_moyenne: Alerte si sÃ©rie exceptionnelle (hot/cold streak)
     - hot_hand: Alerte si clustering de victoires (illusion main chaude)
@@ -634,13 +645,13 @@ async def analyser_patterns_utilisateur(
 
     def _query():
         service = SeriesStatistiquesService()
-        
+
         # Analyser les patterns
         resultats = service.analyser_patterns_utilisateur(user_id)
-        
+
         # Formater pour le frontend
         response = {}
-        
+
         if resultats.get("regression_moyenne"):
             r = resultats["regression_moyenne"]
             response["regression_moyenne"] = {
@@ -648,9 +659,9 @@ async def analyser_patterns_utilisateur(
                 "severite": r.severite,
                 "message": r.message,
                 "details": r.details,
-                "type_pattern": r.type_pattern
+                "type_pattern": r.type_pattern,
             }
-        
+
         if resultats.get("hot_hand"):
             r = resultats["hot_hand"]
             response["hot_hand"] = {
@@ -658,9 +669,9 @@ async def analyser_patterns_utilisateur(
                 "severite": r.severite,
                 "message": r.message,
                 "details": r.details,
-                "type_pattern": r.type_pattern
+                "type_pattern": r.type_pattern,
             }
-        
+
         if resultats.get("gamblers_fallacy"):
             r = resultats["gamblers_fallacy"]
             response["gamblers_fallacy"] = {
@@ -668,9 +679,9 @@ async def analyser_patterns_utilisateur(
                 "severite": r.severite,
                 "message": r.message,
                 "details": r.details,
-                "type_pattern": r.type_pattern
+                "type_pattern": r.type_pattern,
             }
-        
+
         return response
 
     return await executer_async(_query)
@@ -844,7 +855,9 @@ async def modifier_pari(
                     session.add(historique)
                     session.flush()
 
-                def _ajuster_historique(statut: str, mise_val: Decimal, gain_val: Decimal, sens: int) -> None:
+                def _ajuster_historique(
+                    statut: str, mise_val: Decimal, gain_val: Decimal, sens: int
+                ) -> None:
                     if statut not in {"gagne", "perdu"}:
                         return
                     historique.nb_paris = max(0, int(historique.nb_paris or 0) + sens)
@@ -910,6 +923,7 @@ async def supprimer_pari(
 ) -> MessageResponse:
     """Supprime un pari."""
     from src.core.models import PariSportif
+
     def _query():
         with executer_avec_session() as session:
             pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
@@ -918,18 +932,8 @@ async def supprimer_pari(
             session.delete(pari)
             session.commit()
             return MessageResponse(message="Pari supprimÃ©")
+
     return await executer_async(_query)
-
-
-
-
-
-
-
-
-
-
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -1029,16 +1033,26 @@ async def prediction_match(
                 "nuls": match.equipe_domicile.nuls if match.equipe_domicile else 0,
                 "defaites": match.equipe_domicile.defaites if match.equipe_domicile else 0,
                 "buts_marques": match.equipe_domicile.buts_marques if match.equipe_domicile else 0,
-                "buts_encaisses": match.equipe_domicile.buts_encaisses if match.equipe_domicile else 0,
-                "forme_recente": match.equipe_domicile.forme_recente if match.equipe_domicile else None,
+                "buts_encaisses": match.equipe_domicile.buts_encaisses
+                if match.equipe_domicile
+                else 0,
+                "forme_recente": match.equipe_domicile.forme_recente
+                if match.equipe_domicile
+                else None,
             }
             forme_ext = {
                 "victoires": match.equipe_exterieur.victoires if match.equipe_exterieur else 0,
                 "nuls": match.equipe_exterieur.nuls if match.equipe_exterieur else 0,
                 "defaites": match.equipe_exterieur.defaites if match.equipe_exterieur else 0,
-                "buts_marques": match.equipe_exterieur.buts_marques if match.equipe_exterieur else 0,
-                "buts_encaisses": match.equipe_exterieur.buts_encaisses if match.equipe_exterieur else 0,
-                "forme_recente": match.equipe_exterieur.forme_recente if match.equipe_exterieur else None,
+                "buts_marques": match.equipe_exterieur.buts_marques
+                if match.equipe_exterieur
+                else 0,
+                "buts_encaisses": match.equipe_exterieur.buts_encaisses
+                if match.equipe_exterieur
+                else 0,
+                "forme_recente": match.equipe_exterieur.forme_recente
+                if match.equipe_exterieur
+                else None,
             }
             h2h = {}
             cotes = {}
@@ -1076,6 +1090,7 @@ async def lister_value_bets(
     """Liste les value bets (matchs avec edge > seuil)."""
     from src.core.models import Match
     from src.services.jeux import obtenir_odds_data_service, obtenir_prediction_service
+
     def _query():
         with executer_avec_session() as session:
             today = date.today()
@@ -1100,20 +1115,31 @@ async def lister_value_bets(
                         "nuls": m.equipe_domicile.nuls if m.equipe_domicile else 0,
                         "defaites": m.equipe_domicile.defaites if m.equipe_domicile else 0,
                         "buts_marques": m.equipe_domicile.buts_marques if m.equipe_domicile else 0,
-                        "buts_encaisses": m.equipe_domicile.buts_encaisses if m.equipe_domicile else 0,
+                        "buts_encaisses": m.equipe_domicile.buts_encaisses
+                        if m.equipe_domicile
+                        else 0,
                     }
                     forme_ext = {
                         "victoires": m.equipe_exterieur.victoires if m.equipe_exterieur else 0,
                         "nuls": m.equipe_exterieur.nuls if m.equipe_exterieur else 0,
                         "defaites": m.equipe_exterieur.defaites if m.equipe_exterieur else 0,
-                        "buts_marques": m.equipe_exterieur.buts_marques if m.equipe_exterieur else 0,
-                        "buts_encaisses": m.equipe_exterieur.buts_encaisses if m.equipe_exterieur else 0,
+                        "buts_marques": m.equipe_exterieur.buts_marques
+                        if m.equipe_exterieur
+                        else 0,
+                        "buts_encaisses": m.equipe_exterieur.buts_encaisses
+                        if m.equipe_exterieur
+                        else 0,
                     }
-                    pred = pred_svc.predire_resultat_match(forme_dom, forme_ext, {}, {
-                        "domicile": m.cote_domicile,
-                        "nul": m.cote_nul,
-                        "exterieur": m.cote_exterieur,
-                    })
+                    pred = pred_svc.predire_resultat_match(
+                        forme_dom,
+                        forme_ext,
+                        {},
+                        {
+                            "domicile": m.cote_domicile,
+                            "nul": m.cote_nul,
+                            "exterieur": m.cote_exterieur,
+                        },
+                    )
                     # Trouver la meilleure proba vs cote
                     mapping = {
                         "domicile": (pred.probabilites.get("domicile", 0), m.cote_domicile),
@@ -1124,29 +1150,30 @@ async def lister_value_bets(
                         if proba and cote and proba > 0:
                             edge_info = odds_svc.calculer_edge(cote, proba)
                             if edge_info.get("edge_pct", 0) >= seuil_ev:
-                                value_bets.append({
-                                    "match_id": m.id,
-                                    "equipe_domicile": m.equipe_domicile.nom if m.equipe_domicile else None,
-                                    "equipe_exterieur": m.equipe_exterieur.nom if m.equipe_exterieur else None,
-                                    "date_match": m.date_match.isoformat(),
-                                    "cote_bookmaker": cote,
-                                    "proba_estimee": proba,
-                                    "edge_pct": edge_info.get("edge_pct", 0),
-                                    "ev": edge_info.get("ev", 0),
-                                    "type_pari": type_pari,
-                                    "prediction": pred.prediction,
-                                })
+                                value_bets.append(
+                                    {
+                                        "match_id": m.id,
+                                        "equipe_domicile": m.equipe_domicile.nom
+                                        if m.equipe_domicile
+                                        else None,
+                                        "equipe_exterieur": m.equipe_exterieur.nom
+                                        if m.equipe_exterieur
+                                        else None,
+                                        "date_match": m.date_match.isoformat(),
+                                        "cote_bookmaker": cote,
+                                        "proba_estimee": proba,
+                                        "edge_pct": edge_info.get("edge_pct", 0),
+                                        "ev": edge_info.get("ev", 0),
+                                        "type_pari": type_pari,
+                                        "prediction": pred.prediction,
+                                    }
+                                )
                 except Exception:
                     continue
             value_bets.sort(key=lambda x: x["edge_pct"], reverse=True)
             return {"items": value_bets[:20]}
+
     return await executer_async(_query)
-
-
-
-
-
-
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -1162,6 +1189,7 @@ async def obtenir_historique_cotes(
 ) -> dict[str, Any]:
     """RÃ©cupÃ¨re l'historique des cotes d'un match pour heatmap."""
     from src.core.models import CoteHistorique
+
     def _query():
         with executer_avec_session() as session:
             historique = (
@@ -1193,4 +1221,5 @@ async def obtenir_historique_cotes(
                     for h in historique
                 ],
             }
+
     return await executer_async(_query)
