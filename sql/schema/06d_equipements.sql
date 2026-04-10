@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS objets_maison (
     marque VARCHAR(100),
     modele VARCHAR(100),
     notes TEXT,
+    duree_vie_ans INTEGER,
     cree_le TIMESTAMP DEFAULT NOW(),
     modifie_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE

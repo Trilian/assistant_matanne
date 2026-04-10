@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 4.0 (régénéré automatiquement)
--- Généré le  : 2026-04-10 05:48 UTC
--- Source     : sql/schema/*.sql (21 fichiers, ~5083 lignes)
+-- Généré le  : 2026-04-10 09:00 UTC
+-- Source     : sql/schema/*.sql (21 fichiers, ~5085 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -1510,6 +1510,7 @@ CREATE TABLE IF NOT EXISTS repas (
     notes_jules TEXT,
     adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
     contexte_meteo VARCHAR(50),
+    laitage VARCHAR(200),
     CONSTRAINT fk_repas_planning FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE,
     CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL,
@@ -2768,6 +2769,7 @@ CREATE TABLE IF NOT EXISTS objets_maison (
     marque VARCHAR(100),
     modele VARCHAR(100),
     notes TEXT,
+    duree_vie_ans INTEGER,
     cree_le TIMESTAMP DEFAULT NOW(),
     modifie_le TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE
