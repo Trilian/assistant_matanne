@@ -31,7 +31,7 @@ COPY sql/ sql/
 
 # ─── Utilisateur non-root (sécurité) ───
 RUN mkdir -p /app/.cache && \
-    adduser --disabled-password --no-create-home appuser && \
+    useradd --system --no-create-home --shell /bin/false appuser && \
     chown -R appuser:appuser /app/.cache
 USER appuser
 
