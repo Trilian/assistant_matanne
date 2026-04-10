@@ -57,7 +57,6 @@ class PlanningIAGenerationMixin:
             recette = Recette(
                 nom=nom,
                 temps_preparation=30,
-                source="ia_planning",
             )
             db.add(recette)
             db.flush()
