@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS recettes (
     portions INTEGER NOT NULL DEFAULT 4,
     difficulte VARCHAR(50) NOT NULL DEFAULT 'moyen',
     -- Catégorisation
-    type_repas VARCHAR(50) NOT NULL DEFAULT 'dîner',
+    type_repas VARCHAR(50) NOT NULL DEFAULT 'diner',
     saison VARCHAR(50) NOT NULL DEFAULT 'toute_année',
     categorie VARCHAR(100) NOT NULL DEFAULT 'Plat',
     -- Flags - Tags système
@@ -413,7 +413,7 @@ CREATE TABLE IF NOT EXISTS repas (
     planning_id INTEGER NOT NULL,
     recette_id INTEGER,
     date_repas DATE NOT NULL,
-    type_repas VARCHAR(50) NOT NULL DEFAULT 'dîner',
+    type_repas VARCHAR(50) NOT NULL DEFAULT 'diner',
     portion_ajustee INTEGER,
     prepare BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,

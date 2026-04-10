@@ -138,6 +138,7 @@ class PariResponse(BaseModel):
     gain: float | None = None
     est_virtuel: bool = True
     confiance_prediction: float | None = None
+    cree_le: datetime | None = None
 
 
 class StatistiquesParis(BaseModel):

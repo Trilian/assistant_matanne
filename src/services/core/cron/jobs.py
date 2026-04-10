@@ -3385,7 +3385,7 @@ def _job_sync_jeux_budget() -> None:
 
                 session.query(func.sum(PariSportif.mise))
 
-                .filter(PariSportif.date_pari >= debut_jour, PariSportif.date_pari < fin_jour)
+                .filter(PariSportif.cree_le >= debut_jour, PariSportif.cree_le < fin_jour)
 
                 .scalar()
 
@@ -3397,7 +3397,7 @@ def _job_sync_jeux_budget() -> None:
 
                 session.query(func.sum(PariSportif.gain))
 
-                .filter(PariSportif.date_pari >= debut_jour, PariSportif.date_pari < fin_jour)
+                .filter(PariSportif.cree_le >= debut_jour, PariSportif.cree_le < fin_jour)
 
                 .scalar()
 

@@ -830,9 +830,7 @@ async def recettes_saisonnieres(
 
 @router.get("/calendrier-saisonnier", responses=REPONSES_LISTE)
 @gerer_exception_api
-async def calendrier_saisonnier(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
+async def calendrier_saisonnier() -> dict[str, Any]:
     """Calendrier visuel des produits de saison par mois (C1).
 
     Retourne le catalogue enrichi d'ingrédients de saison avec

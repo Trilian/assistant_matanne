@@ -51,8 +51,8 @@ class BudgetJeuxInteractionService:
             db.query(PariSportif)
             .filter(
                 PariSportif.user_id == user_id,
-                PariSportif.date_pari >= debut_semaine,
-                PariSportif.date_pari <= fin_semaine,
+                PariSportif.cree_le >= debut_semaine,
+                PariSportif.cree_le <= fin_semaine,
             )
             .with_entities(db.func.sum(PariSportif.mise))
             .scalar() or 0.0

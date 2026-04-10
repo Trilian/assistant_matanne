@@ -533,9 +533,9 @@ export default function PageCourses() {
         />
       </div>
 
-      {panneauBio && bioLocal && bioLocal.suggestions.length > 0 && (
+      {panneauBio && bioLocal?.suggestions?.length ? (
         <PanneauBioLocal bioLocal={bioLocal} />
-      )}
+      ) : null}
 
       {afficherCorrespondancesDrive && <PanneauCorrespondancesDrive />}
 

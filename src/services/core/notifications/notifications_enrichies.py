@@ -152,8 +152,8 @@ class HandlersTelegramEnrichis:
 
                 paris = (
                     session.query(PariSportif)
-                    .filter(PariSportif.date_pari >= semaine_debut)
-                    .filter(PariSportif.date_pari <= today)
+                    .filter(PariSportif.cree_le >= semaine_debut)
+                    .filter(PariSportif.cree_le <= today)
                     .all()
                 )
 

@@ -1,15 +1,15 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
--- Version    : 4.0
--- Mis à jour : 2026-04-08
--- Source     : sql/schema/*.sql (consolidé, migrations intégrées)
+-- Version    : 4.0 (régénéré automatiquement)
+-- Généré le  : 2026-04-09 20:02 UTC
+-- Source     : sql/schema/*.sql (21 fichiers, ~5117 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
--- Ce fichier est la source de vérité pour l'initialisation complète.
--- Toutes les modifications de schéma passent désormais par les fichiers
--- sql/schema/*.sql ET sont répercutées ici — plus de migrations séparées.
+-- ⚠️  NE PAS MODIFIER CE FICHIER DIRECTEMENT.
+--     Modifier les fichiers dans sql/schema/ puis relancer:
+--       python scripts/db/regenerate_init.py
 --
 -- Workflow SQL-first:
 --   - Nouvelles tables / colonnes → modifier sql/schema/0X_domaine.sql
@@ -22,7 +22,6 @@
 --
 -- ============================================================================
 
-
 -- Source: 01_extensions.sql
 -- ============================================================================
 -- ASSISTANT MATANNE — Extensions & Transaction
@@ -34,12 +33,41 @@
 BEGIN;
 
 -- ============================================================================
--- DROP ALL TABLES (reset propre — drop dynamique du schéma public)
+-- DROP COMPLET DU SCHEMA PUBLIC (reset propre)
+-- Ordre : vues → fonctions/procédures → tables → types enum
 -- ============================================================================
 DO $$
 DECLARE
     r RECORD;
 BEGIN
+    -- 1. Supprimer les vues
+    FOR r IN
+        SELECT viewname
+        FROM pg_views
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE 'DROP VIEW IF EXISTS public.' || quote_ident(r.viewname) || ' CASCADE';
+    END LOOP;
+
+    -- 2. Supprimer les fonctions et procédures
+    FOR r IN
+        SELECT p.oid,
+               p.proname,
+               CASE p.prokind WHEN 'p' THEN 'PROCEDURE' ELSE 'FUNCTION' END AS kind,
+               pg_get_function_identity_arguments(p.oid) AS args
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public'
+    LOOP
+        EXECUTE format(
+            'DROP %s IF EXISTS public.%I(%s) CASCADE',
+            r.kind,
+            r.proname,
+            r.args
+        );
+    END LOOP;
+
+    -- 3. Supprimer les tables
     FOR r IN
         SELECT tablename
         FROM pg_tables
@@ -47,9 +75,20 @@ BEGIN
     LOOP
         EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
     END LOOP;
+
+    -- 4. Supprimer les types enum
+    FOR r IN
+        SELECT t.typname
+        FROM pg_type t
+        JOIN pg_namespace n ON n.oid = t.typnamespace
+        WHERE n.nspname = 'public'
+          AND t.typtype = 'e'
+    LOOP
+        EXECUTE 'DROP TYPE IF EXISTS public.' || quote_ident(r.typname) || ' CASCADE';
+    END LOOP;
 END $$;
 
--- ============================================================================
+
 -- Source: 02_functions.sql
 -- PARTIE 1 : FONCTIONS TRIGGER
 -- ============================================================================
@@ -873,6 +912,49 @@ CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_h
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 4.XX CHECKLISTS_ANNIVERSAIRE — Listes de tâches pour préparer les anniversaires
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS checklists_anniversaire (
+    id SERIAL PRIMARY KEY,
+    anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
+    nom VARCHAR(200) NOT NULL,
+    budget_total FLOAT,
+    date_limite DATE,
+    completee BOOLEAN NOT NULL DEFAULT FALSE,
+    notes TEXT,
+    maj_auto_le TIMESTAMP,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
+
+CREATE TABLE IF NOT EXISTS items_checklist_anniversaire (
+    id SERIAL PRIMARY KEY,
+    checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
+    categorie VARCHAR(50) NOT NULL,
+    libelle VARCHAR(300) NOT NULL,
+    budget_estime FLOAT,
+    budget_reel FLOAT,
+    fait BOOLEAN NOT NULL DEFAULT FALSE,
+    priorite VARCHAR(20) NOT NULL DEFAULT 'moyenne',
+    responsable VARCHAR(50),
+    quand VARCHAR(20),
+    source VARCHAR(20) NOT NULL DEFAULT 'manuel',
+    score_pertinence FLOAT,
+    raison_suggestion TEXT,
+    ordre INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_checklist_id ON items_checklist_anniversaire(checklist_id);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_checklist_anniversaire(categorie);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX EVENEMENTS_FAMILIAUX — Calendrier partagé
 
 
@@ -1064,7 +1146,8 @@ CREATE TABLE IF NOT EXISTS batch_cooking_congelation (
     date_consommation DATE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT ck_congelation_portions_positive_placeholder CHECK (1=1),
+    CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL,
     CONSTRAINT ck_congelation_portions_positive CHECK (portions > 0),
     CONSTRAINT ck_congelation_categorie CHECK (categorie IN (
         'viande', 'poisson', 'legume', 'fruit', 'plat_cuisine',
@@ -1125,7 +1208,7 @@ CREATE TABLE IF NOT EXISTS minuteur_sessions (
     user_id VARCHAR(255) NOT NULL,
     label VARCHAR(200) NOT NULL,
     duree_secondes INTEGER NOT NULL CHECK (duree_secondes > 0),
-    recette_id INTEGER,
+    recette_id INTEGER REFERENCES recettes(id) ON DELETE SET NULL,
     date_debut TIMESTAMP,
     date_fin TIMESTAMP,
     terminee BOOLEAN DEFAULT FALSE,
@@ -1176,7 +1259,7 @@ CREATE TABLE IF NOT EXISTS recettes (
     portions INTEGER NOT NULL DEFAULT 4,
     difficulte VARCHAR(50) NOT NULL DEFAULT 'moyen',
     -- Catégorisation
-    type_repas VARCHAR(50) NOT NULL DEFAULT 'dîner',
+    type_repas VARCHAR(50) NOT NULL DEFAULT 'diner',
     saison VARCHAR(50) NOT NULL DEFAULT 'toute_année',
     categorie VARCHAR(100) NOT NULL DEFAULT 'Plat',
     -- Flags - Tags système
@@ -1429,13 +1512,13 @@ CREATE TABLE IF NOT EXISTS inventaire (
     quantite_min FLOAT NOT NULL DEFAULT 1.0,
     emplacement VARCHAR(100),
     date_peremption DATE,
+    date_entree DATE NOT NULL DEFAULT CURRENT_DATE,
     derniere_maj TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     photo_url VARCHAR(500),
     photo_filename VARCHAR(200),
     photo_uploaded_at TIMESTAMP WITH TIME ZONE,
     code_barres VARCHAR(50),
     prix_unitaire FLOAT,
-    date_entree DATE NOT NULL DEFAULT CURRENT_DATE,
     CONSTRAINT fk_inventaire_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
     CONSTRAINT ck_quantite_inventaire_positive CHECK (quantite >= 0),
     CONSTRAINT ck_seuil_positif CHECK (quantite_min >= 0)
@@ -1558,7 +1641,7 @@ CREATE TABLE IF NOT EXISTS repas (
     planning_id INTEGER NOT NULL,
     recette_id INTEGER,
     date_repas DATE NOT NULL,
-    type_repas VARCHAR(50) NOT NULL DEFAULT 'dîner',
+    type_repas VARCHAR(50) NOT NULL DEFAULT 'diner',
     portion_ajustee INTEGER,
     prepare BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,
@@ -2230,44 +2313,6 @@ CREATE TABLE IF NOT EXISTS anniversaires_famille (
 CREATE INDEX IF NOT EXISTS ix_anniversaires_date ON anniversaires_famille(date_naissance);
 CREATE INDEX IF NOT EXISTS ix_anniversaires_actif ON anniversaires_famille(actif);
 
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS checklists_anniversaire (
-    id SERIAL PRIMARY KEY,
-    anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
-    nom VARCHAR(200) NOT NULL,
-    budget_total FLOAT,
-    date_limite DATE,
-    completee BOOLEAN NOT NULL DEFAULT FALSE,
-    notes TEXT,
-    maj_auto_le TIMESTAMP,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
-CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
-
-CREATE TABLE IF NOT EXISTS items_checklist_anniversaire (
-    id SERIAL PRIMARY KEY,
-    checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
-    categorie VARCHAR(50) NOT NULL,
-    libelle VARCHAR(300) NOT NULL,
-    budget_estime FLOAT,
-    budget_reel FLOAT,
-    fait BOOLEAN NOT NULL DEFAULT FALSE,
-    priorite VARCHAR(20) NOT NULL DEFAULT 'moyenne',
-    responsable VARCHAR(50),
-    quand VARCHAR(20),
-    source VARCHAR(20) NOT NULL DEFAULT 'manuel',
-    score_pertinence FLOAT,
-    raison_suggestion TEXT,
-    ordre INTEGER NOT NULL DEFAULT 0,
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_checklist_id ON items_checklist_anniversaire(checklist_id);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_checklist_anniversaire(categorie);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
-
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS evenements_familiaux (
@@ -2792,7 +2837,6 @@ CREATE TABLE IF NOT EXISTS objets_maison (
     priorite_remplacement VARCHAR(20),
     date_achat DATE,
     duree_garantie_mois INTEGER,
-    duree_vie_ans INTEGER,
     prix_achat NUMERIC(10, 2),
     prix_remplacement_estime NUMERIC(10, 2),
     marque VARCHAR(100),
@@ -3557,6 +3601,7 @@ CREATE TABLE IF NOT EXISTS jeux_matchs (
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS jeux_paris_sportifs (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER,
     match_id INTEGER NOT NULL,
     type_pari VARCHAR(30) NOT NULL DEFAULT '1N2',
     prediction VARCHAR(20) NOT NULL,
@@ -5174,88 +5219,6 @@ GRANT SELECT,
 GRANT USAGE,
     SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 -- ============================================================================
-
--- Source: 17_migrations_absorbees.sql
--- ============================================================================
--- ASSISTANT MATANNE — Migrations absorbees (SQL-first)
--- ============================================================================
--- Objectif: conserver un script idempotent pour aligner les schemas existants
--- avec les conventions actuelles quand les colonnes ont evolue.
--- ============================================================================
-
--- workflow validation v2 (planning + courses)
-
--- Plannings: ajoute `etat` si absent, puis migre depuis `actif` si present.
-ALTER TABLE plannings
-    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon';
-
-DO $$
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'plannings' AND column_name = 'actif'
-    ) THEN
-        UPDATE plannings
-        SET etat = CASE
-            WHEN actif IS TRUE THEN 'valide'
-            ELSE 'archive'
-        END
-        WHERE etat = 'brouillon';
-    END IF;
-END $$;
-
-CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
-
--- Listes de courses: ajoute `etat` et `archivee`, puis migre depuis `statut` si present.
-ALTER TABLE listes_courses
-    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon';
-
-ALTER TABLE listes_courses
-    ADD COLUMN IF NOT EXISTS archivee BOOLEAN NOT NULL DEFAULT FALSE;
-
-DO $$
-BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_name = 'listes_courses' AND column_name = 'statut'
-    ) THEN
-        UPDATE listes_courses
-        SET etat = CASE
-            WHEN statut IN ('active', 'en_cours') THEN 'active'
-            WHEN statut IN ('completee', 'archivee') THEN 'terminee'
-            ELSE 'brouillon'
-        END
-        WHERE etat = 'brouillon';
-    END IF;
-END $$;
-
-CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
-CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
-
--- Source: migrations/V001__add_repas_jules_columns.sql
--- ============================================================================
--- MIGRATION V001 — Ajout colonnes Jules et contexte sur la table repas
--- ============================================================================
--- Colonnes présentes dans le modèle SQLAlchemy mais absentes du schéma initial.
--- Idempotent : ADD COLUMN IF NOT EXISTS.
-
-ALTER TABLE repas
-    ADD COLUMN IF NOT EXISTS plat_jules TEXT,
-    ADD COLUMN IF NOT EXISTS notes_jules TEXT,
-    ADD COLUMN IF NOT EXISTS adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
-    ADD COLUMN IF NOT EXISTS contexte_meteo VARCHAR(50);
-
--- ============================================================================
--- FOREIGN KEYS DIFFÉRÉES (tables créées après leurs référents)
--- ============================================================================
-ALTER TABLE batch_cooking_congelation
-    ADD CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-    ADD CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL;
-ALTER TABLE minuteur_sessions
-    ADD CONSTRAINT fk_minuteur_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL;
-
 
 -- Source: 99_footer.sql
 -- ============================================================================

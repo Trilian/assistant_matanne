@@ -369,6 +369,7 @@ __all__ = [
     "StockSaisonCroise",
     "INGREDIENTS_SAISON_ENRICHI",
     "PAIRES_SAISON",
+    "obtenir_saison",
     "obtenir_ingredients_saison_enrichis",
     "obtenir_paires_saison",
     "croisement_stock_saison",

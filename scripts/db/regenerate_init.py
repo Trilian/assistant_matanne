@@ -81,7 +81,7 @@ def build_header(schema_dir: Path, files: list[Path]) -> str:
 -- ============================================================================
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
--- Version    : 3.1 (régénéré automatiquement)
+-- Version    : 4.0 (régénéré automatiquement)
 -- Généré le  : {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}
 -- Source     : sql/schema/*.sql ({len(files)} fichiers, ~{total_lines} lignes)
 -- Cible      : Supabase PostgreSQL
@@ -92,15 +92,80 @@ def build_header(schema_dir: Path, files: list[Path]) -> str:
 --       python scripts/db/regenerate_init.py
 --
 -- Workflow SQL-first:
---   - Nouvelles tables → ajouter dans sql/schema/0X_domaine.sql
---   - Modifications  → créer sql/migrations/VNNN__description.sql
---   - Réinitialisation complète → exécuter ce fichier (DROP CASCADE)
+--   - Nouvelles tables / colonnes → modifier sql/schema/0X_domaine.sql
+--                                   ET mettre à jour ce fichier
+--   - Réinitialisation complète   → exécuter ce fichier (DROP CASCADE)
 --
 -- Usage:
 --   psql $DATABASE_URL -f sql/INIT_COMPLET.sql
 --   (ou Supabase SQL Editor)
 --
 -- ============================================================================
+"""
+
+
+def build_drop_block() -> str:
+    """Génère le bloc SQL de suppression complète du schéma public.
+
+    Supprime dans l'ordre : vues → fonctions/procédures → tables → types enum.
+    Tout est en CASCADE pour éviter les erreurs de dépendances.
+    """
+    return """\
+-- ============================================================================
+-- DROP COMPLET DU SCHEMA PUBLIC (reset propre)
+-- Ordre : vues → fonctions/procédures → tables → types enum
+-- ============================================================================
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    -- 1. Supprimer les vues
+    FOR r IN
+        SELECT viewname
+        FROM pg_views
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE 'DROP VIEW IF EXISTS public.' || quote_ident(r.viewname) || ' CASCADE';
+    END LOOP;
+
+    -- 2. Supprimer les fonctions et procédures
+    FOR r IN
+        SELECT p.oid,
+               p.proname,
+               CASE p.prokind WHEN 'p' THEN 'PROCEDURE' ELSE 'FUNCTION' END AS kind,
+               pg_get_function_identity_arguments(p.oid) AS args
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public'
+    LOOP
+        EXECUTE format(
+            'DROP %s IF EXISTS public.%I(%s) CASCADE',
+            r.kind,
+            r.proname,
+            r.args
+        );
+    END LOOP;
+
+    -- 3. Supprimer les tables
+    FOR r IN
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+
+    -- 4. Supprimer les types enum
+    FOR r IN
+        SELECT t.typname
+        FROM pg_type t
+        JOIN pg_namespace n ON n.oid = t.typnamespace
+        WHERE n.nspname = 'public'
+          AND t.typtype = 'e'
+    LOOP
+        EXECUTE 'DROP TYPE IF EXISTS public.' || quote_ident(r.typname) || ' CASCADE';
+    END LOOP;
+END $$;
 """
 
 
@@ -126,20 +191,6 @@ def main() -> int:
             missing.append(filename)
             print(f"  ⚠️  Fichier manquant: {filename}", file=sys.stderr)
 
-    # Chercher aussi les fichiers supplémentaires (non listés dans EXPECTED_FILES)
-    extra_files = [
-        f for f in sorted(schema_dir.glob("*.sql"))
-        if f.name not in EXPECTED_FILES
-    ]
-    if extra_files:
-        print(f"  ℹ️  Fichiers supplémentaires trouvés: {[f.name for f in extra_files]}")
-        # Les insérer avant 99_footer.sql
-        insert_before_footer = output_path if not found_files else None
-        for ef in extra_files:
-            if ef not in found_files and "99_footer.sql" in EXPECTED_FILES:
-                idx = found_files.index(schema_dir / "99_footer.sql") if (schema_dir / "99_footer.sql") in found_files else len(found_files)
-                found_files.insert(idx, ef)
-
     if not found_files:
         print("❌ Aucun fichier SQL trouvé dans sql/schema/", file=sys.stderr)
         return 1
@@ -154,6 +205,9 @@ def main() -> int:
         # (le BEGIN est déjà dans 01_extensions.sql)
         parts.append(f"\n-- Source: {f.name}\n")
         parts.append(content)
+        # Injecter le DROP complet juste après BEGIN; (01_extensions.sql)
+        if f.name == "01_extensions.sql":
+            parts.append("\n" + build_drop_block() + "\n")
 
     final_content = "".join(parts)
 

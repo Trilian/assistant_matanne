@@ -215,7 +215,6 @@ class PariSportif(CreeLeMixin, Base):
     match_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("jeux_matchs.id"), nullable=True
     )
-    date_pari: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # Détails du pari
     type_pari: Mapped[str] = mapped_column(String(30), default="1N2")  # 1N2, over_under, etc.

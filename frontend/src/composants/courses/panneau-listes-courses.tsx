@@ -112,7 +112,7 @@ export function PanneauListesCourses({
           </div>
         )}
 
-        {recurrents && recurrents.suggestions.length > 0 && listeSelectionnee && (
+        {recurrents?.suggestions?.length && listeSelectionnee && (
           <div className="mt-3 border-t pt-3">
             <p className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
               <RotateCcw className="h-3 w-3" />
@@ -140,7 +140,7 @@ export function PanneauListesCourses({
           </div>
         )}
 
-        {listeSelectionnee && predictionsInvites && predictionsInvites.items.length > 0 && (
+        {listeSelectionnee && predictionsInvites?.items?.length && (
           <div className="mt-3 border-t pt-3">
             <p className="mb-2 text-xs font-medium text-muted-foreground">
               Suggestions invites
@@ -162,11 +162,11 @@ export function PanneauListesCourses({
                   </div>
                   <p className="mt-1 text-[11px] text-muted-foreground">
                     Confiance {Math.round(prediction.confiance_contextualisee * 100)}%
-                    {prediction.contexte_applique.raisons.length > 0 && (
+                    {prediction.contexte_applique?.raisons?.length ? (
                       <span>
                         {" "}· {prediction.contexte_applique.raisons.join(", ")}
                       </span>
-                    )}
+                    ) : null}
                   </p>
                 </button>
               ))}

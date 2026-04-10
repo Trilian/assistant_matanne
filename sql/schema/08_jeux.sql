@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS jeux_matchs (
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS jeux_paris_sportifs (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER,
     match_id INTEGER NOT NULL,
     type_pari VARCHAR(30) NOT NULL DEFAULT '1N2',
     prediction VARCHAR(20) NOT NULL,

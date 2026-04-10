@@ -72,8 +72,8 @@ class StatsPersonnellesService:
             filtres_paris = []
             if _has_attr(PariSportif, "user_id"):
                 filtres_paris.append(PariSportif.user_id == user_id)
-            if _has_attr(PariSportif, "date_pari"):
-                filtres_paris.append(PariSportif.date_pari >= date_debut)
+            if _has_attr(PariSportif, "cree_le"):
+                filtres_paris.append(PariSportif.cree_le >= date_debut)
             if _has_attr(PariSportif, "statut"):
                 filtres_paris.append(PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"]))
 
@@ -171,8 +171,8 @@ class StatsPersonnellesService:
             filtres_paris = []
             if _has_attr(PariSportif, "user_id"):
                 filtres_paris.append(PariSportif.user_id == user_id)
-            if _has_attr(PariSportif, "date_pari"):
-                filtres_paris.append(PariSportif.date_pari >= date_debut)
+            if _has_attr(PariSportif, "cree_le"):
+                filtres_paris.append(PariSportif.cree_le >= date_debut)
 
             paris_total_query = session.query(func.count(PariSportif.id))
             if filtres_paris:
@@ -306,7 +306,7 @@ class StatsPersonnellesService:
                 func.sum(PariSportif.mise).label("mises")
             ).filter(
                 PariSportif.user_id == user_id,
-                PariSportif.date_pari >= date_debut,
+                PariSportif.cree_le >= date_debut,
                 PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"])
             ).group_by(PariSportif.type_pari).all()
             
@@ -460,8 +460,8 @@ class StatsPersonnellesService:
                 # Calcul ROI pour ce mois
                 paris = session.query(PariSportif).filter(
                     PariSportif.user_id == user_id,
-                    PariSportif.date_pari >= date_debut,
-                    PariSportif.date_pari < date_fin,
+                    PariSportif.cree_le >= date_debut,
+                    PariSportif.cree_le < date_fin,
                     PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"])
                 ).all()
                 
