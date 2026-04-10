@@ -35,6 +35,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from src.core.dto.base import PaginatedResult, ResultatAction
+from src.services.core.base.advanced import _filtrer_donnees_modele
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -236,7 +237,7 @@ class CommandService(ABC, Generic[T]):
 
         def _execute(session: Session) -> ResultatAction:
             try:
-                entity = self.model(**data)
+                entity = self.model(**_filtrer_donnees_modele(self.model, data))
                 session.add(entity)
                 session.commit()
                 session.refresh(entity)

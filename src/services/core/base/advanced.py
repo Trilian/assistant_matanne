@@ -19,6 +19,40 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _filtrer_donnees_modele(model: type[Any], data: dict[str, Any]) -> dict[str, Any]:
+    """Retire les clés qui ne correspondent pas au modèle SQLAlchemy.
+
+    Certaines couches métier ajoutent des métadonnées transverses (`source`,
+    `action`, etc.) aux payloads. Sans filtrage, SQLAlchemy lève un
+    ``TypeError: '<champ>' is an invalid keyword argument`` lors du ``model(**data)``.
+    """
+    if not isinstance(data, dict):
+        return data
+
+    try:
+        allowed_fields = {attr.key for attr in model.__mapper__.attrs}
+    except Exception:
+        table = getattr(model, "__table__", None)
+        columns = getattr(table, "columns", None)
+        allowed_fields = {
+            getattr(col, "key", getattr(col, "name", None)) for col in (columns or [])
+        }
+        allowed_fields = {field for field in allowed_fields if field}
+
+    if not allowed_fields:
+        return data
+
+    extras = sorted(key for key in data if key not in allowed_fields)
+    if extras:
+        logger.debug(
+            "Champs non mappés ignorés pour %s: %s",
+            getattr(model, "__name__", str(model)),
+            ", ".join(extras),
+        )
+
+    return {key: value for key, value in data.items() if key in allowed_fields}
+
+
 class AdvancedQueryMixin:
     """Mixin: recherche avancée, bulk operations, statistiques et helpers de statut.
 
@@ -174,7 +208,7 @@ class AdvancedQueryMixin:
                             setattr(existing, key, value)
                     merged += 1
                 else:
-                    entity = self.model(**data)
+                    entity = self.model(**_filtrer_donnees_modele(self.model, data))
                     session.add(entity)
                     created += 1
 

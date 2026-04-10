@@ -177,7 +177,7 @@ async def detecter_doublons_recettes(
     return await executer_async(_query)
 
 
-@router.get("/{recette_id}/export-pdf", responses=REPONSES_CRUD_LECTURE)
+@router.get("/{recette_id:int}/export-pdf", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def exporter_recette_pdf(
     recette_id: int,
@@ -420,7 +420,7 @@ async def lister_recettes(
     return await executer_async(_query)
 
 
-@router.get("/{recette_id}", response_model=RecetteResponse, responses=REPONSES_CRUD_LECTURE)
+@router.get("/{recette_id:int}", response_model=RecetteResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
     """

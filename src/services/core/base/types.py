@@ -13,7 +13,7 @@ from typing import Any, Generic, TypeVar
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from .advanced import AdvancedQueryMixin
+from .advanced import AdvancedQueryMixin, _filtrer_donnees_modele
 from .pipeline import PipelineMixin
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class BaseService(PipelineMixin, AdvancedQueryMixin, Generic[T]):
         """Crée une entité"""
 
         def _execute(session: Session) -> T:
-            entity = self.model(**data)
+            entity = self.model(**_filtrer_donnees_modele(self.model, data))
             session.add(entity)
             session.commit()
             session.refresh(entity)

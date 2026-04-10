@@ -152,7 +152,7 @@ async def optimiser_nutrition_planning(
     _rate: dict = Depends(verifier_limite_debit_ia),
 ) -> OptimisationNutrition:
     service = _get_planning_ai_service()
-    return service.optimiser_nutrition_semaine(
+    return await service.optimiser_nutrition_semaine(
         body.planning_repas,
         restrictions=body.restrictions or None,
     )
@@ -171,7 +171,7 @@ async def suggerer_simplification_planning(
     _rate: dict = Depends(verifier_limite_debit_ia),
 ) -> SimplificationSemaine:
     service = _get_planning_ai_service()
-    return service.suggerer_simplification(
+    return await service.suggerer_simplification(
         body.planning_repas,
         nb_heures_cuisine_max=body.nb_heures_cuisine_max,
     )

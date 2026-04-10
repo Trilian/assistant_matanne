@@ -1350,6 +1350,8 @@ CREATE TABLE IF NOT EXISTS retours_recettes (
     feedback VARCHAR(20) NOT NULL DEFAULT 'neutral',
     contexte VARCHAR(200),
     notes TEXT,
+    planifie_cette_semaine BOOLEAN NOT NULL DEFAULT FALSE,
+    date_planifie TIMESTAMP WITH TIME ZONE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_recipe_feedbacks_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT ck_feedback_type CHECK (feedback IN ('like', 'dislike', 'neutral'))

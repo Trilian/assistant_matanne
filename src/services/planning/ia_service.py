@@ -102,7 +102,7 @@ class PlanningAIService(BaseAIService):
 
 Format JSON."""
 
-        result = self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es nutritionniste expert. Évalue la variété de manière objective.",
         )
@@ -120,7 +120,7 @@ Format JSON."""
         _sync = sync_wrapper(self.analyser_variete_semaine)
         return _sync(planning_repas)
 
-    def optimiser_nutrition_semaine(
+    async def optimiser_nutrition_semaine(
         self,
         planning_repas: list[dict],
         restrictions: Optional[list[str]] = None,
@@ -156,7 +156,7 @@ Analyse:
 
 Format JSON."""
 
-        result = self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es diététicienne experte. Fournis une analyse nutritionnelle précise.",
         )
@@ -170,7 +170,7 @@ Format JSON."""
             aliments_a_limiter=result.get("aliments_a_limiter", []),
         )
 
-    def suggerer_simplification(
+    async def suggerer_simplification(
         self,
         planning_repas: list[dict],
         nb_heures_cuisine_max: int = 4,
@@ -205,7 +205,7 @@ Identifie:
 Format JSON."""
 
 
-        result = self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es expert culinaire pragmatique. Propose des simplifications réalistes.",
         )

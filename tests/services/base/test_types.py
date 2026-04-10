@@ -186,6 +186,17 @@ class TestBaseServiceCreate:
 
             assert result is not None
 
+    def test_create_ignore_les_champs_non_mappes(self, integration_service, integration_db):
+        """Les métadonnées techniques comme `source` ne doivent pas casser la création."""
+        result = integration_service.create(
+            {"nom": "Repas planning", "statut": "actif", "source": "planning_ia"},
+            db=integration_db,
+        )
+
+        assert result is not None
+        assert result.nom == "Repas planning"
+        assert result.statut == "actif"
+
 
 # ═══════════════════════════════════════════════════════════
 # TESTS CRUD - GET BY ID
