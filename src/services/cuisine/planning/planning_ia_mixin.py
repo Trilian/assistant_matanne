@@ -13,6 +13,7 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.core.caching import obtenir_cache
@@ -40,6 +41,27 @@ class PlanningIAGenerationMixin:
         class ServicePlanning(BaseService, BaseAIService, PlanningAIMixin, PlanningIAGenerationMixin):
             ...
     """
+
+    # ═══════════════════════════════════════════════════════════
+    # HELPERS INTERNES
+    # ═══════════════════════════════════════════════════════════
+
+    @staticmethod
+    def _trouver_ou_creer_recette(db: Session, nom: str) -> int:
+        """Retourne l'id d'une recette existante (lookup insensible à la casse)
+        ou crée un stub minimal si elle n'existe pas encore."""
+        from src.core.models.recettes import Recette
+
+        recette = db.query(Recette).filter(func.lower(Recette.nom) == nom.lower()).first()
+        if recette is None:
+            recette = Recette(
+                nom=nom,
+                temps_preparation=30,
+                source="ia_planning",
+            )
+            db.add(recette)
+            db.flush()
+        return recette.id
 
     # ═══════════════════════════════════════════════════════════
     # SUGGESTIONS ÉQUILIBRÉES
@@ -196,17 +218,37 @@ CONTEXT:
 
 OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 {{"items": [
-  {{"jour": "Lundi", "dejeuner": "Pâtes carbonara", "diner": "Salade niçoise"}},
-  {{"jour": "Mardi", "dejeuner": "Riz et poulet", "diner": "Soupe de légumes"}}
+  {{
+    "jour": "Lundi",
+    "petit_dejeuner": "Tartines beurre confiture",
+    "petit_dejeuner_est_recette": false,
+    "dejeuner": "Pâtes carbonara",
+    "dejeuner_entree": "Salade verte",
+    "dejeuner_entree_est_recette": false,
+    "dejeuner_laitage": "Yaourt nature",
+    "dejeuner_dessert": "Tarte aux pommes",
+    "dejeuner_dessert_est_recette": true,
+    "gouter": "Pain au chocolat",
+    "gouter_est_recette": false,
+    "diner": "Salade niçoise",
+    "diner_entree": null,
+    "diner_entree_est_recette": false,
+    "diner_laitage": "Fromage",
+    "diner_dessert": "Fruit de saison",
+    "diner_dessert_est_recette": false
+  }}
 ]}}
 
 RULES:
-1. Return ONLY valid JSON array with exactly 7 items (one per day)
-2. jour values: Lundi, Mardi, Mercredi, Jeudi, Vendredi, Samedi, Dimanche
-3. dejeuner and diner: recipe names or meal descriptions (3-50 chars)
-4. Ensure variety throughout the week
-5. Adapt to family preferences and dietary restrictions
-6. No explanations, no text, ONLY JSON"""
+1. Return ONLY valid JSON with exactly 7 items (one per day: Lundi→Dimanche)
+2. dejeuner and diner (le PLAT principal): always a real recipe name to cook (3-50 chars)
+3. petit_dejeuner: simple text on weekdays (tartines, céréales, fruit), can be est_recette=true on weekend (crêpes, gaufres...)
+4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
+5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
+6. gouter: simple text (pain au chocolat, fruit, yaourt...), est_recette=true only for real preparations
+7. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
+8. null is valid for optional fields
+9. No explanations, no text, ONLY JSON"""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -217,7 +259,7 @@ RULES:
             system_prompt="Return ONLY valid JSON. No text before or after JSON. Never use markdown code blocks.",
             max_items=7,
             temperature=0.5,
-            max_tokens=2000,
+            max_tokens=3000,
         )
 
         # Log de debug pour voir la réponse
@@ -257,23 +299,85 @@ RULES:
         for idx, jour_data in enumerate(planning_data):
             date_jour = semaine_debut + timedelta(days=idx)
 
-            # Déjeuner
-            repas_dej = Repas(
+            # Petit-déjeuner (optionnel selon ce que l'IA a fourni)
+            if jour_data.petit_dejeuner:
+                recette_pdj_id = (
+                    self._trouver_ou_creer_recette(db, jour_data.petit_dejeuner)
+                    if jour_data.petit_dejeuner_est_recette
+                    else None
+                )
+                db.add(Repas(
+                    planning_id=planning.id,
+                    date_repas=date_jour,
+                    type_repas="petit_dejeuner",
+                    notes=jour_data.petit_dejeuner,
+                    recette_id=recette_pdj_id,
+                ))
+
+            # Déjeuner — plat = toujours une recette stub
+            recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner)
+            entree_dej_recette_id = (
+                self._trouver_ou_creer_recette(db, jour_data.dejeuner_entree)
+                if jour_data.dejeuner_entree and jour_data.dejeuner_entree_est_recette
+                else None
+            )
+            dessert_dej_recette_id = (
+                self._trouver_ou_creer_recette(db, jour_data.dejeuner_dessert)
+                if jour_data.dejeuner_dessert and jour_data.dejeuner_dessert_est_recette
+                else None
+            )
+            db.add(Repas(
                 planning_id=planning.id,
                 date_repas=date_jour,
                 type_repas="dejeuner",
                 notes=jour_data.dejeuner,
-            )
-            db.add(repas_dej)
+                recette_id=recette_dej_id,
+                entree=jour_data.dejeuner_entree,
+                entree_recette_id=entree_dej_recette_id,
+                laitage=jour_data.dejeuner_laitage,
+                dessert=jour_data.dejeuner_dessert,
+                dessert_recette_id=dessert_dej_recette_id,
+            ))
 
-            # Dîner
-            repas_din = Repas(
+            # Goûter (optionnel)
+            if jour_data.gouter:
+                recette_gouter_id = (
+                    self._trouver_ou_creer_recette(db, jour_data.gouter)
+                    if jour_data.gouter_est_recette
+                    else None
+                )
+                db.add(Repas(
+                    planning_id=planning.id,
+                    date_repas=date_jour,
+                    type_repas="gouter",
+                    notes=jour_data.gouter,
+                    recette_id=recette_gouter_id,
+                ))
+
+            # Dîner — plat = toujours une recette stub
+            recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner)
+            entree_din_recette_id = (
+                self._trouver_ou_creer_recette(db, jour_data.diner_entree)
+                if jour_data.diner_entree and jour_data.diner_entree_est_recette
+                else None
+            )
+            dessert_din_recette_id = (
+                self._trouver_ou_creer_recette(db, jour_data.diner_dessert)
+                if jour_data.diner_dessert and jour_data.diner_dessert_est_recette
+                else None
+            )
+            db.add(Repas(
                 planning_id=planning.id,
                 date_repas=date_jour,
                 type_repas="diner",
                 notes=jour_data.diner,
-            )
-            db.add(repas_din)
+                recette_id=recette_din_id,
+                entree=jour_data.diner_entree,
+                entree_recette_id=entree_din_recette_id,
+                laitage=jour_data.diner_laitage,
+                dessert=jour_data.diner_dessert,
+                dessert_recette_id=dessert_din_recette_id,
+            ))
 
         db.commit()
         db.refresh(planning)

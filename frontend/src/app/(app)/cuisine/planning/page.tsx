@@ -261,31 +261,69 @@ function CarteRepasDraggable({
       ref={definirRefs}
       className={`flex items-center justify-between gap-1 rounded-md bg-background/80 ${isDragging ? "opacity-60 shadow-lg ring-2 ring-primary/30" : ""}`}
     >
-      <div className="flex items-center gap-1 min-w-0 flex-1">
+      <div className="flex items-start gap-1 min-w-0 flex-1">
         <button
           type="button"
-          className="rounded p-0.5 text-muted-foreground hover:bg-muted touch-none"
+          className="rounded p-0.5 text-muted-foreground hover:bg-muted touch-none mt-0.5"
           aria-label={`Déplacer ${repas.recette_nom || repas.notes || label}`}
           {...listeners}
           {...attributes}
         >
           <GripVertical className="h-3 w-3" />
         </button>
-        {repas.recette_id ? (
-          <a
-            href={`/cuisine/recettes/${repas.recette_id}`}
-            className="font-medium text-foreground truncate hover:underline hover:text-primary transition-colors"
-            title={`Voir la recette : ${repas.recette_nom || repas.notes || "—"}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {repas.recette_nom || repas.notes || "—"}
-          </a>
-        ) : (
-          <span className="font-medium text-foreground truncate">
-            {repas.recette_nom || repas.notes || "—"}
-          </span>
-        )}
-        {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1">
+            {repas.recette_id ? (
+              <a
+                href={`/cuisine/recettes/${repas.recette_id}`}
+                className="font-medium text-foreground truncate hover:underline hover:text-primary transition-colors"
+                title={`Voir la recette : ${repas.recette_nom || repas.notes || "—"}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {repas.recette_nom || repas.notes || "—"}
+              </a>
+            ) : (
+              <span className="font-medium text-foreground truncate">
+                {repas.recette_nom || repas.notes || "—"}
+              </span>
+            )}
+            {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
+          </div>
+          {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
+            (repas.entree || repas.laitage || repas.dessert) && (
+              <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
+                {repas.entree && (
+                  repas.entree_recette_id ? (
+                    <a
+                      href={`/cuisine/recettes/${repas.entree_recette_id}`}
+                      className="text-[10px] text-muted-foreground hover:underline truncate max-w-[90px]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      E·{repas.entree}
+                    </a>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[90px]">E·{repas.entree}</span>
+                  )
+                )}
+                {repas.laitage && (
+                  <span className="text-[10px] text-muted-foreground truncate max-w-[90px]">🥛 {repas.laitage}</span>
+                )}
+                {repas.dessert && (
+                  repas.dessert_recette_id ? (
+                    <a
+                      href={`/cuisine/recettes/${repas.dessert_recette_id}`}
+                      className="text-[10px] text-muted-foreground hover:underline truncate max-w-[90px]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      🍮 {repas.dessert}
+                    </a>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground truncate max-w-[90px]">🍮 {repas.dessert}</span>
+                  )
+                )}
+              </div>
+            )}
+        </div>
       </div>
       <div className="flex items-center gap-0.5 shrink-0">
         <ConvertisseurInline className="h-5 px-1" />
@@ -598,6 +636,7 @@ export default function PagePlanning() {
           toastIaRef.current = null;
         }
         invalider(["planning"]);
+        invalider(["flux", "cuisine"]);
 
         if (!resultat.genere_par_ia) {
           const msg = "Le planning a été créé sans IA. Réessayez ou vérifiez la clé Mistral.";

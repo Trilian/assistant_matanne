@@ -16,6 +16,16 @@ export interface RepasPlanning {
   notes?: string;
   portions?: number;
   nutri_score?: string | null;
+  // Entrée (texte seul ou recette si complexe)
+  entree?: string;
+  entree_recette_id?: number;
+  entree_recette_nom?: string;
+  // Laitage (texte seul, jamais une recette)
+  laitage?: string;
+  // Dessert (texte seul ou recette si complexe)
+  dessert?: string;
+  dessert_recette_id?: number;
+  dessert_recette_nom?: string;
   plat_jules?: string;
   notes_jules?: string;
   adaptation_auto?: boolean;

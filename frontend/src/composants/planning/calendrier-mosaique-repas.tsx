@@ -120,7 +120,7 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
             ))}
           </div>
         )}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 xl:grid-cols-7">
           {dates.map((date) => {
             const repasJour = repasParJour[date] ?? [];
             return (
@@ -167,6 +167,20 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
                         <div className="relative">
                           <p className="font-semibold">{LABEL_TYPE[type]}</p>
                           <p className="truncate opacity-90">{repas?.recette_nom || repas?.notes || "Non planifié"}</p>
+                          {repas && (type === "dejeuner" || type === "diner") &&
+                            (repas.entree || repas.laitage || repas.dessert) && (
+                              <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 mt-0.5">
+                                {repas.entree && (
+                                  <span className="text-[9px] opacity-75 truncate max-w-[60px]">E·{repas.entree}</span>
+                                )}
+                                {repas.laitage && (
+                                  <span className="text-[9px] opacity-75 truncate max-w-[60px]">🥛 {repas.laitage}</span>
+                                )}
+                                {repas.dessert && (
+                                  <span className="text-[9px] opacity-75 truncate max-w-[60px]">🍮 {repas.dessert}</span>
+                                )}
+                              </div>
+                            )}
                         </div>
                       </div>
                     );

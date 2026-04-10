@@ -17,11 +17,45 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class JourPlanning(BaseModel):
-    """Jour du planning généré par l'IA"""
+    """Jour du planning généré par l'IA.
+
+    Structure complète par slot:
+    - petit_dejeuner: texte simple en semaine, peut être recette le weekend (est_recette=True)
+    - dejeuner/diner: plat = toujours recette; entrée/laitage/dessert optionnels selon complexité
+    - gouter: texte ou recette si préparation réelle
+    - *_est_recette: True si l'IA juge que c'est une vraie préparation à lier à une recette
+    - laitage: texte seul uniquement (yaourt, fromage blanc, fromage...) — jamais une recette
+    """
 
     jour: str = Field(..., min_length=4, max_length=12)
     dejeuner: str = Field(..., min_length=3)
     diner: str = Field(..., min_length=3)
+
+    # Petit-déjeuner: texte simple (tartines, céréales...) ou recette si complexe (crêpes, gaufres...)
+    petit_dejeuner: str | None = None
+    petit_dejeuner_est_recette: bool = False
+
+    # Déjeuner — entrée optionnelle
+    dejeuner_entree: str | None = None
+    dejeuner_entree_est_recette: bool = False
+    # Déjeuner — laitage texte uniquement (pas de flag est_recette)
+    dejeuner_laitage: str | None = None
+    # Déjeuner — dessert optionnel
+    dejeuner_dessert: str | None = None
+    dejeuner_dessert_est_recette: bool = False
+
+    # Goûter
+    gouter: str | None = None
+    gouter_est_recette: bool = False
+
+    # Dîner — entrée optionnelle
+    diner_entree: str | None = None
+    diner_entree_est_recette: bool = False
+    # Dîner — laitage texte uniquement
+    diner_laitage: str | None = None
+    # Dîner — dessert optionnel
+    diner_dessert: str | None = None
+    diner_dessert_est_recette: bool = False
 
 
 class SuggestionRecettesDay(BaseModel):

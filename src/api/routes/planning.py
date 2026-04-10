@@ -211,7 +211,13 @@ async def obtenir_planning_semaine(
             )
 
             # Récupérer les noms de recettes en une seule requête
-            recette_ids = [r.recette_id for r in repas if r.recette_id]
+            # (plat principal + entrée + dessert)
+            recette_ids = list({
+                rid
+                for r in repas
+                for rid in (r.recette_id, r.entree_recette_id, r.dessert_recette_id)
+                if rid is not None
+            })
             recettes_map: dict[int, str] = {}
             if recette_ids:
                 for rec in session.query(Recette.id, Recette.nom).filter(Recette.id.in_(recette_ids)):
@@ -250,6 +256,13 @@ async def obtenir_planning_semaine(
                     "recette_id": r.recette_id,
                     "notes": getattr(r, "notes", None),
                     "recette_nom": recette_nom,
+                    "entree": getattr(r, "entree", None),
+                    "entree_recette_id": getattr(r, "entree_recette_id", None),
+                    "entree_recette_nom": recettes_map.get(r.entree_recette_id) if r.entree_recette_id else None,
+                    "laitage": getattr(r, "laitage", None),
+                    "dessert": getattr(r, "dessert", None),
+                    "dessert_recette_id": getattr(r, "dessert_recette_id", None),
+                    "dessert_recette_nom": recettes_map.get(r.dessert_recette_id) if r.dessert_recette_id else None,
                 }
                 if jour not in planning_dict:
                     planning_dict[jour] = {}
@@ -262,6 +275,13 @@ async def obtenir_planning_semaine(
                     "recette_id": r.recette_id,
                     "recette_nom": recette_nom,
                     "notes": getattr(r, "notes", None),
+                    "entree": getattr(r, "entree", None),
+                    "entree_recette_id": getattr(r, "entree_recette_id", None),
+                    "entree_recette_nom": recettes_map.get(r.entree_recette_id) if r.entree_recette_id else None,
+                    "laitage": getattr(r, "laitage", None),
+                    "dessert": getattr(r, "dessert", None),
+                    "dessert_recette_id": getattr(r, "dessert_recette_id", None),
+                    "dessert_recette_nom": recettes_map.get(r.dessert_recette_id) if r.dessert_recette_id else None,
                     "plat_jules": getattr(r, "plat_jules", None),
                     "notes_jules": getattr(r, "notes_jules", None),
                     "adaptation_auto": getattr(r, "adaptation_auto", True),
@@ -1134,7 +1154,13 @@ async def generer_planning_ia(
             )
 
             # Récupérer les noms de recettes en une seule requête
-            recette_ids = [r.recette_id for r in repas if r.recette_id]
+            # (plat principal + entrée + dessert)
+            recette_ids = list({
+                rid
+                for r in repas
+                for rid in (r.recette_id, r.entree_recette_id, r.dessert_recette_id)
+                if rid is not None
+            })
             recettes_map: dict[int, str] = {}
             if recette_ids:
                 for rec in session.query(Recette.id, Recette.nom, Recette.calories, Recette.proteines, Recette.lipides).filter(Recette.id.in_(recette_ids)):
@@ -1160,12 +1186,21 @@ async def generer_planning_ia(
 
                 rec = recettes_map.get(r.recette_id) if r.recette_id else None
                 recette_nom = rec.nom if rec else None
+                rec_entree = recettes_map.get(r.entree_recette_id) if r.entree_recette_id else None
+                rec_dessert = recettes_map.get(r.dessert_recette_id) if r.dessert_recette_id else None
                 type_repas = _TYPE_NORM.get(r.type_repas, r.type_repas)
                 entry: dict = {
                     "id": r.id,
                     "recette_id": r.recette_id,
                     "notes": getattr(r, "notes", None),
                     "recette_nom": recette_nom,
+                    "entree": getattr(r, "entree", None),
+                    "entree_recette_id": getattr(r, "entree_recette_id", None),
+                    "entree_recette_nom": rec_entree.nom if rec_entree else None,
+                    "laitage": getattr(r, "laitage", None),
+                    "dessert": getattr(r, "dessert", None),
+                    "dessert_recette_id": getattr(r, "dessert_recette_id", None),
+                    "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,
                 }
                 if rec:
                     cal = rec.calories or 0
@@ -1196,6 +1231,13 @@ async def generer_planning_ia(
                     "recette_nom": recette_nom,
                     "notes": getattr(r, "notes", None),
                     "nutri_score": entry.get("nutri_score"),
+                    "entree": getattr(r, "entree", None),
+                    "entree_recette_id": getattr(r, "entree_recette_id", None),
+                    "entree_recette_nom": rec_entree.nom if rec_entree else None,
+                    "laitage": getattr(r, "laitage", None),
+                    "dessert": getattr(r, "dessert", None),
+                    "dessert_recette_id": getattr(r, "dessert_recette_id", None),
+                    "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,
                     "plat_jules": getattr(r, "plat_jules", None),
                     "notes_jules": getattr(r, "notes_jules", None),
                     "adaptation_auto": getattr(r, "adaptation_auto", True),

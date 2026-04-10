@@ -131,6 +131,9 @@ class Repas(Base):
         ForeignKey("recettes.id", ondelete="SET NULL")
     )
 
+    # Laitage / produit laitier (yaourt, fromage blanc, fromage...)
+    laitage: Mapped[str | None] = mapped_column(String(200))
+
     # Adaptation Jules
     plat_jules: Mapped[str | None] = mapped_column(Text)
     notes_jules: Mapped[str | None] = mapped_column(Text)
