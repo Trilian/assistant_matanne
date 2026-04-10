@@ -1708,11 +1708,11 @@ export default function PagePlanning() {
                 </p>
               )}
             </div>
-            {Object.keys(coursesResultat.par_rayon).length > 0 && (
+            {Object.keys(coursesResultat.par_rayon ?? {}).length > 0 && (
               <div className="space-y-1">
                 <p className="text-sm font-medium">Par rayon :</p>
                 <div className="grid grid-cols-2 gap-1">
-                  {Object.entries(coursesResultat.par_rayon).map(([rayon, count]) => (
+                  {Object.entries(coursesResultat.par_rayon ?? {}).map(([rayon, count]) => (
                     <div key={rayon} className="flex items-center justify-between text-sm rounded-md bg-muted/50 px-2 py-1">
                       <span className="capitalize truncate">{rayon.replace(/_/g, " ")}</span>
                       <Badge variant="secondary" className="ml-1 text-xs">{count}</Badge>

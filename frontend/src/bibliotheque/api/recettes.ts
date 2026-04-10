@@ -5,6 +5,7 @@
 import { clientApi } from "./client";
 import type { ReponsePaginee } from "@/types/api";
 import type { Recette, CreerRecetteDTO, DoublonRecette, SuggestionRecette } from "@/types/recettes";
+import { construireCalendrierStatique } from "@/bibliotheque/saison-fallback";
 
 /** Lister les recettes (paginé) */
 export async function listerRecettes(
@@ -121,10 +122,15 @@ export interface ReponseCalendrierSaisonnier {
   paires_saison: PaireSaisonCalendrier[];
 }
 
-/** Récupérer le calendrier saisonnier complet */
+/** Récupérer le calendrier saisonnier complet (fallback statique si le backend est inaccessible) */
 export async function obtenirCalendrierSaisonnier(): Promise<ReponseCalendrierSaisonnier> {
-  const { data } = await clientApi.get<ReponseCalendrierSaisonnier>("/recettes/calendrier-saisonnier");
-  return data;
+  try {
+    const { data } = await clientApi.get<ReponseCalendrierSaisonnier>("/recettes/calendrier-saisonnier");
+    return data;
+  } catch {
+    // Données purement statiques — on peut les servir hors-ligne sans perte de valeur
+    return construireCalendrierStatique();
+  }
 }
 
 export interface ReponseDoublonsRecettes {

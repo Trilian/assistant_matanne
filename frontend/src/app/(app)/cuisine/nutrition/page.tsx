@@ -106,7 +106,7 @@ function ContenuNutrition() {
     () => obtenirNutritionHebdo(semaine)
   );
 
-  const jours = data ? Object.entries(data.par_jour).sort(([a], [b]) => a.localeCompare(b)) : [];
+  const jours = data ? Object.entries(data.par_jour ?? {}).sort(([a], [b]) => a.localeCompare(b)) : [];
 
   const donneesHeatmap = jours.map(([dateIso, valeur]) => {
     const caloriesPct = Math.min(100, (valeur.calories / OBJECTIFS.calories) * 100);
