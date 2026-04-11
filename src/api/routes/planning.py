@@ -630,8 +630,16 @@ async def valider_planning(
             from src.services.core.notifications import get_dispatcher_notifications
 
             semaine = semaine_debut
+            if semaine:
+                try:
+                    from datetime import date as _date
+                    semaine_formatee = _date.fromisoformat(semaine).strftime("du %d/%m")
+                except Exception:
+                    semaine_formatee = semaine
+            else:
+                semaine_formatee = "de la semaine"
             message = (
-                f"Planning semaine validé ({semaine}). "
+                f"✅ Planning validé ({semaine_formatee}). "
                 "La semaine est activée et prête pour les courses."
             )
             dispatcher = get_dispatcher_notifications()
@@ -646,6 +654,19 @@ async def valider_planning(
             logger.debug("Notification Telegram planning non envoyée: %s", exc)
 
     background_tasks.add_task(_notifier_validation)
+
+    # Enrichir les recettes stubs du planning (étapes + ingrédients) en arrière-plan.
+    # Déclenché à la validation pour couvrir aussi les stubs créés avant ce correctif.
+    try:
+        from src.services.cuisine.planning import obtenir_service_planning
+
+        _service_planning = obtenir_service_planning()
+        background_tasks.add_task(
+            _service_planning.enrichir_recettes_stub_planning, planning_id
+        )
+    except Exception as _enr_exc:
+        logger.debug("[planning] Enrichissement stubs au démarrage ignoré: %s", _enr_exc)
+
     return resultat
 
 
@@ -959,7 +980,7 @@ async def reset_circuit_breaker_ia(
 @gerer_exception_api
 async def generer_planning_ia(
     body: GenererPlanningRequest | None = None,
-    background_tasks: "BackgroundTasks" = None,  # injected by FastAPI
+    background_tasks: BackgroundTasks = None,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
@@ -1180,13 +1201,6 @@ async def generer_planning_ia(
                 status_code=503, detail="Impossible de générer le planning. Réessayez plus tard."
             )
 
-        # Enrichir les recettes stubs en arrière-plan (étapes + ingrédients via IA)
-        try:
-            if background_tasks is not None:
-                background_tasks.add_task(service.enrichir_recettes_stub_planning, planning_obj.id)
-        except Exception as _bg_err:
-            logger.debug("[planning] background_tasks non disponible: %s", _bg_err)
-
         # Reconstruire la réponse dans le même format que GET /semaine
         with executer_avec_session() as session:
             from src.core.models import Planning, Repas
@@ -1323,7 +1337,21 @@ async def generer_planning_ia(
                 "repas": repas_list,
             }
 
-    return await executer_async(_generate)
+    resultat = await executer_async(_generate)
+
+    # Enrichir les recettes stubs (via IA : étapes + ingrédients) en arrière-plan.
+    # Doit être appelé depuis la coroutine async, PAS depuis le thread pool.
+    planning_id_gen = resultat.get("planning_id") if isinstance(resultat, dict) else None
+    if planning_id_gen and background_tasks is not None:
+        try:
+            from src.services.cuisine.planning import obtenir_service_planning as _get_svc
+            background_tasks.add_task(
+                _get_svc().enrichir_recettes_stub_planning, planning_id_gen
+            )
+        except Exception as _bg_err:
+            logger.debug("[planning] Échec ajout background enrichissement: %s", _bg_err)
+
+    return resultat
 
 
 # ----------------------------------------------------------

@@ -130,10 +130,11 @@ def _formater_planning_html(repas_tries) -> str:
     TYPES_REPAS: dict[str, tuple[str, str]] = {
         "petit_dejeuner": ("🌅", "Petit-déjeuner"),
         "dejeuner": ("☀️", "Déjeuner"),
+        "gouter": ("🍎", "Goûter"),
         "collation": ("🍎", "Goûter"),
         "diner": ("🌙", "Dîner"),
     }
-    ORDRE_REPAS = {"petit_dejeuner": 0, "dejeuner": 1, "collation": 2, "diner": 3}
+    ORDRE_REPAS = {"petit_dejeuner": 0, "dejeuner": 1, "gouter": 2, "collation": 2, "diner": 3}
 
     par_jour: dict = defaultdict(list)
     for repas in repas_tries:
