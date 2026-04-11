@@ -69,6 +69,8 @@ async def envoyer_planning_telegram(
             repas_tries = sorted(
                 planning.repas, key=lambda item: (item.date_repas, item.type_repas)
             )
+            from src.api.routes.telegram._helpers import _formater_planning_html
+
             noms_recettes: list[str] = []
             for repas in repas_tries:
                 nom_recette = None
@@ -76,9 +78,8 @@ async def envoyer_planning_telegram(
                     nom_recette = getattr(repas.recette, "nom", None)
                 nom_affiche = nom_recette or "Repas à préciser"
                 noms_recettes.append(str(nom_affiche))
-                lignes.append(
-                    f"• {repas.date_repas.strftime('%d/%m')} {repas.type_repas} : {nom_affiche}"
-                )
+                lignes.append(nom_affiche)  # conservé pour le résumé IA uniquement
+            contenu_formate = _formater_planning_html(repas_tries)
 
             noms_uniques = {nom.lower() for nom in noms_recettes if nom}
             mots_reconfort = ("soupe", "gratin", "curry", "mijot", "potage", "parmentier")
@@ -93,7 +94,7 @@ async def envoyer_planning_telegram(
             return {
                 "planning_id": planning.id,
                 "contenu": payload.contenu
-                or "\n".join(lignes)
+                or contenu_formate
                 or f"Planning {planning.nom} du {planning.semaine_debut.strftime('%d/%m')} au {planning.semaine_fin.strftime('%d/%m')}",
                 "resume_ia": " • ".join(resume_parts[:2]),
             }

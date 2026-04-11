@@ -118,6 +118,46 @@ def _boutons_planning(planning_id: int) -> list[dict[str, str]]:
     ]
 
 
+def _formater_planning_html(repas_tries) -> str:
+    """Formate une liste de repas en HTML structuré groupé par jour.
+
+    Produit des blocs par jour avec titre en gras, un repas par ligne avec emoji.
+    Compatible avec parse_mode HTML Telegram.
+    """
+    from collections import defaultdict
+
+    JOURS_FR = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+    TYPES_REPAS: dict[str, tuple[str, str]] = {
+        "petit_dejeuner": ("🌅", "Petit-déjeuner"),
+        "dejeuner": ("☀️", "Déjeuner"),
+        "collation": ("🍎", "Goûter"),
+        "diner": ("🌙", "Dîner"),
+    }
+    ORDRE_REPAS = {"petit_dejeuner": 0, "dejeuner": 1, "collation": 2, "diner": 3}
+
+    par_jour: dict = defaultdict(list)
+    for repas in repas_tries:
+        par_jour[repas.date_repas].append(repas)
+
+    blocs: list[str] = []
+    for jour_date in sorted(par_jour):
+        nom_jour = JOURS_FR[jour_date.weekday()]
+        lignes_jour = [f"<b>{nom_jour} {jour_date.strftime('%d/%m')} :</b>"]
+        for repas in sorted(par_jour[jour_date], key=lambda r: ORDRE_REPAS.get(r.type_repas, 99)):
+            emoji, libelle = TYPES_REPAS.get(
+                repas.type_repas, ("🍽️", repas.type_repas.capitalize())
+            )
+            nom_recette = (
+                getattr(getattr(repas, "recette", None), "nom", None)
+                or getattr(repas, "notes", None)
+                or "—"
+            )
+            lignes_jour.append(f"{emoji} {libelle} : {html.escape(str(nom_recette))}")
+        blocs.append("\n".join(lignes_jour))
+
+    return "\n\n".join(blocs) if blocs else "Aucun repas saisi."
+
+
 def _selectionner_liste_courses(session, liste_id: int | None = None):
     from src.core.models.courses import ListeCourses
 

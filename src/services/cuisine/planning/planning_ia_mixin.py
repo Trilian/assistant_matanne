@@ -24,7 +24,7 @@ from src.core.monitoring import chronometre
 from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 from .nutrition import determine_protein_type
-from .types import JourPlanning, ParametresEquilibre
+from .types import JourPlanning, ParametresEquilibre, RecetteEnrichieIA
 
 logger = logging.getLogger(__name__)
 
@@ -405,3 +405,174 @@ RULES:
 
         logger.info(f"✅ Generated AI planning for week starting {semaine_debut}")
         return planning
+
+    # ═══════════════════════════════════════════════════════════
+    # ENRICHISSEMENT DES RECETTES STUBS
+    # ═══════════════════════════════════════════════════════════
+
+    def enrichir_recettes_stub_planning(self, planning_id: int) -> None:
+        """Enrichit en arrière-plan les recettes stubs créées lors de la génération.
+
+        Appelé après ``generer_planning_ia`` via BackgroundTasks : interroge l'IA
+        pour obtenir les étapes et ingrédients des recettes qui n'ont encore aucune
+        étape enregistrée.
+
+        Args:
+            planning_id: ID du planning dont les recettes stubs sont à enrichir.
+        """
+        try:
+            from src.core.db import obtenir_contexte_db
+            from src.core.models import EtapeRecette, Ingredient, RecetteIngredient, Repas
+            from src.core.models.recettes import Recette
+
+            with obtenir_contexte_db() as session:
+                # Collecter tous les recette_id liés au planning
+                repas_list = session.query(Repas).filter(Repas.planning_id == planning_id).all()
+                recette_ids: set[int] = set()
+                for r in repas_list:
+                    for rid in (r.recette_id, r.entree_recette_id, r.dessert_recette_id):
+                        if rid is not None:
+                            recette_ids.add(rid)
+
+                if not recette_ids:
+                    return
+
+                # Filtrer celles sans étapes (stubs) — stocker (id, nom) pour éviter les objets détachés
+                stubs_data: list[tuple[int, str]] = []
+                for recette in session.query(Recette).filter(Recette.id.in_(recette_ids)).all():
+                    has_etapes = (
+                        session.query(EtapeRecette)
+                        .filter(EtapeRecette.recette_id == recette.id)
+                        .first()
+                    ) is not None
+                    if not has_etapes:
+                        stubs_data.append((recette.id, recette.nom))
+
+            if not stubs_data:
+                logger.debug("[planning] Aucune recette stub à enrichir pour planning %d", planning_id)
+                return
+
+            noms = [nom for _, nom in stubs_data]
+            logger.info("[planning] Enrichissement IA de %d recette(s) stub: %s", len(noms), noms)
+
+            liste_noms = "\n".join(f"{i + 1}. {nom}" for i, nom in enumerate(noms))
+            prompt = f"""For each recipe listed below, generate practical cooking steps and main ingredients.
+
+OUTPUT ONLY THIS JSON (no other text, no markdown, no code blocks):
+{{"items": [
+  {{
+    "nom": "Pâtes carbonara",
+    "temps_preparation": 10,
+    "temps_cuisson": 15,
+    "portions": 4,
+    "difficulte": "facile",
+    "ingredients": [{{"nom": "spaghetti", "quantite": 400, "unite": "g"}}, {{"nom": "lardons", "quantite": 200, "unite": "g"}}, {{"nom": "oeufs", "quantite": 3, "unite": "pièce"}}],
+    "etapes": ["Faire bouillir l'eau salée et cuire les spaghetti al dente.", "Faire revenir les lardons à sec dans une poêle.", "Mélanger les oeufs battus avec le parmesan.", "Égoutter les pâtes, hors du feu mélanger avec les lardons puis la sauce oeufs-parmesan."]
+  }}
+]}}
+
+RULES:
+1. Return ONLY valid JSON — no text before or after
+2. One item per recipe, in the SAME ORDER as the input list
+3. etapes: array of French strings, 3-8 steps each, describing the actual cooking process
+4. ingredients: array of {{nom, quantite, unite}}, 3-12 items
+5. Keep nom identical to the input recipe name
+6. No explanations, ONLY JSON
+
+Recipes to enrich:
+{liste_noms}"""
+
+            enriched = self.call_with_list_parsing_sync(
+                prompt=prompt,
+                item_model=RecetteEnrichieIA,
+                system_prompt="Return ONLY valid JSON. No text before or after JSON.",
+                max_items=len(noms),
+                temperature=0.3,
+                max_tokens=4000,
+            )
+
+            if not enriched:
+                logger.warning("[planning] Aucune donnée IA reçue pour l'enrichissement des stubs")
+                return
+
+            # Sauvegarder en base
+            stubs_by_nom = {nom.lower(): rid for rid, nom in stubs_data}
+            with obtenir_contexte_db() as session:
+                for recette_ia in enriched:
+                    stub_id = stubs_by_nom.get(recette_ia.nom.lower())
+                    if stub_id is None:
+                        # Tentative de correspondance approximative
+                        for nom_key, rid in stubs_by_nom.items():
+                            if recette_ia.nom.lower() in nom_key or nom_key in recette_ia.nom.lower():
+                                stub_id = rid
+                                break
+                    if stub_id is None:
+                        continue
+
+                    # Recharger la recette dans la session courante
+                    db_recette = session.get(Recette, stub_id)
+                    if db_recette is None:
+                        continue
+
+                    # Mise à jour des temps si renseignés par l'IA
+                    if recette_ia.temps_preparation:
+                        db_recette.temps_preparation = recette_ia.temps_preparation
+                    if recette_ia.temps_cuisson:
+                        db_recette.temps_cuisson = recette_ia.temps_cuisson
+                    if recette_ia.portions:
+                        db_recette.portions = recette_ia.portions
+                    if recette_ia.difficulte:
+                        db_recette.difficulte = recette_ia.difficulte
+
+                    # Étapes
+                    for idx, texte in enumerate(recette_ia.etapes, start=1):
+                        texte = texte.strip()
+                        if texte:
+                            session.add(
+                                EtapeRecette(
+                                    recette_id=stub_id,
+                                    ordre=idx,
+                                    description=texte,
+                                )
+                            )
+
+                    # Ingrédients
+                    for ing_data in recette_ia.ingredients:
+                        nom_ing = (ing_data.get("nom") or "").strip()
+                        if not nom_ing:
+                            continue
+                        db_ingredient = (
+                            session.query(Ingredient)
+                            .filter(Ingredient.nom == nom_ing)
+                            .first()
+                        )
+                        if db_ingredient is None:
+                            db_ingredient = Ingredient(
+                                nom=nom_ing,
+                                unite=ing_data.get("unite") or "pièce",
+                            )
+                            session.add(db_ingredient)
+                            session.flush()
+                        session.add(
+                            RecetteIngredient(
+                                recette_id=stub_id,
+                                ingredient_id=db_ingredient.id,
+                                quantite=float(ing_data.get("quantite") or 1),
+                                unite=ing_data.get("unite") or db_ingredient.unite,
+                            )
+                        )
+
+                session.commit()
+                logger.info(
+                    "[planning] ✅ %d recette(s) stub enrichies pour planning %d",
+                    len(enriched),
+                    planning_id,
+                )
+
+        except Exception as exc:
+            logger.warning(
+                "[planning] Enrichissement stubs ignoré pour planning %d: %s",
+                planning_id,
+                exc,
+                exc_info=True,
+            )

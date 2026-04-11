@@ -9,7 +9,7 @@ Centralise tous les modèles de validation pour:
 
 from datetime import date
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS PLANNING DE BASE
@@ -56,6 +56,25 @@ class JourPlanning(BaseModel):
     # Dîner — dessert optionnel
     diner_dessert: str | None = None
     diner_dessert_est_recette: bool = False
+
+
+class RecetteEnrichieIA(BaseModel):
+    """Recette enrichie par l'IA lors de la génération du planning (étapes + ingrédients)."""
+
+    nom: str = Field(..., min_length=1, max_length=200)
+    temps_preparation: int = Field(20, ge=1, le=300)
+    temps_cuisson: int = Field(20, ge=0, le=300)
+    portions: int = Field(4, ge=1, le=20)
+    difficulte: str = Field("moyen", pattern="^(facile|moyen|difficile)$")
+    ingredients: list[dict] = Field(default_factory=list)
+    etapes: list[str] = Field(default_factory=list)
+
+    @field_validator("temps_preparation", "temps_cuisson", "portions", mode="before")
+    @classmethod
+    def convert_float_to_int(cls, v):
+        if isinstance(v, float):
+            return int(v)
+        return v
 
 
 class SuggestionRecettesDay(BaseModel):

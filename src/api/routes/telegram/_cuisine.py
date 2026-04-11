@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from ._helpers import (
     _boutons_planning,
     _emoji_peremption,
+    _formater_planning_html,
     _obtenir_url_app,
     _resume_statut_article,
     _selectionner_liste_courses,
@@ -52,22 +53,12 @@ async def _envoyer_planning_commande(chat_id: str) -> None:
             return
 
         repas_tries = sorted(planning.repas, key=lambda item: (item.date_repas, item.type_repas))
-        lignes = []
-        for repas in repas_tries:
-            type_repas = "Midi" if repas.type_repas == "dejeuner" else repas.type_repas.capitalize()
-            nom_recette = (
-                getattr(getattr(repas, "recette", None), "nom", None)
-                or repas.notes
-                or "Repas à préciser"
-            )
-            lignes.append(
-                f"• {repas.date_repas.strftime('%a %d/%m')} {html.escape(type_repas)} : {html.escape(str(nom_recette))}"
-            )
+        contenu = _formater_planning_html(repas_tries)
 
         message = (
             f"🍽️ <b>Planning de la semaine</b>\n"
             f"Du {planning.semaine_debut.strftime('%d/%m')} au {planning.semaine_fin.strftime('%d/%m')}\n\n"
-            + ("\n".join(lignes) if lignes else "Aucun repas saisi.")
+            + contenu
         )
 
         sauvegarder_etat_conversation(

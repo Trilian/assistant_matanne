@@ -959,6 +959,7 @@ async def reset_circuit_breaker_ia(
 @gerer_exception_api
 async def generer_planning_ia(
     body: GenererPlanningRequest | None = None,
+    background_tasks: "BackgroundTasks" = None,  # injected by FastAPI
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
@@ -966,6 +967,7 @@ async def generer_planning_ia(
 
     Crée 7 jours × 2 repas (déjeuner + dîner) en utilisant Mistral AI.
     Persiste directement les repas dans la DB.
+    Enrichit les recettes stubs (étapes + ingrédients) en arrière-plan.
 
     Args:
         body: Paramètres optionnels (date_debut, nb_personnes, preferences)
@@ -1177,6 +1179,13 @@ async def generer_planning_ia(
             raise HTTPException(
                 status_code=503, detail="Impossible de générer le planning. Réessayez plus tard."
             )
+
+        # Enrichir les recettes stubs en arrière-plan (étapes + ingrédients via IA)
+        try:
+            if background_tasks is not None:
+                background_tasks.add_task(service.enrichir_recettes_stub_planning, planning_obj.id)
+        except Exception as _bg_err:
+            logger.debug("[planning] background_tasks non disponible: %s", _bg_err)
 
         # Reconstruire la réponse dans le même format que GET /semaine
         with executer_avec_session() as session:
