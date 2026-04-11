@@ -47,26 +47,49 @@ class PlanningIAGenerationMixin:
     # ═══════════════════════════════════════════════════════════
 
     @staticmethod
-    def _trouver_ou_creer_recette(db: Session, nom: str, etapes: list[str] | None = None) -> int:
+    def _trouver_ou_creer_recette(
+        db: Session,
+        nom: str,
+        etapes: list[str] | None = None,
+        ingredients: list[dict] | None = None,
+    ) -> int:
         """Retourne l'id d'une recette existante (lookup insensible à la casse)
-        ou crée un stub et sauvegarde ses étapes si elles sont fournies."""
-        from src.core.models import EtapeRecette
+        ou crée un stub et sauvegarde ses étapes + ingrédients si fournis."""
+        from src.core.models import EtapeRecette, Ingredient, RecetteIngredient
         from src.core.models.recettes import Recette
 
         recette = db.query(Recette).filter(func.lower(Recette.nom) == nom.lower()).first()
         if recette is None:
-            recette = Recette(
-                nom=nom,
-                temps_preparation=30,
-            )
+            recette = Recette(nom=nom, temps_preparation=30)
             db.add(recette)
             db.flush()
-            # Sauvegarder les étapes dans la même transaction
+
+            # Étapes
             if etapes:
                 for idx, texte in enumerate(etapes, start=1):
                     texte = texte.strip()
                     if texte:
                         db.add(EtapeRecette(recette_id=recette.id, ordre=idx, description=texte))
+
+            # Ingrédients
+            if ingredients:
+                for ing in ingredients:
+                    nom_ing = (ing.get("nom") or "").strip()
+                    if not nom_ing:
+                        continue
+                    db_ing = db.query(Ingredient).filter(Ingredient.nom == nom_ing).first()
+                    if db_ing is None:
+                        db_ing = Ingredient(nom=nom_ing, unite=ing.get("unite") or "pcs")
+                        db.add(db_ing)
+                        db.flush()
+                    db.add(
+                        RecetteIngredient(
+                            recette_id=recette.id,
+                            ingredient_id=db_ing.id,
+                            quantite=float(ing.get("quantite") or 1),
+                            unite=ing.get("unite") or db_ing.unite,
+                        )
+                    )
         return recette.id
 
     # ═══════════════════════════════════════════════════════════
@@ -230,40 +253,48 @@ OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
     "petit_dejeuner_est_recette": false,
     "dejeuner": "Pâtes carbonara",
     "dejeuner_etapes": ["Faire bouillir l'eau salée.", "Cuire les spaghetti al dente 8 min.", "Faire revenir les lardons à sec.", "Mélanger hors du feu les pâtes, lardons et oeufs battus avec parmesan."],
+    "dejeuner_ingredients": [{{"nom": "spaghetti", "quantite": 400, "unite": "g"}}, {{"nom": "lardons", "quantite": 200, "unite": "g"}}, {{"nom": "oeufs", "quantite": 3, "unite": "pièce"}}, {{"nom": "parmesan", "quantite": 50, "unite": "g"}}],
     "dejeuner_entree": "Salade verte",
     "dejeuner_entree_est_recette": false,
     "dejeuner_entree_etapes": [],
+    "dejeuner_entree_ingredients": [],
     "dejeuner_laitage": "Yaourt nature",
     "dejeuner_dessert": "Tarte aux pommes",
     "dejeuner_dessert_est_recette": true,
-    "dejeuner_dessert_etapes": ["Étaler la pâte dans le moule.", "Éplucher et émincer les pommes.", "Disposer les pommes, saupoudrer de sucre et cannelle.", "Cuire 30 min à 180°C."],
+    "dejeuner_dessert_etapes": ["Étaler la pâte dans le moule.", "Éplucher et émincer les pommes.", "Disposer les pommes, saupoudrer de sucre.", "Cuire 30 min à 180°C."],
+    "dejeuner_dessert_ingredients": [{{"nom": "pâte brisée", "quantite": 1, "unite": "pièce"}}, {{"nom": "pommes", "quantite": 4, "unite": "pièce"}}, {{"nom": "sucre", "quantite": 50, "unite": "g"}}],
     "gouter": "Pain au chocolat",
     "gouter_est_recette": false,
     "gouter_etapes": [],
+    "gouter_ingredients": [],
     "diner": "Salade niçoise",
-    "diner_etapes": ["Cuire les oeufs durs 10 min.", "Égoutter le thon et les haricots verts.", "Couper tomates et concombre.", "Dresser la salade avec tous les ingrédients, assaisonner à l'huile d'olive."],
+    "diner_etapes": ["Cuire les oeufs durs 10 min.", "Égoutter le thon et les haricots verts.", "Couper tomates et concombre.", "Dresser et assaisonner à l'huile d'olive."],
+    "diner_ingredients": [{{"nom": "thon en boîte", "quantite": 200, "unite": "g"}}, {{"nom": "tomates", "quantite": 3, "unite": "pièce"}}, {{"nom": "oeufs", "quantite": 2, "unite": "pièce"}}, {{"nom": "haricots verts", "quantite": 150, "unite": "g"}}],
     "diner_entree": null,
     "diner_entree_est_recette": false,
     "diner_entree_etapes": [],
+    "diner_entree_ingredients": [],
     "diner_laitage": "Fromage",
     "diner_dessert": "Fruit de saison",
     "diner_dessert_est_recette": false,
-    "diner_dessert_etapes": []
+    "diner_dessert_etapes": [],
+    "diner_dessert_ingredients": []
   }}
 ]}}
 
 RULES:
 1. Return ONLY valid JSON with exactly 7 items (one per day: Lundi→Dimanche)
-2. dejeuner and diner (le PLAT principal): always a real recipe name to cook (3-50 chars)
-3. dejeuner_etapes / diner_etapes: MANDATORY — always 3-6 practical French cooking steps for each main dish
-4. *_etapes: only fill when *_est_recette is true; otherwise leave as empty array []
-5. petit_dejeuner: simple text on weekdays (tartines, céréales, fruit), can be est_recette=true on weekend (crêpes, gaufres...)
-6. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
-7. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
-8. gouter: MANDATORY — always a non-null short text. est_recette=true only for real preparations. Never leave null.
-9. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
-10. null is valid ONLY for entree, laitage, dessert — never for gouter
-11. No explanations, no text, ONLY JSON"""
+2. dejeuner and diner (PLAT principal): always a real recipe name (3-50 chars)
+3. dejeuner_etapes / diner_etapes: MANDATORY — 3-6 practical French cooking steps
+4. dejeuner_ingredients / diner_ingredients: MANDATORY — 3-10 items with {{nom, quantite, unite}}
+5. *_etapes / *_ingredients: fill only when *_est_recette is true; otherwise leave as []
+6. petit_dejeuner: simple text on weekdays; can be est_recette=true on weekend (crêpes, gaufres...)
+7. entree/dessert: optional — est_recette=true only if real preparation needed
+8. laitage: text only — never est_recette
+9. gouter: MANDATORY non-null text; est_recette=true only for real preparations
+10. Vary proteins: fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri
+11. null valid ONLY for entree/laitage/dessert — never for gouter
+12. No explanations, ONLY JSON"""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -338,12 +369,15 @@ RULES:
 
             # Déjeuner — plat = toujours une recette stub
             recette_dej_id = self._trouver_ou_creer_recette(
-                db, jour_data.dejeuner, etapes=jour_data.dejeuner_etapes or None
+                db, jour_data.dejeuner,
+                etapes=jour_data.dejeuner_etapes or None,
+                ingredients=jour_data.dejeuner_ingredients or None,
             )
             entree_dej_recette_id = (
                 self._trouver_ou_creer_recette(
                     db, jour_data.dejeuner_entree,
                     etapes=jour_data.dejeuner_entree_etapes or None,
+                    ingredients=jour_data.dejeuner_entree_ingredients or None,
                 )
                 if jour_data.dejeuner_entree and jour_data.dejeuner_entree_est_recette
                 else None
@@ -352,6 +386,7 @@ RULES:
                 self._trouver_ou_creer_recette(
                     db, jour_data.dejeuner_dessert,
                     etapes=jour_data.dejeuner_dessert_etapes or None,
+                    ingredients=jour_data.dejeuner_dessert_ingredients or None,
                 )
                 if jour_data.dejeuner_dessert and jour_data.dejeuner_dessert_est_recette
                 else None
@@ -377,7 +412,9 @@ RULES:
             if jour_data.gouter:
                 recette_gouter_id = (
                     self._trouver_ou_creer_recette(
-                        db, jour_data.gouter, etapes=jour_data.gouter_etapes or None
+                        db, jour_data.gouter,
+                        etapes=jour_data.gouter_etapes or None,
+                        ingredients=jour_data.gouter_ingredients or None,
                     )
                     if jour_data.gouter_est_recette
                     else None
@@ -394,12 +431,15 @@ RULES:
 
             # Dîner — plat = toujours une recette stub
             recette_din_id = self._trouver_ou_creer_recette(
-                db, jour_data.diner, etapes=jour_data.diner_etapes or None
+                db, jour_data.diner,
+                etapes=jour_data.diner_etapes or None,
+                ingredients=jour_data.diner_ingredients or None,
             )
             entree_din_recette_id = (
                 self._trouver_ou_creer_recette(
                     db, jour_data.diner_entree,
                     etapes=jour_data.diner_entree_etapes or None,
+                    ingredients=jour_data.diner_entree_ingredients or None,
                 )
                 if jour_data.diner_entree and jour_data.diner_entree_est_recette
                 else None
@@ -408,6 +448,7 @@ RULES:
                 self._trouver_ou_creer_recette(
                     db, jour_data.diner_dessert,
                     etapes=jour_data.diner_dessert_etapes or None,
+                    ingredients=jour_data.diner_dessert_ingredients or None,
                 )
                 if jour_data.diner_dessert and jour_data.diner_dessert_est_recette
                 else None
