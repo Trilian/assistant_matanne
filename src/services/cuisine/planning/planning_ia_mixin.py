@@ -47,9 +47,10 @@ class PlanningIAGenerationMixin:
     # ═══════════════════════════════════════════════════════════
 
     @staticmethod
-    def _trouver_ou_creer_recette(db: Session, nom: str) -> int:
+    def _trouver_ou_creer_recette(db: Session, nom: str, etapes: list[str] | None = None) -> int:
         """Retourne l'id d'une recette existante (lookup insensible à la casse)
-        ou crée un stub minimal si elle n'existe pas encore."""
+        ou crée un stub et sauvegarde ses étapes si elles sont fournies."""
+        from src.core.models import EtapeRecette
         from src.core.models.recettes import Recette
 
         recette = db.query(Recette).filter(func.lower(Recette.nom) == nom.lower()).first()
@@ -60,6 +61,12 @@ class PlanningIAGenerationMixin:
             )
             db.add(recette)
             db.flush()
+            # Sauvegarder les étapes dans la même transaction
+            if etapes:
+                for idx, texte in enumerate(etapes, start=1):
+                    texte = texte.strip()
+                    if texte:
+                        db.add(EtapeRecette(recette_id=recette.id, ordre=idx, description=texte))
         return recette.id
 
     # ═══════════════════════════════════════════════════════════
@@ -222,32 +229,41 @@ OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
     "petit_dejeuner": "Tartines beurre confiture",
     "petit_dejeuner_est_recette": false,
     "dejeuner": "Pâtes carbonara",
+    "dejeuner_etapes": ["Faire bouillir l'eau salée.", "Cuire les spaghetti al dente 8 min.", "Faire revenir les lardons à sec.", "Mélanger hors du feu les pâtes, lardons et oeufs battus avec parmesan."],
     "dejeuner_entree": "Salade verte",
     "dejeuner_entree_est_recette": false,
+    "dejeuner_entree_etapes": [],
     "dejeuner_laitage": "Yaourt nature",
     "dejeuner_dessert": "Tarte aux pommes",
     "dejeuner_dessert_est_recette": true,
+    "dejeuner_dessert_etapes": ["Étaler la pâte dans le moule.", "Éplucher et émincer les pommes.", "Disposer les pommes, saupoudrer de sucre et cannelle.", "Cuire 30 min à 180°C."],
     "gouter": "Pain au chocolat",
     "gouter_est_recette": false,
+    "gouter_etapes": [],
     "diner": "Salade niçoise",
+    "diner_etapes": ["Cuire les oeufs durs 10 min.", "Égoutter le thon et les haricots verts.", "Couper tomates et concombre.", "Dresser la salade avec tous les ingrédients, assaisonner à l'huile d'olive."],
     "diner_entree": null,
     "diner_entree_est_recette": false,
+    "diner_entree_etapes": [],
     "diner_laitage": "Fromage",
     "diner_dessert": "Fruit de saison",
-    "diner_dessert_est_recette": false
+    "diner_dessert_est_recette": false,
+    "diner_dessert_etapes": []
   }}
 ]}}
 
 RULES:
 1. Return ONLY valid JSON with exactly 7 items (one per day: Lundi→Dimanche)
 2. dejeuner and diner (le PLAT principal): always a real recipe name to cook (3-50 chars)
-3. petit_dejeuner: simple text on weekdays (tartines, céréales, fruit), can be est_recette=true on weekend (crêpes, gaufres...)
-4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
-5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
-6. gouter: MANDATORY — always a non-null short text (pain au chocolat, fruit, yaourt, biscuits, compote...). est_recette=true only for real preparations. Never leave null.
-7. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
-8. null is valid ONLY for entree, laitage, dessert — never for gouter
-9. No explanations, no text, ONLY JSON"""
+3. dejeuner_etapes / diner_etapes: MANDATORY — always 3-6 practical French cooking steps for each main dish
+4. *_etapes: only fill when *_est_recette is true; otherwise leave as empty array []
+5. petit_dejeuner: simple text on weekdays (tartines, céréales, fruit), can be est_recette=true on weekend (crêpes, gaufres...)
+6. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
+7. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
+8. gouter: MANDATORY — always a non-null short text. est_recette=true only for real preparations. Never leave null.
+9. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
+10. null is valid ONLY for entree, laitage, dessert — never for gouter
+11. No explanations, no text, ONLY JSON"""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -259,7 +275,7 @@ RULES:
             system_prompt="Return ONLY valid JSON. No text before or after JSON. Never use markdown code blocks.",
             max_items=7,
             temperature=0.5,
-            max_tokens=3000,
+            max_tokens=6000,
             use_cache=False,
         )
 
@@ -321,14 +337,22 @@ RULES:
                 )
 
             # Déjeuner — plat = toujours une recette stub
-            recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner)
+            recette_dej_id = self._trouver_ou_creer_recette(
+                db, jour_data.dejeuner, etapes=jour_data.dejeuner_etapes or None
+            )
             entree_dej_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.dejeuner_entree)
+                self._trouver_ou_creer_recette(
+                    db, jour_data.dejeuner_entree,
+                    etapes=jour_data.dejeuner_entree_etapes or None,
+                )
                 if jour_data.dejeuner_entree and jour_data.dejeuner_entree_est_recette
                 else None
             )
             dessert_dej_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.dejeuner_dessert)
+                self._trouver_ou_creer_recette(
+                    db, jour_data.dejeuner_dessert,
+                    etapes=jour_data.dejeuner_dessert_etapes or None,
+                )
                 if jour_data.dejeuner_dessert and jour_data.dejeuner_dessert_est_recette
                 else None
             )
@@ -352,7 +376,9 @@ RULES:
                 jour_data.gouter = "Fruit de saison"
             if jour_data.gouter:
                 recette_gouter_id = (
-                    self._trouver_ou_creer_recette(db, jour_data.gouter)
+                    self._trouver_ou_creer_recette(
+                        db, jour_data.gouter, etapes=jour_data.gouter_etapes or None
+                    )
                     if jour_data.gouter_est_recette
                     else None
                 )
@@ -367,14 +393,22 @@ RULES:
                 )
 
             # Dîner — plat = toujours une recette stub
-            recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner)
+            recette_din_id = self._trouver_ou_creer_recette(
+                db, jour_data.diner, etapes=jour_data.diner_etapes or None
+            )
             entree_din_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.diner_entree)
+                self._trouver_ou_creer_recette(
+                    db, jour_data.diner_entree,
+                    etapes=jour_data.diner_entree_etapes or None,
+                )
                 if jour_data.diner_entree and jour_data.diner_entree_est_recette
                 else None
             )
             dessert_din_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.diner_dessert)
+                self._trouver_ou_creer_recette(
+                    db, jour_data.diner_dessert,
+                    etapes=jour_data.diner_dessert_etapes or None,
+                )
                 if jour_data.diner_dessert and jour_data.diner_dessert_est_recette
                 else None
             )
@@ -406,14 +440,6 @@ RULES:
         obtenir_cache().invalidate(pattern="planning")
 
         logger.info(f"✅ Generated AI planning for week starting {semaine_debut}")
-
-        # Enrichir les recettes stubs MAINTENANT (synchrone) — garantit que les
-        # instructions sont disponibles dès que la méthode retourne.
-        try:
-            self.enrichir_recettes_stub_planning(planning.id)
-        except Exception as _enr_err:
-            logger.warning("[planning] Enrichissement stubs échoué (non bloquant): %s", _enr_err)
-
         return planning
 
     # ═══════════════════════════════════════════════════════════
