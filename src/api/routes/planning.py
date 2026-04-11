@@ -980,7 +980,6 @@ async def reset_circuit_breaker_ia(
 @gerer_exception_api
 async def generer_planning_ia(
     body: GenererPlanningRequest | None = None,
-    background_tasks: BackgroundTasks = None,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
@@ -1338,18 +1337,6 @@ async def generer_planning_ia(
             }
 
     resultat = await executer_async(_generate)
-
-    # Enrichir les recettes stubs (via IA : étapes + ingrédients) en arrière-plan.
-    # Doit être appelé depuis la coroutine async, PAS depuis le thread pool.
-    planning_id_gen = resultat.get("planning_id") if isinstance(resultat, dict) else None
-    if planning_id_gen and background_tasks is not None:
-        try:
-            from src.services.cuisine.planning import obtenir_service_planning as _get_svc
-            background_tasks.add_task(
-                _get_svc().enrichir_recettes_stub_planning, planning_id_gen
-            )
-        except Exception as _bg_err:
-            logger.debug("[planning] Échec ajout background enrichissement: %s", _bg_err)
 
     return resultat
 

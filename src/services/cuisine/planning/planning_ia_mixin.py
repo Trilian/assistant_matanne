@@ -252,6 +252,7 @@ RULES:
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
         # Appel IA avec auto rate limiting & parsing
+        # use_cache=False : chaque génération doit produire un planning UNIQUE (pas de réponse recyclée)
         planning_data = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=JourPlanning,
@@ -259,6 +260,7 @@ RULES:
             max_items=7,
             temperature=0.5,
             max_tokens=3000,
+            use_cache=False,
         )
 
         # Log de debug pour voir la réponse
@@ -404,6 +406,14 @@ RULES:
         obtenir_cache().invalidate(pattern="planning")
 
         logger.info(f"✅ Generated AI planning for week starting {semaine_debut}")
+
+        # Enrichir les recettes stubs MAINTENANT (synchrone) — garantit que les
+        # instructions sont disponibles dès que la méthode retourne.
+        try:
+            self.enrichir_recettes_stub_planning(planning.id)
+        except Exception as _enr_err:
+            logger.warning("[planning] Enrichissement stubs échoué (non bloquant): %s", _enr_err)
+
         return planning
 
     # ═══════════════════════════════════════════════════════════
