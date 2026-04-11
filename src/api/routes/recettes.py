@@ -1472,6 +1472,60 @@ async def enrichir_nutrition_batch(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
+
+# ═══════════════════════════════════════════════════════════
+# ENRICHISSEMENT DES INSTRUCTIONS (étapes + ingrédients via IA)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/{recette_id}/enrichir-instructions")
+@gerer_exception_api
+async def enrichir_instructions_recette(
+    recette_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère via l'IA les étapes de préparation et les ingrédients d'une recette stub."""
+    from src.services.cuisine.planning import obtenir_service_planning
+
+    def _enrichir():
+        service = obtenir_service_planning()
+        count = service.enrichir_recettes_stubs_global(recette_ids=[recette_id])
+        return {"enrichies": count, "recette_id": recette_id}
+
+    return await executer_async(_enrichir)
+
+
+@router.post("/enrichir-instructions-batch")
+@gerer_exception_api
+async def enrichir_instructions_batch(
+    limite: int = Query(20, ge=1, le=50, description="Nombre max de recettes stubs à traiter"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Enrichit en batch toutes les recettes sans étapes de préparation (stubs IA)."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models import EtapeRecette
+    from src.core.models.recettes import Recette
+    from src.services.cuisine.planning import obtenir_service_planning
+
+    def _batch():
+        with obtenir_contexte_db() as session:
+            stub_ids: list[int] = []
+            for (rid,) in session.query(Recette.id).all():
+                if not session.query(EtapeRecette).filter(EtapeRecette.recette_id == rid).first():
+                    stub_ids.append(rid)
+                if len(stub_ids) >= limite:
+                    break
+
+        if not stub_ids:
+            return {"enrichies": 0, "message": "Aucune recette stub trouvée"}
+
+        service = obtenir_service_planning()
+        count = service.enrichir_recettes_stubs_global(recette_ids=stub_ids)
+        return {"enrichies": count, "traites": len(stub_ids)}
+
+    return await executer_async(_batch)
+
+
 @router.post("/{recette_id}/version-jules", response_model=dict)
 @gerer_exception_api
 async def generer_version_jules(
