@@ -57,24 +57,6 @@ class JourPlanning(BaseModel):
     diner_dessert: str | None = None
     diner_dessert_est_recette: bool = False
 
-    # Étapes + ingrédients générés en ligne — évite un 2ème appel IA post-génération
-    # Plats principaux : toujours remplis
-    dejeuner_etapes: list[str] = Field(default_factory=list)
-    dejeuner_ingredients: list[dict] = Field(default_factory=list)
-    diner_etapes: list[str] = Field(default_factory=list)
-    diner_ingredients: list[dict] = Field(default_factory=list)
-    # Entrées/desserts/goûter : remplis seulement si est_recette=true
-    dejeuner_entree_etapes: list[str] = Field(default_factory=list)
-    dejeuner_entree_ingredients: list[dict] = Field(default_factory=list)
-    dejeuner_dessert_etapes: list[str] = Field(default_factory=list)
-    dejeuner_dessert_ingredients: list[dict] = Field(default_factory=list)
-    diner_entree_etapes: list[str] = Field(default_factory=list)
-    diner_entree_ingredients: list[dict] = Field(default_factory=list)
-    diner_dessert_etapes: list[str] = Field(default_factory=list)
-    diner_dessert_ingredients: list[dict] = Field(default_factory=list)
-    gouter_etapes: list[str] = Field(default_factory=list)
-    gouter_ingredients: list[dict] = Field(default_factory=list)
-
 
 class RecetteEnrichieIA(BaseModel):
     """Recette enrichie par l'IA lors de la génération du planning (étapes + ingrédients)."""
