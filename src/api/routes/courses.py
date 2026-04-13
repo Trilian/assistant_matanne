@@ -67,6 +67,15 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
+_CATEGORIES_GENERIQUES = {"autre", "other"}
+
+
+def _rayon_valide(rayon: str | None) -> str | None:
+    """Retourne le rayon s'il est significatif, None sinon."""
+    if rayon and rayon.lower() not in _CATEGORIES_GENERIQUES:
+        return rayon
+    return None
+
 
 def _etat_liste_response(liste: Any) -> str:
     """Normalise l'etat expose par l'API pour les mocks et anciennes donnees."""
@@ -340,7 +349,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
                         "nom": a.ingredient.nom if a.ingredient else "Article",
                         "quantite": a.quantite_necessaire,
                         "coche": a.achete,
-                        "categorie": a.rayon_magasin or (a.ingredient.categorie if a.ingredient else None),
+                        "categorie": _rayon_valide(a.rayon_magasin) or _rayon_valide(a.ingredient.categorie if a.ingredient else None),
                         "magasin_cible": a.magasin_cible,
                         "prix_estime": a.prix_unitaire,
                     }
@@ -940,7 +949,7 @@ async def generer_depuis_planning(
                     "nom": row.nom,
                     "quantite": float(row.total_qty or 1),
                     "unite": row.unite or "",
-                    "rayon": row.categorie or None,
+                    "rayon": None if (not row.categorie or row.categorie.lower() in ("autre", "other")) else row.categorie,
                 }
                 for row in rows
             ]
@@ -1017,7 +1026,7 @@ async def generer_depuis_planning(
             # Compter par rayon
             par_rayon: dict[str, int] = {}
             for art in articles_a_acheter:
-                rayon = art.get("rayon", "Autre")
+                rayon = art.get("rayon") or "Autre"
                 par_rayon[rayon] = par_rayon.get(rayon, 0) + 1
 
             return {
@@ -1075,7 +1084,7 @@ async def confirmer_courses(
                 return MessageResponse(
                     message="La liste est déjà active",
                     id=liste_id,
-                    data={"etat": liste.etat},
+                    details={"etat": liste.etat},
                 )
 
             if liste.etat != "brouillon":
@@ -1091,7 +1100,7 @@ async def confirmer_courses(
             return MessageResponse(
                 message="Liste confirmée et activée",
                 id=liste_id,
-                data={"etat": liste.etat},
+                details={"etat": liste.etat},
             )
 
     return await executer_async(_confirmer)

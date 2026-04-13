@@ -1167,6 +1167,11 @@ async def generer_planning_ia(
         except Exception as e:
             logger.warning("[planning] Enrichissement saisonnier non chargé: %s", e)
 
+        # Transmettre les préférences saisonnières de l'utilisateur au service IA
+        preferences_enrichies["legumes_souhaites"] = body.legumes_souhaites
+        preferences_enrichies["plats_souhaites"] = body.plats_souhaites
+        preferences_enrichies["autoriser_restes"] = body.autoriser_restes
+
         from src.core.exceptions import ExceptionApp
 
         service = obtenir_service_planning()
@@ -1275,6 +1280,8 @@ async def generer_planning_ia(
                     "dessert": getattr(r, "dessert", None),
                     "dessert_recette_id": getattr(r, "dessert_recette_id", None),
                     "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,
+                    "est_reste": getattr(r, "est_reste", False),
+                    "reste_description": getattr(r, "reste_description", None),
                 }
                 if rec:
                     cal = rec.calories or 0
@@ -1316,6 +1323,8 @@ async def generer_planning_ia(
                         "plat_jules": getattr(r, "plat_jules", None),
                         "notes_jules": getattr(r, "notes_jules", None),
                         "adaptation_auto": getattr(r, "adaptation_auto", True),
+                        "est_reste": getattr(r, "est_reste", False),
+                        "reste_description": getattr(r, "reste_description", None),
                     }
                 )
 

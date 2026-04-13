@@ -1513,6 +1513,8 @@ CREATE TABLE IF NOT EXISTS repas (
     adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
     contexte_meteo VARCHAR(50),
     laitage VARCHAR(200),
+    est_reste BOOLEAN NOT NULL DEFAULT FALSE,
+    reste_description VARCHAR(200),
     CONSTRAINT fk_repas_planning FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE,
     CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
     SET NULL,
@@ -1532,6 +1534,12 @@ CREATE INDEX IF NOT EXISTS idx_repas_planning_id ON repas(planning_id);
 CREATE INDEX IF NOT EXISTS ix_repas_recette ON repas(recette_id);
 CREATE INDEX IF NOT EXISTS ix_repas_date ON repas(date_repas);
 CREATE INDEX IF NOT EXISTS ix_repas_type ON repas(type_repas);
+
+-- Colonnes ajoutées post-création (idempotent pour bases existantes)
+DO $$ BEGIN
+    ALTER TABLE repas ADD COLUMN IF NOT EXISTS est_reste BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE repas ADD COLUMN IF NOT EXISTS reste_description VARCHAR(200);
+END $$;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

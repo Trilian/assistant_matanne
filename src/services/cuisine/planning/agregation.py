@@ -76,7 +76,7 @@ def sort_ingredients_by_rayon(ingredients: dict[str, dict] | list[dict]) -> list
     else:
         items = ingredients
 
-    return sorted(items, key=lambda x: (x.get("rayon", "zzz"), -x.get("quantite", 0)))
+    return sorted(items, key=lambda x: (x.get("rayon") or "zzz", -x.get("quantite", 0)))
 
 
 def get_rayon_order() -> list[str]:

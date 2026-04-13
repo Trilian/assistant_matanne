@@ -153,6 +153,20 @@ export async function obtenirDoublonsRecettes(seuil = 0.72): Promise<ReponseDoub
   return data;
 }
 
+/** Fusionner deux recettes similaires — conserve id_a_garder, supprime id_a_supprimer */
+export async function fusionnerRecettes(
+  idAGarder: number,
+  idASupprimer: number,
+  nouveauNom?: string
+): Promise<Recette> {
+  const { data } = await clientApi.post<Recette>("/recettes/fusionner", {
+    id_a_garder: idAGarder,
+    id_a_supprimer: idASupprimer,
+    ...(nouveauNom ? { nouveau_nom: nouveauNom } : {}),
+  });
+  return data;
+}
+
 /** Marquer une recette "à faire cette semaine" */
 export async function planifierRecetteSemaine(id: number): Promise<void> {
   await clientApi.post(`/recettes/${id}/planifier-semaine`);
@@ -250,5 +264,13 @@ export async function exporterRecettePdf(recetteId: number): Promise<void> {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+/** Générer via l'IA les étapes de préparation d'une recette sans instructions */
+export async function enrichirInstructionsRecette(recetteId: number): Promise<{ enrichies: number; recette_id: number }> {
+  const { data } = await clientApi.post<{ enrichies: number; recette_id: number }>(
+    `/recettes/${recetteId}/enrichir-instructions`
+  );
+  return data;
 }
 

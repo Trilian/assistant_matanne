@@ -142,6 +142,10 @@ class Repas(Base):
     # Contexte apprentissage
     contexte_meteo: Mapped[str | None] = mapped_column(String(50))
 
+    # Reste réchauffé (ex: "Reste du poulet rôti de lundi soir")
+    est_reste: Mapped[bool] = mapped_column(Boolean, default=False)
+    reste_description: Mapped[str | None] = mapped_column(String(200))
+
     # Relations
     planning: Mapped["Planning"] = relationship(back_populates="repas")
     recette: Mapped[Optional["Recette"]] = relationship(foreign_keys=[recette_id])

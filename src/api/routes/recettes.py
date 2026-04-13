@@ -111,6 +111,142 @@ async def obtenir_repas_adaptatif_garmin(
     return result or SuggestionRepasSoirResponse()
 
 
+@router.post("/fusionner", response_model=RecetteResponse, responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def fusionner_recettes(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> Any:
+    """Fusionne deux recettes similaires en une seule.
+
+    La recette à garder est conservée (avec son historique, ses ingrédients, ses étapes).
+    L'historique de cuisson et les feedbacks de la recette à supprimer sont transférés.
+    Les entrées de planning et de batch cooking sont mises à jour.
+    La recette à supprimer est ensuite effacée.
+    """
+    from src.core.models import Recette
+    from src.core.models.recettes import HistoriqueRecette
+    from src.core.models.planning import Repas
+    from src.core.models.batch_cooking import EtapeBatchCooking, PreparationBatch, BatchCookingCongelation
+    from src.core.models.user_preferences import RetourRecette
+
+    id_a_garder: int | None = payload.get("id_a_garder")
+    id_a_supprimer: int | None = payload.get("id_a_supprimer")
+    nouveau_nom: str | None = payload.get("nouveau_nom")
+
+    if not id_a_garder or not id_a_supprimer:
+        raise HTTPException(status_code=422, detail="id_a_garder et id_a_supprimer sont obligatoires.")
+    if id_a_garder == id_a_supprimer:
+        raise HTTPException(status_code=422, detail="Les deux recettes doivent être différentes.")
+
+    def _fusionner() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            recette_garde = session.get(Recette, id_a_garder)
+            recette_supprime = session.get(Recette, id_a_supprimer)
+
+            if not recette_garde:
+                raise HTTPException(status_code=404, detail=f"Recette {id_a_garder} introuvable.")
+            if not recette_supprime:
+                raise HTTPException(status_code=404, detail=f"Recette {id_a_supprimer} introuvable.")
+
+            if nouveau_nom:
+                recette_garde.nom = nouveau_nom.strip()
+
+            # 1. Transférer l'historique de cuisson
+            session.query(HistoriqueRecette).filter(
+                HistoriqueRecette.recette_id == id_a_supprimer
+            ).update({"recette_id": id_a_garder}, synchronize_session=False)
+
+            # 2. Transférer les feedbacks (éviter les doublons : on supprime ceux qui existent déjà sur la recette gardée)
+            ids_feedbacks_gardes = {
+                r.user_id
+                for r in session.query(RetourRecette).filter(
+                    RetourRecette.recette_id == id_a_garder
+                ).all()
+            }
+            feedbacks_a_transferer = session.query(RetourRecette).filter(
+                RetourRecette.recette_id == id_a_supprimer
+            ).all()
+            for fb in feedbacks_a_transferer:
+                if fb.user_id not in ids_feedbacks_gardes:
+                    fb.recette_id = id_a_garder
+                else:
+                    session.delete(fb)
+
+            # 3. Mettre à jour les plannings (4 colonnes nullable)
+            for col in ("recette_id", "entree_recette_id", "dessert_recette_id", "dessert_jules_recette_id"):
+                session.query(Repas).filter(
+                    getattr(Repas, col) == id_a_supprimer
+                ).update({col: id_a_garder}, synchronize_session=False)
+
+            # 4. Mettre à jour le batch cooking
+            for model in (EtapeBatchCooking, PreparationBatch, BatchCookingCongelation):
+                session.query(model).filter(
+                    model.recette_id == id_a_supprimer
+                ).update({"recette_id": id_a_garder}, synchronize_session=False)
+
+            # 5. Supprimer la recette doublon (CASCADE supprime ses ingrédients, étapes, versions)
+            session.delete(recette_supprime)
+            session.flush()
+
+            # Invalider le cache du service
+            try:
+                from src.services.cuisine.recettes.service import obtenir_service_recettes
+                svc = obtenir_service_recettes()
+                svc._cache.invalider(f"recette_{id_a_garder}")
+                svc._cache.invalider(f"recette_{id_a_supprimer}")
+            except Exception:
+                pass
+
+            session.refresh(recette_garde)
+
+            # Construire la réponse minimale (RecetteResponse)
+            ingredients_out = []
+            for ri in (recette_garde.ingredients or []):
+                if ri.ingredient:
+                    ingredients_out.append({
+                        "id": ri.ingredient.id,
+                        "nom": ri.ingredient.nom,
+                        "quantite": ri.quantite,
+                        "unite": ri.unite or ri.ingredient.unite,
+                        "optionnel": ri.optionnel,
+                    })
+            etapes_out = [
+                {
+                    "id": e.id,
+                    "ordre": e.ordre,
+                    "titre": e.titre,
+                    "description": e.description,
+                    "duree": e.duree,
+                }
+                for e in sorted(recette_garde.etapes or [], key=lambda x: x.ordre)
+            ]
+            return {
+                "id": recette_garde.id,
+                "nom": recette_garde.nom,
+                "description": recette_garde.description,
+                "temps_preparation": recette_garde.temps_preparation,
+                "temps_cuisson": recette_garde.temps_cuisson,
+                "portions": recette_garde.portions,
+                "difficulte": recette_garde.difficulte,
+                "categorie": recette_garde.categorie,
+                "ingredients": ingredients_out,
+                "etapes": etapes_out,
+                "est_favori": False,
+                "url_source": recette_garde.url_source,
+                "compatible_cookeo": recette_garde.compatible_cookeo,
+                "compatible_airfryer": recette_garde.compatible_airfryer,
+                "compatible_monsieur_cuisine": recette_garde.compatible_monsieur_cuisine,
+                "jours_depuis_derniere_cuisson": None,
+                "calories": recette_garde.calories,
+                "proteines": recette_garde.proteines,
+                "lipides": recette_garde.lipides,
+                "glucides": recette_garde.glucides,
+            }
+
+    return await executer_async(_fusionner)
+
+
 @router.get("/doublons", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def detecter_doublons_recettes(
@@ -404,7 +540,25 @@ async def lister_recettes(
                 recette_id: derniere_cuisson for recette_id, derniere_cuisson in historiques
             }
 
-            # SÃ©rialisation basique (sans relations) pour la liste
+            # Favoris de l'utilisateur courant (une seule requête IN)
+            from src.core.models.user_preferences import RetourRecette
+
+            user_id = user.get("sub", user.get("id", "dev"))
+            ids_items = [r.id for r in items]
+            favoris_ids: set[int] = set()
+            if ids_items:
+                retours = (
+                    session.query(RetourRecette.recette_id)
+                    .filter(
+                        RetourRecette.user_id == user_id,
+                        RetourRecette.recette_id.in_(ids_items),
+                        RetourRecette.feedback == "like",
+                    )
+                    .all()
+                )
+                favoris_ids = {row.recette_id for row in retours}
+
+            # Sérialisation basique (sans relations) pour la liste
             items_dicts = [
                 {
                     "id": r.id,
@@ -415,6 +569,10 @@ async def lister_recettes(
                     "portions": r.portions,
                     "difficulte": r.difficulte,
                     "categorie": r.categorie,
+                    "est_favori": r.id in favoris_ids,
+                    "compatible_cookeo": r.compatible_cookeo,
+                    "compatible_monsieur_cuisine": r.compatible_monsieur_cuisine,
+                    "compatible_airfryer": r.compatible_airfryer,
                     "jours_depuis_derniere_cuisson": (
                         (date.today() - historique_par_recette[r.id]).days
                         if historique_par_recette.get(r.id)

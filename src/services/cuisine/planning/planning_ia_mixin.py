@@ -204,13 +204,36 @@ class PlanningIAGenerationMixin:
             semaine_debut=semaine_debut.strftime("%d/%m/%Y"),
         )
 
+        prefs = preferences or {}
+        legumes_souhaites: list[str] = prefs.get("legumes_souhaites", [])
+        plats_souhaites: list[str] = prefs.get("plats_souhaites", [])
+        autoriser_restes: bool = prefs.get("autoriser_restes", True)
+
         semaine_fin = semaine_debut + timedelta(days=6)
 
         # Construire prompt ultra-direct (comme pour recettes)
+        legumes_section = (
+            f"\nLÉGUMES À PRIVILÉGIER CETTE SEMAINE (forte préférence — essaie d'inclure chacun dans 2-3 préparations différentes) :\n"
+            + "\n".join(f"- {v}" for v in legumes_souhaites)
+            if legumes_souhaites
+            else ""
+        )
+        plats_section = (
+            f"\nPLATS À INCLURE CETTE SEMAINE (forte préférence) :\n"
+            + "\n".join(f"- {p}" for p in plats_souhaites)
+            if plats_souhaites
+            else ""
+        )
+        restes_section = (
+            "\nRESTES RÉCHAUFFÉS : Si un dîner se prête à être réchauffé le lendemain midi (plat en sauce, rôti, lasagnes, gratin, soupe...), propose-le en déjeuner du lendemain avec dejeuner_est_reste=true et dejeuner_reste_source=\"dîner de [JOUR]\". Utilise cette option pour 1 à 3 repas par semaine maximum — ne pas abuser."
+            if autoriser_restes
+            else "\nRESTES RÉCHAUFFÉS : Ne propose pas de restes réchauffés. Chaque repas doit être une préparation fraîche."
+        )
+
         prompt = f"""GENERATE A 7-DAY MEAL PLAN (MONDAY-SUNDAY) IN JSON FORMAT ONLY.
 
 CONTEXT:
-{context}
+{context}{legumes_section}{plats_section}{restes_section}
 
 OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 {{"items": [
@@ -224,6 +247,8 @@ OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
     "dejeuner_laitage": "Yaourt nature",
     "dejeuner_dessert": "Tarte aux pommes",
     "dejeuner_dessert_est_recette": true,
+    "dejeuner_est_reste": false,
+    "dejeuner_reste_source": null,
     "gouter": "Pain au chocolat",
     "gouter_est_recette": false,
     "diner": "Salade niçoise",
@@ -231,7 +256,9 @@ OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
     "diner_entree_est_recette": false,
     "diner_laitage": "Fromage",
     "diner_dessert": "Fruit de saison",
-    "diner_dessert_est_recette": false
+    "diner_dessert_est_recette": false,
+    "diner_est_reste": false,
+    "diner_reste_source": null
   }}
 ]}}
 
@@ -243,8 +270,9 @@ RULES:
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text. est_recette=true only for real preparations. Never leave null.
 7. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
-8. null is valid ONLY for entree, laitage, dessert — never for gouter
-9. No explanations, no text, ONLY JSON"""
+8. null is valid ONLY for entree, laitage, dessert, reste_source — never for gouter
+9. If a meal is a leftover (est_reste=true), set reste_source to identify the source meal (e.g. "dîner de lundi")
+10. No explanations, no text, ONLY JSON"""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -341,6 +369,8 @@ RULES:
                     laitage=jour_data.dejeuner_laitage,
                     dessert=jour_data.dejeuner_dessert,
                     dessert_recette_id=dessert_dej_recette_id,
+                    est_reste=jour_data.dejeuner_est_reste,
+                    reste_description=jour_data.dejeuner_reste_source,
                 )
             )
 
@@ -387,6 +417,8 @@ RULES:
                     laitage=jour_data.diner_laitage,
                     dessert=jour_data.diner_dessert,
                     dessert_recette_id=dessert_din_recette_id,
+                    est_reste=jour_data.diner_est_reste,
+                    reste_description=jour_data.diner_reste_source,
                 )
             )
 
@@ -553,17 +585,29 @@ Recipes to enrich:
             return 0
 
         stubs_by_nom = {nom.lower(): rid for rid, nom in stubs_data}
+        stubs_ids_ordered = [rid for rid, _ in stubs_data]
         with obtenir_contexte_db() as session:
             count = 0
-            for recette_ia in enriched:
+            matched_ids: set[int] = set()
+            for enriched_idx, recette_ia in enumerate(enriched):
                 stub_id = stubs_by_nom.get(recette_ia.nom.lower())
                 if stub_id is None:
                     for nom_key, rid in stubs_by_nom.items():
                         if recette_ia.nom.lower() in nom_key or nom_key in recette_ia.nom.lower():
                             stub_id = rid
                             break
+                # Fallback positionnel : Mistral a retourné les items dans le même ordre
+                if stub_id is None and enriched_idx < len(stubs_ids_ordered):
+                    candidate = stubs_ids_ordered[enriched_idx]
+                    if candidate not in matched_ids:
+                        stub_id = candidate
+                        logger.debug(
+                            "[planning] Fallback positionnel idx=%d → recette_id=%d (%s→%s)",
+                            enriched_idx, candidate, stubs_data[enriched_idx][1], recette_ia.nom,
+                        )
                 if stub_id is None:
                     continue
+                matched_ids.add(stub_id)
 
                 db_recette = session.get(Recette, stub_id)
                 if db_recette is None:

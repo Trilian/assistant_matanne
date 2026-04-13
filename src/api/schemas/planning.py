@@ -51,6 +51,8 @@ class RepasResponse(RepasBase, IdentifiedResponse):
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False
     compatible_airfryer: bool = False
+    est_reste: bool = False
+    reste_description: str | None = Field(None, max_length=200)
 
 
 class PlanningSemaineResponse(BaseModel):
@@ -91,6 +93,17 @@ class GenererPlanningRequest(BaseModel):
     preferences: dict[str, Any] | None = Field(
         None, description="Préférences (allergies, régime, etc.)"
     )
+    legumes_souhaites: list[str] = Field(
+        default_factory=list,
+        description="Légumes à privilégier cette semaine (forte préférence)",
+    )
+    plats_souhaites: list[str] = Field(
+        default_factory=list,
+        description="Plats à inclure cette semaine (forte préférence)",
+    )
+    autoriser_restes: bool = Field(
+        True, description="Proposer des repas 'reste réchauffé' (soir → midi lendemain)"
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -98,6 +111,9 @@ class GenererPlanningRequest(BaseModel):
                 "date_debut": "2026-04-06",
                 "nb_personnes": 3,
                 "preferences": {"allergies": ["arachides"], "temps_max": 30, "jules": True},
+                "legumes_souhaites": ["courgettes", "brocoli"],
+                "plats_souhaites": ["lasagnes"],
+                "autoriser_restes": True,
             }
         }
     }

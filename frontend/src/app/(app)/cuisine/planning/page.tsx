@@ -122,6 +122,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { ModalGenerationPlanning } from "@/composants/cuisine/modal-generation-planning";
 
 const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
 const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
@@ -288,6 +289,14 @@ function CarteRepasDraggable({
               </span>
             )}
             {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
+            {repas.est_reste && (
+              <span
+                title={repas.reste_description ?? "Reste réchauffé"}
+                className="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300"
+              >
+                ♻ Reste
+              </span>
+            )}
           </div>
           {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
             (repas.entree || repas.laitage || repas.dessert) && (
@@ -435,6 +444,7 @@ export default function PagePlanning() {
   const [choixModePrepa, setChoixModePrepa] = useState(false);
   const [repasGlisse, setRepasGlisse] = useState<RepasPlanning | null>(null);
   const [analysePlanningIa, setAnalysePlanningIa] = useState<AnalysePlanningIaResultat | null>(null);
+  const [modalGenerationOuvert, setModalGenerationOuvert] = useState(false);
   const [vuesSupplementairesOuvertes, setVuesSupplementairesOuvertes] = utiliserStockageLocal<boolean>("planning.vuesSupplementaires", false);
   // Jour de début de semaine persisté en localStorage (0=Dim, 1=Lun … 6=Sam)
   const [jourDebutSemaine, setJourDebutSemaine] = utiliserStockageLocal<number>("planning.jourDebutSemaine", 1);
@@ -617,10 +627,10 @@ export default function PagePlanning() {
   const toastIaRef = useRef<string | number | null>(null);
 
   const { mutate: genererIA, isPending: enGeneration } = utiliserMutation(
-    () =>
+    (params?: { legumes_souhaites?: string[]; plats_souhaites?: string[]; autoriser_restes?: boolean; nb_personnes?: number }) =>
       genererPlanningSemaine({
         date_debut: dateDebut,
-        nb_personnes: nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0),
+        nb_personnes: params?.nb_personnes ?? nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0),
         preferences:
           contexteInvitesActif || evenementsModeInvites.length > 0
             ? {
@@ -630,6 +640,9 @@ export default function PagePlanning() {
                 evenements: evenementsModeInvites,
               }
             : undefined,
+        legumes_souhaites: params?.legumes_souhaites ?? [],
+        plats_souhaites: params?.plats_souhaites ?? [],
+        autoriser_restes: params?.autoriser_restes ?? true,
       }),
     {
       onSuccess: async (resultat: ResultatGenerationPlanning) => {
@@ -1131,11 +1144,7 @@ export default function PagePlanning() {
                 size="sm"
                 onClick={() => {
                   setErreurIA(null);
-                  toastIaRef.current = toast.loading(
-                    "Génération IA en cours… cela peut prendre 1 à 2 minutes ☕",
-                    { duration: Infinity }
-                  );
-                  genererIA(undefined);
+                  setModalGenerationOuvert(true);
                 }}
                 disabled={enGeneration}
               >
@@ -1870,6 +1879,23 @@ export default function PagePlanning() {
       </ResponsiveOverlay>
         </TabsContent>
       </Tabs>
+
+      {/* Modal de génération IA */}
+      <ModalGenerationPlanning
+        ouvert={modalGenerationOuvert}
+        onFermer={() => setModalGenerationOuvert(false)}
+        enGeneration={enGeneration}
+        nbPersonnesInitial={nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0)}
+        dateDebut={dateDebut}
+        onGenerer={(params) => {
+          setModalGenerationOuvert(false);
+          toastIaRef.current = toast.loading(
+            "Génération IA en cours… cela peut prendre 1 à 2 minutes ☕",
+            { duration: Infinity }
+          );
+          genererIA(params);
+        }}
+      />
     </div>
   );
 }

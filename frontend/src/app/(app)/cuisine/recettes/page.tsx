@@ -22,6 +22,7 @@ import {
   Star,
   Leaf,
   Copy,
+  Merge,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/composants/ui/button";
@@ -30,6 +31,14 @@ import { Card, CardContent } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { EtatVide } from "@/composants/ui/etat-vide";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/composants/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -46,13 +55,14 @@ import {
   planifierRecetteSemaine,
   deplanifierRecetteSemaine,
   obtenirDoublonsRecettes,
+  fusionnerRecettes,
   ajouterAuFavori,
   retirerDuFavori,
 } from "@/bibliotheque/api/recettes";
 import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
 import { SwipeableItem } from "@/composants/swipeable-item";
 import { PanneauFiltres, SectionFiltre, BoutonFiltre } from "@/composants/panneau-filtres";
-import type { Recette } from "@/types/recettes";
+import type { Recette, DoublonRecette } from "@/types/recettes";
 
 const CATEGORIES = [
   "Toutes",
@@ -107,6 +117,12 @@ export default function PageRecettes() {
     const [filtresFavoris, setFiltresFavoris] = useState(false);
     const [filtreTempsMax, setFiltreTempsMax] = useState<number | null>(null);
     const [filtreSaison, setFiltreSaison] = useState(false);
+
+  // Fusion de doublons
+  const [doublonAFusionner, setDoublonAFusionner] = useState<DoublonRecette | null>(null);
+  const [idAGarder, setIdAGarder] = useState<number | null>(null);
+  const [nouveauNomFusion, setNouveauNomFusion] = useState("");
+
   const rechercheDelayee = utiliserDelai(recherche, 300);
 
   const { data, isLoading } = utiliserRequete(
@@ -161,6 +177,21 @@ export default function PageRecettes() {
     (id: number) => retirerDuFavori(id),
     [["recettes"]],
     { onSuccess: () => toast.success("Retiré des favoris") }
+  );
+
+  const mutationFusionner = utiliserMutationAvecInvalidation(
+    ({ idAGarder, idASupprimer, nouveauNom }: { idAGarder: number; idASupprimer: number; nouveauNom?: string }) =>
+      fusionnerRecettes(idAGarder, idASupprimer, nouveauNom),
+    [["recettes"], ["recettes", "doublons"]],
+    {
+      onSuccess: (recette) => {
+        toast.success(`"${recette.nom}" conservée — doublon supprimé`);
+        setDoublonAFusionner(null);
+        setIdAGarder(null);
+        setNouveauNomFusion("");
+      },
+      onError: () => toast.error("La fusion a échoué"),
+    }
   );
 
   const recettes = useMemo(() => data?.items ?? [], [data]);
@@ -320,26 +351,110 @@ export default function PageRecettes() {
             </div>
             <div className="grid gap-2 md:grid-cols-2">
               {doublonsRecettes.items.slice(0, 4).map((doublon) => (
-                <div key={`${doublon.recette_source.id}-${doublon.recette_proche.id}`} className="rounded-lg border bg-background/80 p-3">
-                  <p className="text-sm font-medium">
-                    {doublon.recette_source.nom} ↔ {doublon.recette_proche.nom}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Similarité {(doublon.score_similarite * 100).toFixed(0)}%
-                  </p>
-                  {doublon.raisons?.length ? (
-                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                      {doublon.raisons.slice(0, 2).map((raison) => (
-                        <li key={raison}>• {raison}</li>
-                      ))}
-                    </ul>
-                  ) : null}
+                <div key={`${doublon.recette_source.id}-${doublon.recette_proche.id}`} className="rounded-lg border bg-background/80 p-3 flex flex-col gap-2">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {doublon.recette_source.nom} ↔ {doublon.recette_proche.nom}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Similarité {(doublon.score_similarite * 100).toFixed(0)}%
+                    </p>
+                    {doublon.raisons?.length ? (
+                      <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        {doublon.raisons.slice(0, 2).map((raison) => (
+                          <li key={raison}>• {raison}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="self-end gap-1.5 text-xs"
+                    onClick={() => {
+                      setDoublonAFusionner(doublon);
+                      setIdAGarder(doublon.recette_source.id);
+                      setNouveauNomFusion("");
+                    }}
+                  >
+                    <Merge className="h-3.5 w-3.5" />
+                    Fusionner
+                  </Button>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
       ) : null}
+
+      {/* Dialogue fusion */}
+      <Dialog open={!!doublonAFusionner} onOpenChange={(open) => { if (!open) { setDoublonAFusionner(null); setIdAGarder(null); setNouveauNomFusion(""); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Merge className="h-4 w-4" />
+              Fusionner deux recettes
+            </DialogTitle>
+            <DialogDescription>
+              Choisissez quelle recette conserver. L'autre sera supprimée définitivement — son historique et son planning seront transférés.
+            </DialogDescription>
+          </DialogHeader>
+          {doublonAFusionner ? (
+            <div className="space-y-4 py-2">
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Recette à conserver</p>
+              <div className="grid grid-cols-2 gap-2">
+                {[doublonAFusionner.recette_source, doublonAFusionner.recette_proche].map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setIdAGarder(r.id)}
+                    className={`rounded-lg border p-3 text-left text-sm transition-colors focus:outline-none ${
+                      idAGarder === r.id
+                        ? "border-primary bg-primary/5 font-medium ring-1 ring-primary"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    {r.nom}
+                  </button>
+                ))}
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="nouveau-nom-fusion" className="text-xs text-muted-foreground">
+                  Renommer (optionnel)
+                </label>
+                <Input
+                  id="nouveau-nom-fusion"
+                  placeholder={idAGarder === doublonAFusionner.recette_source.id ? doublonAFusionner.recette_source.nom : doublonAFusionner.recette_proche.nom}
+                  value={nouveauNomFusion}
+                  onChange={(e) => setNouveauNomFusion(e.target.value)}
+                />
+              </div>
+            </div>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setDoublonAFusionner(null); setIdAGarder(null); setNouveauNomFusion(""); }}>
+              Annuler
+            </Button>
+            <Button
+              disabled={!idAGarder || mutationFusionner.isPending}
+              onClick={() => {
+                if (!doublonAFusionner || !idAGarder) return;
+                const idASupprimer =
+                  idAGarder === doublonAFusionner.recette_source.id
+                    ? doublonAFusionner.recette_proche.id
+                    : doublonAFusionner.recette_source.id;
+                mutationFusionner.mutate({
+                  idAGarder,
+                  idASupprimer,
+                  nouveauNom: nouveauNomFusion.trim() || undefined,
+                });
+              }}
+            >
+              {mutationFusionner.isPending ? "Fusion en cours…" : "Fusionner"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Grille de recettes */}
       {isLoading ? (

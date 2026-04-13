@@ -57,6 +57,12 @@ class JourPlanning(BaseModel):
     diner_dessert: str | None = None
     diner_dessert_est_recette: bool = False
 
+    # Restes réchauffés — déjeuner ou dîner peut être un reste du repas précédent
+    dejeuner_est_reste: bool = False
+    dejeuner_reste_source: str | None = None  # ex: "dîner de lundi"
+    diner_est_reste: bool = False
+    diner_reste_source: str | None = None  # ex: "déjeuner de mercredi"
+
 
 class RecetteEnrichieIA(BaseModel):
     """Recette enrichie par l'IA lors de la génération du planning (étapes + ingrédients)."""

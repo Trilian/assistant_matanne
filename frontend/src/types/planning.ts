@@ -32,6 +32,9 @@ export interface RepasPlanning {
   compatible_cookeo?: boolean;
   compatible_monsieur_cuisine?: boolean;
   compatible_airfryer?: boolean;
+  // Reste réchauffé
+  est_reste?: boolean;
+  reste_description?: string | null;
 }
 
 export interface PlanningSemaine {
@@ -91,4 +94,7 @@ export interface GenererPlanningParams {
   nb_jours?: number;
   nb_personnes?: number;
   preferences?: ObjetDonnees;
+  legumes_souhaites?: string[];
+  plats_souhaites?: string[];
+  autoriser_restes?: boolean;
 }

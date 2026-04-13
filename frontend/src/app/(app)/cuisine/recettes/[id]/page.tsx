@@ -19,6 +19,7 @@ import {
   Printer,
   Baby,
   ShoppingCart,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -31,7 +32,7 @@ import {
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
-import { exporterRecettePdf, genererVersionJules, obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
+import { exporterRecettePdf, genererVersionJules, obtenirRecette, supprimerRecette, enrichirInstructionsRecette } from "@/bibliotheque/api/recettes";
 import { obtenirScoreEcologiqueRecette } from "@/bibliotheque/api/ia-avancee";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { BadgeEcoscore } from "@/composants/cuisine/badge-ecoscore";
@@ -87,6 +88,17 @@ export default function PageDetailRecette({
         toast.success("Version Jules générée");
       },
       onError: () => toast.error("Impossible de générer la version Jules"),
+    }
+  );
+
+  const { mutate: enrichirInstructions, isPending: enEnrichissement } = utiliserMutation(
+    () => enrichirInstructionsRecette(Number(id)),
+    {
+      onSuccess: () => {
+        invalider(["recette", id]);
+        toast.success("Instructions générées par l'IA");
+      },
+      onError: () => toast.error("Impossible de générer les instructions"),
     }
   );
 
@@ -393,9 +405,20 @@ export default function PageDetailRecette({
                 {recette.instructions}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                Aucune instruction renseignée
-              </p>
+              <div className="flex flex-col items-start gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Aucune instruction renseignée
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => enrichirInstructions()}
+                  disabled={enEnrichissement}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {enEnrichissement ? "Génération en cours…" : "Générer via l'IA"}
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
