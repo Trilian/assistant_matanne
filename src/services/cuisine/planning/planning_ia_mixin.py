@@ -404,12 +404,6 @@ RULES:
 
         logger.info(f"✅ Generated AI planning for week starting {semaine_debut}")
 
-        # Enrichir les recettes stubs (étapes + ingrédients) en batches après le commit
-        try:
-            self.enrichir_recettes_stub_planning(planning.id)
-        except Exception as _enr_err:
-            logger.warning("[planning] Enrichissement stubs échoué (non bloquant): %s", _enr_err)
-
         return planning
 
     # ═══════════════════════════════════════════════════════════
@@ -497,6 +491,18 @@ RULES:
             total_count += self._enrichir_batch(batch, context=context)
 
         return total_count
+
+    @staticmethod
+    def _safe_quantite(v: object) -> float:
+        """Convertit *v* en float, retourne 1.0 si la valeur n'est pas numérique.
+
+        Gère les valeurs renvoyées par Mistral comme ``"au goût"``, ``"QS"``,
+        ``None``, ``""`` etc. qui ne peuvent pas être passées à ``float()``.
+        """
+        try:
+            return float(v)  # type: ignore[arg-type]
+        except (TypeError, ValueError):
+            return 1.0
 
     def _enrichir_batch(self, stubs_data: list[tuple[int, str]], context: str = "") -> int:
         """Enrichit un batch de ≤5 recettes via un seul appel Mistral."""
@@ -601,7 +607,7 @@ Recipes to enrich:
                         RecetteIngredient(
                             recette_id=stub_id,
                             ingredient_id=db_ingredient.id,
-                            quantite=float(ing_data.get("quantite") or 1),
+                            quantite=self._safe_quantite(ing_data.get("quantite")),
                             unite=ing_data.get("unite") or db_ingredient.unite,
                         )
                     )

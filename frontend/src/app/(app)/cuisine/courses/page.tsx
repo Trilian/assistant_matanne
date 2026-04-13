@@ -530,6 +530,8 @@ export default function PageCourses() {
           onCocherCategorie={(categorie) => cocherCategorie(categorie)}
           onCocherArticle={(articleId, coche) => cocher({ articleId, coche })}
           onSupprimerArticle={supprimerAvecUndo}
+          onConfirmer={() => confirmer(undefined)}
+          enConfirmation={enConfirmation}
         />
       </div>
 

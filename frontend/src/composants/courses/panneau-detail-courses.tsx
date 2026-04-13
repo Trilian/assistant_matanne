@@ -7,6 +7,7 @@ import type {
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CheckSquare,
+  CheckCircle2,
   Loader2,
   Mic,
   MicOff,
@@ -66,6 +67,8 @@ type PanneauDetailCoursesProps = {
   onCocherCategorie: (categorie: string) => void;
   onCocherArticle: (articleId: number, coche: boolean) => void;
   onSupprimerArticle: (article: ArticleCourses) => void;
+  onConfirmer?: () => void;
+  enConfirmation?: boolean;
 };
 
 export function PanneauDetailCourses({
@@ -102,6 +105,8 @@ export function PanneauDetailCourses({
   onCocherCategorie,
   onCocherArticle,
   onSupprimerArticle,
+  onConfirmer,
+  enConfirmation = false,
 }: PanneauDetailCoursesProps) {
   return (
     <Card className="lg:col-span-2">
@@ -142,8 +147,23 @@ export function PanneauDetailCourses({
         ) : (
           <div className="space-y-4">
             {detailListe?.etat === "brouillon" && (
-              <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                Cette liste est en brouillon. Confirmez-la avant de finaliser les courses.
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                <span>Cette liste est en brouillon. Confirmez-la avant de finaliser les courses.</span>
+                {onConfirmer && (
+                  <Button
+                    size="sm"
+                    className="shrink-0"
+                    onClick={onConfirmer}
+                    disabled={enConfirmation}
+                  >
+                    {enConfirmation ? (
+                      <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="mr-1 h-4 w-4" />
+                    )}
+                    Confirmer
+                  </Button>
+                )}
               </div>
             )}
 

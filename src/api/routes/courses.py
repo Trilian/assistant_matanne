@@ -340,7 +340,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
                         "nom": a.ingredient.nom if a.ingredient else "Article",
                         "quantite": a.quantite_necessaire,
                         "coche": a.achete,
-                        "categorie": a.rayon_magasin,
+                        "categorie": a.rayon_magasin or (a.ingredient.categorie if a.ingredient else None),
                         "magasin_cible": a.magasin_cible,
                         "prix_estime": a.prix_unitaire,
                     }
@@ -940,7 +940,7 @@ async def generer_depuis_planning(
                     "nom": row.nom,
                     "quantite": float(row.total_qty or 1),
                     "unite": row.unite or "",
-                    "rayon": row.categorie or "Autre",
+                    "rayon": row.categorie or None,
                 }
                 for row in rows
             ]
@@ -1006,7 +1006,7 @@ async def generer_depuis_planning(
                         liste_id=liste.id,
                         ingredient_id=ingredient.id,
                         quantite_necessaire=art["quantite"],
-                        rayon_magasin=art.get("rayon", "Autre"),
+                        rayon_magasin=art.get("rayon"),
                         priorite="moyenne",
                         suggere_par_ia=False,
                     )

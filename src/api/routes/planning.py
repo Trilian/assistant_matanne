@@ -979,6 +979,7 @@ async def reset_circuit_breaker_ia(
 @router.post("/generer", response_model=PlanningSemaineResponse)
 @gerer_exception_api
 async def generer_planning_ia(
+    background_tasks: BackgroundTasks,
     body: GenererPlanningRequest | None = None,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -1337,6 +1338,17 @@ async def generer_planning_ia(
             }
 
     resultat = await executer_async(_generate)
+
+    # Enrichir les recettes stubs (étapes + ingrédients) en arrière-plan
+    # pour ne pas bloquer la réponse HTTP (~5-8 s au lieu de 75 s).
+    planning_id_bg = resultat.get("planning_id") if isinstance(resultat, dict) else None
+    if planning_id_bg:
+        from src.services.cuisine.planning import obtenir_service_planning
+
+        background_tasks.add_task(
+            obtenir_service_planning().enrichir_recettes_stub_planning,
+            planning_id_bg,
+        )
 
     return resultat
 
