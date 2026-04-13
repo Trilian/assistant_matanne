@@ -515,8 +515,8 @@ RULES:
         noms = [nom for _, nom in stubs_data]
         logger.info("[planning] Enrichissement IA de %d recette(s) [%s]: %s", len(noms), context, noms)
 
-        # ── Batcher par 5 pour rester sous la limite de tokens Mistral ──────────
-        BATCH_SIZE = 5
+        # ── Batcher par 3 pour limiter la taille des réponses Mistral ──────────
+        BATCH_SIZE = 3
         total_count = 0
         for batch_start in range(0, len(stubs_data), BATCH_SIZE):
             batch = stubs_data[batch_start : batch_start + BATCH_SIZE]
@@ -577,7 +577,7 @@ Recipes to enrich:
             max_items=len(noms),
             use_cache=False,
             temperature=0.3,
-            max_tokens=2500,
+            max_tokens=4000,
         )
 
         if not enriched:

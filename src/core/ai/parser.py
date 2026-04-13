@@ -320,7 +320,7 @@ def analyser_liste_reponse(
         Liste d'items validés
     """
 
-    # LOG DEBUG: Première partie de la réponse pour diagnostiquer
+    # LOG: Première partie de la réponse pour diagnostiquer
     reponse_debut = reponse[:500] if len(reponse) > 500 else reponse
     logger.debug(f"RAW AI RESPONSE (first 500 chars): {repr(reponse_debut)}")
 
@@ -343,6 +343,17 @@ def analyser_liste_reponse(
                 result = [modele_item(**item) for item in items_list]
                 logger.info(f"✅ Successfully parsed {len(result)} items")
                 return result
+
+        # Stratégie 1b: dict avec clé différente — chercher la première valeur qui est une liste de dicts
+        if isinstance(items_data, dict):
+            for key, val in items_data.items():
+                if isinstance(val, list) and val and isinstance(val[0], dict):
+                    try:
+                        result = [modele_item(**item) for item in val]
+                        logger.info(f"✅ Parser liste avec clé alternative '{key}' pour {modele_item.__name__}")
+                        return result
+                    except Exception:
+                        pass
     except Exception as e:
         logger.debug(f"Stratégie 1 échouée: {str(e)[:100]}")
         pass
@@ -391,5 +402,8 @@ def analyser_liste_reponse(
         except Exception as e:
             logger.debug(f"Échec instantiation items_secours: {e}")
 
-    logger.error(f"[ERROR] Impossible de parser liste pour {modele_item.__name__}")
+    logger.warning(
+        f"[PARSE_FAIL] Impossible de parser liste pour {modele_item.__name__}. "
+        f"Réponse IA (500 chars): {repr(reponse_debut)}"
+    )
     return []
