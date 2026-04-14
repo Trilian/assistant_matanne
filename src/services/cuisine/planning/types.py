@@ -75,6 +75,19 @@ class RecetteEnrichieIA(BaseModel):
     ingredients: list[dict] = Field(default_factory=list)
     etapes: list[str] = Field(default_factory=list)
 
+    @field_validator("difficulte", mode="before")
+    @classmethod
+    def normaliser_difficulte(cls, v: object) -> str:
+        """Normalise la difficulté retournée par l'IA vers les valeurs attendues."""
+        if not isinstance(v, str):
+            return "moyen"
+        v_lower = v.strip().lower()
+        if v_lower in ("facile", "easy", "simple", "débutant", "debutant"):
+            return "facile"
+        if v_lower in ("difficile", "hard", "complexe", "expert", "avancé", "avance"):
+            return "difficile"
+        return "moyen"
+
     @field_validator("temps_preparation", "temps_cuisson", "portions", mode="before")
     @classmethod
     def convert_float_to_int(cls, v):

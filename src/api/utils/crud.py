@@ -15,7 +15,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from src.core.exceptions import ErreurBaseDeDonnees
+from src.core.exceptions import ErreurBaseDeDonnees, ErreurLimiteDebit
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +93,10 @@ def executer_avec_session() -> Generator[Session, None, None]:
                 "La base de données est temporairement indisponible. Réessayez.",
             ),
         ) from e
+    except ErreurLimiteDebit as e:
+        msg = getattr(e, "message_utilisateur", str(e))
+        logger.warning("Rate limit IA atteint: %s", e)
+        raise HTTPException(status_code=429, detail=msg) from e
     except HTTPException:
         raise
     except Exception as e:

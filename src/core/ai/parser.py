@@ -95,7 +95,7 @@ class AnalyseurIA:
             logger.warning(
                 f"[!]  Toutes stratégies échouées, utilisation fallback pour {modele.__name__}"
             )
-            logger.debug(f"   Response était: {reponse[:300]}")
+            logger.warning(f"   Response IA brute (300 chars): {reponse[:300]}")
             return modele(**valeur_secours)
 
         # Échec total

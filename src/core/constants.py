@@ -34,10 +34,10 @@ CACHE_MAX_SIZE = 100
 # IA / API
 # ═══════════════════════════════════════════════════════════
 
-AI_RATE_LIMIT_DAILY = 100
+AI_RATE_LIMIT_DAILY = 200
 """Limite d'appels IA par jour."""
 
-AI_RATE_LIMIT_HOURLY = 30
+AI_RATE_LIMIT_HOURLY = 60
 """Limite d'appels IA par heure."""
 
 # ═══════════════════════════════════════════════════════════
