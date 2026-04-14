@@ -300,6 +300,7 @@ from .recettes import (
     RecetteCreate,
     RecettePatch,
     RecetteResponse,
+    normaliser_categorie,
 )
 
 # Suggestions IA

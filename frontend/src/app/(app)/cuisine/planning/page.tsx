@@ -5,6 +5,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronLeft,
@@ -463,6 +464,7 @@ export default function PagePlanning() {
   );
 
   const invalider = utiliserInvalidation();
+  const queryClient = useQueryClient();
   const { planifierSuppression } = utiliserSuppressionAnnulable({ ttlMs: 8000 });
   const dateDebut = getDebutDeSemaine(offsetSemaine, jourDebutSemaine);
   const datesSemaine = getDatesDeSemaine(dateDebut);
@@ -650,6 +652,26 @@ export default function PagePlanning() {
           toast.dismiss(toastIaRef.current);
           toastIaRef.current = null;
         }
+
+        // Mise à jour immédiate du cache planning pour afficher la grille sans attendre le refetch
+        if (resultat.date_debut) {
+          queryClient.setQueryData(["planning", resultat.date_debut], resultat);
+        }
+
+        // Pré-peupler le flux pour afficher le bandeau brouillon immédiatement
+        if (resultat.planning_id) {
+          queryClient.setQueryData(["flux", "cuisine", String(resultat.planning_id)], {
+            etape_actuelle: "valider_planning",
+            planning: {
+              id: resultat.planning_id,
+              semaine: resultat.date_debut,
+              etat: "brouillon",
+            },
+            courses: null,
+            actions_suivantes: [],
+          });
+        }
+
         invalider(["planning"]);
         invalider(["flux", "cuisine"]);
 

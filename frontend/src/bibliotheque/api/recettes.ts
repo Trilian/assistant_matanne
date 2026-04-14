@@ -216,11 +216,16 @@ export async function importerRecettePDF(file: File): Promise<Recette> {
 // ─── Version Jules ───────────────────────────────────────
 
 export interface VersionJulesResult {
-  nom: string;
-  ingredients: string[];
-  instructions: string;
-  adaptations: string[];
-  aliments_exclus_retires: string[];
+  id: number;
+  recette_base_id: number;
+  type_version: string;
+  recette_nom: string | null;
+  instructions_modifiees: string | null;
+  ingredients_modifies: Record<string, string> | null;
+  notes_bebe: string | null;
+  modifications_resume: string[];
+  alertes: string[];
+  age_mois_jules: number | null;
 }
 
 /** Générer une version adaptée pour Jules (bébé/enfant) */

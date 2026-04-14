@@ -9,8 +9,12 @@ export const schemaRecette = z.object({
   temps_cuisson: z.coerce.number().min(0).optional(),
   portions: z.coerce.number().min(1).optional(),
   difficulte: z.enum(["facile", "moyen", "difficile"]).optional(),
-  categorie: z.string().optional(),
-  ingredients: z
+  categorie: z.string().min(1, "Catégorie requise"),  compatible_cookeo: z.boolean().optional(),
+  compatible_monsieur_cuisine: z.boolean().optional(),
+  compatible_airfryer: z.boolean().optional(),
+  instructions_cookeo: z.string().optional(),
+  instructions_monsieur_cuisine: z.string().optional(),
+  instructions_airfryer: z.string().optional(),  ingredients: z
     .array(
       z.object({
         nom: z.string().min(1, "Nom requis"),

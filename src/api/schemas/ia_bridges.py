@@ -8,7 +8,7 @@ suggestions IA diverses.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # ═══════════════════════════════════════════════════════════
 # PRÉDICTION COURSES (B4.1 / B5.4)
@@ -22,6 +22,12 @@ class PredictionArticle(BaseModel):
     categorie: str = "Autre"
     rayon: str = "Autre"
     frequence_jours: int | None = None
+
+    @field_validator("rayon", "categorie", mode="before")
+    @classmethod
+    def normaliser_str_nulle(cls, v: object) -> str:
+        """Convertit None (retourné par l'IA) en valeur par défaut."""
+        return v if isinstance(v, str) and v.strip() else "Autre"
     dernier_achat: str | None = None
     prochaine_date_estimee: str | None = None
     jours_retard: int = 0

@@ -159,9 +159,72 @@ class MarmitonParser(RecipeParser):
 
     @staticmethod
     def parse(soup: BeautifulSoup, url: str) -> ImportedRecipe:
-        """Parse une page Marmiton."""
+        """Parse une page Marmiton.
+
+        Tente d'abord le JSON-LD (schema.org Recipe) qui est propre, UTF-8,
+        sans doublons et contient cookTime. Fallback HTML si absent.
+        """
         recipe = ImportedRecipe(source_url=url, source_site="Marmiton")
 
+        # 1. JSON-LD en priorité (données structurées, fiables)
+        for script in soup.find_all("script", type="application/ld+json"):
+            try:
+                data = json.loads(script.string)
+
+                # Peut être une liste (ex: [@type BreadcrumbList, @type Recipe])
+                if isinstance(data, list):
+                    data = next(
+                        (d for d in data if isinstance(d, dict) and d.get("@type") == "Recipe"),
+                        None,
+                    )
+
+                if isinstance(data, dict) and data.get("@type") == "Recipe":
+                    recipe.nom = data.get("name", "")
+                    recipe.description = data.get("description", "")
+
+                    # Image
+                    image = data.get("image")
+                    if isinstance(image, list):
+                        recipe.image_url = image[0] if image else None
+                    elif isinstance(image, dict):
+                        recipe.image_url = image.get("url")
+                    elif isinstance(image, str):
+                        recipe.image_url = image
+
+                    # Temps
+                    if "prepTime" in data:
+                        recipe.temps_preparation = RecipeParser.parse_duration(data["prepTime"])
+                    if "cookTime" in data:
+                        recipe.temps_cuisson = RecipeParser.parse_duration(data["cookTime"])
+
+                    # Portions
+                    if "recipeYield" in data:
+                        recipe.portions = RecipeParser.parse_portions(str(data["recipeYield"]))
+
+                    # Ingrédients
+                    for ing_text in data.get("recipeIngredient", []):
+                        ing = RecipeParser.parse_ingredient(ing_text)
+                        if ing.nom:
+                            recipe.ingredients.append(ing)
+
+                    # Étapes
+                    instructions = data.get("recipeInstructions", [])
+                    if isinstance(instructions, str):
+                        recipe.etapes = [s.strip() for s in instructions.split(".") if s.strip()]
+                    elif isinstance(instructions, list):
+                        for step in instructions:
+                            if isinstance(step, str):
+                                recipe.etapes.append(step)
+                            elif isinstance(step, dict):
+                                recipe.etapes.append(step.get("text", ""))
+
+                    recipe.confiance_score = 0.9
+                    return recipe
+            except Exception as e:
+                logger.debug("Erreur parsing JSON-LD Marmiton: %s", e)
+                continue
+
+        # 2. Fallback HTML (si JSON-LD absent)
         # Titre
         title = soup.find("h1")
         if title:
@@ -191,12 +254,12 @@ class MarmitonParser(RecipeParser):
         if portions_el:
             recipe.portions = RecipeParser.parse_portions(portions_el.get_text())
 
-        # Ingrédients
+        # Ingrédients (avec dédoublonnage)
         ingredients_section = soup.find(class_=re.compile(r"ingredient", re.I))
         if ingredients_section:
             for item in ingredients_section.find_all(["li", "span", "p"]):
                 ing = RecipeParser.parse_ingredient(item.get_text())
-                if ing.nom:
+                if ing.nom and ing.nom not in [i.nom for i in recipe.ingredients]:
                     recipe.ingredients.append(ing)
 
         # Étapes

@@ -63,6 +63,12 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
           portions: recetteExistante.portions ?? undefined,
           difficulte: recetteExistante.difficulte ?? undefined,
           categorie: recetteExistante.categorie ?? "",
+          compatible_cookeo: recetteExistante.compatible_cookeo ?? false,
+          compatible_monsieur_cuisine: recetteExistante.compatible_monsieur_cuisine ?? false,
+          compatible_airfryer: recetteExistante.compatible_airfryer ?? false,
+          instructions_cookeo: recetteExistante.instructions_cookeo ?? "",
+          instructions_monsieur_cuisine: recetteExistante.instructions_monsieur_cuisine ?? "",
+          instructions_airfryer: recetteExistante.instructions_airfryer ?? "",
           ingredients: recetteExistante.ingredients.map((ing) => ({
             nom: ing.nom,
             quantite: ing.quantite ?? undefined,
@@ -71,6 +77,10 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
         }
       : {
           nom: "",
+          categorie: "Plat",
+          compatible_cookeo: false,
+          compatible_monsieur_cuisine: false,
+          compatible_airfryer: false,
           ingredients: [{ nom: "", quantite: undefined, unite: "" }],
         },
   });
@@ -405,6 +415,38 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Robots de cuisine */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Robots de cuisine</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {([
+              { cle: "compatible_cookeo" as const, labelInstr: "instructions_cookeo" as const, label: "Cookeo" },
+              { cle: "compatible_monsieur_cuisine" as const, labelInstr: "instructions_monsieur_cuisine" as const, label: "Monsieur Cuisine" },
+              { cle: "compatible_airfryer" as const, labelInstr: "instructions_airfryer" as const, label: "Air Fryer" },
+            ]).map(({ cle, labelInstr, label }) => (
+              <div key={cle} className="space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-input accent-primary"
+                    {...register(cle)}
+                  />
+                  <span className="text-sm font-medium">{label}</span>
+                </label>
+                {watch(cle) && (
+                  <textarea
+                    {...register(labelInstr)}
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    placeholder={`Instructions adaptées pour ${label}\u00a0: températures, durées, accessoires…`}
+                  />
+                )}
+              </div>
+            ))}
           </CardContent>
         </Card>
 

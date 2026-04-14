@@ -90,6 +90,8 @@ def creer_mock_recette(data: dict) -> MagicMock:
         mock.etapes = []
     if "url_source" not in data:
         mock.url_source = None
+    if "url_image" not in data:
+        mock.url_image = None
     return mock
 
 

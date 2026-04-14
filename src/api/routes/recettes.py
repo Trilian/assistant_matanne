@@ -21,6 +21,7 @@ from src.api.schemas import (
     RecettePatch,
     RecetteResponse,
     ReponsePaginee,
+    normaliser_categorie,
 )
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
@@ -459,6 +460,7 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         etapes=etapes_resp,
         est_favori=est_favori,
         url_source=getattr(db_recette, "url_source", None),
+        image_url=getattr(db_recette, "url_image", None),
         jours_depuis_derniere_cuisson=jours_depuis_derniere_cuisson,
         calories=getattr(db_recette, "calories", None),
         proteines=getattr(db_recette, "proteines", None),
@@ -516,7 +518,7 @@ async def lister_recettes(
             query = session.query(Recette)
 
             if categorie:
-                query = query.filter(Recette.categorie == categorie)
+                query = query.filter(func.lower(Recette.categorie) == categorie.lower())
 
             if search:
                 # Ã‰chapper les caractÃ¨res spÃ©ciaux SQL wildcard pour Ã©viter l'injection
@@ -1268,7 +1270,7 @@ async def importer_recette_url(
                 temps_cuisson=recipe_data.temps_cuisson or 0,
                 portions=recipe_data.portions or 4,
                 difficulte=getattr(recipe_data, "niveau", "moyen") or "moyen",
-                categorie=recipe_data.categorie or "plat",
+                categorie=normaliser_categorie(recipe_data.categorie),
                 saison="toute_annÃ©e",
                 genere_par_ia=True,
                 # Enrichissement nutrition
@@ -1288,6 +1290,9 @@ async def importer_recette_url(
                 compatible_cookeo=enrichment.compatible_cookeo,
                 compatible_airfryer=enrichment.compatible_airfryer,
                 compatible_monsieur_cuisine=enrichment.compatible_monsieur_cuisine,
+                # Source et image
+                url_source=recipe_data.source_url or None,
+                url_image=recipe_data.image_url or None,
             )
             session.add(recette)
             session.flush()
@@ -1299,7 +1304,7 @@ async def importer_recette_url(
                 IngredientItem(
                     nom=ing_data.nom,
                     quantite=ing_data.quantite or 1,
-                    unite=ing_data.unite or "piÃ¨ce",
+                    unite=ing_data.unite or "pièce",
                 )
                 for ing_data in (recipe_data.ingredients or [])
                 if ing_data.nom
@@ -1451,7 +1456,7 @@ async def importer_recette_pdf(
                     temps_cuisson=recipe.temps_cuisson,
                     portions=recipe.portions,
                     difficulte="moyen",
-                    categorie="plat",
+                    categorie=normaliser_categorie(getattr(recipe, "categorie", None)),
                     saison="toute_annÃ©e",
                     genere_par_ia=False,
                     # Enrichissement nutrition
@@ -1773,7 +1778,7 @@ async def generer_recette_depuis_photo(
                     temps_cuisson=_parse_minutes(recette_extraite.temps_cuisson),
                     portions=4,
                     difficulte=(recette_extraite.difficulte or "moyen").lower(),
-                    categorie=(recette_extraite.categorie or "plat").lower(),
+                    categorie=normaliser_categorie(recette_extraite.categorie),
                     genere_par_ia=True,
                 )
                 session.add(db_recette)

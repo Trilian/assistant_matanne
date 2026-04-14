@@ -34,6 +34,7 @@ import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { exporterRecettePdf, genererVersionJules, obtenirRecette, supprimerRecette, enrichirInstructionsRecette } from "@/bibliotheque/api/recettes";
 import { obtenirScoreEcologiqueRecette } from "@/bibliotheque/api/ia-avancee";
+import { formaterDuree } from "@/bibliotheque/utils";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { BadgeEcoscore } from "@/composants/cuisine/badge-ecoscore";
 import { RadarNutritionFamille } from "@/composants/graphiques/radar-nutrition-famille";
@@ -233,30 +234,59 @@ export default function PageDetailRecette({
               <Baby className="h-4 w-4" />
               Version Jules
             </CardTitle>
-            <CardDescription>{versionJules.nom}</CardDescription>
+            {versionJules.recette_nom && (
+              <CardDescription>{versionJules.recette_nom}</CardDescription>
+            )}
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            {!!versionJules.adaptations?.length && (
+            {!!versionJules.modifications_resume?.length && (
               <div>
                 <p className="font-medium mb-1">Adaptations</p>
                 <ul className="list-disc pl-4 space-y-1">
-                  {versionJules.adaptations.map((adaptation) => (
+                  {versionJules.modifications_resume.map((adaptation) => (
                     <li key={adaptation}>{adaptation}</li>
                   ))}
                 </ul>
               </div>
             )}
-            {!!versionJules.ingredients?.length && (
+            {!!versionJules.alertes?.length && (
               <div>
-                <p className="font-medium mb-1">Ingrédients adaptés</p>
-                <ul className="list-disc pl-4 space-y-1">
-                  {versionJules.ingredients.map((ingredient) => (
-                    <li key={ingredient}>{ingredient}</li>
+                <p className="font-medium mb-1 text-amber-700 dark:text-amber-400">⚠️ Alertes</p>
+                <ul className="list-disc pl-4 space-y-1 text-amber-700 dark:text-amber-400">
+                  {versionJules.alertes.map((alerte) => (
+                    <li key={alerte}>{alerte}</li>
                   ))}
                 </ul>
               </div>
             )}
-            <p className="text-muted-foreground whitespace-pre-line">{versionJules.instructions}</p>
+            {versionJules.ingredients_modifies && Object.keys(versionJules.ingredients_modifies).length > 0 && (
+              <div>
+                <p className="font-medium mb-1">Ingrédients adaptés</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  {Object.entries(versionJules.ingredients_modifies).map(([k, v]) => (
+                    <li key={k}><span className="font-medium">{k}</span> : {v}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {versionJules.instructions_modifiees && (
+              <p className="text-muted-foreground whitespace-pre-line">{versionJules.instructions_modifiees}</p>
+            )}
+            {versionJules.notes_bebe && (
+              <p className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 rounded p-2">
+                🌿 {versionJules.notes_bebe}
+              </p>
+            )}
+            {(recette.compatible_cookeo || recette.compatible_monsieur_cuisine || recette.compatible_airfryer) && (
+              <div>
+                <p className="font-medium mb-1">Robots compatibles</p>
+                <div className="flex flex-wrap gap-1">
+                  {recette.compatible_cookeo && <Badge variant="outline" className="text-xs">Cookeo</Badge>}
+                  {recette.compatible_monsieur_cuisine && <Badge variant="outline" className="text-xs">Monsieur Cuisine</Badge>}
+                  {recette.compatible_airfryer && <Badge variant="outline" className="text-xs">Air Fryer</Badge>}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -269,7 +299,7 @@ export default function PageDetailRecette({
               <Clock className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">
-                  {recette.temps_preparation} min
+                  {formaterDuree(recette.temps_preparation)}
                 </p>
                 <p className="text-xs text-muted-foreground">Préparation</p>
               </div>
@@ -282,7 +312,7 @@ export default function PageDetailRecette({
               <Clock className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">
-                  {recette.temps_cuisson} min
+                  {formaterDuree(recette.temps_cuisson)}
                 </p>
                 <p className="text-xs text-muted-foreground">Cuisson</p>
               </div>
@@ -302,6 +332,44 @@ export default function PageDetailRecette({
         )}
 
       </div>
+
+      {/* Robots de cuisine */}
+      {(recette.compatible_cookeo || recette.compatible_monsieur_cuisine || recette.compatible_airfryer) && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Robots de cuisine compatibles</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {recette.compatible_cookeo && <Badge variant="secondary">Cookeo</Badge>}
+              {recette.compatible_monsieur_cuisine && <Badge variant="secondary">Monsieur Cuisine</Badge>}
+              {recette.compatible_airfryer && <Badge variant="secondary">Air Fryer</Badge>}
+            </div>
+            {(recette.instructions_cookeo || recette.instructions_monsieur_cuisine || recette.instructions_airfryer) && (
+              <div className="space-y-3">
+                {recette.compatible_cookeo && recette.instructions_cookeo && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Cookeo</p>
+                    <p className="text-sm whitespace-pre-line">{recette.instructions_cookeo}</p>
+                  </div>
+                )}
+                {recette.compatible_monsieur_cuisine && recette.instructions_monsieur_cuisine && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Monsieur Cuisine</p>
+                    <p className="text-sm whitespace-pre-line">{recette.instructions_monsieur_cuisine}</p>
+                  </div>
+                )}
+                {recette.compatible_airfryer && recette.instructions_airfryer && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Air Fryer</p>
+                    <p className="text-sm whitespace-pre-line">{recette.instructions_airfryer}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {nutritionDisponible && (
         <Card className="overflow-hidden border-sky-200/70 bg-sky-50/40 dark:border-sky-900/50 dark:bg-sky-950/10">
@@ -377,7 +445,7 @@ export default function PageDetailRecette({
           <CardHeader>
             <CardTitle className="text-lg">Instructions</CardTitle>
             {tempsTotal > 0 && (
-              <CardDescription>Temps total : {tempsTotal} min</CardDescription>
+              <CardDescription>Temps total : {formaterDuree(tempsTotal)}</CardDescription>
             )}
           </CardHeader>
           <CardContent>

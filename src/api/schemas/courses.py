@@ -4,7 +4,7 @@ Schémas Pydantic pour les courses.
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .base import NomValidatorMixin, QuantiteValidatorMixin
 
@@ -254,6 +254,12 @@ class ArticleGenereResume(BaseModel):
     unite: str = Field("", max_length=20)
     rayon: str = Field("Autre", max_length=100)
     en_stock: float = 0
+
+    @field_validator("rayon", mode="before")
+    @classmethod
+    def normaliser_rayon(cls, v: object) -> str:
+        """Convertit None (retourné par l'IA) en valeur par défaut."""
+        return v if isinstance(v, str) and v.strip() else "Autre"
 
 
 class GenererCoursesResponse(BaseModel):

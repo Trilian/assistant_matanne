@@ -54,7 +54,7 @@ class PlanningIAGenerationMixin:
 
         recette = db.query(Recette).filter(func.lower(Recette.nom) == nom.lower()).first()
         if recette is None:
-            recette = Recette(nom=nom, temps_preparation=30)
+            recette = Recette(nom=nom, temps_preparation=30, categorie="Plat")
             db.add(recette)
             db.flush()
         return recette.id
@@ -208,6 +208,7 @@ class PlanningIAGenerationMixin:
         legumes_souhaites: list[str] = prefs.get("legumes_souhaites", [])
         plats_souhaites: list[str] = prefs.get("plats_souhaites", [])
         autoriser_restes: bool = prefs.get("autoriser_restes", True)
+        recettes_favorites: list[dict] = prefs.get("recettes_favorites", [])
 
         semaine_fin = semaine_debut + timedelta(days=6)
 
@@ -219,7 +220,7 @@ class PlanningIAGenerationMixin:
             else ""
         )
         plats_section = (
-            f"\nPLATS À INCLURE CETTE SEMAINE (forte préférence) :\n"
+            f"\nPLATS À INCLURE CETTE SEMAINE — OBLIGATION (voir règle 11) :\n"
             + "\n".join(f"- {p}" for p in plats_souhaites)
             if plats_souhaites
             else ""
@@ -229,11 +230,19 @@ class PlanningIAGenerationMixin:
             if autoriser_restes
             else "\nRESTES RÉCHAUFFÉS : Ne propose pas de restes réchauffés. Chaque repas doit être une préparation fraîche."
         )
+        recettes_section = (
+            f"\nRECETTES FAVORITES À RÉUTILISER (l'utilisateur les apprécie — réintègre-en au moins 2 dans la semaine si elles s'y prêtent) :\n"
+            + "\n".join(
+                f"- {r['nom']} (préparé {r.get('frequence', 1)} fois)" for r in recettes_favorites
+            )
+            if recettes_favorites
+            else ""
+        )
 
         prompt = f"""GENERATE A 7-DAY MEAL PLAN (MONDAY-SUNDAY) IN JSON FORMAT ONLY.
 
 CONTEXT:
-{context}{legumes_section}{plats_section}{restes_section}
+{context}{legumes_section}{plats_section}{restes_section}{recettes_section}
 
 OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 {{"items": [
@@ -272,7 +281,8 @@ RULES:
 7. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
 8. null is valid ONLY for entree, laitage, dessert, reste_source — never for gouter
 9. If a meal is a leftover (est_reste=true), set reste_source to identify the source meal (e.g. "dîner de lundi")
-10. No explanations, no text, ONLY JSON"""
+10. No explanations, no text, ONLY JSON
+11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them."""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 

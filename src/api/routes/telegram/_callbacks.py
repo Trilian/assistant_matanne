@@ -310,6 +310,7 @@ async def _traiter_callback_planning(
     callback_data: str,
     callback_query_id: str,
     chat_id: str,
+    message_id: int | None = None,
 ) -> None:
     from src.api.utils import executer_async, executer_avec_session
     from src.services.integrations.telegram import modifier_message, repondre_callback_query
@@ -357,12 +358,13 @@ async def _traiter_callback_planning(
                 await repondre_callback_query(
                     callback_query_id, "✅ Planning validé!", show_alert=False
                 )
-                await modifier_message(
-                    chat_id,
-                    (await _obtenir_message_id(callback_query_id)) or 0,
-                    "✅ <b>Planning validé</b>\n\nVotre planning a été validé et les courses sont générées.",
-                    boutons=None,
-                )
+                if message_id:
+                    await modifier_message(
+                        chat_id,
+                        message_id,
+                        "✅ <b>Planning validé</b>\n\nVotre planning a été validé. Vous pouvez maintenant générer la liste de courses.",
+                        boutons=None,
+                    )
             else:
                 await repondre_callback_query(
                     callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
@@ -372,74 +374,34 @@ async def _traiter_callback_planning(
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
 
     elif action == "planning_modifier":
-        web_url = "https://matanne.vercel.app/app/cuisine/planning"
+        web_url = "https://matanne.vercel.app/cuisine/planning"
         await repondre_callback_query(
-            callback_query_id, f"Ouvrez ce lien pour modifier: {web_url}", show_alert=False
+            callback_query_id,
+            f"Ouvrez l'app pour modifier le planning :\n{web_url}",
+            show_alert=True,
         )
 
     elif action == "planning_regenerer":
-        try:
-
-            def _regenerer():
-                from src.core.models.planning import Planning
-
-                with executer_avec_session() as session:
-                    if planning_id:
-                        old_planning = (
-                            session.query(Planning).filter(Planning.id == planning_id).first()
-                        )
-                    else:
-                        old_planning = (
-                            session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
-                        )
-
-                    if not old_planning:
-                        return {"error": "Planning non trouvé", "status": 404}
-                    if old_planning.etat == "archive":
-                        return {
-                            "error": "Planning archivé ne peut pas être régénéré",
-                            "status": 409,
-                        }
-
-                    old_planning.etat = "archive"
-                    session.flush()
-
-                    from src.core.models.planning import Planning as PlanningModel
-
-                    new_planning = PlanningModel(
-                        nom=f"{old_planning.nom} (refait)",
-                        semaine_debut=old_planning.semaine_debut,
-                        semaine_fin=old_planning.semaine_fin,
-                        etat="brouillon",
-                    )
-                    session.add(new_planning)
-                    session.commit()
-                    return {"message": "Planning régénéré", "id": new_planning.id, "status": 200}
-
-            result = await executer_async(_regenerer)
-            if result.get("status") == 200:
-                await repondre_callback_query(
-                    callback_query_id, "🔄 Planning en cours de régénération...", show_alert=False
-                )
-                await modifier_message(
-                    chat_id,
-                    (await _obtenir_message_id(callback_query_id)) or 0,
-                    "🔄 <b>Planning régénéré</b>\n\nLe nouveau planning en brouillon est prêt.",
-                    boutons=None,
-                )
-            else:
-                await repondre_callback_query(
-                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
-                )
-        except Exception as e:
-            logger.error(f"❌ Erreur traitement callback planning_regenerer: {e}", exc_info=True)
-            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+        web_url = "https://matanne.vercel.app/cuisine/planning"
+        await repondre_callback_query(
+            callback_query_id,
+            f"Utilisez le bouton « Régénérer » dans l'app pour relancer l'IA :\n{web_url}",
+            show_alert=True,
+        )
+        if message_id:
+            await modifier_message(
+                chat_id,
+                message_id,
+                "🔄 <b>Régénération IA</b>\n\nOuvrez l'app pour relancer la génération IA du planning.",
+                boutons=None,
+            )
 
 
 async def _traiter_callback_courses(
     callback_data: str,
     callback_query_id: str,
     chat_id: str,
+    message_id: int | None = None,
 ) -> None:
     from src.api.utils import executer_async, executer_avec_session
     from src.services.integrations.telegram import modifier_message, repondre_callback_query
@@ -490,12 +452,13 @@ async def _traiter_callback_courses(
                 await repondre_callback_query(
                     callback_query_id, "✅ Liste confirmée!", show_alert=False
                 )
-                await modifier_message(
-                    chat_id,
-                    (await _obtenir_message_id(callback_query_id)) or 0,
-                    "✅ <b>Liste de courses confirmée</b>\n\nVous pouvez maintenant faire les courses!",
-                    boutons=None,
-                )
+                if message_id:
+                    await modifier_message(
+                        chat_id,
+                        message_id,
+                        "✅ <b>Liste de courses confirmée</b>\n\nVous pouvez maintenant faire les courses!",
+                        boutons=None,
+                    )
             else:
                 await repondre_callback_query(
                     callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
@@ -505,9 +468,9 @@ async def _traiter_callback_courses(
             await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
 
     elif action == "courses_ajouter":
-        web_url = "https://matanne.vercel.app/app/cuisine/courses"
+        web_url = "https://matanne.vercel.app/cuisine/courses"
         await repondre_callback_query(
-            callback_query_id, f"Ouvrez ce lien pour ajouter: {web_url}", show_alert=False
+            callback_query_id, f"Ouvrez l'app pour ajouter des articles :\n{web_url}", show_alert=True
         )
 
     elif action == "courses_refaire":
@@ -543,14 +506,15 @@ async def _traiter_callback_courses(
             result = await executer_async(_refaire)
             if result.get("status") == 200:
                 await repondre_callback_query(
-                    callback_query_id, "🔄 Liste en cours de refonte...", show_alert=False
+                    callback_query_id, "\U0001f504 Nouvelle liste créée en brouillon.", show_alert=False
                 )
-                await modifier_message(
-                    chat_id,
-                    (await _obtenir_message_id(callback_query_id)) or 0,
-                    "🔄 <b>Liste refaite</b>\n\nUne nouvelle liste brouillon a été créée.",
-                    boutons=None,
-                )
+                if message_id:
+                    await modifier_message(
+                        chat_id,
+                        message_id,
+                        "\U0001f504 <b>Liste refaite</b>\n\nUne nouvelle liste brouillon a été créée.",
+                        boutons=None,
+                    )
             else:
                 await repondre_callback_query(
                     callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True

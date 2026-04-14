@@ -6,6 +6,35 @@ from pydantic import BaseModel, Field, field_validator
 
 from .base import IdentifiedResponse, NomValidatorMixin
 
+
+# ═══════════════════════════════════════════════════════════
+# NORMALISATION CATÉGORIES
+# ═══════════════════════════════════════════════════════════
+
+_MAP_CATEGORIES: dict[str, str] = {
+    "plat": "Plat", "plats": "Plat", "principal": "Plat", "plat principal": "Plat",
+    "entrée": "Entrée", "entree": "Entrée", "entrées": "Entrée", "entrees": "Entrée", "starter": "Entrée",
+    "dessert": "Dessert", "desserts": "Dessert",
+    "accompagnement": "Accompagnement", "accompagnements": "Accompagnement", "garniture": "Accompagnement",
+    "boisson": "Boisson", "boissons": "Boisson", "drink": "Boisson",
+    "petit-déjeuner": "Petit-déjeuner", "petit déjeuner": "Petit-déjeuner",
+    "petit_dejeuner": "Petit-déjeuner", "breakfast": "Petit-déjeuner",
+    "goûter": "Goûter", "gouter": "Goûter", "goûters": "Goûter",
+    "snack": "Snack", "snacks": "Snack", "apéro": "Snack", "apero": "Snack", "amuse-bouche": "Snack",
+}
+
+
+def normaliser_categorie(cat: str | None) -> str:
+    """Normalise une valeur de catégorie vers la forme canonique capitalisée.
+
+    Accepte toutes les variantes (casse, accents, pluriel) et retourne
+    la forme canonique. Retourne "Plat" par défaut si non reconnue.
+    """
+    if not cat or not cat.strip():
+        return "Plat"
+    return _MAP_CATEGORIES.get(cat.strip().lower(), "Plat")
+
+
 # ═══════════════════════════════════════════════════════════
 # SOUS-SCHÉMAS INGRÉDIENTS & ÉTAPES
 # ═══════════════════════════════════════════════════════════
@@ -84,6 +113,9 @@ class RecetteBase(BaseModel, NomValidatorMixin):
     portions: int = Field(4, ge=1)
     difficulte: str = Field("moyen", max_length=30)
     categorie: str | None = Field(None, max_length=100)
+    instructions_cookeo: str | None = Field(None, max_length=4000)
+    instructions_monsieur_cuisine: str | None = Field(None, max_length=4000)
+    instructions_airfryer: str | None = Field(None, max_length=4000)
 
     model_config = {
         "json_schema_extra": {
@@ -103,9 +135,18 @@ class RecetteBase(BaseModel, NomValidatorMixin):
 class RecetteCreate(RecetteBase):
     """Schéma pour créer une recette."""
 
+    categorie: str = Field("Plat", max_length=100)
     ingredients: list[IngredientItem] = Field(default_factory=list)
     instructions: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
+    compatible_cookeo: bool = False
+    compatible_monsieur_cuisine: bool = False
+    compatible_airfryer: bool = False
+
+    @field_validator("categorie", mode="before")
+    @classmethod
+    def normaliser_cat(cls, v: str | None) -> str:
+        return normaliser_categorie(v)
 
     @field_validator("instructions", mode="before")
     @classmethod
@@ -171,6 +212,19 @@ class RecettePatch(BaseModel):
     ingredients: list[IngredientItem] | None = None
     instructions: list[str] | None = None
     tags: list[str] | None = None
+    compatible_cookeo: bool | None = None
+    compatible_monsieur_cuisine: bool | None = None
+    compatible_airfryer: bool | None = None
+    instructions_cookeo: str | None = None
+    instructions_monsieur_cuisine: str | None = None
+    instructions_airfryer: str | None = None
+
+    @field_validator("categorie", mode="before")
+    @classmethod
+    def normaliser_cat(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        return normaliser_categorie(v)
 
     @field_validator("instructions", mode="before")
     @classmethod
@@ -203,9 +257,13 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     etapes: list[EtapeResponse] = Field(default_factory=list)
     est_favori: bool = False
     url_source: str | None = Field(None, max_length=500)
+    image_url: str | None = None
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False
     compatible_airfryer: bool = False
+    instructions_cookeo: str | None = None
+    instructions_monsieur_cuisine: str | None = None
+    instructions_airfryer: str | None = None
     jours_depuis_derniere_cuisson: int | None = None
     calories: int | None = None
     proteines: float | None = None

@@ -59,6 +59,7 @@ import {
   ajouterAuFavori,
   retirerDuFavori,
 } from "@/bibliotheque/api/recettes";
+import { formaterDuree } from "@/bibliotheque/utils";
 import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
 import { SwipeableItem } from "@/composants/swipeable-item";
 import { PanneauFiltres, SectionFiltre, BoutonFiltre } from "@/composants/panneau-filtres";
@@ -594,7 +595,7 @@ export default function PageRecettes() {
                       {tempsTotal(recette) > 0 && (
                         <span className="flex items-center gap-0.5">
                           <Clock className="h-3 w-3" />
-                          {tempsTotal(recette)} min
+                          {formaterDuree(tempsTotal(recette))}
                         </span>
                       )}
                       {recette.portions && (

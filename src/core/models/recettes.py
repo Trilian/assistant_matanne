@@ -170,6 +170,9 @@ class Recette(TimestampMixin, Base):
     compatible_monsieur_cuisine: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     compatible_airfryer: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     compatible_multicooker: Mapped[bool] = mapped_column(Boolean, default=False)
+    instructions_cookeo: Mapped[str | None] = mapped_column(Text, nullable=True)
+    instructions_monsieur_cuisine: Mapped[str | None] = mapped_column(Text, nullable=True)
+    instructions_airfryer: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Nutrition (optionnel)
     calories: Mapped[int | None] = mapped_column(Integer)

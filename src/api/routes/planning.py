@@ -1467,6 +1467,36 @@ async def obtenir_suggestions_rapides(
 
             recettes = query.limit(nombre).all()
 
+            # Fallback : si l'exclusion des déjà planifiées vide la liste,
+            # on retourne toutes les recettes sans filtre d'exclusion
+            if not recettes and recettes_planifiees_ids:
+                fallback_query = session.query(Recette)
+                if type_repas in ("petit_dejeuner", "gouter"):
+                    fallback_query = fallback_query.filter(
+                        Recette.categorie.in_(["Petit-déjeuner", "Dessert", "Goûter", "Snack"])
+                    )
+                fallback_query = (
+                    fallback_query
+                    .outerjoin(HistoriqueRecette, HistoriqueRecette.recette_id == Recette.id)
+                    .group_by(Recette.id)
+                )
+                if categories_favorites:
+                    meteo_boost_fb = case(
+                        (Recette.categorie.in_(categories_favorites), 1),
+                        else_=0,
+                    )
+                    fallback_query = fallback_query.order_by(
+                        meteo_boost_fb.desc(),
+                        func.count(HistoriqueRecette.id).desc(),
+                        func.random(),
+                    )
+                else:
+                    fallback_query = fallback_query.order_by(
+                        func.count(HistoriqueRecette.id).desc(),
+                        func.random(),
+                    )
+                recettes = fallback_query.limit(nombre).all()
+
             result: dict[str, Any] = {
                 "suggestions": [
                     {

@@ -1,9 +1,9 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
--- Version    : 4.0 (régénéré automatiquement)
--- Généré le  : 2026-04-10 09:00 UTC
--- Source     : sql/schema/*.sql (21 fichiers, ~5085 lignes)
+-- Version    : 4.1 (migrations 001 + 002 intégrées)
+-- Généré le  : 2026-04-14 00:00 UTC
+-- Source     : sql/schema/*.sql (21 fichiers)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -1136,6 +1136,10 @@ CREATE TABLE IF NOT EXISTS recettes (
     compatible_monsieur_cuisine BOOLEAN NOT NULL DEFAULT FALSE,
     compatible_airfryer BOOLEAN NOT NULL DEFAULT FALSE,
     compatible_multicooker BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Instructions robots
+    instructions_cookeo TEXT,
+    instructions_monsieur_cuisine TEXT,
+    instructions_airfryer TEXT,
     -- Nutrition
     calories INTEGER,
     proteines FLOAT,
@@ -5196,6 +5200,19 @@ GRANT SELECT,
 GRANT USAGE,
     SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 -- ============================================================================
+
+-- ============================================================================
+-- NORMALISATION DES CATÉGORIES DE RECETTES (idempotent)
+-- Corrige les valeurs NULL, minuscules et variantes vers les formes canoniques.
+-- ============================================================================
+UPDATE recettes SET categorie = 'Entrée'         WHERE LOWER(TRIM(categorie)) IN ('entrée', 'entree', 'entrées', 'entrees', 'starter');
+UPDATE recettes SET categorie = 'Dessert'        WHERE LOWER(TRIM(categorie)) IN ('dessert', 'desserts');
+UPDATE recettes SET categorie = 'Accompagnement' WHERE LOWER(TRIM(categorie)) IN ('accompagnement', 'accompagnements', 'garniture');
+UPDATE recettes SET categorie = 'Boisson'        WHERE LOWER(TRIM(categorie)) IN ('boisson', 'boissons', 'drink');
+UPDATE recettes SET categorie = 'Petit-déjeuner' WHERE LOWER(TRIM(categorie)) IN ('petit-déjeuner', 'petit déjeuner', 'petit_dejeuner', 'breakfast');
+UPDATE recettes SET categorie = 'Goûter'         WHERE LOWER(TRIM(categorie)) IN ('goûter', 'gouter', 'goûters');
+UPDATE recettes SET categorie = 'Snack'          WHERE LOWER(TRIM(categorie)) IN ('snack', 'snacks', 'apéro', 'apero', 'amuse-bouche');
+UPDATE recettes SET categorie = 'Plat'           WHERE categorie IS NULL OR LOWER(TRIM(categorie)) IN ('plat', 'plats', 'principal', 'plat principal');
 
 -- Source: 99_footer.sql
 -- ============================================================================

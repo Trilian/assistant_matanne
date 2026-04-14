@@ -15,6 +15,7 @@ import {
   Loader2,
   QrCode,
   Square,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ import { envoyerCoursesMagasinTelegram } from "@/bibliotheque/api/telegram";
 import { PREFIXE_API, URL_API } from "@/bibliotheque/constantes";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { utiliserPageCourses } from "@/crochets/utiliser-page-courses";
+import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import type { MagasinCible } from "@/types/courses";
 
 export default function PageCourses() {
@@ -102,6 +104,13 @@ export default function PageCourses() {
     demarrerEcoute,
     arreterEcoute,
   } = utiliserPageCourses();
+
+  // ─── Mode invités — panneau collapsible ─────────────────
+  const [panneauInvitesOuvert, setPanneauInvitesOuvert] = utiliserStockageLocal<boolean>(
+    "courses.panneauInvites",
+    false
+  );
+  const contexteInvitesActif = modeInvites.actif && modeInvites.nbInvites > 0;
 
   // ─── Filtre par magasin ─────────────────────────────────
   const [magasinActif, setMagasinActif] = useState<string | null>(null);
@@ -268,8 +277,26 @@ export default function PageCourses() {
           <p className="text-muted-foreground">Gérez vos listes de courses</p>
         </div>
 
-        {listeSelectionnee && (
-          <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Bouton mode invités */}
+          <Button
+            variant={contexteInvitesActif ? "default" : "outline"}
+            size="sm"
+            onClick={() => setPanneauInvitesOuvert((v) => !v)}
+            title="Mode invités — adapter quantités et suggestions d'achats"
+            className={contexteInvitesActif ? "bg-amber-500 text-white hover:bg-amber-600 border-transparent" : ""}
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Invités
+            {contexteInvitesActif && (
+              <span className="ml-1 rounded-full bg-white/30 px-1.5 text-xs font-semibold">
+                +{modeInvites.nbInvites}
+              </span>
+            )}
+          </Button>
+
+          {listeSelectionnee && (
+          <>
             {detailListe?.etat === "brouillon" && (
               <Button size="sm" onClick={() => confirmer(undefined)} disabled={enConfirmation}>
                 {enConfirmation ? (
@@ -378,8 +405,9 @@ export default function PageCourses() {
               )}
               Valider courses
             </Button>
-          </div>
-        )}
+          </>
+          )}
+        </div>
       </div>
 
       <div className="rounded-lg border border-dashed bg-muted/30 px-4 py-3">
@@ -396,13 +424,22 @@ export default function PageCourses() {
         </p>
       </div>
 
-      <CarteModeInvites
-        contexte={modeInvites}
-        onChange={mettreAJourModeInvites}
-        onReset={reinitialiserModeInvites}
-        suggestionsEvenements={suggestionsInvites}
-        description="Le contexte invité alimente les suggestions d'achats et les quantités recommandées pour la liste active."
-      />
+      {/* Mode invités — panneau collapsible, caché par défaut */}
+      {panneauInvitesOuvert && (
+        <CarteModeInvites
+          contexte={modeInvites}
+          onChange={(patch) => {
+            mettreAJourModeInvites(patch);
+            if (patch.actif === false) setPanneauInvitesOuvert(false);
+          }}
+          onReset={() => {
+            reinitialiserModeInvites();
+            setPanneauInvitesOuvert(false);
+          }}
+          suggestionsEvenements={suggestionsInvites}
+          description="Le contexte invité alimente les suggestions d'achats et les quantités recommandées pour la liste active."
+        />
+      )}
 
       {historiquePrix?.items?.length ? (
         <div className="rounded-lg border bg-muted/20 p-4">
