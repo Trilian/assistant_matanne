@@ -16,6 +16,7 @@ export interface RepasPlanning {
   notes?: string;
   portions?: number;
   nutri_score?: string | null;
+  genere_par_ia?: boolean;
   // Entrée (texte seul ou recette si complexe)
   entree?: string;
   entree_recette_id?: number;
@@ -87,6 +88,7 @@ export interface SuggestionRecettePlanning {
   description?: string;
   temps_total: number;
   categorie?: string;
+  genere_par_ia?: boolean;
 }
 
 export interface GenererPlanningParams {

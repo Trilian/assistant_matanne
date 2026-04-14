@@ -26,6 +26,7 @@ export interface Recette {
   url_source?: string;
   ingredients: IngredientRecette[];
   est_favori?: boolean;
+  genere_par_ia?: boolean;
   jours_depuis_derniere_cuisson?: number;
   compatible_cookeo?: boolean;
   compatible_monsieur_cuisine?: boolean;

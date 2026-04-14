@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport Travaux — 12 Impasse des Primevères, 63370 Lempdes</title>
+    <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2c5282;
+            --accent: #e67e22;
+            --accent-light: #f39c12;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light), var(--accent));
+        }
+        .header h1 { font-size: 2rem; margin-bottom: 0.5rem; font-weight: 700; }
+        .header .subtitle { font-size: 1.1rem; opacity: 0.9; }
+        .header .date { font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem; }
+
+        /* Navigation */
+        .nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav a {
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav a:hover { background: var(--primary); color: white; }
+
+        /* Main */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 2.5rem;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-title .icon { font-size: 1.3rem; }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+            transition: box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-title .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .badge-int { background: #ebf5fb; color: #2980b9; }
+        .badge-ext { background: #eafaf1; color: #27ae60; }
+        .badge-alert { background: #fdedec; color: #e74c3c; }
+        .badge-terrain { background: #fef9e7; color: #d4ac0d; }
+
+        .card-body { font-size: 0.95rem; color: var(--text); }
+        .card-body ul { padding-left: 1.25rem; margin: 0.5rem 0; }
+        .card-body li { margin-bottom: 0.3rem; }
+
+        /* Price bar */
+        .price-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: #f7f9fc;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+        .price-range {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+        .price-bar-visual {
+            flex: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .price-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+        }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        /* Summary table */
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .summary-table th, .summary-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .summary-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-table tr:nth-child(even) { background: #f7f9fc; }
+        .summary-table tr:hover { background: #edf2f7; }
+        .summary-table .total-row {
+            font-weight: 700;
+            background: #2c5282 !important;
+            color: white;
+            font-size: 1.05rem;
+        }
+        .summary-table .total-row:hover { background: #1e3a5f !important; }
+        .summary-table .subtotal-row {
+            font-weight: 600;
+            background: #ebf5fb !important;
+            color: var(--primary);
+        }
+        .text-right { text-align: right !important; }
+
+        /* Alert box */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+        .alert-warning {
+            background: #fef9e7;
+            border: 1px solid #f9e79f;
+            color: #7d6608;
+        }
+        .alert-danger {
+            background: #fdedec;
+            border: 1px solid #f5b7b1;
+            color: #922b21;
+        }
+        .alert-info {
+            background: #ebf5fb;
+            border: 1px solid #aed6f1;
+            color: #1b4f72;
+        }
+        .alert-success {
+            background: #eafaf1;
+            border: 1px solid #a9dfbf;
+            color: #1e8449;
+        }
+        .alert .alert-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+        .alert-title { font-weight: 700; margin-bottom: 0.25rem; }
+
+        /* Floor Plan SVG */
+        .plan-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        .plan-container h3 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .plan-svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--border);
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.55rem;
+            top: 6px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+        .timeline-phase {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+        .timeline-duration {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        .timeline-details {
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* KPI */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .kpi-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kpi-accent .kpi-value { color: var(--accent); }
+        .kpi-success .kpi-value { color: var(--success); }
+        .kpi-danger .kpi-value { color: var(--danger); }
+
+        /* Chart bar */
+        .chart-bar-container { margin: 1rem 0; }
+        .chart-bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            gap: 0.75rem;
+        }
+        .chart-bar-label {
+            width: 180px;
+            font-size: 0.85rem;
+            text-align: right;
+            flex-shrink: 0;
+            color: var(--text);
+        }
+        .chart-bar-track {
+            flex: 1;
+            height: 24px;
+            background: #edf2f7;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .chart-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            min-width: 60px;
+            transition: width 0.5s ease;
+        }
+        .fill-int { background: linear-gradient(90deg, #3498db, #2980b9); }
+        .fill-ext { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+        .fill-terrain { background: linear-gradient(90deg, #f1c40f, #d4ac0d); }
+        .fill-misc { background: linear-gradient(90deg, #9b59b6, #8e44ad); }
+
+        /* Footer */
+        .footer {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        .footer a { color: var(--accent-light); }
+
+        /* Print */
+        @media print {
+            .nav { display: none; }
+            .header { padding: 1.5rem; }
+            .card { break-inside: avoid; }
+            body { font-size: 11pt; }
+            .main { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- HEADER                                                        -->
+<!-- ============================================================ -->
+<div class="header">
+    <h1>📋 Rapport Complet Travaux de Rénovation</h1>
+    <div class="subtitle">12 Impasse des Primevères — 63370 Lempdes (Puy-de-Dôme)</div>
+    <div class="date">Généré le 14 avril 2026 — Version corrigée avec terrain agricole</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- NAVIGATION                                                    -->
+<!-- ============================================================ -->
+<div class="nav">
+    <div class="nav-inner">
+        <a href="#synthese">Synthèse</a>
+        <a href="#etat-des-lieux">État des lieux</a>
+        <a href="#plan-rdc">Plan RDC</a>
+        <a href="#plan-exterieur">Plan extérieur</a>
+        <a href="#interieur">Travaux intérieurs</a>
+        <a href="#exterieur">Travaux extérieurs</a>
+        <a href="#terrain">Terrain AT 15</a>
+        <a href="#budget">Budget global</a>
+        <a href="#planning">Planning</a>
+        <a href="#alertes">Alertes</a>
+        <a href="#sources">Sources</a>
+    </div>
+</div>
+
+<div class="main">
+
+<!-- ============================================================ -->
+<!-- SYNTHÈSE CHIFFRES CLÉS                                        -->
+<!-- ============================================================ -->
+<section class="section" id="synthese">
+    <h2 class="section-title"><span class="icon">📊</span> Synthèse chiffres clés</h2>
+
+    <div class="kpi-grid">
+        <div class="kpi-card kpi-accent">
+            <div class="kpi-value">~95 000 €</div>
+            <div class="kpi-label">Budget médian total</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">61 – 142 K€</div>
+            <div class="kpi-label">Fourchette globale</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">12</div>
+            <div class="kpi-label">Postes de travaux</div>
+        </div>
+        <div class="kpi-card kpi-success">
+            <div class="kpi-value">1 448 m²</div>
+            <div class="kpi-label">Terrain AT 15 à acquérir</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">~155 m²</div>
+            <div class="kpi-label">Surface totale habitable</div>
+        </div>
+        <div class="kpi-card kpi-danger">
+            <div class="kpi-value">⚠️ Zone A</div>
+            <div class="kpi-label">Alerte constructibilité</div>
+        </div>
+    </div>
+
+    <!-- Budget répartition visuelle -->
+    <div class="card">
+        <div class="card-title">Répartition du budget (estimation médiane)</div>
+        <div class="chart-bar-container">
+            <div class="chart-bar-row">
+                <div class="chart-bar-label">Intérieur</div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill fill-int" style="width: 56%;">~53 000 €</div>
+                </div>
+            </div>
+            <div class="chart-bar-row">
+                <div class="chart-bar-label">Extérieur (hors terrain)</div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill fill-ext" style="width: 28%;">~25 500 €</div>
+                </div>
+            </div>
+            <div class="chart-bar-row">
+                <div class="chart-bar-label">Terrain AT 15</div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill fill-terrain" style="width: 10%;">~9 000 €</div>
+                </div>
+            </div>
+            <div class="chart-bar-row">
+                <div class="chart-bar-label">MO + imprévus</div>
+                <div class="chart-bar-track">
+                    <div class="chart-bar-fill fill-misc" style="width: 18%;">~17 500 €</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ÉTAT DES LIEUX                                                -->
+<!-- ============================================================ -->
+<section class="section" id="etat-des-lieux">
+    <h2 class="section-title"><span class="icon">🏠</span> État des lieux actuel</h2>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-title">RDC — Surface habitable <span class="badge badge-int">101,38 m²</span></div>
+            <div class="card-body">
+                <table class="summary-table">
+                    <tr><th>Pièce</th><th class="text-right">Surface</th></tr>
+                    <tr><td>Bureau (→ futur chambre)</td><td class="text-right">13,32 m²</td></tr>
+                    <tr><td>Bar (→ à détruire)</td><td class="text-right">5,52 m²</td></tr>
+                    <tr><td>Salle à manger (SAM)</td><td class="text-right">19,18 m²</td></tr>
+                    <tr><td>Salon actuel (→ chambre + salle jeux)</td><td class="text-right">19,40 m²</td></tr>
+                    <tr><td>Hall</td><td class="text-right">9,80 m²</td></tr>
+                    <tr><td>Cuisine</td><td class="text-right">16,40 m²</td></tr>
+                    <tr><td>Chambre 1</td><td class="text-right">~13,00 m²</td></tr>
+                    <tr><td>Salle de bains (→ à refaire)</td><td class="text-right">5,14 m²</td></tr>
+                    <tr><td>Cellier + WC</td><td class="text-right">~5-6 m²</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Annexes et étage</div>
+            <div class="card-body">
+                <p><strong>Annexes RDC :</strong> 53,81 m²</p>
+                <ul>
+                    <li>Garage : ~28-30 m² (→ futur salon)</li>
+                    <li>Autres annexes (cellier, terrasse…)</li>
+                </ul>
+                <br>
+                <p><strong>Étage :</strong></p>
+                <ul>
+                    <li>Chambre 2 : 16,56 m² (niveau +2,84 m)</li>
+                    <li>Salle de bains étage : 6,47 m²</li>
+                </ul>
+                <br>
+                <p><strong>Caractéristiques :</strong></p>
+                <ul>
+                    <li>HSP : 2,50 m</li>
+                    <li>Volets : VR C TITAN</li>
+                    <li>Portes : BC 180/215</li>
+                    <li>Marche : RES 8 cm (étage)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Parcelles cadastrales</div>
+        <div class="card-body">
+            <table class="summary-table">
+                <tr><th>Parcelle</th><th>Statut</th><th>Zone PLU</th><th class="text-right">Surface</th></tr>
+                <tr><td><strong>263</strong> — Propriété actuelle</td><td>✅ Propriétaire</td><td>Zone U (urbaine)</td><td class="text-right">~800-1 000 m²</td></tr>
+                <tr><td><strong>AT 15</strong> — Terrain voisin</td><td>🎯 À acquérir</td><td>Zone A (agricole)</td><td class="text-right">1 448 m²</td></tr>
+                <tr><td><strong>269</strong> — Parcelle adjacente</td><td>Voisin (référence)</td><td>—</td><td class="text-right">—</td></tr>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PLAN RDC — SVG SCHÉMATIQUE                                    -->
+<!-- ============================================================ -->
+<section class="section" id="plan-rdc">
+    <h2 class="section-title"><span class="icon">📐</span> Plan schématique RDC — Avant / Après</h2>
+
+    <div class="grid-2">
+        <!-- AVANT -->
+        <div class="plan-container">
+            <h3>🔴 ÉTAT ACTUEL</h3>
+            <svg viewBox="0 0 600 450" class="plan-svg" xmlns="http://www.w3.org/2000/svg">
+                <!-- Murs extérieurs -->
+                <rect x="30" y="30" width="540" height="390" fill="none" stroke="#2d3748" stroke-width="4" rx="2"/>
+
+                <!-- Garage -->
+                <rect x="30" y="30" width="180" height="200" fill="#e8d5b7" stroke="#2d3748" stroke-width="2"/>
+                <text x="120" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#5d4e37">GARAGE</text>
+                <text x="120" y="145" text-anchor="middle" font-size="10" fill="#8b7355">~28-30 m²</text>
+
+                <!-- Cuisine -->
+                <rect x="210" y="30" width="170" height="130" fill="#c8e6c9" stroke="#2d3748" stroke-width="2"/>
+                <text x="295" y="95" text-anchor="middle" font-size="13" font-weight="700" fill="#2e7d32">CUISINE</text>
+                <text x="295" y="112" text-anchor="middle" font-size="10" fill="#4caf50">16,40 m²</text>
+
+                <!-- Hall -->
+                <rect x="380" y="30" width="90" height="130" fill="#fff9c4" stroke="#2d3748" stroke-width="2"/>
+                <text x="425" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#f57f17">HALL</text>
+                <text x="425" y="112" text-anchor="middle" font-size="10" fill="#ff8f00">9,80 m²</text>
+
+                <!-- Bureau + Bar -->
+                <rect x="470" y="30" width="100" height="80" fill="#ffccbc" stroke="#2d3748" stroke-width="2"/>
+                <text x="520" y="68" text-anchor="middle" font-size="11" font-weight="700" fill="#bf360c">BUREAU</text>
+                <text x="520" y="83" text-anchor="middle" font-size="9" fill="#e64a19">13,32 m²</text>
+
+                <rect x="470" y="110" width="100" height="50" fill="#ffab91" stroke="#2d3748" stroke-width="2"/>
+                <text x="520" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#bf360c">BAR</text>
+                <text x="520" y="153" text-anchor="middle" font-size="9" fill="#e64a19">5,52 m²</text>
+
+                <!-- SAM -->
+                <rect x="210" y="160" width="170" height="130" fill="#bbdefb" stroke="#2d3748" stroke-width="2"/>
+                <text x="295" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#1565c0">SAM</text>
+                <text x="295" y="242" text-anchor="middle" font-size="10" fill="#1976d2">19,18 m²</text>
+
+                <!-- Salon -->
+                <rect x="380" y="160" width="190" height="130" fill="#b3e5fc" stroke="#2d3748" stroke-width="2"/>
+                <text x="475" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#0277bd">SALON</text>
+                <text x="475" y="242" text-anchor="middle" font-size="10" fill="#0288d1">19,40 m²</text>
+
+                <!-- SDB -->
+                <rect x="30" y="230" width="120" height="90" fill="#e1bee7" stroke="#2d3748" stroke-width="2"/>
+                <text x="90" y="275" text-anchor="middle" font-size="12" font-weight="700" fill="#7b1fa2">SDB</text>
+                <text x="90" y="290" text-anchor="middle" font-size="9" fill="#9c27b0">5,14 m²</text>
+
+                <!-- CH1 -->
+                <rect x="150" y="290" width="130" height="130" fill="#dcedc8" stroke="#2d3748" stroke-width="2"/>
+                <text x="215" y="355" text-anchor="middle" font-size="13" font-weight="700" fill="#33691e">CH1</text>
+                <text x="215" y="372" text-anchor="middle" font-size="10" fill="#558b2f">~13 m²</text>
+
+                <!-- Cellier + WC -->
+                <rect x="30" y="320" width="120" height="100" fill="#f5f5f5" stroke="#2d3748" stroke-width="2"/>
+                <text x="90" y="370" text-anchor="middle" font-size="11" font-weight="700" fill="#616161">CELLIER</text>
+                <text x="90" y="385" text-anchor="middle" font-size="9" fill="#9e9e9e">+ WC</text>
+
+                <!-- Extension basse -->
+                <rect x="280" y="290" width="145" height="130" fill="#f0f4c3" stroke="#2d3748" stroke-width="2"/>
+                <text x="352" y="350" text-anchor="middle" font-size="11" font-weight="700" fill="#827717">TERRASSE</text>
+                <text x="352" y="367" text-anchor="middle" font-size="9" fill="#9e9d24">/ annexes</text>
+
+                <rect x="425" y="290" width="145" height="130" fill="#f0f4c3" stroke="#2d3748" stroke-width="2"/>
+                <text x="497" y="355" text-anchor="middle" font-size="11" font-weight="700" fill="#827717">JARDIN</text>
+            </svg>
+        </div>
+
+        <!-- APRÈS -->
+        <div class="plan-container">
+            <h3>🟢 PROJET APRÈS TRAVAUX</h3>
+            <svg viewBox="0 0 600 450" class="plan-svg" xmlns="http://www.w3.org/2000/svg">
+                <!-- Murs extérieurs -->
+                <rect x="30" y="30" width="540" height="390" fill="none" stroke="#2d3748" stroke-width="4" rx="2"/>
+
+                <!-- EX-Garage → NOUVEAU SALON -->
+                <rect x="30" y="30" width="180" height="200" fill="#81d4fa" stroke="#1565c0" stroke-width="3"/>
+                <text x="120" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#0d47a1">NOUVEAU</text>
+                <text x="120" y="130" text-anchor="middle" font-size="13" font-weight="700" fill="#0d47a1">SALON</text>
+                <text x="120" y="150" text-anchor="middle" font-size="10" fill="#1565c0">~28-30 m²</text>
+                <!-- Étoile travaux -->
+                <circle cx="172" cy="50" r="10" fill="#e74c3c" opacity="0.9"/>
+                <text x="172" y="54" text-anchor="middle" font-size="12" fill="white">4</text>
+
+                <!-- Cuisine ouverte sur salon -->
+                <rect x="210" y="30" width="170" height="130" fill="#a5d6a7" stroke="#2e7d32" stroke-width="3"/>
+                <text x="295" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#1b5e20">CUISINE</text>
+                <text x="295" y="102" text-anchor="middle" font-size="10" fill="#2e7d32">OUVERTE</text>
+                <text x="295" y="117" text-anchor="middle" font-size="10" fill="#4caf50">16,40 m²</text>
+                <!-- Ouverture cuisine↔salon -->
+                <line x1="210" y1="90" x2="210" y2="120" stroke="#e74c3c" stroke-width="4" stroke-dasharray="6,3"/>
+                <circle cx="213" cy="50" r="10" fill="#e74c3c" opacity="0.9"/>
+                <text x="213" y="54" text-anchor="middle" font-size="12" fill="white">5</text>
+
+                <!-- Hall + meuble entrée -->
+                <rect x="380" y="30" width="90" height="130" fill="#fff9c4" stroke="#2d3748" stroke-width="2"/>
+                <text x="425" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#f57f17">HALL</text>
+                <text x="425" y="100" text-anchor="middle" font-size="9" fill="#ff8f00">+ meuble</text>
+                <text x="425" y="114" text-anchor="middle" font-size="10" fill="#ff8f00">9,80 m²</text>
+
+                <!-- Bureau → CHAMBRE 3 -->
+                <rect x="470" y="30" width="100" height="130" fill="#c5e1a5" stroke="#33691e" stroke-width="3"/>
+                <text x="520" y="85" text-anchor="middle" font-size="12" font-weight="700" fill="#1b5e20">CHAMBRE 3</text>
+                <text x="520" y="102" text-anchor="middle" font-size="9" fill="#33691e">(ex-bureau+bar)</text>
+                <text x="520" y="117" text-anchor="middle" font-size="10" fill="#558b2f">~18,8 m²</text>
+                <circle cx="535" cy="50" r="10" fill="#e74c3c" opacity="0.9"/>
+                <text x="535" y="54" text-anchor="middle" font-size="12" fill="white">1</text>
+
+                <!-- SAM -->
+                <rect x="210" y="160" width="170" height="130" fill="#bbdefb" stroke="#2d3748" stroke-width="2"/>
+                <text x="295" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#1565c0">SAM</text>
+                <text x="295" y="242" text-anchor="middle" font-size="10" fill="#1976d2">19,18 m²</text>
+
+                <!-- Salon → CHAMBRE + SALLE JEUX -->
+                <rect x="380" y="160" width="95" height="130" fill="#c5e1a5" stroke="#33691e" stroke-width="3"/>
+                <text x="427" y="215" text-anchor="middle" font-size="10" font-weight="700" fill="#1b5e20">CHAMBRE</text>
+                <text x="427" y="230" text-anchor="middle" font-size="10" font-weight="700" fill="#1b5e20">JULES</text>
+                <text x="427" y="245" text-anchor="middle" font-size="9" fill="#558b2f">~10 m²</text>
+
+                <rect x="475" y="160" width="95" height="130" fill="#fff59d" stroke="#f9a825" stroke-width="3"/>
+                <text x="522" y="215" text-anchor="middle" font-size="10" font-weight="700" fill="#e65100">SALLE</text>
+                <text x="522" y="230" text-anchor="middle" font-size="10" font-weight="700" fill="#e65100">JEUX</text>
+                <text x="522" y="245" text-anchor="middle" font-size="9" fill="#ef6c00">~9 m²</text>
+                <circle cx="440" cy="175" r="10" fill="#e74c3c" opacity="0.9"/>
+                <text x="440" y="179" text-anchor="middle" font-size="12" fill="white">3</text>
+
+                <!-- SDB refaite -->
+                <rect x="30" y="230" width="120" height="90" fill="#ce93d8" stroke="#7b1fa2" stroke-width="3"/>
+                <text x="90" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#4a148c">SDB NEUVE</text>
+                <text x="90" y="280" text-anchor="middle" font-size="9" fill="#6a1b9a">Baignoire +</text>
+                <text x="90" y="292" text-anchor="middle" font-size="9" fill="#6a1b9a">double vasque</text>
+                <circle cx="125" cy="243" r="10" fill="#e74c3c" opacity="0.9"/>
+                <text x="125" y="247" text-anchor="middle" font-size="12" fill="white">2</text>
+
+                <!-- CH1 -->
+                <rect x="150" y="290" width="130" height="130" fill="#dcedc8" stroke="#2d3748" stroke-width="2"/>
+                <text x="215" y="355" text-anchor="middle" font-size="13" font-weight="700" fill="#33691e">CH1</text>
+                <text x="215" y="372" text-anchor="middle" font-size="10" fill="#558b2f">~13 m²</text>
+
+                <!-- Cellier + WC -->
+                <rect x="30" y="320" width="120" height="100" fill="#f5f5f5" stroke="#2d3748" stroke-width="2"/>
+                <text x="90" y="370" text-anchor="middle" font-size="11" font-weight="700" fill="#616161">CELLIER</text>
+                <text x="90" y="385" text-anchor="middle" font-size="9" fill="#9e9e9e">+ WC</text>
+
+                <!-- Vélos -->
+                <rect x="280" y="290" width="60" height="50" fill="#b0bec5" stroke="#455a64" stroke-width="2"/>
+                <text x="310" y="318" text-anchor="middle" font-size="9" font-weight="700" fill="#263238">VÉLOS</text>
+                <circle cx="325" cy="296" r="8" fill="#e74c3c" opacity="0.9"/>
+                <text x="325" y="300" text-anchor="middle" font-size="10" fill="white">13</text>
+
+                <!-- Jardin / terrasse -->
+                <rect x="340" y="290" width="230" height="130" fill="#e8f5e9" stroke="#4caf50" stroke-width="2" stroke-dasharray="6,3"/>
+                <text x="455" y="355" text-anchor="middle" font-size="12" font-weight="700" fill="#2e7d32">JARDIN</text>
+            </svg>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background:#81d4fa;border-color:#1565c0"></div> Transformation garage</div>
+                <div class="legend-item"><div class="legend-color" style="background:#c5e1a5;border-color:#33691e"></div> Nouvelles chambres</div>
+                <div class="legend-item"><div class="legend-color" style="background:#ce93d8;border-color:#7b1fa2"></div> SDB rénovée</div>
+                <div class="legend-item"><div class="legend-color" style="background:#fff59d;border-color:#f9a825"></div> Salle de jeux</div>
+                <div class="legend-item"><div class="legend-color" style="background:#e74c3c;border-radius:50%"></div> N° poste travaux</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PLAN EXTÉRIEUR                                                -->
+<!-- ============================================================ -->
+<section class="section" id="plan-exterieur">
+    <h2 class="section-title"><span class="icon">🌳</span> Plan schématique extérieur</h2>
+
+    <div class="plan-container">
+        <h3>Vue d'ensemble du terrain — Parcelles et aménagements projetés</h3>
+        <svg viewBox="0 0 800 550" class="plan-svg" xmlns="http://www.w3.org/2000/svg">
+            <!-- Fond -->
+            <rect x="0" y="0" width="800" height="550" fill="#f5f5f0" rx="8"/>
+
+            <!-- Parcelle 263 (propriété) -->
+            <rect x="300" y="60" width="280" height="260" fill="#e3f2fd" stroke="#1565c0" stroke-width="3" rx="4"/>
+            <text x="440" y="85" text-anchor="middle" font-size="14" font-weight="700" fill="#0d47a1">PARCELLE 263</text>
+            <text x="440" y="100" text-anchor="middle" font-size="10" fill="#1976d2">(propriété actuelle — zone U)</text>
+
+            <!-- Maison sur 263 -->
+            <rect x="350" y="120" width="200" height="140" fill="#fff" stroke="#2d3748" stroke-width="3" rx="3"/>
+            <text x="450" y="180" text-anchor="middle" font-size="16" font-weight="700" fill="#2d3748">🏠 MAISON</text>
+            <text x="450" y="200" text-anchor="middle" font-size="11" fill="#718096">RDC : 101 m² + Étage : 23 m²</text>
+
+            <!-- Piscine -->
+            <rect x="370" y="275" width="100" height="40" fill="#90caf9" stroke="#1565c0" stroke-width="2" rx="10"/>
+            <text x="420" y="300" text-anchor="middle" font-size="11" font-weight="700" fill="#0d47a1">🏊 Piscine</text>
+
+            <!-- Zone terrassement -->
+            <rect x="310" y="330" width="260" height="70" fill="#fff9c4" stroke="#f9a825" stroke-width="2" stroke-dasharray="8,4" rx="4"/>
+            <text x="440" y="365" text-anchor="middle" font-size="12" font-weight="700" fill="#e65100">TERRASSEMENT</text>
+            <text x="440" y="380" text-anchor="middle" font-size="10" fill="#ef6c00">80-120 m² (poste 8)</text>
+            <circle cx="555" cy="340" r="10" fill="#e74c3c" opacity="0.9"/>
+            <text x="555" y="344" text-anchor="middle" font-size="12" fill="white">8</text>
+
+            <!-- Parcelle AT 15 (terrain agricole) -->
+            <rect x="30" y="60" width="250" height="440" fill="#e8f5e9" stroke="#2e7d32" stroke-width="3" rx="4" stroke-dasharray="10,5"/>
+            <text x="155" y="85" text-anchor="middle" font-size="14" font-weight="700" fill="#1b5e20">PARCELLE AT 15</text>
+            <text x="155" y="102" text-anchor="middle" font-size="10" fill="#2e7d32">1 448 m² — Zone A (agricole)</text>
+            <text x="155" y="118" text-anchor="middle" font-size="10" fill="#c62828" font-weight="700">⚠️ NON CONSTRUCTIBLE</text>
+
+            <!-- Carport + Abri jardin sur AT 15 -->
+            <rect x="60" y="150" width="100" height="80" fill="#ffcc80" stroke="#e65100" stroke-width="2" rx="3"/>
+            <text x="110" y="185" text-anchor="middle" font-size="11" font-weight="700" fill="#bf360c">CARPORT</text>
+            <text x="110" y="200" text-anchor="middle" font-size="9" fill="#e64a19">~10-15 m²</text>
+            <circle cx="145" cy="158" r="10" fill="#e74c3c" opacity="0.9"/>
+            <text x="145" y="162" text-anchor="middle" font-size="12" fill="white">11</text>
+
+            <rect x="170" y="150" width="80" height="80" fill="#ffe0b2" stroke="#e65100" stroke-width="2" rx="3"/>
+            <text x="210" y="185" text-anchor="middle" font-size="10" font-weight="700" fill="#bf360c">ABRI</text>
+            <text x="210" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="#bf360c">JARDIN</text>
+            <text x="210" y="213" text-anchor="middle" font-size="9" fill="#e64a19">~10-15 m²</text>
+
+            <!-- Arbres à abattre -->
+            <circle cx="80" cy="290" r="18" fill="#81c784" stroke="#388e3c" stroke-width="2"/>
+            <text x="80" y="295" text-anchor="middle" font-size="18">🌳</text>
+            <circle cx="140" cy="330" r="18" fill="#81c784" stroke="#388e3c" stroke-width="2"/>
+            <text x="140" y="335" text-anchor="middle" font-size="18">🌳</text>
+            <circle cx="200" cy="280" r="18" fill="#81c784" stroke="#388e3c" stroke-width="2"/>
+            <text x="200" y="285" text-anchor="middle" font-size="18">🌳</text>
+            <circle cx="100" cy="380" r="18" fill="#81c784" stroke="#388e3c" stroke-width="2"/>
+            <text x="100" y="385" text-anchor="middle" font-size="18">🌳</text>
+            <text x="155" y="420" text-anchor="middle" font-size="10" fill="#c62828" font-weight="700">3-5 arbres à abattre (poste 6)</text>
+            <circle cx="200" cy="390" r="10" fill="#e74c3c" opacity="0.9"/>
+            <text x="200" y="394" text-anchor="middle" font-size="12" fill="white">6</text>
+
+            <!-- Haie à arracher (entre 263 et AT 15) -->
+            <line x1="290" y1="120" x2="290" y2="320" stroke="#4caf50" stroke-width="8" stroke-dasharray="3,5"/>
+            <text x="287" y="230" text-anchor="end" font-size="10" fill="#c62828" font-weight="700" transform="rotate(-90, 287, 230)">HAIE → ARRACHAGE (poste 7)</text>
+            <circle cx="290" cy="120" r="10" fill="#e74c3c" opacity="0.9"/>
+            <text x="290" y="124" text-anchor="middle" font-size="12" fill="white">7</text>
+
+            <!-- Enrochement -->
+            <rect x="280" y="400" width="100" height="30" fill="#bcaaa4" stroke="#5d4037" stroke-width="2" rx="2"/>
+            <text x="330" y="420" text-anchor="middle" font-size="10" font-weight="700" fill="#3e2723">ENROCHEMENT</text>
+            <text x="330" y="445" text-anchor="middle" font-size="9" fill="#5d4037">5-10 ml à casser (poste 9)</text>
+            <circle cx="370" cy="405" r="10" fill="#e74c3c" opacity="0.9"/>
+            <text x="370" y="409" text-anchor="middle" font-size="12" fill="white">9</text>
+
+            <!-- Parcelle 269 -->
+            <rect x="600" y="60" width="170" height="260" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="4"/>
+            <text x="685" y="85" text-anchor="middle" font-size="12" font-weight="700" fill="#4a148c">PARCELLE 269</text>
+            <text x="685" y="100" text-anchor="middle" font-size="10" fill="#7b1fa2">(voisin)</text>
+
+            <!-- Stockage vélos accolé à 269 -->
+            <rect x="575" y="160" width="30" height="50" fill="#b0bec5" stroke="#455a64" stroke-width="2" rx="2"/>
+            <text x="590" y="190" text-anchor="middle" font-size="8" font-weight="700" fill="#263238">🚲</text>
+            <circle cx="590" cy="155" r="8" fill="#e74c3c" opacity="0.9"/>
+            <text x="590" y="159" text-anchor="middle" font-size="10" fill="white">13</text>
+
+            <!-- Chemin accès -->
+            <rect x="310" y="420" width="280" height="30" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="1" rx="2"/>
+            <text x="450" y="440" text-anchor="middle" font-size="10" fill="#616161">CHEMIN D'ACCÈS (à élargir via enrochement)</text>
+
+            <!-- Impasse des Primevères -->
+            <rect x="100" y="510" width="600" height="30" fill="#cfd8dc" stroke="#78909c" stroke-width="2" rx="4"/>
+            <text x="400" y="530" text-anchor="middle" font-size="12" font-weight="700" fill="#37474f">IMPASSE DES PRIMEVÈRES</text>
+
+            <!-- Flèche Nord -->
+            <text x="740" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#2d3748">⬆ N</text>
+        </svg>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background:#e3f2fd;border-color:#1565c0"></div> Parcelle 263 (propriété)</div>
+            <div class="legend-item"><div class="legend-color" style="background:#e8f5e9;border-color:#2e7d32"></div> AT 15 (à acquérir)</div>
+            <div class="legend-item"><div class="legend-color" style="background:#ffcc80;border-color:#e65100"></div> Carport + Abri</div>
+            <div class="legend-item"><div class="legend-color" style="background:#fff9c4;border-color:#f9a825"></div> Terrassement</div>
+            <div class="legend-item"><div class="legend-color" style="background:#bcaaa4;border-color:#5d4037"></div> Enrochement</div>
+            <div class="legend-item"><div class="legend-color" style="background:#e74c3c;border-radius:50%"></div> N° poste travaux</div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- TRAVAUX INTÉRIEURS — DÉTAIL                                   -->
+<!-- ============================================================ -->
+<section class="section" id="interieur">
+    <h2 class="section-title"><span class="icon">🔨</span> Travaux intérieurs — Détail par poste</h2>
+
+    <!-- Poste 1 -->
+    <div class="card">
+        <div class="card-title">
+            1. Bureau → Chambre 3 + destruction bar
+            <span class="badge badge-int">INTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <p>Transformation du bureau actuel (13,32 m²) et du bar (5,52 m²) en une chambre unique (~18,8 m²) avec prise de surface sur la SAM.</p>
+            <ul>
+                <li><strong>Démolition bar :</strong> destruction du comptoir et du mobilier intégré, rebouchage sol</li>
+                <li><strong>Cloison :</strong> ajustement/dépose cloison entre bureau et bar pour unifier l'espace</li>
+                <li><strong>Prise sur SAM :</strong> modification cloison côté SAM pour agrandir la chambre</li>
+                <li><strong>Finitions :</strong> enduit, peinture, revêtement sol, plinthes, prises électriques</li>
+                <li><strong>Porte :</strong> pose d'une porte de chambre standard</li>
+            </ul>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">4 200 € — 7 000 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 10%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 2 -->
+    <div class="card">
+        <div class="card-title">
+            2. Réfection complète SDB RDC
+            <span class="badge badge-int">INTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <p>Rénovation totale de la salle de bains du RDC (5,14 m²) : passer de douche + simple vasque à baignoire + double vasque.</p>
+            <ul>
+                <li><strong>Dépose :</strong> démontage douche existante, vasque, carrelage murs et sol</li>
+                <li><strong>Plomberie :</strong> modification alimentation/évacuation pour baignoire + double vasque</li>
+                <li><strong>Baignoire :</strong> fourniture et pose (standard ou îlot selon espace)</li>
+                <li><strong>Double vasque :</strong> meuble 120 cm + 2 vasques + miroir + éclairage</li>
+                <li><strong>Carrelage :</strong> sol + murs (faïence murale ou carrelage grand format)</li>
+                <li><strong>Finitions :</strong> joints silicone, peinture plafond, VMC, sèche-serviettes</li>
+            </ul>
+            <div class="alert alert-info">
+                <span class="alert-icon">ℹ️</span>
+                <div>
+                    <div class="alert-title">Contrainte d'espace</div>
+                    5,14 m² est serré pour baignoire + double vasque. Prévoir une baignoire asymétrique (160×70/90 cm) ou sabot (120 cm) + meuble vasque compact 100-120 cm.
+                </div>
+            </div>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">7 300 € — 15 300 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 22%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 3 -->
+    <div class="card">
+        <div class="card-title">
+            3. Cloison salon actuel → Chambre Jules + Salle de jeux
+            <span class="badge badge-int">INTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <p>Division du salon actuel (19,40 m²) en deux espaces : chambre enfant (~10 m²) + salle de jeux (~9 m²).</p>
+            <ul>
+                <li><strong>Cloison :</strong> création mur de séparation en placo + isolation phonique (BA13 + laine minérale)</li>
+                <li><strong>Portes :</strong> 2 portes (1 par pièce) — accès depuis le hall</li>
+                <li><strong>Électricité :</strong> dédoublement du circuit, prises et points lumineux dans chaque pièce</li>
+                <li><strong>Finitions :</strong> enduit, peinture, plinthes</li>
+            </ul>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">4 900 € — 9 100 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 13%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 4 -->
+    <div class="card">
+        <div class="card-title">
+            4. Garage → Nouveau salon
+            <span class="badge badge-int">INTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <p>Transformation du garage (~28-30 m²) en espace de vie principal (salon/séjour). Travaux les plus conséquents.</p>
+            <ul>
+                <li><strong>Fermeture :</strong> remplacement porte de garage par baie vitrée ou mur + fenêtres</li>
+                <li><strong>Isolation :</strong> doublage murs (ITE ou ITI) + isolation sol (polyuréthane + chape)</li>
+                <li><strong>Sol :</strong> ragréage + revêtement (parquet, carrelage ou PVC)</li>
+                <li><strong>Plafond :</strong> faux plafond isolé (placo + laine de verre) avec spots LED</li>
+                <li><strong>Chauffage :</strong> extension circuit chauffage central ou pose radiateurs électriques</li>
+                <li><strong>Électricité :</strong> mise aux normes NF C 15-100 (prises, éclairage, réseau)</li>
+                <li><strong>Fenêtres :</strong> création éventuelle d'ouvertures supplémentaires</li>
+                <li><strong>Finitions :</strong> enduits, peinture complète murs et plafond</li>
+            </ul>
+            <div class="alert alert-warning">
+                <span class="alert-icon">📋</span>
+                <div>
+                    <div class="alert-title">Déclaration préalable</div>
+                    Changement de destination (garage → habitation) = déclaration préalable obligatoire en mairie. Si &gt; 20 m² de surface de plancher créée en zone U : simple DP. Si la surface totale après travaux dépasse 150 m² : recours architecte obligatoire.
+                </div>
+            </div>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">13 000 € — 24 500 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 35%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 5 -->
+    <div class="card">
+        <div class="card-title">
+            5. Ouverture cuisine ↔ salon + meuble entrée
+            <span class="badge badge-int">INTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <p>Création d'une ouverture entre la cuisine et le nouveau salon (ex-garage) pour un espace de vie ouvert + pose d'un meuble à gauche de la porte d'entrée.</p>
+            <ul>
+                <li><strong>Étude structure :</strong> diagnostic mur porteur obligatoire (BET structure)</li>
+                <li><strong>Ouverture mur porteur :</strong> pose IPN/poutre acier + étaiement temporaire</li>
+                <li><strong>Dimensionnement :</strong> ouverture ~2-3 m de large × 2,10 m de haut</li>
+                <li><strong>Finitions mur :</strong> enduit, peinture, habillage IPN</li>
+                <li><strong>Meuble entrée :</strong> meuble sur mesure ou semi-mesure, côté gauche porte</li>
+            </ul>
+            <div class="alert alert-danger">
+                <span class="alert-icon">⚠️</span>
+                <div>
+                    <div class="alert-title">Mur porteur — Point critique</div>
+                    Si le mur entre cuisine et garage est porteur : BET structure obligatoire (~500-1 500 €). L'IPN + pose professionnelle = 3 000 – 6 000 € à elle seule. Assurance décennale exigée.
+                </div>
+            </div>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">7 000 € — 13 800 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 20%"></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- TRAVAUX EXTÉRIEURS — DÉTAIL                                   -->
+<!-- ============================================================ -->
+<section class="section" id="exterieur">
+    <h2 class="section-title"><span class="icon">🌿</span> Travaux extérieurs — Détail par poste</h2>
+
+    <!-- Poste 6 -->
+    <div class="card">
+        <div class="card-title">
+            6. Abattage de 3 à 5 arbres
+            <span class="badge badge-ext">EXTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li><strong>Quantité :</strong> 3 à 5 arbres moyens (hauteur 5-15 m)</li>
+                <li>Abattage + dessouchage + évacuation des déchets</li>
+                <li>Prix unitaire : 350-1 100 € selon taille et accessibilité</li>
+                <li>Vérifier auprès de la mairie si des arbres sont classés (PLU ou EBC)</li>
+            </ul>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">1 800 € — 5 100 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 7%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 7 -->
+    <div class="card">
+        <div class="card-title">
+            7. Arrachage haie existante
+            <span class="badge badge-ext">EXTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li><strong>Nature :</strong> destruction de la haie existante en face du garage/nouveau séjour</li>
+                <li><strong>Emplacement :</strong> sur l'enrochement actuel, entre parcelle 263 et AT 15</li>
+                <li><strong>Objectif :</strong> améliorer la visibilité et l'accès au terrain AT 15</li>
+                <li><strong>Linéaire estimé :</strong> 15-20 mètres linéaires</li>
+                <li>Arrachage mécanique + évacuation</li>
+            </ul>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">1 125 € — 1 900 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 3%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 8 -->
+    <div class="card">
+        <div class="card-title">
+            8. Terrassement
+            <span class="badge badge-ext">EXTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li><strong>Surface :</strong> 80-120 m² (zone jaune sur le cadastre)</li>
+                <li><strong>Localisation :</strong> au-dessus de la piscine + côté terrain voisin gauche</li>
+                <li>Décaissement, nivellement, compactage</li>
+                <li>Évacuation de terre (~40-80 m³)</li>
+                <li>Prévoir drainage si nécessaire (terrain en pente)</li>
+            </ul>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">3 950 € — 8 700 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 12%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 9 -->
+    <div class="card">
+        <div class="card-title">
+            9. Destruction partielle enrochement
+            <span class="badge badge-ext">EXTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li><strong>Linéaire :</strong> 5 à 10 mètres linéaires</li>
+                <li><strong>Objectif :</strong> élargir le chemin d'accès au niveau du terrain voisin AT 15</li>
+                <li>Brise-roche hydraulique + évacuation des blocs</li>
+                <li>Éventuellement refaire un muret de soutènement réduit</li>
+            </ul>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">1 700 € — 4 600 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 7%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 11 -->
+    <div class="card">
+        <div class="card-title">
+            11. Carport adossé + Abri de jardin
+            <span class="badge badge-alert">⚠️ SOUS RÉSERVE</span>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li><strong>Carport :</strong> ~10-15 m², structure bois ou alu, adossé à l'abri de jardin</li>
+                <li><strong>Abri de jardin :</strong> ~10-15 m², bois traité, dalle béton</li>
+                <li><strong>Surface totale :</strong> ~25-33 m²</li>
+                <li><strong>Localisation prévue :</strong> sur parcelle AT 15 (terrain agricole)</li>
+            </ul>
+            <div class="alert alert-danger">
+                <span class="alert-icon">🚨</span>
+                <div>
+                    <div class="alert-title">ALERTE CONSTRUCTIBILITÉ — Zone A du PLU</div>
+                    <p>La parcelle AT 15 est en zone agricole (Zone A). En principe, <strong>aucune construction n'est autorisée</strong> sauf bâtiments nécessaires à une exploitation agricole. Le carport et l'abri risquent d'être refusés si construits sur AT 15.</p>
+                    <p style="margin-top:0.5rem"><strong>→ Consulter le service urbanisme de Lempdes AVANT l'achat.</strong></p>
+                </div>
+            </div>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">5 350 € — 12 900 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 18%"></div></div>
+        </div>
+    </div>
+
+    <!-- Poste 13 -->
+    <div class="card">
+        <div class="card-title">
+            13. Stockage vélos
+            <span class="badge badge-ext">EXTÉRIEUR</span>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li><strong>Emplacement :</strong> à gauche de la porte d'entrée de l'ex-garage (futur séjour), accolé à la parcelle 269</li>
+                <li>Abri vélos compact (coffre extérieur ou appentis ~3-5 m²)</li>
+                <li>Structure bois ou métal, sans fondation lourde</li>
+            </ul>
+        </div>
+        <div class="price-bar">
+            <span class="price-range">700 € — 1 900 €</span>
+            <div class="price-bar-visual"><div class="price-bar-fill" style="width: 2%"></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- TERRAIN AT 15 — ANALYSE DÉTAILLÉE                             -->
+<!-- ============================================================ -->
+<section class="section" id="terrain">
+    <h2 class="section-title"><span class="icon">🗺️</span> Acquisition terrain — Parcelle AT 15</h2>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-title">Fiche parcelle <span class="badge badge-terrain">AGRICOLE</span></div>
+            <div class="card-body">
+                <table class="summary-table">
+                    <tr><td><strong>Référence</strong></td><td>Section AT, n° 0015</td></tr>
+                    <tr><td><strong>Commune</strong></td><td>Lempdes (63193)</td></tr>
+                    <tr><td><strong>Contenance</strong></td><td>1 448 m² (0,1448 ha)</td></tr>
+                    <tr><td><strong>Zone PLU</strong></td><td>Zone A (agricole)</td></tr>
+                    <tr><td><strong>Constructibilité</strong></td><td style="color:#e74c3c;font-weight:700">NON CONSTRUCTIBLE</td></tr>
+                    <tr><td><strong>Source</strong></td><td>API apicarto.ign.fr (vérifié)</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Estimation de prix</div>
+            <div class="card-body">
+                <table class="summary-table">
+                    <tr><th>Scénario</th><th class="text-right">€/m²</th><th class="text-right">Total</th></tr>
+                    <tr><td>Valeur agricole pure (Limagne)</td><td class="text-right">~0,7 €</td><td class="text-right">~1 014 €</td></tr>
+                    <tr><td>Négociation amiable voisin</td><td class="text-right">2-3 €</td><td class="text-right">2 900 – 4 350 €</td></tr>
+                    <tr><td><strong>Réaliste (périurbain Clermont)</strong></td><td class="text-right"><strong>3-8 €</strong></td><td class="text-right"><strong>4 350 – 11 580 €</strong></td></tr>
+                    <tr><td>Frais de notaire (minimum + %)</td><td class="text-right">—</td><td class="text-right">1 500 – 2 500 €</td></tr>
+                    <tr class="subtotal-row"><td><strong>TOTAL TTC estimé</strong></td><td></td><td class="text-right"><strong>4 400 – 14 100 €</strong></td></tr>
+                </table>
+                <div class="alert alert-success" style="margin-top:1rem">
+                    <span class="alert-icon">💰</span>
+                    <div>
+                        <div class="alert-title">Économie vs terrain constructible</div>
+                        L'estimation initiale (constructible) était de 125 910 – 236 076 €. En terrain agricole : <strong>économie de 112 000 à 222 000 €</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Procédure d'achat — Étapes</div>
+        <div class="card-body">
+            <ol>
+                <li><strong>Consulter le PLU et le service urbanisme</strong> de Lempdes pour confirmer la zone et les droits à construire (carport/abri)</li>
+                <li><strong>Contacter le propriétaire</strong> de la parcelle AT 15 pour négociation amiable (gré à gré)</li>
+                <li><strong>Compromis de vente</strong> chez le notaire</li>
+                <li><strong>Notification SAFER</strong> (obligatoire pour terrain agricole) → délai de 2 mois pour réponse</li>
+                <li><strong>Acte authentique</strong> après purge du droit de préemption SAFER</li>
+                <li>Durée totale estimée : <strong>3-5 mois</strong></li>
+            </ol>
+            <div class="alert alert-info">
+                <span class="alert-icon">📝</span>
+                <div>
+                    <div class="alert-title">SAFER — Droit de préemption</div>
+                    La SAFER peut préempter tout terrain agricole. En pratique, pour une parcelle <1 500 m² en zone périurbaine, l'intervention est très rare. Le notaire gère la notification automatiquement.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">⚠️ Constructibilité — Solutions possibles</div>
+        <div class="card-body">
+            <table class="summary-table">
+                <tr><th>Solution</th><th>Faisabilité</th><th>Délai</th><th>Coût additionnel</th></tr>
+                <tr>
+                    <td>1. Regroupement parcellaire (AT 15 + 263) comme annexe d'habitation</td>
+                    <td>🟡 Variable selon commune</td>
+                    <td>2-6 mois</td>
+                    <td>~500-1 500 € (géomètre + notaire)</td>
+                </tr>
+                <tr>
+                    <td>2. Modification PLU (passage en zone U/AU)</td>
+                    <td>🔴 Difficile, long</td>
+                    <td>1-3 ans</td>
+                    <td>Variable</td>
+                </tr>
+                <tr>
+                    <td>3. STECAL en zone A (secteur limité)</td>
+                    <td>🟡 Si prévu au PLU</td>
+                    <td>0 (déjà en place ou non)</td>
+                    <td>0 €</td>
+                </tr>
+                <tr>
+                    <td>4. Construire carport sur parcelle 263 (constructible)</td>
+                    <td>🟢 Le plus sûr</td>
+                    <td>1-2 mois (DP)</td>
+                    <td>0 € additionnel</td>
+                </tr>
+                <tr>
+                    <td>5. Structures légères amovibles (&lt;5 m² sans fondation)</td>
+                    <td>🟠 Toléré mais fragile</td>
+                    <td>Immédiat</td>
+                    <td>0 €</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BUDGET GLOBAL CONSOLIDÉ                                       -->
+<!-- ============================================================ -->
+<section class="section" id="budget">
+    <h2 class="section-title"><span class="icon">💰</span> Budget global consolidé</h2>
+
+    <div class="card">
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>N°</th>
+                    <th>Poste de travaux</th>
+                    <th class="text-right">Bas</th>
+                    <th class="text-right">Haut</th>
+                    <th class="text-right">Médiane</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Intérieur -->
+                <tr><td>1</td><td>Bureau → Chambre 3 + destruction bar</td><td class="text-right">4 200 €</td><td class="text-right">7 000 €</td><td class="text-right">5 600 €</td></tr>
+                <tr><td>2</td><td>SDB RDC — baignoire + double vasque (5,14 m²)</td><td class="text-right">7 300 €</td><td class="text-right">15 300 €</td><td class="text-right">11 300 €</td></tr>
+                <tr><td>3</td><td>Cloison salon → chambre Jules + salle jeux</td><td class="text-right">4 900 €</td><td class="text-right">9 100 €</td><td class="text-right">7 000 €</td></tr>
+                <tr><td>4</td><td>Garage → Nouveau salon (~28-30 m²)</td><td class="text-right">13 000 €</td><td class="text-right">24 500 €</td><td class="text-right">18 750 €</td></tr>
+                <tr><td>5</td><td>Ouverture cuisine ↔ salon + meuble entrée</td><td class="text-right">7 000 €</td><td class="text-right">13 800 €</td><td class="text-right">10 400 €</td></tr>
+                <tr class="subtotal-row"><td></td><td><strong>Sous-total intérieur</strong></td><td class="text-right"><strong>36 400 €</strong></td><td class="text-right"><strong>69 700 €</strong></td><td class="text-right"><strong>53 050 €</strong></td></tr>
+
+                <!-- Extérieur -->
+                <tr><td>6</td><td>Abattage 3-5 arbres (5-15 m)</td><td class="text-right">1 800 €</td><td class="text-right">5 100 €</td><td class="text-right">3 450 €</td></tr>
+                <tr><td>7</td><td>Arrachage haie (15-20 ml)</td><td class="text-right">1 125 €</td><td class="text-right">1 900 €</td><td class="text-right">1 513 €</td></tr>
+                <tr><td>8</td><td>Terrassement (80-120 m²)</td><td class="text-right">3 950 €</td><td class="text-right">8 700 €</td><td class="text-right">6 325 €</td></tr>
+                <tr><td>9</td><td>Enrochement partiel (5-10 ml)</td><td class="text-right">1 700 €</td><td class="text-right">4 600 €</td><td class="text-right">3 150 €</td></tr>
+                <tr><td>10</td><td>Terrain AT 15 — 1 448 m² agricole (TTC notaire)</td><td class="text-right">4 400 €</td><td class="text-right">14 100 €</td><td class="text-right">9 250 €</td></tr>
+                <tr><td>11</td><td>Carport + abri jardin (~25-33 m²) ⚠️</td><td class="text-right">5 350 €</td><td class="text-right">12 900 €</td><td class="text-right">9 125 €</td></tr>
+                <tr><td>13</td><td>Stockage vélos</td><td class="text-right">700 €</td><td class="text-right">1 900 €</td><td class="text-right">1 300 €</td></tr>
+                <tr class="subtotal-row"><td></td><td><strong>Sous-total extérieur</strong></td><td class="text-right"><strong>19 025 €</strong></td><td class="text-right"><strong>49 200 €</strong></td><td class="text-right"><strong>34 113 €</strong></td></tr>
+
+                <!-- Imprévus -->
+                <tr><td></td><td>Maîtrise d'œuvre + assurance + imprévus (15-20%)</td><td class="text-right">10 000 €</td><td class="text-right">25 000 €</td><td class="text-right">17 500 €</td></tr>
+
+                <!-- Total -->
+                <tr class="total-row"><td></td><td><strong>TOTAL GLOBAL</strong></td><td class="text-right"><strong>65 425 €</strong></td><td class="text-right"><strong>143 900 €</strong></td><td class="text-right"><strong>104 663 €</strong></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert alert-info">
+        <span class="alert-icon">📌</span>
+        <div>
+            <div class="alert-title">Notes sur les estimations</div>
+            <ul>
+                <li>Prix TTC incluant fournitures et main-d'œuvre (tarifs indicatifs avril 2026, région Clermont-Ferrand)</li>
+                <li>Fourchette basse = standard / entrée de gamme. Fourchette haute = prestations qualitatives avec finitions soignées</li>
+                <li>Le poste 11 (carport + abri) est <strong>sous réserve de constructibilité</strong> sur la parcelle AT 15</li>
+                <li>Les postes 4 et 5 peuvent nécessiter une déclaration préalable ou un permis de construire</li>
+                <li>Prévoir des devis contradictoires (3 artisans minimum par corps de métier)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PLANNING PRÉVISIONNEL                                         -->
+<!-- ============================================================ -->
+<section class="section" id="planning">
+    <h2 class="section-title"><span class="icon">📅</span> Planning prévisionnel suggéré</h2>
+
+    <div class="card">
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 0 — Préparation administrative</div>
+                <div class="timeline-duration">Mois 1-3</div>
+                <div class="timeline-details">
+                    RDV service urbanisme Lempdes (PLU, constructibilité AT 15) • Consultation notaire pour achat terrain • Demandes devis artisans (3 min par poste) • Déclaration préalable poste 4 (garage → habitation)
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 1 — Achat terrain AT 15</div>
+                <div class="timeline-duration">Mois 2-5 (en parallèle)</div>
+                <div class="timeline-details">
+                    Compromis • Notification SAFER (2 mois) • Acte authentique
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 2 — Travaux extérieurs</div>
+                <div class="timeline-duration">Mois 4-6</div>
+                <div class="timeline-details">
+                    Abattage arbres (poste 6) • Arrachage haie (poste 7) • Terrassement (poste 8) • Enrochement (poste 9)
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 3 — Gros œuvre intérieur</div>
+                <div class="timeline-duration">Mois 5-8</div>
+                <div class="timeline-details">
+                    Ouverture mur porteur cuisine/salon (poste 5) • Transformation garage (poste 4) • Création cloisons (postes 1 + 3)
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 4 — Second œuvre + finitions</div>
+                <div class="timeline-duration">Mois 7-10</div>
+                <div class="timeline-details">
+                    Plomberie + électricité • SDB complète (poste 2) • Peinture, sols, menuiseries intérieures
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-phase">Phase 5 — Constructions extérieures</div>
+                <div class="timeline-duration">Mois 8-11</div>
+                <div class="timeline-details">
+                    Carport + abri jardin (poste 11) ⚠️ si autorisé • Stockage vélos (poste 13) • Aménagements paysagers finaux
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-warning" style="margin-top:1rem">
+            <span class="alert-icon">⏱️</span>
+            <div>
+                <div class="alert-title">Durée totale estimée : 10 à 12 mois</div>
+                Variable selon disponibilité des artisans, délais administratifs et météo (travaux extérieurs). Les phases se chevauchent partiellement.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ALERTES ET RECOMMANDATIONS                                    -->
+<!-- ============================================================ -->
+<section class="section" id="alertes">
+    <h2 class="section-title"><span class="icon">⚠️</span> Alertes et recommandations</h2>
+
+    <div class="alert alert-danger">
+        <span class="alert-icon">🚨</span>
+        <div>
+            <div class="alert-title">PRIORITÉ 1 — Constructibilité parcelle AT 15</div>
+            <p>Prendre RDV au service urbanisme de la mairie de Lempdes <strong>AVANT</strong> tout engagement d'achat. Demander explicitement :</p>
+            <ul>
+                <li>Le zonage exact de la parcelle AT 15 au PLU</li>
+                <li>Les possibilités de construction d'annexes (carport, abri) en zone A</li>
+                <li>La faisabilité d'un regroupement parcellaire avec la parcelle 263</li>
+                <li>L'existence de STECAL sur le secteur</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="alert alert-danger">
+        <span class="alert-icon">🚨</span>
+        <div>
+            <div class="alert-title">PRIORITÉ 2 — Mur porteur cuisine/garage</div>
+            <p>Faire intervenir un BET (Bureau d'Études Techniques) structure pour diagnostiquer le mur entre cuisine et garage <strong>AVANT</strong> tout percement. Impact potentiel : +3 000 à 6 000 € si mur porteur + IPN nécessaire.</p>
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <span class="alert-icon">📋</span>
+        <div>
+            <div class="alert-title">Autorisations administratives requises</div>
+            <ul>
+                <li><strong>Déclaration préalable (DP) :</strong> poste 4 (changement de destination garage → habitation) — obligatoire</li>
+                <li><strong>DP potentielle :</strong> carport &gt;5 m² et abri jardin &gt;5 m² (si autorisés)</li>
+                <li><strong>Recours architecte :</strong> si surface totale après travaux dépasse 150 m² de surface de plancher</li>
+                <li><strong>Notification SAFER :</strong> achat terrain agricole AT 15</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <span class="alert-icon">📋</span>
+        <div>
+            <div class="alert-title">Assurances et garanties</div>
+            <ul>
+                <li>Exiger l'attestation d'assurance <strong>décennale</strong> de chaque artisan</li>
+                <li>Souscrire une assurance <strong>dommages-ouvrage</strong> (DO) — fortement recommandé pour le gros œuvre</li>
+                <li>Conserver toutes les factures pour la déclaration de plus-value en cas de revente</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <span class="alert-icon">💡</span>
+        <div>
+            <div class="alert-title">Aides financières possibles</div>
+            <ul>
+                <li><strong>MaPrimeRénov' :</strong> si isolation thermique incluse dans la transformation du garage (poste 4)</li>
+                <li><strong>TVA réduite 10% :</strong> applicable sur les travaux de rénovation (maison &gt;2 ans) — économie vs 20%</li>
+                <li><strong>Éco-PTZ :</strong> si bouquet de travaux d'amélioration énergétique</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SOURCES                                                       -->
+<!-- ============================================================ -->
+<section class="section" id="sources">
+    <h2 class="section-title"><span class="icon">📚</span> Sources et méthodologie</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="summary-table">
+                <tr><th>Source</th><th>Données utilisées</th><th>Date</th></tr>
+                <tr><td>AlloJardin.com</td><td>Tarifs terrassement, abattage arbres, taille/arrachage haie</td><td>2026</td></tr>
+                <tr><td>Prix-Pose.com</td><td>Prix carport, garage, ouverture mur porteur, abri jardin</td><td>2025-2026</td></tr>
+                <tr><td>MeilleursAgents.com</td><td>Prix m² terrain constructible Lempdes (2 400 €/m² maison)</td><td>Avril 2026</td></tr>
+                <tr><td>API apicarto.ign.fr</td><td>Données cadastrales parcelle AT 15 (contenance, code INSEE)</td><td>2026</td></tr>
+                <tr><td>Barème Agreste/SAFER</td><td>Prix terres agricoles Puy-de-Dôme / Limagne (~8-12 K€/ha)</td><td>2024 (lissé 2020-2022)</td></tr>
+                <tr><td>Plans du propriétaire</td><td>Surfaces pièces, HSP, configuration RDC + étage</td><td>2026</td></tr>
+            </table>
+            <p style="margin-top:1rem;font-size:0.85rem;color:var(--text-light)">
+                <strong>Avertissement :</strong> ce rapport fournit des estimations indicatives basées sur des moyennes de marché. Les montants réels dépendront des devis artisans, des contraintes techniques découvertes en chantier, et des choix de matériaux/finitions. Les plans schématiques sont des représentations simplifiées non cotées et ne se substituent pas à des plans d'architecte.
+            </p>
+        </div>
+    </div>
+</section>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- FOOTER                                                        -->
+<!-- ============================================================ -->
+<div class="footer">
+    <p><strong>Rapport généré par Assistant Matanne</strong> — 14 avril 2026</p>
+    <p>12 Impasse des Primevères, 63370 Lempdes — Budget médian estimé : ~105 000 €</p>
+    <p style="margin-top:0.5rem;opacity:0.7">Ce document est un outil d'aide à la décision. Consulter des professionnels qualifiés pour la mise en œuvre.</p>
+</div>
+
+</body>
+</html>

@@ -256,6 +256,7 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     ingredients: list[IngredientResponse] = Field(default_factory=list)
     etapes: list[EtapeResponse] = Field(default_factory=list)
     est_favori: bool = False
+    genere_par_ia: bool = False
     url_source: str | None = Field(None, max_length=500)
     image_url: str | None = None
     compatible_cookeo: bool = False

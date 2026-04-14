@@ -227,11 +227,13 @@ async def obtenir_planning_semaine(
                 }
             )
             recettes_map: dict[int, str] = {}
+            genere_par_ia_map: dict[int, bool] = {}
             if recette_ids:
-                for rec in session.query(Recette.id, Recette.nom).filter(
+                for rec in session.query(Recette.id, Recette.nom, Recette.genere_par_ia).filter(
                     Recette.id.in_(recette_ids)
                 ):
                     recettes_map[rec.id] = rec.nom
+                    genere_par_ia_map[rec.id] = bool(rec.genere_par_ia)
 
             # Récupérer l'ID du planning actif (non archivé) pour la période
             planning_db = (
@@ -289,6 +291,7 @@ async def obtenir_planning_semaine(
                         "type_repas": type_repas,
                         "recette_id": r.recette_id,
                         "recette_nom": recette_nom,
+                        "genere_par_ia": genere_par_ia_map.get(r.recette_id, False) if r.recette_id else False,
                         "notes": getattr(r, "notes", None),
                         "entree": getattr(r, "entree", None),
                         "entree_recette_id": getattr(r, "entree_recette_id", None),
@@ -1313,6 +1316,7 @@ async def generer_planning_ia(
                         "recette_nom": recette_nom,
                         "notes": getattr(r, "notes", None),
                         "nutri_score": entry.get("nutri_score"),
+                        "genere_par_ia": bool(getattr(rec, "genere_par_ia", False)) if rec else False,
                         "entree": getattr(r, "entree", None),
                         "entree_recette_id": getattr(r, "entree_recette_id", None),
                         "entree_recette_nom": rec_entree.nom if rec_entree else None,
@@ -1505,6 +1509,7 @@ async def obtenir_suggestions_rapides(
                         "description": r.description,
                         "temps_total": (r.temps_preparation or 0) + (r.temps_cuisson or 0),
                         "categorie": r.categorie,
+                        "genere_par_ia": getattr(r, "genere_par_ia", False) or False,
                     }
                     for r in recettes
                 ],

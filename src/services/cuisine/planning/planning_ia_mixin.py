@@ -47,14 +47,14 @@ class PlanningIAGenerationMixin:
     # ═══════════════════════════════════════════════════════════
 
     @staticmethod
-    def _trouver_ou_creer_recette(db: Session, nom: str) -> int:
+    def _trouver_ou_creer_recette(db: Session, nom: str, categorie: str = "Plat") -> int:
         """Retourne l'id d'une recette existante (lookup insensible à la casse)
         ou crée un stub minimal si elle n'existe pas encore."""
         from src.core.models.recettes import Recette
 
         recette = db.query(Recette).filter(func.lower(Recette.nom) == nom.lower()).first()
         if recette is None:
-            recette = Recette(nom=nom, temps_preparation=30, categorie="Plat")
+            recette = Recette(nom=nom, temps_preparation=30, categorie=categorie)
             db.add(recette)
             db.flush()
         return recette.id
@@ -341,7 +341,7 @@ RULES:
             # Petit-déjeuner (optionnel selon ce que l'IA a fourni)
             if jour_data.petit_dejeuner:
                 recette_pdj_id = (
-                    self._trouver_ou_creer_recette(db, jour_data.petit_dejeuner)
+                    self._trouver_ou_creer_recette(db, jour_data.petit_dejeuner, "Petit-déjeuner")
                     if jour_data.petit_dejeuner_est_recette
                     else None
                 )
@@ -356,14 +356,14 @@ RULES:
                 )
 
             # Déjeuner — plat = toujours une recette stub
-            recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner)
+            recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner, "Plat")
             entree_dej_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.dejeuner_entree)
+                self._trouver_ou_creer_recette(db, jour_data.dejeuner_entree, "Entrée")
                 if jour_data.dejeuner_entree and jour_data.dejeuner_entree_est_recette
                 else None
             )
             dessert_dej_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.dejeuner_dessert)
+                self._trouver_ou_creer_recette(db, jour_data.dejeuner_dessert, "Dessert")
                 if jour_data.dejeuner_dessert and jour_data.dejeuner_dessert_est_recette
                 else None
             )
@@ -389,7 +389,7 @@ RULES:
                 jour_data.gouter = "Fruit de saison"
             if jour_data.gouter:
                 recette_gouter_id = (
-                    self._trouver_ou_creer_recette(db, jour_data.gouter)
+                    self._trouver_ou_creer_recette(db, jour_data.gouter, "Goûter")
                     if jour_data.gouter_est_recette
                     else None
                 )
@@ -404,14 +404,14 @@ RULES:
                 )
 
             # Dîner — plat = toujours une recette stub
-            recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner)
+            recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner, "Plat")
             entree_din_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.diner_entree)
+                self._trouver_ou_creer_recette(db, jour_data.diner_entree, "Entrée")
                 if jour_data.diner_entree and jour_data.diner_entree_est_recette
                 else None
             )
             dessert_din_recette_id = (
-                self._trouver_ou_creer_recette(db, jour_data.diner_dessert)
+                self._trouver_ou_creer_recette(db, jour_data.diner_dessert, "Dessert")
                 if jour_data.diner_dessert and jour_data.diner_dessert_est_recette
                 else None
             )

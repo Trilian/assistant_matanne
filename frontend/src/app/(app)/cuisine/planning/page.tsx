@@ -290,6 +290,14 @@ function CarteRepasDraggable({
               </span>
             )}
             {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
+            {repas.genere_par_ia && (
+              <span
+                title="Recette générée par l'IA"
+                className="inline-flex items-center text-[11px]"
+              >
+                🤖
+              </span>
+            )}
             {repas.est_reste && (
               <span
                 title={repas.reste_description ?? "Reste réchauffé"}
@@ -673,7 +681,8 @@ export default function PagePlanning() {
         }
 
         invalider(["planning"]);
-        invalider(["flux", "cuisine"]);
+        // Note: le flux est déjà pré-peuplé via setQueryData ci-dessus.
+        // L'invalidation sera faite par validerBrouillonPlanning.onSuccess.
 
         if (!resultat.genere_par_ia) {
           const msg = "Le planning a été créé sans IA. Réessayez ou vérifiez la clé Mistral.";

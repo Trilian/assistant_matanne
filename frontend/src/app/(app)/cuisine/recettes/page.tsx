@@ -624,6 +624,13 @@ export default function PageRecettes() {
                     {/* Appareils compatibles */}
                     <ApplianceBadges recette={recette} />
 
+                    {/* Badge IA */}
+                    {recette.genere_par_ia && (
+                      <Badge variant="outline" className="text-[10px] gap-0.5 px-1 py-0 text-purple-600 border-purple-300">
+                        🤖 Générée par l'IA
+                      </Badge>
+                    )}
+
                     {/* Badge saisonnalité */}
                     {idsSaison.has(recette.id) && (
                       <Badge variant="outline" className="text-[10px] gap-0.5 px-1 py-0 text-green-600 border-green-300">

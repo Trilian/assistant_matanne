@@ -174,6 +174,11 @@ export default function PageDetailRecette({
               </Badge>
             ))}
             <BadgeEcoscore grade={ecoScore?.score} />
+            {recette.genere_par_ia && (
+              <Badge variant="outline" className="text-purple-600 border-purple-300">
+                🤖 Générée par l'IA
+              </Badge>
+            )}
           </div>
         </div>
 
