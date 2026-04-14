@@ -27,7 +27,6 @@ import {
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
-import { Progress } from "@/composants/ui/progress";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { FriseFluxCuisine } from "@/composants/cuisine/frise-flux-cuisine";
 import {
@@ -322,53 +321,6 @@ function ContenuMaSemaine() {
         progression={progression}
         onSelectionEtape={setEtapeActuelle}
       />
-
-      {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-medium">
-            Étape {etapeActuelle + 1} sur {ETAPES.length}
-          </span>
-          <span className="text-muted-foreground">{Math.round(progression)}%</span>
-        </div>
-        <Progress value={progression} className="h-2" />
-      </div>
-
-      {/* Stepper Navigation */}
-      <div className="flex items-center justify-between">
-        {ETAPES.map((e, idx) => {
-          const Icone = e.icone;
-          const estActif = idx === etapeActuelle;
-          const estComplete = idx < etapeActuelle;
-          return (
-            <div
-              key={e.id}
-              className="flex flex-col items-center gap-2 flex-1"
-            >
-              <button
-                onClick={() => setEtapeActuelle(idx)}
-                title={e.titre}
-                className={`rounded-full p-3 transition-colors ${
-                  estActif
-                    ? "bg-primary text-primary-foreground"
-                    : estComplete
-                      ? "bg-green-600 text-white"
-                      : "bg-muted text-muted-foreground"
-                }`}
-              >
-                <Icone className="h-5 w-5" />
-              </button>
-              <span
-                className={`text-xs text-center ${
-                  estActif ? "font-medium" : "text-muted-foreground"
-                }`}
-              >
-                {e.titre.replace(/^.+ /, "")}
-              </span>
-            </div>
-          );
-        })}
-      </div>
 
       {/* Contenu de l'étape */}
       <Card>

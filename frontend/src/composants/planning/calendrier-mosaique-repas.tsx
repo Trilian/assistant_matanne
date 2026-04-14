@@ -6,10 +6,17 @@ import { cn } from "@/bibliotheque/utils";
 import type { RepasPlanning, TypeRepas } from "@/types/planning";
 
 const COULEUR_TYPE: Record<TypeRepas, string> = {
-  petit_dejeuner: "bg-amber-100 text-amber-900 dark:bg-amber-950/30 dark:text-amber-100",
-  dejeuner: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100",
-  gouter: "bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-950/30 dark:text-fuchsia-100",
-  diner: "bg-blue-100 text-blue-900 dark:bg-blue-950/30 dark:text-blue-100",
+  petit_dejeuner: "bg-amber-200 text-amber-950 dark:bg-amber-900/50 dark:text-amber-100",
+  dejeuner:       "bg-emerald-200 text-emerald-950 dark:bg-emerald-900/50 dark:text-emerald-100",
+  gouter:         "bg-pink-200 text-pink-950 dark:bg-pink-900/50 dark:text-pink-100",
+  diner:          "bg-indigo-200 text-indigo-950 dark:bg-indigo-900/50 dark:text-indigo-100",
+};
+
+const BORDURE_TYPE: Record<TypeRepas, string> = {
+  petit_dejeuner: "border-l-[3px] border-amber-500",
+  dejeuner:       "border-l-[3px] border-emerald-600",
+  gouter:         "border-l-[3px] border-pink-500",
+  diner:          "border-l-[3px] border-indigo-500",
 };
 
 const LABEL_TYPE: Record<TypeRepas, string> = {
@@ -26,11 +33,19 @@ const TYPES: TypeRepas[] = ["petit_dejeuner", "dejeuner", "gouter", "diner"];
 type CategorieAlimentaire = "viande" | "poisson" | "vegetal" | "feculent" | "autre";
 
 const COULEUR_CATEGORIE: Record<CategorieAlimentaire, string> = {
-  viande: "bg-red-200 text-red-900 dark:bg-red-950/40 dark:text-red-200",
-  poisson: "bg-blue-200 text-blue-900 dark:bg-blue-950/40 dark:text-blue-200",
-  vegetal: "bg-green-200 text-green-900 dark:bg-green-950/40 dark:text-green-200",
-  feculent: "bg-orange-200 text-orange-900 dark:bg-orange-950/40 dark:text-orange-200",
-  autre: "bg-slate-100 text-slate-700 dark:bg-slate-800/40 dark:text-slate-300",
+  viande:   "bg-rose-200 text-rose-950 dark:bg-rose-900/50 dark:text-rose-100",
+  poisson:  "bg-cyan-200 text-cyan-950 dark:bg-cyan-900/50 dark:text-cyan-100",
+  vegetal:  "bg-lime-200 text-lime-950 dark:bg-lime-900/50 dark:text-lime-100",
+  feculent: "bg-yellow-200 text-yellow-950 dark:bg-yellow-900/50 dark:text-yellow-100",
+  autre:    "bg-slate-200 text-slate-700 dark:bg-slate-700/40 dark:text-slate-300",
+};
+
+const BORDURE_CATEGORIE: Record<CategorieAlimentaire, string> = {
+  viande:   "border-l-[3px] border-rose-500",
+  poisson:  "border-l-[3px] border-cyan-500",
+  vegetal:  "border-l-[3px] border-lime-600",
+  feculent: "border-l-[3px] border-yellow-500",
+  autre:    "border-l-[3px] border-slate-400",
 };
 
 const LABEL_CATEGORIE: Record<CategorieAlimentaire, string> = {
@@ -124,7 +139,7 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
           {dates.map((date) => {
             const repasJour = repasParJour[date] ?? [];
             return (
-              <div key={date} className="rounded-lg border p-2.5">
+              <div key={date} className="overflow-hidden rounded-lg border p-2.5">
                 <p className="mb-2 text-xs font-semibold text-muted-foreground">
                   {new Date(date).toLocaleDateString("fr-FR", {
                     weekday: "short",
@@ -142,12 +157,12 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
                       <div
                         key={`${date}-${type}`}
                         className={cn(
-                          "relative overflow-hidden rounded-md px-2 py-1.5 text-[11px]",
+                          "relative isolate overflow-hidden rounded-md px-2 py-1.5 text-[11px]",
                           mode === "nutrition" && repas && categorie
-                            ? COULEUR_CATEGORIE[categorie]
+                            ? cn(COULEUR_CATEGORIE[categorie], BORDURE_CATEGORIE[categorie])
                             : repas && mode === "repas"
                               ? "text-white"
-                              : COULEUR_TYPE[type]
+                              : cn(COULEUR_TYPE[type], BORDURE_TYPE[type])
                         )}
                         title={repas?.recette_nom || repas?.notes || `${LABEL_TYPE[type]} non planifié`}
                       >
@@ -155,16 +170,16 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
                           <img
                             src={vignette}
                             alt={`Vignette recette ${repas.recette_nom ?? repas.notes ?? LABEL_TYPE[type]}`}
-                            className="absolute inset-0 h-full w-full object-cover"
+                            className="absolute inset-0 z-0 h-full w-full object-cover"
                             loading="lazy"
                           />
                         )}
 
                         {repas && mode === "repas" && (
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/45 to-black/20" />
+                          <div className="absolute inset-0 z-[1] bg-gradient-to-t from-black/70 via-black/45 to-black/20" />
                         )}
 
-                        <div className="relative">
+                        <div className="relative z-[2]">
                           <p className="font-semibold">{LABEL_TYPE[type]}</p>
                           <p className="truncate opacity-90">{repas?.recette_nom || repas?.notes || "Non planifié"}</p>
                           {repas && (type === "dejeuner" || type === "diner") &&

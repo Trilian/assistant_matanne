@@ -92,7 +92,7 @@ import { utiliserWebSocket } from "@/crochets/utiliser-websocket";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
-import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
+import { obtenirFluxCuisine, type FluxCuisine } from "@/bibliotheque/api/ia-bridges";
 import {
   analyserVarietePlanningRepas,
   optimiserNutritionPlanningRepas,
@@ -768,6 +768,11 @@ export default function PagePlanning() {
     (planningId: number) => validerPlanning(planningId),
     {
       onSuccess: () => {
+        // Fermeture immédiate du bandeau sans attendre le refetch.
+        const fluxKey = ["flux", "cuisine", planning?.planning_id ? String(planning.planning_id) : "courant"];
+        queryClient.setQueryData(fluxKey, (old: FluxCuisine | undefined) =>
+          old?.etape_actuelle === "valider_planning" ? { ...old, etape_actuelle: "generer_courses" } : old
+        );
         invalider(["planning"]);
         invalider(["flux", "cuisine"]);
         toast.success("Planning validé, vous pouvez confirmer la liste de courses ensuite.");
@@ -1282,7 +1287,7 @@ export default function PagePlanning() {
             <div>
               <p className="text-sm font-semibold text-amber-900">Brouillon planning en attente de validation</p>
               <p className="text-xs text-amber-800/90">
-                Validez ce brouillon pour debloquer la generation et la confirmation des courses.
+                Validez ce brouillon pour débloquer la génération et la confirmation des courses.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1311,7 +1316,7 @@ export default function PagePlanning() {
                 onClick={() => regenererBrouillonPlanning(fluxCuisine.planning!.id)}
                 disabled={enValidationPlanning || enRegenerationPlanning}
               >
-                {enRegenerationPlanning ? "Regeneration..." : "Regenerer"}
+                {enRegenerationPlanning ? "Régénération…" : "Régénérer"}
               </Button>
             </div>
           </CardContent>

@@ -333,38 +333,77 @@ async def _traiter_callback_planning(
         try:
 
             def _valider():
+                from datetime import date, timedelta
+
                 from src.core.models.planning import Planning
 
                 with executer_avec_session() as session:
+                    planning = None
+
+                    # Tenter de cibler le planning demandé s'il est encore brouillon.
                     if planning_id:
                         planning = (
                             session.query(Planning).filter(Planning.id == planning_id).first()
                         )
-                    else:
+                        if planning:
+                            if planning.etat in ("valide", "actif"):
+                                # Le planning est déjà validé — on considère c'est un succès.
+                                return {
+                                    "message": "Planning déjà validé",
+                                    "id": planning.id,
+                                    "status": 200,
+                                    "deja_valide": True,
+                                }
+                            if planning.etat != "brouillon":
+                                # Planning archivé ou état inattendu → chercher le brouillon courant.
+                                planning = None
+
+                    # Fallback : dernier brouillon de la semaine en cours.
+                    if not planning:
+                        aujourd_hui = date.today()
+                        lundi = aujourd_hui - timedelta(days=aujourd_hui.weekday())
                         planning = (
-                            session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
+                            session.query(Planning)
+                            .filter(
+                                Planning.semaine_debut >= lundi,
+                                Planning.etat == "brouillon",
+                            )
+                            .order_by(Planning.semaine_debut.desc(), Planning.id.desc())
+                            .first()
                         )
 
                     if not planning:
-                        return {"error": "Planning non trouvé", "status": 404}
-                    if planning.etat != "brouillon":
-                        return {"error": f"Planning déjà {planning.etat}", "status": 409}
+                        return {
+                            "error": "Aucun brouillon de planning pour cette semaine",
+                            "status": 404,
+                        }
+
                     planning.etat = "valide"
                     session.commit()
-                    return {"message": "Planning validé", "id": planning.id, "status": 200}
+                    return {
+                        "message": "Planning validé",
+                        "id": planning.id,
+                        "status": 200,
+                        "deja_valide": False,
+                    }
 
             result = await executer_async(_valider)
             if result.get("status") == 200:
-                await repondre_callback_query(
-                    callback_query_id, "✅ Planning validé!", show_alert=False
-                )
-                if message_id:
-                    await modifier_message(
-                        chat_id,
-                        message_id,
-                        "✅ <b>Planning validé</b>\n\nVotre planning a été validé. Vous pouvez maintenant générer la liste de courses.",
-                        boutons=None,
+                if result.get("deja_valide"):
+                    await repondre_callback_query(
+                        callback_query_id, "✅ Planning déjà validé !", show_alert=False
                     )
+                else:
+                    await repondre_callback_query(
+                        callback_query_id, "✅ Planning validé !", show_alert=False
+                    )
+                    if message_id:
+                        await modifier_message(
+                            chat_id,
+                            message_id,
+                            "✅ <b>Planning validé</b>\n\nVotre planning a été validé. Vous pouvez maintenant générer la liste de courses.",
+                            boutons=None,
+                        )
             else:
                 await repondre_callback_query(
                     callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True

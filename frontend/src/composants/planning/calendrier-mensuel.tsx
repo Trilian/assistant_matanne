@@ -65,7 +65,7 @@ export function CalendrierMensuel({ mois, parJour }: CalendrierMensuelProps) {
         <div className="grid grid-cols-7 gap-1">
           {cellules.map((d, idx) => {
             if (!d) {
-              return <div key={`empty-${idx}`} className="h-24 rounded-md bg-muted/30" />;
+              return <div key={`empty-${idx}`} className="min-h-28 rounded-md bg-muted/30" />;
             }
 
             const key = formatJour(d);
@@ -75,7 +75,7 @@ export function CalendrierMensuel({ mois, parJour }: CalendrierMensuelProps) {
             return (
               <div
                 key={key}
-                className={`h-24 rounded-md border p-1.5 overflow-hidden ${aujourdHui ? "border-primary" : "border-border"}`}
+                className={`min-h-28 rounded-md border p-1.5 overflow-hidden ${aujourdHui ? "border-primary" : "border-border"}`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold">{d.getDate()}</span>
@@ -86,13 +86,13 @@ export function CalendrierMensuel({ mois, parJour }: CalendrierMensuelProps) {
                   )}
                 </div>
                 <div className="mt-1 space-y-1">
-                  {repas.slice(0, 2).map((r) => (
-                    <p key={`${r.id}-${r.type_repas}`} className="text-[10px] leading-tight truncate">
+                  {repas.slice(0, 3).map((r) => (
+                    <p key={`${r.id}-${r.type_repas}`} className="text-[10px] leading-tight truncate" title={r.recette_nom || r.notes || "Repas"}>
                       {badgeType(r.type_repas)} {r.recette_nom || r.notes || "Repas"}
                     </p>
                   ))}
-                  {repas.length > 2 && (
-                    <p className="text-[10px] text-muted-foreground">+{repas.length - 2}</p>
+                  {repas.length > 3 && (
+                    <p className="text-[10px] text-muted-foreground">+{repas.length - 3}</p>
                   )}
                 </div>
               </div>

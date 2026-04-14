@@ -405,6 +405,9 @@ export function utiliserPageCourses() {
     () => validerCourses(listeSelectionnee!),
     {
       onSuccess: () => {
+        queryClient.setQueryData(["courses", String(listeSelectionnee)], (old: ListeCourses | undefined) =>
+          old ? { ...old, etat: "terminee" } : old,
+        );
         invalider(["courses"]);
         invalider(["inventaire"]);
         toast.success("Courses validées ! Stock mis à jour.");
@@ -418,6 +421,9 @@ export function utiliserPageCourses() {
     {
       onSuccess: async () => {
         const idListe = listeSelectionnee;
+        queryClient.setQueryData(["courses", String(idListe)], (old: ListeCourses | undefined) =>
+          old ? { ...old, etat: "active" } : old,
+        );
         invalider(["courses"]);
         toast.success("Liste confirmée, vous pouvez maintenant cocher vos achats.");
 

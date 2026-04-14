@@ -873,6 +873,7 @@ async def generer_depuis_planning(
         RecetteIngredient,
     )
     from src.core.models.planning import Repas
+    from src.core.constants import CATEGORIE_VERS_MAGASIN
     from src.services.cuisine.planning.agregation import (
         aggregate_ingredients,
         sort_ingredients_by_rayon,
@@ -1010,12 +1011,15 @@ async def generer_depuis_planning(
                     session.add(ingredient)
                     session.flush()
 
+                rayon_article = art.get("rayon")
+                magasin_article = CATEGORIE_VERS_MAGASIN.get((rayon_article or "").lower()) if rayon_article else None
                 session.add(
                     ArticleCourses(
                         liste_id=liste.id,
                         ingredient_id=ingredient.id,
                         quantite_necessaire=art["quantite"],
-                        rayon_magasin=art.get("rayon"),
+                        rayon_magasin=rayon_article,
+                        magasin_cible=magasin_article,
                         priorite="moyenne",
                         suggere_par_ia=False,
                     )

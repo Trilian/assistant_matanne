@@ -5,7 +5,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { cn } from "@/bibliotheque/utils";
 import { Badge } from "@/composants/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Progress } from "@/composants/ui/progress";
 
 export interface EtapeFriseFluxCuisine {
@@ -43,20 +43,16 @@ export function FriseFluxCuisine({
 
   return (
     <Card className="border-primary/10 bg-gradient-to-br from-primary/5 via-background to-emerald-500/5">
-      <CardHeader className="pb-3">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <CardTitle>{titre}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-          <Badge variant="secondary">{Math.round(progressionNormalisee)}% du parcours</Badge>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-base">{titre}</CardTitle>
+          <Badge variant="secondary" className="shrink-0 text-xs">{Math.round(progressionNormalisee)}%</Badge>
         </div>
+        <Progress value={progressionNormalisee} className="h-1.5 mt-1" />
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <Progress value={progressionNormalisee} className="h-2" />
-
-        <div className="grid gap-3 xl:grid-cols-4">
+      <CardContent className="pt-0">
+        <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
           {etapes.map((etape, index) => {
             const statut = index < etapeActive ? "termine" : index === etapeActive ? "actif" : "a_venir";
             const estActif = statut === "actif";
@@ -74,40 +70,48 @@ export function FriseFluxCuisine({
                   aria-current={estActif ? "step" : undefined}
                   onClick={() => onSelectionEtape?.(index)}
                   className={cn(
-                    "w-full rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm",
+                    "w-full rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm",
                     estActif && "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20",
                     estTermine && "border-emerald-200 bg-emerald-50/60 dark:border-emerald-900 dark:bg-emerald-950/20",
                     !estActif && !estTermine && "border-dashed bg-background/80"
                   )}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2">
                     <div
                       className={cn(
-                        "mt-0.5 rounded-full p-2",
+                        "mt-0.5 shrink-0 rounded-full p-1.5",
                         estActif && "bg-primary text-primary-foreground",
                         estTermine && "bg-emerald-600 text-white",
                         !estActif && !estTermine && "bg-muted text-muted-foreground"
                       )}
                     >
-                      {estTermine ? <CheckCircle2 className="h-4 w-4" /> : <Icone className="h-4 w-4" />}
+                      {estTermine ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Icone className="h-3.5 w-3.5" />}
                     </div>
 
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold">{etape.titre}</p>
-                        <Badge variant={estActif ? "default" : estTermine ? "secondary" : "outline"}>
-                          {estActif ? "En cours" : estTermine ? "Terminé" : "À venir"}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="text-xs font-semibold leading-tight">{etape.titre.replace(/^[\p{Emoji}\s]+/u, "")}</p>
+                        <Badge
+                          variant={estActif ? "default" : estTermine ? "secondary" : "outline"}
+                          className="h-4 px-1.5 text-[10px]"
+                        >
+                          {estActif ? "En cours" : estTermine ? "✓" : "—"}
                         </Badge>
                       </div>
 
-                      <p className="text-xs text-muted-foreground">{etape.description}</p>
-
-                      {etape.resume && <p className="pt-1 text-sm font-medium">{etape.resume}</p>}
+                      {etape.resume && (
+                        <p className={cn(
+                          "mt-1 text-xs font-medium leading-snug",
+                          estTermine && "text-emerald-700 dark:text-emerald-400"
+                        )}>
+                          {etape.resume}
+                        </p>
+                      )}
 
                       {etape.meta && (
                         <p
                           className={cn(
-                            "text-[11px]",
+                            "mt-0.5 text-[11px] leading-snug",
                             etape.alerte ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"
                           )}
                         >

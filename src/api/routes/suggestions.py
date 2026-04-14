@@ -60,6 +60,19 @@ def _detecter_type_repas(contexte: str) -> str:
         return "petit_dejeuner"
     if any(k in c for k in ("midi", "dejeuner", "déjeuner", "lunch")):
         return "dejeuner"
+    if any(k in c for k in ("goûter", "gouter", "snack", "quatre-heure", "quatre heure")):
+        return "gouter"
+    if any(
+        k in c
+        for k in (
+            "dessert", "gâteau", "gateau", "tarte", "compote", "mousse",
+            "crème", "creme", "flan", "clafoutis", "tiramisu", "brownie",
+            "muffin", "cookie", "biscuit", "sorbet", "glace", "fondant",
+            "cheesecake", "cake", "yaourt", "charlotte", "île flottante",
+            "panna cotta", "crumble", "financier",
+        )
+    ):
+        return "dessert"
     return "diner"
 
 
@@ -129,11 +142,13 @@ async def suggest_recettes(
 
     service = obtenir_service_recettes()
 
-    difficulte = (
-        "facile"
-        if any(k in contexte.lower() for k in ("rapide", "express", "vite", "simple"))
-        else "moyen"
+    MOTS_FACILE = (
+        "rapide", "express", "vite", "simple", "facile",
+        # Préparations intrinsèquement simples
+        "compote", "salade", "yaourt", "smoothie", "velouté",
+        "soupe", "purée", "puree", "omelette",
     )
+    difficulte = "facile" if any(k in contexte.lower() for k in MOTS_FACILE) else "moyen"
 
     suggestions = service.generer_recettes_ia(
         type_repas=_detecter_type_repas(contexte),

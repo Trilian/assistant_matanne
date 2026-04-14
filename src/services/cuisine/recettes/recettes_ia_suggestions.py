@@ -100,7 +100,9 @@ RULES:
 5. ingredients: array of {{nom, quantite, unite}}
 6. etapes: array of {{description}}
 7. difficulte values: facile, moyen, difficile
-8. No explanations, no text, ONLY JSON"""
+8. type_repas valid values: petit_dejeuner, dejeuner, diner, dessert, gouter
+9. type_repas MUST match the true nature of the recipe: compote/gâteau/tarte/mousse/crème/crumble/tiramisu → dessert; soupe/potage/velouté → entree or diner
+10. No explanations, no text, ONLY JSON"""
 
         logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
 
