@@ -55,7 +55,7 @@ async def resume_mensuel_ia(
     _rate: dict = Depends(verifier_limite_debit_ia),
 ):
     """Alias métier du résumé mensuel IA historiquement servi via /innovations."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.generer_resume_mensuel_ia()
     return result or ResumeMensuelIAResponse()
 
@@ -68,7 +68,7 @@ async def retrospective_annuelle_ia(
     _rate: dict = Depends(verifier_limite_debit_ia),
 ):
     """Alias métier de la rétrospective annuelle IA."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.generer_bilan_annuel(annee=annee)
     return result or BilanAnnuelResponse()
 
@@ -80,7 +80,7 @@ async def journal_familial_ia(
     _rate: dict = Depends(verifier_limite_debit_ia),
 ):
     """Alias métier du journal familial automatique."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.generer_journal_familial_auto()
     return result or JournalFamilialAutoResponse()
 
@@ -93,7 +93,7 @@ async def journal_familial_pdf_ia(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Alias métier du PDF de journal familial."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.generer_journal_familial_pdf()
     return result or RapportMensuelPdfResponse()
 
@@ -105,7 +105,7 @@ async def rapport_mensuel_pdf_ia(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Alias métier du rapport mensuel PDF."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.generer_rapport_mensuel_pdf(mois=mois)
     return result or RapportMensuelPdfResponse()
 
@@ -149,7 +149,7 @@ async def bilan_annuel_ia(
     _rate: dict = Depends(verifier_limite_debit_ia),
 ):
     """Alias métier du bilan annuel complet IA."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.generer_bilan_annuel(annee=body.annee)
     return result or BilanAnnuelResponse()
 
@@ -160,7 +160,7 @@ async def score_bien_etre_ia(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Alias métier du score bien-être familial composite."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.calculer_score_bien_etre()
     return result or ScoreBienEtreResponse()
 
@@ -173,7 +173,7 @@ async def score_eco_responsable_ia(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Alias métier du score éco-responsable."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.calculer_score_eco_responsable()
     return result or ScoreEcoResponsableResponse()
 
@@ -187,7 +187,7 @@ async def carte_visuelle_ia(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Alias métier de la carte visuelle partageable."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.generer_carte_visuelle_partageable(
         type_carte=body.type_carte, titre=body.titre
     )
@@ -202,7 +202,7 @@ async def mode_tablette_magazine_ia(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Alias métier du mode tablette magazine."""
-    service = obtenir_service_innovations_rapports()
+    service = _obtenir_service_rapports()
     result = service.obtenir_mode_tablette_magazine()
     return result or ModeTabletteMagazineResponse()
 
