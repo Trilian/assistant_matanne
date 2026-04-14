@@ -36,7 +36,7 @@ def aggregate_ingredients(ingredients_list: list[dict]) -> dict[str, dict]:
 
         quantite = ing.get("quantite", 1) or 1
         unite = ing.get("unite", "pcs") or "pcs"
-        rayon = ing.get("rayon", ing.get("categorie", "autre"))
+        rayon = ing.get("rayon") or ing.get("categorie") or "autre"
 
         if nom not in aggregated:
             aggregated[nom] = {

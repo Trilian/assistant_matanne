@@ -7,13 +7,35 @@
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
+import { clientApi } from "@/bibliotheque/api/client";
 
 const ROUTES_PUBLIQUES = ["/connexion", "/inscription", "/auth-callback"];
+
+// Ping le backend toutes les 4 minutes pour empêcher Railway (plan gratuit) de s'endormir.
+// Cela garantit que les boutons Telegram (callbacks webhook) répondent sans cold-start.
+const KEEPALIVE_INTERVAL_MS = 4 * 60 * 1000;
+
+function utiliserKeepaliveRailway(estConnecte: boolean) {
+  useEffect(() => {
+    if (!estConnecte) return;
+
+    const ping = () => {
+      clientApi.get("/health", { timeout: 5000 }).catch(() => {/* silencieux */});
+    };
+
+    // Premier ping immédiat, puis toutes les 4 minutes
+    ping();
+    const id = setInterval(ping, KEEPALIVE_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [estConnecte]);
+}
 
 export function FournisseurAuth({ children }: { children: ReactNode }) {
   const { estConnecte, estChargement } = utiliserAuth();
   const pathname = usePathname();
   const router = useRouter();
+
+  utiliserKeepaliveRailway(estConnecte);
 
   const estPublique = ROUTES_PUBLIQUES.some((r) => pathname.startsWith(r));
 

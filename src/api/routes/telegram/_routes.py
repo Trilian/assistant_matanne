@@ -48,6 +48,92 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/telegram", tags=["Telegram"])
 
 
+async def _enregistrer_webhook_telegram(base_url: str) -> dict[str, Any]:
+    """Enregistre le webhook Telegram avec l'URL publique de l'API."""
+    import httpx
+
+    from src.core.config import obtenir_parametres
+
+    settings = obtenir_parametres()
+    if not settings.TELEGRAM_BOT_TOKEN:
+        return {"ok": False, "error": "TELEGRAM_BOT_TOKEN non configuré"}
+
+    webhook_url = f"{base_url.rstrip('/')}/api/v1/telegram/webhook"
+    api_url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook"
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(api_url, json={"url": webhook_url, "drop_pending_updates": False})
+            data = resp.json()
+            if data.get("ok"):
+                logger.info("✅ Webhook Telegram enregistré : %s", webhook_url)
+            else:
+                logger.warning("⚠️ Échec enregistrement webhook : %s", data.get("description"))
+            return data
+    except Exception as exc:
+        logger.error("❌ Erreur enregistrement webhook Telegram : %s", exc)
+        return {"ok": False, "error": str(exc)}
+
+
+async def _obtenir_info_webhook() -> dict[str, Any]:
+    """Retourne les informations du webhook Telegram enregistré."""
+    import httpx
+
+    from src.core.config import obtenir_parametres
+
+    settings = obtenir_parametres()
+    if not settings.TELEGRAM_BOT_TOKEN:
+        return {"ok": False, "error": "TELEGRAM_BOT_TOKEN non configuré"}
+
+    api_url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/getWebhookInfo"
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(api_url)
+            return resp.json()
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+@router.post("/setup-webhook", response_model=MessageResponse)
+@gerer_exception_api
+async def setup_webhook(
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Enregistre ou met à jour le webhook Telegram.
+
+    Utilise APP_BASE_URL depuis les paramètres. Appeler une fois après chaque
+    nouveau déploiement Railway pour activer les callbacks des boutons.
+    """
+    from src.core.config import obtenir_parametres
+
+    settings = obtenir_parametres()
+    base_url = settings.APP_BASE_URL
+    if not base_url:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=400,
+            detail="APP_BASE_URL non configuré. Ajoutez cette variable dans Railway.",
+        )
+
+    result = await _enregistrer_webhook_telegram(base_url)
+    if not result.get("ok"):
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=502,
+            detail=f"Échec Telegram : {result.get('description') or result.get('error')}",
+        )
+    return MessageResponse(message="webhook_enregistre", id=0)
+
+
+@router.get("/webhook-info")
+@gerer_exception_api
+async def webhook_info(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les informations du webhook Telegram actuellement configuré."""
+    return await _obtenir_info_webhook()
+
+
 @router.post("/envoyer-planning", response_model=MessageResponse)
 @gerer_exception_api
 async def envoyer_planning_telegram(
@@ -239,6 +325,12 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
             return MessageResponse(message="invalid_callback", id=0)
 
         logger.info(f"Callback Telegram reçu: {data} (msg_id={message_id})")
+
+        # Accusé de réception immédiat (< 10 s deadline Telegram).
+        # Appelé en premier avant tout traitement lourd pour éviter le timeout
+        # en cas de cold-start Railway (15-30 s de démarrage).
+        from src.services.integrations.telegram import repondre_callback_query as _ack
+        await _ack(callback_query_id)
 
         # Dispatch vers le handler correspondant.
         if data.startswith("courses_toggle_article:"):

@@ -603,6 +603,7 @@ export default function PagePlanning() {
         diffuserPlanning({
           action: "repas_added",
           data: { date: dto.date, type_repas: dto.type_repas },
+          user_id: identifiantPresencePlanning,
         });
         toast.success("Repas ajouté");
       },
@@ -616,6 +617,7 @@ export default function PagePlanning() {
       diffuserPlanning({
         action: "repas_removed",
         data: { repas_id: repas.id, date: repas.date_repas || repas.date, type_repas: repas.type_repas },
+        user_id: identifiantPresencePlanning,
       });
       toast.success("Repas retiré");
     },
@@ -661,11 +663,6 @@ export default function PagePlanning() {
           toastIaRef.current = null;
         }
 
-        // Mise à jour immédiate du cache planning pour afficher la grille sans attendre le refetch
-        if (resultat.date_debut) {
-          queryClient.setQueryData(["planning", resultat.date_debut], resultat);
-        }
-
         // Pré-peupler le flux pour afficher le bandeau brouillon immédiatement
         if (resultat.planning_id) {
           queryClient.setQueryData(["flux", "cuisine", String(resultat.planning_id)], {
@@ -680,9 +677,12 @@ export default function PagePlanning() {
           });
         }
 
+        // Forcer un rechargement immédiat du planning (refetchQueries garantit un vrai appel GET
+        // contrairement à invalider qui se contente de marquer comme stale).
+        void queryClient.refetchQueries({ queryKey: ["planning", dateDebut], exact: true });
+        // Invalider les sous-requêtes planning (nutrition, conflits…) pour qu'elles se rechargent aussi.
         invalider(["planning"]);
-        // Note: le flux est déjà pré-peuplé via setQueryData ci-dessus.
-        // L'invalidation sera faite par validerBrouillonPlanning.onSuccess.
+        // L'invalidation du flux sera faite par validerBrouillonPlanning.onSuccess.
 
         if (!resultat.genere_par_ia) {
           const msg = "Le planning a été créé sans IA. Réessayez ou vérifiez la clé Mistral.";
@@ -901,6 +901,7 @@ export default function PagePlanning() {
             date_cible: dateCible,
             type_cible: typeCible,
           },
+          user_id: identifiantPresencePlanning,
         });
         toast.success("Repas déplacé");
       } catch {

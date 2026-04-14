@@ -209,12 +209,27 @@ async def obtenir_planning_semaine(
         from src.core.models.recettes import Recette
 
         with executer_avec_session() as session:
-            repas = (
-                session.query(Repas)
-                .filter(Repas.date_repas >= date_debut, Repas.date_repas < date_fin)
-                .order_by(Repas.date_repas)
-                .all()
+            # Identifier le planning actif en premier pour scoper les repas
+            planning_actif = (
+                session.query(Planning)
+                .filter(
+                    Planning.semaine_debut <= date_debut,
+                    Planning.semaine_fin >= date_debut,
+                    Planning.etat.notin_(["archive"]),
+                )
+                .order_by(Planning.id.desc())
+                .first()
             )
+            planning_actif_id = planning_actif.id if planning_actif else None
+
+            # Filtrer les repas par planning actif pour éviter les doublons
+            # liés aux anciens plannings IA générés pour la même semaine
+            repas_q = session.query(Repas).filter(
+                Repas.date_repas >= date_debut, Repas.date_repas < date_fin
+            )
+            if planning_actif_id is not None:
+                repas_q = repas_q.filter(Repas.planning_id == planning_actif_id)
+            repas = repas_q.order_by(Repas.date_repas).all()
 
             # Récupérer les noms de recettes en une seule requête
             # (plat principal + entrée + dessert)
@@ -235,18 +250,8 @@ async def obtenir_planning_semaine(
                     recettes_map[rec.id] = rec.nom
                     genere_par_ia_map[rec.id] = bool(rec.genere_par_ia)
 
-            # Récupérer l'ID du planning actif (non archivé) pour la période
-            planning_db = (
-                session.query(Planning)
-                .filter(
-                    Planning.semaine_debut <= date_debut,
-                    Planning.semaine_fin >= date_debut,
-                    Planning.etat.notin_(["archive"]),
-                )
-                .order_by(Planning.id.desc())
-                .first()
-            )
-            planning_id = planning_db.id if planning_db else None
+            # Réutiliser le planning actif déjà identifié
+            planning_id = planning_actif_id
 
             # Normalise les valeurs accentuées stockées en DB vers les valeurs
             # canoniques sans accents attendues par le frontend.
@@ -366,10 +371,15 @@ async def creer_repas(donnees: RepasCreate, user: dict[str, Any] = Depends(requi
             # donnees.date est un objet date (plus datetime) depuis le schéma corrigé
             date_repas = donnees.date
 
-            # Chercher un planning existant pour cette date
+            # Chercher le planning le plus récent (non archivé) pour cette date
             planning = (
                 session.query(Planning)
-                .filter(Planning.semaine_debut <= date_repas, Planning.semaine_fin >= date_repas)
+                .filter(
+                    Planning.semaine_debut <= date_repas,
+                    Planning.semaine_fin >= date_repas,
+                    Planning.etat.notin_(["archive"]),
+                )
+                .order_by(Planning.id.desc())
                 .first()
             )
 
@@ -387,12 +397,12 @@ async def creer_repas(donnees: RepasCreate, user: dict[str, Any] = Depends(requi
                 session.flush()
 
             # Vérifier s'il existe déjà un repas pour cette date/type
+            # (dédup global sur tous les plannings pour éviter les duplicatas)
             existing = (
                 session.query(Repas)
                 .filter(
                     Repas.date_repas == date_repas,
                     Repas.type_repas == donnees.type_repas,
-                    Repas.planning_id == planning.id,
                 )
                 .first()
             )
@@ -1169,6 +1179,41 @@ async def generer_planning_ia(
                 preferences_enrichies["produits_de_saison"] = produits_saison
         except Exception as e:
             logger.warning("[planning] Enrichissement saisonnier non chargé: %s", e)
+
+        # Enrichir avec les préférences nutritionnelles de l'utilisateur depuis la DB
+        try:
+            with executer_avec_session() as session:
+                from src.core.models.user_preferences import PreferenceUtilisateur
+
+                user_id_str = str(user.get("sub", user.get("id", "")))
+                prefs_db = (
+                    session.query(PreferenceUtilisateur)
+                    .filter(PreferenceUtilisateur.user_id == user_id_str)
+                    .first()
+                )
+                if prefs_db:
+                    # Viande rouge max (OMS: ≤2/semaine recommandé)
+                    preferences_enrichies.setdefault("viande_rouge_max", prefs_db.viande_rouge_max)
+
+                    # Présence et âge de Jules
+                    preferences_enrichies.setdefault("jules_present", prefs_db.jules_present)
+                    preferences_enrichies.setdefault("jules_age_mois", prefs_db.jules_age_mois)
+
+                    # Dériver les jours poisson blanc / gras selon poisson_par_semaine
+                    if prefs_db.poisson_par_semaine >= 2:
+                        preferences_enrichies.setdefault("poisson_blanc_jour", "lundi")
+                        preferences_enrichies.setdefault("poisson_gras_jour", "jeudi")
+                    elif prefs_db.poisson_par_semaine == 1:
+                        preferences_enrichies.setdefault("poisson_blanc_jour", "lundi")
+                        preferences_enrichies.setdefault("poisson_gras_jour", None)
+                    else:
+                        preferences_enrichies.setdefault("poisson_blanc_jour", "lundi")
+                        preferences_enrichies.setdefault("poisson_gras_jour", "jeudi")
+
+                    # Jour végétarien selon vegetarien_par_semaine
+                    preferences_enrichies.setdefault("vegetarien_jour", "mercredi")
+        except Exception as e:
+            logger.warning("[planning] Enrichissement UserPreferences nutritionnel ignoré: %s", e)
 
         # Transmettre les préférences saisonnières de l'utilisateur au service IA
         preferences_enrichies["legumes_souhaites"] = body.legumes_souhaites

@@ -29,19 +29,31 @@ def determine_protein_type(
     poisson_jours: list[str],
     viande_rouge_jours: list[str],
     vegetarien_jours: list[str],
+    poisson_blanc_jours: list[str] | None = None,
+    poisson_gras_jours: list[str] | None = None,
 ) -> tuple[str, str]:
     """
     Détermine le type de protéine pour un jour donné selon les paramètres.
 
     Args:
         jour_lower: Nom du jour en minuscules
-        poisson_jours: Liste des jours poisson (blanc + gras confondus)
+        poisson_jours: Liste des jours poisson (blanc + gras confondus, rétrocompat)
         viande_rouge_jours: Liste des jours viande rouge
         vegetarien_jours: Liste des jours végétariens
+        poisson_blanc_jours: Jours spécifiques poisson blanc (optionnel, OMS)
+        poisson_gras_jours: Jours spécifiques poisson gras (optionnel, OMS)
 
     Returns:
-        Tuple (type_proteine, raison_emoji)
+        Tuple (type_proteine, raison_emoji) — type_proteine peut être
+        "poisson_blanc", "poisson_gras", "poisson" (générique), "viande_rouge",
+        "vegetarien" ou "volaille".
     """
+    # Priorité aux listes spécifiques blanc/gras si fournies
+    if poisson_blanc_jours is not None and jour_lower in [j.lower() for j in poisson_blanc_jours]:
+        return "poisson_blanc", "🐟 Jour poisson blanc"
+    if poisson_gras_jours is not None and jour_lower in [j.lower() for j in poisson_gras_jours]:
+        return "poisson_gras", "🐟 Jour poisson gras (oméga-3)"
+    # Fallback rétrocompatible : liste générique poisson_jours
     if jour_lower in [j.lower() for j in poisson_jours]:
         return "poisson", "🐟 Jour poisson"
     elif jour_lower in [j.lower() for j in viande_rouge_jours]:

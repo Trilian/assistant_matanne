@@ -198,6 +198,10 @@ class Parametres(BaseSettings):
     TELEGRAM_VERIFY_TOKEN: str = ""
     """Token facultatif de validation webhook Telegram."""
 
+    APP_BASE_URL: str = ""
+    """URL publique de l'API (ex: https://assistant-matanne.railway.app).
+    Utilisé pour enregistrer automatiquement le webhook Telegram au démarrage."""
+
     # ── OpenWeatherMap ──
 
     OPENWEATHER_API_KEY: str = ""

@@ -391,7 +391,12 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
                         "nom": a.ingredient.nom if a.ingredient else "Article",
                         "quantite": a.quantite_necessaire,
                         "coche": a.achete,
-                        "categorie": _rayon_valide(a.rayon_magasin) or _rayon_valide(a.ingredient.categorie if a.ingredient else None),
+                        "categorie": (
+                            _rayon_valide(a.rayon_magasin)
+                            or _rayon_valide(a.ingredient.categorie if a.ingredient else None)
+                            or _suggerer_rayon_depuis_nom(a.ingredient.nom if a.ingredient else None)
+                            or "autre"
+                        ),
                         "magasin_cible": a.magasin_cible,
                         "prix_estime": a.prix_unitaire,
                     }
@@ -441,7 +446,13 @@ async def exporter_liste_texte(
             else:
                 groupes: dict[str, list] = {}
                 for a in articles:
-                    categorie = a.rayon_magasin or "Autre"
+                    nom_ing = a.ingredient.nom if a.ingredient else None
+                    categorie = (
+                        _rayon_valide(a.rayon_magasin)
+                        or _rayon_valide(a.ingredient.categorie if a.ingredient else None)
+                        or _suggerer_rayon_depuis_nom(nom_ing)
+                        or "Autre"
+                    )
                     groupes.setdefault(categorie, []).append(a)
 
                 for categorie in sorted(groupes.keys()):
@@ -1053,7 +1064,7 @@ async def generer_depuis_planning(
                     session.add(ingredient)
                     session.flush()
 
-                rayon_article = art.get("rayon")
+                rayon_article = art.get("rayon") or _suggerer_rayon_depuis_nom(art["nom"])
                 magasin_article = CATEGORIE_VERS_MAGASIN.get((rayon_article or "").lower()) if rayon_article else None
                 session.add(
                     ArticleCourses(
@@ -1863,7 +1874,12 @@ async def obtenir_articles_par_magasin(
                         "nom": a.ingredient.nom if a.ingredient else "Article",
                         "quantite": a.quantite_necessaire,
                         "coche": a.achete,
-                        "categorie": a.rayon_magasin,
+                        "categorie": (
+                            _rayon_valide(a.rayon_magasin)
+                            or _rayon_valide(a.ingredient.categorie if a.ingredient else None)
+                            or _suggerer_rayon_depuis_nom(a.ingredient.nom if a.ingredient else None)
+                            or "autre"
+                        ),
                         "magasin_cible": a.magasin_cible,
                     }
                 )
@@ -2072,7 +2088,12 @@ async def obtenir_articles_drive(
                     "ingredient_id": a.ingredient_id,
                     "quantite": a.quantite_necessaire,
                     "coche": a.achete,
-                    "categorie": a.rayon_magasin,
+                    "categorie": (
+                        _rayon_valide(a.rayon_magasin)
+                        or _rayon_valide(a.ingredient.categorie if a.ingredient else None)
+                        or _suggerer_rayon_depuis_nom(a.ingredient.nom if a.ingredient else None)
+                        or "autre"
+                    ),
                     "correspondance": None,
                 }
                 if correspondance:

@@ -100,6 +100,10 @@ Ajoute dans `.env.local` (racine du projet) :
 # === Telegram Bot API ===
 TELEGRAM_BOT_TOKEN=123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw
 TELEGRAM_CHAT_ID=123456789
+
+# URL publique de l'API Railway — OBLIGATOIRE pour les boutons Telegram
+# Le webhook est enregistré automatiquement au démarrage si cette variable est présente.
+APP_BASE_URL=https://assistant-matanne.railway.app
 ```
 
 > Ne jamais commiter ces valeurs. En production (Railway), les ajouter via le dashboard variables.
@@ -108,7 +112,12 @@ TELEGRAM_CHAT_ID=123456789
 
 ## Étape 4 — Configurer le webhook
 
-Le webhook permet à Telegram d'envoyer les messages reçus à ton API.
+Le webhook permet à Telegram d'envoyer les clics de boutons et messages reçus à ton API.
+
+> **Important Railway (plan gratuit)** : Le webhook est enregistré **automatiquement au démarrage** si
+> `APP_BASE_URL` et `TELEGRAM_BOT_TOKEN` sont configurés. Tu n'as rien à faire manuellement.
+> En cas de problème, appelle `POST /api/v1/telegram/setup-webhook` pour forcer la ré-registration.
+> Pour vérifier l'état : `GET /api/v1/telegram/webhook-info`.
 
 ### En développement (localhost)
 

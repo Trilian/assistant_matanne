@@ -100,13 +100,15 @@ class PlanningIAGenerationMixin:
                 poisson_jours=parametres.poisson_jours,
                 viande_rouge_jours=parametres.viande_rouge_jours,
                 vegetarien_jours=parametres.vegetarien_jours,
+                poisson_blanc_jours=parametres.poisson_blanc_jours,
+                poisson_gras_jours=parametres.poisson_gras_jours,
             )
 
             # Requête base pour récupérer 3 recettes de ce type
             query = db.query(Recette).filter(Recette.est_equilibre)
 
-            # Filtrer par type de protéine
-            if type_proteine == "poisson":
+            # Filtrer par type de protéine (poisson_blanc et poisson_gras → filtre sur "poisson")
+            if type_proteine in ("poisson", "poisson_blanc", "poisson_gras"):
                 query = query.filter(Recette.type_proteines.ilike("%poisson%"))
             elif type_proteine == "viande_rouge":
                 query = query.filter(Recette.type_proteines.ilike("%viande%"))
@@ -210,6 +212,14 @@ class PlanningIAGenerationMixin:
         autoriser_restes: bool = prefs.get("autoriser_restes", True)
         recettes_favorites: list[dict] = prefs.get("recettes_favorites", [])
 
+        # Préférences nutritionnelles — injectées depuis UserPreferences par la route
+        poisson_blanc_jour: str = prefs.get("poisson_blanc_jour", "lundi")
+        poisson_gras_jour: str | None = prefs.get("poisson_gras_jour", "jeudi")
+        viande_rouge_max: int = int(prefs.get("viande_rouge_max", 2))
+        vegetarien_jour: str = prefs.get("vegetarien_jour", "mercredi")
+        jules_present: bool = bool(prefs.get("jules_present", True))
+        jules_age_mois: int = int(prefs.get("jules_age_mois", 19))
+
         semaine_fin = semaine_debut + timedelta(days=6)
 
         # Construire prompt ultra-direct (comme pour recettes)
@@ -225,11 +235,23 @@ class PlanningIAGenerationMixin:
             if plats_souhaites
             else ""
         )
-        restes_section = (
-            "\nRESTES RÉCHAUFFÉS : Si un dîner se prête à être réchauffé le lendemain midi (plat en sauce, rôti, lasagnes, gratin, soupe...), propose-le en déjeuner du lendemain avec dejeuner_est_reste=true et dejeuner_reste_source=\"dîner de [JOUR]\". Utilise cette option pour 1 à 3 repas par semaine maximum — ne pas abuser."
-            if autoriser_restes
-            else "\nRESTES RÉCHAUFFÉS : Ne propose pas de restes réchauffés. Chaque repas doit être une préparation fraîche."
-        )
+
+        # Stratégie 4 portions : dîners en sauce/gratin/soupe → midi du lendemain
+        if autoriser_restes:
+            restes_section = (
+                "\nSTRATÉGIE 4 PORTIONS (objectif 3-4 midis issus des dîners) :\n"
+                "Pour les plats en sauce, gratins, soupes, lasagnes, cocottes, tajines, ragoûts, rôtis — "
+                "cuisiner 4 portions (2 adultes + Jules + 1 extra). "
+                "La portion extra devient le déjeuner du LENDEMAIN ou du surlendemain : "
+                "dejeuner_est_reste=true, dejeuner_reste_source=\"dîner de [JOUR]\". "
+                "Cible : 3 à 4 déjeuners par semaine issus d'un dîner précédent. "
+                "Les plats qui ne se prêtent PAS aux restes (poisson grillé, salade, omelette) → dejeuner_est_reste=false."
+            )
+        else:
+            restes_section = (
+                "\nPORTIONS : Pas de restes réchauffés. Chaque repas doit être une préparation fraîche."
+            )
+
         recettes_section = (
             f"\nRECETTES FAVORITES À RÉUTILISER (l'utilisateur les apprécie — réintègre-en au moins 2 dans la semaine si elles s'y prêtent) :\n"
             + "\n".join(
@@ -239,10 +261,38 @@ class PlanningIAGenerationMixin:
             else ""
         )
 
+        # Bloc OMS dynamique selon préférences utilisateur
+        poisson_gras_ligne = (
+            f"- {poisson_gras_jour.capitalize()}: POISSON GRAS obligatoire (saumon, maquereau, sardines, hareng, truite saumonée) — oméga-3 essentiels OMS"
+            if poisson_gras_jour
+            else "- Inclure AU MOINS 1 repas de POISSON GRAS dans la semaine (saumon, maquereau, sardines, hareng)"
+        )
+        oms_section = f"""
+ÉQUILIBRE NUTRITIONNEL HEBDOMADAIRE (recommandations OMS — OBLIGATOIRE) :
+- {poisson_blanc_jour.capitalize()}: POISSON BLANC obligatoire (cabillaud, merlu, colin, sole, bar, lieu noir, daurade) — protéines légères
+{poisson_gras_ligne}
+- Maximum {viande_rouge_max} repas de viande rouge sur toute la semaine (bœuf, veau, agneau) — réduction risque cardiovasculaire OMS
+- {vegetarien_jour.capitalize()}: repas VÉGÉTARIEN ou légumineuses (lentilles, pois chiches, haricots, œufs, tofu) — au MOINS 1x/semaine
+- Reste des jours: volaille préférée (poulet, dinde, pintade, canard)
+- Ne jamais mettre 2 fois le même ingrédient principal à 2 repas consécutifs (déjeuner ou dîner)
+- Varier les féculents : alterner pâtes, riz, pommes de terre, semoule, légumineuses"""
+
+        # Section Jules si présent dans la famille
+        jules_section = (
+            f"""
+JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
+- Chaque plat du dîner DOIT être adaptable pour Jules : sans sel ajouté, sans alcool (même en sauce), sans épices fortes
+- Textures adaptées à l'âge : mixé/écrasé si dur, morceaux mous acceptés
+- À éviter dans les plats principaux : poisson cru, marinades alcoolisées, piments, moutarde forte
+- Version Jules = même recette simplifiée (ex: "Bœuf bourguignon" → "version Jules : bœuf mijoté sans vin, pommes de terre écrasées")"""
+            if jules_present
+            else ""
+        )
+
         prompt = f"""GENERATE A 7-DAY MEAL PLAN (MONDAY-SUNDAY) IN JSON FORMAT ONLY.
 
 CONTEXT:
-{context}{legumes_section}{plats_section}{restes_section}{recettes_section}
+{context}{oms_section}{jules_section}{legumes_section}{plats_section}{restes_section}{recettes_section}
 
 OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 {{"items": [
@@ -278,9 +328,9 @@ RULES:
 4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text. est_recette=true only for real preparations. Never leave null.
-7. Ensure variety throughout the week — alternate proteins (fish Mon/Thu, red meat Tue, vegetarian Wed, poultry Fri)
-8. null is valid ONLY for entree, laitage, dessert, reste_source — never for gouter
-9. If a meal is a leftover (est_reste=true), set reste_source to identify the source meal (e.g. "dîner de lundi")
+7. PROTEINS — strictly follow the OMS balance section above: {poisson_blanc_jour}=poisson blanc, {poisson_gras_jour or "a chosen day"}=poisson gras, max {viande_rouge_max}x red meat, {vegetarien_jour}=vegetarian, other days=poultry
+8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers.
+9. null is valid ONLY for entree, laitage, dessert, reste_source — never for gouter
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them."""
 

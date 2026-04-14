@@ -313,14 +313,18 @@ async def _traiter_callback_planning(
     message_id: int | None = None,
 ) -> None:
     from src.api.utils import executer_async, executer_avec_session
-    from src.services.integrations.telegram import modifier_message, repondre_callback_query
+    from src.services.integrations.telegram import (
+        envoyer_message_telegram,
+        modifier_message,
+        repondre_callback_query,
+    )
 
     if ":" in callback_data:
         action, id_str = callback_data.split(":", 1)
         try:
             planning_id = int(id_str)
         except ValueError:
-            await repondre_callback_query(callback_query_id, "❌ Erreur: ID invalide")
+            await envoyer_message_telegram(chat_id, "❌ Erreur: ID planning invalide")
             logger.error(f"Invalid planning ID in callback: {callback_data}")
             return
     else:
@@ -390,12 +394,12 @@ async def _traiter_callback_planning(
             result = await executer_async(_valider)
             if result.get("status") == 200:
                 if result.get("deja_valide"):
-                    await repondre_callback_query(
-                        callback_query_id, "✅ Planning déjà validé !", show_alert=False
-                    )
+                    await envoyer_message_telegram(chat_id, "✅ Planning déjà validé !")
                 else:
-                    await repondre_callback_query(
-                        callback_query_id, "✅ Planning validé !", show_alert=False
+                    await envoyer_message_telegram(
+                        chat_id,
+                        "✅ <b>Planning validé !</b>\n\nVotre planning est actif. "
+                        "Vous pouvez maintenant générer la liste de courses.",
                     )
                     if message_id:
                         await modifier_message(
@@ -405,27 +409,29 @@ async def _traiter_callback_planning(
                             boutons=None,
                         )
             else:
-                await repondre_callback_query(
-                    callback_query_id, f"❌ {result.get('error', 'Erreur')}", show_alert=True
+                await envoyer_message_telegram(
+                    chat_id, f"❌ {result.get('error', 'Impossible de valider le planning')}"
                 )
         except Exception as e:
             logger.error(f"❌ Erreur traitement callback planning_valider: {e}", exc_info=True)
-            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+            await envoyer_message_telegram(chat_id, "❌ Erreur serveur lors de la validation")
 
     elif action == "planning_modifier":
-        web_url = "https://matanne.vercel.app/cuisine/planning"
-        await repondre_callback_query(
-            callback_query_id,
-            f"Ouvrez l'app pour modifier le planning :\n{web_url}",
-            show_alert=True,
+        from src.core.config import obtenir_parametres
+
+        web_url = obtenir_parametres().APP_BASE_URL.rstrip("/") if obtenir_parametres().APP_BASE_URL else "https://assistantfamilial-git-main-matanne-projects.vercel.app"
+        await envoyer_message_telegram(
+            chat_id,
+            f"✏️ <b>Modifier le planning</b>\n\nOuvrez l'app pour modifier les repas :\n{web_url}/cuisine/planning",
         )
 
     elif action == "planning_regenerer":
-        web_url = "https://matanne.vercel.app/cuisine/planning"
-        await repondre_callback_query(
-            callback_query_id,
-            f"Utilisez le bouton « Régénérer » dans l'app pour relancer l'IA :\n{web_url}",
-            show_alert=True,
+        from src.core.config import obtenir_parametres
+
+        web_url = obtenir_parametres().APP_BASE_URL.rstrip("/") if obtenir_parametres().APP_BASE_URL else "https://assistantfamilial-git-main-matanne-projects.vercel.app"
+        await envoyer_message_telegram(
+            chat_id,
+            f"🔄 <b>Régénérer le planning</b>\n\nUtilisez le bouton « Régénérer » dans l'app :\n{web_url}/cuisine/planning",
         )
         if message_id:
             await modifier_message(
