@@ -28,11 +28,17 @@ from src.api.schemas.ia_transverses import (
     ScoreEcoResponsableResponse,
 )
 from src.api.utils import executer_async, gerer_exception_api
-from src.services.rapports.service_ia import obtenir_service_innovations_rapports
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/rapports", tags=["Rapports IA"])
+
+
+def _obtenir_service_rapports():
+    """Lazy import du service rapports IA (évite le chargement eager au démarrage)."""
+    from src.services.rapports.service_ia import obtenir_service_innovations_rapports
+
+    return obtenir_service_innovations_rapports()
 
 
 def _obtenir_service_partage_invite():

@@ -29,6 +29,11 @@ __all__ = ["obtenir_moteur", "reinitialiser_moteur", "obtenir_moteur_securise"]
 _engine_lock = threading.Lock()
 _engine_instance = None
 
+# Cache d'échec — évite de rejouer les tentatives (34s) à chaque health check
+# quand la DB est injoignable. TTL de 30s puis réessai automatique.
+_engine_failure_time: float | None = None
+_ENGINE_FAILURE_TTL: float = 30.0
+
 
 def _creer_engine_impl(
     database_url: str,
@@ -120,6 +125,8 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
     Crée l'engine PostgreSQL avec retry automatique.
 
     Utilise un singleton thread-safe avec double-check locking.
+    Les échecs de connexion sont mis en cache 30s pour éviter de bloquer
+    les health checks avec des retries coûteux (3 × 10s timeout).
 
     Args:
         nombre_tentatives: Nombre de tentatives de reconnexion
@@ -131,33 +138,57 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
     Raises:
         ErreurBaseDeDonnees: Si connexion impossible après toutes les tentatives
     """
-    global _engine_instance
+    global _engine_instance, _engine_failure_time
 
     if _engine_instance is not None:
         return _engine_instance
+
+    # Fast-fail si le dernier essai a échoué depuis moins de _ENGINE_FAILURE_TTL secondes
+    if _engine_failure_time is not None:
+        elapsed = time.time() - _engine_failure_time
+        if elapsed < _ENGINE_FAILURE_TTL:
+            raise ErreurBaseDeDonnees(
+                f"DB indisponible (cooldown {_ENGINE_FAILURE_TTL - elapsed:.0f}s restantes)",
+                message_utilisateur="Base de données temporairement indisponible",
+            )
 
     with _engine_lock:
         # Double-check locking
         if _engine_instance is not None:
             return _engine_instance
 
+        # Re-check failure cache inside lock
+        if _engine_failure_time is not None:
+            elapsed = time.time() - _engine_failure_time
+            if elapsed < _ENGINE_FAILURE_TTL:
+                raise ErreurBaseDeDonnees(
+                    f"DB indisponible (cooldown {_ENGINE_FAILURE_TTL - elapsed:.0f}s restantes)",
+                    message_utilisateur="Base de données temporairement indisponible",
+                )
+
         parametres = obtenir_parametres()
         sslmode = getattr(parametres, "DB_SSLMODE", "require")
 
-        moteur = _creer_engine_impl(
-            parametres.DATABASE_URL,
-            parametres.DEBUG,
-            sslmode,
-            nombre_tentatives,
-            delai_tentative,
-        )
+        try:
+            moteur = _creer_engine_impl(
+                parametres.DATABASE_URL,
+                parametres.DEBUG,
+                sslmode,
+                nombre_tentatives,
+                delai_tentative,
+            )
+        except ErreurBaseDeDonnees:
+            _engine_failure_time = time.time()
+            raise
+
+        _engine_failure_time = None  # Réinitialise le cache d'échec
         _engine_instance = moteur
         return moteur
 
 
 def reinitialiser_moteur() -> None:
     """Réinitialise le cache du moteur (utile pour les tests)."""
-    global _engine_instance
+    global _engine_instance, _engine_failure_time
     with _engine_lock:
         if _engine_instance is not None:
             try:
@@ -165,6 +196,7 @@ def reinitialiser_moteur() -> None:
             except Exception:
                 pass
             _engine_instance = None
+        _engine_failure_time = None
 
 
 def obtenir_moteur_securise() -> "Engine | None":

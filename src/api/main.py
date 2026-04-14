@@ -584,6 +584,17 @@ async def root(request: Request):
     return {"message": "API Assistant Matanne", "docs": "/docs", "version": "1.0.0"}
 
 
+@app.get("/health/live", tags=["Santé"], include_in_schema=False)
+async def liveness():
+    """
+    Probe liveness ultra-légère utilisée par Railway pour le health check.
+
+    Répond immédiatement sans aucun I/O (pas de DB, pas de cache).
+    Prouve uniquement que le processus uvicorn est vivant et accepte des requêtes.
+    """
+    return {"status": "ok"}
+
+
 @app.get("/health", response_model=HealthResponse, tags=["Santé"], responses=REPONSE_500)
 async def health_check():
     """
@@ -612,7 +623,18 @@ async def health_check():
         ```
     """
     # Utiliser SanteSysteme comme source de vérité unique
-    rapport = verifier_sante_globale(inclure_db=True)
+    try:
+        rapport = verifier_sante_globale(inclure_db=True)
+    except Exception as e:
+        logger.error("Erreur inattendue dans verifier_sante_globale: %s", e, exc_info=True)
+        uptime = (datetime.now(UTC) - _START_TIME).total_seconds()
+        return HealthResponse(
+            status="degraded",
+            version="1.0.0",
+            timestamp=datetime.now(UTC),
+            services={"error": ServiceStatus(status="unknown", details=str(e))},
+            uptime_seconds=round(uptime, 1),
+        )
 
     # Convertir SanteComposant → ServiceStatus pour le schéma API
     services: dict[str, ServiceStatus] = {}
