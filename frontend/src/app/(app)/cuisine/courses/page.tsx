@@ -269,6 +269,13 @@ export default function PageCourses() {
           ? `La liste ${detailListe.nom} est encore en brouillon : confirmez-la pour partager les changements.`
           : `${articlesNonCoches.length} article(s) restant(s) sur ${detailListe?.nom ?? "la liste active"}.`;
 
+  const handleConfirmerListe = () => {
+    if (!listeSelectionnee) {
+      return;
+    }
+    confirmer(listeSelectionnee);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -298,7 +305,7 @@ export default function PageCourses() {
           {listeSelectionnee && (
           <>
             {detailListe?.etat === "brouillon" && (
-              <Button size="sm" onClick={() => confirmer(undefined)} disabled={enConfirmation}>
+              <Button size="sm" onClick={handleConfirmerListe} disabled={enConfirmation}>
                 {enConfirmation ? (
                   <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                 ) : (
@@ -567,7 +574,7 @@ export default function PageCourses() {
           onCocherCategorie={(categorie) => cocherCategorie(categorie)}
           onCocherArticle={(articleId, coche) => cocher({ articleId, coche })}
           onSupprimerArticle={supprimerAvecUndo}
-          onConfirmer={() => confirmer(undefined)}
+          onConfirmer={handleConfirmerListe}
           enConfirmation={enConfirmation}
         />
       </div>

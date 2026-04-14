@@ -1456,9 +1456,10 @@
       ]
     },
     {
-      "nom": "Crêpes sucrées",
+      "nom": "Crêpes au sucre",
       "description": "Crêpes maison pour le goûter",
       "type_repas": "goûter",
+      "categorie": "Dessert",
       "temps_preparation": 10,
       "temps_cuisson": 20,
       "portions": 12,

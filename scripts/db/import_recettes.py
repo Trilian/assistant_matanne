@@ -51,8 +51,7 @@ def importer_recettes_standard() -> int:
                 recette = Recette(
                     nom=recette_data["nom"],
                     description=recette_data.get("description", ""),
-                    type_repas=recette_data.get("type_repas", "dÃ®ner"),
-                    temps_preparation=recette_data.get("temps_preparation", 0),
+                    type_repas=recette_data.get("type_repas", "dÃ®ner"),                    categorie=recette_data.get("categorie", "Plat"),                    temps_preparation=recette_data.get("temps_preparation", 0),
                     temps_cuisson=recette_data.get("temps_cuisson", 0),
                     portions=recette_data.get("portions", 4),
                     difficulte=recette_data.get("difficulte", "moyen"),

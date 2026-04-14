@@ -67,13 +67,55 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
-_CATEGORIES_GENERIQUES = {"autre", "other"}
-
 
 def _rayon_valide(rayon: str | None) -> str | None:
     """Retourne le rayon s'il est significatif, None sinon."""
-    if rayon and rayon.lower() not in _CATEGORIES_GENERIQUES:
-        return rayon
+    if rayon and rayon.strip() and rayon.strip().lower() not in _CATEGORIES_GENERIQUES:
+        return rayon.strip()
+    return None
+
+
+_ETATS_BROUILLON = {"brouillon", "draft", "pending"}
+_ETATS_ACTIFS = {"active", "actif", "en_cours", "in_progress"}
+_ETATS_TERMINES = {"terminee", "terminée", "termine", "terminé", "complete", "completed", "done"}
+_CATEGORIES_GENERIQUES = {
+    "autre",
+    "autres",
+    "other",
+    "others",
+    "divers",
+    "misc",
+    "general",
+    "général",
+}
+
+
+def _normaliser_etat(valeur: str | None) -> str:
+    """Normalise un etat legacy vers les valeurs canoniques exposees par l'API."""
+    if not valeur:
+        return "brouillon"
+
+    brut = valeur.strip().lower()
+    if brut in _ETATS_BROUILLON:
+        return "brouillon"
+    if brut in _ETATS_ACTIFS:
+        return "active"
+    if brut in _ETATS_TERMINES:
+        return "terminee"
+    return "brouillon"
+
+
+def _suggerer_rayon_depuis_nom(nom: str | None) -> str | None:
+    """Propose un rayon a partir du nom de l'ingredient via mapping metier."""
+    if not nom:
+        return None
+
+    from src.services.cuisine.courses.constantes import MAPPING_RAYONS
+
+    nom_normalise = nom.casefold()
+    for mot_cle, rayon in MAPPING_RAYONS.items():
+        if mot_cle.casefold() in nom_normalise:
+            return rayon
     return None
 
 
@@ -81,11 +123,11 @@ def _etat_liste_response(liste: Any) -> str:
     """Normalise l'etat expose par l'API pour les mocks et anciennes donnees."""
     etat = getattr(liste, "etat", None)
     if isinstance(etat, str) and etat:
-        return etat
+        return _normaliser_etat(etat)
 
     statut = getattr(liste, "statut", None)
     if isinstance(statut, str) and statut:
-        return statut
+        return _normaliser_etat(statut)
 
     return "brouillon"
 
@@ -1073,29 +1115,55 @@ async def confirmer_courses(
     from src.core.models import ListeCourses
 
     def _confirmer() -> MessageResponse:
+        from src.core.constants import CATEGORIE_VERS_MAGASIN
+
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            if liste.etat == "terminee":
+            etat_courant = _etat_liste_response(liste)
+
+            if etat_courant == "terminee":
                 raise HTTPException(
                     status_code=409,
                     detail="Cette liste est déjà terminée et ne peut plus être confirmée",
                 )
 
-            if liste.etat == "active":
+            if etat_courant == "active":
                 return MessageResponse(
                     message="La liste est déjà active",
                     id=liste_id,
-                    details={"etat": liste.etat},
+                    details={"etat": "active"},
                 )
 
-            if liste.etat != "brouillon":
+            if etat_courant != "brouillon":
                 raise HTTPException(
                     status_code=409,
                     detail=f"Transition invalide depuis l'état '{liste.etat}'",
                 )
+
+            # Au passage en actif, on enrichit les articles encore en categorie generique.
+            for article in liste.articles or []:
+                rayon_existant = _rayon_valide(article.rayon_magasin)
+                if rayon_existant:
+                    continue
+
+                rayon_ingredient = _rayon_valide(
+                    article.ingredient.categorie if article.ingredient else None
+                )
+                rayon_suggere = rayon_ingredient or _suggerer_rayon_depuis_nom(
+                    article.ingredient.nom if article.ingredient else None
+                )
+
+                if not rayon_suggere:
+                    continue
+
+                article.rayon_magasin = rayon_suggere
+                if not article.magasin_cible:
+                    article.magasin_cible = CATEGORIE_VERS_MAGASIN.get(rayon_suggere.lower())
+                if article.ingredient and not _rayon_valide(article.ingredient.categorie):
+                    article.ingredient.categorie = rayon_suggere
 
             liste.etat = "active"
             liste.archivee = False

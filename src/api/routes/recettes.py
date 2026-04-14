@@ -965,7 +965,7 @@ async def recettes_saisonnieres(
                 nb_saison = sum(
                     1
                     for ing in ingredients
-                    if any(ps in (ing.nom or "").lower() for ps in produits_saison)
+                    if any(ps in (ing.ingredient.nom or "").lower() for ps in produits_saison)
                 )
                 if nb_saison > 0:
                     scored.append((r, nb_saison, nb_total))

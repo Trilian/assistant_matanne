@@ -775,9 +775,9 @@ async def envoyer_digest_matinal() -> bool:
 
             rows = session.execute(
                 text(
-                    "SELECT titre FROM taches_maison"
-                    " WHERE statut NOT IN ('termine', 'annule')"
-                    " AND date_echeance = :today"
+                    "SELECT nom FROM taches_entretien"
+                    " WHERE fait IS NOT TRUE"
+                    " AND prochaine_fois = :today"
                     " LIMIT 5"
                 ),
                 {"today": aujourd_hui},

@@ -335,6 +335,54 @@ class TestValidationCoursesV2:
         response = client.post(f"/api/v1/courses/{liste.id}/confirmer")
         assert response.status_code == 409
 
+    def test_confirmer_liste_brouillon_legacy_majuscule(self, client, db):
+        """Les etats legacy en majuscules sont normalises et confirmables."""
+        from src.core.models import ListeCourses
+
+        liste = ListeCourses(nom="Liste legacy", etat="BROUILLON", archivee=False)
+        db.add(liste)
+        db.commit()
+        db.refresh(liste)
+
+        response = client.post(f"/api/v1/courses/{liste.id}/confirmer")
+        assert response.status_code == 200
+
+        db.refresh(liste)
+        assert liste.etat == "active"
+
+    def test_confirmer_recategorise_articles_autres(self, client, db):
+        """La confirmation recategorie les articles generiques 'Autres'."""
+        from src.core.models import ArticleCourses, Ingredient, ListeCourses
+
+        liste = ListeCourses(nom="Liste categories", etat="brouillon", archivee=False)
+        ingredient = Ingredient(nom="Lait demi-écrémé", categorie="Autres", unite="L")
+        db.add_all([liste, ingredient])
+        db.commit()
+        db.refresh(liste)
+        db.refresh(ingredient)
+
+        article = ArticleCourses(
+            liste_id=liste.id,
+            ingredient_id=ingredient.id,
+            quantite_necessaire=1.0,
+            priorite="moyenne",
+            achete=False,
+            rayon_magasin="Autres",
+        )
+        db.add(article)
+        db.commit()
+        db.refresh(article)
+
+        response = client.post(f"/api/v1/courses/{liste.id}/confirmer")
+        assert response.status_code == 200
+
+        detail = client.get(f"/api/v1/courses/{liste.id}")
+        assert detail.status_code == 200
+        categories = {item.get("categorie") for item in detail.json().get("items", [])}
+
+        assert "Crèmerie" in categories
+        assert "Autres" not in categories
+
 
 # ═══════════════════════════════════════════════════════════
 # TESTS ADDITIONNELS POUR COUVERTURE

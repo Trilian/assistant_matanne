@@ -186,13 +186,13 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
                             (repas.entree || repas.laitage || repas.dessert) && (
                               <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 mt-0.5">
                                 {repas.entree && (
-                                  <span className="text-[9px] opacity-75 truncate max-w-[60px]">E·{repas.entree}</span>
+                                  <span className="text-[9px] opacity-75 truncate" title={`Entrée : ${repas.entree}`}>E·{repas.entree}</span>
                                 )}
                                 {repas.laitage && (
-                                  <span className="text-[9px] opacity-75 truncate max-w-[60px]">🥛 {repas.laitage}</span>
+                                  <span className="text-[9px] opacity-75 truncate" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
                                 )}
                                 {repas.dessert && (
-                                  <span className="text-[9px] opacity-75 truncate max-w-[60px]">🍮 {repas.dessert}</span>
+                                  <span className="text-[9px] opacity-75 truncate" title={`Dessert : ${repas.dessert}`}>🍮 {repas.dessert}</span>
                                 )}
                               </div>
                             )}

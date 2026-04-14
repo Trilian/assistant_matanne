@@ -417,22 +417,25 @@ export function utiliserPageCourses() {
   );
 
   const { mutate: confirmer, isPending: enConfirmation } = utiliserMutation(
-    () => confirmerCourses(listeSelectionnee!),
+    (idListe: number) => confirmerCourses(idListe),
     {
-      onSuccess: async () => {
-        const idListe = listeSelectionnee;
+      onSuccess: async (_data, idListe) => {
         queryClient.setQueryData(["courses", String(idListe)], (old: ListeCourses | undefined) =>
           old ? { ...old, etat: "active" } : old,
         );
+        queryClient.setQueryData<ListeCourses[] | undefined>(["courses"], (old) => {
+          if (!old) {
+            return old;
+          }
+          return old.map((liste) => (liste.id === idListe ? { ...liste, etat: "active" } : liste));
+        });
         invalider(["courses"]);
         toast.success("Liste confirmée, vous pouvez maintenant cocher vos achats.");
 
-        if (idListe) {
-          try {
-            await envoyerListeCoursesTelegram(idListe);
-          } catch {
-            toast.info("Liste confirmée, notification Telegram non envoyée.");
-          }
+        try {
+          await envoyerListeCoursesTelegram(idListe);
+        } catch {
+          toast.info("Liste confirmée, notification Telegram non envoyée.");
         }
       },
       onError: () => toast.error("Impossible de confirmer cette liste"),

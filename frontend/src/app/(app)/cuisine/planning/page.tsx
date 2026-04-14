@@ -278,14 +278,14 @@ function CarteRepasDraggable({
             {repas.recette_id ? (
               <a
                 href={`/cuisine/recettes/${repas.recette_id}`}
-                className="font-medium text-foreground truncate hover:underline hover:text-primary transition-colors"
+                className="font-medium text-foreground break-words hover:underline hover:text-primary transition-colors"
                 title={`Voir la recette : ${repas.recette_nom || repas.notes || "—"}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 {repas.recette_nom || repas.notes || "—"}
               </a>
             ) : (
-              <span className="font-medium text-foreground truncate">
+              <span className="font-medium text-foreground break-words">
                 {repas.recette_nom || repas.notes || "—"}
               </span>
             )}
@@ -306,31 +306,31 @@ function CarteRepasDraggable({
                   repas.entree_recette_id ? (
                     <a
                       href={`/cuisine/recettes/${repas.entree_recette_id}`}
-                      className="text-[10px] text-muted-foreground hover:underline line-clamp-1"
+                      className="text-[10px] text-muted-foreground hover:underline break-words"
                       title={`Entrée : ${repas.entree}`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       🥗 {repas.entree}
                     </a>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground line-clamp-1" title={`Entrée : ${repas.entree}`}>🥗 {repas.entree}</span>
+                    <span className="text-[10px] text-muted-foreground break-words" title={`Entrée : ${repas.entree}`}>🥗 {repas.entree}</span>
                   )
                 )}
                 {repas.laitage && (
-                  <span className="text-[10px] text-muted-foreground line-clamp-1" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
                 )}
                 {repas.dessert && (
                   repas.dessert_recette_id ? (
                     <a
                       href={`/cuisine/recettes/${repas.dessert_recette_id}`}
-                      className="text-[10px] text-muted-foreground hover:underline line-clamp-1"
+                      className="text-[10px] text-muted-foreground hover:underline break-words"
                       title={`Dessert : ${repas.dessert}`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       🍮 {repas.dessert}
                     </a>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground line-clamp-1" title={`Dessert : ${repas.dessert}`}>🍮 {repas.dessert}</span>
+                    <span className="text-[10px] text-muted-foreground break-words" title={`Dessert : ${repas.dessert}`}>🍮 {repas.dessert}</span>
                   )
                 )}
               </div>

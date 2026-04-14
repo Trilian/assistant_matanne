@@ -220,7 +220,7 @@ async def generer_session_depuis_planning(
     return await executer_async(_generate)
 
 
-@router.get("/{session_id}", response_model=SessionBatchResponse, responses=REPONSES_CRUD_LECTURE)
+@router.get("/{session_id:int}", response_model=SessionBatchResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_session(
     session_id: int,
@@ -288,7 +288,7 @@ async def creer_session(
 
 
 @router.patch(
-    "/{session_id}", response_model=SessionBatchResponse, responses=REPONSES_CRUD_ECRITURE
+    "/{session_id:int}", response_model=SessionBatchResponse, responses=REPONSES_CRUD_ECRITURE
 )
 @gerer_exception_api
 async def modifier_session(
@@ -343,7 +343,7 @@ async def modifier_session(
 
 
 @router.post(
-    "/{session_id}/generer-etapes",
+    "/{session_id:int}/generer-etapes",
     response_model=SessionBatchResponse,
     responses=REPONSES_IA,
 )
@@ -433,7 +433,7 @@ async def generer_etapes_session(
     return await executer_async(_generate)
 
 
-@router.delete("/{session_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete("/{session_id:int}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
 @gerer_exception_api
 async def supprimer_session(
     session_id: int,
