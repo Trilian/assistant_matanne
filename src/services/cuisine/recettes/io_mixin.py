@@ -168,18 +168,27 @@ class RecetteIOImportMixin:
         db.add(recette)
         db.flush()
 
-        # Parser et ajouter les ingrédients
+        # Parser et ajouter les ingrédients (idempotent : sommer si même ingrédient déjà présent)
         for ing_text in ingredients_textes:
             quantite, unite, nom_ing = self._parser_ingredient_texte(ing_text)
+            if not nom_ing:
+                continue
 
             ingredient = self._find_or_create_ingredient(db, nom_ing)
-            ri = RecetteIngredient(
-                recette_id=recette.id,
-                ingredient_id=ingredient.id,
-                quantite=quantite,
-                unite=unite,
+            existant = (
+                db.query(RecetteIngredient)
+                .filter_by(recette_id=recette.id, ingredient_id=ingredient.id)
+                .first()
             )
-            db.add(ri)
+            if existant:
+                existant.quantite += quantite
+            else:
+                db.add(RecetteIngredient(
+                    recette_id=recette.id,
+                    ingredient_id=ingredient.id,
+                    quantite=quantite,
+                    unite=unite or "pièce",
+                ))
 
         # Ajouter les étapes
         for idx, etape_text in enumerate(etapes_textes, 1):
@@ -207,26 +216,40 @@ class RecetteIOImportMixin:
     def _parser_ingredient_texte(ing_text: str) -> tuple[float, str, str]:
         """Parse un texte d'ingrédient en (quantité, unité, nom).
 
-        Exemples: "200 g farine" → (200.0, "g", "farine")
-                  "2 oignons" → (2.0, "g", "oignons")
-                  "sel" → (1.0, "", "sel")
+        Exemples:
+            "200 g farine"                 → (200.0, "g", "Farine")
+            "1 sachet (11g) levure chimique" → (1.0, "sachet", "Levure chimique")
+            "2 oignons"                    → (2.0, "", "Oignons")
+            "sel"                          → (1.0, "", "Sel")
         """
-        parts = ing_text.split(maxsplit=2)
+        import re
+
+        text = ing_text.strip()
+        if not text:
+            return 1.0, "", ""
+
+        parts = text.split(maxsplit=2)
         if len(parts) >= 3:
-            quantite_str, unite, nom_ing = parts[0], parts[1], " ".join(parts[2:])
+            quantite_str, unite_brute, nom_ing = parts[0], parts[1], " ".join(parts[2:])
             try:
                 quantite = float(quantite_str.replace(",", "."))
             except (ValueError, TypeError):
-                return 1.0, "", ing_text
+                return 1.0, "", text.strip().title()
+            # Retirer les spécificatifs entre parenthèses de l'unité et du nom
+            # Ex: "sachet (11g)" → unite="sachet", et "(11g) levure" → "levure"
+            unite = re.sub(r"\s*\([^)]*\)", "", unite_brute).strip()
+            nom_ing = re.sub(r"^\s*\([^)]*\)\s*", "", nom_ing).strip()
         elif len(parts) >= 2:
             quantite_str, nom_ing = parts[0], parts[1]
             try:
                 quantite = float(quantite_str.replace(",", "."))
             except (ValueError, TypeError):
-                return 1.0, "", ing_text
-            unite = "g"
+                return 1.0, "", text.strip().title()
+            unite = ""
         else:
-            return 1.0, "", ing_text
+            return 1.0, "", text.strip().title()
+
+        nom_ing = nom_ing.strip().title()
         return quantite, unite, nom_ing
 
 

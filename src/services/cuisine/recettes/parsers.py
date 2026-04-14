@@ -139,8 +139,12 @@ class RecipeParser:
                         quantite = float(quantite_str.replace(",", "."))
                     except (ValueError, TypeError):
                         quantite = None
+                    # Retirer les spécificatifs entre parenthèses de l'unité et du nom
+                    # Ex: unite="sachet (11g)" → "sachet", nom="(11g) sel" → "sel"
+                    unite = re.sub(r"\s*\([^)]*\)", "", unite).strip()
+                    nom = re.sub(r"^\s*\([^)]*\)\s*", "", nom).strip().title()
                     return ImportedIngredient(
-                        nom=nom.strip(), quantite=quantite, unite=unite.strip()
+                        nom=nom, quantite=quantite, unite=unite
                     )
                 elif len(groups) == 2:
                     quantite_str, nom = groups
@@ -148,10 +152,11 @@ class RecipeParser:
                         quantite = float(quantite_str.replace(",", "."))
                     except (ValueError, TypeError):
                         quantite = None
-                    return ImportedIngredient(nom=nom.strip(), quantite=quantite, unite="")
+                    nom = re.sub(r"^\s*\([^)]*\)\s*", "", nom).strip().title()
+                    return ImportedIngredient(nom=nom, quantite=quantite, unite="")
 
         # Pas de pattern trouvé, garder le texte entier comme nom
-        return ImportedIngredient(nom=text)
+        return ImportedIngredient(nom=text.title())
 
 
 class MarmitonParser(RecipeParser):

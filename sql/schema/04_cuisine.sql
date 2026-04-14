@@ -175,7 +175,8 @@ CREATE TABLE IF NOT EXISTS recette_ingredients (
     optionnel BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_recette_ing_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT fk_recette_ing_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
-    CONSTRAINT ck_quantite_positive CHECK (quantite > 0)
+    CONSTRAINT ck_quantite_positive CHECK (quantite > 0),
+    CONSTRAINT uq_recette_ingredient UNIQUE (recette_id, ingredient_id)
 );
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_recette ON recette_ingredients(recette_id);
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_ingredient ON recette_ingredients(ingredient_id);

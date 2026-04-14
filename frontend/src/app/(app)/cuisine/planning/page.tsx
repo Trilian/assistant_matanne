@@ -127,6 +127,7 @@ import { ModalGenerationPlanning } from "@/composants/cuisine/modal-generation-p
 
 const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
 const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
+const ContenuSaisonnierLazy = lazy(() => import("../saisonnier/page"));
 
 // Noms des jours indexés 0=Dimanche … 6=Samedi (aligné sur Date.getDay())
 const NOMS_JOURS_SEMAINE = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -432,7 +433,7 @@ function CaseRepasPlanning({
 }
 
 export default function PagePlanning() {
-  const [vuePlanning, setVuePlanning] = useState<"planning" | "ma-semaine" | "nutrition">("planning");
+  const [vuePlanning, setVuePlanning] = useState<"planning" | "ma-semaine" | "nutrition" | "saisonnier">("planning");
   const { contexte: modeInvites, mettreAJour: mettreAJourModeInvites, reinitialiser: reinitialiserModeInvites } = utiliserModeInvites();
   const { utilisateur } = utiliserAuth();
   const [modeAffichage, setModeAffichage] = useState<"semaine" | "mois">("semaine");
@@ -778,9 +779,11 @@ export default function PagePlanning() {
     {
       onSuccess: () => {
         // Fermeture immédiate du bandeau sans attendre le refetch.
-        const fluxKey = ["flux", "cuisine", planning?.planning_id ? String(planning.planning_id) : "courant"];
-        queryClient.setQueryData(fluxKey, (old: FluxCuisine | undefined) =>
-          old?.etape_actuelle === "valider_planning" ? { ...old, etape_actuelle: "generer_courses" } : old
+        // setQueriesData (match partiel) couvre toutes les keys ["flux","cuisine","<id>"]
+        // même si planning_id n'est pas encore résolu dans la closure.
+        queryClient.setQueriesData<FluxCuisine>(
+          { queryKey: ["flux", "cuisine"] },
+          (old) => old?.etape_actuelle === "valider_planning" ? { ...old, etape_actuelle: "generer_courses" } : old
         );
         invalider(["planning"]);
         invalider(["flux", "cuisine"]);
@@ -1003,10 +1006,11 @@ export default function PagePlanning() {
     <div className="space-y-6">
       {/* ─── Onglets haut niveau ─── */}
       <Tabs value={vuePlanning} onValueChange={(v) => setVuePlanning(v as typeof vuePlanning)}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="planning">📅 Planning</TabsTrigger>
           <TabsTrigger value="ma-semaine">🔄 Ma Semaine</TabsTrigger>
           <TabsTrigger value="nutrition">🥗 Nutrition</TabsTrigger>
+          <TabsTrigger value="saisonnier">🌿 Saisonnier</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ma-semaine" className="mt-4">
@@ -1018,6 +1022,12 @@ export default function PagePlanning() {
         <TabsContent value="nutrition" className="mt-4">
           <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
             <ContenuNutritionLazy />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="saisonnier" className="mt-4">
+          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
+            <ContenuSaisonnierLazy />
           </Suspense>
         </TabsContent>
 

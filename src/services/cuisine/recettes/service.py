@@ -241,16 +241,25 @@ class ServiceRecettes(
         db.add(recette)
         db.flush()
 
-        # Créer ingrédients
+        # Créer ingrédients (idempotent : sommer si même ingrédient déjà présent)
         for ing_data in validated.ingredients or []:
             ingredient = self._find_or_create_ingredient(db, ing_data.nom)
-            recette_ing = RecetteIngredient(
-                recette_id=recette.id,
-                ingredient_id=ingredient.id,
-                quantite=ing_data.quantite or 1.0,
-                unite=ing_data.unite or "pièce",
+            quantite = ing_data.quantite or 1.0
+            unite = ing_data.unite or "pièce"
+            existant = (
+                db.query(RecetteIngredient)
+                .filter_by(recette_id=recette.id, ingredient_id=ingredient.id)
+                .first()
             )
-            db.add(recette_ing)
+            if existant:
+                existant.quantite += quantite
+            else:
+                db.add(RecetteIngredient(
+                    recette_id=recette.id,
+                    ingredient_id=ingredient.id,
+                    quantite=quantite,
+                    unite=unite,
+                ))
 
         # Créer étapes
         for idx, etape_data in enumerate(validated.etapes or []):
@@ -535,7 +544,7 @@ class ServiceRecettes(
     # ═══════════════════════════════════════════════════════════
 
     def _find_or_create_ingredient(self, db: Session, nom: str) -> Ingredient:
-        """Finds or creates an ingredient.
+        """Finds or creates an ingredient (case-insensitive lookup).
 
         Args:
             db: Database session
@@ -544,12 +553,19 @@ class ServiceRecettes(
         Returns:
             Ingredient object (existing or newly created)
         """
-        ingredient = db.query(Ingredient).filter(Ingredient.nom == nom).first()
+        from sqlalchemy import func
+
+        nom_normalise = nom.strip().title()
+        ingredient = (
+            db.query(Ingredient)
+            .filter(func.lower(Ingredient.nom) == nom_normalise.lower())
+            .first()
+        )
         if not ingredient:
-            ingredient = Ingredient(nom=nom, unite="pcs", categorie="Autre")
+            ingredient = Ingredient(nom=nom_normalise, unite="pcs", categorie="Autre")
             db.add(ingredient)
             db.flush()
-            logger.debug(f"Created ingredient: {nom}")
+            logger.debug(f"Created ingredient: {nom_normalise}")
         return ingredient
 
 

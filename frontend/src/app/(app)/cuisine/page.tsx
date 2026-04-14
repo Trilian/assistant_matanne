@@ -80,14 +80,6 @@ const SECTIONS = [
     couleur: "text-orange-600",
     bgCouleur: "bg-orange-500/10",
   },
-  {
-    titre: "Saisonnier",
-    description: "Calendrier visuel des produits de saison",
-    chemin: "/cuisine/saisonnier",
-    Icone: Leaf,
-    couleur: "text-emerald-600",
-    bgCouleur: "bg-emerald-500/10",
-  },
 ];
 
 export default function PageCuisine() {

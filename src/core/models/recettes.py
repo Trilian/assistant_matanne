@@ -25,6 +25,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -291,7 +292,10 @@ class RecetteIngredient(Base):
     recette: Mapped["Recette"] = relationship(back_populates="ingredients")
     ingredient: Mapped["Ingredient"] = relationship(back_populates="recette_ingredients")
 
-    __table_args__ = (CheckConstraint("quantite > 0", name="ck_quantite_positive"),)
+    __table_args__ = (
+        CheckConstraint("quantite > 0", name="ck_quantite_positive"),
+        UniqueConstraint("recette_id", "ingredient_id", name="uq_recette_ingredient"),
+    )
 
     def __repr__(self) -> str:
         return f"<RecetteIngredient(recette={self.recette_id}, ingredient={self.ingredient_id})>"

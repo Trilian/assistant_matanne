@@ -1064,7 +1064,14 @@ async def generer_depuis_planning(
                     session.add(ingredient)
                     session.flush()
 
-                rayon_article = art.get("rayon") or _suggerer_rayon_depuis_nom(art["nom"])
+                rayon_brut = art.get("rayon")
+                rayon_article = (
+                    _suggerer_rayon_depuis_nom(art["nom"])
+                    if not rayon_brut or rayon_brut.lower() in ("autre", "other")
+                    else rayon_brut
+                )
+                # Mettre à jour le dict pour que par_rayon reflète le bon rayon
+                art["rayon"] = rayon_article or "Autre"
                 magasin_article = CATEGORIE_VERS_MAGASIN.get((rayon_article or "").lower()) if rayon_article else None
                 session.add(
                     ArticleCourses(
@@ -1080,7 +1087,7 @@ async def generer_depuis_planning(
 
             session.commit()
 
-            # Compter par rayon
+            # Compter par rayon (art["rayon"] a déjà été résolu ci-dessus)
             par_rayon: dict[str, int] = {}
             for art in articles_a_acheter:
                 rayon = art.get("rayon") or "Autre"

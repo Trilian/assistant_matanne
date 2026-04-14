@@ -100,7 +100,6 @@ const LIENS: LienNav[] = [
       { nom: "Courses", chemin: "/cuisine/courses", Icone: ShoppingCart },
       { nom: "Frigo & Stock", chemin: "/cuisine/inventaire", Icone: Package },
       { nom: "Batch Cooking", chemin: "/cuisine/batch-cooking", Icone: CookingPot },
-      { nom: "Saisonnier", chemin: "/cuisine/saisonnier", Icone: CalendarRange },
     ],
   },
   {

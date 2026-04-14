@@ -1258,7 +1258,8 @@ CREATE TABLE IF NOT EXISTS recette_ingredients (
     optionnel BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_recette_ing_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT fk_recette_ing_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
-    CONSTRAINT ck_quantite_positive CHECK (quantite > 0)
+    CONSTRAINT ck_quantite_positive CHECK (quantite > 0),
+    CONSTRAINT uq_recette_ingredient UNIQUE (recette_id, ingredient_id)
 );
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_recette ON recette_ingredients(recette_id);
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_ingredient ON recette_ingredients(ingredient_id);
@@ -1281,6 +1282,14 @@ CREATE TABLE IF NOT EXISTS etapes_recette (
     CONSTRAINT ck_ordre_positif CHECK (ordre > 0)
 );
 CREATE INDEX IF NOT EXISTS ix_etapes_recette_recette ON etapes_recette(recette_id);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'uq_etapes_recette_recette_ordre'
+  ) THEN
+    ALTER TABLE etapes_recette
+      ADD CONSTRAINT uq_etapes_recette_recette_ordre UNIQUE (recette_id, ordre);
+  END IF;
+END $$;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
