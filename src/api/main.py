@@ -154,7 +154,6 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     # Enregistre le webhook si APP_BASE_URL est défini — permet d'activer les
     # callbacks des boutons Telegram sans intervention manuelle après chaque déploiement.
     try:
-        from src.core.config import obtenir_parametres
         from src.api.routes.telegram._routes import _enregistrer_webhook_telegram
 
         _settings = obtenir_parametres()
