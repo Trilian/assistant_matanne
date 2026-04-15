@@ -60,6 +60,8 @@ import {
   obtenirConflitsPlanning,
   definirRepas,
   supprimerRepas,
+  mettreAJourRepas,
+  obtenirSuggestionsAccompagnements,
   genererPlanningSemaine,
   validerPlanning,
   regenererPlanning,
@@ -78,6 +80,7 @@ import type {
   TypeRepas,
   RepasPlanning,
   CreerRepasPlanningDTO,
+  SuggestionAccompagnement,
   SuggestionRecettePlanning,
 } from "@/types/planning";
 import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
@@ -291,6 +294,24 @@ function CarteRepasDraggable({
               </span>
             )}
             {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
+            {repas.score_equilibre != null && repas.type_repas !== "petit_dejeuner" && (
+              <span
+                title={
+                  repas.alertes_equilibre?.length
+                    ? `Score équilibre : ${repas.score_equilibre}/100\n${repas.alertes_equilibre.join("\n")}`
+                    : `Score équilibre : ${repas.score_equilibre}/100`
+                }
+                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                  repas.score_equilibre >= 80
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                    : repas.score_equilibre >= 50
+                    ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                }`}
+              >
+                ⚖ {repas.score_equilibre}
+              </span>
+            )}
             {repas.genere_par_ia && (
               <span
                 title="Recette générée par l'IA"
@@ -309,7 +330,7 @@ function CarteRepasDraggable({
             )}
           </div>
           {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
-            (repas.entree || repas.laitage || repas.dessert) && (
+            (repas.entree || repas.laitage || repas.dessert || repas.legumes || repas.feculents || repas.proteine_accompagnement) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
                 {repas.entree && (
                   repas.entree_recette_id ? (
@@ -324,6 +345,15 @@ function CarteRepasDraggable({
                   ) : (
                     <span className="text-[10px] text-muted-foreground break-words" title={`Entrée : ${repas.entree}`}>🥗 {repas.entree}</span>
                   )
+                )}
+                {repas.legumes && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Légumes : ${repas.legumes}`}>🥦 {repas.legumes}</span>
+                )}
+                {repas.feculents && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Féculents : ${repas.feculents}`}>🍚 {repas.feculents}</span>
+                )}
+                {repas.proteine_accompagnement && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Protéine : ${repas.proteine_accompagnement}`}>🥩 {repas.proteine_accompagnement}</span>
                 )}
                 {repas.laitage && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
@@ -447,6 +477,17 @@ export default function PagePlanning() {
   const [notesRepas, setNotesRepas] = useState("");
   const [ongletDialogue, setOngletDialogue] = useState<"suggestions" | "libre">("suggestions");
   const [rechercheRecette, setRechercheRecette] = useState("");
+  // Étape 2 du dialogue : accompagnements nutritionnels
+  const [repasIdCree, setRepasIdCree] = useState<number | null>(null);
+  const [dialogueEtape, setDialogueEtape] = useState<"choisir" | "equilibre">("choisir");
+  const [legumesForm, setLegumesForm] = useState("");
+  const [feculentsForm, setFeculentsForm] = useState("");
+  const [proteineForm, setProteineForm] = useState("");
+  const [laitageForm, setLaitageForm] = useState("");
+  const [fruitGouter, setFruitGouter] = useState("");
+  const [gateauGouter, setGateauGouter] = useState("");
+  const [suggestionsIA, setSuggestionsIA] = useState<SuggestionAccompagnement | null>(null);
+  const [enSuggestionIA, setEnSuggestionIA] = useState(false);
   const [coursesDialogue, setCoursesDialogue] = useState(false);
   const [coursesResultat, setCoursesResultat] = useState<GenererCoursesResult | null>(null);
   const [batchDialogue, setBatchDialogue] = useState(false);
@@ -597,16 +638,23 @@ export default function PagePlanning() {
   const { mutate: ajouterRepas, isPending: enAjout } = utiliserMutation(
     (dto: CreerRepasPlanningDTO) => definirRepas(dto),
     {
-      onSuccess: (_resultat, dto) => {
+      onSuccess: (resultat, dto) => {
         invalider(["planning"]);
-        setDialogueOuvert(false);
-        setNotesRepas("");
         diffuserPlanning({
           action: "repas_added",
           data: { date: dto.date, type_repas: dto.type_repas },
           user_id: identifiantPresencePlanning,
         });
-        toast.success("Repas ajouté");
+        // Pour déj/dîner/goûter : passer à l'étape accompagnements
+        if (dto.type_repas !== "petit_dejeuner" && "id" in resultat && typeof (resultat as { id: number }).id === "number") {
+          setRepasIdCree((resultat as { id: number }).id);
+          setDialogueEtape("equilibre");
+          toast.success("Repas ajouté — ajoutez les accompagnements !");
+        } else {
+          setDialogueOuvert(false);
+          setNotesRepas("");
+          toast.success("Repas ajouté");
+        }
       },
       onError: () => toast.error("Erreur lors de l'ajout"),
     }
@@ -870,6 +918,15 @@ export default function PagePlanning() {
     setNotesRepas("");
     setRechercheRecette("");
     setOngletDialogue("suggestions");
+    setRepasIdCree(null);
+    setDialogueEtape("choisir");
+    setLegumesForm("");
+    setFeculentsForm("");
+    setProteineForm("");
+    setLaitageForm("");
+    setFruitGouter("");
+    setGateauGouter("");
+    setSuggestionsIA(null);
     setDialogueOuvert(true);
   }
 
@@ -1621,8 +1678,15 @@ export default function PagePlanning() {
       {/* ─── Dialogue ajout repas avec sélecteur de recettes ─── */}
       <ResponsiveOverlay
         open={dialogueOuvert}
-        onOpenChange={setDialogueOuvert}
-        title="Ajouter un repas"
+        onOpenChange={(open) => {
+          setDialogueOuvert(open);
+          if (!open) {
+            setDialogueEtape("choisir");
+            setRepasIdCree(null);
+            setSuggestionsIA(null);
+          }
+        }}
+        title={dialogueEtape === "equilibre" ? "⚖ Équilibre du repas" : "Ajouter un repas"}
         contentClassName="sm:max-w-lg"
       >
         {repasEnCours && (
@@ -1636,113 +1700,318 @@ export default function PagePlanning() {
             {TYPES_REPAS.find((t) => t.valeur === repasEnCours.type_repas)?.label}
           </p>
         )}
-        <Tabs value={ongletDialogue} onValueChange={(v) => setOngletDialogue(v as "suggestions" | "libre")}>
-          <TabsList className="w-full">
-            <TabsTrigger value="suggestions" className="flex-1">
-              <Search className="h-3.5 w-3.5 mr-1.5" />
-              Recettes
-            </TabsTrigger>
-            <TabsTrigger value="libre" className="flex-1">
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              Texte libre
-            </TabsTrigger>
-          </TabsList>
 
-          {/* ─── Onglet suggestions de recettes ─── */}
-          <TabsContent value="suggestions" className="space-y-3 mt-3">
-            <div className="flex gap-2">
+        {/* ─── Étape 1 : Choisir la recette / texte ─── */}
+        {dialogueEtape === "choisir" && (
+          <Tabs value={ongletDialogue} onValueChange={(v) => setOngletDialogue(v as "suggestions" | "libre")}>
+            <TabsList className="w-full">
+              <TabsTrigger value="suggestions" className="flex-1">
+                <Search className="h-3.5 w-3.5 mr-1.5" />
+                Recettes
+              </TabsTrigger>
+              <TabsTrigger value="libre" className="flex-1">
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                Texte libre
+              </TabsTrigger>
+            </TabsList>
+
+            {/* ─── Onglet suggestions de recettes ─── */}
+            <TabsContent value="suggestions" className="space-y-3 mt-3">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Rechercher une recette..."
+                  value={rechercheRecette}
+                  onChange={(e) => setRechercheRecette(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  title="Surprise du chef — choisit une recette au hasard"
+                  disabled={!suggestions || suggestions.length === 0 || enAjout}
+                  onClick={() => {
+                    if (!suggestions || suggestions.length === 0) return;
+                    const idx = Math.floor(Math.random() * suggestions.length);
+                    choisirRecette(suggestions[idx]);
+                  }}
+                >
+                  🎲
+                </Button>
+              </div>
+              <div className="max-h-64 overflow-y-auto space-y-1.5">
+                {chargeSuggestions ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-14 w-full" />
+                  ))
+                ) : suggestionsFiltrees.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">
+                    Aucune recette trouvée
+                  </p>
+                ) : (
+                  suggestionsFiltrees.map((recette) => (
+                    <button
+                      key={recette.id}
+                      onClick={() => choisirRecette(recette)}
+                      disabled={enAjout}
+                      className="w-full flex items-center justify-between rounded-md border p-3 text-left hover:bg-accent transition-colors disabled:opacity-50"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{recette.nom}</p>
+                        {recette.categorie && (
+                          <Badge variant="outline" className="text-[10px] mt-0.5">
+                            {recette.categorie}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        {recette.temps_total > 0 && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {recette.temps_total} min
+                          </span>
+                        )}
+                        <ConvertisseurInline />
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+
+            {/* ─── Onglet texte libre ─── */}
+            <TabsContent value="libre" className="space-y-4 mt-3">
               <Input
-                placeholder="Rechercher une recette..."
-                value={rechercheRecette}
-                onChange={(e) => setRechercheRecette(e.target.value)}
-                className="flex-1"
+                value={notesRepas}
+                onChange={(e) => setNotesRepas(e.target.value)}
+                placeholder="Ex: Quiche lorraine"
               />
-              <Button
-                variant="outline"
-                size="sm"
-                title="Surprise du chef — choisit une recette au hasard"
-                disabled={!suggestions || suggestions.length === 0 || enAjout}
-                onClick={() => {
-                  if (!suggestions || suggestions.length === 0) return;
-                  const idx = Math.floor(Math.random() * suggestions.length);
-                  choisirRecette(suggestions[idx]);
-                }}
-              >
-                🎲
-              </Button>
-            </div>
-            <div className="max-h-64 overflow-y-auto space-y-1.5">
-              {chargeSuggestions ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-14 w-full" />
-                ))
-              ) : suggestionsFiltrees.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  Aucune recette trouvée
-                </p>
-              ) : (
-                suggestionsFiltrees.map((recette) => (
-                  <button
-                    key={recette.id}
-                    onClick={() => choisirRecette(recette)}
-                    disabled={enAjout}
-                    className="w-full flex items-center justify-between rounded-md border p-3 text-left hover:bg-accent transition-colors disabled:opacity-50"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{recette.nom}</p>
-                      {recette.categorie && (
-                        <Badge variant="outline" className="text-[10px] mt-0.5">
-                          {recette.categorie}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      {recette.temps_total > 0 && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {recette.temps_total} min
-                        </span>
-                      )}
-                      <ConvertisseurInline />
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          </TabsContent>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDialogueOuvert(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  disabled={enAjout || !notesRepas.trim()}
+                  onClick={() => {
+                    if (repasEnCours) {
+                      ajouterRepas({
+                        date: repasEnCours.date,
+                        type_repas: repasEnCours.type_repas,
+                        notes: notesRepas,
+                      });
+                    }
+                  }}
+                >
+                  {enAjout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Ajouter
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        )}
 
-          {/* ─── Onglet texte libre ─── */}
-          <TabsContent value="libre" className="space-y-4 mt-3">
-            <Input
-              value={notesRepas}
-              onChange={(e) => setNotesRepas(e.target.value)}
-              placeholder="Ex: Quiche lorraine"
-            />
+        {/* ─── Étape 2 : Accompagnements nutritionnels ─── */}
+        {dialogueEtape === "equilibre" && repasIdCree != null && repasEnCours && (
+          <div className="space-y-4 mt-2">
+            {repasEnCours.type_repas === "gouter" ? (
+              <>
+                <p className="text-xs text-muted-foreground">Complétez le goûter (PNNS4 : laitage + fruit + gâteau sain).</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🥛 Laitage</label>
+                    <Input
+                      value={laitageForm}
+                      onChange={(e) => setLaitageForm(e.target.value)}
+                      placeholder="Ex: Yaourt nature, fromage blanc…"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🍎 Fruit</label>
+                    <Input
+                      value={fruitGouter}
+                      onChange={(e) => setFruitGouter(e.target.value)}
+                      placeholder="Ex: Pomme, Compote poire…"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🍪 Gâteau / biscuit sain</label>
+                    <Input
+                      value={gateauGouter}
+                      onChange={(e) => setGateauGouter(e.target.value)}
+                      placeholder="Ex: Cake maison, biscuit complet…"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">Équilibrez l'assiette (PNNS4 : ≥½ légumes, ¼ féculents, ¼ protéines).</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={enSuggestionIA}
+                    onClick={async () => {
+                      setEnSuggestionIA(true);
+                      try {
+                        const s = await obtenirSuggestionsAccompagnements(repasIdCree);
+                        setSuggestionsIA(s);
+                        if (s.legumes[0]) setLegumesForm(s.legumes[0]);
+                        if (s.feculents[0]) setFeculentsForm(s.feculents[0]);
+                        if (s.proteines[0]) setProteineForm(s.proteines[0]);
+                      } catch {
+                        toast.error("Impossible de générer des suggestions");
+                      } finally {
+                        setEnSuggestionIA(false);
+                      }
+                    }}
+                  >
+                    {enSuggestionIA ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    ) : (
+                      <span className="mr-1.5">✨</span>
+                    )}
+                    Suggérer
+                  </Button>
+                </div>
+
+                {suggestionsIA && (
+                  <div className="rounded-md border bg-muted/30 p-3 space-y-2 text-xs">
+                    {suggestionsIA.legumes.length > 0 && (
+                      <div>
+                        <span className="font-medium text-muted-foreground">🥦 Légumes :</span>{" "}
+                        <span className="flex flex-wrap gap-1 mt-1">
+                          {suggestionsIA.legumes.map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => setLegumesForm(s)}
+                              className="rounded bg-background border px-2 py-0.5 hover:bg-accent transition-colors"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                    {suggestionsIA.feculents.length > 0 && (
+                      <div>
+                        <span className="font-medium text-muted-foreground">🍚 Féculents :</span>{" "}
+                        <span className="flex flex-wrap gap-1 mt-1">
+                          {suggestionsIA.feculents.map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => setFeculentsForm(s)}
+                              className="rounded bg-background border px-2 py-0.5 hover:bg-accent transition-colors"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                    {suggestionsIA.proteines.length > 0 && (
+                      <div>
+                        <span className="font-medium text-muted-foreground">🥩 Protéines :</span>{" "}
+                        <span className="flex flex-wrap gap-1 mt-1">
+                          {suggestionsIA.proteines.map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => setProteineForm(s)}
+                              className="rounded bg-background border px-2 py-0.5 hover:bg-accent transition-colors"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🥦 Légumes</label>
+                    <Input
+                      value={legumesForm}
+                      onChange={(e) => setLegumesForm(e.target.value)}
+                      placeholder="Ex: Haricots verts, Courgettes sautées…"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🍚 Féculents</label>
+                    <Input
+                      value={feculentsForm}
+                      onChange={(e) => setFeculentsForm(e.target.value)}
+                      placeholder="Ex: Riz vapeur, Pommes de terre…"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🥩 Protéine accompagnement</label>
+                    <Input
+                      value={proteineForm}
+                      onChange={(e) => setProteineForm(e.target.value)}
+                      placeholder="Ex: Filet de poulet, Œufs dur… (si plat principal = féculent)"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
             <div className="flex justify-end gap-2">
               <Button
-                variant="outline"
-                onClick={() => setDialogueOuvert(false)}
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  invalider(["planning"]);
+                  setDialogueOuvert(false);
+                  setDialogueEtape("choisir");
+                  setRepasIdCree(null);
+                }}
               >
-                Annuler
+                Passer
               </Button>
               <Button
-                disabled={enAjout || !notesRepas.trim()}
-                onClick={() => {
-                  if (repasEnCours) {
-                    ajouterRepas({
-                      date: repasEnCours.date,
-                      type_repas: repasEnCours.type_repas,
-                      notes: notesRepas,
-                    });
+                size="sm"
+                disabled={enAjout}
+                onClick={async () => {
+                  if (!repasIdCree) return;
+                  const payload: Partial<CreerRepasPlanningDTO> =
+                    repasEnCours.type_repas === "gouter"
+                      ? {
+                          laitage: laitageForm || undefined,
+                          fruit_gouter: fruitGouter || undefined,
+                          gateau_gouter: gateauGouter || undefined,
+                        }
+                      : {
+                          legumes: legumesForm || undefined,
+                          feculents: feculentsForm || undefined,
+                          proteine_accompagnement: proteineForm || undefined,
+                        };
+                  try {
+                    await mettreAJourRepas(repasIdCree, payload);
+                    invalider(["planning"]);
+                    toast.success("Accompagnements enregistrés");
+                    setDialogueOuvert(false);
+                    setDialogueEtape("choisir");
+                    setRepasIdCree(null);
+                  } catch {
+                    toast.error("Impossible de sauvegarder les accompagnements");
                   }
                 }}
               >
-                {enAjout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Ajouter
+                Confirmer
               </Button>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </ResponsiveOverlay>
 
       {/* ─── Dialogue résultat courses ─── */}
