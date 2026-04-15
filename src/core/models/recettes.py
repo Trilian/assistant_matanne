@@ -160,6 +160,11 @@ class Recette(TimestampMixin, Base):
         String(100)
     )  # poisson, viande, volaille, vegetarien
 
+    # Catégorie nutritionnelle (pour validation équilibre assiette)
+    # Valeurs : proteines_poisson, proteines_viande_rouge, proteines_volaille,
+    #           proteines_oeuf, proteines_legumineuses, feculents, legumes_principaux, mixte
+    categorie_nutritionnelle: Mapped[str | None] = mapped_column(String(50))
+
     # Bio & Local
     est_bio: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     est_local: Mapped[bool] = mapped_column(Boolean, default=False, index=True)

@@ -98,10 +98,10 @@ class ConfigBatchCooking(TimestampMixin, Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Jours préférés (stockés en JSON: [0, 6] pour lundi et dimanche)
+    # Jours préférés (stockés en JSON: [2, 6] pour mercredi=2 et dimanche=6)
     jours_batch: Mapped[list[int]] = mapped_column(
-        JSONB, default=lambda: [6]
-    )  # Dimanche par défaut
+        JSONB, default=lambda: [2, 6]
+    )  # Mercredi + Dimanche par défaut
     heure_debut_preferee: Mapped[time | None] = mapped_column(Time, default=time(10, 0))
     duree_max_session: Mapped[int] = mapped_column(Integer, default=180)  # 3h par défaut
 
@@ -113,8 +113,12 @@ class ConfigBatchCooking(TimestampMixin, Base):
         JSONB, default=lambda: ["four", "plaques"]
     )
 
-    # Préférences stockage
+    # Préférences stockage (frigo / congélateur / ambiant)
     preferences_stockage: Mapped[dict | None] = mapped_column(JSONB)
+
+    # Couverture jours par session (ex: {"2": [2, 3, 4], "6": [6, 0, 1, 2]})
+    # Mercredi (2) couvre mer+jeu+ven, Dimanche (6) couvre dim+lun+mar+mer_midi
+    couverture_jours: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Personnalisation
     objectif_portions_semaine: Mapped[int] = mapped_column(Integer, default=20)

@@ -284,7 +284,8 @@ JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
 - Chaque plat du dîner DOIT être adaptable pour Jules : sans sel ajouté, sans alcool (même en sauce), sans épices fortes
 - Textures adaptées à l'âge : mixé/écrasé si dur, morceaux mous acceptés
 - À éviter dans les plats principaux : poisson cru, marinades alcoolisées, piments, moutarde forte
-- Version Jules = même recette simplifiée (ex: "Bœuf bourguignon" → "version Jules : bœuf mijoté sans vin, pommes de terre écrasées")"""
+- Version Jules = même recette simplifiée (ex: "Bœuf bourguignon" → "version Jules : bœuf mijoté sans vin, pommes de terre écrasées")
+- Jules ne mange PAS d'entrée — ses légumes lui viennent uniquement du plat principal et de l'accompagnement (diner_legumes/dejeuner_legumes) : inclure impérativement un légume dans chaque plat ou en accompagnement"""
             if jules_present
             else ""
         )
@@ -304,17 +305,22 @@ OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
     "dejeuner_entree": "Salade verte",
     "dejeuner_entree_est_recette": false,
     "dejeuner_laitage": "Yaourt nature",
+    "dejeuner_legumes": "Haricots verts",
     "dejeuner_dessert": "Tarte aux pommes",
     "dejeuner_dessert_est_recette": true,
+    "dejeuner_legumes": "Haricots verts",
     "dejeuner_est_reste": false,
     "dejeuner_reste_source": null,
     "gouter": "Pain au chocolat",
     "gouter_est_recette": false,
+    "gouter_laitage": "Yaourt nature",
+    "gouter_fruit": "Pomme",
     "diner": "Salade niçoise",
     "diner_entree": null,
     "diner_entree_est_recette": false,
     "diner_laitage": "Fromage",
-    "diner_dessert": "Fruit de saison",
+    "diner_legumes": "Tomates cerises",
+    "diner_dessert": null,
     "diner_dessert_est_recette": false,
     "diner_est_reste": false,
     "diner_reste_source": null
@@ -327,12 +333,13 @@ RULES:
 3. petit_dejeuner: simple text on weekdays (tartines, céréales, fruit), can be est_recette=true on weekend (crêpes, gaufres...)
 4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
-6. gouter: MANDATORY — always a non-null short text. est_recette=true only for real preparations. Never leave null.
+6. gouter: MANDATORY — always a non-null short text. est_recette=true only for real preparations. Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice.
 7. PROTEINS — strictly follow the OMS balance section above: {poisson_blanc_jour}=poisson blanc, {poisson_gras_jour or "a chosen day"}=poisson gras, max {viande_rouge_max}x red meat, {vegetarien_jour}=vegetarian, other days=poultry
 8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers.
-9. null is valid ONLY for entree, laitage, dessert, reste_source — never for gouter
+9. null is valid ONLY for entree, laitage, dessert, reste_source, gouter_laitage, gouter_fruit, dejeuner_legumes, diner_legumes — never for gouter
 10. No explanations, no text, ONLY JSON
-11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them."""
+11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
+12. LÉGUMES — every dejeuner and diner MUST have a non-null legumes field: a vegetable side dish or garnish (haricots verts, courgettes sautées, brocoli vapeur, carottes, épinards, poêlée de champignons...). Never leave dejeuner_legumes or diner_legumes null."""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -427,6 +434,7 @@ RULES:
                     entree=jour_data.dejeuner_entree,
                     entree_recette_id=entree_dej_recette_id,
                     laitage=jour_data.dejeuner_laitage,
+                    legumes=jour_data.dejeuner_legumes,
                     dessert=jour_data.dejeuner_dessert,
                     dessert_recette_id=dessert_dej_recette_id,
                     est_reste=jour_data.dejeuner_est_reste,
@@ -450,6 +458,8 @@ RULES:
                         type_repas="gouter",
                         notes=jour_data.gouter,
                         recette_id=recette_gouter_id,
+                        laitage=jour_data.gouter_laitage,
+                        fruit=jour_data.gouter_fruit,
                     )
                 )
 
@@ -475,6 +485,7 @@ RULES:
                     entree=jour_data.diner_entree,
                     entree_recette_id=entree_din_recette_id,
                     laitage=jour_data.diner_laitage,
+                    legumes=jour_data.diner_legumes,
                     dessert=jour_data.diner_dessert,
                     dessert_recette_id=dessert_din_recette_id,
                     est_reste=jour_data.diner_est_reste,

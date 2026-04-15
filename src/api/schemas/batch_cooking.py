@@ -48,14 +48,20 @@ class GenererSessionDepuisPlanningRequest(BaseModel):
         None, description="Nom personnalisé (sinon auto-généré)", max_length=200
     )
     avec_jules: bool = Field(False, description="Jules participe ?")
+    jours_cibles: list[int] | None = Field(
+        None,
+        description="Jours de la semaine dont les repas seront batchés (0=lun…6=dim). "
+        "Si None, toutes les recettes du planning sont incluses (comportement par défaut).",
+    )
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "planning_id": 7,
-                "date_session": "2026-04-06",
-                "nom": "Préparation semaine 15",
+                "date_session": "2026-04-09",
+                "nom": "Batch mercredi — jeu/ven",
                 "avec_jules": False,
+                "jours_cibles": [2, 3, 4],
             }
         }
     }
@@ -172,22 +178,53 @@ class PreparationBatchResponse(BaseModel):
 class ConfigBatchResponse(BaseModel):
     """Config batch cooking de l'utilisateur."""
 
-    jours_batch: list[str] = Field(default_factory=list)
+    jours_batch: list[int] = Field(default_factory=list, description="Jours batch (0=lun… 6=dim)")
     heure_debut_preferee: str | None = Field(None, max_length=8)
     duree_max_session: int | None = None
     avec_jules_par_defaut: bool = False
     robots_disponibles: list[str] = Field(default_factory=list)
     objectif_portions_semaine: int = 0
+    couverture_jours: dict | None = Field(
+        None,
+        description="Mapping jour_batch → jours couverts. Ex: {'2': [2, 3, 4], '6': [6, 0, 1, 2]}",
+    )
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "jours_batch": ["dimanche"],
-                "heure_debut_preferee": "14:00",
+                "jours_batch": [2, 6],
+                "heure_debut_preferee": "10:00",
                 "duree_max_session": 180,
                 "avec_jules_par_defaut": True,
-                "robots_disponibles": ["Thermomix", "Air fryer"],
-                "objectif_portions_semaine": 12,
+                "robots_disponibles": ["four", "plaques", "cookeo"],
+                "objectif_portions_semaine": 20,
+                "couverture_jours": {"2": [2, 3, 4], "6": [6, 0, 1, 2]},
+            }
+        }
+    }
+
+
+class ConfigBatchUpdate(BaseModel):
+    """Mise à jour de la configuration batch cooking (tous champs optionnels)."""
+
+    jours_batch: list[int] | None = Field(None, description="Jours batch (0=lundi…6=dimanche)")
+    heure_debut_preferee: str | None = Field(None, max_length=8, description="Heure de début HH:MM")
+    duree_max_session: int | None = Field(None, ge=30, le=720, description="Durée max en minutes")
+    avec_jules_par_defaut: bool | None = None
+    robots_disponibles: list[str] | None = None
+    objectif_portions_semaine: int | None = Field(None, ge=1, le=100)
+    notes: str | None = None
+    couverture_jours: dict | None = Field(
+        None,
+        description="Mapping jour_batch → jours couverts. Ex: {'2': [2, 3, 4], '6': [6, 0, 1, 2]}",
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "jours_batch": [2, 6],
+                "couverture_jours": {"2": [2, 3, 4], "6": [6, 0, 1, 2]},
+                "robots_disponibles": ["four", "plaques", "cookeo"],
             }
         }
     }

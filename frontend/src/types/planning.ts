@@ -23,6 +23,10 @@ export interface RepasPlanning {
   entree_recette_nom?: string;
   // Laitage (texte seul, jamais une recette)
   laitage?: string;
+  // Fruit entier ou compote (goûter — ex: "Pomme", "Compote poire")
+  fruit?: string;
+  // Légumes accompagnement (déjeuner/dîner — ex: "Haricots verts", "Courgettes sautées")
+  legumes?: string;
   // Dessert (texte seul ou recette si complexe)
   dessert?: string;
   dessert_recette_id?: number;
@@ -36,6 +40,18 @@ export interface RepasPlanning {
   // Reste réchauffé
   est_reste?: boolean;
   reste_description?: string | null;
+  // Équilibre nutritionnel assiette (déj / dîner)
+  legumes_recette_id?: number;
+  feculents?: string;
+  feculents_recette_id?: number;
+  proteine_accompagnement?: string;
+  proteine_accompagnement_recette_id?: number;
+  // Goûter PNNS4
+  fruit_gouter?: string;
+  gateau_gouter?: string;
+  // Score PNNS4 (0-100, null si non applicable)
+  score_equilibre?: number | null;
+  alertes_equilibre?: string[] | null;
 }
 
 export interface PlanningSemaine {
@@ -74,12 +90,28 @@ export interface RapportConflitsPlanning {
   items: ConflitPlanning[];
 }
 
+export interface SuggestionAccompagnement {
+  legumes: string[];
+  feculents: string[];
+  proteines: string[];
+  categorie_detectee?: string | null;
+}
+
 export interface CreerRepasPlanningDTO {
   date: string;
   type_repas: TypeRepas;
   recette_id?: number;
   notes?: string;
   portions?: number;
+  legumes?: string;
+  legumes_recette_id?: number;
+  feculents?: string;
+  feculents_recette_id?: number;
+  proteine_accompagnement?: string;
+  proteine_accompagnement_recette_id?: number;
+  laitage?: string;
+  fruit_gouter?: string;
+  gateau_gouter?: string;
 }
 
 export interface SuggestionRecettePlanning {

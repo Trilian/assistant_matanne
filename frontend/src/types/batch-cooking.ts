@@ -68,12 +68,13 @@ export interface PreparationBatch {
 }
 
 export interface ConfigBatchCooking {
-  jours_batch: string[]
+  jours_batch: number[]
   heure_debut_preferee?: string
   duree_max_session?: number
   avec_jules_par_defaut: boolean
   robots_disponibles: string[]
   objectif_portions_semaine: number
+  couverture_jours?: Record<string, number[]> | null
 }
 
 export interface GenererSessionDepuisPlanningOptions {
@@ -81,6 +82,7 @@ export interface GenererSessionDepuisPlanningOptions {
   date_session: string
   nom?: string
   avec_jules?: boolean
+  jours_cibles?: number[]
 }
 
 export interface RecetteSessionBatch {

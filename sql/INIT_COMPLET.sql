@@ -1126,6 +1126,10 @@ CREATE TABLE IF NOT EXISTS recettes (
     congelable BOOLEAN NOT NULL DEFAULT FALSE,
     -- Types de protéines
     type_proteines VARCHAR(100),
+    -- Catégorie nutritionnelle (pour équilibre assiette PNNS)
+    -- Valeurs : proteines_poisson | proteines_viande_rouge | proteines_volaille |
+    --           proteines_oeuf | proteines_legumineuses | feculents | legumes_principaux | mixte
+    categorie_nutritionnelle VARCHAR(50),
     -- Bio & Local
     est_bio BOOLEAN NOT NULL DEFAULT FALSE,
     est_local BOOLEAN NOT NULL DEFAULT FALSE,
@@ -1239,6 +1243,7 @@ CREATE TABLE IF NOT EXISTS config_batch_cooking (
     avec_jules_par_defaut BOOLEAN NOT NULL DEFAULT TRUE,
     robots_disponibles JSONB NOT NULL DEFAULT '["four", "plaques"]',
     preferences_stockage JSONB,
+    couverture_jours JSONB,
     objectif_portions_semaine INTEGER NOT NULL DEFAULT 20,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -1526,6 +1531,17 @@ CREATE TABLE IF NOT EXISTS repas (
     adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
     contexte_meteo VARCHAR(50),
     laitage VARCHAR(200),
+    fruit VARCHAR(200),
+    legumes VARCHAR(200),
+    legumes_recette_id INTEGER,
+    feculents VARCHAR(200),
+    feculents_recette_id INTEGER,
+    proteine_accompagnement VARCHAR(200),
+    proteine_accompagnement_recette_id INTEGER,
+    fruit_gouter VARCHAR(100),
+    gateau_gouter VARCHAR(100),
+    score_equilibre SMALLINT,
+    alertes_equilibre JSONB,
     est_reste BOOLEAN NOT NULL DEFAULT FALSE,
     reste_description VARCHAR(200),
     CONSTRAINT fk_repas_planning FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE,
@@ -1534,6 +1550,9 @@ CREATE TABLE IF NOT EXISTS repas (
         CONSTRAINT fk_repas_entree_recette FOREIGN KEY (entree_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
         CONSTRAINT fk_repas_dessert_recette FOREIGN KEY (dessert_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
         CONSTRAINT fk_repas_dessert_jules_recette FOREIGN KEY (dessert_jules_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+        CONSTRAINT fk_repas_legumes_recette FOREIGN KEY (legumes_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+        CONSTRAINT fk_repas_feculents_recette FOREIGN KEY (feculents_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+        CONSTRAINT fk_repas_proteine_acc_recette FOREIGN KEY (proteine_accompagnement_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
         CONSTRAINT ck_repas_portions_valides CHECK (
             portion_ajustee IS NULL
             OR (

@@ -13,6 +13,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.batch_cooking import (
+    ConfigBatchResponse,
+    ConfigBatchUpdate,
     GenererSessionDepuisPlanningRequest,
     GenererSessionDepuisPlanningResponse,
     SessionBatchCreate,
@@ -122,8 +124,9 @@ async def generer_session_depuis_planning(
 ) -> dict[str, Any]:
     """Génère une session batch à partir d'un planning hebdomadaire.
 
-    Collecte toutes les recettes du planning, filtre celles compatibles avec batch cooking,
-    calcule durée totale, identifie robots compatibles.
+    Collecte les recettes du planning (filtrées par jours_cibles si fourni),
+    retient celles compatibles batch cooking, calcule durée parallélisée,
+    identifie robots compatibles.
     """
     from src.core.models import Planning, Recette, Repas, SessionBatchCooking
 
@@ -135,14 +138,19 @@ async def generer_session_depuis_planning(
                 raise HTTPException(status_code=404, detail="Planning non trouvé")
 
             # Collecter tous les repas avec recette_id
-            repas_list = (
-                session.query(Repas)
-                .filter(
-                    Repas.planning_id == donnees.planning_id,
-                    Repas.recette_id.isnot(None),
-                )
-                .all()
+            repas_query = session.query(Repas).filter(
+                Repas.planning_id == donnees.planning_id,
+                Repas.recette_id.isnot(None),
             )
+            repas_list = repas_query.all()
+
+            # Filtrer par jours_cibles si fourni (0=lun…6=dim)
+            if donnees.jours_cibles is not None:
+                jours_cibles_set = set(donnees.jours_cibles)
+                repas_list = [
+                    r for r in repas_list
+                    if r.date is not None and r.date.weekday() in jours_cibles_set
+                ]
 
             # Collecter tous les ID de recettes (plat + entrée + dessert + dessert_jules)
             recette_ids = set()
@@ -170,12 +178,7 @@ async def generer_session_depuis_planning(
                 # Fallback: toutes les recettes
                 recettes_batch = recettes_objs
 
-            # Calculer durée totale (temps_preparation + temps_cuisson)
-            duree_estimee = sum(
-                r.temps_preparation + (r.temps_cuisson or 0) for r in recettes_batch
-            )
-
-            # Identifier robots compatibles (au moins une recette)
+            # Identifier robots compatibles (au moins une recette les utilise)
             robots_utilises = []
             for r in recettes_batch:
                 if r.compatible_cookeo and "Cookeo" not in robots_utilises:
@@ -186,6 +189,13 @@ async def generer_session_depuis_planning(
                     robots_utilises.append("Airfryer")
                 if r.compatible_multicooker and "Multicooker" not in robots_utilises:
                     robots_utilises.append("Multicooker")
+
+            # Calculer durée estimée avec facteur de parallélisation
+            # (plusieurs robots tournent simultanément — l'IA affine après génération des étapes)
+            duree_brute = sum(r.temps_preparation + (r.temps_cuisson or 0) for r in recettes_batch)
+            nb_robots = max(1, len(robots_utilises))
+            facteur_parallelisation = min(nb_robots, 2.5)
+            duree_estimee = max(30, int(duree_brute / facteur_parallelisation))
 
             # Nom auto-généré si non fourni
             nom = donnees.nom or f"Batch {planning.nom} ({donnees.date_session.strftime('%d/%m')})"
@@ -553,7 +563,7 @@ async def consommer_preparation(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/config", responses=REPONSES_CRUD_LECTURE)
+@router.get("/config", response_model=ConfigBatchResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_config(
     user: dict[str, Any] = Depends(require_auth),
@@ -566,13 +576,69 @@ async def obtenir_config(
             config = session.query(ConfigBatchCooking).first()
             if not config:
                 return {
-                    "jours_batch": [],
-                    "heure_debut_preferee": None,
-                    "duree_max_session": None,
-                    "avec_jules_par_defaut": False,
-                    "robots_disponibles": [],
-                    "objectif_portions_semaine": 0,
+                    "jours_batch": [2, 6],
+                    "heure_debut_preferee": "10:00",
+                    "duree_max_session": 180,
+                    "avec_jules_par_defaut": True,
+                    "robots_disponibles": ["four", "plaques"],
+                    "objectif_portions_semaine": 20,
+                    "couverture_jours": {"2": [2, 3, 4], "6": [6, 0, 1, 2]},
                 }
+
+            return {
+                "jours_batch": config.jours_batch or [2, 6],
+                "heure_debut_preferee": str(config.heure_debut_preferee)
+                if config.heure_debut_preferee
+                else None,
+                "duree_max_session": config.duree_max_session,
+                "avec_jules_par_defaut": config.avec_jules_par_defaut,
+                "robots_disponibles": config.robots_disponibles or [],
+                "objectif_portions_semaine": config.objectif_portions_semaine,
+                "couverture_jours": config.couverture_jours,
+            }
+
+    return await executer_async(_query)
+
+
+@router.put("/config", response_model=ConfigBatchResponse, responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def mettre_a_jour_config(
+    donnees: ConfigBatchUpdate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour la configuration batch cooking de l'utilisateur."""
+    from datetime import time as dtime
+
+    from src.services.cuisine.batch_cooking import obtenir_service_batch_cooking
+
+    def _update():
+        with executer_avec_session() as session:
+            service = obtenir_service_batch_cooking()
+
+            # Convertir heure_debut_preferee string "HH:MM" → time
+            heure_debut = None
+            if donnees.heure_debut_preferee:
+                try:
+                    h, m = donnees.heure_debut_preferee.split(":")
+                    heure_debut = dtime(int(h), int(m))
+                except (ValueError, AttributeError):
+                    raise HTTPException(
+                        status_code=422,
+                        detail="Format heure invalide — attendu HH:MM",
+                    )
+
+            config = service.update_config(
+                jours_batch=donnees.jours_batch,
+                heure_debut=heure_debut,
+                duree_max=donnees.duree_max_session,
+                avec_jules=donnees.avec_jules_par_defaut,
+                robots=donnees.robots_disponibles,
+                objectif_portions=donnees.objectif_portions_semaine,
+                couverture_jours=donnees.couverture_jours,
+                notes=donnees.notes,
+            )
+            if not config:
+                raise HTTPException(status_code=500, detail="Échec mise à jour config")
 
             return {
                 "jours_batch": config.jours_batch or [],
@@ -583,6 +649,7 @@ async def obtenir_config(
                 "avec_jules_par_defaut": config.avec_jules_par_defaut,
                 "robots_disponibles": config.robots_disponibles or [],
                 "objectif_portions_semaine": config.objectif_portions_semaine,
+                "couverture_jours": config.couverture_jours,
             }
 
-    return await executer_async(_query)
+    return await executer_async(_update)

@@ -9,6 +9,7 @@ import type {
   RapportConflitsPlanning,
   RepasPlanning,
   CreerRepasPlanningDTO,
+  SuggestionAccompagnement,
   SuggestionRecettePlanning,
   GenererPlanningParams,
 } from "@/types/planning";
@@ -37,6 +38,25 @@ export async function obtenirConflitsPlanning(dateDebut?: string): Promise<Rappo
 /** Ajouter/modifier un repas dans le planning */
 export async function definirRepas(dto: CreerRepasPlanningDTO): Promise<RepasPlanning> {
   const { data } = await clientApi.post<RepasPlanning>("/planning/repas", dto);
+  return data;
+}
+
+/** Mettre à jour un repas existant (PUT) */
+export async function mettreAJourRepas(
+  id: number,
+  dto: Partial<CreerRepasPlanningDTO>
+): Promise<{ message: string; id: number }> {
+  const { data } = await clientApi.put<{ message: string; id: number }>(`/planning/repas/${id}`, dto);
+  return data;
+}
+
+/** Obtenir des suggestions d'accompagnements équilibrés via IA pour un repas */
+export async function obtenirSuggestionsAccompagnements(
+  repasId: number
+): Promise<SuggestionAccompagnement> {
+  const { data } = await clientApi.post<SuggestionAccompagnement>(
+    `/planning/repas/${repasId}/accompagnements-suggeres`
+  );
   return data;
 }
 

@@ -40,6 +40,25 @@ class RepasBase(BaseModel, TypeRepasValidator):
 class RepasCreate(RepasBase):
     """Création d'un repas — hérite tous les champs de RepasBase."""
 
+    # Accompagnements équilibre assiette
+    legumes: str | None = Field(None, max_length=200)
+    legumes_recette_id: int | None = None
+    feculents: str | None = Field(None, max_length=200)
+    feculents_recette_id: int | None = None
+    proteine_accompagnement: str | None = Field(None, max_length=200)
+    proteine_accompagnement_recette_id: int | None = None
+    # Goûter
+    laitage: str | None = Field(None, max_length=200)
+    fruit_gouter: str | None = Field(None, max_length=100)
+    gateau_gouter: str | None = Field(None, max_length=100)
+
+
+class RepasUpdate(RepasCreate):
+    """Mise à jour partielle d'un repas — tous les champs optionnels."""
+
+    type_repas: str | None = Field(None, max_length=30)  # type: ignore[assignment]
+    date: DateType | None = Field(None, alias="date_repas")  # type: ignore[assignment]
+
 
 class RepasResponse(RepasBase, IdentifiedResponse):
     """Schéma de réponse pour un repas."""
@@ -53,6 +72,28 @@ class RepasResponse(RepasBase, IdentifiedResponse):
     compatible_airfryer: bool = False
     est_reste: bool = False
     reste_description: str | None = Field(None, max_length=200)
+    # Champs équilibre nutritionnel
+    fruit: str | None = Field(None, max_length=200)  # legacy migration 005
+    legumes: str | None = Field(None, max_length=200)
+    legumes_recette_id: int | None = None
+    feculents: str | None = Field(None, max_length=200)
+    feculents_recette_id: int | None = None
+    proteine_accompagnement: str | None = Field(None, max_length=200)
+    proteine_accompagnement_recette_id: int | None = None
+    laitage: str | None = Field(None, max_length=200)
+    fruit_gouter: str | None = Field(None, max_length=100)
+    gateau_gouter: str | None = Field(None, max_length=100)
+    score_equilibre: int | None = Field(None, ge=0, le=100)
+    alertes_equilibre: list[str] | None = None
+
+
+class SuggestionAccompagnementResponse(BaseModel):
+    """Réponse IA pour les suggestions d'accompagnements."""
+
+    legumes: list[str] = Field(default_factory=list)
+    feculents: list[str] = Field(default_factory=list)
+    proteines: list[str] = Field(default_factory=list)
+    categorie_detectee: str | None = None
 
 
 class PlanningSemaineResponse(BaseModel):

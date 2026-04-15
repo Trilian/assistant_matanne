@@ -40,6 +40,8 @@ class JourPlanning(BaseModel):
     dejeuner_entree_est_recette: bool = False
     # Déjeuner — laitage texte uniquement (pas de flag est_recette)
     dejeuner_laitage: str | None = None
+    # Déjeuner — légumes accompagnement (ex: "Haricots verts", "Courgettes sautées")
+    dejeuner_legumes: str | None = None
     # Déjeuner — dessert optionnel
     dejeuner_dessert: str | None = None
     dejeuner_dessert_est_recette: bool = False
@@ -47,12 +49,18 @@ class JourPlanning(BaseModel):
     # Goûter — obligatoire, fallback "Fruit de saison" si l'IA renvoie null
     gouter: str | None = None  # None accepté en entrée mais normalisé avant persistance
     gouter_est_recette: bool = False
+    # Goûter — laitage obligatoire (yaourt, fromage frais...)
+    gouter_laitage: str | None = None
+    # Goûter — fruit entier ou compote obligatoire (pomme, poire, compote... — jamais un jus)
+    gouter_fruit: str | None = None
 
     # Dîner — entrée optionnelle
     diner_entree: str | None = None
     diner_entree_est_recette: bool = False
     # Dîner — laitage texte uniquement
     diner_laitage: str | None = None
+    # Dîner — légumes accompagnement (ex: "Brocoli", "Épinards à la crème")
+    diner_legumes: str | None = None
     # Dîner — dessert optionnel
     diner_dessert: str | None = None
     diner_dessert_est_recette: bool = False

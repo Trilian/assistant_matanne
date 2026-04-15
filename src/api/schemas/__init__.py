@@ -276,6 +276,8 @@ from .planning import (
     RepasCreate,
     RepasRapideSuggestion,
     RepasResponse,
+    RepasUpdate,
+    SuggestionAccompagnementResponse,
 )
 
 # Préférences

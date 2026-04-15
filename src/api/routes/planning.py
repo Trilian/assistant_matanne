@@ -18,6 +18,8 @@ from src.api.schemas import (
     MessageResponse,
     PlanningSemaineResponse,
     RepasCreate,
+    RepasUpdate,
+    SuggestionAccompagnementResponse,
 )
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
@@ -407,22 +409,49 @@ async def creer_repas(donnees: RepasCreate, user: dict[str, Any] = Depends(requi
                 .first()
             )
 
+            from src.services.planning.nutrition import evaluer_equilibre_repas
+
             if existing:
-                # Mettre à jour
+                # Mettre à jour les champs de base + équilibre
                 existing.recette_id = donnees.recette_id
-                if hasattr(existing, "notes"):
-                    existing.notes = donnees.notes
+                existing.notes = donnees.notes
+                for champ in (
+                    "legumes", "legumes_recette_id",
+                    "feculents", "feculents_recette_id",
+                    "proteine_accompagnement", "proteine_accompagnement_recette_id",
+                    "laitage", "fruit_gouter", "gateau_gouter",
+                ):
+                    val = getattr(donnees, champ, None)
+                    if val is not None:
+                        setattr(existing, champ, val)
+                resultat = evaluer_equilibre_repas(existing)
+                existing.score_equilibre = resultat["score_equilibre"]
+                existing.alertes_equilibre = resultat["alertes_equilibre"] or None
                 session.commit()
                 return MessageResponse(message="Repas mis à jour", id=existing.id)
 
-            # Créer
+            # Créer avec tous les champs
             db_repas = Repas(
                 planning_id=planning.id,
                 date_repas=date_repas,
                 type_repas=donnees.type_repas,
                 recette_id=donnees.recette_id,
+                notes=donnees.notes,
+                legumes=donnees.legumes,
+                legumes_recette_id=donnees.legumes_recette_id,
+                feculents=donnees.feculents,
+                feculents_recette_id=donnees.feculents_recette_id,
+                proteine_accompagnement=donnees.proteine_accompagnement,
+                proteine_accompagnement_recette_id=donnees.proteine_accompagnement_recette_id,
+                laitage=donnees.laitage,
+                fruit_gouter=donnees.fruit_gouter,
+                gateau_gouter=donnees.gateau_gouter,
             )
             session.add(db_repas)
+            session.flush()
+            resultat = evaluer_equilibre_repas(db_repas)
+            db_repas.score_equilibre = resultat["score_equilibre"]
+            db_repas.alertes_equilibre = resultat["alertes_equilibre"] or None
             session.commit()
 
             return MessageResponse(message="Repas planifié", id=db_repas.id)
@@ -430,20 +459,84 @@ async def creer_repas(donnees: RepasCreate, user: dict[str, Any] = Depends(requi
     return await executer_async(_create)
 
 
+@router.post(
+    "/repas/{repas_id}/accompagnements-suggeres",
+    response_model=SuggestionAccompagnementResponse,
+)
+@gerer_exception_api
+async def suggerer_accompagnements_repas(
+    repas_id: int, user: dict[str, Any] = Depends(require_auth)
+):
+    """
+    Suggère via IA les accompagnements manquants pour équilibrer un repas.
+
+    Détecte la catégorie nutritionnelle du plat principal et propose
+    les légumes, féculents ou protéines manquants (logique bidirectionnelle PNNS4).
+
+    Args:
+        repas_id: ID du repas à analyser
+
+    Returns:
+        Listes de suggestions pour légumes, féculents et protéines
+
+    Raises:
+        401: Non authentifié
+        404: Repas non trouvé
+    """
+    import datetime
+
+    from src.core.models import Repas
+    from src.services.planning.ia_service import get_planning_ai_service
+    from src.services.planning.nutrition import _categorie_from_repas
+
+    def _get_repas():
+        with executer_avec_session() as session:
+            db_repas = session.query(Repas).filter(Repas.id == repas_id).first()
+            if not db_repas:
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
+            recette = db_repas.recette
+            recette_nom = recette.nom if recette else (db_repas.notes or "")
+            categorie = _categorie_from_repas(db_repas)
+            return recette_nom, categorie
+
+    recette_nom, categorie = await executer_async(_get_repas)
+
+    mois = datetime.date.today().month
+    if mois in (3, 4, 5):
+        saison = "printemps"
+    elif mois in (6, 7, 8):
+        saison = "été"
+    elif mois in (9, 10, 11):
+        saison = "automne"
+    else:
+        saison = "hiver"
+
+    service = get_planning_ai_service()
+    suggestions = await service.suggerer_accompagnements(recette_nom, categorie, saison)
+
+    return SuggestionAccompagnementResponse(
+        legumes=suggestions.get("legumes", []),
+        feculents=suggestions.get("feculents", []),
+        proteines=suggestions.get("proteines", []),
+        categorie_detectee=categorie,
+    )
+
+
 @router.put("/repas/{repas_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_repas(
-    repas_id: int, maj: RepasCreate, user: dict[str, Any] = Depends(require_auth)
+    repas_id: int, maj: RepasUpdate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
     Met à jour un repas planifié.
 
-    Permet de changer la recette, le type de repas ou les notes
-    d'un repas déjà planifié.
+    Accepte les champs d'équilibre nutritionnel (légumes, féculents,
+    protéine accompagnement, goûter) et recalcule automatiquement le
+    score_equilibre + alertes_equilibre après chaque modification.
 
     Args:
         repas_id: ID du repas à modifier
-        repas: Nouvelles données du repas
+        maj: Nouvelles données du repas
 
     Returns:
         Message de confirmation
@@ -451,25 +544,9 @@ async def modifier_repas(
     Raises:
         401: Non authentifié
         404: Repas non trouvé
-
-    Example:
-        ```
-        PUT /api/v1/planning/repas/7
-        Authorization: Bearer <token>
-
-        Body:
-        {
-            "date": "2026-02-19",
-            "type_repas": "diner",
-            "recette_id": 15,
-            "notes": "Changement de dernière minute"
-        }
-
-        Response:
-        {"message": "Repas mis à jour", "id": 7}
-        ```
     """
     from src.core.models import Repas
+    from src.services.planning.nutrition import evaluer_equilibre_repas
 
     def _update():
         with executer_avec_session() as session:
@@ -478,10 +555,35 @@ async def modifier_repas(
             if not db_repas:
                 raise HTTPException(status_code=404, detail="Repas non trouvé")
 
-            db_repas.type_repas = maj.type_repas
-            db_repas.recette_id = maj.recette_id
-            if hasattr(db_repas, "notes") and maj.notes:
+            # Mettre à jour les champs de base
+            if maj.type_repas is not None:
+                db_repas.type_repas = maj.type_repas
+            if maj.recette_id is not None or maj.recette_id == 0:
+                db_repas.recette_id = maj.recette_id
+            if maj.notes is not None:
                 db_repas.notes = maj.notes
+
+            # Champs équilibre assiette (déj / dîner)
+            champs_equilibre = (
+                "legumes", "legumes_recette_id",
+                "feculents", "feculents_recette_id",
+                "proteine_accompagnement", "proteine_accompagnement_recette_id",
+            )
+            for champ in champs_equilibre:
+                val = getattr(maj, champ, None)
+                if val is not None:
+                    setattr(db_repas, champ, val)
+
+            # Champs goûter
+            for champ in ("laitage", "fruit_gouter", "gateau_gouter"):
+                val = getattr(maj, champ, None)
+                if val is not None:
+                    setattr(db_repas, champ, val)
+
+            # Recalculer le score équilibre
+            resultat = evaluer_equilibre_repas(db_repas)
+            db_repas.score_equilibre = resultat["score_equilibre"]
+            db_repas.alertes_equilibre = resultat["alertes_equilibre"] or None
 
             session.commit()
             session.refresh(db_repas)

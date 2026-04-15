@@ -21,6 +21,7 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from .base import Base
@@ -134,6 +135,38 @@ class Repas(Base):
     # Laitage / produit laitier (yaourt, fromage blanc, fromage...)
     laitage: Mapped[str | None] = mapped_column(String(200))
 
+    # Fruit entier ou compote (goûter — ex: "Pomme", "Compote poire")
+    # Conservé pour rétro-compatibilité avec migration 005
+    fruit: Mapped[str | None] = mapped_column(String(200))
+
+    # Légumes accompagnement (déjeuner/dîner — ex: "Haricots verts", "Courgettes sautées")
+    # Conservé pour rétro-compatibilité avec migration 005
+    legumes: Mapped[str | None] = mapped_column(String(200))
+    legumes_recette_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recettes.id", ondelete="SET NULL")
+    )
+
+    # Féculents accompagnement : texte libre OU recette liée
+    feculents: Mapped[str | None] = mapped_column(String(200))
+    feculents_recette_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recettes.id", ondelete="SET NULL")
+    )
+
+    # Protéine quand le plat principal est féculent/légume (ex: gratin dauphinois)
+    proteine_accompagnement: Mapped[str | None] = mapped_column(String(200))
+    proteine_accompagnement_recette_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recettes.id", ondelete="SET NULL")
+    )
+
+    # Spécifique goûter PNNS : laitage déjà présent + fruit + gâteau sain
+    fruit_gouter: Mapped[str | None] = mapped_column(String(100))
+    gateau_gouter: Mapped[str | None] = mapped_column(String(100))
+
+    # Score équilibre PNNS calculé automatiquement (0-100, None si non applicable)
+    score_equilibre: Mapped[int | None] = mapped_column(Integer)
+    # Alertes texte : ["Pas de légumes", "Protéine manquante", ...]
+    alertes_equilibre: Mapped[list | None] = mapped_column(JSONB)
+
     # Adaptation Jules
     plat_jules: Mapped[str | None] = mapped_column(Text)
     notes_jules: Mapped[str | None] = mapped_column(Text)
@@ -153,6 +186,11 @@ class Repas(Base):
     dessert_recette: Mapped[Optional["Recette"]] = relationship(foreign_keys=[dessert_recette_id])
     dessert_jules_recette: Mapped[Optional["Recette"]] = relationship(
         foreign_keys=[dessert_jules_recette_id]
+    )
+    legumes_recette: Mapped[Optional["Recette"]] = relationship(foreign_keys=[legumes_recette_id])
+    feculents_recette: Mapped[Optional["Recette"]] = relationship(foreign_keys=[feculents_recette_id])
+    proteine_accompagnement_recette: Mapped[Optional["Recette"]] = relationship(
+        foreign_keys=[proteine_accompagnement_recette_id]
     )
 
     __table_args__ = (

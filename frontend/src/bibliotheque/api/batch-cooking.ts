@@ -103,6 +103,14 @@ export async function obtenirConfigBatch(): Promise<ConfigBatchCooking> {
   return data
 }
 
+/** Mettre à jour la configuration batch cooking */
+export async function mettreAJourConfig(
+  donnees: Partial<ConfigBatchCooking>
+): Promise<ConfigBatchCooking> {
+  const { data } = await clientApi.put<ConfigBatchCooking>("/batch-cooking/config", donnees)
+  return data
+}
+
 /** Générer les étapes IA pour une session existante et les persister */
 export async function genererEtapesSession(
   id: number

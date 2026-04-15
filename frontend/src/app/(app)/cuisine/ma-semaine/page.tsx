@@ -42,7 +42,7 @@ import {
 } from "@/bibliotheque/api/planning";
 import { listerInventaire, obtenirAlertes } from "@/bibliotheque/api/inventaire";
 import { genererCoursesDepuisPlanning } from "@/bibliotheque/api/courses";
-import { genererSessionDepuisPlanning } from "@/bibliotheque/api/batch-cooking";
+import { genererSessionDepuisPlanning, obtenirConfigBatch } from "@/bibliotheque/api/batch-cooking";
 import { toast } from "sonner";
 import type { RepasPlanning } from "@/types/planning";
 
@@ -184,24 +184,39 @@ function ContenuMaSemaine() {
   );
 
   const { mutate: genererBatch, isPending: enGenerationBatch } = utiliserMutation(
-    () => {
+    async () => {
       if (!planning) throw new Error("Pas de planning");
       if (!planning.planning_id) {
         throw new Error("Planning sans identifiant. Générez d'abord un planning persistant.");
       }
-      const dimanche = new Date(dateDebut);
-      dimanche.setDate(dimanche.getDate() + 6);
-      return genererSessionDepuisPlanning({
-        planning_id: planning.planning_id,
-        date_session: dimanche.toISOString().split("T")[0],
-      });
+      const config = await obtenirConfigBatch();
+      const jours = config.jours_batch && config.jours_batch.length > 0 ? config.jours_batch : [6];
+      const sessions = await Promise.all(
+        jours.map((jourOffset) => {
+          const date = new Date(dateDebut);
+          // dateDebut est un lundi (offset 0) ; jourOffset 0=lun, 1=mar, ... 6=dim
+          date.setDate(date.getDate() + jourOffset);
+          const jours_cibles =
+            config.couverture_jours?.[String(jourOffset)] ?? undefined;
+          return genererSessionDepuisPlanning({
+            planning_id: planning.planning_id as number,
+            date_session: date.toISOString().split("T")[0],
+            jours_cibles,
+          });
+        })
+      );
+      return sessions;
     },
     {
-      onSuccess: (result) => {
-        setBatchSessionId(result.session_id);
-        toast.success(`Session batch créée avec ${result.nb_recettes} recettes !`);
+      onSuccess: (results) => {
+        const last = results[results.length - 1];
+        setBatchSessionId(last?.session_id ?? null);
+        const total = results.reduce((s, r) => s + (r.nb_recettes ?? 0), 0);
+        toast.success(
+          `${results.length} session${results.length > 1 ? "s" : ""} batch créée${results.length > 1 ? "s" : ""} — ${total} recettes au total !`
+        );
       },
-      onError: () => toast.error("Erreur lors de la création de la session batch"),
+      onError: () => toast.error("Erreur lors de la création des sessions batch"),
     }
   );
 

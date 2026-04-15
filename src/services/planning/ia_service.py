@@ -249,6 +249,154 @@ Liste format: "1. Recette A\n2. Recette B..."."""
 
         return [line.strip("0123456789. ") for line in result.split("\n") if line.strip()]
 
+    async def suggerer_accompagnements(
+        self,
+        recette_nom: str,
+        categorie: str | None,
+        saison: str = "printemps",
+    ) -> dict:
+        """
+        Suggère les accompagnements manquants pour équilibrer un repas.
+
+        Logique bidirectionnelle :
+        - Plat protéiné    → 2 légumes + 1 féculent
+        - Plat féculent    → 1 protéine + 1-2 légumes
+        - Plat légume      → 1 protéine + 1 féculent
+        - Mixte / inconnu  → 1 légume + suggestions selon contexte
+
+        Args:
+            recette_nom: Nom du plat principal
+            categorie:   categorie_nutritionnelle (ex: "proteines_poisson", "feculents")
+            saison:      Saison courante pour suggestions saisonnières
+
+        Returns:
+            dict avec clés legumes, feculents, proteines (chacune list[str])
+        """
+        from src.services.planning.nutrition import (
+            CATEGORIES_FECULENTS,
+            CATEGORIES_LEGUMES,
+            CATEGORIES_PROTEINES,
+        )
+
+        if categorie in CATEGORIES_PROTEINES:
+            consigne = (
+                f"Le plat principal est une source de protéines : {recette_nom}. "
+                "Propose 2 légumes et 1 féculent adaptés à ce plat, de saison "
+                f"({saison}), simples à cuisiner, variés et savoureux."
+            )
+            champs_attendus = "legumes (liste 2), feculents (liste 1)"
+        elif categorie in CATEGORIES_FECULENTS:
+            consigne = (
+                f"Le plat principal est essentiellement un féculent : {recette_nom}. "
+                "Propose 1 source de protéines et 1 légume pour compléter l'assiette, "
+                f"de saison ({saison}), adaptés au plat."
+            )
+            champs_attendus = "proteines (liste 1-2 options), legumes (liste 1)"
+        elif categorie in CATEGORIES_LEGUMES:
+            consigne = (
+                f"Le plat principal est essentiellement un légume : {recette_nom}. "
+                "Propose 1 source de protéines et 1 féculent pour compléter l'assiette, "
+                f"de saison ({saison}), adaptés au plat."
+            )
+            champs_attendus = "proteines (liste 1-2 options), feculents (liste 1)"
+        else:
+            consigne = (
+                f"Pour le plat {recette_nom}, propose des accompagnements équilibrés "
+                f"(légumes et/ou féculents), de saison ({saison})."
+            )
+            champs_attendus = "legumes (liste 1-2), feculents (liste 0-1)"
+
+        prompt = f"""{consigne}
+
+Réponds UNIQUEMENT en JSON valide avec ces clés :
+{{
+  "legumes": ["exemple 1", "exemple 2"],
+  "feculents": ["exemple 1"],
+  "proteines": ["exemple 1", "exemple 2"]
+}}
+
+Règles :
+- {champs_attendus}
+- Noms courts et concrets (ex: "Haricots verts vapeur", "Riz basmati", "Filet de saumon")
+- Pas de sauces ni préparations complexes pour les accompagnements
+- Si une liste n'est pas pertinente, retourne []"""
+
+        result = await self.call_with_dict_parsing(
+            prompt=prompt,
+            system_prompt=(
+                "Tu es nutritionniste et chef cuisinier. "
+                "Tu proposes des accompagnements équilibrés selon les recommandations PNNS4. "
+                "Réponds TOUJOURS en JSON valide."
+            ),
+        )
+
+        return {
+            "legumes": result.get("legumes", []),
+            "feculents": result.get("feculents", []),
+            "proteines": result.get("proteines", []),
+        }
+
+    def suggerer_accompagnements_sync(
+        self, recette_nom: str, categorie: str | None, saison: str = "printemps"
+    ) -> dict:
+        """Version synchrone de suggerer_accompagnements."""
+        _sync = sync_wrapper(self.suggerer_accompagnements)
+        return _sync(recette_nom, categorie, saison)
+
+    async def detecter_categorie_recette(self, recette_nom: str, ingredients: str = "") -> str:
+        """
+        Détecte la catégorie nutritionnelle d'un plat via Mistral.
+
+        Utilisé uniquement si type_proteines ET categorie_nutritionnelle sont absents.
+
+        Args:
+            recette_nom:  Nom de la recette
+            ingredients:  Ingrédients principaux (optionnel, améliore la précision)
+
+        Returns:
+            categorie_nutritionnelle parmi :
+            proteines_poisson | proteines_viande_rouge | proteines_volaille |
+            proteines_oeuf | proteines_legumineuses | feculents | legumes_principaux | mixte
+        """
+        prompt = f"""Classifie ce plat en UNE SEULE catégorie nutritionnelle.
+
+Plat : {recette_nom}
+{f"Ingrédients principaux : {ingredients}" if ingredients else ""}
+
+Catégories disponibles :
+- proteines_poisson     : poisson, fruits de mer (ex: saumon, cabillaud, crevettes)
+- proteines_viande_rouge: bœuf, porc, agneau, veau (ex: steak, côtelettes)
+- proteines_volaille    : poulet, dinde, canard, lapin
+- proteines_oeuf        : œufs comme protéine principale (ex: omelette, quiche)
+- proteines_legumineuses: lentilles, pois chiches, haricots comme protéine principale
+- feculents             : riz, pâtes, pommes de terre, semoule dominent (ex: gratin dauphinois)
+- legumes_principaux    : légumes dominent sans protéine forte (ex: ratatouille, gratin courgettes)
+- mixte                 : mélange équilibré (ex: pot-au-feu, hachis parmentier)
+
+Réponds UNIQUEMENT avec le nom de la catégorie, rien d'autre."""
+
+        result = await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es nutritionniste expert. Réponds avec UN seul mot-clé de catégorie.",
+            max_tokens=30,
+        )
+
+        # Nettoyer la réponse : garder uniquement le token de catégorie
+        categories_valides = {
+            "proteines_poisson", "proteines_viande_rouge", "proteines_volaille",
+            "proteines_oeuf", "proteines_legumineuses", "feculents",
+            "legumes_principaux", "mixte",
+        }
+        token = result.strip().lower().replace("-", "_").split()[0] if result else "mixte"
+        return token if token in categories_valides else "mixte"
+
+    def detecter_categorie_recette_sync(
+        self, recette_nom: str, ingredients: str = ""
+    ) -> str:
+        """Version synchrone de detecter_categorie_recette."""
+        _sync = sync_wrapper(self.detecter_categorie_recette)
+        return _sync(recette_nom, ingredients)
+
     def stream_analyse_variete(self, planning_repas: list[dict]):
         """Stream d'analyse de variété."""
         repas_desc = "\n".join(

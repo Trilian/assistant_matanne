@@ -183,10 +183,13 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
                           <p className="font-semibold">{LABEL_TYPE[type]}</p>
                           <p className="truncate opacity-90">{repas?.recette_nom || repas?.notes || "Non planifié"}</p>
                           {repas && (type === "dejeuner" || type === "diner") &&
-                            (repas.entree || repas.laitage || repas.dessert) && (
+                            (repas.entree || repas.laitage || repas.legumes || repas.dessert) && (
                               <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 mt-0.5">
                                 {repas.entree && (
                                   <span className="text-[9px] opacity-75 truncate" title={`Entrée : ${repas.entree}`}>E·{repas.entree}</span>
+                                )}
+                                {repas.legumes && (
+                                  <span className="text-[9px] opacity-75 truncate" title={`Légumes : ${repas.legumes}`}>🥦 {repas.legumes}</span>
                                 )}
                                 {repas.laitage && (
                                   <span className="text-[9px] opacity-75 truncate" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
@@ -196,6 +199,16 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
                                 )}
                               </div>
                             )}
+                          {repas && type === "gouter" && (repas.laitage || repas.fruit) && (
+                            <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 mt-0.5">
+                              {repas.laitage && (
+                                <span className="text-[9px] opacity-75 truncate" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
+                              )}
+                              {repas.fruit && (
+                                <span className="text-[9px] opacity-75 truncate" title={`Fruit : ${repas.fruit}`}>🍎 {repas.fruit}</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

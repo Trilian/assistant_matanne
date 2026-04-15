@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -22,9 +22,12 @@ import {
   Timer,
   Search,
   X,
+  Settings,
+  Save,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
+import { Switch } from "@/composants/ui/switch";
 import { Label } from "@/composants/ui/label";
 import {
   Card,
@@ -55,6 +58,8 @@ import {
   supprimerSessionBatch,
   listerPreparations,
   consommerPreparation,
+  obtenirConfigBatch,
+  mettreAJourConfig,
 } from "@/bibliotheque/api/batch-cooking";
 import { listerRecettes } from "@/bibliotheque/api/recettes";
 import { toast } from "sonner";
@@ -95,6 +100,40 @@ function classeProgression(progression: number) {
   return classes[pourcentage] ?? "w-0";
 }
 
+const JOURS_SEMAINE = [
+  { valeur: 0, label: "Lun", long: "Lundi" },
+  { valeur: 1, label: "Mar", long: "Mardi" },
+  { valeur: 2, label: "Mer", long: "Mercredi" },
+  { valeur: 3, label: "Jeu", long: "Jeudi" },
+  { valeur: 4, label: "Ven", long: "Vendredi" },
+  { valeur: 5, label: "Sam", long: "Samedi" },
+  { valeur: 6, label: "Dim", long: "Dimanche" },
+];
+
+const ROBOTS_DISPONIBLES_OPTIONS = [
+  "cookeo",
+  "monsieur_cuisine",
+  "airfryer",
+  "multicooker",
+  "four",
+  "plaques",
+  "robot_patissier",
+  "mixeur",
+  "hachoir",
+];
+
+const ROBOTS_LABELS: Record<string, string> = {
+  cookeo: "🍲 Cookeo",
+  monsieur_cuisine: "🤖 Monsieur Cuisine",
+  airfryer: "🍟 Airfryer",
+  multicooker: "♨️ Multicooker",
+  four: "🔥 Four",
+  plaques: "🍳 Plaques",
+  robot_patissier: "🎂 Robot pâtissier",
+  mixeur: "🥤 Mixeur",
+  hachoir: "🔪 Hachoir",
+};
+
 export default function PageBatchCooking() {
   const [dialogueCreation, setDialogueCreation] = useState(false);
   const [nomSession, setNomSession] = useState("");
@@ -105,7 +144,55 @@ export default function PageBatchCooking() {
   const [recettesSelectionnees, setRecettesSelectionnees] = useState<number[]>([]);
   const [rechercheRecette, setRechercheRecette] = useState("");
 
+  // ── Config état local (onglet Paramètres)
+  const [configJoursBatch, setConfigJoursBatch] = useState<number[]>([2, 6]);
+  const [configHeure, setConfigHeure] = useState("10:00");
+  const [configDureeMax, setConfigDureeMax] = useState(180);
+  const [configAvecJules, setConfigAvecJules] = useState(true);
+  const [configRobots, setConfigRobots] = useState<string[]>(["four", "plaques"]);
+  const [configObjectif, setConfigObjectif] = useState(20);
+  const [configCouvertureJours, setConfigCouvertureJours] = useState<Record<string, number[]>>({
+    "2": [2, 3, 4],
+    "6": [6, 0, 1, 2],
+  });
+
   const invalider = utiliserInvalidation();
+
+  // Charger la config au montage pour pré-remplir l'onglet Paramètres
+  const { data: configData } = utiliserRequete(["batch-cooking", "config"], () =>
+    obtenirConfigBatch()
+  );
+  useEffect(() => {
+    if (configData) {
+      if (configData.jours_batch?.length) setConfigJoursBatch(configData.jours_batch);
+      if (configData.heure_debut_preferee) setConfigHeure(configData.heure_debut_preferee);
+      if (configData.duree_max_session) setConfigDureeMax(configData.duree_max_session);
+      setConfigAvecJules(configData.avec_jules_par_defaut);
+      if (configData.robots_disponibles?.length) setConfigRobots(configData.robots_disponibles);
+      if (configData.objectif_portions_semaine) setConfigObjectif(configData.objectif_portions_semaine);
+      if (configData.couverture_jours) setConfigCouvertureJours(configData.couverture_jours as Record<string, number[]>);
+    }
+  }, [configData]);
+
+  const { mutate: sauvegarderConfig, isPending: enSauvegarde } = utiliserMutation(
+    () =>
+      mettreAJourConfig({
+        jours_batch: configJoursBatch,
+        heure_debut_preferee: configHeure,
+        duree_max_session: configDureeMax,
+        avec_jules_par_defaut: configAvecJules,
+        robots_disponibles: configRobots,
+        objectif_portions_semaine: configObjectif,
+        couverture_jours: configCouvertureJours,
+      }),
+    {
+      onSuccess: () => {
+        invalider(["batch-cooking", "config"]);
+        toast.success("Configuration sauvegardée");
+      },
+      onError: () => toast.error("Erreur lors de la sauvegarde"),
+    }
+  );
 
   const { data: donnees, isLoading } = utiliserRequete(
     ["batch-cooking"],
@@ -147,7 +234,7 @@ export default function PageBatchCooking() {
   );
 
   const recettesFiltrees = useMemo(() => {
-    const items = toutesRecettes?.items ?? [];
+    const items = (toutesRecettes?.items ?? []).filter((r) => r.compatible_batch);
     if (!rechercheRecette.trim()) return items;
     const q = rechercheRecette.toLowerCase();
     return items.filter((r) => r.nom.toLowerCase().includes(q));
@@ -253,6 +340,10 @@ export default function PageBatchCooking() {
           <TabsTrigger value="planifier">
             <CalendarPlus className="mr-1 h-4 w-4" />
             Planifier repas
+          </TabsTrigger>
+          <TabsTrigger value="parametres">
+            <Settings className="mr-1 h-4 w-4" />
+            Paramètres
           </TabsTrigger>
         </TabsList>
 
@@ -431,6 +522,205 @@ export default function PageBatchCooking() {
           description="Il faut des portions restantes pour injecter un plat batch cooking dans le planning de la semaine."
         />
       )}
+        </TabsContent>
+
+        {/* ═════ Onglet Paramètres ═════ */}
+        <TabsContent value="parametres">
+          <div className="space-y-6 max-w-2xl">
+
+            {/* Jours de batch cooking */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Jours de batch cooking</CardTitle>
+                <CardDescription>
+                  Ces jours sont vos sessions récurrentes. Pour une session exceptionnelle un autre
+                  jour, créez-la manuellement depuis l&apos;onglet Sessions. 🍳
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {JOURS_SEMAINE.map((jour) => {
+                    const actif = configJoursBatch.includes(jour.valeur);
+                    return (
+                      <button
+                        key={jour.valeur}
+                        type="button"
+                        onClick={() =>
+                          setConfigJoursBatch((prev) =>
+                            actif
+                              ? prev.filter((j) => j !== jour.valeur)
+                              : [...prev, jour.valeur].sort((a, b) => a - b)
+                          )
+                        }
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                          actif
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "border-border bg-background hover:bg-accent"
+                        }`}
+                      >
+                        {jour.long}
+                      </button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Couverture par session */}
+            {configJoursBatch.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Repas couverts par session</CardTitle>
+                  <CardDescription>
+                    Chaque session de batch cooking couvre les repas de certains jours. Cliquez sur
+                    les jours pour les associer à une session.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {configJoursBatch.map((jourBatch) => {
+                    const nomJour = JOURS_SEMAINE.find((j) => j.valeur === jourBatch)?.long ?? `Jour ${jourBatch}`;
+                    const couverture = configCouvertureJours[String(jourBatch)] ?? [];
+                    return (
+                      <div key={jourBatch}>
+                        <p className="text-sm font-medium mb-2">{nomJour} couvre :</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {JOURS_SEMAINE.map((j) => {
+                            const couvert = couverture.includes(j.valeur);
+                            return (
+                              <button
+                                key={j.valeur}
+                                type="button"
+                                onClick={() =>
+                                  setConfigCouvertureJours((prev) => {
+                                    const actuelle = prev[String(jourBatch)] ?? [];
+                                    return {
+                                      ...prev,
+                                      [String(jourBatch)]: couvert
+                                        ? actuelle.filter((x) => x !== j.valeur)
+                                        : [...actuelle, j.valeur],
+                                    };
+                                  })
+                                }
+                                className={`px-2 py-1 rounded text-xs border transition-colors ${
+                                  couvert
+                                    ? "bg-primary/20 border-primary/50 text-primary font-medium"
+                                    : "border-border bg-background hover:bg-accent"
+                                }`}
+                              >
+                                {j.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Robots + heure + durée */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Équipement &amp; horaires</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="param-heure">Heure de début préférée</Label>
+                    <Input
+                      id="param-heure"
+                      type="time"
+                      value={configHeure}
+                      onChange={(e) => setConfigHeure(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="param-duree">Durée max par session (min)</Label>
+                    <Input
+                      id="param-duree"
+                      type="number"
+                      min={30}
+                      step={15}
+                      value={configDureeMax}
+                      onChange={(e) => setConfigDureeMax(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Robots disponibles</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {ROBOTS_DISPONIBLES_OPTIONS.map((robot) => {
+                      const actif = configRobots.includes(robot);
+                      return (
+                        <button
+                          key={robot}
+                          type="button"
+                          onClick={() =>
+                            setConfigRobots((prev) =>
+                              actif ? prev.filter((r) => r !== robot) : [...prev, robot]
+                            )
+                          }
+                          className={`px-2.5 py-1 text-xs rounded border transition-colors ${
+                            actif
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "border-border bg-background hover:bg-accent"
+                          }`}
+                        >
+                          {ROBOTS_LABELS[robot] ?? robot}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Préférences générales */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Préférences</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Jules présent par défaut</p>
+                    <p className="text-xs text-muted-foreground">
+                      Les sessions incluront des portions adaptées pour Jules
+                    </p>
+                  </div>
+                  <Switch
+                    checked={configAvecJules}
+                    onCheckedChange={setConfigAvecJules}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="param-objectif">Objectif portions par semaine</Label>
+                  <Input
+                    id="param-objectif"
+                    type="number"
+                    min={1}
+                    max={60}
+                    value={configObjectif}
+                    onChange={(e) => setConfigObjectif(Number(e.target.value))}
+                    className="max-w-[8rem]"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end">
+              <Button onClick={() => sauvegarderConfig(undefined)} disabled={enSauvegarde}>
+                {enSauvegarde ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Sauvegarder la configuration
+              </Button>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
 

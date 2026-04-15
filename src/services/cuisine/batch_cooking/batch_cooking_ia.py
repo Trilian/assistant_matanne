@@ -322,14 +322,14 @@ class BatchCookingIAMixin:
     @avec_resilience(retry=1, timeout_s=60, fallback=None)
     def _appel_ia_detail(self, prompt: str, max_tokens: int = _MAX_TOKENS) -> dict | None:
         """Effectue un appel IA unique pour le batch cooking détaillé."""
-        if not self._client:
+        if not self.client:
             return None
 
         logger.info(
             "Appel IA batch cooking: prompt=%d chars, max_tokens=%d", len(prompt), max_tokens
         )
 
-        response = self._client.generer_json(
+        response = self.client.generer_json(
             prompt=prompt,
             system_prompt=_SYSTEM_PROMPT_DETAIL,
             max_tokens=max_tokens,
@@ -456,7 +456,7 @@ RÈGLES:
             response_model=SessionBatchIA,
             system_prompt="Tu es un chef expert en batch cooking et organisation de cuisine. Retourne UNIQUEMENT du JSON valide, sans aucun texte avant ou après.",
             temperature=0.5,
-            max_tokens=4000,
+            max_tokens=8000,
         )
 
         if result:
