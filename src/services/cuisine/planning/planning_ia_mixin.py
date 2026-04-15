@@ -425,8 +425,12 @@ RULES:
             if not jour_data.dejeuner_feculents:
                 jour_data.dejeuner_feculents = "Riz vapeur"
 
-            # Déjeuner — plat = toujours une recette stub
-            recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner, "Plat")
+            # Déjeuner — recette stub uniquement si ce n'est pas un reste
+            recette_dej_id = (
+                None
+                if jour_data.dejeuner_est_reste
+                else self._trouver_ou_creer_recette(db, jour_data.dejeuner, "Plat")
+            )
             entree_dej_recette_id = (
                 self._trouver_ou_creer_recette(db, jour_data.dejeuner_entree, "Entrée")
                 if jour_data.dejeuner_entree and jour_data.dejeuner_entree_est_recette
@@ -487,8 +491,12 @@ RULES:
             if not jour_data.diner_feculents:
                 jour_data.diner_feculents = "Riz vapeur"
 
-            # Dîner — plat = toujours une recette stub
-            recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner, "Plat")
+            # Dîner — recette stub uniquement si ce n'est pas un reste
+            recette_din_id = (
+                None
+                if jour_data.diner_est_reste
+                else self._trouver_ou_creer_recette(db, jour_data.diner, "Plat")
+            )
             entree_din_recette_id = (
                 self._trouver_ou_creer_recette(db, jour_data.diner_entree, "Entrée")
                 if jour_data.diner_entree and jour_data.diner_entree_est_recette

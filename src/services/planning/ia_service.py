@@ -106,11 +106,11 @@ Format JSON."""
         )
 
         return AnalyseVariete(
-            score_variete=int(result.get("score_variete", 50)),
-            proteins_bien_repartis=result.get("proteins_bien_repartis", False),
-            types_cuisines=result.get("types_cuisines", []),
-            repetitions_problematiques=result.get("repetitions_problematiques", []),
-            recommandations=result.get("recommandations", []),
+            score_variete=int(result.get("score_variete") or 50),
+            proteins_bien_repartis=result.get("proteins_bien_repartis") or False,
+            types_cuisines=result.get("types_cuisines") or [],
+            repetitions_problematiques=result.get("repetitions_problematiques") or [],
+            recommandations=result.get("recommandations") or [],
         )
 
     def analyser_variete_semaine_sync(self, planning_repas: list[dict]) -> AnalyseVariete:
@@ -160,12 +160,12 @@ Format JSON."""
         )
 
         return OptimisationNutrition(
-            calories_jour=result.get("calories_jour", {}),
-            proteines_equilibree=result.get("proteines_equilibree", False),
-            fruits_legumes_quota=float(result.get("fruits_legumes_quota", 0.5)),
-            equilibre_fibre=result.get("equilibre_fibre", False),
-            aliments_a_privilegier=result.get("aliments_a_privilegier", []),
-            aliments_a_limiter=result.get("aliments_a_limiter", []),
+            calories_jour=result.get("calories_jour") or {},
+            proteines_equilibree=result.get("proteines_equilibree") or False,
+            fruits_legumes_quota=float(result.get("fruits_legumes_quota") or 0.5),
+            equilibre_fibre=result.get("equilibre_fibre") or False,
+            aliments_a_privilegier=result.get("aliments_a_privilegier") or [],
+            aliments_a_limiter=result.get("aliments_a_limiter") or [],
         )
 
     async def suggerer_simplification(
@@ -208,11 +208,11 @@ Format JSON."""
         )
 
         return SimplificationSemaine(
-            nb_recettes_complexes=int(result.get("nb_recettes_complexes", 0)),
-            suggestions_simplification=result.get("suggestions_simplification", []),
-            gain_temps_minutes=int(result.get("gain_temps_minutes", 0)),
-            recettes_simples_substitution=result.get("recettes_simples_substitution", []),
-            charge_globale=result.get("charge_globale", "normal"),
+            nb_recettes_complexes=int(result.get("nb_recettes_complexes") or 0),
+            suggestions_simplification=result.get("suggestions_simplification") or [],
+            gain_temps_minutes=int(result.get("gain_temps_minutes") or 0),
+            recettes_simples_substitution=result.get("recettes_simples_substitution") or [],
+            charge_globale=result.get("charge_globale") or "normal",
         )
 
     def suggerer_recettes_adaptees(

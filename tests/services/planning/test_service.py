@@ -135,6 +135,31 @@ class TestJourPlanning:
         with pytest.raises(ValueError):
             JourPlanning(jour="Lundi 1", dejeuner="Test", diner="AB")
 
+    def test_normalise_champs_obligatoires_placeholders(self):
+        """Remplace les placeholders IA par des valeurs exploitables."""
+        jour = JourPlanning(
+            jour="Lundi 1",
+            dejeuner="Boeuf bourguignon léger",
+            diner="Poisson vapeur",
+            dejeuner_legumes="pas de légumes",
+            dejeuner_feculents="pas de féculents",
+            diner_legumes="aucun",
+            diner_feculents="none",
+            gouter=None,
+            gouter_laitage="-",
+            gouter_fruit="",
+            gouter_gateau="N/A",
+        )
+
+        assert jour.dejeuner_legumes == "Légumes de saison"
+        assert jour.dejeuner_feculents == "Riz vapeur"
+        assert jour.diner_legumes == "Légumes de saison"
+        assert jour.diner_feculents == "Riz vapeur"
+        assert jour.gouter == "Fruit de saison"
+        assert jour.gouter_laitage == "Yaourt nature"
+        assert jour.gouter_fruit == "Compote de pomme"
+        assert jour.gouter_gateau == "Biscuit complet"
+
 
 class TestServicePlanningCache:
     """Tests du cache du service."""

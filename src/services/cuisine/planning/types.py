@@ -11,6 +11,43 @@ from datetime import date
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+
+_VALEURS_PLACEHOLDER: set[str] = {
+    "",
+    "-",
+    "--",
+    "aucun",
+    "aucune",
+    "none",
+    "null",
+    "n/a",
+    "na",
+    "pas de feculent",
+    "pas de feculents",
+    "pas de féculent",
+    "pas de féculents",
+    "sans feculent",
+    "sans feculents",
+    "sans féculent",
+    "sans féculents",
+    "pas de legume",
+    "pas de legumes",
+    "pas de légume",
+    "pas de légumes",
+    "sans legume",
+    "sans legumes",
+    "sans légume",
+    "sans légumes",
+    "rien",
+}
+
+
+def _texte_valide(texte: str | None) -> bool:
+    if texte is None:
+        return False
+    normalise = " ".join(texte.strip().lower().split())
+    return bool(normalise) and normalise not in _VALEURS_PLACEHOLDER
+
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS PLANNING DE BASE
 # ═══════════════════════════════════════════════════════════
@@ -76,6 +113,29 @@ class JourPlanning(BaseModel):
     dejeuner_reste_source: str | None = None  # ex: "dîner de lundi"
     diner_est_reste: bool = False
     diner_reste_source: str | None = None  # ex: "déjeuner de mercredi"
+
+    @model_validator(mode="after")
+    def normaliser_champs_obligatoires(self):
+        """Normalise les champs obligatoires quand l'IA renvoie des placeholders."""
+        if not _texte_valide(self.dejeuner_legumes):
+            self.dejeuner_legumes = "Légumes de saison"
+        if not _texte_valide(self.dejeuner_feculents):
+            self.dejeuner_feculents = "Riz vapeur"
+        if not _texte_valide(self.diner_legumes):
+            self.diner_legumes = "Légumes de saison"
+        if not _texte_valide(self.diner_feculents):
+            self.diner_feculents = "Riz vapeur"
+
+        if not _texte_valide(self.gouter):
+            self.gouter = "Fruit de saison"
+        if not _texte_valide(self.gouter_laitage):
+            self.gouter_laitage = "Yaourt nature"
+        if not _texte_valide(self.gouter_fruit):
+            self.gouter_fruit = "Compote de pomme"
+        if not _texte_valide(self.gouter_gateau):
+            self.gouter_gateau = "Biscuit complet"
+
+        return self
 
 
 class RecetteEnrichieIA(BaseModel):

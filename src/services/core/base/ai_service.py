@@ -107,6 +107,7 @@ class BaseAIService(
         max_tokens: int = 1000,
         use_cache: bool = True,
         category: str | None = None,
+        response_format: dict | None = None,
     ) -> str | None:
         """
         Appel IA avec rate limiting + cache automatiques
@@ -118,6 +119,7 @@ class BaseAIService(
             max_tokens: Tokens max
             use_cache: Utiliser le cache
             category: Catégorie pour cache
+            response_format: Format de réponse Mistral (ex: {"type": "json_object"})
 
         Returns:
             Réponse IA ou None si erreur
@@ -180,6 +182,7 @@ class BaseAIService(
                     temperature=temp,
                     max_tokens=max_tokens,
                     utiliser_cache=False,  # On gère le cache nous-mêmes
+                    **(({"response_format": response_format}) if response_format else {}),
                 )
                 response = (
                     await maybe_response if inspect.isawaitable(maybe_response) else maybe_response
@@ -396,6 +399,7 @@ class BaseAIService(
             temperature=temperature,
             max_tokens=max_tokens,
             use_cache=use_cache,
+            response_format={"type": "json_object"},
         )
 
         if not response:

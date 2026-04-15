@@ -199,13 +199,16 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
                                 )}
                               </div>
                             )}
-                          {repas && type === "gouter" && (repas.laitage || repas.fruit) && (
+                          {repas && type === "gouter" && (repas.gateau_gouter || repas.laitage || repas.fruit_gouter) && (
                             <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 mt-0.5">
+                              {repas.gateau_gouter && (
+                                <span className="text-[9px] opacity-75 truncate" title={`Céréales/gâteau : ${repas.gateau_gouter}`}>🍪 {repas.gateau_gouter}</span>
+                              )}
                               {repas.laitage && (
                                 <span className="text-[9px] opacity-75 truncate" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
                               )}
-                              {repas.fruit && (
-                                <span className="text-[9px] opacity-75 truncate" title={`Fruit : ${repas.fruit}`}>🍎 {repas.fruit}</span>
+                              {repas.fruit_gouter && (
+                                <span className="text-[9px] opacity-75 truncate" title={`Fruit : ${repas.fruit_gouter}`}>🍎 {repas.fruit_gouter}</span>
                               )}
                             </div>
                           )}

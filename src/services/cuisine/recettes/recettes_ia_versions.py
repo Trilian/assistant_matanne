@@ -14,6 +14,7 @@ call_with_parsing_sync).
 from __future__ import annotations
 
 import logging
+import re
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Session, joinedload
@@ -56,6 +57,47 @@ class RecettesIAVersionsMixin:
     - build_system_prompt() (BaseAIService)
     - call_with_parsing_sync() (BaseAIService)
     """
+
+    _REGEX_ALCOOL = re.compile(
+        r"\b(vin(?:\s+rouge|\s+blanc)?|alcool|bi[eè]re|rhum|whisk(?:y|ey)|cognac|armagnac|porto|liqueur)\b",
+        flags=re.IGNORECASE,
+    )
+    _REGEX_SEL = re.compile(
+        r"\b(sel|sal[ée]r?|pinc[ée]e?s?\s+de\s+sel)\b",
+        flags=re.IGNORECASE,
+    )
+
+    @classmethod
+    def _securiser_texte_bebe(cls, texte: str) -> str:
+        """Retire les mentions incompatibles avec une portion bébé/Jules."""
+        if not texte:
+            return texte
+
+        nettoye = texte
+        nettoye = re.sub(
+            r"\b\d+\s*(?:ml|cl|l)\s+de\s+vin(?:\s+rouge|\s+blanc)?\b",
+            "bouillon sans sel ajouté",
+            nettoye,
+            flags=re.IGNORECASE,
+        )
+        nettoye = cls._REGEX_ALCOOL.sub("bouillon sans sel ajouté", nettoye)
+        nettoye = cls._REGEX_SEL.sub("sans sel ajouté", nettoye)
+
+        # Nettoyage simple des répétitions créées par les remplacements.
+        nettoye = re.sub(r"(sans sel ajouté)(?:\s+sans sel ajouté)+", r"\1", nettoye)
+        nettoye = re.sub(
+            r"(bouillon sans sel ajouté)(?:\s+bouillon sans sel ajouté)+",
+            r"\1",
+            nettoye,
+        )
+        return nettoye
+
+    @classmethod
+    def _contient_termes_interdits_bebe(cls, texte: str) -> bool:
+        if not texte:
+            return False
+        # Les mentions "sans sel ajouté" sont autorisées; on bloque surtout l'alcool résiduel.
+        return bool(cls._REGEX_ALCOOL.search(texte))
 
     @avec_gestion_erreurs(default_return=None)
     @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_bebe_{rid}")
@@ -167,12 +209,26 @@ Steps:
 
         logger.debug("[generer_version_bebe] version_data parsed: %s", version_data)
 
+        instructions_bebe = self._securiser_texte_bebe(version_data.instructions_modifiees)
+        notes_bebe = self._securiser_texte_bebe(version_data.notes_bebe)
+
+        if self._contient_termes_interdits_bebe(instructions_bebe) or self._contient_termes_interdits_bebe(notes_bebe):
+            raise ErreurValidation(
+                "La version bébé générée contient encore des mentions incompatibles (alcool/sel)."
+            )
+
+        note_securite = (
+            "Version Jules: retirer totalement l'alcool de la préparation et ne pas saler sa portion."
+        )
+        if note_securite.lower() not in notes_bebe.lower():
+            notes_bebe = f"{notes_bebe}\n\n{note_securite}".strip()
+
         # Créer version en DB
         version = VersionRecette(
             recette_base_id=recette_id,
             type_version=_TYPE_VERSION_BEBE,
-            instructions_modifiees=version_data.instructions_modifiees,
-            notes_bebe=version_data.notes_bebe,
+            instructions_modifiees=instructions_bebe,
+            notes_bebe=notes_bebe,
         )
         logger.debug("[generer_version_bebe] VersionRecette object created")
         db.add(version)

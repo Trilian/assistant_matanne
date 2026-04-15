@@ -1143,6 +1143,47 @@ class TestGenererVersionBebe:
         assert result.type_version == "bébé"
         assert "Mixer très finement" in result.instructions_modifiees
 
+    def test_generer_version_bebe_sanitise_alcool_et_sel(self, service, db, patch_db_context):
+        """La version bébé ne doit pas conserver de vin/alcool et sel ajouté."""
+        from src.services.cuisine.recettes.types import VersionBebeGeneree
+
+        recette = Recette(
+            nom="Boeuf bourguignon",
+            description="Recette mijotée",
+            temps_preparation=25,
+            temps_cuisson=120,
+            portions=4,
+            difficulte="moyen",
+            type_repas="diner",
+            saison="hiver",
+        )
+        db.add(recette)
+        db.flush()
+
+        ing = Ingredient(nom="boeuf", unite="g")
+        db.add(ing)
+        db.flush()
+
+        db.add(RecetteIngredient(recette_id=recette.id, ingredient_id=ing.id, quantite=500, unite="g"))
+        db.add(EtapeRecette(recette_id=recette.id, ordre=1, description="Mijoter longuement"))
+        db.commit()
+
+        mock_response = VersionBebeGeneree(
+            instructions_modifiees="Ajouter 500 ml de vin rouge puis une pincée de sel.",
+            notes_bebe="Version bébé avec vin rouge, ajuster le sel.",
+            age_minimum_mois=12,
+        )
+
+        with patch.object(service, "call_with_parsing_sync", return_value=mock_response):
+            result = service.generer_version_bebe(recette.id)
+
+        assert result is not None
+        contenu = f"{result.instructions_modifiees} {result.notes_bebe}".lower()
+        assert "vin" not in contenu
+        assert "500 ml" not in contenu
+        assert "pincée de sel" not in contenu
+        assert "sans sel ajouté" in contenu
+
     def test_generer_version_bebe_ia_returns_none(self, service, db, patch_db_context):
         """Test génération quand l'IA retourne None."""
         from src.core.exceptions import ErreurValidation

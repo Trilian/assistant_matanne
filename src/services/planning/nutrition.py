@@ -88,6 +88,37 @@ _MAP_TYPE_PROTEINES: dict[str, str] = {
 TYPES_REPAS_ASSIETTE: set[str] = {"dejeuner", "diner"}
 TYPES_REPAS_GOUTER: set[str] = {"gouter"}
 
+_TEXTES_ABSENTS: set[str] = {
+    "",
+    "-",
+    "--",
+    "aucun",
+    "aucune",
+    "none",
+    "null",
+    "n/a",
+    "na",
+    "pas de feculent",
+    "pas de feculents",
+    "pas de féculent",
+    "pas de féculents",
+    "pas de féculent",
+    "pas de féculents",
+    "sans feculent",
+    "sans feculents",
+    "sans féculent",
+    "sans féculents",
+    "pas de legume",
+    "pas de legumes",
+    "pas de légume",
+    "pas de légumes",
+    "sans legume",
+    "sans legumes",
+    "sans légume",
+    "sans légumes",
+    "rien",
+}
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -113,15 +144,25 @@ def _categorie_from_repas(repas: "Repas") -> str | None:
     return None
 
 
+def _valeur_repas_presente(valeur: object) -> bool:
+    """Détermine si une valeur textuelle représente un vrai contenu nutritionnel."""
+    if valeur is None:
+        return False
+    if isinstance(valeur, str):
+        normalise = " ".join(valeur.strip().lower().split())
+        return bool(normalise) and normalise not in _TEXTES_ABSENTS
+    return bool(valeur)
+
+
 def _a_legumes(repas: "Repas") -> bool:
-    return bool(
-        getattr(repas, "legumes", None) or getattr(repas, "legumes_recette_id", None)
+    return _valeur_repas_presente(getattr(repas, "legumes", None)) or bool(
+        getattr(repas, "legumes_recette_id", None)
     )
 
 
 def _a_feculents(repas: "Repas") -> bool:
-    return bool(
-        getattr(repas, "feculents", None) or getattr(repas, "feculents_recette_id", None)
+    return _valeur_repas_presente(getattr(repas, "feculents", None)) or bool(
+        getattr(repas, "feculents_recette_id", None)
     )
 
 
@@ -130,9 +171,8 @@ def _a_proteines(repas: "Repas") -> bool:
     cat = _categorie_from_repas(repas)
     if cat and cat in CATEGORIES_PROTEINES:
         return True
-    return bool(
-        getattr(repas, "proteine_accompagnement", None)
-        or getattr(repas, "proteine_accompagnement_recette_id", None)
+    return _valeur_repas_presente(getattr(repas, "proteine_accompagnement", None)) or bool(
+        getattr(repas, "proteine_accompagnement_recette_id", None)
     )
 
 
@@ -166,9 +206,9 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
     elif categorie in CATEGORIES_PROTEINES:
         a_proteines = True
     elif categorie in CATEGORIES_MIXTES:
-        # Plat mixte → on présume feculents et légumes partiellement présents
-        a_feculents = a_feculents or True
-        a_legumes = a_legumes or True
+        # Plat mixte: ne pas attribuer automatiquement de points.
+        # On conserve uniquement les champs réellement renseignés.
+        pass
 
     if not a_legumes:
         alertes.append("Pas de légumes")

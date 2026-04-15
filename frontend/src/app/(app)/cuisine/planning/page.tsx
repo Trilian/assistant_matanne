@@ -329,6 +329,20 @@ function CarteRepasDraggable({
               </span>
             )}
           </div>
+          {repas.type_repas === "gouter" &&
+            (repas.gateau_gouter || repas.laitage || repas.fruit_gouter) && (
+              <div className="flex flex-col gap-y-0.5 mt-0.5">
+                {repas.gateau_gouter && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Céréales/gâteau : ${repas.gateau_gouter}`}>🍪 {repas.gateau_gouter}</span>
+                )}
+                {repas.laitage && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
+                )}
+                {repas.fruit_gouter && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Fruit : ${repas.fruit_gouter}`}>🍎 {repas.fruit_gouter}</span>
+                )}
+              </div>
+            )}
           {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
             (repas.entree || repas.laitage || repas.dessert || repas.legumes || repas.feculents || repas.proteine_accompagnement) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
@@ -1566,7 +1580,7 @@ export default function PagePlanning() {
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">Variété</p>
                     <p className="mt-1 text-2xl font-bold text-violet-600">{analysePlanningIa.variete.score_variete}/100</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {analysePlanningIa.variete.types_cuisines.length} styles culinaires détectés
+                      {(analysePlanningIa.variete.types_cuisines ?? []).length} styles culinaires détectés
                     </p>
                   </div>
                   <div className="rounded-lg border bg-background/80 p-3">
@@ -1603,9 +1617,9 @@ export default function PagePlanning() {
                   <div className="rounded-lg border bg-background/80 p-3 space-y-2">
                     <p className="text-sm font-semibold">À privilégier</p>
                     <p className="text-xs text-muted-foreground">
-                      {analysePlanningIa.nutrition.aliments_a_privilegier.join(" · ") || "RAS"}
+                      {(analysePlanningIa.nutrition.aliments_a_privilegier ?? []).join(" · ") || "RAS"}
                     </p>
-                    {analysePlanningIa.variete.recommandations.length > 0 && (
+                    {(analysePlanningIa.variete.recommandations ?? []).length > 0 && (
                       <>
                         <p className="text-sm font-semibold pt-1">Idées de variété</p>
                         <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
@@ -1623,9 +1637,9 @@ export default function PagePlanning() {
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
-                    {analysePlanningIa.variete.repetitions_problematiques.length > 0 && (
+                    {(analysePlanningIa.variete.repetitions_problematiques ?? []).length > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        Répétitions à surveiller : {analysePlanningIa.variete.repetitions_problematiques.join(", ")}
+                        Répétitions à surveiller : {(analysePlanningIa.variete.repetitions_problematiques ?? []).join(", ")}
                       </p>
                     )}
                   </div>
