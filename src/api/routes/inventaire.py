@@ -799,7 +799,8 @@ async def ajouter_articles_bulk(
                 if not nom:
                     continue
                 quantite = float(art.get("quantite") or 1.0)
-
+                quantite_min = float(art.get("quantite_min") or 1.0)
+                date_perm_raw = art.get("date_peremption")
                 # Trouver ou crÃ©er l'ingrÃ©dient
                 ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
                 if not ingredient:
@@ -821,14 +822,28 @@ async def ajouter_articles_bulk(
                     inv.quantite = float(inv.quantite or 0) + quantite
                     if emplacement and not inv.emplacement:
                         inv.emplacement = emplacement
+                    if date_perm_raw and not inv.date_peremption:
+                        from datetime import datetime
+                        try:
+                            inv.date_peremption = datetime.fromisoformat(str(date_perm_raw))
+                        except ValueError:
+                            pass
                     maj += 1
                 else:
+                    from datetime import datetime
+                    date_perm = None
+                    if date_perm_raw:
+                        try:
+                            date_perm = datetime.fromisoformat(str(date_perm_raw))
+                        except ValueError:
+                            pass
                     session.add(
                         ArticleInventaire(
                             ingredient_id=ingredient.id,
                             quantite=quantite,
-                            quantite_min=1.0,
+                            quantite_min=quantite_min,
                             emplacement=emplacement,
+                            date_peremption=date_perm,
                         )
                     )
                     crees += 1

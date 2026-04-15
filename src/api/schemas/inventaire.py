@@ -5,7 +5,7 @@ Aligné avec le modèle ORM ``ArticleInventaire`` qui utilise
 ``ingredient_id`` (FK vers ``ingredients``) et non pas ``nom`` directement.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
@@ -201,6 +201,23 @@ class InventaireItemResponse(BaseModel):
     nutriscore: str | None = Field(None, max_length=10)
     ecoscore: str | None = Field(None, max_length=10)
     nova_group: int | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def est_bas(self) -> bool:
+        return self.quantite < (self.quantite_min or 1.0)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def est_expire(self) -> bool:
+        if self.date_peremption is None:
+            return False
+        perem_date = (
+            self.date_peremption.date()
+            if isinstance(self.date_peremption, datetime)
+            else self.date_peremption
+        )
+        return perem_date < date.today()
 
     model_config = {
         "from_attributes": True,

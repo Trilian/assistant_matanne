@@ -103,7 +103,7 @@ export default function PageDetailBatch() {
     () => modifierSessionBatch(id, { recettes_selectionnees: recettesSel }),
     {
       onSuccess: () => {
-        invalider(["batch-cooking", String(id)]);
+        invalider(["batch-cooking"]);
         setDialogueRecettes(false);
         toast.success("Recettes mises à jour");
       },

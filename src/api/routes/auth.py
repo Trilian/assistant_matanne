@@ -252,6 +252,7 @@ async def connexion(request: LoginRequest, raw_request: Request):
             user_id=response.user.id,
             email=email,
             role=role,
+            nom=nom or "",
         )
 
         return LoginResponse(
@@ -334,6 +335,7 @@ async def inscription(request: RegisterRequest):
             user_id=response.user.id,
             email=email_ok,
             role="membre",
+            nom=request.nom,
         )
 
         return TokenResponse(access_token=token)
@@ -427,6 +429,7 @@ async def rafraichir_token(user: dict[str, Any] = Depends(get_current_user)):
         user_id=user["id"],
         email=user["email"],
         role=user.get("role", "membre"),
+        nom=user.get("nom", ""),
     )
 
     return TokenResponse(access_token=token)
@@ -449,6 +452,7 @@ async def obtenir_profil(user: dict[str, Any] = Depends(get_current_user)):
         id=user["id"],
         email=user["email"],
         role=user.get("role", "membre"),
+        nom=user.get("nom", ""),
     )
 
 

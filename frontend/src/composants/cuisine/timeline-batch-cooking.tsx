@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 import type { SessionBatchCooking } from "@/types/batch-cooking";
@@ -41,7 +42,8 @@ export function TimelineBatchCooking({
               className="relative mb-5"
             >
               <span className="absolute -left-[2.4rem] top-5 h-4 w-4 rounded-full border-2 border-background bg-primary shadow-sm" />
-              <div className={`rounded-2xl border bg-gradient-to-r p-4 ${COULEURS_STATUT[session.statut] ?? COULEURS_STATUT.planifiee}`}>
+              <Link href={`/cuisine/batch-cooking/${session.id}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl">
+              <div className={`rounded-2xl border bg-gradient-to-r p-4 cursor-pointer hover:opacity-90 transition-opacity ${COULEURS_STATUT[session.statut] ?? COULEURS_STATUT.planifiee}`}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold">{session.nom}</p>
@@ -68,6 +70,7 @@ export function TimelineBatchCooking({
                   />
                 </div>
               </div>
+              </Link>
             </motion.div>
           );
         })}

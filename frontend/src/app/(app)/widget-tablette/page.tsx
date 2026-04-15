@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Clock3, CloudSun, ListChecks, Timer, Utensils } from 'lucide-react'
+import Link from 'next/link'
+import { CalendarPlus, Clock3, CloudSun, ListChecks, Loader2, Timer, Utensils } from 'lucide-react'
 import { utiliserRequete } from '@/crochets/utiliser-api'
 import { obtenirTableauBord } from '@/bibliotheque/api/tableau-bord'
 import { obtenirTachesJourMaison } from '@/bibliotheque/api/maison'
@@ -33,8 +34,8 @@ export default function WidgetTablettePage() {
   const [timerSecondes, setTimerSecondes] = useState(25 * 60)
   const [meteo, setMeteo] = useState<{ temperature: number; condition: string } | null>(null)
 
-  const { data: dashboard } = utiliserRequete(['dashboard', 'widget'], obtenirTableauBord)
-  const { data: taches } = utiliserRequete(['maison', 'widget', 'taches'], obtenirTachesJourMaison)
+  const { data: dashboard, chargement: chargementDashboard, erreur: erreurDashboard } = utiliserRequete(['dashboard', 'widget'], obtenirTableauBord)
+  const { data: taches, chargement: chargementTaches } = utiliserRequete(['maison', 'widget', 'taches'], obtenirTachesJourMaison)
 
   useEffect(() => {
     const horloge = window.setInterval(() => setNow(new Date()), 30_000)
@@ -83,9 +84,6 @@ export default function WidgetTablettePage() {
   }, [timerActif, timerSecondes])
 
   const repasAujourdhui = dashboard?.repas_aujourd_hui ?? []
-  const repasPrincipal = repasAujourdhui[0] as
-    | { recette_nom?: string; type_repas?: string }
-    | undefined
   const tachePrioritaire = (Array.isArray(taches) ? taches : []).find(
     (t: { fait?: boolean }) => !t.fait
   ) as { nom?: string; categorie?: string } | undefined
@@ -108,12 +106,37 @@ export default function WidgetTablettePage() {
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
-            <div className="mb-4 flex items-center gap-2 text-emerald-300">
-              <Utensils className="h-5 w-5" />
-              <h2 className="text-lg font-medium">Repas du jour</h2>
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-emerald-300">
+                <Utensils className="h-5 w-5" />
+                <h2 className="text-lg font-medium">Repas du jour</h2>
+              </div>
+              {!chargementDashboard && repasAujourdhui.length === 0 && (
+                <Link href="/cuisine/planning" className="flex items-center gap-1 rounded-md bg-emerald-500/20 px-3 py-1 text-xs text-emerald-300 hover:bg-emerald-500/30">
+                  <CalendarPlus className="h-3.5 w-3.5" />
+                  Planifier
+                </Link>
+              )}
             </div>
-            <p className="text-xl font-semibold leading-snug">{repasPrincipal?.recette_nom ?? 'Aucun repas planifie'}</p>
-            <p className="mt-2 text-sm text-zinc-300">{repasPrincipal?.type_repas ?? 'Planification a faire'}</p>
+            {chargementDashboard ? (
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Chargement...</span>
+              </div>
+            ) : erreurDashboard ? (
+              <p className="text-sm text-red-400">Connexion impossible au serveur</p>
+            ) : repasAujourdhui.length === 0 ? (
+              <p className="text-sm text-zinc-400">Aucun repas planifie pour aujourd'hui</p>
+            ) : (
+              <ul className="space-y-2">
+                {repasAujourdhui.map((r: { type_repas?: string; recette_nom?: string }, idx: number) => (
+                  <li key={idx} className="flex items-baseline gap-2">
+                    <span className="w-20 shrink-0 text-xs capitalize text-emerald-300/80">{r.type_repas ?? 'repas'}</span>
+                    <span className="text-base font-semibold leading-snug">{r.recette_nom ?? 'A definir'}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </article>
 
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
@@ -121,8 +144,17 @@ export default function WidgetTablettePage() {
               <ListChecks className="h-5 w-5" />
               <h2 className="text-lg font-medium">Tache prioritaire</h2>
             </div>
-            <p className="text-xl font-semibold leading-snug">{tachePrioritaire?.nom ?? 'Rien de prioritaire'}</p>
-            <p className="mt-2 text-sm text-zinc-300">{tachePrioritaire?.categorie ?? 'Maison'}</p>
+            {chargementTaches ? (
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Chargement...</span>
+              </div>
+            ) : (
+              <>
+                <p className="text-xl font-semibold leading-snug">{tachePrioritaire?.nom ?? 'Rien de prioritaire'}</p>
+                <p className="mt-2 text-sm text-zinc-300">{tachePrioritaire?.categorie ?? 'Maison'}</p>
+              </>
+            )}
           </article>
 
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
@@ -143,16 +175,30 @@ export default function WidgetTablettePage() {
               <Clock3 className="h-5 w-5" />
               <h2 className="text-lg font-medium">Agenda rapide</h2>
             </div>
-            <ul className="space-y-2 text-base text-zinc-100 md:text-lg">
-              {repasAujourdhui
-                .slice(0, 3)
-                .map((repas: { id?: number | string; type_repas?: string; recette_nom?: string }, index: number) => (
-                <li key={`${repas.id}-${index}`}>
-                  {(repas.type_repas ?? 'repas').toString()} - {(repas.recette_nom ?? 'Repas').toString()}
-                </li>
-              ))}
-              {repasAujourdhui.length === 0 && <li>Aucun evenement repas aujourd'hui</li>}
-            </ul>
+            {chargementDashboard ? (
+              <div className="flex items-center gap-2 text-zinc-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Chargement...</span>
+              </div>
+            ) : (
+              <ul className="space-y-2 text-base text-zinc-100 md:text-lg">
+                {repasAujourdhui
+                  .slice(0, 3)
+                  .map((repas: { id?: number | string; type_repas?: string; recette_nom?: string }, index: number) => (
+                  <li key={`${repas.id}-${index}`}>
+                    {(repas.type_repas ?? 'repas').toString()} - {(repas.recette_nom ?? 'Repas').toString()}
+                  </li>
+                ))}
+                {repasAujourdhui.length === 0 && (
+                  <li className="text-zinc-400">
+                    Aucun repas aujourd'hui —{' '}
+                    <Link href="/cuisine/planning" className="text-emerald-400 underline underline-offset-2">
+                      planifier
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            )}
           </article>
 
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">

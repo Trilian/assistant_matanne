@@ -42,6 +42,8 @@ class JourPlanning(BaseModel):
     dejeuner_laitage: str | None = None
     # Déjeuner — légumes accompagnement (ex: "Haricots verts", "Courgettes sautées")
     dejeuner_legumes: str | None = None
+    # Déjeuner — féculents accompagnement (ex: "Riz vapeur", "Pommes de terre")
+    dejeuner_feculents: str | None = None
     # Déjeuner — dessert optionnel
     dejeuner_dessert: str | None = None
     dejeuner_dessert_est_recette: bool = False
@@ -53,6 +55,8 @@ class JourPlanning(BaseModel):
     gouter_laitage: str | None = None
     # Goûter — fruit entier ou compote obligatoire (pomme, poire, compote... — jamais un jus)
     gouter_fruit: str | None = None
+    # Goûter — gâteau / biscuit sain (cake maison, galette avoine, biscuit complet...)
+    gouter_gateau: str | None = None
 
     # Dîner — entrée optionnelle
     diner_entree: str | None = None
@@ -61,6 +65,8 @@ class JourPlanning(BaseModel):
     diner_laitage: str | None = None
     # Dîner — légumes accompagnement (ex: "Brocoli", "Épinards à la crème")
     diner_legumes: str | None = None
+    # Dîner — féculents accompagnement (ex: "Pâtes", "Semoule", "Lentilles")
+    diner_feculents: str | None = None
     # Dîner — dessert optionnel
     diner_dessert: str | None = None
     diner_dessert_est_recette: bool = False

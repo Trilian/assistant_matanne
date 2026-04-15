@@ -130,6 +130,7 @@ class UtilisateurToken(BaseModel):
     id: str
     email: str
     role: str = "membre"
+    nom: str = ""
 
 
 class TokenResponse(BaseModel):
@@ -150,6 +151,7 @@ def creer_token_acces(
     email: str,
     role: str = "membre",
     duree_heures: int = DUREE_TOKEN_HEURES,
+    nom: str = "",
 ) -> str:
     """
     Crée un token JWT signé pour l'API.
@@ -170,6 +172,7 @@ def creer_token_acces(
         "sub": user_id,
         "email": email,
         "role": role,
+        "nom": nom,
         "iat": maintenant,
         "exp": expiration,
         "iss": "assistant-matanne-api",
@@ -230,6 +233,7 @@ def valider_token_api(token: str) -> UtilisateurToken | None:
         id=payload.get("sub", "unknown"),
         email=payload.get("email", ""),
         role=payload.get("role", "membre"),
+        nom=payload.get("nom", ""),
     )
 
 
@@ -309,11 +313,13 @@ def _extraire_utilisateur_supabase(payload: dict[str, Any]) -> UtilisateurToken:
     app_metadata = payload.get("app_metadata", {})
 
     role = metadata.get("role") or app_metadata.get("role") or payload.get("role", "membre")
+    nom = metadata.get("nom") or metadata.get("full_name") or ""
 
     return UtilisateurToken(
         id=payload.get("sub", "unknown"),
         email=payload.get("email", ""),
         role=role,
+        nom=nom,
     )
 
 

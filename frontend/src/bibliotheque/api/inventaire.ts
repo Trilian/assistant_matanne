@@ -39,11 +39,22 @@ export async function listerInventaireConsolide(): Promise<ArticleConsolide[]> {
   return data;
 }
 
-/** Ajouter un article à l'inventaire */
+/** Ajouter un article à l'inventaire (via bulk pour résolution auto ingredient) */
 export async function ajouterArticleInventaire(
   dto: CreerArticleInventaireDTO
-): Promise<ArticleInventaire> {
-  const { data } = await clientApi.post<ArticleInventaire>("/inventaire", dto);
+): Promise<ResultatBulk> {
+  const emplacement = dto.emplacement ?? "Frigo";
+  const { data } = await clientApi.post<ResultatBulk>(
+    `/inventaire/bulk?emplacement=${encodeURIComponent(emplacement)}`,
+    [{
+      nom: dto.nom,
+      quantite: dto.quantite,
+      unite: dto.unite,
+      categorie: dto.categorie,
+      date_peremption: dto.date_peremption,
+      quantite_min: dto.seuil_alerte,
+    }]
+  );
   return data;
 }
 

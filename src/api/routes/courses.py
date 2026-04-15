@@ -1355,6 +1355,7 @@ async def valider_courses(
                             ingredient_id=art.ingredient_id,
                             quantite=float(art.quantite_necessaire or 1),
                             quantite_min=1.0,
+                            emplacement="Frigo",
                         )
                     )
                 articles_sync += 1

@@ -251,6 +251,33 @@ async def obtenir_budget_meubles(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
+
+
+# Helpers de mapping champs frontend vers modele ArticleCellier
+
+
+def _normaliser_payload_cellier(data: dict, *, is_patch: bool = False) -> dict:
+    data = {k: v for k, v in data.items() if v is not None}
+    if 'date_peremption' in data:
+        data['dlc'] = data.pop('date_peremption')
+    if 'code_barre' in data:
+        data['code_barres'] = data.pop('code_barre')
+    if not is_patch and not data.get('categorie'):
+        data['categorie'] = 'Divers'
+    return data
+
+
+def _serialiser_article_cellier(article) -> dict:
+    from src.services.core.backup.utils_serialization import model_to_dict as _mtd
+    d = _mtd(article)
+    if 'dlc' in d:
+        d['date_peremption'] = d.pop('dlc')
+    d.pop('dluo', None)
+    if 'code_barres' in d:
+        d['code_barre'] = d.pop('code_barres')
+    return d
+
+
 @router.get("/cellier", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_articles_cellier(
@@ -267,7 +294,7 @@ async def lister_articles_cellier(
             filtre_categorie=categorie,
             filtre_emplacement=emplacement,
         )
-        return {"items": articles}
+        return {"items": [_serialiser_article_cellier(a) for a in articles]}
 
     return await executer_async(_query)
 
@@ -283,7 +310,12 @@ async def alertes_peremption_cellier(
 
     def _query():
         service = obtenir_cellier_crud_service()
-        return {"items": service.get_alertes_peremption(jours_horizon=jours)}
+        alertes = service.get_alertes_peremption(jours_horizon=jours)
+        # Renommer dlc -> date_peremption pour correspondre au type frontend
+        for a in alertes:
+            if "dlc" in a:
+                a["date_peremption"] = a.pop("dlc")
+        return {"items": alertes}
 
     return await executer_async(_query)
 
@@ -331,8 +363,8 @@ async def obtenir_article_cellier(
         service = obtenir_cellier_crud_service()
         result = service.get_article_by_id(article_id)
         if not result:
-            raise HTTPException(status_code=404, detail="Article non trouvÃ©")
-        return model_to_dict(result)
+            raise HTTPException(status_code=404, detail="Article non trouv\u00e9")
+        return _serialiser_article_cellier(result)
 
     return await executer_async(_query)
 
@@ -348,7 +380,8 @@ async def creer_article_cellier(
 
     def _query():
         service = obtenir_cellier_crud_service()
-        return model_to_dict(service.create_article(payload))
+        data = _normaliser_payload_cellier(payload)
+        return _serialiser_article_cellier(service.create_article(data))
 
     return await executer_async(_query)
 
@@ -365,7 +398,8 @@ async def modifier_article_cellier(
 
     def _query():
         service = obtenir_cellier_crud_service()
-        return model_to_dict(service.update_article(article_id, payload))
+        data = _normaliser_payload_cellier(payload, is_patch=True)
+        return _serialiser_article_cellier(service.update_article(article_id, data))
 
     return await executer_async(_query)
 
@@ -401,7 +435,8 @@ async def ajuster_quantite_cellier(
 
     def _query():
         service = obtenir_cellier_crud_service()
-        return service.ajuster_quantite(article_id, delta)
+        result = service.ajuster_quantite(article_id, delta)
+        return _serialiser_article_cellier(result) if result else {}
 
     return await executer_async(_query)
 

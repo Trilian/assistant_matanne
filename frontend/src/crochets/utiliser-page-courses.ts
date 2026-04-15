@@ -30,6 +30,7 @@ import { utiliserInvalidation, utiliserMutation, utiliserRequete } from "@/croch
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { utiliserRaccourcisPage } from "@/crochets/utiliser-raccourcis-page";
 import { utiliserReconnaissanceVocale } from "@/crochets/utiliser-reconnaissance-vocale";
+import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 import type { ArticleCourses, ListeCourses } from "@/types/courses";
 
@@ -53,7 +54,10 @@ export function utiliserPageCourses() {
     reinitialiser: reinitialiserModeInvites,
   } = utiliserModeInvites();
 
-  const [listeSelectionnee, setListeSelectionnee] = useState<number | null>(null);
+  const [listeSelectionnee, setListeSelectionnee] = utiliserStockageLocal<number | null>(
+    "courses.listeSelectionnee",
+    null,
+  );
   const [nomNouvelleListe, setNomNouvelleListe] = useState("");
   const [dialogueArticle, setDialogueArticle] = useState(false);
   const [scanneurOuvert, setScanneurOuvert] = useState(false);
@@ -82,6 +86,21 @@ export function utiliserPageCourses() {
     ["courses"],
     listerListesCourses,
   );
+
+  // Auto-sélection : liste de la semaine > première active > première liste
+  useEffect(() => {
+    if (!listes?.length) return;
+    setListeSelectionnee((current) => {
+      // La liste persistée existe encore → on la conserve
+      if (current !== null && listes.some((l) => l.id === current)) return current;
+      // Sinon : priorité à la liste contenant "semaine" non terminée
+      const listeSemaine = listes.find(
+        (l) => !l.est_terminee && l.nom.toLowerCase().includes("semaine"),
+      );
+      const premiere = listeSemaine ?? listes.find((l) => !l.est_terminee) ?? listes[0];
+      return premiere?.id ?? null;
+    });
+  }, [listes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: detailListe, isLoading: chargementDetail } = utiliserRequete(
     ["courses", String(listeSelectionnee)],

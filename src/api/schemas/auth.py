@@ -44,10 +44,11 @@ class UserInfoResponse(BaseModel):
     id: str = Field(max_length=100)
     email: str = Field(max_length=200)
     role: str = Field(max_length=50)
+    nom: str = Field(default="", max_length=120)
 
     model_config = {
         "json_schema_extra": {
-            "example": {"id": "user_123", "email": "anne@example.com", "role": "admin"}
+            "example": {"id": "user_123", "email": "anne@example.com", "role": "admin", "nom": "Anne"}
         }
     }
 
