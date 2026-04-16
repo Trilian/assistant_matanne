@@ -31,7 +31,12 @@ logger = logging.getLogger(__name__)
 
 # Nombre max de recettes par appel IA avant découpage automatique
 _MAX_RECETTES_PAR_APPEL = 4
-_MAX_TOKENS = 16000
+# Pipeline simplifié (SessionBatchIA) : schéma compact, ~2000-3000 tokens suffisent
+_MAX_TOKENS_SIMPLE = 4000
+# Pipeline détaillé (PlanBatchDetailIA) : listes d'ingrédients + instructions complètes
+_MAX_TOKENS_DETAIL = 16000
+# Alias conservé pour compatibilité interne (utilisé uniquement par le pipeline détaillé)
+_MAX_TOKENS = _MAX_TOKENS_DETAIL
 
 _SYSTEM_PROMPT_DETAIL = (
     "Tu es un chef expérimenté spécialiste du batch cooking familial. "
@@ -348,7 +353,7 @@ class BatchCookingIAMixin:
         ),
     )
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("ia.batch_cooking.generer_plan", seuil_alerte_ms=15000)
+    @chronometre("ia.batch_cooking.generer_plan", seuil_alerte_ms=20000)
     @avec_session_db
     def generer_plan_ia(
         self,
@@ -453,16 +458,16 @@ RÈGLES:
 
         _system = "Tu es un chef expert en batch cooking et organisation de cuisine. Retourne UNIQUEMENT du JSON valide, sans aucun texte avant ou après."
 
-        # Tentative 1 : appel avec _MAX_TOKENS tokens
+        # Tentative 1 : appel avec _MAX_TOKENS_SIMPLE tokens (schéma compact)
         result = self.call_with_json_parsing_sync(
             prompt=prompt,
             response_model=SessionBatchIA,
             system_prompt=_system,
             temperature=0.5,
-            max_tokens=_MAX_TOKENS,
+            max_tokens=_MAX_TOKENS_SIMPLE,
         )
 
-        # Tentative 2 : retry avec encore plus de tokens si le JSON était tronqué
+        # Tentative 2 : retry avec plus de tokens si le JSON était tronqué
         if not result:
             logger.warning("Tentative 1 échouée (réponse tronquée?), retry avec max_tokens augmenté")
             result = self.call_with_json_parsing_sync(
@@ -470,7 +475,7 @@ RÈGLES:
                 response_model=SessionBatchIA,
                 system_prompt=_system,
                 temperature=0.5,
-                max_tokens=_MAX_TOKENS + 8000,
+                max_tokens=_MAX_TOKENS_SIMPLE + 2000,
                 use_cache=False,
             )
 

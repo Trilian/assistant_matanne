@@ -195,11 +195,18 @@ class ServiceNotificationsEnrichis:
     def obtenir_preferences(self, user_id: str) -> dict[str, Any]:
         """RÃ©cupÃ¨re les prÃ©fÃ©rences de notification granulaires (E.4)."""
         try:
+            from uuid import UUID as _UUID
+
             from src.core.models.notifications import PreferenceNotification
+
+            try:
+                user_uuid = _UUID(str(user_id))
+            except (ValueError, AttributeError):
+                return self._prefs_par_defaut()
 
             prefs = (
                 self.session.query(PreferenceNotification)
-                .filter(PreferenceNotification.user_id == user_id)
+                .filter(PreferenceNotification.user_id == user_uuid)
                 .first()
             )
 
@@ -222,17 +229,25 @@ class ServiceNotificationsEnrichis:
     def mettre_a_jour_preferences(self, user_id: str, updates: dict[str, Any]) -> bool:
         """Met Ã  jour les prÃ©fÃ©rences (E.4)."""
         try:
+            from uuid import UUID as _UUID
+
             from src.core.models.notifications import PreferenceNotification
+
+            try:
+                user_uuid = _UUID(str(user_id))
+            except (ValueError, AttributeError):
+                logger.warning("E.4 user_id non-UUID ignoré: %s", user_id)
+                return False
 
             prefs = (
                 self.session.query(PreferenceNotification)
-                .filter(PreferenceNotification.user_id == user_id)
+                .filter(PreferenceNotification.user_id == user_uuid)
                 .first()
             )
 
             if not prefs:
                 # CrÃ©er les pref par dÃ©faut
-                prefs = PreferenceNotification(user_id=user_id)
+                prefs = PreferenceNotification(user_id=user_uuid)
                 self.session.add(prefs)
 
             # Appliquer les updates

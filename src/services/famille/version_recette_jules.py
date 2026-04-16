@@ -381,7 +381,7 @@ Adapte cette recette pour Jules."""
                 texture_conseil=texture_conseil,
             )
 
-            result = self.call_with_json_parsing_sync(
+            result = self.call_with_dict_parsing_sync(
                 prompt=prompt,
                 system_prompt=system,
                 max_tokens=1200,

@@ -7,6 +7,7 @@ W4 : ajout endpoints préférences canaux de notification.
 
 import logging
 from typing import Any, cast
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -311,10 +312,31 @@ async def obtenir_preferences_notifications(
     from src.core.models.notifications import PreferenceNotification
 
     def _query():
+        try:
+            user_uuid = UUID(str(user["id"]))
+        except (ValueError, AttributeError):
+            # user_id non-UUID (ex: mode dev) — retourner les valeurs par défaut
+            return {
+                "user_id": user["id"],
+                "courses_rappel": True,
+                "repas_suggestion": True,
+                "stock_alerte": True,
+                "meteo_alerte": True,
+                "budget_alerte": True,
+                "canal_prefere": "push",
+                "canaux_par_categorie": _CANAUX_DEFAULTS,
+                "notifications_par_module": _NOTIFICATIONS_MODULES_DEFAULTS,
+                "quiet_hours_start": "22:00",
+                "quiet_hours_end": "07:00",
+                "max_par_heure": 5,
+                "mode_digest": False,
+                "mode_vacances": False,
+                "checklist_voyage_auto": True,
+            }
         with executer_avec_session() as session:
             prefs = (
                 session.query(PreferenceNotification)
-                .filter(PreferenceNotification.user_id == user["id"])
+                .filter(PreferenceNotification.user_id == user_uuid)
                 .first()
             )
 
@@ -353,15 +375,19 @@ async def modifier_preferences_notifications(
     from src.core.models.notifications import PreferenceNotification
 
     def _upsert():
+        try:
+            user_uuid = UUID(str(user["id"]))
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=400, detail="Identifiant utilisateur invalide (UUID requis)")
         with executer_avec_session() as session:
             prefs = (
                 session.query(PreferenceNotification)
-                .filter(PreferenceNotification.user_id == user["id"])
+                .filter(PreferenceNotification.user_id == user_uuid)
                 .first()
             )
 
             if not prefs:
-                prefs = PreferenceNotification(user_id=user["id"])
+                prefs = PreferenceNotification(user_id=user_uuid)
                 session.add(prefs)
 
             updates = donnees.model_dump(exclude_unset=True)

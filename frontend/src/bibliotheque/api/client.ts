@@ -73,10 +73,15 @@ clientApi.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const currentToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
         const { data } = await axios.post(
           `${URL_API}${PREFIXE_API}/auth/refresh`,
           {},
-          { withCredentials: true, timeout: 10_000 }
+          {
+            withCredentials: true,
+            timeout: 10_000,
+            headers: currentToken ? { Authorization: `Bearer ${currentToken}` } : undefined,
+          }
         );
 
         if (data.access_token) {

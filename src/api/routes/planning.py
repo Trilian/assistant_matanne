@@ -308,6 +308,8 @@ async def obtenir_planning_semaine(
                         if r.entree_recette_id
                         else None,
                         "laitage": getattr(r, "laitage", None),
+                        "legumes": getattr(r, "legumes", None),
+                        "feculents": getattr(r, "feculents", None),
                         "fruit_gouter": getattr(r, "fruit_gouter", None),
                         "gateau_gouter": getattr(r, "gateau_gouter", None),
                         "dessert": getattr(r, "dessert", None),
@@ -318,6 +320,10 @@ async def obtenir_planning_semaine(
                         "plat_jules": getattr(r, "plat_jules", None),
                         "notes_jules": getattr(r, "notes_jules", None),
                         "adaptation_auto": getattr(r, "adaptation_auto", True),
+                        "est_reste": getattr(r, "est_reste", False),
+                        "reste_description": getattr(r, "reste_description", None),
+                        "score_equilibre": getattr(r, "score_equilibre", None),
+                        "alertes_equilibre": getattr(r, "alertes_equilibre", None),
                     }
                 )
 
@@ -1474,6 +1480,8 @@ async def generer_planning_ia(
                         "entree_recette_id": getattr(r, "entree_recette_id", None),
                         "entree_recette_nom": rec_entree.nom if rec_entree else None,
                         "laitage": getattr(r, "laitage", None),
+                        "legumes": getattr(r, "legumes", None),
+                        "feculents": getattr(r, "feculents", None),
                         "fruit_gouter": getattr(r, "fruit_gouter", None),
                         "gateau_gouter": getattr(r, "gateau_gouter", None),
                         "dessert": getattr(r, "dessert", None),
@@ -1484,6 +1492,8 @@ async def generer_planning_ia(
                         "adaptation_auto": getattr(r, "adaptation_auto", True),
                         "est_reste": getattr(r, "est_reste", False),
                         "reste_description": getattr(r, "reste_description", None),
+                        "score_equilibre": getattr(r, "score_equilibre", None),
+                        "alertes_equilibre": getattr(r, "alertes_equilibre", None),
                     }
                 )
 

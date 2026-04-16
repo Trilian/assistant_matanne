@@ -300,7 +300,10 @@ class ServiceExportPDF:
 
         for jour in jours_semaine:
             repas_jour = data.repas_par_jour.get(jour, [])
-            dejeuner = next((r["recette"] for r in repas_jour if "déj" in r["type"].lower()), "-")
+            dejeuner = next(
+                (r["recette"] for r in repas_jour if "déj" in r["type"].lower() or "dej" in r["type"].lower()),
+                "-",
+            )
             diner = next(
                 (
                     r["recette"]

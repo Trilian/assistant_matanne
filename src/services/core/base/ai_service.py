@@ -350,6 +350,7 @@ class BaseAIService(
             temperature=temperature,
             max_tokens=max_tokens,
             use_cache=use_cache,
+            response_format={"type": "json_object"},
         )
 
         if not response:

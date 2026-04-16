@@ -104,6 +104,19 @@ class SessionBatchPatch(BaseModel):
     recettes_selectionnees: list[int] | None = Field(None, description="IDs des recettes sélectionnées")
 
 
+class EtapeBatchResponse(BaseModel):
+    """Réponse d'une étape de batch cooking."""
+
+    id: int
+    ordre: int
+    groupe_parallele: int | None = None
+    titre: str = Field(max_length=200)
+    duree_minutes: int | None = None
+    robots_requis: list[str] = Field(default_factory=list)
+    statut: str = Field(max_length=20)
+    est_terminee: bool = False
+
+
 class SessionBatchResponse(BaseModel):
     """Réponse d'une session batch cooking."""
 
@@ -122,6 +135,7 @@ class SessionBatchResponse(BaseModel):
     genere_par_ia: bool = False
     etapes_count: int = 0
     progression: float = 0.0
+    etapes: list[EtapeBatchResponse] = Field(default_factory=list)
 
     model_config = {
         "json_schema_extra": {
@@ -144,19 +158,6 @@ class SessionBatchResponse(BaseModel):
             }
         }
     }
-
-
-class EtapeBatchResponse(BaseModel):
-    """Réponse d'une étape de batch cooking."""
-
-    id: int
-    ordre: int
-    groupe_parallele: int | None = None
-    titre: str = Field(max_length=200)
-    duree_minutes: int | None = None
-    robots_requis: list[str] = Field(default_factory=list)
-    statut: str = Field(max_length=20)
-    est_terminee: bool = False
 
 
 class PreparationBatchResponse(BaseModel):

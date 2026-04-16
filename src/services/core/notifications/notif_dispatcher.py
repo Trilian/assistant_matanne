@@ -541,13 +541,20 @@ class DispatcherNotifications:
             return {}
 
         try:
+            from uuid import UUID as _UUID
+
             from src.core.db import obtenir_contexte_db
             from src.core.models.notifications import PreferenceNotification
+
+            try:
+                user_uuid = _UUID(str(user_id))
+            except (ValueError, AttributeError):
+                return {}
 
             with obtenir_contexte_db() as session:
                 prefs = (
                     session.query(PreferenceNotification)
-                    .filter(PreferenceNotification.user_id == user_id)
+                    .filter(PreferenceNotification.user_id == user_uuid)
                     .first()
                 )
 

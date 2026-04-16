@@ -330,11 +330,8 @@ function CarteRepasDraggable({
             )}
           </div>
           {repas.type_repas === "gouter" &&
-            (repas.gateau_gouter || repas.laitage || repas.fruit_gouter) && (
+            (repas.laitage || repas.fruit_gouter) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
-                {repas.gateau_gouter && (
-                  <span className="text-[10px] text-muted-foreground break-words" title={`Céréales/gâteau : ${repas.gateau_gouter}`}>🍪 {repas.gateau_gouter}</span>
-                )}
                 {repas.laitage && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
                 )}
