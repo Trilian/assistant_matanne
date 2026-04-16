@@ -43,6 +43,10 @@ CREATE TABLE IF NOT EXISTS recettes (
     congelable BOOLEAN NOT NULL DEFAULT FALSE,
     -- Types de protéines
     type_proteines VARCHAR(100),
+    -- Catégorie nutritionnelle (pour équilibre assiette PNNS)
+    -- Valeurs : proteines_poisson | proteines_viande_rouge | proteines_volaille |
+    --           proteines_oeuf | proteines_legumineuses | feculents | legumes_principaux | mixte
+    categorie_nutritionnelle VARCHAR(50),
     -- Bio & Local
     est_bio BOOLEAN NOT NULL DEFAULT FALSE,
     est_local BOOLEAN NOT NULL DEFAULT FALSE,
@@ -156,6 +160,8 @@ CREATE TABLE IF NOT EXISTS config_batch_cooking (
     avec_jules_par_defaut BOOLEAN NOT NULL DEFAULT TRUE,
     robots_disponibles JSONB NOT NULL DEFAULT '["four", "plaques"]',
     preferences_stockage JSONB,
+    -- Mapping jour_batch → jours couverts, ex: {"2": [2, 3, 4], "6": [6, 0, 1, 2]}
+    couverture_jours JSONB,
     objectif_portions_semaine INTEGER NOT NULL DEFAULT 20,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -211,9 +217,11 @@ CREATE TABLE IF NOT EXISTS versions_recette (
     notes_bebe TEXT,
     etapes_paralleles_batch JSONB,
     temps_optimise_batch INTEGER,
+    modifications_resume JSONB NOT NULL DEFAULT '[]'::jsonb,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_versions_recette FOREIGN KEY (recette_base_id) REFERENCES recettes(id) ON DELETE CASCADE
 );
+COMMENT ON COLUMN versions_recette.modifications_resume IS 'Résumé des modifications apportées (liste de chaînes), ex: ["sans sel", "champignons mixés"]';
 CREATE INDEX IF NOT EXISTS ix_versions_recette_base ON versions_recette(recette_base_id);
 CREATE INDEX IF NOT EXISTS ix_versions_recette_type ON versions_recette(type_version);
 
@@ -435,20 +443,50 @@ CREATE TABLE IF NOT EXISTS repas (
     adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
     contexte_meteo VARCHAR(50),
     laitage VARCHAR(200),
+    -- Accompagnements (migrations 005b + 006)
+    fruit VARCHAR(200),
+    legumes VARCHAR(200),
+    legumes_recette_id INTEGER,
+    feculents VARCHAR(200),
+    feculents_recette_id INTEGER,
+    proteine_accompagnement VARCHAR(200),
+    proteine_accompagnement_recette_id INTEGER,
+    -- Goûter PNNS
+    fruit_gouter VARCHAR(100),
+    gateau_gouter VARCHAR(100),
+    -- Équilibre PNNS calculé
+    score_equilibre SMALLINT,
+    alertes_equilibre JSONB,
+    -- Restes
+    est_reste BOOLEAN NOT NULL DEFAULT FALSE,
+    reste_description VARCHAR(200),
     CONSTRAINT fk_repas_planning FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE,
-    CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
-    SET NULL,
-        CONSTRAINT fk_repas_entree_recette FOREIGN KEY (entree_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT fk_repas_dessert_recette FOREIGN KEY (dessert_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT fk_repas_dessert_jules_recette FOREIGN KEY (dessert_jules_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT ck_repas_portions_valides CHECK (
-            portion_ajustee IS NULL
-            OR (
-                portion_ajustee > 0
-                AND portion_ajustee <= 20
-            )
+    CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_entree_recette FOREIGN KEY (entree_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_dessert_recette FOREIGN KEY (dessert_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_dessert_jules_recette FOREIGN KEY (dessert_jules_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_legumes_recette FOREIGN KEY (legumes_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_feculents_recette FOREIGN KEY (feculents_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_proteine_acc_recette FOREIGN KEY (proteine_accompagnement_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT ck_repas_portions_valides CHECK (
+        portion_ajustee IS NULL
+        OR (
+            portion_ajustee > 0
+            AND portion_ajustee <= 20
         )
+    )
 );
+COMMENT ON COLUMN repas.fruit IS 'Fruit entier ou compote (goûter) — texte libre, ex: Pomme, Compote poire';
+COMMENT ON COLUMN repas.legumes IS 'Légumes accompagnement (déjeuner/dîner) — texte libre, ex: Haricots verts, Courgettes sautées';
+COMMENT ON COLUMN repas.legumes_recette_id IS 'Recette liée pour les légumes (optionnel, sinon texte libre dans `legumes`)';
+COMMENT ON COLUMN repas.feculents IS 'Féculents accompagnement — texte libre (ex: Riz basmati, Pommes de terre vapeur)';
+COMMENT ON COLUMN repas.feculents_recette_id IS 'Recette liée pour les féculents (optionnel)';
+COMMENT ON COLUMN repas.proteine_accompagnement IS 'Protéine quand le plat est féculent/légume (ex: Escalope de dinde, Lentilles)';
+COMMENT ON COLUMN repas.proteine_accompagnement_recette_id IS 'Recette liée pour la protéine accompagnement';
+COMMENT ON COLUMN repas.fruit_gouter IS 'Fruit frais ou compote au goûter (PNNS) — ex: Pomme, Compote poire sans sucre';
+COMMENT ON COLUMN repas.gateau_gouter IS 'Gâteau/biscuit sain au goûter (PNNS) — ex: Cake maison, Barre céréales';
+COMMENT ON COLUMN repas.score_equilibre IS 'Score PNNS calculé 0-100 (NULL=non applicable). Vert≥80, Orange 50-79, Rouge<50';
+COMMENT ON COLUMN repas.alertes_equilibre IS 'Liste alertes équilibre : ["Pas de légumes", "Féculents manquants", "Protéine manquante"]';
 CREATE INDEX IF NOT EXISTS ix_repas_planning ON repas(planning_id);
 CREATE INDEX IF NOT EXISTS idx_repas_planning_id ON repas(planning_id);
 CREATE INDEX IF NOT EXISTS ix_repas_recette ON repas(recette_id);

@@ -1,7 +1,7 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
--- Version    : 4.1 (migrations 001 + 002 intégrées)
+-- Version    : 4.2 (migrations 001-007 intégrées)
 -- Généré le  : 2026-04-14 00:00 UTC
 -- Source     : sql/schema/*.sql (21 fichiers)
 -- Cible      : Supabase PostgreSQL
@@ -1307,9 +1307,11 @@ CREATE TABLE IF NOT EXISTS versions_recette (
     notes_bebe TEXT,
     etapes_paralleles_batch JSONB,
     temps_optimise_batch INTEGER,
+    modifications_resume JSONB NOT NULL DEFAULT '[]'::jsonb,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_versions_recette FOREIGN KEY (recette_base_id) REFERENCES recettes(id) ON DELETE CASCADE
 );
+COMMENT ON COLUMN versions_recette.modifications_resume IS 'Résumé des modifications apportées (liste de chaînes), ex: ["sans sel", "champignons mixés"]';
 CREATE INDEX IF NOT EXISTS ix_versions_recette_base ON versions_recette(recette_base_id);
 CREATE INDEX IF NOT EXISTS ix_versions_recette_type ON versions_recette(type_version);
 
