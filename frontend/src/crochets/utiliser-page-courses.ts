@@ -438,7 +438,7 @@ export function utiliserPageCourses() {
   const { mutate: confirmer, isPending: enConfirmation } = utiliserMutation(
     (idListe: number) => confirmerCourses(idListe),
     {
-      onSuccess: async (_data, idListe) => {
+      onSuccess: (_data, idListe) => {
         queryClient.setQueryData(["courses", String(idListe)], (old: ListeCourses | undefined) =>
           old ? { ...old, etat: "active" } : old,
         );
@@ -451,11 +451,10 @@ export function utiliserPageCourses() {
         invalider(["courses"]);
         toast.success("Liste confirmée, vous pouvez maintenant cocher vos achats.");
 
-        try {
-          await envoyerListeCoursesTelegram(idListe);
-        } catch {
+        // L'envoi Telegram ne doit jamais bloquer l'UX de confirmation.
+        void envoyerListeCoursesTelegram(idListe).catch(() => {
           toast.info("Liste confirmée, notification Telegram non envoyée.");
-        }
+        });
       },
       onError: () => toast.error("Impossible de confirmer cette liste"),
     },

@@ -98,17 +98,18 @@ class ETagMiddleware(BaseHTTPMiddleware):
     Features:
     - Génère des ETags weak (W/) basés sur le hash SHA-256 tronqué du body
     - Retourne 304 Not Modified si If-None-Match correspond
-    - Ajoute Cache-Control headers configurables
+    - Utilise Cache-Control: no-cache pour forcer la revalidation systématique
+      (évite que le navigateur serve des données périmées après une mutation)
 
     Usage:
-        app.add_middleware(ETagMiddleware, cache_seconds=60)
+        app.add_middleware(ETagMiddleware)
 
     Note:
         Ce middleware buffurise le body pour calculer l'ETag.
         À utiliser uniquement pour des réponses de taille raisonnable.
     """
 
-    def __init__(self, app: ASGIApp, cache_seconds: int = 60):
+    def __init__(self, app: ASGIApp, cache_seconds: int = 0):
         super().__init__(app)
         self.cache_seconds = cache_seconds
 
@@ -139,6 +140,14 @@ class ETagMiddleware(BaseHTTPMiddleware):
         hash_value = hashlib.sha256(body).hexdigest()[:16]
         etag = f'W/"{hash_value}"'
 
+        # Déterminer la directive Cache-Control
+        # no-cache : le navigateur DOIT revalider avant de servir la réponse cachée
+        # (évite que max-age masque les mutations comme la confirmation de liste)
+        if self.cache_seconds > 0:
+            cache_directive = f"private, max-age={self.cache_seconds}"
+        else:
+            cache_directive = "private, no-cache"
+
         # Vérifier If-None-Match - retourner 304 si correspondance
         if client_etag:
             client_etags = [e.strip() for e in client_etag.split(",")]
@@ -147,7 +156,7 @@ class ETagMiddleware(BaseHTTPMiddleware):
                     status_code=304,
                     headers={
                         "ETag": etag,
-                        "Cache-Control": f"private, max-age={self.cache_seconds}",
+                        "Cache-Control": cache_directive,
                     },
                 )
 
@@ -158,7 +167,7 @@ class ETagMiddleware(BaseHTTPMiddleware):
             headers={
                 **dict(response.headers),
                 "ETag": etag,
-                "Cache-Control": f"private, max-age={self.cache_seconds}",
+                "Cache-Control": cache_directive,
             },
             media_type=response.media_type,
         )

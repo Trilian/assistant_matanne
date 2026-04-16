@@ -127,7 +127,7 @@ class JourPlanning(BaseModel):
             self.diner_feculents = "Riz vapeur"
 
         if not _texte_valide(self.gouter):
-            self.gouter = "Fruit de saison"
+            self.gouter = "Goûter"
         if not _texte_valide(self.gouter_laitage):
             self.gouter_laitage = "Yaourt nature"
         if not _texte_valide(self.gouter_fruit):

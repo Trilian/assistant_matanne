@@ -281,6 +281,8 @@ async def obtenir_planning_semaine(
                     if r.entree_recette_id
                     else None,
                     "laitage": getattr(r, "laitage", None),
+                    "fruit_gouter": getattr(r, "fruit_gouter", None),
+                    "gateau_gouter": getattr(r, "gateau_gouter", None),
                     "dessert": getattr(r, "dessert", None),
                     "dessert_recette_id": getattr(r, "dessert_recette_id", None),
                     "dessert_recette_nom": recettes_map.get(r.dessert_recette_id)
@@ -306,6 +308,8 @@ async def obtenir_planning_semaine(
                         if r.entree_recette_id
                         else None,
                         "laitage": getattr(r, "laitage", None),
+                        "fruit_gouter": getattr(r, "fruit_gouter", None),
+                        "gateau_gouter": getattr(r, "gateau_gouter", None),
                         "dessert": getattr(r, "dessert", None),
                         "dessert_recette_id": getattr(r, "dessert_recette_id", None),
                         "dessert_recette_nom": recettes_map.get(r.dessert_recette_id)
@@ -1427,6 +1431,8 @@ async def generer_planning_ia(
                     "entree_recette_id": getattr(r, "entree_recette_id", None),
                     "entree_recette_nom": rec_entree.nom if rec_entree else None,
                     "laitage": getattr(r, "laitage", None),
+                    "fruit_gouter": getattr(r, "fruit_gouter", None),
+                    "gateau_gouter": getattr(r, "gateau_gouter", None),
                     "dessert": getattr(r, "dessert", None),
                     "dessert_recette_id": getattr(r, "dessert_recette_id", None),
                     "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,
@@ -1468,6 +1474,8 @@ async def generer_planning_ia(
                         "entree_recette_id": getattr(r, "entree_recette_id", None),
                         "entree_recette_nom": rec_entree.nom if rec_entree else None,
                         "laitage": getattr(r, "laitage", None),
+                        "fruit_gouter": getattr(r, "fruit_gouter", None),
+                        "gateau_gouter": getattr(r, "gateau_gouter", None),
                         "dessert": getattr(r, "dessert", None),
                         "dessert_recette_id": getattr(r, "dessert_recette_id", None),
                         "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,

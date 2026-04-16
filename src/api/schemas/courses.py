@@ -54,6 +54,7 @@ class ListeCoursesResume(BaseModel):
     nom: str = Field(max_length=200)
     etat: str = Field("brouillon", max_length=30)
     items_count: int = 0
+    checked_count: int = 0
     created_at: datetime | None = None
 
     model_config = {
@@ -63,6 +64,7 @@ class ListeCoursesResume(BaseModel):
                 "nom": "Courses semaine 15",
                 "etat": "brouillon",
                 "items_count": 18,
+                "checked_count": 6,
                 "created_at": "2026-04-03T09:00:00",
             }
         }

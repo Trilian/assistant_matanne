@@ -745,6 +745,10 @@ export default function PagePlanning() {
         void queryClient.refetchQueries({ queryKey: ["planning", dateDebut], exact: true });
         // Invalider les sous-requêtes planning (nutrition, conflits…) pour qu'elles se rechargent aussi.
         invalider(["planning"]);
+        // Second rechargement décalé de 3 s pour absorber les race conditions Railway (transaction non encore committée).
+        setTimeout(() => {
+          void queryClient.refetchQueries({ queryKey: ["planning", dateDebut], exact: true });
+        }, 3000);
         // L'invalidation du flux sera faite par validerBrouillonPlanning.onSuccess.
 
         if (!resultat.genere_par_ia) {

@@ -17,6 +17,7 @@ type ListeCoursesResumeApi = {
   nom: string;
   etat?: string;
   items_count?: number;
+  checked_count?: number;
   created_at?: string;
 };
 
@@ -51,7 +52,7 @@ export async function listerListesCourses(): Promise<ListeCourses[]> {
     est_terminee: (liste.etat ?? "") === "terminee",
     articles: [],
     nombre_articles: liste.items_count ?? 0,
-    nombre_coche: 0,
+    nombre_coche: liste.checked_count ?? 0,
   }));
 }
 

@@ -206,6 +206,11 @@ async def lister_courses(
                         "nom": liste.nom,
                         "etat": _etat_liste_response(liste),
                         "items_count": len(liste.articles) if liste.articles else 0,
+                        "checked_count": (
+                            sum(1 for article in liste.articles if article.achete)
+                            if liste.articles
+                            else 0
+                        ),
                         "created_at": liste.cree_le,
                     }
                     for liste in items

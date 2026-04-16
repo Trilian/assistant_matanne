@@ -451,13 +451,28 @@ RÈGLES:
 
         logger.info("🤖 Génération plan batch cooking IA (%d recettes)", len(recettes))
 
+        _system = "Tu es un chef expert en batch cooking et organisation de cuisine. Retourne UNIQUEMENT du JSON valide, sans aucun texte avant ou après."
+
+        # Tentative 1 : appel avec _MAX_TOKENS tokens
         result = self.call_with_json_parsing_sync(
             prompt=prompt,
             response_model=SessionBatchIA,
-            system_prompt="Tu es un chef expert en batch cooking et organisation de cuisine. Retourne UNIQUEMENT du JSON valide, sans aucun texte avant ou après.",
+            system_prompt=_system,
             temperature=0.5,
-            max_tokens=8000,
+            max_tokens=_MAX_TOKENS,
         )
+
+        # Tentative 2 : retry avec encore plus de tokens si le JSON était tronqué
+        if not result:
+            logger.warning("Tentative 1 échouée (réponse tronquée?), retry avec max_tokens augmenté")
+            result = self.call_with_json_parsing_sync(
+                prompt=prompt,
+                response_model=SessionBatchIA,
+                system_prompt=_system,
+                temperature=0.5,
+                max_tokens=_MAX_TOKENS + 8000,
+                use_cache=False,
+            )
 
         if result:
             logger.info(

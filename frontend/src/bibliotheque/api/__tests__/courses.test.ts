@@ -27,7 +27,14 @@ describe("listerListesCourses", () => {
     api.get.mockResolvedValueOnce({
       data: {
         items: [
-          { id: 1, nom: "Courses semaine", etat: "brouillon", items_count: 3, created_at: "2024-01-01" },
+          {
+            id: 1,
+            nom: "Courses semaine",
+            etat: "brouillon",
+            items_count: 3,
+            checked_count: 2,
+            created_at: "2024-01-01",
+          },
         ],
       },
     });
@@ -40,6 +47,7 @@ describe("listerListesCourses", () => {
       id: 1,
       nom: "Courses semaine",
       nombre_articles: 3,
+      nombre_coche: 2,
     });
   });
 
