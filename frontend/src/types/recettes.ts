@@ -2,6 +2,19 @@
 // Types Recettes
 // ═══════════════════════════════════════════════════════════
 
+export interface VersionRecette {
+  id: number;
+  recette_base_id: number;
+  type_version: string; // 'jules' | 'cookeo' | 'monsieur_cuisine' | 'airfryer'
+  instructions_modifiees?: string;
+  ingredients_modifies?: Record<string, string>;
+  notes_bebe?: string;
+  modifications_resume: string[];
+  recette_nom?: string;
+  age_mois_jules?: number;
+  alertes?: string[];
+}
+
 export interface EtapeRecette {
   id: number;
   ordre: number;
@@ -39,6 +52,9 @@ export interface Recette {
   proteines?: number;
   lipides?: number;
   glucides?: number;
+  // Adaptations persistées
+  version_jules?: VersionRecette;
+  versions_robots?: VersionRecette[];
   created_at: string;
   updated_at?: string;
 }

@@ -258,6 +258,10 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     est_favori: bool = False
     genere_par_ia: bool = False
     url_source: str | None = Field(None, max_length=500)
+    # Adaptation Jules (si enregistrée)
+    version_jules: "VersionRecetteResponse | None" = None
+    # Adaptations robots (si enregistrées)
+    versions_robots: "list[VersionRecetteResponse]" = Field(default_factory=list)
     image_url: str | None = None
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False
@@ -343,4 +347,89 @@ class VersionRecetteResponse(BaseModel):
                 "age_mois_jules": 18,
             }
         },
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# ADAPTATIONS MANUELLES (Jules + Robots)
+# ═══════════════════════════════════════════════════════════
+
+
+class AdaptationJulesManuelle(BaseModel):
+    """Payload pour sauvegarder manuellement la version Jules d'une recette."""
+
+    instructions_modifiees: str | None = Field(
+        None,
+        max_length=4000,
+        description="Instructions adaptées pour Jules (texte libre, étape par étape)",
+    )
+    ingredients_modifies: dict[str, str] | None = Field(
+        None,
+        description="Modifications par ingrédient, ex: {'champignons': 'mixés', 'sel': 'supprimé'}",
+    )
+    notes_bebe: str | None = Field(
+        None, max_length=1000, description="Notes de service (texture, température, portion)"
+    )
+    modifications_resume: list[str] = Field(
+        default_factory=list,
+        description="Résumé des adaptations, ex: ['sans sel', 'champignons mixés']",
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "instructions_modifiees": (
+                    "Mixer les champignons finement. "
+                    "Ne pas ajouter de sel. Servir tiède."
+                ),
+                "ingredients_modifies": {
+                    "champignons": "mixés finement",
+                    "sel": "supprimé",
+                    "fromage": "en petite quantité",
+                },
+                "notes_bebe": "Portions réduites, servir tiède.",
+                "modifications_resume": ["sans sel", "champignons mixés", "fromage adapté"],
+            }
+        }
+    }
+
+
+ROBOTS_VALIDES = {"cookeo", "monsieur_cuisine", "airfryer"}
+
+
+class AdaptationRobotManuelle(BaseModel):
+    """Payload pour sauvegarder les instructions robot d'une recette."""
+
+    robot: str = Field(
+        ...,
+        description="Nom du robot : cookeo, monsieur_cuisine ou airfryer",
+        max_length=50,
+    )
+    instructions_modifiees: str = Field(
+        ...,
+        min_length=1,
+        max_length=4000,
+        description="Instructions spécifiques au robot (étape par étape)",
+    )
+    modifications_resume: list[str] = Field(
+        default_factory=list,
+        description="Points clés par rapport à la recette classique",
+    )
+    notes_bebe: str | None = Field(
+        None,
+        max_length=1000,
+        description="Notes complémentaires (optionnel)",
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "robot": "cookeo",
+                "instructions_modifiees": (
+                    "1. Faire revenir les champignons avec la touche Dorer, 5 min.\n"
+                    "2. Ajouter les œufs battus, mode Mijoter 3 min."
+                ),
+                "modifications_resume": ["cuisson Cookeo", "mode Dorer + Mijoter"],
+            }
+        }
     }

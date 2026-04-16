@@ -2,9 +2,12 @@
 Service de scoring nutritionnel PNNS4 pour les repas planifiés.
 
 Règles applicables :
-- Déjeuner / Dîner : logique assiette bidirectionnelle (légumes + féculents + protéines)
-- Goûter           : laitage + fruit + gâteau sain
-- Petit-déjeuner   : exclu (score=None)
+- Déjeuner  : 5 composants × 20 pts = 100 (légumes + féculents + protéines + laitage + fruit)
+- Dîner     : 4 composants × 25 pts = 100 (légumes + féculents + protéines + laitage)
+             Le soir : jamais de dessert, uniquement du fromage (laitage), pas de fruit
+- Goûter    : laitage + fruit + gâteau sain
+- Petit-déjeuner : exclu (score=None)
+- Reste     : protéines implicitement présentes (repas complet réutilisé)
 
 Distribution protéines semaine :
   poisson      ≥ 2x (dont 1 poisson gras)
@@ -167,7 +170,13 @@ def _a_feculents(repas: "Repas") -> bool:
 
 
 def _a_proteines(repas: "Repas") -> bool:
-    """True si le plat OU la protéine accompagnement couvre la protéine."""
+    """True si le plat OU la protéine accompagnement couvre la protéine.
+
+    Un repas « reste » (est_reste=True) est un repas complet réutilisé :
+    les protéines du repas d'origine sont implicitement présentes.
+    """
+    if getattr(repas, "est_reste", False):
+        return True
     cat = _categorie_from_repas(repas)
     if cat and cat in CATEGORIES_PROTEINES:
         return True
@@ -188,11 +197,16 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
     - Plat = légumes     → vérifie féculents + protéines
     - Plat = mixte       → analyse globale
     - Catégorie inconnue → utilise présence des champs comme indicateur
+    - Reste              → protéines implicitement présentes
 
-    Score : 3 composants × 33 pts + 1 pt bonus si tout est présent = 100.
+    Score déjeuner : 5 composants × 20 pts = 100 (légumes + féculents + protéines + laitage + fruit).
+    Score dîner    : 4 composants × 25 pts = 100 (légumes + féculents + protéines + laitage).
     """
     alertes: list[str] = []
     categorie = _categorie_from_repas(repas)
+    type_repas = getattr(repas, "type_repas", "").lower()
+    est_diner = type_repas == "diner"
+    est_dejeuner = type_repas == "dejeuner"
 
     a_legumes = _a_legumes(repas)
     a_feculents = _a_feculents(repas)
@@ -217,16 +231,34 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
     if not a_proteines:
         alertes.append("Protéine manquante")
 
-    # Score sur 100
-    nb_ok = sum([a_legumes, a_feculents, a_proteines])
-    if nb_ok == 3:
-        score = 100
-    elif nb_ok == 2:
-        score = 66
-    elif nb_ok == 1:
-        score = 33
+    if est_diner:
+        # Dîner : 4 composants × 25 pts — le laitage (fromage) remplace le dessert, pas de fruit
+        a_laitage = bool(getattr(repas, "laitage", None))
+        if not a_laitage:
+            alertes.append("Laitage manquant")
+        nb_ok = sum([a_legumes, a_feculents, a_proteines, a_laitage])
+        score = nb_ok * 25
+    elif est_dejeuner:
+        # Déjeuner : 5 composants × 20 pts (PNNS4 complet)
+        a_laitage = bool(getattr(repas, "laitage", None))
+        a_fruit = _valeur_repas_presente(getattr(repas, "fruit", None))
+        if not a_laitage:
+            alertes.append("Laitage manquant")
+        if not a_fruit:
+            alertes.append("Fruit manquant")
+        nb_ok = sum([a_legumes, a_feculents, a_proteines, a_laitage, a_fruit])
+        score = nb_ok * 20
     else:
-        score = 0
+        # Autres types (type inconnu) : 3 composants × 33 pts + 1 pt bonus
+        nb_ok = sum([a_legumes, a_feculents, a_proteines])
+        if nb_ok == 3:
+            score = 100
+        elif nb_ok == 2:
+            score = 66
+        elif nb_ok == 1:
+            score = 33
+        else:
+            score = 0
 
     return score, alertes
 

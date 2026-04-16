@@ -70,6 +70,7 @@ shared_tables TEXT[] := ARRAY[
     'etapes_batch_cooking', 'preparations_batch', 'batch_cooking_congelation',
     -- Inventaire & Courses
     'inventaire', 'historique_inventaire', 'listes_courses',
+    'articles_courses', 'correspondances_drive', 'historique_achats',
     'modeles_courses', 'articles_modeles', 'articles_achats_famille',
     -- Planning & Calendrier
     'plannings', 'repas', 'evenements_planning', 'templates_semaine', 'elements_templates',
@@ -77,6 +78,7 @@ shared_tables TEXT[] := ARRAY[
     'profils_enfants', 'entrees_bien_etre', 'jalons',
     'activites_famille', 'budgets_famille', 'achats_famille',
     'activites_weekend', 'anniversaires_famille', 'evenements_familiaux',
+    'checklists_anniversaire', 'items_checklist_anniversaire',
     'contacts_famille', 'documents_famille',
     -- Santé & Fitness
     'profils_utilisateurs', 'routines_sante', 'objectifs_sante', 'entrees_sante',
@@ -84,7 +86,7 @@ shared_tables TEXT[] := ARRAY[
     'points_utilisateurs', 'badges_utilisateurs', 'automations',
     'vaccins', 'rendez_vous_medicaux', 'mesures_croissance',
     -- Finances
-    'depenses_maison',
+    'depenses_maison', 'abonnements',
     -- Habitat
     'meubles', 'stocks_maison', 'taches_entretien', 'actions_ecologiques',
     'habitat_scenarios', 'habitat_criteres', 'habitat_criteres_immo',
@@ -133,7 +135,8 @@ DO $$
 DECLARE t TEXT;
 readonly_tables TEXT[] := ARRAY[
     'schema_migrations',
-    'plantes_catalogue'
+    'plantes_catalogue',
+    'job_executions'
 ];
 BEGIN FOREACH t IN ARRAY readonly_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);

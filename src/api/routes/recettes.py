@@ -23,6 +23,12 @@ from src.api.schemas import (
     ReponsePaginee,
     normaliser_categorie,
 )
+from src.api.schemas.recettes import (
+    AdaptationJulesManuelle,
+    AdaptationRobotManuelle,
+    VersionRecetteResponse,
+    ROBOTS_VALIDES,
+)
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
     REPONSES_CRUD_ECRITURE,
@@ -457,6 +463,42 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         difficulte=db_recette.difficulte,
         categorie=db_recette.categorie,
         ingredients=ingredients_resp,
+    from src.core.models.recettes import VersionRecette
+
+    # Charger les adaptations persistées (Jules + robots)
+    versions = (
+        session.query(VersionRecette)
+        .filter(VersionRecette.recette_base_id == db_recette.id)
+        .all()
+    )
+    version_jules = None
+    versions_robots = []
+    for v in versions:
+        v_resp = VersionRecetteResponse(
+            id=v.id,
+            recette_base_id=v.recette_base_id,
+            type_version=v.type_version,
+            instructions_modifiees=v.instructions_modifiees,
+            ingredients_modifies=v.ingredients_modifies,
+            notes_bebe=v.notes_bebe,
+            modifications_resume=v.modifications_resume or [],
+            recette_nom=db_recette.nom,
+        )
+        if v.type_version == "jules":
+            version_jules = v_resp
+        elif v.type_version in ("cookeo", "monsieur_cuisine", "airfryer"):
+            versions_robots.append(v_resp)
+
+    return RecetteResponse(
+        id=db_recette.id,
+        nom=db_recette.nom,
+        description=db_recette.description,
+        temps_preparation=db_recette.temps_preparation,
+        temps_cuisson=db_recette.temps_cuisson,
+        portions=db_recette.portions,
+        difficulte=db_recette.difficulte,
+        categorie=db_recette.categorie,
+        ingredients=ingredients_resp,
         etapes=etapes_resp,
         est_favori=est_favori,
         genere_par_ia=getattr(db_recette, "genere_par_ia", False) or False,
@@ -473,6 +515,8 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         proteines=getattr(db_recette, "proteines", None),
         lipides=getattr(db_recette, "lipides", None),
         glucides=getattr(db_recette, "glucides", None),
+        version_jules=version_jules,
+        versions_robots=versions_robots,
     )
 
 
@@ -1642,6 +1686,228 @@ async def enrichir_nutrition_batch(
 # VERSION JULES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
+
+
+# ═══════════════════════════════════════════════════════════
+# VERSION JULES
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/{recette_id}/version-jules", response_model=VersionRecetteResponse)
+@gerer_exception_api
+async def obtenir_version_jules(
+    recette_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> Any:
+    """Retourne la version Jules enregistrée pour une recette (si elle existe)."""
+    from src.core.models.recettes import Recette, VersionRecette
+
+    def _get():
+        with executer_avec_session() as session:
+            recette = session.query(Recette).filter(Recette.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette introuvable")
+            version = (
+                session.query(VersionRecette)
+                .filter(
+                    VersionRecette.recette_base_id == recette_id,
+                    VersionRecette.type_version == "jules",
+                )
+                .first()
+            )
+            if not version:
+                raise HTTPException(status_code=404, detail="Aucune version Jules pour cette recette")
+            return VersionRecetteResponse(
+                id=version.id,
+                recette_base_id=version.recette_base_id,
+                type_version=version.type_version,
+                instructions_modifiees=version.instructions_modifiees,
+                ingredients_modifies=version.ingredients_modifies,
+                notes_bebe=version.notes_bebe,
+                modifications_resume=version.modifications_resume or [],
+                recette_nom=recette.nom,
+            )
+
+    return await executer_async(_get)
+
+
+@router.put("/{recette_id}/version-jules", response_model=VersionRecetteResponse)
+@gerer_exception_api
+async def sauvegarder_version_jules_manuelle(
+    recette_id: int,
+    payload: AdaptationJulesManuelle,
+    user: dict[str, Any] = Depends(require_auth),
+) -> Any:
+    """Sauvegarde manuellement la version Jules d'une recette (sans IA).
+
+    Crée ou remplace la version Jules existante. Permet de saisir directement
+    les adaptations sans passer par la génération automatique.
+    """
+    from src.core.models.recettes import Recette, VersionRecette
+
+    def _save():
+        with executer_avec_session() as session:
+            recette = session.query(Recette).filter(Recette.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette introuvable")
+
+            version = (
+                session.query(VersionRecette)
+                .filter(
+                    VersionRecette.recette_base_id == recette_id,
+                    VersionRecette.type_version == "jules",
+                )
+                .first()
+            )
+            if version:
+                version.instructions_modifiees = payload.instructions_modifiees
+                version.ingredients_modifies = payload.ingredients_modifies
+                version.notes_bebe = payload.notes_bebe
+                version.modifications_resume = payload.modifications_resume or []
+            else:
+                version = VersionRecette(
+                    recette_base_id=recette_id,
+                    type_version="jules",
+                    instructions_modifiees=payload.instructions_modifiees,
+                    ingredients_modifies=payload.ingredients_modifies,
+                    notes_bebe=payload.notes_bebe,
+                    modifications_resume=payload.modifications_resume or [],
+                )
+                session.add(version)
+            session.commit()
+            session.refresh(version)
+            return VersionRecetteResponse(
+                id=version.id,
+                recette_base_id=version.recette_base_id,
+                type_version=version.type_version,
+                instructions_modifiees=version.instructions_modifiees,
+                ingredients_modifies=version.ingredients_modifies,
+                notes_bebe=version.notes_bebe,
+                modifications_resume=version.modifications_resume or [],
+                recette_nom=recette.nom,
+            )
+
+    return await executer_async(_save)
+
+
+@router.get("/{recette_id}/version-robot/{robot}", response_model=VersionRecetteResponse)
+@gerer_exception_api
+async def obtenir_version_robot(
+    recette_id: int,
+    robot: str,
+    user: dict[str, Any] = Depends(require_auth),
+) -> Any:
+    """Retourne les instructions robot enregistrées pour une recette.
+
+    Args:
+        robot: cookeo | monsieur_cuisine | airfryer
+    """
+    from src.core.models.recettes import Recette, VersionRecette
+
+    robot = robot.lower()
+    if robot not in ROBOTS_VALIDES:
+        raise HTTPException(status_code=400, detail=f"Robot invalide. Valeurs : {ROBOTS_VALIDES}")
+
+    def _get():
+        with executer_avec_session() as session:
+            recette = session.query(Recette).filter(Recette.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette introuvable")
+            version = (
+                session.query(VersionRecette)
+                .filter(
+                    VersionRecette.recette_base_id == recette_id,
+                    VersionRecette.type_version == robot,
+                )
+                .first()
+            )
+            if not version:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Aucune version {robot} pour cette recette",
+                )
+            return VersionRecetteResponse(
+                id=version.id,
+                recette_base_id=version.recette_base_id,
+                type_version=version.type_version,
+                instructions_modifiees=version.instructions_modifiees,
+                ingredients_modifies=version.ingredients_modifies,
+                notes_bebe=version.notes_bebe,
+                modifications_resume=version.modifications_resume or [],
+                recette_nom=recette.nom,
+            )
+
+    return await executer_async(_get)
+
+
+@router.put("/{recette_id}/version-robot", response_model=VersionRecetteResponse)
+@gerer_exception_api
+async def sauvegarder_version_robot(
+    recette_id: int,
+    payload: AdaptationRobotManuelle,
+    user: dict[str, Any] = Depends(require_auth),
+) -> Any:
+    """Sauvegarde les instructions robot pour une recette (crée ou remplace).
+
+    Le champ `robot` du payload détermine le type : cookeo, monsieur_cuisine, airfryer.
+    Met également à jour le flag `compatible_{robot}` et les `instructions_{robot}`
+    sur la recette principale pour cohérence.
+    """
+    from src.core.models.recettes import Recette, VersionRecette
+
+    robot = payload.robot.lower()
+    if robot not in ROBOTS_VALIDES:
+        raise HTTPException(status_code=400, detail=f"Robot invalide. Valeurs : {ROBOTS_VALIDES}")
+
+    def _save():
+        with executer_avec_session() as session:
+            recette = session.query(Recette).filter(Recette.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette introuvable")
+
+            # Mise à jour des champs compatibilité sur la recette principale
+            flag_attr = f"compatible_{robot}"
+            instr_attr = f"instructions_{robot}"
+            if hasattr(recette, flag_attr):
+                setattr(recette, flag_attr, True)
+            if hasattr(recette, instr_attr):
+                setattr(recette, instr_attr, payload.instructions_modifiees)
+
+            version = (
+                session.query(VersionRecette)
+                .filter(
+                    VersionRecette.recette_base_id == recette_id,
+                    VersionRecette.type_version == robot,
+                )
+                .first()
+            )
+            if version:
+                version.instructions_modifiees = payload.instructions_modifiees
+                version.notes_bebe = payload.notes_bebe
+                version.modifications_resume = payload.modifications_resume or []
+            else:
+                version = VersionRecette(
+                    recette_base_id=recette_id,
+                    type_version=robot,
+                    instructions_modifiees=payload.instructions_modifiees,
+                    notes_bebe=payload.notes_bebe,
+                    modifications_resume=payload.modifications_resume or [],
+                )
+                session.add(version)
+            session.commit()
+            session.refresh(version)
+            return VersionRecetteResponse(
+                id=version.id,
+                recette_base_id=version.recette_base_id,
+                type_version=version.type_version,
+                instructions_modifiees=version.instructions_modifiees,
+                ingredients_modifies=None,
+                notes_bebe=version.notes_bebe,
+                modifications_resume=version.modifications_resume or [],
+                recette_nom=recette.nom,
+            )
+
+    return await executer_async(_save)
 
 
 # ═══════════════════════════════════════════════════════════

@@ -228,9 +228,57 @@ export interface VersionJulesResult {
   age_mois_jules: number | null;
 }
 
-/** Générer une version adaptée pour Jules (bébé/enfant) */
+/** Générer une version adaptée pour Jules (bébé/enfant) via IA */
 export async function genererVersionJules(recetteId: number): Promise<VersionJulesResult> {
   const { data } = await clientApi.post<VersionJulesResult>(`/recettes/${recetteId}/version-jules`);
+  return data;
+}
+
+/** Récupérer la version Jules persistée en base */
+export async function obtenirVersionJules(recetteId: number): Promise<VersionJulesResult | null> {
+  try {
+    const { data } = await clientApi.get<VersionJulesResult>(`/recettes/${recetteId}/version-jules`);
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export interface AdaptationJulesManuelle {
+  instructions_modifiees?: string;
+  ingredients_modifies?: Record<string, string>;
+  notes_bebe?: string;
+  modifications_resume?: string[];
+}
+
+/** Sauvegarder manuellement la version Jules (sans IA) */
+export async function sauvegarderVersionJulesManuelle(
+  recetteId: number,
+  payload: AdaptationJulesManuelle,
+): Promise<VersionJulesResult> {
+  const { data } = await clientApi.put<VersionJulesResult>(
+    `/recettes/${recetteId}/version-jules`,
+    payload,
+  );
+  return data;
+}
+
+export interface AdaptationRobotManuelle {
+  robot: "cookeo" | "monsieur_cuisine" | "airfryer";
+  instructions_modifiees: string;
+  modifications_resume?: string[];
+  notes_bebe?: string;
+}
+
+/** Sauvegarder les instructions robot pour une recette */
+export async function sauvegarderVersionRobot(
+  recetteId: number,
+  payload: AdaptationRobotManuelle,
+): Promise<VersionJulesResult> {
+  const { data } = await clientApi.put<VersionJulesResult>(
+    `/recettes/${recetteId}/version-robot`,
+    payload,
+  );
   return data;
 }
 

@@ -20,6 +20,9 @@ import {
   Baby,
   ShoppingCart,
   Sparkles,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -31,8 +34,20 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { Textarea } from "@/composants/ui/textarea";
+import { Input } from "@/composants/ui/input";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
-import { exporterRecettePdf, genererVersionJules, obtenirRecette, supprimerRecette, enrichirInstructionsRecette } from "@/bibliotheque/api/recettes";
+import {
+  exporterRecettePdf,
+  genererVersionJules,
+  obtenirRecette,
+  supprimerRecette,
+  enrichirInstructionsRecette,
+  sauvegarderVersionJulesManuelle,
+  sauvegarderVersionRobot,
+  type AdaptationJulesManuelle,
+  type AdaptationRobotManuelle,
+} from "@/bibliotheque/api/recettes";
 import { obtenirScoreEcologiqueRecette } from "@/bibliotheque/api/ia-avancee";
 import { formaterDuree } from "@/bibliotheque/utils";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
@@ -41,6 +56,7 @@ import { RadarNutritionFamille } from "@/composants/graphiques/radar-nutrition-f
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { utiliserStoreUI } from "@/magasins/store-ui";
+import type { VersionRecette } from "@/types/recettes";
 
 export default function PageDetailRecette({
   params,
@@ -51,7 +67,12 @@ export default function PageDetailRecette({
   const router = useRouter();
   const invalider = utiliserInvalidation();
   const { definirTitrePage } = utiliserStoreUI();
-  const [versionJules, setVersionJules] = useState<Awaited<ReturnType<typeof genererVersionJules>> | null>(null);
+
+  // État local pour les formulaires d'adaptation
+  const [editJules, setEditJules] = useState(false);
+  const [julesForm, setJulesForm] = useState<AdaptationJulesManuelle>({});
+  const [editRobot, setEditRobot] = useState<string | null>(null);
+  const [robotForm, setRobotForm] = useState<Partial<AdaptationRobotManuelle>>({});
 
   const { data: recette, isLoading } = utiliserRequete(
     ["recette", id],
@@ -84,11 +105,35 @@ export default function PageDetailRecette({
   const { mutate: adapterPourJules, isPending: enVersionJules } = utiliserMutation(
     () => genererVersionJules(Number(id)),
     {
-      onSuccess: (data) => {
-        setVersionJules(data);
-        toast.success("Version Jules générée");
+      onSuccess: () => {
+        invalider(["recette", id]);
+        toast.success("Version Jules générée et sauvegardée");
       },
       onError: () => toast.error("Impossible de générer la version Jules"),
+    }
+  );
+
+  const { mutate: sauvegarderJules, isPending: enSauvegardeJules } = utiliserMutation(
+    (payload: AdaptationJulesManuelle) => sauvegarderVersionJulesManuelle(Number(id), payload),
+    {
+      onSuccess: () => {
+        invalider(["recette", id]);
+        setEditJules(false);
+        toast.success("Version Jules sauvegardée");
+      },
+      onError: () => toast.error("Erreur lors de la sauvegarde"),
+    }
+  );
+
+  const { mutate: sauvegarderRobot, isPending: enSauvegardeRobot } = utiliserMutation(
+    (payload: AdaptationRobotManuelle) => sauvegarderVersionRobot(Number(id), payload),
+    {
+      onSuccess: () => {
+        invalider(["recette", id]);
+        setEditRobot(null);
+        toast.success("Instructions robot sauvegardées");
+      },
+      onError: () => toast.error("Erreur lors de la sauvegarde"),
     }
   );
 
@@ -202,7 +247,7 @@ export default function PageDetailRecette({
         <div className="flex gap-2 flex-wrap print:hidden">
           <Button variant="outline" size="sm" onClick={() => adapterPourJules(undefined)} disabled={enVersionJules}>
             <Baby className="mr-1 h-4 w-4" />
-            {enVersionJules ? "Génération..." : "Version Jules"}
+            {enVersionJules ? "Génération..." : recette.version_jules ? "Regénérer Jules (IA)" : "Version Jules (IA)"}
           </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-1 h-4 w-4" />
@@ -232,68 +277,47 @@ export default function PageDetailRecette({
         </div>
       </div>
 
-      {versionJules && (
-        <Card className="border-emerald-200 bg-emerald-50/60 dark:border-emerald-900 dark:bg-emerald-950/20 print:hidden">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Baby className="h-4 w-4" />
-              Version Jules
-            </CardTitle>
-            {versionJules.recette_nom && (
-              <CardDescription>{versionJules.recette_nom}</CardDescription>
-            )}
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {!!versionJules.modifications_resume?.length && (
-              <div>
-                <p className="font-medium mb-1">Adaptations</p>
-                <ul className="list-disc pl-4 space-y-1">
-                  {versionJules.modifications_resume.map((adaptation) => (
-                    <li key={adaptation}>{adaptation}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {!!versionJules.alertes?.length && (
-              <div>
-                <p className="font-medium mb-1 text-amber-700 dark:text-amber-400">⚠️ Alertes</p>
-                <ul className="list-disc pl-4 space-y-1 text-amber-700 dark:text-amber-400">
-                  {versionJules.alertes.map((alerte) => (
-                    <li key={alerte}>{alerte}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {versionJules.ingredients_modifies && Object.keys(versionJules.ingredients_modifies).length > 0 && (
-              <div>
-                <p className="font-medium mb-1">Ingrédients adaptés</p>
-                <ul className="list-disc pl-4 space-y-1">
-                  {Object.entries(versionJules.ingredients_modifies).map(([k, v]) => (
-                    <li key={k}><span className="font-medium">{k}</span> : {v}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {versionJules.instructions_modifiees && (
-              <p className="text-muted-foreground whitespace-pre-line">{versionJules.instructions_modifiees}</p>
-            )}
-            {versionJules.notes_bebe && (
-              <p className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 rounded p-2">
-                🌿 {versionJules.notes_bebe}
-              </p>
-            )}
-            {(recette.compatible_cookeo || recette.compatible_monsieur_cuisine || recette.compatible_airfryer) && (
-              <div>
-                <p className="font-medium mb-1">Robots compatibles</p>
-                <div className="flex flex-wrap gap-1">
-                  {recette.compatible_cookeo && <Badge variant="outline" className="text-xs">Cookeo</Badge>}
-                  {recette.compatible_monsieur_cuisine && <Badge variant="outline" className="text-xs">Monsieur Cuisine</Badge>}
-                  {recette.compatible_airfryer && <Badge variant="outline" className="text-xs">Air Fryer</Badge>}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Version Jules */}
+      {(recette.version_jules || editJules) && (
+        <CarteAdaptationJules
+          version={recette.version_jules}
+          enEdition={editJules}
+          form={julesForm}
+          onEditer={() => {
+            setJulesForm({
+              instructions_modifiees: recette.version_jules?.instructions_modifiees ?? "",
+              notes_bebe: recette.version_jules?.notes_bebe ?? "",
+              modifications_resume: recette.version_jules?.modifications_resume ?? [],
+              ingredients_modifies: recette.version_jules?.ingredients_modifies ?? {},
+            });
+            setEditJules(true);
+          }}
+          onAnnuler={() => setEditJules(false)}
+          onSauvegarder={() => sauvegarderJules(julesForm)}
+          enSauvegarde={enSauvegardeJules}
+          onChangerInstructions={(v) => setJulesForm((f) => ({ ...f, instructions_modifiees: v }))}
+          onChangerNotes={(v) => setJulesForm((f) => ({ ...f, notes_bebe: v }))}
+          onChangerResume={(v) =>
+            setJulesForm((f) => ({
+              ...f,
+              modifications_resume: v.split(",").map((s) => s.trim()).filter(Boolean),
+            }))
+          }
+        />
+      )}
+
+      {!recette.version_jules && !editJules && (
+        <div className="print:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+            onClick={() => { setJulesForm({}); setEditJules(true); }}
+          >
+            <Baby className="mr-1 h-4 w-4" />
+            Saisir version Jules manuellement
+          </Button>
+        </div>
       )}
 
       {/* Métriques */}
@@ -338,43 +362,32 @@ export default function PageDetailRecette({
 
       </div>
 
-      {/* Robots de cuisine */}
-      {(recette.compatible_cookeo || recette.compatible_monsieur_cuisine || recette.compatible_airfryer) && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Robots de cuisine compatibles</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {recette.compatible_cookeo && <Badge variant="secondary">Cookeo</Badge>}
-              {recette.compatible_monsieur_cuisine && <Badge variant="secondary">Monsieur Cuisine</Badge>}
-              {recette.compatible_airfryer && <Badge variant="secondary">Air Fryer</Badge>}
-            </div>
-            {(recette.instructions_cookeo || recette.instructions_monsieur_cuisine || recette.instructions_airfryer) && (
-              <div className="space-y-3">
-                {recette.compatible_cookeo && recette.instructions_cookeo && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Cookeo</p>
-                    <p className="text-sm whitespace-pre-line">{recette.instructions_cookeo}</p>
-                  </div>
-                )}
-                {recette.compatible_monsieur_cuisine && recette.instructions_monsieur_cuisine && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Monsieur Cuisine</p>
-                    <p className="text-sm whitespace-pre-line">{recette.instructions_monsieur_cuisine}</p>
-                  </div>
-                )}
-                {recette.compatible_airfryer && recette.instructions_airfryer && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Air Fryer</p>
-                    <p className="text-sm whitespace-pre-line">{recette.instructions_airfryer}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+
+      {/* Robots de cuisine — éditables */}
+      <CarteRobots
+        recette={recette}
+        editRobot={editRobot}
+        robotForm={robotForm}
+        onEditerRobot={(robot) => {
+          const versionExistante = recette.versions_robots?.find((v) => v.type_version === robot);
+          setRobotForm({
+            robot: robot as "cookeo" | "monsieur_cuisine" | "airfryer",
+            instructions_modifiees: versionExistante?.instructions_modifiees ?? "",
+            modifications_resume: versionExistante?.modifications_resume ?? [],
+          });
+          setEditRobot(robot);
+        }}
+        onAnnulerRobot={() => setEditRobot(null)}
+        onSauvegarderRobot={() => sauvegarderRobot(robotForm as AdaptationRobotManuelle)}
+        enSauvegarde={enSauvegardeRobot}
+        onChangerInstructions={(v) => setRobotForm((f) => ({ ...f, instructions_modifiees: v }))}
+        onChangerResume={(v) =>
+          setRobotForm((f) => ({
+            ...f,
+            modifications_resume: v.split(",").map((s) => s.trim()).filter(Boolean),
+          }))
+        }
+      />
 
       {nutritionDisponible && (
         <Card className="overflow-hidden border-sky-200/70 bg-sky-50/40 dark:border-sky-900/50 dark:bg-sky-950/10">
@@ -508,5 +521,206 @@ export default function PageDetailRecette({
         }
       `}</style>
     </div>
+  );
+}
+
+// ─── Composant : Carte Adaptation Jules ────────────────────────
+interface CarteAdaptationJulesProps {
+  version: VersionRecette | null | undefined;
+  enEdition: boolean;
+  form: AdaptationJulesManuelle;
+  onEditer: () => void;
+  onAnnuler: () => void;
+  onSauvegarder: () => void;
+  enSauvegarde: boolean;
+  onChangerInstructions: (v: string) => void;
+  onChangerNotes: (v: string) => void;
+  onChangerResume: (v: string) => void;
+}
+
+function CarteAdaptationJules({
+  version,
+  enEdition,
+  form,
+  onEditer,
+  onAnnuler,
+  onSauvegarder,
+  enSauvegarde,
+  onChangerInstructions,
+  onChangerNotes,
+  onChangerResume,
+}: CarteAdaptationJulesProps) {
+  return (
+    <Card className="border-emerald-200/70 bg-emerald-50/30 dark:border-emerald-800/50 dark:bg-emerald-950/10">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Baby className="h-4 w-4 text-emerald-600" />
+          Version Jules
+          {!enEdition && (
+            <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={onEditer}>
+              <Pencil className="h-3 w-3" />
+            </Button>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 text-sm">
+        {enEdition ? (
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-medium mb-1 text-muted-foreground">Résumé des adaptations (séparées par virgules)</p>
+              <Input
+                value={form.modifications_resume?.join(", ") ?? ""}
+                onChange={(e) => onChangerResume(e.target.value)}
+                placeholder="sans sel, champignons mixés, …"
+              />
+            </div>
+            <div>
+              <p className="text-xs font-medium mb-1 text-muted-foreground">Instructions adaptées</p>
+              <Textarea
+                value={form.instructions_modifiees ?? ""}
+                onChange={(e) => onChangerInstructions(e.target.value)}
+                rows={4}
+                placeholder="Instructions simplifiées pour Jules…"
+              />
+            </div>
+            <div>
+              <p className="text-xs font-medium mb-1 text-muted-foreground">Notes bébé</p>
+              <Textarea
+                value={form.notes_bebe ?? ""}
+                onChange={(e) => onChangerNotes(e.target.value)}
+                rows={2}
+                placeholder="Mixé, sans sel, texture adaptée…"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={onSauvegarder} disabled={enSauvegarde}>
+                <Check className="h-3 w-3 mr-1" />
+                {enSauvegarde ? "Sauvegarde…" : "Sauvegarder"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={onAnnuler}>
+                <X className="h-3 w-3 mr-1" />
+                Annuler
+              </Button>
+            </div>
+          </div>
+        ) : version ? (
+          <>
+            {!!version.modifications_resume?.length && (
+              <ul className="list-disc pl-4 space-y-0.5">
+                {version.modifications_resume.map((a) => <li key={a}>{a}</li>)}
+              </ul>
+            )}
+            {version.instructions_modifiees && (
+              <p className="text-muted-foreground whitespace-pre-line">{version.instructions_modifiees}</p>
+            )}
+            {version.notes_bebe && (
+              <p className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 rounded p-2">
+                {version.notes_bebe}
+              </p>
+            )}
+          </>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Composant : Carte Robots ───────────────────────────────────
+const ROBOTS_LABELS: Record<string, string> = {
+  cookeo: "Cookeo",
+  monsieur_cuisine: "Monsieur Cuisine",
+  airfryer: "Air Fryer",
+};
+
+interface CarteRobotsProps {
+  recette: import("@/types/recettes").Recette;
+  editRobot: string | null;
+  robotForm: Partial<AdaptationRobotManuelle>;
+  onEditerRobot: (robot: string) => void;
+  onAnnulerRobot: () => void;
+  onSauvegarderRobot: () => void;
+  enSauvegarde: boolean;
+  onChangerInstructions: (v: string) => void;
+  onChangerResume: (v: string) => void;
+}
+
+function CarteRobots({
+  recette,
+  editRobot,
+  robotForm,
+  onEditerRobot,
+  onAnnulerRobot,
+  onSauvegarderRobot,
+  enSauvegarde,
+  onChangerInstructions,
+  onChangerResume,
+}: CarteRobotsProps) {
+  const robots = [
+    { key: "cookeo", compatible: recette.compatible_cookeo },
+    { key: "monsieur_cuisine", compatible: recette.compatible_monsieur_cuisine },
+    { key: "airfryer", compatible: recette.compatible_airfryer },
+  ];
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Robots de cuisine</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {robots.map(({ key, compatible }) => {
+          const version = recette.versions_robots?.find((v) => v.type_version === key);
+          const isEditing = editRobot === key;
+          return (
+            <div key={key} className={`rounded-lg border p-3 space-y-2 ${compatible ? "" : "opacity-50"}`}>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">{ROBOTS_LABELS[key]}</p>
+                <div className="flex gap-1">
+                  {!isEditing && (
+                    <Button variant="ghost" size={compatible ? "icon" : "sm"} className={compatible ? "h-6 w-6" : "h-6 text-xs"} onClick={() => onEditerRobot(key)}>
+                      {compatible ? <Pencil className="h-3 w-3" /> : "+ Ajouter"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Résumé (séparé par virgules)</p>
+                    <Input
+                      value={robotForm.modifications_resume?.join(", ") ?? ""}
+                      onChange={(e) => onChangerResume(e.target.value)}
+                      placeholder="cuisson 15 min, mode mijoter…"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Instructions</p>
+                    <Textarea
+                      value={robotForm.instructions_modifiees ?? ""}
+                      onChange={(e) => onChangerInstructions(e.target.value)}
+                      rows={3}
+                      placeholder={`Instructions pour ${ROBOTS_LABELS[key]}…`}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={onSauvegarderRobot} disabled={enSauvegarde}>
+                      <Check className="h-3 w-3 mr-1" />
+                      {enSauvegarde ? "Sauvegarde…" : "Sauvegarder"}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={onAnnulerRobot}>
+                      <X className="h-3 w-3 mr-1" />
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              ) : version ? (
+                <p className="text-sm text-muted-foreground whitespace-pre-line">{version.instructions_modifiees}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">{compatible ? "Aucune instruction spécifique" : "Non configuré"}</p>
+              )}
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 }

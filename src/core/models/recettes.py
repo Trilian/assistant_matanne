@@ -380,6 +380,9 @@ class VersionRecette(CreeLeMixin, Base):
     # Spécifique bébé
     notes_bebe: Mapped[str | None] = mapped_column(Text)
 
+    # Résumé des modifications (persisté, utilisé par Jules et robots)
+    modifications_resume: Mapped[list[str] | None] = mapped_column(JSONB)
+
     # Spécifique batch
     etapes_paralleles_batch: Mapped[list[str] | None] = mapped_column(JSONB)
     temps_optimise_batch: Mapped[int | None] = mapped_column(Integer)

@@ -405,6 +405,8 @@ Adapte cette recette pour Jules."""
 
                 version_existante.notes_bebe = result.get("notes_bebe")
 
+                version_existante.modifications_resume = result.get("modifications_resume", [])
+
                 session.commit()
 
                 session.refresh(version_existante)
@@ -418,6 +420,7 @@ Adapte cette recette pour Jules."""
                     instructions_modifiees=result.get("instructions_modifiees"),
                     ingredients_modifies=result.get("ingredients_modifies"),
                     notes_bebe=result.get("notes_bebe"),
+                    modifications_resume=result.get("modifications_resume", []),
                 )
 
                 session.add(version)
