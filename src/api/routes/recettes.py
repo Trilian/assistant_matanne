@@ -453,16 +453,6 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
     if derniere_cuisson:
         jours_depuis_derniere_cuisson = (date.today() - derniere_cuisson).days
 
-    return RecetteResponse(
-        id=db_recette.id,
-        nom=db_recette.nom,
-        description=db_recette.description,
-        temps_preparation=db_recette.temps_preparation,
-        temps_cuisson=db_recette.temps_cuisson,
-        portions=db_recette.portions,
-        difficulte=db_recette.difficulte,
-        categorie=db_recette.categorie,
-        ingredients=ingredients_resp,
     from src.core.models.recettes import VersionRecette
 
     # Charger les adaptations persistées (Jules + robots)
