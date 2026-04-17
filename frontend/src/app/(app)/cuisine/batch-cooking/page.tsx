@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   CookingPot,
@@ -24,6 +25,8 @@ import {
   X,
   Settings,
   Save,
+  CalendarDays,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -60,7 +63,9 @@ import {
   consommerPreparation,
   obtenirConfigBatch,
   mettreAJourConfig,
+  genererSessionDepuisPlanning,
 } from "@/bibliotheque/api/batch-cooking";
+import { obtenirPlanningSemaine } from "@/bibliotheque/api/planning";
 import { listerRecettes } from "@/bibliotheque/api/recettes";
 import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
@@ -134,8 +139,25 @@ const ROBOTS_LABELS: Record<string, string> = {
   hachoir: "🔪 Hachoir",
 };
 
+// Calcule la date (YYYY-MM-DD) du prochain jour de batch parmi les jours configurés
+function prochainJourBatch(jours: number[]): string {
+  if (!jours.length) return "";
+  const today = new Date();
+  const todayISO = (today.getDay() + 6) % 7; // 0=lun, 6=dim
+  let minDelta = 7;
+  for (const jour of jours) {
+    const delta = (jour - todayISO + 7) % 7 || 7; // 0 → 7 (même jour = semaine prochaine)
+    if (delta < minDelta) minDelta = delta;
+  }
+  const next = new Date(today);
+  next.setDate(today.getDate() + minDelta);
+  return next.toISOString().slice(0, 10);
+}
+
 export default function PageBatchCooking() {
+  const router = useRouter();
   const [dialogueCreation, setDialogueCreation] = useState(false);
+  const [dialoguePlanning, setDialoguePlanning] = useState(false);
   const [nomSession, setNomSession] = useState("");
   const [dateSession, setDateSession] = useState("");
   const [dureeEstimee, setDureeEstimee] = useState("");
@@ -256,6 +278,61 @@ export default function PageBatchCooking() {
     setRechercheRecette("");
   }
 
+  // ── Dialogue "Depuis le planning" ─────────────────────────────────────────
+  const [pDateSession, setPDateSession] = useState("");
+  const [pNom, setPNom] = useState("");
+  const [pAvecJules, setPAvecJules] = useState(false);
+
+  // Initialiser les valeurs par défaut quand on ouvre le dialogue
+  function ouvrirDialoguePlanning() {
+    setPDateSession(prochainJourBatch(configJoursBatch));
+    setPNom("");
+    setPAvecJules(configAvecJules);
+    setDialoguePlanning(true);
+  }
+
+  const { data: planningCourant, isLoading: chargementPlanning } = utiliserRequete(
+    ["planning", "semaine", "batch"],
+    () => obtenirPlanningSemaine(),
+    { enabled: dialoguePlanning }
+  );
+
+  // Calculer jours_cibles depuis la date choisie et la config couverture
+  const jourISOChoisi = pDateSession
+    ? (new Date(pDateSession + "T12:00:00").getDay() + 6) % 7
+    : null;
+  const jours_cibles_selectionnes: number[] | undefined =
+    jourISOChoisi != null
+      ? (configCouvertureJours[String(jourISOChoisi)] ?? undefined)
+      : undefined;
+  const labelsCouverture = jours_cibles_selectionnes
+    ? jours_cibles_selectionnes.map(
+        (j) => JOURS_SEMAINE.find((js) => js.valeur === j)?.long ?? ""
+      )
+    : [];
+
+  const { mutate: genererDepuisPlanning, isPending: enGeneration } = utiliserMutation(
+    () => {
+      if (!planningCourant?.planning_id) throw new Error("Aucun planning actif");
+      return genererSessionDepuisPlanning({
+        planning_id: planningCourant.planning_id,
+        date_session: pDateSession || new Date().toISOString().slice(0, 10),
+        nom: pNom.trim() || undefined,
+        avec_jules: pAvecJules,
+        jours_cibles: jours_cibles_selectionnes,
+      });
+    },
+    {
+      onSuccess: (result) => {
+        invalider(["batch-cooking"]);
+        setDialoguePlanning(false);
+        toast.success(`Session "${result.nom}" créée — ${result.nb_recettes} recette(s)`);
+        router.push(`/cuisine/batch-cooking/${result.session_id}`);
+      },
+      onError: () => toast.error("Erreur lors de la génération depuis le planning"),
+    }
+  );
+
   const { data: preparationsDonnees } = utiliserRequete(
     ["batch-cooking", "preparations"],
     () => listerPreparations(false)
@@ -302,10 +379,18 @@ export default function PageBatchCooking() {
             Planifiez et gérez vos sessions de cuisine en lot
           </p>
         </div>
-        <Button onClick={() => setDialogueCreation(true)}>
-          <Plus className="mr-1 h-4 w-4" />
-          Nouvelle session
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={ouvrirDialoguePlanning}>
+            <CalendarDays className="mr-1 h-4 w-4" />
+            <span className="hidden sm:inline">Depuis le planning</span>
+            <span className="sm:hidden">Planning</span>
+          </Button>
+          <Button onClick={() => setDialogueCreation(true)}>
+            <Plus className="mr-1 h-4 w-4" />
+            <span className="hidden sm:inline">Nouvelle session</span>
+            <span className="sm:hidden">Créer</span>
+          </Button>
+        </div>
       </div>
 
       {sessions.length > 0 && (
@@ -723,6 +808,101 @@ export default function PageBatchCooking() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Dialogue "Depuis le planning" */}
+      <Dialog open={dialoguePlanning} onOpenChange={(open) => { if (!open) setDialoguePlanning(false); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-primary" />
+              Créer depuis le planning
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {chargementPlanning ? (
+              <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Chargement du planning…
+              </div>
+            ) : !planningCourant?.planning_id ? (
+              <p className="text-sm text-destructive">
+                Aucun planning actif cette semaine. Créez d&apos;abord un planning dans l&apos;onglet Planning.
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Planning actif :{" "}
+                  <span className="font-medium text-foreground">{planningCourant.semaine}</span>
+                </p>
+
+                <div className="space-y-2">
+                  <Label htmlFor="p-date">Date de la session</Label>
+                  <Input
+                    id="p-date"
+                    type="date"
+                    value={pDateSession}
+                    onChange={(e) => setPDateSession(e.target.value)}
+                  />
+                  {labelsCouverture.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Recettes couvertes :{" "}
+                      <span className="font-medium text-foreground">
+                        {labelsCouverture.join(" · ")}
+                      </span>
+                    </p>
+                  )}
+                  {jours_cibles_selectionnes === undefined && pDateSession && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      Aucune couverture configurée pour ce jour — toutes les recettes du planning seront incluses.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="p-nom">Nom (optionnel)</Label>
+                  <Input
+                    id="p-nom"
+                    value={pNom}
+                    onChange={(e) => setPNom(e.target.value)}
+                    placeholder="Auto-généré si vide"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="p-jules" className="flex flex-col gap-0.5">
+                    <span>Avec Jules</span>
+                    <span className="text-xs font-normal text-muted-foreground">Portions adaptées + tâches simples</span>
+                  </Label>
+                  <Switch
+                    id="p-jules"
+                    checked={pAvecJules}
+                    onCheckedChange={setPAvecJules}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setDialoguePlanning(false)}>
+                    Annuler
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={enGeneration || !pDateSession}
+                    onClick={() => genererDepuisPlanning(undefined)}
+                  >
+                    {enGeneration ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="mr-2 h-4 w-4" />
+                    )}
+                    Créer la session
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialogue création */}
       <Dialog open={dialogueCreation} onOpenChange={(open) => { if (!open) reinitialiserDialogue(); else setDialogueCreation(true); }}>

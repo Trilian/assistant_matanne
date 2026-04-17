@@ -59,6 +59,26 @@ class PlanningIAGenerationMixin:
             db.flush()
         return recette.id
 
+    @staticmethod
+    def _trouver_recette_seule(db: Session, nom: str) -> int | None:
+        """Retourne l'id d'une recette existante ou None si non trouvée (sans créer de stub).
+        Utilisé pour les repas « Reste » afin d'éviter la création d'une fausse recette."""
+        from src.core.models.recettes import Recette
+
+        recette = db.query(Recette).filter(func.lower(Recette.nom) == nom.lower()).first()
+        return recette.id if recette else None
+
+    @staticmethod
+    def _nettoyer_si_inclus_dans_nom(valeur: str | None, nom_recette: str) -> str | None:
+        """Retourne None si `valeur` est déjà un sous-texte du nom de la recette.
+
+        Évite les doublons comme « Semoule » dans les légumes/féculents quand la
+        recette s'appelle « Agneau rôti aux légumes de saison, semoule ».
+        """
+        if not valeur or not nom_recette:
+            return valeur
+        return None if valeur.lower().strip() in nom_recette.lower() else valeur
+
     # ═══════════════════════════════════════════════════════════
     # SUGGESTIONS ÉQUILIBRÉES
     # ═══════════════════════════════════════════════════════════
@@ -338,7 +358,7 @@ RULES:
 6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
 7. PROTEINS — strictly follow the OMS balance section above: {poisson_blanc_jour}=poisson blanc, {poisson_gras_jour or "a chosen day"}=poisson gras, max {viande_rouge_max}x red meat, {vegetarien_jour}=vegetarian, other days=poultry
 8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly.
-9. null is valid ONLY for entree, laitage, dessert, reste_source — never for legumes, feculents, gouter, gouter_laitage, gouter_fruit, gouter_gateau
+9. null is valid ONLY for entree, laitage, dessert, reste_source. For restes: legumes AND feculents MUST be null (the full dish is already a complete meal). For normal meals: legumes and feculents are MANDATORY (never null) — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null).
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
 13. NO DISH REPETITION — Never plan the exact same main dish (dejeuner or diner) more than once across the 7 days. Vary proteins AND preparations throughout the week.
@@ -420,16 +440,31 @@ RULES:
                     )
                 )
 
-            # Déjeuner — fallbacks légumes/féculents si l'IA a omis ces champs obligatoires
-            if not jour_data.dejeuner_legumes:
-                jour_data.dejeuner_legumes = "Légumes de saison"
-            if not jour_data.dejeuner_feculents:
-                jour_data.dejeuner_feculents = "Riz vapeur"
+            # Déjeuner — pour un reste, légumes/féculents sont déjà dans le nom du plat → on ne
+            # duplique pas ; pour un repas normal, on applique les fallbacks obligatoires.
+            if jour_data.dejeuner_est_reste:
+                jour_data.dejeuner_legumes = None
+                jour_data.dejeuner_feculents = None
+            else:
+                if not jour_data.dejeuner_legumes:
+                    jour_data.dejeuner_legumes = "Légumes de saison"
+                if not jour_data.dejeuner_feculents:
+                    jour_data.dejeuner_feculents = "Riz vapeur"
+                # Éviter la duplication quand légumes/féculents sont déjà dans le nom du plat
+                # (ex : « Semoule » dans « Agneau rôti aux légumes de saison, semoule »)
+                jour_data.dejeuner_legumes = self._nettoyer_si_inclus_dans_nom(
+                    jour_data.dejeuner_legumes, jour_data.dejeuner
+                )
+                jour_data.dejeuner_feculents = self._nettoyer_si_inclus_dans_nom(
+                    jour_data.dejeuner_feculents, jour_data.dejeuner
+                )
 
-            # Déjeuner — recette stub toujours créée/retrouvée (même pour un reste :
-            # _trouver_ou_creer_recette retrouve la recette du dîner original par lookup
-            # insensible à la casse, évitant la duplication tout en liant la recette.)
-            recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner, "Plat")
+            # Déjeuner — pour un reste : lookup seul (pas de création de recette stub) ;
+            # pour un repas normal : lookup ou création.
+            if jour_data.dejeuner_est_reste:
+                recette_dej_id = self._trouver_recette_seule(db, jour_data.dejeuner)
+            else:
+                recette_dej_id = self._trouver_ou_creer_recette(db, jour_data.dejeuner, "Plat")
             entree_dej_recette_id = (
                 self._trouver_ou_creer_recette(db, jour_data.dejeuner_entree, "Entrée")
                 if jour_data.dejeuner_entree and jour_data.dejeuner_entree_est_recette
@@ -484,14 +519,30 @@ RULES:
                     )
                 )
 
-            # Dîner — fallbacks légumes/féculents si l'IA a omis ces champs obligatoires
-            if not jour_data.diner_legumes:
-                jour_data.diner_legumes = "Légumes de saison"
-            if not jour_data.diner_feculents:
-                jour_data.diner_feculents = "Riz vapeur"
+            # Dîner — pour un reste, légumes/féculents sont déjà dans le nom du plat → pas de
+            # duplication ; pour un repas normal, on applique les fallbacks obligatoires.
+            if jour_data.diner_est_reste:
+                jour_data.diner_legumes = None
+                jour_data.diner_feculents = None
+            else:
+                if not jour_data.diner_legumes:
+                    jour_data.diner_legumes = "Légumes de saison"
+                if not jour_data.diner_feculents:
+                    jour_data.diner_feculents = "Riz vapeur"
+                # Éviter la duplication quand légumes/féculents sont déjà dans le nom du plat
+                jour_data.diner_legumes = self._nettoyer_si_inclus_dans_nom(
+                    jour_data.diner_legumes, jour_data.diner
+                )
+                jour_data.diner_feculents = self._nettoyer_si_inclus_dans_nom(
+                    jour_data.diner_feculents, jour_data.diner
+                )
 
-            # Dîner — recette stub toujours créée/retrouvée (même pour un reste)
-            recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner, "Plat")
+            # Dîner — pour un reste : lookup seul (pas de création de recette stub) ;
+            # pour un repas normal : lookup ou création.
+            if jour_data.diner_est_reste:
+                recette_din_id = self._trouver_recette_seule(db, jour_data.diner)
+            else:
+                recette_din_id = self._trouver_ou_creer_recette(db, jour_data.diner, "Plat")
             entree_din_recette_id = (
                 self._trouver_ou_creer_recette(db, jour_data.diner_entree, "Entrée")
                 if jour_data.diner_entree and jour_data.diner_entree_est_recette

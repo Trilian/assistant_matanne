@@ -426,6 +426,8 @@ async def creer_repas(donnees: RepasCreate, user: dict[str, Any] = Depends(requi
                 existing.recette_id = donnees.recette_id
                 existing.notes = donnees.notes
                 for champ in (
+                    "entree", "entree_recette_id",
+                    "dessert", "dessert_recette_id",
                     "legumes", "legumes_recette_id",
                     "feculents", "feculents_recette_id",
                     "proteine_accompagnement", "proteine_accompagnement_recette_id",
@@ -447,6 +449,10 @@ async def creer_repas(donnees: RepasCreate, user: dict[str, Any] = Depends(requi
                 type_repas=donnees.type_repas,
                 recette_id=donnees.recette_id,
                 notes=donnees.notes,
+                entree=donnees.entree,
+                entree_recette_id=donnees.entree_recette_id,
+                dessert=donnees.dessert,
+                dessert_recette_id=donnees.dessert_recette_id,
                 legumes=donnees.legumes,
                 legumes_recette_id=donnees.legumes_recette_id,
                 feculents=donnees.feculents,
@@ -575,6 +581,8 @@ async def modifier_repas(
 
             # Champs équilibre assiette (déj / dîner)
             champs_equilibre = (
+                "entree", "entree_recette_id",
+                "dessert", "dessert_recette_id",
                 "legumes", "legumes_recette_id",
                 "feculents", "feculents_recette_id",
                 "proteine_accompagnement", "proteine_accompagnement_recette_id",
@@ -645,6 +653,32 @@ async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_
             return MessageResponse(message="Repas supprimé", id=repas_id)
 
     return await executer_async(_delete)
+
+
+@router.post("/repas/recalculer-scores", response_model=MessageResponse)
+@gerer_exception_api
+async def recalculer_scores_equilibre(user: dict[str, Any] = Depends(require_auth)):
+    """Recalcule le score d'équilibre PNNS4 de tous les repas en base.
+
+    Utile après une correction de l'algorithme de scoring pour mettre à jour
+    les données existantes sans les re-créer.
+    """
+    from src.core.models import Repas
+    from src.services.planning.nutrition import evaluer_equilibre_repas
+
+    def _recalculer():
+        with executer_avec_session() as session:
+            repas_list = session.query(Repas).all()
+            nb = 0
+            for repas in repas_list:
+                resultat = evaluer_equilibre_repas(repas)
+                repas.score_equilibre = resultat["score_equilibre"]
+                repas.alertes_equilibre = resultat["alertes_equilibre"] or None
+                nb += 1
+            session.commit()
+            return MessageResponse(message=f"{nb} repas recalculés", id=0)
+
+    return await executer_async(_recalculer)
 
 
 # ----------------------------------------------------------

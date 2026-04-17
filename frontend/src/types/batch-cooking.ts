@@ -7,12 +7,15 @@ export type StatutSessionBatch = 'planifiee' | 'en_cours' | 'terminee' | 'annule
 export interface EtapeBatchCooking {
   id: number
   ordre: number
-  groupe_parallele?: number
+  groupe_parallele?: number | null
   titre: string
   duree_minutes?: number
   robots_requis: string[]
   statut: string
   est_terminee: boolean
+  description?: string | null
+  est_supervision?: boolean
+  temperature?: number | null
 }
 
 export interface SessionBatchCooking {

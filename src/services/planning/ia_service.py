@@ -98,17 +98,28 @@ class PlanningAIService(BaseAIService):
 4. Éléments trop répétés (si max 2x semaine = ok)
 5. Recommandations de variété
 
-Format JSON."""
+Réponds en JSON avec ces clés exactes:
+{{
+  "score_variete": <int 0-100>,
+  "proteins_bien_repartis": <bool>,
+  "types_cuisines": ["française", "asiatique"],  // liste plate de strings
+  "repetitions_problematiques": ["..."],
+  "recommandations": ["..."]
+}}"""
 
         result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es nutritionniste expert. Évalue la variété de manière objective.",
         )
 
+        types_cuisines_raw = result.get("types_cuisines") or []
+        if isinstance(types_cuisines_raw, dict):
+            types_cuisines_raw = list(types_cuisines_raw.keys())
+
         return AnalyseVariete(
             score_variete=int(result.get("score_variete") or 50),
             proteins_bien_repartis=result.get("proteins_bien_repartis") or False,
-            types_cuisines=result.get("types_cuisines") or [],
+            types_cuisines=types_cuisines_raw,
             repetitions_problematiques=result.get("repetitions_problematiques") or [],
             recommandations=result.get("recommandations") or [],
         )

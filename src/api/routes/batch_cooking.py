@@ -149,7 +149,7 @@ async def generer_session_depuis_planning(
                 jours_cibles_set = set(donnees.jours_cibles)
                 repas_list = [
                     r for r in repas_list
-                    if r.date is not None and r.date.weekday() in jours_cibles_set
+                    if r.date_repas is not None and r.date_repas.weekday() in jours_cibles_set
                 ]
 
             # Collecter tous les ID de recettes (plat + entrée + dessert + dessert_jules)
@@ -260,6 +260,9 @@ async def obtenir_session(
                     "robots_requis": e.robots_requis or [],
                     "statut": e.statut,
                     "est_terminee": e.est_terminee if hasattr(e, "est_terminee") else False,
+                    "description": e.description,
+                    "est_supervision": e.est_supervision,
+                    "temperature": e.temperature,
                 }
                 for e in sorted((s.etapes or []), key=lambda x: x.ordre)
             ]
@@ -362,9 +365,33 @@ async def generer_etapes_session(
     session_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère les étapes IA pour une session batch cooking et les persiste en base."""
-    from src.core.models import EtapeBatchCooking, SessionBatchCooking
+    """Génère les étapes IA pour une session batch cooking et les persiste en base.
+
+    Utilise le pipeline détaillé (generer_plan_depuis_planning) qui produit des
+    instructions concrètes avec grammes/températures/programmes exact et une
+    timeline assignant chaque étape à un appareil (track). Fallback sur le
+    pipeline simplifié si le pipeline détaillé échoue.
+    """
+    from src.core.models import EtapeBatchCooking, Recette, Repas, SessionBatchCooking
     from src.services.cuisine.batch_cooking import obtenir_service_batch_cooking
+
+    # Mapping type_repas DB → clé planning_data ("midi"/"soir")
+    _TYPE_REPAS_MAP = {
+        "dejeuner": "midi",
+        "diner": "soir",
+        "repas": "midi",
+        "gouter": "soir",
+    }
+    # Mapping noms display (stockés dans robots_utilises) → clés ROBOTS_INFO
+    _ROBOTS_NORMALIZE = {
+        "Cookeo": "cookeo",
+        "Monsieur Cuisine": "monsieur_cuisine",
+        "Airfryer": "airfryer",
+        "Multicooker": "multicooker",
+        "Four": "four",
+        "Plaques": "plaques",
+    }
+    _JOURS_FR = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 
     def _generate():
         with executer_avec_session() as session:
@@ -376,51 +403,147 @@ async def generer_etapes_session(
             if not s:
                 raise HTTPException(status_code=404, detail="Session non trouvée")
 
-            recettes_ids = s.recettes_selectionnees or []
+            recettes_ids: list[int] = s.recettes_selectionnees or []
             if not recettes_ids:
                 raise HTTPException(
                     status_code=422,
                     detail="La session ne contient aucune recette",
                 )
 
-            robots = s.robots_utilises or []
+            robots_raw: list[str] = s.robots_utilises or []
+            # Normaliser les noms d'appareils pour le service IA
+            robots_user = [
+                _ROBOTS_NORMALIZE.get(r, r.lower().replace(" ", "_")) for r in robots_raw
+            ] or ["four", "plaques"]
+
             service = obtenir_service_batch_cooking()
 
-            plan = service.generer_plan_ia(
-                recettes_ids=recettes_ids,
-                robots_disponibles=robots,
-                avec_jules=s.avec_jules,
-            )
-            if not plan or not plan.etapes:
-                raise HTTPException(
-                    status_code=503,
-                    detail="La génération IA n'a pas produit d'étapes. Réessayez.",
+            # ── Pipeline détaillé ──────────────────────────────────────────────
+            # Construire planning_data depuis le planning lié ou depuis les recettes
+            planning_data: dict = {}
+            if s.planning_id:
+                repas_list = (
+                    session.query(Repas)
+                    .filter(
+                        Repas.planning_id == s.planning_id,
+                        Repas.recette_id.in_(recettes_ids),
+                    )
+                    .all()
                 )
+                recette_cache: dict[int, str] = {
+                    r.id: r.nom
+                    for r in session.query(Recette).filter(Recette.id.in_(recettes_ids)).all()
+                }
+                for repas in repas_list:
+                    if not repas.recette_id:
+                        continue
+                    nom_recette = recette_cache.get(repas.recette_id, "Recette")
+                    type_key = _TYPE_REPAS_MAP.get(repas.type_repas, "midi")
+                    jour_key = _JOURS_FR[repas.date_repas.weekday()]
+                    planning_data.setdefault(jour_key, {})[type_key] = {
+                        "nom": nom_recette,
+                        "est_rechauffe": False,
+                    }
+            if not planning_data:
+                # Pas de planning lié ou planning vide → construire depuis les IDs
+                recettes_objs = (
+                    session.query(Recette).filter(Recette.id.in_(recettes_ids)).all()
+                )
+                for i, r in enumerate(recettes_objs):
+                    planning_data[f"Plat {i + 1}"] = {
+                        "midi": {"nom": r.nom, "est_rechauffe": False}
+                    }
 
-            # Supprimer les étapes existantes avant de les régénérer
+            type_session = "collective" if s.avec_jules else "solo"
+            plan_detaille = service.generer_plan_depuis_planning(
+                planning_data=planning_data,
+                type_session=type_session,
+                avec_jules=s.avec_jules,
+                robots_user=robots_user,
+            )
+
+            timeline: list[dict] = plan_detaille.get("timeline", []) if plan_detaille else []
+
+            if timeline:
+                # ── Convertir la timeline en étapes avec groupe_parallele ──────
+                timeline_sorted = sorted(timeline, key=lambda x: x.get("debut_min", 0))
+                groupe_courant = 0
+                fin_max = 0
+                etapes_a_creer: list[EtapeBatchCooking] = []
+
+                for i, entry in enumerate(timeline_sorted):
+                    debut = entry.get("debut_min", 0)
+                    fin = entry.get("fin_min", debut)
+                    if i > 0 and debut >= fin_max:
+                        groupe_courant += 1
+                    fin_max = max(fin_max, fin)
+
+                    # track = "vous" pour tâche manuelle, nom robot sinon
+                    track = entry.get("track") or entry.get("robot") or "vous"
+                    robots_requis = [track] if track and track != "vous" else []
+
+                    etapes_a_creer.append(
+                        EtapeBatchCooking(
+                            session_id=s.id,
+                            ordre=i + 1,
+                            groupe_parallele=groupe_courant,
+                            titre=entry.get("tache", ""),
+                            description=entry.get("detail") or entry.get("description"),
+                            duree_minutes=max(0, fin - debut) or None,
+                            robots_requis=robots_requis,
+                            est_supervision=bool(robots_requis),
+                            temperature=entry.get("temperature"),
+                            statut="a_faire",
+                        )
+                    )
+
+                duree_ia = plan_detaille.get("session", {}).get("duree_estimee_minutes")
+
+            else:
+                # ── Fallback : pipeline simplifié ─────────────────────────────
+                logger.warning(
+                    "Pipeline détaillé sans timeline pour session %d, fallback simplifié",
+                    session_id,
+                )
+                plan = service.generer_plan_ia(
+                    recettes_ids=recettes_ids,
+                    robots_disponibles=robots_raw,
+                    avec_jules=s.avec_jules,
+                )
+                if not plan or not plan.etapes:
+                    raise HTTPException(
+                        status_code=503,
+                        detail="La génération IA n'a pas produit d'étapes. Réessayez.",
+                    )
+                etapes_a_creer = [
+                    EtapeBatchCooking(
+                        session_id=s.id,
+                        ordre=etape_ia.ordre,
+                        groupe_parallele=etape_ia.groupe_parallele,
+                        titre=etape_ia.titre,
+                        description=etape_ia.description,
+                        duree_minutes=etape_ia.duree_minutes,
+                        robots_requis=etape_ia.robots or [],
+                        est_supervision=etape_ia.est_supervision,
+                        alerte_bruit=etape_ia.alerte_bruit,
+                        temperature=etape_ia.temperature,
+                        statut="a_faire",
+                    )
+                    for etape_ia in plan.etapes
+                ]
+                duree_ia = plan.duree_totale_estimee
+
+            # ── Persister les étapes ─────────────────────────────────────────
             for etape_existante in list(s.etapes or []):
                 session.delete(etape_existante)
             session.flush()
 
-            for etape_ia in plan.etapes:
-                nouv = EtapeBatchCooking(
-                    session_id=s.id,
-                    ordre=etape_ia.ordre,
-                    groupe_parallele=etape_ia.groupe_parallele,
-                    titre=etape_ia.titre,
-                    description=etape_ia.description,
-                    duree_minutes=etape_ia.duree_minutes,
-                    robots_requis=etape_ia.robots or [],
-                    est_supervision=etape_ia.est_supervision,
-                    alerte_bruit=etape_ia.alerte_bruit,
-                    temperature=etape_ia.temperature,
-                    statut="a_faire",
-                )
+            for nouv in etapes_a_creer:
                 session.add(nouv)
 
             s.genere_par_ia = True
-            if plan.duree_totale_estimee:
-                s.duree_estimee = plan.duree_totale_estimee
+            if duree_ia:
+                s.duree_estimee = duree_ia
             session.commit()
             session.refresh(s)
 
@@ -435,6 +558,9 @@ async def generer_etapes_session(
                     "robots_requis": e.robots_requis or [],
                     "statut": e.statut,
                     "est_terminee": e.est_terminee,
+                    "description": e.description,
+                    "est_supervision": e.est_supervision,
+                    "temperature": e.temperature,
                 }
                 for e in sorted(s.etapes, key=lambda x: x.ordre)
             ]

@@ -330,8 +330,11 @@ function CarteRepasDraggable({
             )}
           </div>
           {repas.type_repas === "gouter" &&
-            (repas.laitage || repas.fruit_gouter) && (
+            (repas.gateau_gouter || repas.laitage || repas.fruit_gouter) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
+                {repas.gateau_gouter && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Céréales/gâteau : ${repas.gateau_gouter}`}>🍪 {repas.gateau_gouter}</span>
+                )}
                 {repas.laitage && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
                 )}
@@ -495,6 +498,7 @@ export default function PagePlanning() {
   const [feculentsForm, setFeculentsForm] = useState("");
   const [proteineForm, setProteineForm] = useState("");
   const [laitageForm, setLaitageForm] = useState("");
+  const [dessertForm, setDessertForm] = useState("");
   const [fruitGouter, setFruitGouter] = useState("");
   const [gateauGouter, setGateauGouter] = useState("");
   const [suggestionsIA, setSuggestionsIA] = useState<SuggestionAccompagnement | null>(null);
@@ -939,6 +943,7 @@ export default function PagePlanning() {
     setFeculentsForm("");
     setProteineForm("");
     setLaitageForm("");
+    setDessertForm("");
     setFruitGouter("");
     setGateauGouter("");
     setSuggestionsIA(null);
@@ -1976,6 +1981,24 @@ export default function PagePlanning() {
                       className="mt-1"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🥛 Laitage</label>
+                    <Input
+                      value={laitageForm}
+                      onChange={(e) => setLaitageForm(e.target.value)}
+                      placeholder="Ex: Yaourt nature, Fromage blanc…"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">🍮 Dessert / Fruit</label>
+                    <Input
+                      value={dessertForm}
+                      onChange={(e) => setDessertForm(e.target.value)}
+                      placeholder="Ex: Compote, Fruit frais, Tarte aux pommes…"
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
               </>
             )}
@@ -2009,6 +2032,8 @@ export default function PagePlanning() {
                           legumes: legumesForm || undefined,
                           feculents: feculentsForm || undefined,
                           proteine_accompagnement: proteineForm || undefined,
+                          laitage: laitageForm || undefined,
+                          dessert: dessertForm || undefined,
                         };
                   try {
                     await mettreAJourRepas(repasIdCree, payload);

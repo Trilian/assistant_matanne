@@ -115,6 +115,9 @@ class EtapeBatchResponse(BaseModel):
     robots_requis: list[str] = Field(default_factory=list)
     statut: str = Field(max_length=20)
     est_terminee: bool = False
+    description: str | None = None
+    est_supervision: bool = False
+    temperature: int | None = None
 
 
 class SessionBatchResponse(BaseModel):

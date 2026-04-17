@@ -19,6 +19,12 @@ import {
   Search,
   Sparkles,
   X,
+  ChevronDown,
+  ChevronUp,
+  LayoutList,
+  BarChart3,
+  Thermometer,
+  Timer,
 } from "lucide-react";
 import {
   Card,
@@ -57,6 +63,176 @@ const STATUT_COLORS: Record<string, string> = {
   annule: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
 };
 
+// ─── Constantes robots pour la swimlane ────────────────────────────────────
+const ROBOT_LABELS: Record<string, string> = {
+  vous: "Vous",
+  cookeo: "🍲 Cookeo",
+  monsieur_cuisine: "🤖 M. Cuisine",
+  airfryer: "🍟 Airfryer",
+  multicooker: "♨️ Multicooker",
+  four: "🔥 Four",
+  plaques: "🍳 Plaques",
+};
+const ROBOT_COLORS: Record<string, string> = {
+  vous: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  cookeo: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  monsieur_cuisine: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+  airfryer: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  multicooker: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  four: "bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200",
+  plaques: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+};
+
+function normaliserTrack(robots: string[]): string {
+  if (!robots || robots.length === 0) return "vous";
+  const raw = robots[0].toLowerCase().replace(/ /g, "_").replace(".", "");
+  // Alias connus
+  if (raw === "monsieur_cuisine" || raw === "mr_cuisine") return "monsieur_cuisine";
+  return raw;
+}
+
+interface EtapeBatch {
+  id: number;
+  ordre: number;
+  groupe_parallele?: number | null;
+  titre: string;
+  duree_minutes?: number | null;
+  robots_requis: string[];
+  statut: string;
+  est_terminee: boolean;
+  description?: string | null;
+  est_supervision?: boolean;
+  temperature?: number | null;
+}
+
+function TimelineSwimlane({
+  etapes,
+  robotsUtilises,
+}: {
+  etapes: EtapeBatch[];
+  robotsUtilises: string[];
+}) {
+  // Déduire les tracks présents
+  const tracksPresents: string[] = ["vous"];
+  for (const e of etapes) {
+    const track = normaliserTrack(e.robots_requis);
+    if (track !== "vous" && !tracksPresents.includes(track)) {
+      tracksPresents.push(track);
+    }
+  }
+  // Ajouter robots configurés mais pas encore dans les étapes (pour la cohérence)
+  for (const r of robotsUtilises) {
+    const track = normaliserTrack([r]);
+    if (!tracksPresents.includes(track)) tracksPresents.push(track);
+  }
+
+  // Grouper par groupe_parallele (null/undefined → groupe solo unique)
+  const groupesMap = new Map<number, EtapeBatch[]>();
+  let compteurSolo = 1000; // compteur pour les groupes sans id
+  for (const e of [...etapes].sort((a, b) => a.ordre - b.ordre)) {
+    const gId = e.groupe_parallele != null ? e.groupe_parallele : compteurSolo++;
+    if (!groupesMap.has(gId)) groupesMap.set(gId, []);
+    groupesMap.get(gId)!.push(e);
+  }
+  const groupes = Array.from(groupesMap.entries()).sort((a, b) => {
+    const minA = Math.min(...a[1].map((e) => e.ordre));
+    const minB = Math.min(...b[1].map((e) => e.ordre));
+    return minA - minB;
+  });
+
+  const dureeGroupe = (etapes: EtapeBatch[]) =>
+    Math.max(...etapes.map((e) => e.duree_minutes ?? 0), 0);
+
+  return (
+    <div className="overflow-x-auto -mx-2 px-2">
+      <table className="w-full min-w-[480px] border-collapse text-sm">
+        <thead>
+          <tr>
+            <th className="w-16 py-2 pr-3 text-right text-xs text-muted-foreground font-medium">
+              Temps
+            </th>
+            {tracksPresents.map((track) => (
+              <th
+                key={track}
+                className={`px-2 py-2 text-xs font-semibold rounded-t whitespace-nowrap ${
+                  ROBOT_COLORS[track] ?? "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                }`}
+              >
+                {ROBOT_LABELS[track] ?? track}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {groupes.map(([gId, etapesGroupe], idx) => {
+            const duree = dureeGroupe(etapesGroupe);
+            return (
+              <tr key={gId} className={idx % 2 === 0 ? "bg-muted/20" : ""}>
+                <td className="py-2 pr-3 text-right align-top">
+                  {duree > 0 ? (
+                    <span className="flex items-center justify-end gap-0.5 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3 shrink-0" />
+                      {duree}&nbsp;min
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </td>
+                {tracksPresents.map((track) => {
+                  const etape = etapesGroupe.find(
+                    (e) => normaliserTrack(e.robots_requis) === track
+                  );
+                  if (!etape) {
+                    return (
+                      <td
+                        key={track}
+                        className="px-2 py-2 text-center text-xs text-muted-foreground/40 border-l border-border/30"
+                      >
+                        —
+                      </td>
+                    );
+                  }
+                  return (
+                    <td
+                      key={track}
+                      className={`px-2 py-2 align-top border-l border-border/30 ${
+                        etape.est_supervision
+                          ? "border border-dashed border-muted-foreground/30 rounded"
+                          : ""
+                      } ${etape.est_terminee ? "opacity-50" : ""}`}
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium leading-snug">
+                          {etape.est_terminee && (
+                            <CheckCircle2 className="h-3 w-3 inline mr-1 text-green-500" />
+                          )}
+                          {etape.titre}
+                        </span>
+                        {etape.est_supervision && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                            <Timer className="h-3 w-3" />
+                            Passif
+                          </span>
+                        )}
+                        {etape.temperature != null && (
+                          <span className="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-0.5">
+                            <Thermometer className="h-3 w-3" />
+                            {etape.temperature}°C
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function PageDetailBatch() {
   const params = useParams();
   const router = useRouter();
@@ -67,6 +243,17 @@ export default function PageDetailBatch() {
   const [dialogueRecettes, setDialogueRecettes] = useState(false);
   const [recettesSel, setRecettesSel] = useState<number[]>([]);
   const [rechercheRecette, setRechercheRecette] = useState("");
+  const [etapesExpandees, setEtapesExpandees] = useState<Set<number>>(new Set());
+  const [vueTimeline, setVueTimeline] = useState(false);
+
+  function toggleEtape(id: number) {
+    setEtapesExpandees((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const { data: session, isLoading } = utiliserRequete(
     ["batch-cooking", String(id)],
@@ -298,92 +485,177 @@ export default function PageDetailBatch() {
       {etapes.length > 0 && (
         <Card>
           <CardHeader>
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-2 flex-wrap">
               <div>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Loader2 className="h-5 w-5 text-primary" />
                   Étapes ({etapesTerminees}/{etapes.length})
                 </CardTitle>
-                <CardDescription>
-                  Suivez la progression de votre session
-                </CardDescription>
+                <CardDescription>Suivez la progression de votre session</CardDescription>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => genererEtapesMutation.mutate()}
-                disabled={genererEtapesMutation.isPending}
-              >
-                {genererEtapesMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-                <span className="ml-1.5 hidden sm:inline">Régénérer</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* Toggle Liste / Timeline */}
+                <div className="flex rounded-md border overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setVueTimeline(false)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 text-xs transition-colors ${
+                      !vueTimeline ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                    }`}
+                    title="Vue liste"
+                  >
+                    <LayoutList className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Liste</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVueTimeline(true)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 text-xs transition-colors border-l ${
+                      vueTimeline ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                    }`}
+                    title="Vue timeline"
+                  >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Timeline</span>
+                  </button>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => genererEtapesMutation.mutate()}
+                  disabled={genererEtapesMutation.isPending}
+                >
+                  {genererEtapesMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  <span className="ml-1.5 hidden sm:inline">Régénérer</span>
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {etapes.map((etape) => (
-                <div
-                  key={etape.id}
-                  className={`flex items-start gap-3 rounded-lg border p-3 transition-opacity ${
-                    etape.est_terminee ? "opacity-60" : ""
-                  }`}
-                >
-                  {etape.est_terminee ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-muted-foreground font-medium">
-                        #{etape.ordre}
-                      </span>
-                      <p className={`text-sm font-medium ${etape.est_terminee ? "line-through" : ""}`}>
-                        {etape.titre}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      {etape.duree_minutes && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {etape.duree_minutes} min
-                        </span>
+            {vueTimeline ? (
+              <TimelineSwimlane etapes={etapes} robotsUtilises={session.robots_utilises} />
+            ) : (
+              <div className="space-y-2">
+                {etapes.map((etape) => {
+                  const developpe = etapesExpandees.has(etape.id);
+                  const aDescription = Boolean(etape.description);
+                  return (
+                    <div
+                      key={etape.id}
+                      className={`rounded-lg border transition-opacity ${
+                        etape.est_terminee ? "opacity-60" : ""
+                      }`}
+                    >
+                      {/* Ligne principale */}
+                      <div className="flex items-start gap-3 p-3">
+                        {etape.est_terminee ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs text-muted-foreground font-medium">
+                              #{etape.ordre}
+                            </span>
+                            <p className={`text-sm font-medium ${etape.est_terminee ? "line-through" : ""}`}>
+                              {etape.titre}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            {etape.duree_minutes != null && (
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {etape.duree_minutes} min
+                              </span>
+                            )}
+                            {etape.robots_requis.map((r) => (
+                              <Badge key={r} variant="outline" className="text-xs">
+                                {r}
+                              </Badge>
+                            ))}
+                            {etape.est_supervision && (
+                              <Badge variant="secondary" className="text-xs gap-1">
+                                <Timer className="h-3 w-3" />
+                                Passif
+                              </Badge>
+                            )}
+                            {etape.groupe_parallele != null && (
+                              <Badge variant="secondary" className="text-xs">
+                                ∥ Groupe {etape.groupe_parallele}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Badge
+                            className={`text-xs ${
+                              etape.est_terminee
+                                ? "bg-green-500 hover:bg-green-600"
+                                : etape.statut === "en_cours"
+                                ? "bg-orange-500 hover:bg-orange-600"
+                                : ""
+                            }`}
+                            variant={
+                              etape.est_terminee || etape.statut === "en_cours" ? "default" : "outline"
+                            }
+                          >
+                            {etape.est_terminee
+                              ? "✓ Terminée"
+                              : etape.statut === "en_cours"
+                              ? "En cours"
+                              : "En attente"}
+                          </Badge>
+                          {aDescription && (
+                            <button
+                              type="button"
+                              aria-label={developpe ? "Réduire" : "Développer"}
+                              onClick={() => toggleEtape(etape.id)}
+                              className="ml-1 rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                            >
+                              {developpe ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Zone accordéon */}
+                      {aDescription && developpe && (
+                        <div className="border-t bg-muted/30 px-4 pb-3 pt-2">
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {etape.description}
+                          </p>
+                          {(etape.temperature != null || etape.est_supervision) && (
+                            <div className="flex items-center gap-3 mt-2">
+                              {etape.temperature != null && (
+                                <span className="flex items-center gap-1 text-xs font-medium text-orange-600 dark:text-orange-400">
+                                  <Thermometer className="h-3.5 w-3.5" />
+                                  {etape.temperature}°C
+                                </span>
+                              )}
+                              {etape.est_supervision && (
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Timer className="h-3.5 w-3.5" />
+                                  L&apos;appareil travaille seul
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       )}
-                      {etape.robots_requis.map((r) => (
-                        <Badge key={r} variant="outline" className="text-xs">
-                          {r}
-                        </Badge>
-                      ))}
-                      {etape.groupe_parallele !== undefined && etape.groupe_parallele !== null && (
-                        <Badge variant="secondary" className="text-xs">
-                          ∥ Groupe {etape.groupe_parallele}
-                        </Badge>
-                      )}
                     </div>
-                  </div>
-                  <Badge
-                    className={`text-xs shrink-0 ${
-                      etape.est_terminee
-                        ? "bg-green-500 hover:bg-green-600"
-                        : etape.statut === "en_cours"
-                        ? "bg-orange-500 hover:bg-orange-600"
-                        : ""
-                    }`}
-                    variant={etape.est_terminee || etape.statut === "en_cours" ? "default" : "outline"}
-                  >
-                    {etape.est_terminee
-                      ? "✓ Terminée"
-                      : etape.statut === "en_cours"
-                      ? "En cours"
-                      : "En attente"}
-                  </Badge>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

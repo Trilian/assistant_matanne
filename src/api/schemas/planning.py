@@ -40,6 +40,11 @@ class RepasBase(BaseModel, TypeRepasValidator):
 class RepasCreate(RepasBase):
     """Création d'un repas — hérite tous les champs de RepasBase."""
 
+    # Entrée et dessert (déjeuner / dîner)
+    entree: str | None = Field(None, max_length=200)
+    entree_recette_id: int | None = None
+    dessert: str | None = Field(None, max_length=200)
+    dessert_recette_id: int | None = None
     # Accompagnements équilibre assiette
     legumes: str | None = Field(None, max_length=200)
     legumes_recette_id: int | None = None
@@ -47,7 +52,7 @@ class RepasCreate(RepasBase):
     feculents_recette_id: int | None = None
     proteine_accompagnement: str | None = Field(None, max_length=200)
     proteine_accompagnement_recette_id: int | None = None
-    # Goûter
+    # Laitage + goûter
     laitage: str | None = Field(None, max_length=200)
     fruit_gouter: str | None = Field(None, max_length=100)
     gateau_gouter: str | None = Field(None, max_length=100)
@@ -72,6 +77,11 @@ class RepasResponse(RepasBase, IdentifiedResponse):
     compatible_airfryer: bool = False
     est_reste: bool = False
     reste_description: str | None = Field(None, max_length=200)
+    # Entrée et dessert
+    entree: str | None = Field(None, max_length=200)
+    entree_recette_id: int | None = None
+    dessert: str | None = Field(None, max_length=200)
+    dessert_recette_id: int | None = None
     # Champs équilibre nutritionnel
     fruit: str | None = Field(None, max_length=200)  # legacy migration 005
     legumes: str | None = Field(None, max_length=200)

@@ -105,13 +105,16 @@ RÉPONDS EN JSON VALIDE avec cette structure:
    "instructions_finition": ["Réchauffer 3min micro-ondes"],
    "stockage": "Boîte hermétique frigo", "duree_conservation_jours": 3}],
  "moments_jules": [{"temps": "0-15min", "tache": "Laver légumes"}],
- "timeline": [{"debut_min": 0, "fin_min": 15, "tache": "Découpe légumes", "robot": null}]}
+ "timeline": [{"debut_min": 0, "fin_min": 15, "tache": "Découper les carottes en rondelles 5mm", "detail": "500g carottes, économe, rondelles régulières 5mm", "robot": null, "track": "vous", "temperature": null},
+              {"debut_min": 0, "fin_min": 40, "tache": "Sauce bolognaise Cookeo", "detail": "Dorer 250g boeuf haché 5min, puis mijoter programme Viande 30min", "robot": "cookeo", "track": "cookeo", "temperature": null}]}
 
 RÈGLES:
-1. Étapes CONCRÈTES: découpe exacte, grammes, °C, durée. Jamais "les légumes" → nommer chaque légume avec quantité
-2. Robot utilisé: programme exact, température, vitesse, durée
-3. PARALLÉLISER: pendant qu'un robot tourne (est_passif=true), travailler sur une autre recette. La timeline montre les opérations simultanées
-4. Quantités en grammes/ml (sauf pièces: oeufs, oignons). Finition = réchauffage/assaisonnement jour J"""
+1. Étapes CONCRÈTES: découpe exacte, grammes, °C, durée. Jamais "les légumes" → nommer chaque légume avec quantité précise
+2. Robot utilisé: programme exact, température, vitesse, durée dans le champ detail
+3. PARALLÉLISER: pendant qu'un robot tourne, travailler sur une autre recette. La timeline montre les opérations simultanées
+4. Quantités en grammes/ml (sauf pièces: oeufs, oignons). Finition = réchauffage/assaisonnement jour J
+5. TRACK: chaque entrée timeline doit avoir "track" = "vous" (tâche manuelle) ou le nom exact du robot (ex: "cookeo", "monsieur_cuisine", "airfryer", "four", "plaques")
+6. detail: phrase concrète décrivant exactement comment faire l'étape (grammes, programme, durée, température)"""
 
     if avec_jules:
         prompt += "\n5. Jules 19 mois: UNIQUEMENT laver, mélanger dans un bol, verser (PAS de couteau, PAS de chaleur)"

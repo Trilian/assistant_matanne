@@ -126,6 +126,42 @@ _TEXTES_ABSENTS: set[str] = {
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 
+_HEURISTIQUES_PROTEINES: list[tuple[str, list[str]]] = [
+    ("proteines_oeuf", ["omelette", "œuf", "oeuf", "quiche", "frittata", "tortilla"]),
+    (
+        "proteines_poisson",
+        [
+            "saumon", "colin", "cabillaud", "thon", "truite", "sardine", "maquereau",
+            "merlu", "lieu", "sole", "turbot", "bar ", "dorade", "daurade", "crevette",
+            "moule", "coquille", "poulpe", "calmar", "seiche", "langoustine", "homard",
+            "poisson",
+        ],
+    ),
+    (
+        "proteines_volaille",
+        [
+            "poulet", "dinde", "canard", "lapin", "pintade", "caille", "chapon",
+            "volaille",
+        ],
+    ),
+    (
+        "proteines_viande_rouge",
+        [
+            "bœuf", "boeuf", "agneau", "porc", "veau", "steak", "côtelette",
+            "cotelette", "côte de", "rôti", "roti", "entrecôte", "bavette",
+            "gigot", "carré d'agneau", "saucisse", "merguez", "chipolata",
+        ],
+    ),
+    (
+        "proteines_legumineuses",
+        [
+            "lentille", "pois chiche", "haricot rouge", "haricot blanc", "flageolet",
+            "soja", "tofu", "tempeh", "edamame", "falafel", "dal", "dahl",
+        ],
+    ),
+]
+
+
 def _categorie_from_repas(repas: "Repas") -> str | None:
     """Déduit la catégorie nutritionnelle du plat principal.
 
@@ -144,6 +180,14 @@ def _categorie_from_repas(repas: "Repas") -> str | None:
     if recette.type_proteines:
         return _MAP_TYPE_PROTEINES.get(recette.type_proteines.lower())
 
+    # Heuristique sur le nom (fallback sans IA)
+    nom = (recette.nom or "").lower()
+    if nom:
+        for categorie, mots_cles in _HEURISTIQUES_PROTEINES:
+            for mot in mots_cles:
+                if mot in nom:
+                    return categorie
+
     return None
 
 
@@ -158,8 +202,12 @@ def _valeur_repas_presente(valeur: object) -> bool:
 
 
 def _a_legumes(repas: "Repas") -> bool:
-    return _valeur_repas_presente(getattr(repas, "legumes", None)) or bool(
-        getattr(repas, "legumes_recette_id", None)
+    return (
+        _valeur_repas_presente(getattr(repas, "legumes", None))
+        or bool(getattr(repas, "legumes_recette_id", None))
+        # L'entrée (soupe, salade…) compte comme légumes si aucun autre légume n'est renseigné
+        or _valeur_repas_presente(getattr(repas, "entree", None))
+        or bool(getattr(repas, "entree_recette_id", None))
     )
 
 
@@ -241,11 +289,18 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
     elif est_dejeuner:
         # Déjeuner : 5 composants × 20 pts (PNNS4 complet)
         a_laitage = bool(getattr(repas, "laitage", None))
-        a_fruit = _valeur_repas_presente(getattr(repas, "fruit", None))
+        # Le dessert (compote, fruit, yaourt aux fruits…) compte comme fruit/dessert.
+        # Champ ``fruit`` conservé pour rétro-compat migration 005 ; ``dessert`` est le
+        # champ canonique utilisé par le générateur IA et le formulaire manuel.
+        a_fruit = (
+            _valeur_repas_presente(getattr(repas, "fruit", None))
+            or _valeur_repas_presente(getattr(repas, "dessert", None))
+            or bool(getattr(repas, "dessert_recette_id", None))
+        )
         if not a_laitage:
             alertes.append("Laitage manquant")
         if not a_fruit:
-            alertes.append("Fruit manquant")
+            alertes.append("Fruit / dessert manquant")
         nb_ok = sum([a_legumes, a_feculents, a_proteines, a_laitage, a_fruit])
         score = nb_ok * 20
     else:

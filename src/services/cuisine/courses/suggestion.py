@@ -1,1 +1,877 @@
-"""Service Courses Intelligentes.Generation de liste de courses depuis le planning repas avec comparaison inventaire."""import loggingimport re as _refrom collections import defaultdictfrom datetime import date# Normalisations de noms d'ingrédients pour la déduplication_NORMALISATIONS_INGREDIENTS: dict[str, str] = {    "blancs de poulet cuits": "blancs de poulet",    "blanc de poulet cuit": "blancs de poulet",    "filets de poulet cuits": "filets de poulet",    "filet de poulet cuit": "filets de poulet",    "poulet cuit": "blancs de poulet",    "fromage blanc sucré": "fromage blanc",    "fromage blanc naturé": "fromage blanc",    "yaourts nature": "yaourt nature",    "yaourts": "yaourt nature",    "petit suisse": "petit-suisse",    "petits suisses": "petit-suisse",    "kirino": "kiri",    "kiri no": "kiri",}def _normaliser_ingredient(nom: str) -> str:    """Normalise un nom d'ingrédient pour améliorer la déduplication."""    key = nom.lower().strip()    # Nettoyage de ponctuation/bruit fréquent sur les champs texte    key = _re.sub(r"[,:;.!?()\[\]\{\}]", " ", key)    key = _re.sub(r"\s+", " ", key).strip()    # "kiri no..." ou variantes typo -> "kiri"    if key.startswith("kiri no") or key.startswith("kirino"):        key = "kiri"    if key in _NORMALISATIONS_INGREDIENTS:        return _NORMALISATIONS_INGREDIENTS[key]    # Retirer " cuit(e)(s)" en fin    key = _re.sub(r"\s+cuit[e]?s?\s*$", "", key)    # Retirer " surgelé(e)(s)" en fin    key = _re.sub(r"\s+surgel[\u00e9èe][e]?s?\s*$", "", key)    return key.strip()def _parser_texte_courses(texte: str, source_label: str) -> list[tuple[str, float, str]]:    """Parse un texte de dessert/entrée en items achetables individuels.    Ex: "Petit-suisse \u00d72 + compote poire" → [("petit-suisse", 2.0, source), ("compote", 1.0, source)]    Ex: "Yaourt nature + purée de banane" → [("yaourt nature", 1.0, source), ("banane", 1.0, source)]    Ex: "Fromage blanc sucré à la compote" → [("fromage blanc", 1.0, source), ("compote", 1.0, source)]    Ex: "Compote pomme-coing maison" → [("pomme", 1.0, source), ("coing", 1.0, source)]    Returns list of (nom_normalise, quantite, source_label)    """    from functools import reduce    from src.services.cuisine.courses.constantes import MAPPING_RAYONS    results: list[tuple[str, float, str]] = []    # Mots-clés d'ingrédients connus (pour éviter de garder un nom de plat complet)    mots_ingredients = {        _normaliser_ingredient(k)        for k in MAPPING_RAYONS.keys()        if isinstance(k, str) and len(k.strip()) >= 3    }    def _normaliser_token(token: str) -> str:        t = _normaliser_ingredient(token)        t = _re.sub(r"\b(maison|frais|fraiche|fraîche|cuit|cuite|rapide|express)\b", "", t)        t = _re.sub(r"\s+", " ", t).strip()        return t    def _token_est_ingredient(token: str) -> bool:        t = _normaliser_token(token)        if len(t) < 3:            return False        if t in mots_ingredients:            return True        # Gestion simple singulier/pluriel        if t.endswith("s") and t[:-1] in mots_ingredients:            return True        if (t + "s") in mots_ingredients:            return True        return False    def _extraire_depuis_nom_plat(part: str) -> list[str]:        """Extrait des ingrédients depuis un libellé de plat texte."""        p = _normaliser_token(part)        if not p:            return []        # Formes fréquentes: soupe/velouté/mousse/salade de X        base_m = _re.match(            r"(?:soupe|veloute|veloutee|veloute|velouté|mousse|salade)\s+d(?:e|')\s+(.+)$",            p,            _re.IGNORECASE,        )        if base_m:            p = _normaliser_token(base_m.group(1))        # Retirer compléments de style "à la ...", "au ...", "aux ..."        p = _re.sub(r"\s+a\s+l[ae]\s+.+$", "", p, flags=_re.IGNORECASE)        p = _re.sub(r"\s+aux?\s+.+$", "", p, flags=_re.IGNORECASE)        # Préserver quelques expressions multi-mots avant split        p = p.replace("pommes de terre", "pommes_de_terre")        p = p.replace("fromage blanc", "fromage_blanc")        p = p.replace("petit suisse", "petit_suisse")        p = p.replace("petit-suisse", "petit_suisse")        tokens = [            _normaliser_token(t.replace("_", " "))            for t in _re.split(r"\s*[,+/]\s*|\s+et\s+|\s+-\s+|\s+", p)            if t.strip()        ]        # Recombiner en bigrammes pour détecter des ingrédients composés        extraits: list[str] = []        i = 0        while i < len(tokens):            if i + 1 < len(tokens):                bigram = f"{tokens[i]} {tokens[i + 1]}".strip()                if _token_est_ingredient(bigram):                    extraits.append(bigram)                    i += 2                    continue            if _token_est_ingredient(tokens[i]):                extraits.append(tokens[i])            i += 1        # Cas "avocat crevettes" : 2 ingrédients collés sans séparateur        if not extraits and len(tokens) == 2:            if _token_est_ingredient(tokens[0]) and _token_est_ingredient(tokens[1]):                extraits = [tokens[0], tokens[1]]        return [e for e in extraits if e and len(e) >= 3]    # Séparer sur +, / et " et "    parts = _re.split(r"\s*[+/]\s*|\s+et\s+", texte, flags=_re.IGNORECASE)    for part in parts:        part = part.strip()        if not part or len(part) < 2:            continue        # Extraire quantité : ×2, x2, *2        qty = 1.0        qty_match = _re.search(r"[\u00d7x\*](\d+)", part, _re.IGNORECASE)        if qty_match:            qty = float(qty_match.group(1))            part = _re.sub(r"\s*[\u00d7x\*]\d+", "", part).strip()        # "purée de X" → "X"        puree_m = _re.match(r"pur[\u00e9eée][e]?\s+d[e'u]?\s*(.+)", part, _re.IGNORECASE)        if puree_m:            results.append((_normaliser_ingredient(puree_m.group(1).strip()), qty, source_label))            continue        # "compote X-Y maison" ou "compote X maison" → ingrédients fruit(s) + sucre        compote_m = _re.match(r"compote\s+(.+?)\s*(?:maison)?\s*$", part, _re.IGNORECASE)        if compote_m:            fruits_str = compote_m.group(1).strip()            # Retirer "maison" si présent dans les fruits            fruits_str = _re.sub(r"\bmaison\b", "", fruits_str, flags=_re.IGNORECASE).strip()            # Fruits séparés par - ou espace            fruits = [                f.strip()                for f in _re.split(r"[-\s]", fruits_str)                if f.strip() and len(f.strip()) > 2            ]            if fruits:                for fruit in fruits:                    results.append((fruit.lower(), qty, source_label))            else:                results.append(("compote", qty, source_label))            continue        # "fromage blanc sucré à la compote" → fromage blanc + compote        if "sucré" in part.lower() and "compote" in part.lower():            base = _re.sub(r"sucr[\u00e9e].+", "", part, flags=_re.IGNORECASE).strip()            if base:                results.append((_normaliser_ingredient(base), qty, source_label))            results.append(("compote", qty, source_label))            continue        # "X au/aux Y" (ex: "Clafoutis aux cerises") -> extraire l'ingrédient Y        # pour éviter d'ajouter un nom de plat complet dans la liste de courses.        au_m = _re.match(r".+\s+aux?\s+(.+)", part, _re.IGNORECASE)        if au_m:            y = au_m.group(1).strip()            # Retirer qualificatifs courants non-ingrédients            y = _re.sub(r"\b(maison|express|facile|rapide)\b", "", y, flags=_re.IGNORECASE).strip()            # Gérer "cerises" ou "pommes de terre"            if y:                results.append((_normaliser_ingredient(y), qty, source_label))                continue        # "X nature" / "X naturé" → garder tel quel (ex: yaourt nature)        nom_clean = _normaliser_ingredient(part)        if nom_clean:            # Dernier recours: si c'est un nom de plat, extraire des ingrédients pertinents.            extraits_plat = _extraire_depuis_nom_plat(nom_clean)            if extraits_plat:                for item in extraits_plat:                    results.append((item, qty, source_label))            else:                results.append((nom_clean, qty, source_label))    return results if results else [(_normaliser_ingredient(texte.strip()), 1.0, source_label)]from sqlalchemy.orm import Session, selectinloadfrom src.core.ai import obtenir_client_iafrom src.core.decorators import avec_gestion_erreurs, avec_session_dbfrom src.core.models import (    ArticleCourses,    ArticleInventaire,    Ingredient,    ListeCourses,    Planning,    Recette,    RecetteIngredient,    Repas,)from src.services.core.base import BaseAIServicefrom src.services.core.event_bus_mixin import emettre_evenement_simplefrom .constantes import MAPPING_RAYONS, PRIORITESfrom .types import ArticleCourse, ListeCoursesIntelligente, SuggestionSubstitutionlogger = logging.getLogger(__name__)class ServiceCoursesIntelligentes(BaseAIService):    """Service pour generer des listes de courses intelligentes depuis le planning."""    def __init__(self):        client = obtenir_client_ia()        if client is None:            raise RuntimeError("Client IA non disponible")        super().__init__(            client=client,            cache_prefix="courses_intel",            default_ttl=1800,            service_name="courses_intelligentes",        )    def _determiner_rayon(self, nom_ingredient: str) -> str:        """Determine le rayon d'un ingredient."""        nom_lower = nom_ingredient.lower()        for mot_cle, rayon in MAPPING_RAYONS.items():            if mot_cle in nom_lower:                return rayon        return "Autre"    def _determiner_priorite(self, rayon: str) -> int:        """Determine la priorite basee sur le rayon."""        return PRIORITES.get(rayon, 3)    @avec_gestion_erreurs(default_return=None)    @avec_session_db    def obtenir_planning_actif(self, db: Session | None = None) -> Planning | None:        """Recupere le planning actif le plus récent avec ses repas et recettes."""        planning = (            db.query(Planning)            .options(                selectinload(Planning.repas)                .selectinload(Repas.recette)                .selectinload(Recette.ingredients)                .selectinload(RecetteIngredient.ingredient),                # Charger aussi les recettes liées aux entrées/desserts                selectinload(Planning.repas)                .selectinload(Repas.entree_recette)                .selectinload(Recette.ingredients)                .selectinload(RecetteIngredient.ingredient),                selectinload(Planning.repas)                .selectinload(Repas.dessert_recette)                .selectinload(Recette.ingredients)                .selectinload(RecetteIngredient.ingredient),                selectinload(Planning.repas)                .selectinload(Repas.dessert_jules_recette)                .selectinload(Recette.ingredients)                .selectinload(RecetteIngredient.ingredient),            )            .filter(Planning.statut == "actif")            .order_by(Planning.semaine_debut.desc())            .first()        )        return planning    @avec_gestion_erreurs(default_return={})    @avec_session_db    def obtenir_stock_actuel(self, db: Session | None = None) -> dict[str, float]:        """Recupere le stock actuel sous forme de dictionnaire {nom: quantite}."""        stocks = (            db.query(ArticleInventaire)            .options(selectinload(ArticleInventaire.ingredient))            .filter(ArticleInventaire.quantite > 0)            .all()        )        return {            stock.ingredient.nom.lower(): stock.quantite for stock in stocks if stock.ingredient        }    def extraire_ingredients_planning(self, planning: Planning) -> list[ArticleCourse]:        """Extrait tous les ingredients des recettes du planning (plat + entrée + desserts)."""        from typing import Any        # Agregateur: {nom_ingredient: {quantite, unite, recettes}}        agregat: dict[str, dict[str, Any]] = defaultdict(            lambda: {"quantite": 0.0, "unite": "", "recettes": set()}        )        recettes_traitees: set[str] = set()        def _ajouter_ingredients_recette(recette) -> None:            """Ajoute les ingrédients d'une recette à l'agrégat."""            if not recette or recette.nom in recettes_traitees:                return            recettes_traitees.add(recette.nom)            for ing_recette in recette.ingredients:                if not ing_recette.ingredient:                    continue                nom = _normaliser_ingredient(ing_recette.ingredient.nom)                agregat[nom]["quantite"] += float(ing_recette.quantite or 1)                if not agregat[nom]["unite"]:                    agregat[nom]["unite"] = ing_recette.unite or ""                agregat[nom]["recettes"].add(recette.nom)        for repas in planning.repas:            # Sauter les recettes réchauffées (nom commence par "Réchauffé:")            recette = repas.recette            if recette and recette.nom and recette.nom.lower().startswith("réchauffé"):                continue            # Plat principal            _ajouter_ingredients_recette(recette)            # Entrée (si liée à une recette)            _ajouter_ingredients_recette(getattr(repas, "entree_recette", None))            # Dessert (si lié à une recette)            _ajouter_ingredients_recette(getattr(repas, "dessert_recette", None))            # Dessert Jules (si lié à une recette)            _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette", None))            # Entrées/desserts texte (non liées à une recette) → articles directs (parsés)            # Source volontairement neutre (date + type repas) pour éviter un lien trompeur            # avec le plat principal.            _type_repas_ui = {                "déjeuner": "midi",                "dejeuner": "midi",                "dîner": "soir",                "diner": "soir",                "goûter": "goûter",                "gouter": "goûter",            }.get((repas.type_repas or "").lower(), repas.type_repas)            for champ, label in [                ("entree", "Entrée"),                ("dessert", "Dessert"),                ("dessert_jules", "Dessert Jules"),            ]:                texte = getattr(repas, champ, None)                fk = (                    getattr(repas, f"{champ}_recette_id", None)                    if champ != "dessert_jules"                    else getattr(repas, "dessert_jules_recette_id", None)                )                if texte and not fk:                    source_label = (                        f"{label.lower()} {_type_repas_ui} {repas.date_repas.strftime('%d/%m')}"                    )                    for nom_item, qty, src in _parser_texte_courses(texte, source_label):                        if not nom_item:                            continue                        # Sécurité bébé: le miel ne doit pas apparaître depuis dessert_jules en texte libre.                        if champ == "dessert_jules" and nom_item == "miel":                            logger.warning("Ingredient ignore (dessert_jules): miel")                            continue                        agregat[nom_item]["quantite"] += qty                        if not agregat[nom_item]["unite"]:                            agregat[nom_item]["unite"] = "unité"                        agregat[nom_item]["recettes"].add(src)        # Construire la liste d'articles        articles: list[ArticleCourse] = []        for nom, data in agregat.items():            rayon = self._determiner_rayon(nom)            recettes_set: set[str] = data["recettes"]            articles.append(                ArticleCourse(                    nom=nom.capitalize(),                    quantite=float(data["quantite"]),                    unite=str(data["unite"]),                    rayon=rayon,                    recettes_source=list(recettes_set),                    priorite=self._determiner_priorite(rayon),                )            )        return articles    def comparer_avec_stock(        self, articles: list[ArticleCourse], stock: dict[str, float]    ) -> list[ArticleCourse]:        """Compare les besoins avec le stock et calcule ce qu'il faut acheter."""        articles_ajustes: list[ArticleCourse] = []        for article in articles:            nom_lower = article.nom.lower()            en_stock = stock.get(nom_lower, 0.0)            article.en_stock = en_stock            article.a_acheter = max(0.0, article.quantite - en_stock)            # Ne garder que les articles a acheter            if article.a_acheter > 0:                articles_ajustes.append(article)        return articles_ajustes    def generer_liste_courses(self) -> ListeCoursesIntelligente:        """        Genere une liste de courses complete depuis le planning actif.        Returns:            ListeCoursesIntelligente avec les articles optimises        """        alertes: list[str] = []        # 1. Recuperer planning actif        planning = self.obtenir_planning_actif()        if not planning:            return ListeCoursesIntelligente(                alertes=["Aucun planning actif trouve. Creez d'abord un planning de repas."]            )        # 2. Extraire les ingredients        articles = self.extraire_ingredients_planning(planning)        if not articles:            return ListeCoursesIntelligente(                alertes=["Aucune recette avec ingredients dans le planning."]            )        # 3. Comparer avec stock        stock = self.obtenir_stock_actuel()        articles_a_acheter = self.comparer_avec_stock(articles, stock)        # 4. Trier par rayon puis priorite        articles_a_acheter.sort(key=lambda a: (a.rayon, a.priorite, a.nom))        # 5. Recuperer les recettes couvertes        recettes_couvertes: set[str] = set()        for article in articles:            recettes_couvertes.update(article.recettes_source)        # 6. Generer alertes        if len(articles_a_acheter) == 0:            alertes.append("Tous les ingredients sont en stock!")        elif len(stock) == 0:            alertes.append("Inventaire vide - liste complete generee")        return ListeCoursesIntelligente(            articles=articles_a_acheter,            total_articles=len(articles_a_acheter),            recettes_couvertes=list(recettes_couvertes),            alertes=alertes,        )    @avec_gestion_erreurs(default_return=[])    @avec_session_db    def ajouter_a_liste_courses(        self, articles: list[ArticleCourse], db: Session | None = None    ) -> list[int]:        """        Ajoute les articles generes a la liste de courses.        Args:            articles: Articles a ajouter            db: Session DB        Returns:            Liste des IDs crees        """        ids_crees: list[int] = []        # 0. Récupérer ou créer la liste de courses active        # On suppose qu'il y a une liste active "principale"        liste_active = (            db.query(ListeCourses)            .filter(ListeCourses.archivee == False)            .order_by(ListeCourses.cree_le.desc())            .first()        )        if not liste_active:            liste_active = ListeCourses(nom="Ma liste de courses")            db.add(liste_active)            db.flush()        liste_id = liste_active.id        for article in articles:            # Chercher ou creer l'ingredient (matching exact insensible à la casse)            ingredient = db.query(Ingredient).filter(Ingredient.nom.ilike(article.nom)).first()            if not ingredient:                ingredient = Ingredient(                    nom=article.nom, categorie=article.rayon, unite=article.unite or "pcs"                )                db.add(ingredient)                db.flush()            elif article.unite and article.unite not in ("pcs", "piece", "pièce", ""):                # Mettre à jour l'unité de l'ingrédient si on a une unité plus précise                if ingredient.unite in (None, "", "pcs", "piece", "pièce"):                    ingredient.unite = article.unite            # Verifier si deja dans la liste de courses            existant = (                db.query(ArticleCourses)                .filter(                    ArticleCourses.liste_id == liste_id,                    ArticleCourses.ingredient_id == ingredient.id,                    ArticleCourses.achete == False,                )                .first()            )            if existant:                # Mettre a jour quantite                existant.quantite_necessaire = (                    existant.quantite_necessaire or 0                ) + article.a_acheter                notes_actuelles = existant.notes or ""                if "planning" not in notes_actuelles:                    existant.notes = f"{notes_actuelles} + planning".strip()                ids_crees.append(existant.id)            else:                # Creer nouvel article courses                item = ArticleCourses(                    liste_id=liste_id,                    ingredient_id=ingredient.id,                    quantite_necessaire=article.a_acheter,                    priorite={1: "haute", 2: "moyenne", 3: "basse"}.get(                        article.priorite, "moyenne"                    ),                    rayon_magasin=article.rayon,                    notes=(                        "Depuis planning: "                        + ", ".join(                            [                                s.replace("Depuis planning:", "").strip()                                for s in article.recettes_source[:2]                            ]                        )                    ),                    achete=False,                    suggere_par_ia=True,                )                db.add(item)                db.flush()                ids_crees.append(item.id)        db.commit()        emettre_evenement_simple(            "courses.modifiees",            {"nb_articles": len(ids_crees), "action": "articles_ajoutes", "source": "planning"},            source="courses_suggestion",        )        logger.info(f"{len(ids_crees)} articles ajoutes a la liste de courses")        return ids_crees    async def suggerer_substitutions(        self, articles: list[ArticleCourse]    ) -> list[SuggestionSubstitution]:        """        Suggere des substitutions economiques ou de saison.        Args:            articles: Liste d'articles        Returns:            Suggestions de substitutions        """        # Filtrer articles couteux ou hors saison        articles_a_evaluer = [a for a in articles if a.priorite <= 2][:5]        if not articles_a_evaluer:            return []        noms = ", ".join([a.nom for a in articles_a_evaluer])        prompt = f"""Pour ces ingredients de liste de courses: {noms}Suggere des substitutions economiques ou de saison (max 3).Format JSON:[    {{"ingredient_original": "...", "suggestion": "...", "raison": "..."}}]Criteres:- Moins cher en ce moment- De saison (nous sommes en {date.today().strftime("%B")})- Equivalent nutritionnelReponds UNIQUEMENT avec le JSON."""        try:            response = await self.client.appeler(prompt)            import json            data = json.loads(response.strip().replace("```json", "").replace("```", ""))            return [SuggestionSubstitution(**item) for item in data]        except Exception as e:            logger.error(f"Erreur suggestions: {e}")            return []# ═══════════════════════════════════════════════════════════# FACTORY FUNCTION# ═══════════════════════════════════════════════════════════from src.services.core.registry import service_factory@service_factory("courses_intelligentes", tags={"cuisine", "ia"})def obtenir_service_courses_intelligentes() -> ServiceCoursesIntelligentes:    """Factory pour le service courses intelligentes (thread-safe via registre)."""    return ServiceCoursesIntelligentes()def obtenir_smart_shopping_service() -> ServiceCoursesIntelligentes:    """Factory for smart shopping service (English alias)."""    return obtenir_service_courses_intelligentes()__all__ = [    "ServiceCoursesIntelligentes",    "obtenir_service_courses_intelligentes",    "obtenir_smart_shopping_service",]# ─── Aliases rétrocompatibilité  ───────────────────────────────obtenir_smart_shopping_service = obtenir_smart_shopping_service  # alias rétrocompatibilité
+"""
+
+Service Courses Intelligentes.
+
+
+
+Generation de liste de courses depuis le planning repas avec comparaison inventaire.
+
+"""
+
+import logging
+import re as _re
+from collections import defaultdict
+from datetime import date
+
+# Normalisations de noms d'ingrédients pour la déduplication
+
+_NORMALISATIONS_INGREDIENTS: dict[str, str] = {
+    "blancs de poulet cuits": "blancs de poulet",
+    "blanc de poulet cuit": "blancs de poulet",
+    "filets de poulet cuits": "filets de poulet",
+    "filet de poulet cuit": "filets de poulet",
+    "poulet cuit": "blancs de poulet",
+    "fromage blanc sucré": "fromage blanc",
+    "fromage blanc naturé": "fromage blanc",
+    "yaourts nature": "yaourt nature",
+    "yaourts": "yaourt nature",
+    "petit suisse": "petit-suisse",
+    "petits suisses": "petit-suisse",
+    "kirino": "kiri",
+    "kiri no": "kiri",
+}
+
+
+def _normaliser_ingredient(nom: str) -> str:
+    """Normalise un nom d'ingrédient pour améliorer la déduplication."""
+
+    key = nom.lower().strip()
+
+    # Nettoyage de ponctuation/bruit fréquent sur les champs texte
+
+    key = _re.sub(r"[,:;.!?()\[\]\{\}]", " ", key)
+
+    key = _re.sub(r"\s+", " ", key).strip()
+
+    # "kiri no..." ou variantes typo -> "kiri"
+
+    if key.startswith("kiri no") or key.startswith("kirino"):
+        key = "kiri"
+
+    if key in _NORMALISATIONS_INGREDIENTS:
+        return _NORMALISATIONS_INGREDIENTS[key]
+
+    # Retirer " cuit(e)(s)" en fin
+
+    key = _re.sub(r"\s+cuit[e]?s?\s*$", "", key)
+
+    # Retirer " surgelé(e)(s)" en fin
+
+    key = _re.sub(r"\s+surgel[\u00e9èe][e]?s?\s*$", "", key)
+
+    return key.strip()
+
+
+def _parser_texte_courses(texte: str, source_label: str) -> list[tuple[str, float, str]]:
+    """Parse un texte de dessert/entrée en items achetables individuels.
+
+
+
+    Ex: "Petit-suisse \u00d72 + compote poire" → [("petit-suisse", 2.0, source), ("compote", 1.0, source)]
+
+    Ex: "Yaourt nature + purée de banane" → [("yaourt nature", 1.0, source), ("banane", 1.0, source)]
+
+    Ex: "Fromage blanc sucré à la compote" → [("fromage blanc", 1.0, source), ("compote", 1.0, source)]
+
+    Ex: "Compote pomme-coing maison" → [("pomme", 1.0, source), ("coing", 1.0, source)]
+
+
+
+    Returns list of (nom_normalise, quantite, source_label)
+
+    """
+
+    from functools import reduce
+
+    from src.services.cuisine.courses.constantes import MAPPING_RAYONS
+
+    results: list[tuple[str, float, str]] = []
+
+    # Mots-clés d'ingrédients connus (pour éviter de garder un nom de plat complet)
+
+    mots_ingredients = {
+        _normaliser_ingredient(k)
+        for k in MAPPING_RAYONS.keys()
+        if isinstance(k, str) and len(k.strip()) >= 3
+    }
+
+    def _normaliser_token(token: str) -> str:
+
+        t = _normaliser_ingredient(token)
+
+        t = _re.sub(r"\b(maison|frais|fraiche|fraîche|cuit|cuite|rapide|express)\b", "", t)
+
+        t = _re.sub(r"\s+", " ", t).strip()
+
+        return t
+
+    def _token_est_ingredient(token: str) -> bool:
+
+        t = _normaliser_token(token)
+
+        if len(t) < 3:
+            return False
+
+        if t in mots_ingredients:
+            return True
+
+        # Gestion simple singulier/pluriel
+
+        if t.endswith("s") and t[:-1] in mots_ingredients:
+            return True
+
+        if (t + "s") in mots_ingredients:
+            return True
+
+        return False
+
+    def _extraire_depuis_nom_plat(part: str) -> list[str]:
+        """Extrait des ingrédients depuis un libellé de plat texte."""
+
+        p = _normaliser_token(part)
+
+        if not p:
+            return []
+
+        # Formes fréquentes: soupe/velouté/mousse/salade de X
+
+        base_m = _re.match(
+            r"(?:soupe|veloute|veloutee|veloute|velouté|mousse|salade)\s+d(?:e|')\s+(.+)$",
+            p,
+            _re.IGNORECASE,
+        )
+
+        if base_m:
+            p = _normaliser_token(base_m.group(1))
+
+        # Retirer compléments de style "à la ...", "au ...", "aux ..."
+
+        p = _re.sub(r"\s+a\s+l[ae]\s+.+$", "", p, flags=_re.IGNORECASE)
+
+        p = _re.sub(r"\s+aux?\s+.+$", "", p, flags=_re.IGNORECASE)
+
+        # Préserver quelques expressions multi-mots avant split
+
+        p = p.replace("pommes de terre", "pommes_de_terre")
+
+        p = p.replace("fromage blanc", "fromage_blanc")
+
+        p = p.replace("petit suisse", "petit_suisse")
+
+        p = p.replace("petit-suisse", "petit_suisse")
+
+        tokens = [
+            _normaliser_token(t.replace("_", " "))
+            for t in _re.split(r"\s*[,+/]\s*|\s+et\s+|\s+-\s+|\s+", p)
+            if t.strip()
+        ]
+
+        # Recombiner en bigrammes pour détecter des ingrédients composés
+
+        extraits: list[str] = []
+
+        i = 0
+
+        while i < len(tokens):
+            if i + 1 < len(tokens):
+                bigram = f"{tokens[i]} {tokens[i + 1]}".strip()
+
+                if _token_est_ingredient(bigram):
+                    extraits.append(bigram)
+
+                    i += 2
+
+                    continue
+
+            if _token_est_ingredient(tokens[i]):
+                extraits.append(tokens[i])
+
+            i += 1
+
+        # Cas "avocat crevettes" : 2 ingrédients collés sans séparateur
+
+        if not extraits and len(tokens) == 2:
+            if _token_est_ingredient(tokens[0]) and _token_est_ingredient(tokens[1]):
+                extraits = [tokens[0], tokens[1]]
+
+        return [e for e in extraits if e and len(e) >= 3]
+
+    # Séparer sur +, / et " et "
+
+    parts = _re.split(r"\s*[+/]\s*|\s+et\s+", texte, flags=_re.IGNORECASE)
+
+    for part in parts:
+        part = part.strip()
+
+        if not part or len(part) < 2:
+            continue
+
+        # Extraire quantité : ×2, x2, *2
+
+        qty = 1.0
+
+        qty_match = _re.search(r"[\u00d7x\*](\d+)", part, _re.IGNORECASE)
+
+        if qty_match:
+            qty = float(qty_match.group(1))
+
+            part = _re.sub(r"\s*[\u00d7x\*]\d+", "", part).strip()
+
+        # "purée de X" → "X"
+
+        puree_m = _re.match(r"pur[\u00e9eée][e]?\s+d[e'u]?\s*(.+)", part, _re.IGNORECASE)
+
+        if puree_m:
+            results.append((_normaliser_ingredient(puree_m.group(1).strip()), qty, source_label))
+
+            continue
+
+        # "compote X-Y maison" ou "compote X maison" → ingrédients fruit(s) + sucre
+
+        compote_m = _re.match(r"compote\s+(.+?)\s*(?:maison)?\s*$", part, _re.IGNORECASE)
+
+        if compote_m:
+            fruits_str = compote_m.group(1).strip()
+
+            # Retirer "maison" si présent dans les fruits
+
+            fruits_str = _re.sub(r"\bmaison\b", "", fruits_str, flags=_re.IGNORECASE).strip()
+
+            # Fruits séparés par - ou espace
+
+            fruits = [
+                f.strip()
+                for f in _re.split(r"[-\s]", fruits_str)
+                if f.strip() and len(f.strip()) > 2
+            ]
+
+            if fruits:
+                for fruit in fruits:
+                    results.append((fruit.lower(), qty, source_label))
+
+            else:
+                results.append(("compote", qty, source_label))
+
+            continue
+
+        # "fromage blanc sucré à la compote" → fromage blanc + compote
+
+        if "sucré" in part.lower() and "compote" in part.lower():
+            base = _re.sub(r"sucr[\u00e9e].+", "", part, flags=_re.IGNORECASE).strip()
+
+            if base:
+                results.append((_normaliser_ingredient(base), qty, source_label))
+
+            results.append(("compote", qty, source_label))
+
+            continue
+
+        # "X au/aux Y" (ex: "Clafoutis aux cerises") -> extraire l'ingrédient Y
+
+        # pour éviter d'ajouter un nom de plat complet dans la liste de courses.
+
+        au_m = _re.match(r".+\s+aux?\s+(.+)", part, _re.IGNORECASE)
+
+        if au_m:
+            y = au_m.group(1).strip()
+
+            # Retirer qualificatifs courants non-ingrédients
+
+            y = _re.sub(r"\b(maison|express|facile|rapide)\b", "", y, flags=_re.IGNORECASE).strip()
+
+            # Gérer "cerises" ou "pommes de terre"
+
+            if y:
+                results.append((_normaliser_ingredient(y), qty, source_label))
+
+                continue
+
+        # "X nature" / "X naturé" → garder tel quel (ex: yaourt nature)
+
+        nom_clean = _normaliser_ingredient(part)
+
+        if nom_clean:
+            # Dernier recours: si c'est un nom de plat, extraire des ingrédients pertinents.
+
+            extraits_plat = _extraire_depuis_nom_plat(nom_clean)
+
+            if extraits_plat:
+                for item in extraits_plat:
+                    results.append((item, qty, source_label))
+
+            else:
+                results.append((nom_clean, qty, source_label))
+
+    return results if results else [(_normaliser_ingredient(texte.strip()), 1.0, source_label)]
+
+
+from sqlalchemy.orm import Session, selectinload
+
+from src.core.ai import obtenir_client_ia
+from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.core.models import (
+    ArticleCourses,
+    ArticleInventaire,
+    Ingredient,
+    ListeCourses,
+    Planning,
+    Recette,
+    RecetteIngredient,
+    Repas,
+)
+from src.services.core.base import BaseAIService
+from src.services.core.event_bus_mixin import emettre_evenement_simple
+
+from .constantes import MAPPING_RAYONS, PRIORITES
+from .types import ArticleCourse, ListeCoursesIntelligente, SuggestionSubstitution
+
+logger = logging.getLogger(__name__)
+
+
+class ServiceCoursesIntelligentes(BaseAIService):
+    """Service pour generer des listes de courses intelligentes depuis le planning."""
+
+    def __init__(self):
+
+        client = obtenir_client_ia()
+
+        if client is None:
+            raise RuntimeError("Client IA non disponible")
+
+        super().__init__(
+            client=client,
+            cache_prefix="courses_intel",
+            default_ttl=1800,
+            service_name="courses_intelligentes",
+        )
+
+    def _determiner_rayon(self, nom_ingredient: str) -> str:
+        """Determine le rayon d'un ingredient."""
+
+        nom_lower = nom_ingredient.lower()
+
+        for mot_cle, rayon in MAPPING_RAYONS.items():
+            if mot_cle in nom_lower:
+                return rayon
+
+        return "Autre"
+
+    def _determiner_priorite(self, rayon: str) -> int:
+        """Determine la priorite basee sur le rayon."""
+
+        return PRIORITES.get(rayon, 3)
+
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
+    def obtenir_planning_actif(self, db: Session | None = None) -> Planning | None:
+        """Recupere le planning actif le plus récent avec ses repas et recettes."""
+
+        planning = (
+            db.query(Planning)
+            .options(
+                selectinload(Planning.repas)
+                .selectinload(Repas.recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+                # Charger aussi les recettes liées aux entrées/desserts
+                selectinload(Planning.repas)
+                .selectinload(Repas.entree_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+                selectinload(Planning.repas)
+                .selectinload(Repas.dessert_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+                selectinload(Planning.repas)
+                .selectinload(Repas.dessert_jules_recette)
+                .selectinload(Recette.ingredients)
+                .selectinload(RecetteIngredient.ingredient),
+            )
+            .filter(Planning.statut == "actif")
+            .order_by(Planning.semaine_debut.desc())
+            .first()
+        )
+
+        return planning
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def obtenir_stock_actuel(self, db: Session | None = None) -> dict[str, float]:
+        """Recupere le stock actuel sous forme de dictionnaire {nom: quantite}."""
+
+        stocks = (
+            db.query(ArticleInventaire)
+            .options(selectinload(ArticleInventaire.ingredient))
+            .filter(ArticleInventaire.quantite > 0)
+            .all()
+        )
+
+        return {
+            stock.ingredient.nom.lower(): stock.quantite for stock in stocks if stock.ingredient
+        }
+
+    def extraire_ingredients_planning(self, planning: Planning) -> list[ArticleCourse]:
+        """Extrait tous les ingredients des recettes du planning (plat + entrée + desserts)."""
+
+        from typing import Any
+
+        # Agregateur: {nom_ingredient: {quantite, unite, recettes}}
+
+        agregat: dict[str, dict[str, Any]] = defaultdict(
+            lambda: {"quantite": 0.0, "unite": "", "recettes": set()}
+        )
+
+        recettes_traitees: set[str] = set()
+
+        def _ajouter_ingredients_recette(recette) -> None:
+            """Ajoute les ingrédients d'une recette à l'agrégat."""
+
+            if not recette or recette.nom in recettes_traitees:
+                return
+
+            recettes_traitees.add(recette.nom)
+
+            for ing_recette in recette.ingredients:
+                if not ing_recette.ingredient:
+                    continue
+
+                nom = _normaliser_ingredient(ing_recette.ingredient.nom)
+
+                agregat[nom]["quantite"] += float(ing_recette.quantite or 1)
+
+                if not agregat[nom]["unite"]:
+                    agregat[nom]["unite"] = ing_recette.unite or ""
+
+                agregat[nom]["recettes"].add(recette.nom)
+
+        for repas in planning.repas:
+            # Sauter les restes (repas préparés à partir d'un repas précédent)
+
+            if repas.est_reste:
+                continue
+
+            # Sauter les recettes réchauffées (nom commence par "Réchauffé:")
+
+            recette = repas.recette
+
+            if recette and recette.nom and recette.nom.lower().startswith("réchauffé"):
+                continue
+
+            # Plat principal
+
+            _ajouter_ingredients_recette(recette)
+
+            # Entrée (si liée à une recette)
+
+            _ajouter_ingredients_recette(getattr(repas, "entree_recette", None))
+
+            # Dessert (si lié à une recette)
+
+            _ajouter_ingredients_recette(getattr(repas, "dessert_recette", None))
+
+            # Dessert Jules (si lié à une recette)
+
+            _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette", None))
+
+            # Entrées/desserts texte (non liées à une recette) → articles directs (parsés)
+
+            # Source volontairement neutre (date + type repas) pour éviter un lien trompeur
+
+            # avec le plat principal.
+
+            _type_repas_ui = {
+                "déjeuner": "midi",
+                "dejeuner": "midi",
+                "dîner": "soir",
+                "diner": "soir",
+                "goûter": "goûter",
+                "gouter": "goûter",
+            }.get((repas.type_repas or "").lower(), repas.type_repas)
+
+            for champ, label in [
+                ("entree", "Entrée"),
+                ("dessert", "Dessert"),
+                ("dessert_jules", "Dessert Jules"),
+            ]:
+                texte = getattr(repas, champ, None)
+
+                fk = (
+                    getattr(repas, f"{champ}_recette_id", None)
+                    if champ != "dessert_jules"
+                    else getattr(repas, "dessert_jules_recette_id", None)
+                )
+
+                if texte and not fk:
+                    source_label = (
+                        f"{label.lower()} {_type_repas_ui} {repas.date_repas.strftime('%d/%m')}"
+                    )
+
+                    for nom_item, qty, src in _parser_texte_courses(texte, source_label):
+                        if not nom_item:
+                            continue
+
+                        # Sécurité bébé: le miel ne doit pas apparaître depuis dessert_jules en texte libre.
+
+                        if champ == "dessert_jules" and nom_item == "miel":
+                            logger.warning("Ingredient ignore (dessert_jules): miel")
+
+                            continue
+
+                        agregat[nom_item]["quantite"] += qty
+
+                        if not agregat[nom_item]["unite"]:
+                            agregat[nom_item]["unite"] = "unité"
+
+                        agregat[nom_item]["recettes"].add(src)
+
+        # Construire la liste d'articles
+
+        articles: list[ArticleCourse] = []
+
+        for nom, data in agregat.items():
+            rayon = self._determiner_rayon(nom)
+
+            recettes_set: set[str] = data["recettes"]
+
+            articles.append(
+                ArticleCourse(
+                    nom=nom.capitalize(),
+                    quantite=float(data["quantite"]),
+                    unite=str(data["unite"]),
+                    rayon=rayon,
+                    recettes_source=list(recettes_set),
+                    priorite=self._determiner_priorite(rayon),
+                )
+            )
+
+        return articles
+
+    def comparer_avec_stock(
+        self, articles: list[ArticleCourse], stock: dict[str, float]
+    ) -> list[ArticleCourse]:
+        """Compare les besoins avec le stock et calcule ce qu'il faut acheter."""
+
+        articles_ajustes: list[ArticleCourse] = []
+
+        for article in articles:
+            nom_lower = article.nom.lower()
+
+            en_stock = stock.get(nom_lower, 0.0)
+
+            article.en_stock = en_stock
+
+            article.a_acheter = max(0.0, article.quantite - en_stock)
+
+            # Ne garder que les articles a acheter
+
+            if article.a_acheter > 0:
+                articles_ajustes.append(article)
+
+        return articles_ajustes
+
+    def generer_liste_courses(self) -> ListeCoursesIntelligente:
+        """
+
+        Genere une liste de courses complete depuis le planning actif.
+
+
+
+        Returns:
+
+            ListeCoursesIntelligente avec les articles optimises
+
+        """
+
+        alertes: list[str] = []
+
+        # 1. Recuperer planning actif
+
+        planning = self.obtenir_planning_actif()
+
+        if not planning:
+            return ListeCoursesIntelligente(
+                alertes=["Aucun planning actif trouve. Creez d'abord un planning de repas."]
+            )
+
+        # 2. Extraire les ingredients
+
+        articles = self.extraire_ingredients_planning(planning)
+
+        if not articles:
+            return ListeCoursesIntelligente(
+                alertes=["Aucune recette avec ingredients dans le planning."]
+            )
+
+        # 3. Comparer avec stock
+
+        stock = self.obtenir_stock_actuel()
+
+        articles_a_acheter = self.comparer_avec_stock(articles, stock)
+
+        # 4. Trier par rayon puis priorite
+
+        articles_a_acheter.sort(key=lambda a: (a.rayon, a.priorite, a.nom))
+
+        # 5. Recuperer les recettes couvertes
+
+        recettes_couvertes: set[str] = set()
+
+        for article in articles:
+            recettes_couvertes.update(article.recettes_source)
+
+        # 6. Generer alertes
+
+        if len(articles_a_acheter) == 0:
+            alertes.append("Tous les ingredients sont en stock!")
+
+        elif len(stock) == 0:
+            alertes.append("Inventaire vide - liste complete generee")
+
+        return ListeCoursesIntelligente(
+            articles=articles_a_acheter,
+            total_articles=len(articles_a_acheter),
+            recettes_couvertes=list(recettes_couvertes),
+            alertes=alertes,
+        )
+
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def ajouter_a_liste_courses(
+        self, articles: list[ArticleCourse], db: Session | None = None
+    ) -> list[int]:
+        """
+
+        Ajoute les articles generes a la liste de courses.
+
+
+
+        Args:
+
+            articles: Articles a ajouter
+
+            db: Session DB
+
+
+
+        Returns:
+
+            Liste des IDs crees
+
+        """
+
+        ids_crees: list[int] = []
+
+        # 0. Récupérer ou créer la liste de courses active
+
+        # On suppose qu'il y a une liste active "principale"
+
+        liste_active = (
+            db.query(ListeCourses)
+            .filter(ListeCourses.archivee == False)
+            .order_by(ListeCourses.cree_le.desc())
+            .first()
+        )
+
+        if not liste_active:
+            liste_active = ListeCourses(nom="Ma liste de courses")
+
+            db.add(liste_active)
+
+            db.flush()
+
+        liste_id = liste_active.id
+
+        for article in articles:
+            # Chercher ou creer l'ingredient (matching exact insensible à la casse)
+
+            ingredient = db.query(Ingredient).filter(Ingredient.nom.ilike(article.nom)).first()
+
+            if not ingredient:
+                ingredient = Ingredient(
+                    nom=article.nom, categorie=article.rayon, unite=article.unite or "pcs"
+                )
+
+                db.add(ingredient)
+
+                db.flush()
+
+            elif article.unite and article.unite not in ("pcs", "piece", "pièce", ""):
+                # Mettre à jour l'unité de l'ingrédient si on a une unité plus précise
+
+                if ingredient.unite in (None, "", "pcs", "piece", "pièce"):
+                    ingredient.unite = article.unite
+
+            # Verifier si deja dans la liste de courses
+
+            existant = (
+                db.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste_id,
+                    ArticleCourses.ingredient_id == ingredient.id,
+                    ArticleCourses.achete == False,
+                )
+                .first()
+            )
+
+            if existant:
+                # Mettre a jour quantite
+
+                existant.quantite_necessaire = (
+                    existant.quantite_necessaire or 0
+                ) + article.a_acheter
+
+                notes_actuelles = existant.notes or ""
+
+                if "planning" not in notes_actuelles:
+                    existant.notes = f"{notes_actuelles} + planning".strip()
+
+                ids_crees.append(existant.id)
+
+            else:
+                # Creer nouvel article courses
+
+                item = ArticleCourses(
+                    liste_id=liste_id,
+                    ingredient_id=ingredient.id,
+                    quantite_necessaire=article.a_acheter,
+                    priorite={1: "haute", 2: "moyenne", 3: "basse"}.get(
+                        article.priorite, "moyenne"
+                    ),
+                    rayon_magasin=article.rayon,
+                    notes=(
+                        "Depuis planning: "
+                        + ", ".join(
+                            [
+                                s.replace("Depuis planning:", "").strip()
+                                for s in article.recettes_source[:2]
+                            ]
+                        )
+                    ),
+                    achete=False,
+                    suggere_par_ia=True,
+                )
+
+                db.add(item)
+
+                db.flush()
+
+                ids_crees.append(item.id)
+
+        db.commit()
+
+        emettre_evenement_simple(
+            "courses.modifiees",
+            {"nb_articles": len(ids_crees), "action": "articles_ajoutes", "source": "planning"},
+            source="courses_suggestion",
+        )
+
+        logger.info(f"{len(ids_crees)} articles ajoutes a la liste de courses")
+
+        return ids_crees
+
+    async def suggerer_substitutions(
+        self, articles: list[ArticleCourse]
+    ) -> list[SuggestionSubstitution]:
+        """
+
+        Suggere des substitutions economiques ou de saison.
+
+
+
+        Args:
+
+            articles: Liste d'articles
+
+
+
+        Returns:
+
+            Suggestions de substitutions
+
+        """
+
+        # Filtrer articles couteux ou hors saison
+
+        articles_a_evaluer = [a for a in articles if a.priorite <= 2][:5]
+
+        if not articles_a_evaluer:
+            return []
+
+        noms = ", ".join([a.nom for a in articles_a_evaluer])
+
+        prompt = f"""Pour ces ingredients de liste de courses: {noms}
+
+
+
+Suggere des substitutions economiques ou de saison (max 3).
+
+Format JSON:
+
+[
+
+    {{"ingredient_original": "...", "suggestion": "...", "raison": "..."}}
+
+]
+
+
+
+Criteres:
+
+- Moins cher en ce moment
+
+- De saison (nous sommes en {date.today().strftime("%B")})
+
+- Equivalent nutritionnel
+
+
+
+Reponds UNIQUEMENT avec le JSON."""
+
+        try:
+            response = await self.client.appeler(prompt)
+
+            import json
+
+            data = json.loads(response.strip().replace("```json", "").replace("```", ""))
+
+            return [SuggestionSubstitution(**item) for item in data]
+
+        except Exception as e:
+            logger.error(f"Erreur suggestions: {e}")
+
+            return []
+
+
+# ═══════════════════════════════════════════════════════════
+
+# FACTORY FUNCTION
+
+# ═══════════════════════════════════════════════════════════
+
+
+from src.services.core.registry import service_factory
+
+
+@service_factory("courses_intelligentes", tags={"cuisine", "ia"})
+def obtenir_service_courses_intelligentes() -> ServiceCoursesIntelligentes:
+    """Factory pour le service courses intelligentes (thread-safe via registre)."""
+
+    return ServiceCoursesIntelligentes()
+
+
+def obtenir_smart_shopping_service() -> ServiceCoursesIntelligentes:
+    """Factory for smart shopping service (English alias)."""
+
+    return obtenir_service_courses_intelligentes()
+
+
+__all__ = [
+    "ServiceCoursesIntelligentes",
+    "obtenir_service_courses_intelligentes",
+    "obtenir_smart_shopping_service",
+]
+
+
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+
+obtenir_smart_shopping_service = obtenir_smart_shopping_service  # alias rétrocompatibilité

@@ -103,6 +103,10 @@ export interface CreerRepasPlanningDTO {
   recette_id?: number;
   notes?: string;
   portions?: number;
+  entree?: string;
+  entree_recette_id?: number;
+  dessert?: string;
+  dessert_recette_id?: number;
   legumes?: string;
   legumes_recette_id?: number;
   feculents?: string;
