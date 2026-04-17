@@ -182,6 +182,7 @@ class ClientIA(VisionMixin, StreamingMixin):
                     if tentative < max_tentatives - 1:
                         await asyncio.sleep(delai_effectif)
                         continue
+                    retry_hint = retry_after if retry_after > 0 else 60
                     raise ErreurLimiteDebit(
                         f"Erreur API Mistral: {str(e)}",
                         message_utilisateur=(
@@ -192,6 +193,7 @@ class ClientIA(VisionMixin, StreamingMixin):
                                 else "Réessayez dans quelques secondes."
                             )
                         ),
+                        retry_after=retry_hint,
                     ) from e
                 if tentative == max_tentatives - 1:
                     logger.error(f"[ERROR] Erreur API après {max_tentatives} tentatives: {e}")

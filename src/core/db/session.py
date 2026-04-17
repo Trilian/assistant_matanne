@@ -124,7 +124,11 @@ def obtenir_contexte_db() -> Generator[Session, None, None]:
 
     except Exception as e:
         db.rollback()
-        logger.error("[%s] Erreur inattendue: %s", cid, e)
+        # Les ExceptionApp sont des exceptions métier connues — déjà loggées en amont
+        from src.core.exceptions import ExceptionApp
+
+        if not isinstance(e, ExceptionApp):
+            logger.error("[%s] Erreur inattendue: %s", cid, e)
         raise
 
     finally:

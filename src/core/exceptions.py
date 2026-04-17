@@ -151,9 +151,21 @@ class ErreurLimiteDebit(ExceptionApp):
     - Nombre d'appels restants
     - Heure de reset
     - Période (horaire/quotidienne)
+    - Délai de retry en secondes (retry_after)
     """
 
     code_erreur = "RATE_LIMIT_EXCEEDED"
+
+    def __init__(
+        self,
+        message: str,
+        details: dict[str, Any] | None = None,
+        message_utilisateur: str | None = None,
+        code_erreur: str | None = None,
+        retry_after: int = 60,
+    ) -> None:
+        super().__init__(message, details, message_utilisateur, code_erreur)
+        self.retry_after: int = retry_after
 
 
 class ErreurServiceExterne(ExceptionApp):

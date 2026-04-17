@@ -1385,7 +1385,12 @@ async def generer_planning_ia(
                 tech_msg,
             )
             logger.warning("[planning] Détail technique: %s", tech_msg)
-            raise HTTPException(status_code=503, detail=user_msg) from e
+            headers: dict[str, str] = {}
+            from src.core.exceptions import ErreurLimiteDebit
+
+            if isinstance(e, ErreurLimiteDebit):
+                headers["Retry-After"] = str(getattr(e, "retry_after", 60))
+            raise HTTPException(status_code=503, detail=user_msg, headers=headers or None) from e
         except Exception as e:
             logger.error(
                 "[planning] Erreur inattendue depuis generer_planning_ia: %s", e, exc_info=True
