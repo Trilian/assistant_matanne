@@ -154,9 +154,16 @@ export function utiliserWebSocket({
       return
     }
 
-    // Fermer l'ancienne connexion
+    // Fermer l'ancienne connexion — mettre les callbacks à null d'abord pour éviter
+    // que onclose planifie une reconnexion fantôme pendant le remplacement du WS.
     if (wsRef.current) {
-      wsRef.current.close()
+      const oldWs = wsRef.current
+      wsRef.current = null
+      oldWs.onopen = null
+      oldWs.onmessage = null
+      oldWs.onerror = null
+      oldWs.onclose = null
+      oldWs.close()
     }
 
     const ws = new window.WebSocket(url)

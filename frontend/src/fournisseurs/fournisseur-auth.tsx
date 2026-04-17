@@ -7,7 +7,7 @@
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
-import { clientApi } from "@/bibliotheque/api/client";
+
 
 const ROUTES_PUBLIQUES = ["/connexion", "/inscription", "/auth-callback"];
 
@@ -20,7 +20,8 @@ function utiliserKeepaliveRailway(estConnecte: boolean) {
     if (!estConnecte) return;
 
     const ping = () => {
-      clientApi.get("/health", { timeout: 5000 }).catch(() => {/* silencieux */});
+      // fetch direct sans le préfixe /api/v1 de clientApi pour atteindre /health correctement.
+      fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/health`).catch(() => {/* silencieux */});
     };
 
     // Premier ping immédiat, puis toutes les 4 minutes

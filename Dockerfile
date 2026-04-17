@@ -6,9 +6,10 @@
 
 FROM python:3.13-slim AS base
 
-# Empêcher la création de fichiers .pyc et forcer stdout non-bufferisé
+# Empêcher la création de fichiers .pyc et forcer stdout non-bufferisé + UTF-8 partout
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONUTF8=1
 
 WORKDIR /app
 
