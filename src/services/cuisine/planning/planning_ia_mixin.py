@@ -28,6 +28,33 @@ from .types import JourPlanning, ParametresEquilibre, RecetteEnrichieIA
 
 logger = logging.getLogger(__name__)
 
+# Constituants structurels implicites : mappe un motif (sous-chaîne du nom du plat) vers
+# les féculents redondants à annuler. Utilisé par _nettoyer_feculents_constitutifs.
+# Ex : « Gratin dauphinois » → ne pas mettre « Pommes de terre » en féculent.
+_FECULENTS_CONSTITUTIFS_PAR_PLAT: list[tuple[str, frozenset[str]]] = [
+    # Plats à base de pommes de terre
+    ("gratin dauphinois", frozenset({"pomme de terre", "pommes de terre", "patate", "patates"})),
+    ("tartiflette",       frozenset({"pomme de terre", "pommes de terre", "patate"})),
+    ("hachis parmentier", frozenset({"pomme de terre", "pommes de terre", "purée", "puree"})),
+    ("gnocchi",           frozenset({"gnocchi", "pomme de terre", "pommes de terre"})),
+    # Plats à base de riz
+    ("risotto",  frozenset({"riz", "risotto"})),
+    ("paella",   frozenset({"riz", "riz à la paella"})),
+    # Plats à base de pâtes
+    ("lasagne",  frozenset({"lasagne", "lasagnes", "pâtes", "pates"})),
+    # Plats à base de pâte brisée / feuilletée
+    ("quiche",       frozenset({"pâte brisée", "pate brisee", "pâte feuilletée", "pate feuilletee", "pâte", "pate"})),
+    ("tarte salée",  frozenset({"pâte brisée", "pate brisee", "pâte feuilletée", "pate feuilletee", "pâte", "pate"})),
+    ("tourte",       frozenset({"pâte brisée", "pate brisee", "pâte feuilletée", "pate feuilletee", "pâte", "pate"})),
+    ("flamiche",     frozenset({"pâte brisée", "pate brisee", "pâte feuilletée", "pate feuilletee"})),
+    # Plats à base de polenta / maïs
+    ("polenta", frozenset({"polenta", "maïs", "mais"})),
+    # Légumineuses en plat principal : féculent + protéine simultanément
+    ("lentille",    frozenset({"lentille", "lentilles"})),
+    ("pois chiche", frozenset({"pois chiche", "pois chiches"})),
+    ("dal",         frozenset({"dal", "dahl"})),
+]
+
 
 class PlanningIAGenerationMixin:
     """
@@ -67,6 +94,41 @@ class PlanningIAGenerationMixin:
 
         recette = db.query(Recette).filter(func.lower(Recette.nom) == nom.lower()).first()
         return recette.id if recette else None
+
+    @staticmethod
+    def _nettoyer_feculents_constitutifs(valeur: str | None, nom_recette: str) -> str | None:
+        """Nullifie un féculent qui est le constituant structurel du plat.
+
+        Complète `_nettoyer_si_inclus_dans_nom` qui ne couvre que les sous-chaînes
+        littérales. Ici on gère les cas sémantiques : « Pommes de terre » pour un
+        « Gratin dauphinois », « Pâte brisée » pour une « Quiche lorraine », etc.
+        """
+        if not valeur or not nom_recette:
+            return valeur
+        nom_lower = nom_recette.lower()
+        valeur_lower = valeur.lower().strip()
+        for pattern, feculents_redondants in _FECULENTS_CONSTITUTIFS_PAR_PLAT:
+            if pattern in nom_lower and valeur_lower in feculents_redondants:
+                logger.debug(
+                    "[planning] Féculent constitutif '%s' supprimé de '%s' (pattern '%s')",
+                    valeur,
+                    nom_recette,
+                    pattern,
+                )
+                return None
+        return valeur
+
+    @staticmethod
+    def _est_plat_propre_feculent(nom_recette: str) -> bool:
+        """True si le plat est lui-même son propre féculent (quiche, gratin, risotto…).
+
+        Utilisé pour ignorer le fallback \"Riz vapeur\" qui serait incohérent dans ce cas :
+        si l'IA a correctement laissé feculents=null per Rule 17, on ne doit pas l'écraser.
+        """
+        if not nom_recette:
+            return False
+        nom_lower = nom_recette.lower()
+        return any(pattern in nom_lower for pattern, _ in _FECULENTS_CONSTITUTIFS_PAR_PLAT)
 
     @staticmethod
     def _nettoyer_si_inclus_dans_nom(valeur: str | None, nom_recette: str) -> str | None:
@@ -397,17 +459,28 @@ RULES:
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
 7. PROTEINS — strictly follow the OMS balance section above: {nb_poisson_blanc}x poisson blanc, {nb_poisson_gras}x poisson gras, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. Spread each protein type throughout the week, never two consecutive identical proteins.
-8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. CRITICAL: dejeuner_reste_source MUST reference ONLY a PREVIOUS day — never a future day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly.
+8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. CRITICAL: dejeuner_reste_source MUST reference ONLY a PREVIOUS day — never a future day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste should almost NEVER be true — dinners are fresh preparations; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source).
 9. null is valid ONLY for entree, laitage, dessert, reste_source, proteine_accompagnement. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): copy legumes, feculents AND proteine_accompagnement from the original dish — do NOT return null for legumes/feculents. Example: if the source was 'Bœuf bourguignon' with legumes='Poêlée de légumes' and feculents='Pâtes', the reste must also have legumes='Poêlée de légumes' and feculents='Pâtes'. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null).
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
-12. PNNS4 ASSIETTE ÉQUILIBRÉE — for every dejeuner and diner that is NOT a reste, the meal MUST include BOTH:
+12. PNNS4 ASSIETTE ÉQUILIBRÉE — for every dejeuner and diner that is NOT a reste AND NOT a dish-as-starch (see Rule 17), the meal MUST include BOTH:
     a) legumes field: ≥ half the plate (haricots verts, courgettes sautées, brocoli vapeur, carottes, épinards, poêlée de légumes...) — NEVER null
-    b) feculents field: ~1/4 of the plate (riz, pâtes, pommes de terre, semoule, quinoa, lentilles...) — NEVER null
-    If the PLAT PRINCIPAL is itself a starch or veg (gratin dauphinois, risotto, pasta), use feculents/legumes to name the main component and add the protein in diner_legumes or a note. NEVER leave feculents or legumes null for non-reste dejeuner/diner.
-13. NO DISH REPETITION — Never plan the exact same main dish (dejeuner or diner) more than once across the 7 days. Vary proteins AND preparations throughout the week.
-14. PROTEIN MANDATORY — every dejeuner and diner MUST contain a protein source. If the main dish has NO visible protein in its name (e.g. 'Gratin dauphinois', 'Tarte aux poireaux', 'Risotto', 'Ratatouille'), you MUST fill the proteine_accompagnement field with the protein served alongside (e.g. 'Œufs cocotte', 'Blanc de poulet grillé', 'Saumon poché', 'Fromage de chèvre'). For restes, copy proteine_accompagnement from the source dish. Never plan a meal with zero protein across legumes, feculents, dejeuner/diner name, AND proteine_accompagnement.
-15. FORBIDDEN INGREDIENTS — Never use any ingredient listed in "INGRÉDIENTS INTERDITS" in any field (dejeuner, diner, entree, legumes, feculents, dessert). Choose alternatives automatically."""
+    b) feculents field: ~1/4 of the plate (riz, pâtes, pommes de terre, semoule, quinoa...) — NEVER null
+    EXCEPTION: for dishes that ARE their own starch (see Rule 17), set feculents=null and legumes=side vegetable. NEVER leave legumes null except when the vegetable is literally in the dish name (see Rule 9).
+13. NO DISH REPETITION — Never plan the exact same main dish (dejeuner or diner) more than once across the 7 days. This includes CONCEPTUALLY IDENTICAL dishes with slightly different names: 'Rôti de poulet aux herbes' and 'Poulet rôti aux légumes' are BOTH roasted chicken — only ONE per week. 'Filet de saumon grillé' and 'Pavé de saumon' are BOTH salmon — only ONE per week. Rule: same protein + same cooking method = forbidden repetition. Vary BOTH the protein source AND the cooking technique throughout the week.
+14. PROTEIN MANDATORY — every dejeuner and diner MUST contain a protein source. If the main dish has NO visible protein in its name, you MUST fill proteine_accompagnement. MANDATORY EXAMPLES: 'Gratin dauphinois' → proteine_accompagnement='Jambon blanc' (NEVER null); 'Tarte aux poireaux' → 'Lardons' or 'Saumon poché'; 'Risotto aux légumes' → 'Crevettes sautées' or 'Blanc de poulet'; 'Ratatouille' → 'Blanc de poulet grillé'; 'Soupe de légumes' → 'Pain complet fromage' or 'Œuf dur'; 'Poêlée de légumes' → 'Blanc de dinde'. Rule: a dish with no animal or legume protein keyword in its name ALWAYS needs proteine_accompagnement. For restes, copy proteine_accompagnement from the source dish. Never plan a meal with zero protein across all fields.
+15. ABSOLUTE FORBIDDEN INGREDIENTS — Ingredients listed in "INGRÉDIENTS INTERDITS" are STRICTLY BANNED in EVERY field without ANY exception: dejeuner, diner, entree, legumes, feculents, dessert, petit_dejeuner, laitage, gouter_fruit, gouter_gateau, proteine_accompagnement, and ALL other fields. The ban EXTENDS to all preparations containing that ingredient (if 'concombre' is forbidden → 'concombre à la crème', 'salade de concombre', 'tzatziki' are ALL forbidden — same for champignons, marrons, etc.). There is NO exception. This is the most critical rule.
+16. ENTREE NEVER DUPLICATES LEGUMES — dejeuner_entree and dejeuner_legumes (and their diner_ equivalents) MUST contain different dishes or vegetables. If entree is 'Salade de carottes', legumes MUST be a different vegetable ('Haricots verts', 'Brocoli vapeur'...). Having the same or equivalent value in both fields is FORBIDDEN.
+17. DISH-AS-STARCH: feculents=null WHEN THE DISH IS ITS OWN STARCH — Never list as féculent an ingredient that is the structural base of the dish itself. Set feculents=null in these cases:
+    - 'Quiche lorraine' / 'Quiche aux poireaux': feculents=null (pâte brisée IS the dish — FORBIDDEN: feculents='Pâte brisée')
+    - 'Tarte salée': feculents=null (same reason)
+    - 'Gratin dauphinois': feculents=null (pommes de terre ARE the dish — FORBIDDEN: feculents='Pommes de terre')
+    - 'Tartiflette' / 'Hachis parmentier': feculents=null (pommes de terre = dish base)
+    - 'Risotto': feculents=null (riz IS the risotto — FORBIDDEN: feculents='Riz')
+    - 'Lasagnes': feculents=null (pasta IS the structure)
+    - 'Lentilles à la tomate' / 'Dal' / 'Pois chiches': feculents=null (légumineuse = féculent+protéine combined)
+    In ALL these cases: legumes MUST be filled with a vegetable side (e.g. 'Salade verte', 'Haricots verts', 'Épinards').
+    PROTEIN CHECK: quiche, tarte salée, gratin, risotto, lasagnes have no obvious standalone protein → ALWAYS fill proteine_accompagnement (see Rule 14 examples)."""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -543,6 +616,20 @@ RULES:
                             setattr(jour_data, _source_attr, None)
                             break
 
+            # Guard complémentaire : est_reste=True mais reste_source=None.
+            # L'IA peut omettre la source (le check de cohérence sur le nom de jour
+            # ne se déclenche que si _champ_source est non-null).
+            for _flag_attr, _source_attr in [
+                ("dejeuner_est_reste", "dejeuner_reste_source"),
+                ("diner_est_reste", "diner_reste_source"),
+            ]:
+                if getattr(jour_data, _flag_attr) and not getattr(jour_data, _source_attr):
+                    logger.warning(
+                        f"⚠️ {_flag_attr}=True mais {_source_attr}=None pour {jour_data.jour} "
+                        f"— reste sans source identifiable → est_reste forcé à False."
+                    )
+                    setattr(jour_data, _flag_attr, False)
+
             # Légumes/féculents : pour les restes, héritage depuis le dîner de la veille ;
             # pour les repas normaux, fallback générique si l'IA n'a rien fourni.
             if not jour_data.dejeuner_legumes:
@@ -553,7 +640,9 @@ RULES:
             if not jour_data.dejeuner_feculents:
                 if jour_data.dejeuner_est_reste and idx > 0:
                     jour_data.dejeuner_feculents = planning_data[idx - 1].diner_feculents or "Riz vapeur"
-                else:
+                elif not self._est_plat_propre_feculent(jour_data.dejeuner):
+                    # Ne pas appliquer de fallback si le plat EST déjà son propre féculent
+                    # (quiche, gratin dauphinois, risotto…) — feculents=null est intentionnel
                     jour_data.dejeuner_feculents = "Riz vapeur"
             # Éviter la duplication quand légumes/féculents sont déjà dans le nom du plat
             # (ex : « Semoule » dans « Agneau rôti aux légumes de saison, semoule »)
@@ -561,6 +650,10 @@ RULES:
                 jour_data.dejeuner_legumes, jour_data.dejeuner
             )
             jour_data.dejeuner_feculents = self._nettoyer_si_inclus_dans_nom(
+                jour_data.dejeuner_feculents, jour_data.dejeuner
+            )
+            # Nettoyage sémantique : constituants structurels du plat (gratin→PDT, quiche→pâte…)
+            jour_data.dejeuner_feculents = self._nettoyer_feculents_constitutifs(
                 jour_data.dejeuner_feculents, jour_data.dejeuner
             )
 
@@ -645,13 +738,19 @@ RULES:
             if not jour_data.diner_feculents:
                 if jour_data.diner_est_reste and idx > 0:
                     jour_data.diner_feculents = planning_data[idx - 1].diner_feculents or "Riz vapeur"
-                else:
+                elif not self._est_plat_propre_feculent(jour_data.diner):
+                    # Ne pas appliquer de fallback si le plat EST déjà son propre féculent
+                    # (quiche, gratin dauphinois, risotto…) — feculents=null est intentionnel
                     jour_data.diner_feculents = "Riz vapeur"
             # Éviter la duplication quand légumes/féculents sont déjà dans le nom du plat
             jour_data.diner_legumes = self._nettoyer_si_inclus_dans_nom(
                 jour_data.diner_legumes, jour_data.diner
             )
             jour_data.diner_feculents = self._nettoyer_si_inclus_dans_nom(
+                jour_data.diner_feculents, jour_data.diner
+            )
+            # Nettoyage sémantique : constituants structurels du plat (gratin→PDT, quiche→pâte…)
+            jour_data.diner_feculents = self._nettoyer_feculents_constitutifs(
                 jour_data.diner_feculents, jour_data.diner
             )
 

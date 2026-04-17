@@ -187,6 +187,10 @@ _MOTS_FECULENTS_IMPLICITES: list[str] = [
     "frites", "hachis parmentier", "carbonara", "bolognaise",
     # Plats avec pâte brisée / feuilletée / à pizza (féculent intrinsèque)
     "quiche", "pizza", "tarte salée", "tourte", "flamiche",
+    # Légumineuses : féculent + protéine simultanément (PNNS4)
+    # Quand c'est le plat principal, le féculent est la légumineuse elle-même
+    "lentille", "pois chiche", "haricot rouge", "haricot blanc", "flageolet",
+    "fève", "feve", "dal", "dahl",
 ]
 
 # Mots-clés pour détecter du laitage implicitement présent dans le nom du plat
