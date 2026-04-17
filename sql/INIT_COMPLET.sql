@@ -397,6 +397,8 @@ CREATE TABLE IF NOT EXISTS preferences_utilisateurs (
     aliments_favoris JSONB NOT NULL DEFAULT '[]',
     aliments_exclus_jules JSONB NOT NULL DEFAULT '[]',
     poisson_par_semaine INTEGER NOT NULL DEFAULT 2,
+    nb_poisson_blanc INTEGER NOT NULL DEFAULT 1,
+    nb_poisson_gras INTEGER NOT NULL DEFAULT 1,
     vegetarien_par_semaine INTEGER NOT NULL DEFAULT 1,
     viande_rouge_max INTEGER NOT NULL DEFAULT 2,
     robots JSONB NOT NULL DEFAULT '[]',

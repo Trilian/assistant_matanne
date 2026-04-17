@@ -17,7 +17,8 @@ class PreferencesBase(BaseModel):
     temps_weekend: int = Field(60, ge=5, le=300, description="Minutes de préparation max weekend")
     aliments_exclus: list[str] = Field(default_factory=list)
     aliments_favoris: list[str] = Field(default_factory=list)
-    poisson_par_semaine: int = Field(2, ge=0, le=7)
+    nb_poisson_blanc: int = Field(1, ge=0, le=7)
+    nb_poisson_gras: int = Field(1, ge=0, le=7)
     vegetarien_par_semaine: int = Field(1, ge=0, le=7)
     viande_rouge_max: int = Field(2, ge=0, le=7)
     robots: list[str] = Field(default_factory=list)
@@ -33,7 +34,8 @@ class PreferencesBase(BaseModel):
                 "temps_weekend": 60,
                 "aliments_exclus": ["arachides"],
                 "aliments_favoris": ["courgettes", "saumon"],
-                "poisson_par_semaine": 2,
+                "nb_poisson_blanc": 1,
+                "nb_poisson_gras": 1,
                 "vegetarien_par_semaine": 1,
                 "viande_rouge_max": 2,
                 "robots": ["airfryer"],
@@ -57,7 +59,8 @@ class PreferencesPatch(BaseModel):
     temps_weekend: int | None = None
     aliments_exclus: list[str] | None = None
     aliments_favoris: list[str] | None = None
-    poisson_par_semaine: int | None = None
+    nb_poisson_blanc: int | None = None
+    nb_poisson_gras: int | None = None
     vegetarien_par_semaine: int | None = None
     viande_rouge_max: int | None = None
     robots: list[str] | None = None
@@ -80,7 +83,8 @@ class PreferencesResponse(PreferencesBase):
                 "temps_weekend": 60,
                 "aliments_exclus": ["arachides"],
                 "aliments_favoris": ["courgettes", "saumon"],
-                "poisson_par_semaine": 2,
+                "nb_poisson_blanc": 1,
+                "nb_poisson_gras": 1,
                 "vegetarien_par_semaine": 1,
                 "viande_rouge_max": 2,
                 "robots": ["airfryer"],

@@ -1357,23 +1357,24 @@ async def generer_planning_ia(
                     preferences_enrichies.setdefault("jules_present", prefs_db.jules_present)
                     preferences_enrichies.setdefault("jules_age_mois", prefs_db.jules_age_mois)
 
-                    # Dériver les jours poisson blanc / gras selon poisson_par_semaine
-                    if prefs_db.poisson_par_semaine >= 2:
-                        preferences_enrichies.setdefault("poisson_blanc_jour", "lundi")
-                        preferences_enrichies.setdefault("poisson_gras_jour", "jeudi")
-                    elif prefs_db.poisson_par_semaine == 1:
-                        preferences_enrichies.setdefault("poisson_blanc_jour", "lundi")
-                        preferences_enrichies.setdefault("poisson_gras_jour", None)
-                    else:
-                        preferences_enrichies.setdefault("poisson_blanc_jour", "lundi")
-                        preferences_enrichies.setdefault("poisson_gras_jour", "jeudi")
+                    # Nombre de repas poisson blanc / gras (champs directs)
+                    preferences_enrichies.setdefault("nb_poisson_blanc", prefs_db.nb_poisson_blanc)
+                    preferences_enrichies.setdefault("nb_poisson_gras", prefs_db.nb_poisson_gras)
 
-                    # Jour végétarien selon vegetarien_par_semaine
-                    preferences_enrichies.setdefault("vegetarien_jour", "mercredi")
+                    # Nombre de repas végétariens
+                    preferences_enrichies.setdefault("nb_vegetarien", prefs_db.vegetarien_par_semaine)
 
                     # Ingrédients interdits / allergies
                     if prefs_db.aliments_exclus:
                         preferences_enrichies.setdefault("allergies", prefs_db.aliments_exclus)
+
+                    # Robots cuisine disponibles
+                    if prefs_db.robots:
+                        preferences_enrichies.setdefault("robots", prefs_db.robots)
+
+                    # Aliments favoris
+                    if prefs_db.aliments_favoris:
+                        preferences_enrichies.setdefault("aliments_favoris", prefs_db.aliments_favoris)
         except Exception as e:
             logger.warning("[planning] Enrichissement UserPreferences nutritionnel ignoré: %s", e)
 

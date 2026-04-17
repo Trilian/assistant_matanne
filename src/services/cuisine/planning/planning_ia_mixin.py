@@ -233,12 +233,14 @@ class PlanningIAGenerationMixin:
         recettes_favorites: list[dict] = prefs.get("recettes_favorites", [])
 
         # Préférences nutritionnelles — injectées depuis UserPreferences par la route
-        poisson_blanc_jour: str = prefs.get("poisson_blanc_jour", "lundi")
-        poisson_gras_jour: str | None = prefs.get("poisson_gras_jour", "jeudi")
+        nb_poisson_blanc: int = int(prefs.get("nb_poisson_blanc", 1))
+        nb_poisson_gras: int = int(prefs.get("nb_poisson_gras", 1))
         viande_rouge_max: int = int(prefs.get("viande_rouge_max", 2))
-        vegetarien_jour: str = prefs.get("vegetarien_jour", "mercredi")
+        nb_vegetarien: int = int(prefs.get("nb_vegetarien", 1))
         jules_present: bool = bool(prefs.get("jules_present", True))
         jules_age_mois: int = int(prefs.get("jules_age_mois", 19))
+        robots: list[str] = prefs.get("robots", [])
+        aliments_favoris: list[str] = prefs.get("aliments_favoris", [])
 
         semaine_fin = semaine_debut + timedelta(days=6)
 
@@ -281,21 +283,47 @@ class PlanningIAGenerationMixin:
             else ""
         )
 
-        # Bloc OMS dynamique selon préférences utilisateur
+        # Bloc OMS dynamique selon préférences utilisateur (basé sur des nombres, pas des jours fixes)
+        poisson_blanc_ligne = (
+            f"- {nb_poisson_blanc}x POISSON BLANC cette semaine (cabillaud, merlu, colin, sole, bar, lieu noir, daurade) — répartis sur des jours différents"
+            if nb_poisson_blanc > 0
+            else ""
+        )
         poisson_gras_ligne = (
-            f"- {poisson_gras_jour.capitalize()}: POISSON GRAS obligatoire (saumon, maquereau, sardines, hareng, truite saumonée) — oméga-3 essentiels OMS"
-            if poisson_gras_jour
-            else "- Inclure AU MOINS 1 repas de POISSON GRAS dans la semaine (saumon, maquereau, sardines, hareng)"
+            f"- {nb_poisson_gras}x POISSON GRAS cette semaine (saumon, maquereau, sardines, hareng, truite saumonée) — oméga-3 essentiels OMS"
+            if nb_poisson_gras > 0
+            else ""
+        )
+        poisson_lines = "\n".join(filter(None, [poisson_blanc_ligne, poisson_gras_ligne]))
+        vegetarien_ligne = (
+            f"- Minimum {nb_vegetarien} repas VÉGÉTARIEN ou légumineuses cette semaine (lentilles, pois chiches, haricots, œufs, tofu)"
+            if nb_vegetarien > 0
+            else ""
         )
         oms_section = f"""
 ÉQUILIBRE NUTRITIONNEL HEBDOMADAIRE (recommandations OMS — OBLIGATOIRE) :
-- {poisson_blanc_jour.capitalize()}: POISSON BLANC obligatoire (cabillaud, merlu, colin, sole, bar, lieu noir, daurade) — protéines légères
-{poisson_gras_ligne}
+{poisson_lines}
 - Maximum {viande_rouge_max} repas de viande rouge sur toute la semaine (bœuf, veau, agneau) — réduction risque cardiovasculaire OMS
-- {vegetarien_jour.capitalize()}: repas VÉGÉTARIEN ou légumineuses (lentilles, pois chiches, haricots, œufs, tofu) — au MOINS 1x/semaine
+{vegetarien_ligne}
 - Reste des jours: volaille préférée (poulet, dinde, pintade, canard)
 - Ne jamais mettre 2 fois le même ingrédient principal à 2 repas consécutifs (déjeuner ou dîner)
 - Varier les féculents : alterner pâtes, riz, pommes de terre, semoule, légumineuses"""
+
+        # Section robots cuisine disponibles
+        robots_section = (
+            f"\nROBOTS CUISINE DISPONIBLES (adapter les recettes pour utiliser ces équipements si pertinent) :\n"
+            + "\n".join(f"- {r}" for r in robots)
+            if robots
+            else ""
+        )
+
+        # Section aliments favoris
+        favoris_section = (
+            f"\nALIMENTS FAVORIS (inclure fréquemment si possible — au moins 2-3 fois dans la semaine) :\n"
+            + "\n".join(f"- {a}" for a in aliments_favoris)
+            if aliments_favoris
+            else ""
+        )
 
         # Section Jules si présent dans la famille
         jules_section = (
@@ -321,7 +349,7 @@ JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
         prompt = f"""GENERATE A 7-DAY MEAL PLAN (MONDAY-SUNDAY) IN JSON FORMAT ONLY.
 
 CONTEXT:
-{context}{oms_section}{jules_section}{allergies_section}{legumes_section}{plats_section}{restes_section}{recettes_section}
+{context}{oms_section}{jules_section}{allergies_section}{robots_section}{favoris_section}{legumes_section}{plats_section}{restes_section}{recettes_section}
 
 OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 {{"items": [
@@ -364,7 +392,7 @@ RULES:
 4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
-7. PROTEINS — strictly follow the OMS balance section above: {poisson_blanc_jour}=poisson blanc, {poisson_gras_jour or "a chosen day"}=poisson gras, max {viande_rouge_max}x red meat, {vegetarien_jour}=vegetarian, other days=poultry
+7. PROTEINS — strictly follow the OMS balance section above: {nb_poisson_blanc}x poisson blanc, {nb_poisson_gras}x poisson gras, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. Spread each protein type throughout the week, never two consecutive identical proteins.
 8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly.
 9. null is valid ONLY for entree, laitage, dessert, reste_source. For ALL meals including restes: legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null).
 10. No explanations, no text, ONLY JSON

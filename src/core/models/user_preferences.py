@@ -95,7 +95,9 @@ class PreferenceUtilisateur(TimestampMixin, Base):
     aliments_exclus_jules: Mapped[list[str]] = mapped_column(JSONB, default=list)
 
     # Équilibre souhaité
-    poisson_par_semaine: Mapped[int] = mapped_column(Integer, default=2)
+    poisson_par_semaine: Mapped[int] = mapped_column(Integer, default=2)  # conservé pour compat
+    nb_poisson_blanc: Mapped[int] = mapped_column(Integer, default=1)
+    nb_poisson_gras: Mapped[int] = mapped_column(Integer, default=1)
     vegetarien_par_semaine: Mapped[int] = mapped_column(Integer, default=1)
     viande_rouge_max: Mapped[int] = mapped_column(Integer, default=2)
 

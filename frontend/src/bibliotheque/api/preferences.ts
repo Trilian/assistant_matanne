@@ -13,7 +13,8 @@ export interface Preferences {
   temps_weekend: number;
   aliments_exclus: string[];
   aliments_favoris: string[];
-  poisson_par_semaine: number;
+  nb_poisson_blanc: number;
+  nb_poisson_gras: number;
   vegetarien_par_semaine: number;
   viande_rouge_max: number;
   robots: string[];

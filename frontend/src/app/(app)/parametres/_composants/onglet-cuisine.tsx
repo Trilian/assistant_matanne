@@ -34,7 +34,8 @@ export function OngletCuisine() {
     jules_present: true,
     temps_semaine: 30,
     temps_weekend: 60,
-    poisson_par_semaine: 2,
+    nb_poisson_blanc: 1,
+    nb_poisson_gras: 1,
     vegetarien_par_semaine: 1,
     viande_rouge_max: 2,
     aliments_exclus: "",
@@ -50,7 +51,8 @@ export function OngletCuisine() {
         jules_present: prefs.jules_present,
         temps_semaine: prefs.temps_semaine,
         temps_weekend: prefs.temps_weekend,
-        poisson_par_semaine: prefs.poisson_par_semaine,
+        nb_poisson_blanc: prefs.nb_poisson_blanc,
+        nb_poisson_gras: prefs.nb_poisson_gras,
         vegetarien_par_semaine: prefs.vegetarien_par_semaine,
         viande_rouge_max: prefs.viande_rouge_max,
         aliments_exclus: prefs.aliments_exclus.join(", "),
@@ -69,7 +71,8 @@ export function OngletCuisine() {
         jules_age_mois: prefs?.jules_age_mois ?? null,
         temps_semaine: form.temps_semaine,
         temps_weekend: form.temps_weekend,
-        poisson_par_semaine: form.poisson_par_semaine,
+        nb_poisson_blanc: form.nb_poisson_blanc,
+        nb_poisson_gras: form.nb_poisson_gras,
         vegetarien_par_semaine: form.vegetarien_par_semaine,
         viande_rouge_max: form.viande_rouge_max,
         aliments_exclus: form.aliments_exclus.split(",").map((s) => s.trim()).filter(Boolean),
@@ -136,17 +139,25 @@ export function OngletCuisine() {
             <Input type="number" min={5} max={300} value={form.temps_weekend} onChange={(e) => setForm({ ...form, temps_weekend: Number(e.target.value) })} />
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label>Poisson/sem.</Label>
-            <Input type="number" min={0} max={7} value={form.poisson_par_semaine} onChange={(e) => setForm({ ...form, poisson_par_semaine: Number(e.target.value) })} />
+            <Label>Poisson blanc/sem.</Label>
+            <Input type="number" min={0} max={7} value={form.nb_poisson_blanc} onChange={(e) => setForm({ ...form, nb_poisson_blanc: Number(e.target.value) })} />
+            <p className="text-xs text-muted-foreground">Cabillaud, colin, sole…</p>
           </div>
+          <div className="space-y-1">
+            <Label>Poisson gras/sem.</Label>
+            <Input type="number" min={0} max={7} value={form.nb_poisson_gras} onChange={(e) => setForm({ ...form, nb_poisson_gras: Number(e.target.value) })} />
+            <p className="text-xs text-muted-foreground">Saumon, maquereau…</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label>Végétarien/sem.</Label>
             <Input type="number" min={0} max={7} value={form.vegetarien_par_semaine} onChange={(e) => setForm({ ...form, vegetarien_par_semaine: Number(e.target.value) })} />
           </div>
           <div className="space-y-1">
-            <Label>Viande rouge max</Label>
+            <Label>Viande rouge max/sem.</Label>
             <Input type="number" min={0} max={7} value={form.viande_rouge_max} onChange={(e) => setForm({ ...form, viande_rouge_max: Number(e.target.value) })} />
           </div>
         </div>
