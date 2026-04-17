@@ -1370,6 +1370,10 @@ async def generer_planning_ia(
 
                     # Jour végétarien selon vegetarien_par_semaine
                     preferences_enrichies.setdefault("vegetarien_jour", "mercredi")
+
+                    # Ingrédients interdits / allergies
+                    if prefs_db.aliments_exclus:
+                        preferences_enrichies.setdefault("allergies", prefs_db.aliments_exclus)
         except Exception as e:
             logger.warning("[planning] Enrichissement UserPreferences nutritionnel ignoré: %s", e)
 
