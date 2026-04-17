@@ -108,6 +108,11 @@ class JourPlanning(BaseModel):
     diner_dessert: str | None = None
     diner_dessert_est_recette: bool = False
 
+    # Déjeuner — protéine accompagnement (obligatoire si le plat principal est sans protéine)
+    dejeuner_proteine_accompagnement: str | None = None
+    # Dîner — protéine accompagnement (obligatoire si le plat principal est sans protéine)
+    diner_proteine_accompagnement: str | None = None
+
     # Restes réchauffés — déjeuner ou dîner peut être un reste du repas précédent
     dejeuner_est_reste: bool = False
     dejeuner_reste_source: str | None = None  # ex: "dîner de lundi"
@@ -117,13 +122,15 @@ class JourPlanning(BaseModel):
     @model_validator(mode="after")
     def normaliser_champs_obligatoires(self):
         """Normalise les champs obligatoires quand l'IA renvoie des placeholders."""
-        if not _texte_valide(self.dejeuner_legumes):
+        # Pour les restes, les légumes/féculents sont hérités du repas source au moment
+        # de la sauvegarde — ne pas écraser ici avec des valeurs génériques.
+        if not self.dejeuner_est_reste and not _texte_valide(self.dejeuner_legumes):
             self.dejeuner_legumes = "Légumes de saison"
-        if not _texte_valide(self.dejeuner_feculents):
+        if not self.dejeuner_est_reste and not _texte_valide(self.dejeuner_feculents):
             self.dejeuner_feculents = "Riz vapeur"
-        if not _texte_valide(self.diner_legumes):
+        if not self.diner_est_reste and not _texte_valide(self.diner_legumes):
             self.diner_legumes = "Légumes de saison"
-        if not _texte_valide(self.diner_feculents):
+        if not self.diner_est_reste and not _texte_valide(self.diner_feculents):
             self.diner_feculents = "Riz vapeur"
 
         if not _texte_valide(self.gouter):

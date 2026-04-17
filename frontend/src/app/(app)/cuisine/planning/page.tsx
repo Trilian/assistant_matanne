@@ -362,14 +362,14 @@ function CarteRepasDraggable({
                 )}
                 {repas.legumes && (
                   <span
-                    className={`text-[10px] break-words ${repas.est_reste ? "text-muted-foreground/50 italic" : "text-muted-foreground"}`}
-                    title={repas.est_reste ? `Légumes (hérités du plat d'origine) : ${repas.legumes}` : `Légumes : ${repas.legumes}`}
+                    className="text-[10px] break-words text-muted-foreground"
+                    title={`Légumes : ${repas.legumes}`}
                   >🥦 {repas.legumes}</span>
                 )}
                 {repas.feculents && (
                   <span
-                    className={`text-[10px] break-words ${repas.est_reste ? "text-muted-foreground/50 italic" : "text-muted-foreground"}`}
-                    title={repas.est_reste ? `Féculents (hérités du plat d'origine) : ${repas.feculents}` : `Féculents : ${repas.feculents}`}
+                    className="text-[10px] break-words text-muted-foreground"
+                    title={`Féculents : ${repas.feculents}`}
                   >🍚 {repas.feculents}</span>
                 )}
                 {repas.proteine_accompagnement && (
