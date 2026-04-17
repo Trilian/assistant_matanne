@@ -184,6 +184,8 @@ _MOTS_FECULENTS_IMPLICITES: list[str] = [
     "tagliatelle", "spaghetti", "linguine", "fusilli", "penne",
     "rigatoni", "farfalle", "macaroni", "purée", "puree",
     "frites", "hachis parmentier", "carbonara", "bolognaise",
+    # Plats avec pâte brisée / feuilletée / à pizza (féculent intrinsèque)
+    "quiche", "pizza", "tarte salée", "tourte", "flamiche",
 ]
 
 
