@@ -1567,6 +1567,7 @@ async def generer_planning_ia(
                 "date_fin": date_fin.isoformat(),
                 "planning_id": planning_obj.id,
                 "genere_par_ia": True,
+                "jules_present": bool(preferences_enrichies.get("jules_present", False)),
                 "planning": planning_dict,
                 "repas": repas_list,
             }
@@ -1593,6 +1594,17 @@ async def generer_planning_ia(
             obtenir_service_planning().enrichir_recettes_stub_planning,
             planning_id_bg,
         )
+
+    # Adapter automatiquement les repas pour Jules si présent dans la famille
+    jules_present_bg = resultat.get("jules_present", False) if isinstance(resultat, dict) else False
+    if planning_id_bg and jules_present_bg:
+        from src.services.famille import obtenir_version_recette_jules_service
+
+        background_tasks.add_task(
+            obtenir_version_recette_jules_service().adapter_planning,
+            planning_id_bg,
+        )
+        logger.info("[planning] Adaptation Jules planifiée en arrière-plan (planning_id=%s)", planning_id_bg)
 
     return resultat
 

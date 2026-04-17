@@ -433,6 +433,20 @@ RULES:
                 message_utilisateur="L'IA n'a pas pu générer le planning. Vérifiez la clé Mistral ou réessayez.",
             )
 
+        # Garde : Mistral doit retourner exactement 7 jours
+        if len(planning_data) < 7:
+            jours_manquants = 7 - len(planning_data)
+            logger.error(
+                f"⛔ Planning IA incomplet : {len(planning_data)}/7 jours reçus "
+                f"({jours_manquants} jour(s) manquant(s)) — semaine {semaine_debut}"
+            )
+            from src.core.exceptions import ErreurServiceIA
+
+            raise ErreurServiceIA(
+                f"Planning IA incomplet : {len(planning_data)} jours seulement (7 attendus)",
+                message_utilisateur="L'IA n'a pas généré les 7 jours du planning. Réessayez.",
+            )
+
         # Planning IA réussi
         logger.info(f"✅ Generated planning with {len(planning_data)} days using AI")
 
@@ -458,7 +472,16 @@ RULES:
         db.flush()
 
         # Créer repas pour chaque jour
-        from src.services.planning.nutrition import evaluer_equilibre_repas
+        from src.services.planning.nutrition import (
+            analyser_distribution_proteines_semaine,
+            evaluer_equilibre_repas,
+        )
+
+        _JOURS_IDX = {
+            "lundi": 0, "mardi": 1, "mercredi": 2, "jeudi": 3,
+            "vendredi": 4, "samedi": 5, "dimanche": 6,
+        }
+        repas_generes: list[Repas] = []
 
         for idx, jour_data in enumerate(planning_data):
             date_jour = semaine_debut + timedelta(days=idx)
@@ -479,6 +502,37 @@ RULES:
                         recette_id=recette_pdj_id,
                     )
                 )
+
+            # Correction : un reste le lundi (idx=0) est impossible — pas de dîner précédent.
+            if jour_data.dejeuner_est_reste and idx == 0:
+                logger.warning(
+                    f"⚠️ L'IA a marqué le déjeuner du {jour_data.jour} (1er jour, idx=0) comme reste "
+                    f"(impossible : pas de repas précédent) — est_reste forcé à False."
+                )
+                jour_data.dejeuner_est_reste = False
+                jour_data.dejeuner_reste_source = None
+            if jour_data.diner_est_reste and idx == 0:
+                logger.warning(
+                    f"⚠️ L'IA a marqué le dîner du {jour_data.jour} (1er jour, idx=0) comme reste "
+                    f"(impossible : pas de repas précédent) — est_reste forcé à False."
+                )
+                jour_data.diner_est_reste = False
+                jour_data.diner_reste_source = None
+
+            # Cohérence reste_source : vérifier que la référence est antérieure au jour courant
+            for _champ_source, _est_reste in [
+                (jour_data.dejeuner_reste_source, jour_data.dejeuner_est_reste),
+                (jour_data.diner_reste_source, jour_data.diner_est_reste),
+            ]:
+                if _est_reste and _champ_source:
+                    src_lower = _champ_source.lower()
+                    for _jour_nom, _jour_idx in _JOURS_IDX.items():
+                        if _jour_nom in src_lower and _jour_idx >= idx:
+                            logger.warning(
+                                f"⚠️ reste_source incohérent jour idx={idx} : "
+                                f"{_champ_source!r} référence un jour futur ou identique"
+                            )
+                            break
 
             # Légumes/féculents : pour les restes, héritage depuis le dîner de la veille ;
             # pour les repas normaux, fallback générique si l'IA n'a rien fourni.
@@ -541,7 +595,13 @@ RULES:
             score_dej = evaluer_equilibre_repas(repas_dej)
             repas_dej.score_equilibre = score_dej["score_equilibre"]
             repas_dej.alertes_equilibre = score_dej["alertes_equilibre"] or None
+            if score_dej["score_equilibre"] == 0:
+                logger.warning(
+                    f"⚠️ Déjeuner du {date_jour} a un score d'équilibre de 0 "
+                    f"— alertes : {score_dej.get('alertes_equilibre', [])}"
+                )
             db.add(repas_dej)
+            repas_generes.append(repas_dej)
 
             # Goûter (obligatoire — fallback si l'IA a quand même renvoyé null)
             if not jour_data.gouter:
@@ -610,13 +670,9 @@ RULES:
                 if jour_data.diner_dessert and jour_data.diner_dessert_est_recette
                 else None
             )
-            # Héritage protéine accompagnement pour les restes dîner
-            if jour_data.diner_est_reste and not jour_data.diner_proteine_accompagnement:
-                if idx > 0:
-                    jour_data.diner_proteine_accompagnement = (
-                        planning_data[idx].dejeuner_proteine_accompagnement
-                        or planning_data[idx - 1].diner_proteine_accompagnement
-                    )
+            # Héritage protéine accompagnement pour les restes dîner (source = dîner de la veille)
+            if jour_data.diner_est_reste and not jour_data.diner_proteine_accompagnement and idx > 0:
+                jour_data.diner_proteine_accompagnement = planning_data[idx - 1].diner_proteine_accompagnement
 
             repas_din = Repas(
                 planning_id=planning.id,
@@ -638,7 +694,29 @@ RULES:
             score_din = evaluer_equilibre_repas(repas_din)
             repas_din.score_equilibre = score_din["score_equilibre"]
             repas_din.alertes_equilibre = score_din["alertes_equilibre"] or None
+            if score_din["score_equilibre"] == 0:
+                logger.warning(
+                    f"⚠️ Dîner du {date_jour} a un score d'équilibre de 0 "
+                    f"— alertes : {score_din.get('alertes_equilibre', [])}"
+                )
             db.add(repas_din)
+            repas_generes.append(repas_din)
+
+        # Vérification hebdomadaire de la distribution des protéines (OMS)
+        bilan_proteines = analyser_distribution_proteines_semaine(repas_generes)
+        if bilan_proteines.alertes:
+            logger.warning(
+                f"⚠️ Planning {semaine_debut} — déséquilibre protéique détecté : "
+                f"{bilan_proteines.alertes}"
+            )
+            logger.info(
+                f"   Compteurs protéines : {bilan_proteines.compteurs} "
+                f"| Score semaine : {bilan_proteines.score_semaine}/100"
+            )
+        else:
+            logger.info(
+                f"✅ Distribution protéines OK — score semaine : {bilan_proteines.score_semaine}/100"
+            )
 
         db.commit()
         db.refresh(planning)
