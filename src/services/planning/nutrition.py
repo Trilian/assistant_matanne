@@ -82,6 +82,7 @@ CIBLES_PROTEINES_SEMAINE: dict[str, dict[str, Any]] = {
 _MAP_TYPE_PROTEINES: dict[str, str] = {
     "poisson": "proteines_poisson",
     "viande": "proteines_viande_rouge",
+    "viande_rouge": "proteines_viande_rouge",  # alias explicite retourné par l'IA
     "volaille": "proteines_volaille",
     "vegetarien": "proteines_legumineuses",
     "oeuf": "proteines_oeuf",
@@ -470,11 +471,17 @@ class BilanProteinesSemaine:
     score_semaine: int = 0  # 0-100
 
 
-def analyser_distribution_proteines_semaine(repas_list: list["Repas"]) -> BilanProteinesSemaine:
+def analyser_distribution_proteines_semaine(
+    repas_list: list["Repas"],
+    nb_vegetarien_min: int | None = None,
+) -> BilanProteinesSemaine:
     """Analyse la distribution des protéines sur la semaine (déj + dîner seulement).
 
     Args:
         repas_list: Liste de tous les repas de la semaine (tous types).
+        nb_vegetarien_min: Seuil minimum de repas légumineuses/végétarien configuré
+            par l'utilisateur. Remplace la valeur par défaut de CIBLES_PROTEINES_SEMAINE
+            (3) pour refléter les préférences réelles. None = utiliser la constante.
 
     Returns:
         BilanProteinesSemaine avec compteurs, alertes et score global.
@@ -519,7 +526,11 @@ def analyser_distribution_proteines_semaine(repas_list: list["Repas"]) -> BilanP
     for cat, cible in CIBLES_PROTEINES_SEMAINE.items():
         nb = compteurs.get(cat, 0)
         label = cible["label"]
-        min_v = cible["min"]
+        # Surcharge du seuil minimum légumineuses si l'utilisateur en a configuré un
+        if cat == "proteines_legumineuses" and nb_vegetarien_min is not None:
+            min_v = nb_vegetarien_min
+        else:
+            min_v = cible["min"]
         max_v = cible["max"]
 
         # Contrainte minimale

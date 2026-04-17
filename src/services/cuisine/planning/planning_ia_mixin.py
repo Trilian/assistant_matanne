@@ -89,6 +89,7 @@ class PlanningIAGenerationMixin:
         self,
         semaine_debut: date,
         parametres: ParametresEquilibre,
+        type_repas: str = "dejeuner",
         db: Session | None = None,
     ) -> list[dict]:
         """Suggère des recettes équilibrées pour chaque jour.
@@ -99,6 +100,7 @@ class PlanningIAGenerationMixin:
         Args:
             semaine_debut: Date de début de semaine
             parametres: Contraintes d'équilibre
+            type_repas: Type de repas cible ("dejeuner" ou "diner"). Défaut "dejeuner".
             db: Database session
 
         Returns:
@@ -152,7 +154,7 @@ class PlanningIAGenerationMixin:
                         "description": recette.description,
                         "temps_total": (recette.temps_preparation or 0)
                         + (recette.temps_cuisson or 0),
-                        "type_repas": "dejeuner" if idx % 2 == 0 else "diner",
+                        "type_repas": type_repas,
                         "raison": raison_jour,
                         "type_proteines": recette.type_proteines,
                     }
@@ -175,7 +177,7 @@ class PlanningIAGenerationMixin:
                             "description": recette.description,
                             "temps_total": (recette.temps_preparation or 0)
                             + (recette.temps_cuisson or 0),
-                            "type_repas": "dejeuner" if idx % 2 == 0 else "diner",
+                            "type_repas": type_repas,
                             "raison": "📝 Alternative équilibrée",
                             "type_proteines": getattr(recette, "type_proteines", "mixte"),
                         }
@@ -519,19 +521,26 @@ RULES:
                 jour_data.diner_est_reste = False
                 jour_data.diner_reste_source = None
 
-            # Cohérence reste_source : vérifier que la référence est antérieure au jour courant
-            for _champ_source, _est_reste in [
-                (jour_data.dejeuner_reste_source, jour_data.dejeuner_est_reste),
-                (jour_data.diner_reste_source, jour_data.diner_est_reste),
+            # Cohérence reste_source : vérifier que la référence est antérieure au jour courant.
+            # Si elle pointe vers un jour futur ou identique, désactiver le flag reste
+            # (persistance d'une donnée invalide évitée).
+            for _flag_attr, _source_attr in [
+                ("dejeuner_est_reste", "dejeuner_reste_source"),
+                ("diner_est_reste", "diner_reste_source"),
             ]:
+                _est_reste = getattr(jour_data, _flag_attr)
+                _champ_source = getattr(jour_data, _source_attr)
                 if _est_reste and _champ_source:
                     src_lower = _champ_source.lower()
                     for _jour_nom, _jour_idx in _JOURS_IDX.items():
                         if _jour_nom in src_lower and _jour_idx >= idx:
                             logger.warning(
                                 f"⚠️ reste_source incohérent jour idx={idx} : "
-                                f"{_champ_source!r} référence un jour futur ou identique"
+                                f"{_champ_source!r} référence un jour futur ou identique "
+                                f"— {_flag_attr} forcé à False."
                             )
+                            setattr(jour_data, _flag_attr, False)
+                            setattr(jour_data, _source_attr, None)
                             break
 
             # Légumes/féculents : pour les restes, héritage depuis le dîner de la veille ;
@@ -626,24 +635,16 @@ RULES:
                     )
                 )
 
-            # Légumes/féculents pour le dîner : pour les restes, héritage depuis le déjeuner
-            # du même jour (si disponible) ou le dîner de la veille ; sinon fallback générique.
+            # Légumes/féculents pour le dîner : pour les restes, héritage depuis le dîner
+            # de la veille (source la plus probable pour un reste du soir) ; sinon fallback générique.
             if not jour_data.diner_legumes:
                 if jour_data.diner_est_reste and idx > 0:
-                    jour_data.diner_legumes = (
-                        planning_data[idx].dejeuner_legumes
-                        or planning_data[idx - 1].diner_legumes
-                        or "Légumes de saison"
-                    )
+                    jour_data.diner_legumes = planning_data[idx - 1].diner_legumes or "Légumes de saison"
                 else:
                     jour_data.diner_legumes = "Légumes de saison"
             if not jour_data.diner_feculents:
                 if jour_data.diner_est_reste and idx > 0:
-                    jour_data.diner_feculents = (
-                        planning_data[idx].dejeuner_feculents
-                        or planning_data[idx - 1].diner_feculents
-                        or "Riz vapeur"
-                    )
+                    jour_data.diner_feculents = planning_data[idx - 1].diner_feculents or "Riz vapeur"
                 else:
                     jour_data.diner_feculents = "Riz vapeur"
             # Éviter la duplication quand légumes/féculents sont déjà dans le nom du plat
@@ -703,7 +704,9 @@ RULES:
             repas_generes.append(repas_din)
 
         # Vérification hebdomadaire de la distribution des protéines (OMS)
-        bilan_proteines = analyser_distribution_proteines_semaine(repas_generes)
+        bilan_proteines = analyser_distribution_proteines_semaine(
+            repas_generes, nb_vegetarien_min=nb_vegetarien
+        )
         if bilan_proteines.alertes:
             logger.warning(
                 f"⚠️ Planning {semaine_debut} — déséquilibre protéique détecté : "
@@ -833,7 +836,7 @@ RULES:
             return 1.0
 
     def _enrichir_batch(self, stubs_data: list[tuple[int, str]], context: str = "") -> int:
-        """Enrichit un batch de ≤5 recettes via un seul appel Mistral."""
+        """Enrichit un batch de ≤3 recettes via un seul appel Mistral."""
         from src.core.db import obtenir_contexte_db
         from src.core.models import EtapeRecette, Ingredient, RecetteIngredient
         from src.core.models.recettes import Recette
