@@ -344,7 +344,7 @@ function CarteRepasDraggable({
               </div>
             )}
           {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
-            (repas.entree || repas.laitage || repas.dessert || (!repas.est_reste && (repas.legumes || repas.feculents)) || repas.proteine_accompagnement) && (
+            (repas.entree || repas.laitage || repas.dessert || repas.legumes || repas.feculents || repas.proteine_accompagnement) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
                 {repas.entree && (
                   repas.entree_recette_id ? (
@@ -360,11 +360,17 @@ function CarteRepasDraggable({
                     <span className="text-[10px] text-muted-foreground break-words" title={`Entrée : ${repas.entree}`}>🥗 {repas.entree}</span>
                   )
                 )}
-                {!repas.est_reste && repas.legumes && (
-                  <span className="text-[10px] text-muted-foreground break-words" title={`Légumes : ${repas.legumes}`}>🥦 {repas.legumes}</span>
+                {repas.legumes && (
+                  <span
+                    className={`text-[10px] break-words ${repas.est_reste ? "text-muted-foreground/50 italic" : "text-muted-foreground"}`}
+                    title={repas.est_reste ? `Légumes (hérités du plat d'origine) : ${repas.legumes}` : `Légumes : ${repas.legumes}`}
+                  >🥦 {repas.legumes}</span>
                 )}
-                {!repas.est_reste && repas.feculents && (
-                  <span className="text-[10px] text-muted-foreground break-words" title={`Féculents : ${repas.feculents}`}>🍚 {repas.feculents}</span>
+                {repas.feculents && (
+                  <span
+                    className={`text-[10px] break-words ${repas.est_reste ? "text-muted-foreground/50 italic" : "text-muted-foreground"}`}
+                    title={repas.est_reste ? `Féculents (hérités du plat d'origine) : ${repas.feculents}` : `Féculents : ${repas.feculents}`}
+                  >🍚 {repas.feculents}</span>
                 )}
                 {repas.proteine_accompagnement && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Protéine : ${repas.proteine_accompagnement}`}>🥩 {repas.proteine_accompagnement}</span>

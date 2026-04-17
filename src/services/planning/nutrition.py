@@ -259,11 +259,11 @@ def _a_feculents(repas: "Repas") -> bool:
 def _a_proteines(repas: "Repas") -> bool:
     """True si le plat OU la protéine accompagnement couvre la protéine.
 
-    Un repas « reste » (est_reste=True) est un repas complet réutilisé :
-    les protéines du repas d'origine sont implicitement présentes.
+    Pour les restes, la protéine doit être détectable dans le nom du plat
+    (heuristique) ou via le champ proteine_accompagnement — elle n'est plus
+    considérée implicitement présente, car le plat d'origine peut lui-même
+    être dépourvu de protéine (ex : gratin dauphinois, risotto, pasta).
     """
-    if getattr(repas, "est_reste", False):
-        return True
     cat = _categorie_from_repas(repas)
     if cat and cat in CATEGORIES_PROTEINES:
         return True
@@ -284,10 +284,15 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
     - Plat = légumes     → vérifie féculents + protéines
     - Plat = mixte       → analyse globale
     - Catégorie inconnue → utilise présence des champs comme indicateur
-    - Reste              → protéines implicitement présentes
+    - Reste              → légumes/féculents via fallbacks DB, protéine vérifiée réellement
 
     Score déjeuner : 5 composants × 20 pts = 100 (légumes + féculents + protéines + laitage + fruit).
     Score dîner    : 4 composants × 25 pts = 100 (légumes + féculents + protéines + laitage).
+
+    Pour les restes (est_reste=True) : légumes et féculents proviennent des
+    champs DB remplis par le générateur IA (fallbacks « Légumes de saison » /
+    « Riz vapeur »), donc détectés normalement via _a_legumes / _a_feculents.
+    La protéine est vérifiée via le nom du plat ou proteine_accompagnement.
     """
     alertes: list[str] = []
     categorie = _categorie_from_repas(repas)
@@ -298,12 +303,6 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
     a_legumes = _a_legumes(repas)
     a_feculents = _a_feculents(repas)
     a_proteines = _a_proteines(repas)
-
-    # Un "reste" est un repas complet réutilisé : tous les macros du plat d'origine sont présents.
-    if getattr(repas, "est_reste", False):
-        a_legumes = True
-        a_feculents = True
-        # a_proteines est déjà True (géré dans _a_proteines via est_reste)
 
     # Pour les plats féculents/légumes, la recette elle-même compte dans le bon compartiment
     if categorie in CATEGORIES_FECULENTS:
