@@ -774,8 +774,9 @@ Recipes to enrich:
                 if recette_ia.difficulte:
                     db_recette.difficulte = recette_ia.difficulte
 
-                # Supprimer les étapes existantes avant d'insérer celles de l'IA
+                # Supprimer les étapes et ingrédients existants avant d'insérer ceux de l'IA
                 session.query(EtapeRecette).filter(EtapeRecette.recette_id == stub_id).delete()
+                session.query(RecetteIngredient).filter(RecetteIngredient.recette_id == stub_id).delete()
 
                 for idx, texte in enumerate(recette_ia.etapes, start=1):
                     texte = texte.strip()

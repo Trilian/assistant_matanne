@@ -253,7 +253,7 @@ class ArticleGenereResume(BaseModel):
 
     nom: str = Field(max_length=200)
     quantite: float
-    unite: str = Field("", max_length=20)
+    unite: str = Field("", max_length=50)
     rayon: str = Field("Autre", max_length=100)
     en_stock: float = 0
 
@@ -262,6 +262,14 @@ class ArticleGenereResume(BaseModel):
     def normaliser_rayon(cls, v: object) -> str:
         """Convertit None (retourné par l'IA) en valeur par défaut."""
         return v if isinstance(v, str) and v.strip() else "Autre"
+
+    @field_validator("unite", mode="before")
+    @classmethod
+    def tronquer_unite(cls, v: object) -> str:
+        """Tronque les unités trop longues (l'IA peut retourner des descriptions longues)."""
+        if isinstance(v, str):
+            return v[:50]
+        return v if v is not None else ""
 
 
 class GenererCoursesResponse(BaseModel):

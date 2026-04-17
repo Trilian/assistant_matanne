@@ -150,6 +150,7 @@ _HEURISTIQUES_PROTEINES: list[tuple[str, list[str]]] = [
             "bœuf", "boeuf", "agneau", "porc", "veau", "steak", "côtelette",
             "cotelette", "côte de", "rôti", "roti", "entrecôte", "bavette",
             "gigot", "carré d'agneau", "saucisse", "merguez", "chipolata",
+            "carbonara", "bolognaise", "bourguignon", "blanquette",
         ],
     ),
     (
@@ -157,8 +158,32 @@ _HEURISTIQUES_PROTEINES: list[tuple[str, list[str]]] = [
         [
             "lentille", "pois chiche", "haricot rouge", "haricot blanc", "flageolet",
             "soja", "tofu", "tempeh", "edamame", "falafel", "dal", "dahl",
+            "curry de lentilles", "curry de pois",
         ],
     ),
+]
+
+# Mots-clés pour détecter des légumes implicitement présents dans le nom du plat
+# (utilisé quand le champ legumes a été vidé via _nettoyer_si_inclus_dans_nom)
+_MOTS_LEGUMES_IMPLICITES: list[str] = [
+    "légume", "legume", "ratatouille", "épinard", "epinard", "courgette",
+    "champignon", "tomate", "poivron", "aubergine", "carotte", "haricot",
+    "brocoli", "brocolis", "chou", "poireau", "asperge", "céleri", "celeri",
+    "pois", "potiron", "courge", "fenouil", "radis", "navet", "endive",
+    "betterave", "concombre", "salade verte", "jardinière", "printanière",
+    "tajine", "wok de", "poêlée", "grillés", "gratinés", "mijotés",
+    "plancha", "vapeur de", "provençale", "ratatouille",
+]
+
+# Mots-clés pour détecter des féculents implicitement présents dans le nom du plat
+_MOTS_FECULENTS_IMPLICITES: list[str] = [
+    "pâtes", "pates", " riz", "semoule", "pomme de terre", "patate",
+    "quinoa", "boulgour", "bulgur", "blé", "ble", "épeautre", "epeautre",
+    "orge", "polenta", "fécule", "fecule", "maïs", "mais",
+    "gratin", "risotto", "lasagne", "ravioli", "gnocchi",
+    "tagliatelle", "spaghetti", "linguine", "fusilli", "penne",
+    "rigatoni", "farfalle", "macaroni", "purée", "puree",
+    "frites", "hachis parmentier", "carbonara", "bolognaise",
 ]
 
 
@@ -168,24 +193,28 @@ def _categorie_from_repas(repas: "Repas") -> str | None:
     Priorité :
     1. recette.categorie_nutritionnelle (le plus précis)
     2. recette.type_proteines  (mapping legacy)
-    3. Heuristique sur le nom de la recette (best-effort, sans IA)
+    3. Heuristique sur le nom de la recette ou notes du repas (best-effort, sans IA)
     """
     recette = getattr(repas, "recette", None)
-    if recette is None:
-        return None
+    if recette is not None:
+        if recette.categorie_nutritionnelle:
+            return recette.categorie_nutritionnelle
+        if recette.type_proteines:
+            return _MAP_TYPE_PROTEINES.get(recette.type_proteines.lower())
+        nom_recette = (recette.nom or "").lower()
+        if nom_recette:
+            for categorie, mots_cles in _HEURISTIQUES_PROTEINES:
+                for mot in mots_cles:
+                    if mot in nom_recette:
+                        return categorie
 
-    if recette.categorie_nutritionnelle:
-        return recette.categorie_nutritionnelle
-
-    if recette.type_proteines:
-        return _MAP_TYPE_PROTEINES.get(recette.type_proteines.lower())
-
-    # Heuristique sur le nom (fallback sans IA)
-    nom = (recette.nom or "").lower()
-    if nom:
+    # Fallback sur repas.notes (nom du plat) quand la recette n'est pas chargée —
+    # typiquement lors de la génération IA avant flush de la session SQLAlchemy.
+    notes = (getattr(repas, "notes", None) or "").lower()
+    if notes:
         for categorie, mots_cles in _HEURISTIQUES_PROTEINES:
             for mot in mots_cles:
-                if mot in nom:
+                if mot in notes:
                     return categorie
 
     return None
@@ -202,19 +231,29 @@ def _valeur_repas_presente(valeur: object) -> bool:
 
 
 def _a_legumes(repas: "Repas") -> bool:
-    return (
+    """True si le repas contient des légumes (champ, recette liée, entrée, ou implicites dans le nom)."""
+    if (
         _valeur_repas_presente(getattr(repas, "legumes", None))
         or bool(getattr(repas, "legumes_recette_id", None))
-        # L'entrée (soupe, salade…) compte comme légumes si aucun autre légume n'est renseigné
+        # L'entrée (soupe, salade…) compte comme légumes
         or _valeur_repas_presente(getattr(repas, "entree", None))
         or bool(getattr(repas, "entree_recette_id", None))
-    )
+    ):
+        return True
+    # Détection implicite : légumes déjà dans le nom du plat (champ vidé par _nettoyer_si_inclus_dans_nom)
+    notes = (getattr(repas, "notes", None) or "").lower()
+    return bool(notes) and any(mot in notes for mot in _MOTS_LEGUMES_IMPLICITES)
 
 
 def _a_feculents(repas: "Repas") -> bool:
-    return _valeur_repas_presente(getattr(repas, "feculents", None)) or bool(
+    """True si le repas contient des féculents (champ, recette liée, ou implicites dans le nom)."""
+    if _valeur_repas_presente(getattr(repas, "feculents", None)) or bool(
         getattr(repas, "feculents_recette_id", None)
-    )
+    ):
+        return True
+    # Détection implicite : féculents déjà dans le nom du plat (champ vidé par _nettoyer_si_inclus_dans_nom)
+    notes = (getattr(repas, "notes", None) or "").lower()
+    return bool(notes) and any(mot in notes for mot in _MOTS_FECULENTS_IMPLICITES)
 
 
 def _a_proteines(repas: "Repas") -> bool:
@@ -260,7 +299,13 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
     a_feculents = _a_feculents(repas)
     a_proteines = _a_proteines(repas)
 
-    # Pour les plats féculents/légumes, le recette lui-même compte dans le bon compartiment
+    # Un "reste" est un repas complet réutilisé : tous les macros du plat d'origine sont présents.
+    if getattr(repas, "est_reste", False):
+        a_legumes = True
+        a_feculents = True
+        # a_proteines est déjà True (géré dans _a_proteines via est_reste)
+
+    # Pour les plats féculents/légumes, la recette elle-même compte dans le bon compartiment
     if categorie in CATEGORIES_FECULENTS:
         a_feculents = True
     elif categorie in CATEGORIES_LEGUMES:
