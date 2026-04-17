@@ -507,6 +507,7 @@ export default function PagePlanning() {
   const [dessertForm, setDessertForm] = useState("");
   const [fruitGouter, setFruitGouter] = useState("");
   const [gateauGouter, setGateauGouter] = useState("");
+  const [nomRepasAjoute, setNomRepasAjoute] = useState("");
   const [suggestionsIA, setSuggestionsIA] = useState<SuggestionAccompagnement | null>(null);
   const [enSuggestionIA, setEnSuggestionIA] = useState(false);
   const [coursesDialogue, setCoursesDialogue] = useState(false);
@@ -952,6 +953,7 @@ export default function PagePlanning() {
     setDessertForm("");
     setFruitGouter("");
     setGateauGouter("");
+    setNomRepasAjoute("");
     setSuggestionsIA(null);
     setDialogueOuvert(true);
   }
@@ -1033,6 +1035,7 @@ export default function PagePlanning() {
   const choisirRecette = useCallback(
     (recette: SuggestionRecettePlanning) => {
       if (!repasEnCours) return;
+      setNomRepasAjoute(recette.nom);
       ajouterRepas({
         date: repasEnCours.date,
         type_repas: repasEnCours.type_repas,
@@ -1806,6 +1809,9 @@ export default function PagePlanning() {
 
             {/* ─── Onglet texte libre ─── */}
             <TabsContent value="libre" className="space-y-4 mt-3">
+              <p className="text-xs text-muted-foreground rounded-md border border-dashed px-3 py-2">
+                💡 Pour les plats complexes (gratin, lasagnes, risotto…), préférez l'onglet <span className="font-medium">Recettes</span> afin de lier une fiche recette et activer le suivi nutritionnel complet.
+              </p>
               <Input
                 value={notesRepas}
                 onChange={(e) => setNotesRepas(e.target.value)}
@@ -1822,6 +1828,7 @@ export default function PagePlanning() {
                   disabled={enAjout || !notesRepas.trim()}
                   onClick={() => {
                     if (repasEnCours) {
+                      setNomRepasAjoute(notesRepas);
                       ajouterRepas({
                         date: repasEnCours.date,
                         type_repas: repasEnCours.type_repas,
@@ -1906,6 +1913,58 @@ export default function PagePlanning() {
                   </Button>
                 </div>
 
+                {/* Détection plat féculent : avertissement + protéine en priorité */}
+                {(() => {
+                  const MOTS_FECULENTS_PLAT = [
+                    "gratin", "lasagne", "lasagnes", "risotto", "tartiflette",
+                    "purée", "puree", "pâtes", "pasta", "gnocchi", "ravioli",
+                    "raviolis", "pizza", "quiche", "hachis parmentier",
+                    "carbonara", "bolognaise", "polenta", "macaroni", "semoule",
+                    "tarte salée", "tourte", "flamiche",
+                  ];
+                  const estFeculent = MOTS_FECULENTS_PLAT.some((m) =>
+                    nomRepasAjoute.toLowerCase().includes(m)
+                  );
+                  if (!estFeculent) return null;
+                  const PROTEINES_RAPIDES = [
+                    "Entrecôte", "Côtelettes d'agneau", "Escalope de veau",
+                    "Filet mignon", "Saucisses", "Merguez", "Poulet rôti",
+                    "Blanc de poulet",
+                  ];
+                  return (
+                    <div className="rounded-md border border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30 p-3 space-y-2">
+                      <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">
+                        🥩 Plat féculent détecté — ajoutez une protéine
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        <span className="font-medium">{nomRepasAjoute}</span> n'apporte pas de protéine. Associez une viande ou une autre source.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {PROTEINES_RAPIDES.map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setProteineForm(p)}
+                            className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
+                              proteineForm === p
+                                ? "border-amber-500 bg-amber-100 font-semibold text-amber-800 dark:bg-amber-900/50 dark:text-amber-200"
+                                : "border-border bg-background hover:bg-accent text-foreground"
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+                      <Input
+                        value={proteineForm}
+                        onChange={(e) => setProteineForm(e.target.value)}
+                        placeholder="Ou saisissez une autre protéine…"
+                        className="mt-1 border-amber-300 focus:border-amber-500"
+                      />
+                    </div>
+                  );
+                })()}
+
                 {suggestionsIA && (
                   <div className="rounded-md border bg-muted/30 p-3 space-y-2 text-xs">
                     {suggestionsIA.legumes.length > 0 && (
@@ -1978,15 +2037,31 @@ export default function PagePlanning() {
                       className="mt-1"
                     />
                   </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🥩 Protéine accompagnement</label>
-                    <Input
-                      value={proteineForm}
-                      onChange={(e) => setProteineForm(e.target.value)}
-                      placeholder="Ex: Filet de poulet, Œufs dur… (si plat principal = féculent)"
-                      className="mt-1"
-                    />
-                  </div>
+                  {(() => {
+                    const MOTS_FECULENTS_PLAT = [
+                      "gratin", "lasagne", "lasagnes", "risotto", "tartiflette",
+                      "purée", "puree", "pâtes", "pasta", "gnocchi", "ravioli",
+                      "raviolis", "pizza", "quiche", "hachis parmentier",
+                      "carbonara", "bolognaise", "polenta", "macaroni", "semoule",
+                      "tarte salée", "tourte", "flamiche",
+                    ];
+                    const estFeculent = MOTS_FECULENTS_PLAT.some((m) =>
+                      nomRepasAjoute.toLowerCase().includes(m)
+                    );
+                    // Si féculent, le champ protéine est déjà affiché dans le bloc d'alerte ci-dessus
+                    if (estFeculent) return null;
+                    return (
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">🥩 Protéine accompagnement</label>
+                        <Input
+                          value={proteineForm}
+                          onChange={(e) => setProteineForm(e.target.value)}
+                          placeholder="Ex: Filet de poulet, Œufs durs… (si plat principal = féculent)"
+                          className="mt-1"
+                        />
+                      </div>
+                    );
+                  })()}
                   <div>
                     <label className="text-xs font-medium text-muted-foreground">🥛 Laitage</label>
                     <Input

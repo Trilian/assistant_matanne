@@ -188,6 +188,21 @@ _MOTS_FECULENTS_IMPLICITES: list[str] = [
     "quiche", "pizza", "tarte salée", "tourte", "flamiche",
 ]
 
+# Mots-clés pour détecter du laitage implicitement présent dans le nom du plat
+# (plats où le lait / crème / fromage est un ingrédient structurant de la recette)
+_MOTS_LAITAGE_IMPLICITES: list[str] = [
+    "gratin",              # crème + fromage (gratin dauphinois, gratin de légumes…)
+    "lasagne",             # béchamel au lait
+    "béchamel", "bechamel",
+    "croque-monsieur", "croque monsieur", "croque-madame", "croque madame",
+    "soufflé", "souffle",  # fromage intégré
+    "quiche",              # appareil crème fraîche
+    "flamiche",            # crème + poireaux
+    "tartiflette",         # reblochon
+    "raclette",
+    "fondue",
+]
+
 
 def _categorie_from_repas(repas: "Repas") -> str | None:
     """Déduit la catégorie nutritionnelle du plat principal.
@@ -256,6 +271,20 @@ def _a_feculents(repas: "Repas") -> bool:
     # Détection implicite : féculents déjà dans le nom du plat (champ vidé par _nettoyer_si_inclus_dans_nom)
     notes = (getattr(repas, "notes", None) or "").lower()
     return bool(notes) and any(mot in notes for mot in _MOTS_FECULENTS_IMPLICITES)
+
+
+def _a_laitage(repas: "Repas") -> bool:
+    """True si le repas inclut un laitage (champ explicite ou implicite dans le nom du plat).
+
+    La détection implicite couvre les plats où le lait / crème / fromage est
+    un ingrédient structurant (gratin, quiche, lasagne, béchamel…). Elle ne
+    s'applique pas au goûter — utiliser directement le champ ``laitage`` pour
+    les collations où un laitage séparé est attendu.
+    """
+    if bool(getattr(repas, "laitage", None)):
+        return True
+    notes = (getattr(repas, "notes", None) or "").lower()
+    return bool(notes) and any(mot in notes for mot in _MOTS_LAITAGE_IMPLICITES)
 
 
 def _a_proteines(repas: "Repas") -> bool:
@@ -327,14 +356,14 @@ def _evaluer_repas_assiette(repas: "Repas") -> tuple[int, list[str]]:
 
     if est_diner:
         # Dîner : 4 composants × 25 pts — le laitage (fromage) remplace le dessert, pas de fruit
-        a_laitage = bool(getattr(repas, "laitage", None))
+        a_laitage = _a_laitage(repas)
         if not a_laitage:
             alertes.append("Laitage manquant")
         nb_ok = sum([a_legumes, a_feculents, a_proteines, a_laitage])
         score = nb_ok * 25
     elif est_dejeuner:
         # Déjeuner : 5 composants × 20 pts (PNNS4 complet)
-        a_laitage = bool(getattr(repas, "laitage", None))
+        a_laitage = _a_laitage(repas)
         # Le dessert (compote, fruit, yaourt aux fruits…) compte comme fruit/dessert.
         # Champ ``fruit`` conservé pour rétro-compat migration 005 ; ``dessert`` est le
         # champ canonique utilisé par le générateur IA et le formulaire manuel.
