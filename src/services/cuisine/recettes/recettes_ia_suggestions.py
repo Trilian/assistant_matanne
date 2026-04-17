@@ -102,7 +102,9 @@ RULES:
 7. difficulte values: facile, moyen, difficile
 8. type_repas valid values: petit_dejeuner, dejeuner, diner, dessert, gouter
 9. type_repas MUST match the true nature of the recipe: compote/gâteau/tarte/mousse/crème/crumble/tiramisu → dessert; soupe/potage/velouté → entree or diner
-10. No explanations, no text, ONLY JSON"""
+10. No explanations, no text, ONLY JSON
+11. RECIPE NAME: ONLY the dish name — NO sides, NO accompaniments in the name. Correct: "Poulet rôti", "Filet de saumon". FORBIDDEN: "Poulet rôti, légumes de saison, semoule" or "Saumon avec riz et haricots"
+12. ONE STARCH ONLY per recipe — never combine two heavy starches (e.g. pommes de terre + semoule, riz + pâtes, pâtes + semoule). Choose one."""
 
         logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
 
@@ -236,6 +238,8 @@ Contraintes :
 - Temps total (préparation + cuisson) ≤ {temps_max_min} minutes
 - Recettes familiales, adaptées à des adultes et un enfant en bas âge
 - Pas de recettes nécessitant des ingrédients introuvables
+- Nom de recette UNIQUEMENT le nom du plat, sans accompagnements (correct: "Poulet rôti", interdit: "Poulet rôti, semoule, légumes")
+- UN SEUL féculent par recette — ne jamais combiner deux féculents lourds (pommes de terre + semoule, riz + pâtes, etc.)
 
 RETOURNER UNIQUEMENT CE JSON (sans texte avant/après) :
 

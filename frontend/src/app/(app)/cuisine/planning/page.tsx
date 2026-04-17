@@ -332,7 +332,7 @@ function CarteRepasDraggable({
           {repas.type_repas === "gouter" &&
             (repas.gateau_gouter || repas.laitage || repas.fruit_gouter) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
-                {repas.gateau_gouter && (
+                {repas.gateau_gouter && repas.gateau_gouter.toLowerCase() !== (repas.recette_nom || repas.notes || "").toLowerCase() && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Céréales/gâteau : ${repas.gateau_gouter}`}>🍪 {repas.gateau_gouter}</span>
                 )}
                 {repas.laitage && (
@@ -344,7 +344,7 @@ function CarteRepasDraggable({
               </div>
             )}
           {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
-            (repas.entree || repas.laitage || repas.dessert || repas.legumes || repas.feculents || repas.proteine_accompagnement) && (
+            (repas.entree || repas.laitage || repas.dessert || (!repas.est_reste && (repas.legumes || repas.feculents)) || repas.proteine_accompagnement) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
                 {repas.entree && (
                   repas.entree_recette_id ? (
@@ -360,10 +360,10 @@ function CarteRepasDraggable({
                     <span className="text-[10px] text-muted-foreground break-words" title={`Entrée : ${repas.entree}`}>🥗 {repas.entree}</span>
                   )
                 )}
-                {repas.legumes && (
+                {!repas.est_reste && repas.legumes && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Légumes : ${repas.legumes}`}>🥦 {repas.legumes}</span>
                 )}
-                {repas.feculents && (
+                {!repas.est_reste && repas.feculents && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Féculents : ${repas.feculents}`}>🍚 {repas.feculents}</span>
                 )}
                 {repas.proteine_accompagnement && (

@@ -329,8 +329,8 @@ class PlanningIAGenerationMixin:
         jules_section = (
             f"""
 JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
-- Nommer les plats avec la version ADULTE uniquement (ex: "Bœuf bourguignon"). Ne jamais écrire "version Jules" ou "version adulte" dans le nom — un seul nom simple par champ
-- Jules mange la même chose adaptée : sans sel ajouté, sans alcool même en sauce, sans épices fortes, textures adaptées (écrasé/mixé si nécessaire)
+- Noms de plats COURTS et SIMPLES — un seul nom sans parenthèses, sans précisions entre parenthèses, sans suffixes. Exemples corrects: "Bœuf bourguignon", "Carottes vapeur", "Salade verte". JAMAIS: "Carottes (mixées pour Jules)", "(sans sel)", "(sans piment)", "(version bébé)"
+- Jules mange la même chose adaptée : sans sel ajouté, sans alcool même en sauce, sans épices fortes, textures adaptées si nécessaire — but NEVER mention these adaptations in the field values
 - À éviter dans les plats : poisson cru, marinades alcoolisées, piments, moutarde forte
 - Jules ne mange PAS d'entrée — inclure impérativement un légume dans diner_legumes/dejeuner_legumes pour chaque repas"""
             if jules_present
@@ -387,20 +387,20 @@ OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 
 RULES:
 1. Return ONLY valid JSON with exactly 7 items (one per day: Lundi→Dimanche)
-2. dejeuner and diner (le PLAT principal): always a real recipe name to cook (3-50 chars)
+2. dejeuner and diner (le PLAT principal): ONLY the main dish/recipe name — NEVER include sides, accompaniments, or ingredients in this field. Correct: "Poulet curry", "Filet de saumon", "Gratin dauphinois". FORBIDDEN: "Poulet curry, riz basmati, carottes vapeur" or "Saumon avec haricots verts". Sides go ONLY in legumes/feculents fields. Max 40 chars, no parentheses.
 3. petit_dejeuner: simple text on weekdays (tartines, céréales, fruit), can be est_recette=true on weekend (crêpes, gaufres...)
 4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
 7. PROTEINS — strictly follow the OMS balance section above: {nb_poisson_blanc}x poisson blanc, {nb_poisson_gras}x poisson gras, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. Spread each protein type throughout the week, never two consecutive identical proteins.
-8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly.
-9. null is valid ONLY for entree, laitage, dessert, reste_source. For ALL meals including restes: legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null).
+8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. CRITICAL: dejeuner_reste_source MUST reference ONLY a PREVIOUS day — never a future day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly.
+9. null is valid ONLY for entree, laitage, dessert, reste_source. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): set legumes=null AND feculents=null — they are inherited from the original dish. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null).
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
-12. PNNS4 ASSIETTE ÉQUILIBRÉE — for every dejeuner and diner, the meal MUST include BOTH:
+12. PNNS4 ASSIETTE ÉQUILIBRÉE — for every dejeuner and diner that is NOT a reste, the meal MUST include BOTH:
     a) legumes field: ≥ half the plate (haricots verts, courgettes sautées, brocoli vapeur, carottes, épinards, poêlée de légumes...) — NEVER null
     b) feculents field: ~1/4 of the plate (riz, pâtes, pommes de terre, semoule, quinoa, lentilles...) — NEVER null
-    If the PLAT PRINCIPAL is itself a starch or veg (gratin dauphinois, risotto, pasta), use feculents/legumes to name the main component and add the protein in diner_legumes or a note. NEVER leave feculents or legumes null for dejeuner/diner.
+    If the PLAT PRINCIPAL is itself a starch or veg (gratin dauphinois, risotto, pasta), use feculents/legumes to name the main component and add the protein in diner_legumes or a note. NEVER leave feculents or legumes null for non-reste dejeuner/diner.
 13. NO DISH REPETITION — Never plan the exact same main dish (dejeuner or diner) more than once across the 7 days. Vary proteins AND preparations throughout the week.
 14. FORBIDDEN INGREDIENTS — Never use any ingredient listed in "INGRÉDIENTS INTERDITS" in any field (dejeuner, diner, entree, legumes, feculents, dessert). Choose alternatives automatically."""
 
