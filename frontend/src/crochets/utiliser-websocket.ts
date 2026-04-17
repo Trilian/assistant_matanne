@@ -114,6 +114,8 @@ export function utiliserWebSocket({
   const gestionnairesRef = useRef(gestionnaires)
   const pendingActionsRef = useRef<ObjetDonnees[]>([])
   const lastSeqRef = useRef(0)
+  // Marqueur pour empêcher onclose de planifier une reconnexion après démontage/changement d'URL.
+  const demontageRef = useRef(false)
 
   // Garder les gestionnaires à jour sans recréer la connexion
   useEffect(() => {
@@ -212,6 +214,9 @@ export function utiliserWebSocket({
       setConnecte(false)
       arreterHeartbeat()
 
+      // Ne pas reconnecter si le hook a été démonté ou si l'URL a changé.
+      if (demontageRef.current) return
+
       // Reconnexion auto avec backoff exponentiel
       if (tentativesRef.current < maxTentatives) {
         tentativesRef.current += 1
@@ -276,11 +281,13 @@ export function utiliserWebSocket({
   // Connexion / déconnexion
   useEffect(() => {
     if (url) {
+      demontageRef.current = false
       setMode('websocket')
       connecter()
     }
 
     return () => {
+      demontageRef.current = true
       arreterHeartbeat()
       arreterPolling()
       if (reconnexionRef.current) {

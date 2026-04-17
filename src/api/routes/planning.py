@@ -5,6 +5,7 @@ Gestion du planning de repas hebdomadaire : consultation, création,
 modification et suppression de repas planifiés.
 """
 
+import asyncio
 import logging
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
@@ -35,6 +36,17 @@ from src.services.cuisine.service_ia import obtenir_service_innovations_cuisine
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
+
+# Verrous par user pour empêcher deux générations IA simultanées (économise le quota Mistral).
+_locks_generation: dict[str, asyncio.Lock] = {}
+_locks_meta = asyncio.Lock()
+
+
+async def _obtenir_lock_generation(user_id: str) -> asyncio.Lock:
+    async with _locks_meta:
+        if user_id not in _locks_generation:
+            _locks_generation[user_id] = asyncio.Lock()
+        return _locks_generation[user_id]
 
 
 @router.get(
@@ -1554,7 +1566,17 @@ async def generer_planning_ia(
                 "repas": repas_list,
             }
 
-    resultat = await executer_async(_generate)
+    resultat = None
+    user_id = str(user.get("sub", user.get("id", "anon")))
+    lock = await _obtenir_lock_generation(user_id)
+    if lock.locked():
+        raise HTTPException(
+            status_code=429,
+            detail="Une génération de planning est déjà en cours. Veuillez patienter.",
+            headers={"Retry-After": "30"},
+        )
+    async with lock:
+        resultat = await executer_async(_generate)
 
     # Enrichir les recettes stubs (étapes + ingrédients) en arrière-plan
     # pour ne pas bloquer la réponse HTTP (~5-8 s au lieu de 75 s).
