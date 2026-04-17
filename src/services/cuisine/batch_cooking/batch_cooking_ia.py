@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 
 # Nombre max de recettes par appel IA avant découpage automatique
 _MAX_RECETTES_PAR_APPEL = 4
-# Pipeline simplifié (SessionBatchIA) : schéma compact, ~2000-3000 tokens suffisent
-_MAX_TOKENS_SIMPLE = 4000
+# Pipeline simplifié (SessionBatchIA) : schéma compact — 8000 pour gérer jusqu'à 12-15 recettes sans troncature
+_MAX_TOKENS_SIMPLE = 8000
 # Pipeline détaillé (PlanBatchDetailIA) : listes d'ingrédients + instructions complètes
 _MAX_TOKENS_DETAIL = 16000
 # Alias conservé pour compatibilité interne (utilisé uniquement par le pipeline détaillé)
@@ -327,7 +327,7 @@ class BatchCookingIAMixin:
         logger.error("Toutes les tentatives ont échoué pour %d recette(s)", nb_recettes)
         return {}
 
-    @avec_resilience(retry=1, timeout_s=60, fallback=None)
+    @avec_resilience(retry=1, timeout_s=120, fallback=None)
     def _appel_ia_detail(self, prompt: str, max_tokens: int = _MAX_TOKENS) -> dict | None:
         """Effectue un appel IA unique pour le batch cooking détaillé."""
         if not self.client:
