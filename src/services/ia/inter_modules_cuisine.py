@@ -101,6 +101,9 @@ class CuisineBridgesMixin:
                 repas.entree_recette_id,
                 repas.dessert_recette_id,
                 repas.dessert_jules_recette_id,
+                repas.legumes_recette_id,
+                repas.feculents_recette_id,
+                repas.proteine_accompagnement_recette_id,
             ):
                 if recette_id:
                     recette_ids.add(recette_id)
