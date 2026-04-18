@@ -148,9 +148,17 @@ class GenererPlanningRequest(BaseModel):
         default_factory=list,
         description="Légumes à privilégier cette semaine (forte préférence)",
     )
+    feculents_souhaites: list[str] = Field(
+        default_factory=list,
+        description="Féculents à privilégier cette semaine (forte préférence)",
+    )
     plats_souhaites: list[str] = Field(
         default_factory=list,
         description="Plats à inclure cette semaine (forte préférence)",
+    )
+    ingredients_interdits: list[str] = Field(
+        default_factory=list,
+        description="Ingrédients à exclure pour cette génération (s'ajoute aux allergies permanentes)",
     )
     autoriser_restes: bool = Field(
         True, description="Proposer des repas 'reste réchauffé' (soir → midi lendemain)"
@@ -163,7 +171,9 @@ class GenererPlanningRequest(BaseModel):
                 "nb_personnes": 3,
                 "preferences": {"allergies": ["arachides"], "temps_max": 30, "jules": True},
                 "legumes_souhaites": ["courgettes", "brocoli"],
-                "plats_souhaites": ["lasagnes"],
+                "feculents_souhaites": ["pommes de terre vapeur"],
+                "plats_souhaites": ["poulet rôti"],
+                "ingredients_interdits": ["concombre"],
                 "autoriser_restes": True,
             }
         }

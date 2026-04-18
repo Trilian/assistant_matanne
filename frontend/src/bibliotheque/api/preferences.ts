@@ -80,3 +80,28 @@ export async function sauvegarderPreferencesNotifications(
   const { data } = await clientApi.put<PreferencesNotifications>("/preferences/notifications", prefs);
   return data;
 }
+
+// ─── Valeurs par défaut du modal de génération de planning ───────────────────
+
+export interface PlanningDefaults {
+  legumes_souhaites: string[];
+  feculents_souhaites: string[];
+  plats_souhaites: string[];
+  ingredients_interdits: string[];
+  autoriser_restes: boolean;
+  nb_personnes: number;
+}
+
+/** Récupérer les valeurs par défaut du modal de génération de planning */
+export async function obtenirPreferencesPlanning(): Promise<PlanningDefaults> {
+  const { data } = await clientApi.get<PlanningDefaults>("/preferences/planning-defaults");
+  return data;
+}
+
+/** Sauvegarder les valeurs par défaut du modal de génération de planning */
+export async function sauvegarderPreferencesPlanning(
+  defaults: Partial<PlanningDefaults>
+): Promise<PlanningDefaults> {
+  const { data } = await clientApi.patch<PlanningDefaults>("/preferences/planning-defaults", defaults);
+  return data;
+}

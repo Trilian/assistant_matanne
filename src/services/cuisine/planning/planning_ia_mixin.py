@@ -292,6 +292,7 @@ class PlanningIAGenerationMixin:
 
         prefs = preferences or {}
         legumes_souhaites: list[str] = prefs.get("legumes_souhaites", [])
+        feculents_souhaites: list[str] = prefs.get("feculents_souhaites", [])
         plats_souhaites: list[str] = prefs.get("plats_souhaites", [])
         autoriser_restes: bool = prefs.get("autoriser_restes", True)
         recettes_favorites: list[dict] = prefs.get("recettes_favorites", [])
@@ -305,6 +306,7 @@ class PlanningIAGenerationMixin:
         jules_age_mois: int = int(prefs.get("jules_age_mois", 19))
         robots: list[str] = prefs.get("robots", [])
         aliments_favoris: list[str] = prefs.get("aliments_favoris", [])
+        saison_actuelle: str = prefs.get("saison_actuelle", "printemps")
 
         semaine_fin = semaine_debut + timedelta(days=6)
 
@@ -313,6 +315,12 @@ class PlanningIAGenerationMixin:
             f"\nLÉGUMES À PRIVILÉGIER CETTE SEMAINE (forte préférence — essaie d'inclure chacun dans 2-3 préparations différentes) :\n"
             + "\n".join(f"- {v}" for v in legumes_souhaites)
             if legumes_souhaites
+            else ""
+        )
+        feculents_section = (
+            f"\nFÉCULENTS À PRIVILÉGIER CETTE SEMAINE (forte préférence — utilise-les en priorité pour les champs feculents) :\n"
+            + "\n".join(f"- {f}" for f in feculents_souhaites)
+            if feculents_souhaites
             else ""
         )
         plats_section = (
@@ -349,12 +357,12 @@ class PlanningIAGenerationMixin:
 
         # Bloc OMS dynamique selon préférences utilisateur (basé sur des nombres, pas des jours fixes)
         poisson_blanc_ligne = (
-            f"- {nb_poisson_blanc}x POISSON BLANC cette semaine (cabillaud, merlu, colin, sole, bar, lieu noir, daurade) — répartis sur des jours différents"
+            f"- POISSON BLANC : exactement {nb_poisson_blanc} repas AU TOTAL sur la semaine — cabillaud, merlu, colin, sole, bar, lieu noir, daurade SONT TOUS DU POISSON BLANC et comptent ENSEMBLE dans ce quota de {nb_poisson_blanc}. Choisir {nb_poisson_blanc} espèce(s) MAXIMUM sur toute la semaine."
             if nb_poisson_blanc > 0
-            else ""
+            else "- Pas de poisson blanc cette semaine"
         )
         poisson_gras_ligne = (
-            f"- {nb_poisson_gras}x POISSON GRAS cette semaine (saumon, maquereau, sardines, hareng, truite saumonée) — oméga-3 essentiels OMS"
+            f"- POISSON GRAS : exactement {nb_poisson_gras} repas AU TOTAL (saumon, maquereau, sardines, hareng, truite saumonée — comptent ensemble) — oméga-3 essentiels OMS"
             if nb_poisson_gras > 0
             else ""
         )
@@ -401,6 +409,21 @@ JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
             else ""
         )
 
+        # Section saison
+        saison_labels = {"printemps": "printemps", "ete": "été", "automne": "automne", "hiver": "hiver"}
+        saison_label = saison_labels.get(saison_actuelle, saison_actuelle)
+        # Plats de saison par saison — guide l'IA vers des plats cohérents avec la météo
+        plats_saison_notes = {
+            "printemps": "Privilégier plats légers : poulet grillé, poisson vapeur, sautés de légumes printaniers. Éviter les plats d'hiver lourds (gratin dauphinois, tartiflette, bœuf bourguignon, raclette, fondue, pot-au-feu, cassoulet).",
+            "ete": "Plats froids, grillades, salades composées. Éviter les plats chauds lourds (gratins, rôtis braisés, cuisses confites).",
+            "automne": "Plats mijotés légers, soupes, roasted vegetables. Les plats de type bourguignon et ragoût sont acceptables en fin d'automne.",
+            "hiver": "Plats mijotés, gratins, cocottes, soupes réconfortantes — toute la gamme hivernale est appropriée.",
+        }
+        saison_section = (
+            f"\nSAISON ACTUELLE : {saison_label.upper()}\n"
+            f"{plats_saison_notes.get(saison_actuelle, '')}"
+        )
+
         # Section ingrédients interdits (allergies)
         allergies: list[str] = prefs.get("allergies", [])
         allergies_section = (
@@ -413,7 +436,7 @@ JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
         prompt = f"""GENERATE A 7-DAY MEAL PLAN (MONDAY-SUNDAY) IN JSON FORMAT ONLY.
 
 CONTEXT:
-{context}{oms_section}{jules_section}{allergies_section}{robots_section}{favoris_section}{legumes_section}{plats_section}{restes_section}{recettes_section}
+{context}{saison_section}{oms_section}{jules_section}{allergies_section}{robots_section}{favoris_section}{legumes_section}{feculents_section}{plats_section}{restes_section}{recettes_section}
 
 OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 {{"items": [
@@ -458,7 +481,7 @@ RULES:
 4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
-7. PROTEINS — strictly follow the OMS balance section above: {nb_poisson_blanc}x poisson blanc, {nb_poisson_gras}x poisson gras, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. Spread each protein type throughout the week, never two consecutive identical proteins.
+7. PROTEINS — strictly follow the OMS balance section above: MAX {nb_poisson_blanc}x TOTAL white fish (bar, merlu, lieu noir, cabillaud, sole = ALL are white fish — they share ONE common quota of {nb_poisson_blanc}), {nb_poisson_gras}x fatty fish total, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. ALL white fish species together count as ONE pool: if nb_poisson_blanc=1 you can have cabillaud OR bar OR merlu — only ONE species total, NOT one of each. Same rule for fatty fish. Spread each protein type throughout the week, never two consecutive identical proteins.
 8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. CRITICAL: dejeuner_reste_source MUST reference ONLY a PREVIOUS day — never a future day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste should almost NEVER be true — dinners are fresh preparations; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source).
 9. null is valid ONLY for entree, laitage, dessert, reste_source, proteine_accompagnement. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): copy legumes, feculents AND proteine_accompagnement from the original dish — do NOT return null for legumes/feculents. Example: if the source was 'Bœuf bourguignon' with legumes='Poêlée de légumes' and feculents='Pâtes', the reste must also have legumes='Poêlée de légumes' and feculents='Pâtes'. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null).
 10. No explanations, no text, ONLY JSON
@@ -480,7 +503,16 @@ RULES:
     - 'Lasagnes': feculents=null (pasta IS the structure)
     - 'Lentilles à la tomate' / 'Dal' / 'Pois chiches': feculents=null (légumineuse = féculent+protéine combined)
     In ALL these cases: legumes MUST be filled with a vegetable side (e.g. 'Salade verte', 'Haricots verts', 'Épinards').
-    PROTEIN CHECK: quiche, tarte salée, gratin, risotto, lasagnes have no obvious standalone protein → ALWAYS fill proteine_accompagnement (see Rule 14 examples)."""
+    PROTEIN CHECK: quiche, tarte salée, gratin, risotto, lasagnes have no obvious standalone protein → ALWAYS fill proteine_accompagnement (see Rule 14 examples).
+18. VEGETABLE COHERENCE — legumes MUST make culinary sense with the main dish. Think like a real chef:
+    - Roast chicken (poulet rôti) → haricots verts, petits pois, carottes glacées, haricots plats, ratatouille
+    - Grilled fish (poisson grillé, filet de cabillaud, lieu noir) → haricots verts, courgettes, épinards vapeur, fenouil braisé
+    - Beef stew (bœuf bourguignon, daube) → carottes, champignons, navets (these ARE part of the dish — note: add them to legumes only if not already in dish components)
+    - Pot-au-feu → carottes, navets, poireaux (these are IN the dish — legumes='Légumes du bouillon' or 'Salade verte en entrée')
+    - Pasta (pâtes bolognaise, carbonara, pesto) → salade verte, courgettes sautées — NEVER put a heavy steamed vegetable with pasta that already has a rich sauce
+    - Mediterranean dishes (ratatouille, poulet basquaise, moussaka) → salade verte or tomatoes — AVOID Nordic/Northern vegetables (choux de Bruxelles, endives)
+    - ABSOLUTELY FORBIDDEN incoherent pairings: 'Épinards' with 'Poulet basquaise'; 'Choux de Bruxelles' with 'Filet de sole meunière'; 'Carottes vapeur' with 'Moules marinières' (maritime dish needs maritime vegetables: fenouil, céleri)
+    - If the requested legumes list (LÉGUMES À INCLURE) conflicts with the dish, still use them but match them to the MOST coherent dish available that week."""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 

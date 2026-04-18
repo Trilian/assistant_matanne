@@ -782,6 +782,14 @@ export async function viderCache(): Promise<{ status: string; message: string }>
   return data
 }
 
+export async function viderPlanningTestSemaine(
+  dateDebut?: string,
+): Promise<{ message: string; id: number }> {
+  const params = dateDebut ? `?date_debut=${dateDebut}` : ''
+  const { data } = await clientApi.delete(`admin/planning/semaine${params}`)
+  return data
+}
+
 export async function lireFeatureFlags(): Promise<FeatureFlagsResponse> {
   const { data } = await clientApi.get('admin/feature-flags')
   return data

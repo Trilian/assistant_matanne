@@ -66,7 +66,7 @@ import {
 } from "@/composants/ui/select";
 import { utiliserRequete, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { clientApi } from "@/bibliotheque/api/client";
-import { obtenirStatutBridges } from "@/bibliotheque/api/admin";
+import { obtenirStatutBridges, viderPlanningTestSemaine } from "@/bibliotheque/api/admin";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -162,6 +162,10 @@ export default function PageAdmin() {
   const [patternCache, setPatternCache] = useState("*");
   const [purgeant, setPurgeant] = useState(false);
   const [resultatCache, setResultatCache] = useState<string | null>(null);
+  // Planning test reset
+  const [datePlanningTest, setDatePlanningTest] = useState("");
+  const [vidantPlanning, setVidantPlanning] = useState(false);
+  const [resultatPlanningTest, setResultatPlanningTest] = useState<string | null>(null);
   const [utilisateurCible, setUtilisateurCible] = useState("");
   const [dureeSimulation, setDureeSimulation] = useState("2");
   const [raisonSimulation, setRaisonSimulation] = useState("Vérification du rendu utilisateur");
@@ -298,6 +302,19 @@ export default function PageAdmin() {
       setResultatSimulation("❌ Impossible d'ouvrir le mode “voir en tant que user”.");
     } finally {
       setSimulationEnCours(false);
+    }
+  };
+
+  const viderPlanningTest = async () => {
+    setVidantPlanning(true);
+    setResultatPlanningTest(null);
+    try {
+      const { message } = await viderPlanningTestSemaine(datePlanningTest || undefined);
+      setResultatPlanningTest(`✅ ${message}`);
+    } catch {
+      setResultatPlanningTest("❌ Erreur lors de la suppression.");
+    } finally {
+      setVidantPlanning(false);
     }
   };
 
@@ -849,6 +866,40 @@ export default function PageAdmin() {
               </Button>
               {resultatCache && (
                 <p className="text-sm text-muted-foreground">{resultatCache}</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Planning test reset */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5" />Vider le planning (tests)
+              </CardTitle>
+              <CardDescription>
+                Supprime tous les repas planifiés de la semaine indiquée. Laisser vide pour la semaine courante.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 max-w-md">
+              <div className="space-y-1">
+                <Label htmlFor="date-planning-test">Semaine (lundi, optionnel)</Label>
+                <Input
+                  id="date-planning-test"
+                  type="date"
+                  value={datePlanningTest}
+                  onChange={(e) => setDatePlanningTest(e.target.value)}
+                />
+              </div>
+              <Button variant="destructive" onClick={viderPlanningTest} disabled={vidantPlanning}>
+                {vidantPlanning ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="mr-2 h-4 w-4" />
+                )}
+                Vider les repas
+              </Button>
+              {resultatPlanningTest && (
+                <p className="text-sm text-muted-foreground">{resultatPlanningTest}</p>
               )}
             </CardContent>
           </Card>

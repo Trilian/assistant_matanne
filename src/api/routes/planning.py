@@ -1335,6 +1335,7 @@ async def generer_planning_ia(
             ]
             if produits_saison:
                 preferences_enrichies["produits_de_saison"] = produits_saison
+            preferences_enrichies["saison_actuelle"] = saison_actuelle
         except Exception as e:
             logger.warning("[planning] Enrichissement saisonnier non chargé: %s", e)
 
@@ -1380,8 +1381,16 @@ async def generer_planning_ia(
 
         # Transmettre les préférences saisonnières de l'utilisateur au service IA
         preferences_enrichies["legumes_souhaites"] = body.legumes_souhaites
+        preferences_enrichies["feculents_souhaites"] = body.feculents_souhaites
         preferences_enrichies["plats_souhaites"] = body.plats_souhaites
         preferences_enrichies["autoriser_restes"] = body.autoriser_restes
+
+        # Fusionner les ingrédients interdits ponctuels avec les allergies permanentes
+        if body.ingredients_interdits:
+            allergies_permanentes = list(preferences_enrichies.get("allergies") or [])
+            preferences_enrichies["allergies"] = list(
+                dict.fromkeys(allergies_permanentes + body.ingredients_interdits)
+            )
 
         from src.core.exceptions import ExceptionApp
 

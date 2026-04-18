@@ -254,6 +254,77 @@ async def modifier_preferences(
 
 
 # ─────────────────────────────────────────────────────────
+# Valeurs par défaut du modal de génération de planning
+# ─────────────────────────────────────────────────────────
+
+_PLANNING_DEFAULTS_KEY = "planning"
+_PLANNING_DEFAULTS_DEFAULT: dict[str, Any] = {
+    "legumes_souhaites": [],
+    "feculents_souhaites": [],
+    "plats_souhaites": [],
+    "ingredients_interdits": [],
+    "autoriser_restes": True,
+    "nb_personnes": 4,
+}
+
+
+@router.get("/planning-defaults", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_planning_defaults(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Récupère les valeurs par défaut du modal de génération de planning."""
+    from src.core.models import PreferenceUtilisateur
+
+    def _query():
+        with executer_avec_session() as session:
+            prefs = (
+                session.query(PreferenceUtilisateur)
+                .filter(PreferenceUtilisateur.user_id == user["id"])
+                .first()
+            )
+            if not prefs:
+                return dict(_PLANNING_DEFAULTS_DEFAULT)
+            config = prefs.config_dashboard or {}
+            stored = config.get(_PLANNING_DEFAULTS_KEY, {})
+            return {**_PLANNING_DEFAULTS_DEFAULT, **stored}
+
+    return await executer_async(_query)
+
+
+@router.patch("/planning-defaults", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def sauvegarder_planning_defaults(
+    body: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Sauvegarde les valeurs par défaut du modal de génération de planning."""
+    from src.core.models import PreferenceUtilisateur
+
+    def _update():
+        with executer_avec_session() as session:
+            prefs = (
+                session.query(PreferenceUtilisateur)
+                .filter(PreferenceUtilisateur.user_id == user["id"])
+                .first()
+            )
+            if not prefs:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Préférences non trouvées. Utilisez PUT /preferences pour créer.",
+                )
+            config: dict[str, Any] = dict(prefs.config_dashboard or {})
+            existing = config.get(_PLANNING_DEFAULTS_KEY, {})
+            merged = {**_PLANNING_DEFAULTS_DEFAULT, **existing, **body}
+            config[_PLANNING_DEFAULTS_KEY] = merged
+            prefs.config_dashboard = config
+            session.commit()
+            return merged
+
+    return await executer_async(_update)
+
+
+# ─────────────────────────────────────────────────────────
 # Préférences canaux de notification (W4)
 # ─────────────────────────────────────────────────────────
 

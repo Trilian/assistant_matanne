@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { X, Plus, Loader2, Sparkles, Refrigerator } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -14,6 +14,10 @@ import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Switch } from "@/composants/ui/switch";
 import { listerInventaire } from "@/bibliotheque/api/inventaire";
+import {
+  obtenirPreferencesPlanning,
+  sauvegarderPreferencesPlanning,
+} from "@/bibliotheque/api/preferences";
 import type { GenererPlanningParams } from "@/types/planning";
 import type { ObjetDonnees } from "@/types/commun";
 
@@ -38,13 +42,34 @@ export function ModalGenerationPlanning({
 }: Props) {
   const [nbPersonnes, setNbPersonnes] = useState(nbPersonnesInitial);
   const [legumes, setLegumes] = useState<string[]>([]);
+  const [feculents, setFeculents] = useState<string[]>([]);
   const [plats, setPlats] = useState<string[]>([]);
+  const [ingredientsInterdits, setIngredientsInterdits] = useState<string[]>([]);
   const [autoriserRestes, setAutoriserRestes] = useState(true);
   const [inputLegume, setInputLegume] = useState("");
+  const [inputFeculent, setInputFeculent] = useState("");
   const [inputPlat, setInputPlat] = useState("");
+  const [inputInterdit, setInputInterdit] = useState("");
   const [chargementInventaire, setChargementInventaire] = useState(false);
   const [legumesSuggeres, setLegumesSuggeres] = useState<string[]>([]);
   const [inventaireCharge, setInventaireCharge] = useState(false);
+
+  // Chargement des préférences sauvegardées à l'ouverture du modal
+  useEffect(() => {
+    if (!ouvert) return;
+    obtenirPreferencesPlanning()
+      .then((d) => {
+        setLegumes(d.legumes_souhaites ?? []);
+        setFeculents(d.feculents_souhaites ?? []);
+        setPlats(d.plats_souhaites ?? []);
+        setIngredientsInterdits(d.ingredients_interdits ?? []);
+        setAutoriserRestes(d.autoriser_restes ?? true);
+        setNbPersonnes(d.nb_personnes ?? nbPersonnesInitial);
+      })
+      .catch(() => {
+        // silencieux — les valeurs vides par défaut sont correctes
+      });
+  }, [ouvert]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chargerDepuisInventaire = useCallback(async () => {
     if (inventaireCharge) return;
@@ -86,6 +111,21 @@ export function ModalGenerationPlanning({
     setLegumesSuggeres((prev) => prev); // garde les suggestions disponibles pour re-sélection
   }, []);
 
+  const ajouterFeculent = useCallback(
+    (nom: string) => {
+      const val = nom.trim();
+      if (val && !feculents.includes(val)) {
+        setFeculents((prev) => [...prev, val]);
+      }
+      setInputFeculent("");
+    },
+    [feculents]
+  );
+
+  const retirerFeculent = useCallback((nom: string) => {
+    setFeculents((prev) => prev.filter((f) => f !== nom));
+  }, []);
+
   const ajouterPlat = useCallback(
     (nom: string) => {
       const val = nom.trim();
@@ -101,13 +141,41 @@ export function ModalGenerationPlanning({
     setPlats((prev) => prev.filter((p) => p !== nom));
   }, []);
 
+  const ajouterInterdit = useCallback(
+    (nom: string) => {
+      const val = nom.trim();
+      if (val && !ingredientsInterdits.includes(val)) {
+        setIngredientsInterdits((prev) => [...prev, val]);
+      }
+      setInputInterdit("");
+    },
+    [ingredientsInterdits]
+  );
+
+  const retirerInterdit = useCallback((nom: string) => {
+    setIngredientsInterdits((prev) => prev.filter((i) => i !== nom));
+  }, []);
+
   const handleGenerer = () => {
+    // Sauvegarde silencieuse des paramètres courants en DB
+    sauvegarderPreferencesPlanning({
+      legumes_souhaites: legumes,
+      feculents_souhaites: feculents,
+      plats_souhaites: plats,
+      ingredients_interdits: ingredientsInterdits,
+      autoriser_restes: autoriserRestes,
+      nb_personnes: nbPersonnes,
+    }).catch(() => {
+      // silencieux — la génération continue même si la sauvegarde échoue
+    });
     onGenerer({
       date_debut: dateDebut,
       nb_personnes: nbPersonnes,
       preferences: preferences,
       legumes_souhaites: legumes,
+      feculents_souhaites: feculents,
       plats_souhaites: plats,
+      ingredients_interdits: ingredientsInterdits,
       autoriser_restes: autoriserRestes,
     });
   };
@@ -296,6 +364,116 @@ export function ModalGenerationPlanning({
                 className="h-8 w-8 shrink-0"
                 onClick={() => ajouterPlat(inputPlat)}
                 disabled={!inputPlat.trim()}
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Féculents souhaités */}
+          <div className="space-y-2">
+            <Label>
+              Féculents à privilégier{" "}
+              <span className="text-muted-foreground font-normal text-xs">(forte préférence)</span>
+            </Label>
+
+            {feculents.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {feculents.map((f) => (
+                  <span
+                    key={f}
+                    className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                  >
+                    🍚 {f}
+                    <button
+                      type="button"
+                      onClick={() => retirerFeculent(f)}
+                      aria-label={`Retirer ${f}`}
+                      className="rounded-full hover:bg-primary/20 p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ex: pommes de terre vapeur, riz basmati…"
+                value={inputFeculent}
+                onChange={(e) => setInputFeculent(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    ajouterFeculent(inputFeculent);
+                  }
+                }}
+                className="h-8 text-sm"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => ajouterFeculent(inputFeculent)}
+                disabled={!inputFeculent.trim()}
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Ingrédients interdits */}
+          <div className="space-y-2">
+            <Label>
+              Ingrédients à exclure{" "}
+              <span className="text-muted-foreground font-normal text-xs">
+                (pour cette génération uniquement)
+              </span>
+            </Label>
+
+            {ingredientsInterdits.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {ingredientsInterdits.map((i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive"
+                  >
+                    🚫 {i}
+                    <button
+                      type="button"
+                      onClick={() => retirerInterdit(i)}
+                      aria-label={`Retirer ${i}`}
+                      className="rounded-full hover:bg-destructive/20 p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Input
+                placeholder="Ex: concombre, champignons…"
+                value={inputInterdit}
+                onChange={(e) => setInputInterdit(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    ajouterInterdit(inputInterdit);
+                  }
+                }}
+                className="h-8 text-sm"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => ajouterInterdit(inputInterdit)}
+                disabled={!inputInterdit.trim()}
               >
                 <Plus className="h-3.5 w-3.5" />
               </Button>

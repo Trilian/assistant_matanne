@@ -710,7 +710,7 @@ export default function PagePlanning() {
   const toastIaRef = useRef<string | number | null>(null);
 
   const { mutate: genererIA, isPending: enGeneration } = utiliserMutation(
-    (params?: { legumes_souhaites?: string[]; plats_souhaites?: string[]; autoriser_restes?: boolean; nb_personnes?: number }) =>
+    (params?: { legumes_souhaites?: string[]; feculents_souhaites?: string[]; plats_souhaites?: string[]; ingredients_interdits?: string[]; autoriser_restes?: boolean; nb_personnes?: number }) =>
       genererPlanningSemaine({
         date_debut: dateDebut,
         nb_personnes: params?.nb_personnes ?? nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0),
@@ -724,7 +724,9 @@ export default function PagePlanning() {
               }
             : undefined,
         legumes_souhaites: params?.legumes_souhaites ?? [],
+        feculents_souhaites: params?.feculents_souhaites ?? [],
         plats_souhaites: params?.plats_souhaites ?? [],
+        ingredients_interdits: params?.ingredients_interdits ?? [],
         autoriser_restes: params?.autoriser_restes ?? true,
       }),
     {

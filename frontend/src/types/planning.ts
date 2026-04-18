@@ -133,6 +133,8 @@ export interface GenererPlanningParams {
   nb_personnes?: number;
   preferences?: ObjetDonnees;
   legumes_souhaites?: string[];
+  feculents_souhaites?: string[];
   plats_souhaites?: string[];
+  ingredients_interdits?: string[];
   autoriser_restes?: boolean;
 }

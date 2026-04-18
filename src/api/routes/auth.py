@@ -225,7 +225,9 @@ async def connexion(request: LoginRequest, raw_request: Request):
             raise HTTPException(status_code=401, detail="Identifiants invalides")
 
         metadata = response.user.user_metadata or {}
-        role = metadata.get("role", "membre")
+        app_metadata = response.user.app_metadata or {}
+        # app_metadata a priorité (non modifiable par l'utilisateur lui-même)
+        role = app_metadata.get("role") or metadata.get("role", "membre")
         email = response.user.email or request.email
         nom = metadata.get("nom") or metadata.get("full_name")
 
