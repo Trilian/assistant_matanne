@@ -1384,6 +1384,7 @@ async def generer_planning_ia(
         preferences_enrichies["feculents_souhaites"] = body.feculents_souhaites
         preferences_enrichies["plats_souhaites"] = body.plats_souhaites
         preferences_enrichies["autoriser_restes"] = body.autoriser_restes
+        preferences_enrichies["cuisines_souhaitees"] = body.cuisines_souhaitees
 
         # Fusionner les ingrédients interdits ponctuels avec les allergies permanentes
         if body.ingredients_interdits:

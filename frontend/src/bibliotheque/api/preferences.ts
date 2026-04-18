@@ -90,6 +90,7 @@ export interface PlanningDefaults {
   ingredients_interdits: string[];
   autoriser_restes: boolean;
   nb_personnes: number;
+  cuisines_souhaitees: string[];
 }
 
 /** Récupérer les valeurs par défaut du modal de génération de planning */

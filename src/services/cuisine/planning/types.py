@@ -136,6 +136,10 @@ class JourPlanning(BaseModel):
     diner_est_reste: bool = False
     diner_reste_source: str | None = None  # ex: "déjeuner de mercredi"
 
+    # Jules — adaptation bébé pour déjeuner/dîner (ex: "mixer", "sans sel", "couper petit", null si OK tel quel)
+    dejeuner_plat_jules: str | None = None
+    diner_plat_jules: str | None = None
+
     @model_validator(mode="after")
     def normaliser_champs_obligatoires(self):
         """Normalise les champs obligatoires quand l'IA renvoie des placeholders."""

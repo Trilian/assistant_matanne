@@ -408,14 +408,15 @@ class PlanningIAGenerationMixin:
         legumes_souhaites: list[str] = prefs.get("legumes_souhaites", [])
         feculents_souhaites: list[str] = prefs.get("feculents_souhaites", [])
         plats_souhaites: list[str] = prefs.get("plats_souhaites", [])
+        cuisines_souhaitees: list[str] = prefs.get("cuisines_souhaitees", [])
         autoriser_restes: bool = prefs.get("autoriser_restes", True)
         recettes_favorites: list[dict] = prefs.get("recettes_favorites", [])
 
         # Préférences nutritionnelles — injectées depuis UserPreferences par la route
         nb_poisson_blanc: int = int(prefs.get("nb_poisson_blanc", 1))
         nb_poisson_gras: int = int(prefs.get("nb_poisson_gras", 1))
-        viande_rouge_max: int = int(prefs.get("viande_rouge_max", 2))
-        nb_vegetarien: int = int(prefs.get("nb_vegetarien", 1))
+        viande_rouge_max: int = int(prefs.get("viande_rouge_max", 1))
+        nb_vegetarien: int = int(prefs.get("nb_vegetarien", 2))
         jules_present: bool = bool(prefs.get("jules_present", True))
         jules_age_mois: int = int(prefs.get("jules_age_mois", 19))
         robots: list[str] = prefs.get("robots", [])
@@ -443,6 +444,29 @@ class PlanningIAGenerationMixin:
             if plats_souhaites
             else ""
         )
+
+        # Cuisines du monde — section conditionnelle
+        cuisines_section = ""
+        if cuisines_souhaitees:
+            cuisines_list = ", ".join(cuisines_souhaitees)
+            cuisines_section = (
+                f"\n🌍 CUISINES DU MONDE À INTÉGRER CETTE SEMAINE :\n"
+                f"Inclure au moins 2-3 repas d'inspiration : {cuisines_list}.\n"
+                f"Adapter les féculents au style culinaire (voir Rule 18 FÉCULENTS).\n"
+                f"Exemples par cuisine :\n"
+                + (f"- Italien : risotto, osso buco, saltimbocca, pâtes alle vongole, piccata de veau, tiramisu\n" if any(c.lower() in ("italien", "italienne", "italie") for c in cuisines_souhaitees) else "")
+                + (f"- Japonais : ramen, donburi, gyoza, tempura, teriyaki, chirashi, yakitori\n" if any(c.lower() in ("japonais", "japonaise", "japon") for c in cuisines_souhaitees) else "")
+                + (f"- Chinois : wok de poulet, riz cantonais, porc au caramel, raviolis vapeur, bo bun, bao\n" if any(c.lower() in ("chinois", "chinoise", "chine") for c in cuisines_souhaitees) else "")
+                + (f"- Mexicain : fajitas, chili con carne, tacos, burritos, enchiladas, guacamole\n" if any(c.lower() in ("mexicain", "mexicaine", "mexique") for c in cuisines_souhaitees) else "")
+                + (f"- Espagnol : paella, tapas, tortilla espagnole, gambas al ajillo, gazpacho, patatas bravas\n" if any(c.lower() in ("espagnol", "espagnole", "espagne") for c in cuisines_souhaitees) else "")
+                + (f"- Américain : burgers maison, mac & cheese, pulled pork, BBQ ribs, coleslaw, cheesecake\n" if any(c.lower() in ("américain", "américaine", "amerique", "usa") for c in cuisines_souhaitees) else "")
+                + (f"- Breton : galettes complètes, crêpes, far breton, kouign-amann, kig ha farz, cotriade\n" if any(c.lower() in ("breton", "bretonne", "bretagne") for c in cuisines_souhaitees) else "")
+                + (f"- Basque : poulet basquaise, axoa, piperade, gâteau basque, ttoro, chipirons\n" if any(c.lower() in ("basque",) for c in cuisines_souhaitees) else "")
+                + (f"- Alsacien : flammekueche, choucroute, baeckeoffe, tarte flambée, spätzle, bretzel\n" if any(c.lower() in ("alsacien", "alsacienne", "alsace") for c in cuisines_souhaitees) else "")
+                + (f"- Savoyard : tartiflette, raclette, fondue, croziflette, diots, gratin savoyard\n" if any(c.lower() in ("savoyard", "savoyarde", "savoie") for c in cuisines_souhaitees) else "")
+                + (f"- Provençal : ratatouille, pissaladière, tapenade, bouillabaisse, daube provençale, pan bagnat\n" if any(c.lower() in ("provençal", "provençale", "provence") for c in cuisines_souhaitees) else "")
+                + (f"- Régional français : galettes, tartiflette, ratatouille, choucroute, poulet basquaise, gratin dauphinois\n" if any(c.lower() in ("régional français", "regional francais") for c in cuisines_souhaitees) else "")
+            )
 
         # Stratégie 4 portions : dîners en sauce/gratin/soupe → midi du lendemain
         if autoriser_restes:
@@ -487,18 +511,63 @@ class PlanningIAGenerationMixin:
         )
         poisson_lines = "\n".join(filter(None, [poisson_blanc_ligne, poisson_gras_ligne]))
         vegetarien_ligne = (
-            f"- Minimum {nb_vegetarien} repas VÉGÉTARIEN ou légumineuses cette semaine (lentilles, pois chiches, haricots, œufs, tofu)"
+            f"- Minimum {nb_vegetarien} repas VÉGÉTARIEN ou à base de LÉGUMES SECS cette semaine (lentilles, pois chiches, haricots rouges/blancs, fèves, œufs, tofu) — PNNS : légumineuses au moins 2x/semaine"
             if nb_vegetarien > 0
             else ""
         )
         oms_section = f"""
-ÉQUILIBRE NUTRITIONNEL HEBDOMADAIRE (recommandations OMS — OBLIGATOIRE) :
+ÉQUILIBRE NUTRITIONNEL HEBDOMADAIRE (recommandations PNNS/OMS — OBLIGATOIRE) :
+
+🐟 POISSONS :
 {poisson_lines}
-- Maximum {viande_rouge_max} repas de viande rouge sur toute la semaine (bœuf, veau, agneau) — réduction risque cardiovasculaire OMS
+
+🥩 VIANDE TOTALE (bœuf + veau + agneau + porc + abats) ≤ 500 g/semaine soit 3–4 repas MAX :
+- VIANDE ROUGE : maximum {viande_rouge_max} repas/semaine. Alterner entre :
+  • Bœuf : steak, bourguignon, bœuf stroganoff, hachis, daube, joue braisée, rosbif
+  • Veau : escalope, blanquette, osso buco, rôti, piccata
+  • Agneau : côtelettes grillées, gigot, souris braisée, épaule confite, navarin, curry d'agneau
+- PORC : 1 repas/semaine (côtelette, rôti, filet mignon, sauté, travers, échine, porc au caramel)
+  → Total viande rouge + porc = max {viande_rouge_max + 1} repas/semaine (cap PNNS 500 g)
+
+🥺 CHARCUTERIE ≤ 150 g/semaine (max 3 tranches de jambon) :
+- Jambon blanc, lardons, saucisse, saucisson comptent dans ce quota
+- Si jambon ou lardons sont utilisés en proteine_accompagnement, c'est 1 usage charcuterie
+- Ne PAS utiliser de la charcuterie à plus de 2 repas dans la semaine (accompagnement inclus)
+
+🌿 VÉGÉTARIEN & LÉGUMES SECS (PNNS : légumineuses au moins 2x/semaine) :
 {vegetarien_ligne}
-- Reste des jours: volaille préférée (poulet, dinde, pintade, canard)
-- Ne jamais mettre 2 fois le même ingrédient principal à 2 repas consécutifs (déjeuner ou dîner)
-- Varier les féculents : alterner pâtes, riz, pommes de terre, semoule, légumineuses"""
+- Les légumes secs comptent : lentilles, pois chiches, haricots rouges/blancs, fèves
+- Peuvent être un plat principal (dal, salade de lentilles) OU un accompagnement (pois chiches en salade)
+
+🐔 VOLAILLE — pour les jours restants, VARIER les espèces et modes de cuisson :
+  • Poulet (3-4x max) : rôti entier, cuisse, escalope grillée, curry, wok, basquaise, sauté, pané maison
+  • Dinde (1-2x) : escalope poêlée, rôti, émincé sauce moutarde, sauté aux légumes, pané
+  • Canard (0-1x) : magret grillé, aiguillettes sautées, cuisse confite (plutôt automne/hiver), parmentier de canard
+  • Pintade ou autre volaille (0-1x) : rôtie, en cocotte, braisée, lapin en moutarde/chasseur
+  RÈGLE : ne JAMAIS avoir plus de 2 repas poulet consécutifs — alterner avec dinde/canard/pintade
+
+🍞 FÉCULENTS COMPLETS (PNNS : au moins 1 féculent complet par jour) :
+- Privilégier les versions complètes : riz complet, pâtes complètes, pain complet, semoule complète
+- Au moins 1 féculent complet/jour dans les champs feculents (pas obligatoirement TOUS en complet)
+- Huiles : privilégier huile d'olive, colza, noix (PNNS : ALLER VERS ces matières grasses de qualité)
+
+🍳 FAIT MAISON (PNNS : privilégier le fait maison avec produits frais/conserve/surgelé peu transformés) :
+- Tous les plats proposés doivent être CUISINABLES MAISON avec des ingrédients frais
+- JAMAIS de plats industriels : pas de pizza surgelée, pas de lasagnes du commerce, pas de nuggets industriels
+- Si pizza/nuggets/cordons bleus : toujours MAISON (pizza maison, nuggets maison, cordon bleu maison)
+- Les conserves et surgelés peu transformés sont OK : légumes surgelés, conserves de tomates, pois chiches en boîte
+
+🍽 PLAISIR/PRATIQUE : maximum 1 repas par semaine (cordon bleu maison, nuggets maison, croque-monsieur, quiche maison, pizza maison)
+
+🔁 ALTERNANCE : ne jamais mettre 2 fois le même ingrédient principal à 2 repas consécutifs (déjeuner ou dîner)
+- Varier les féculents : alterner pâtes, riz, pommes de terre, semoule, légumineuses
+- Alterner dans la semaine : viande, volaille, poisson, œufs, légumes secs (PNNS)
+
+⚠️ RÉDUIRE (PNNS) :
+- Limiter sel et sucre ajouté dans les préparations
+- Limiter la charcuterie (déjà capée à 150 g ci-dessus)
+- Pas de boissons sucrées (sodas, jus industriels) — eau ou infusions uniquement
+- Éviter les produits ultra-transformés (NOVA 4) : plats préparés industriels, sauces toutes faites, céréales très sucrées"""
 
         # Section robots cuisine disponibles
         robots_section = (
@@ -524,7 +593,10 @@ JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
 - Jules mange la même chose adaptée : sans sel ajouté, sans alcool même en sauce, sans épices fortes, textures adaptées si nécessaire — but NEVER mention these adaptations in the field values
 - POISSON CRU INTERDIT pour Jules — ne jamais planifier tartare, carpaccio, sashimi, gravlax un jour où Jules mange. Toujours choisir du poisson CUIT (vapeur, grillé, poché)
 - À éviter également : marinades alcoolisées, piments, moutarde forte
-- Jules ne mange PAS d'entrée — inclure impérativement un légume dans diner_legumes/dejeuner_legumes pour chaque repas"""
+- Jules ne mange PAS d'entrée — inclure impérativement un légume dans diner_legumes/dejeuner_legumes pour chaque repas
+- PRIORISER les plats naturellement adaptables : mijotés, gratins, soupes, pâtes, poisson vapeur, purées, woks coupés fin
+- ÉVITER les plats nécessitant trop d'adaptation : fritures, plats très épicés, textures complexes (fruits de mer entiers)
+- dejeuner_plat_jules / diner_plat_jules : texte COURT d'adaptation pour Jules. Exemples: "mixer", "couper petit", "sans sauce piquante", "écraser la viande", "version sans sel". Si le plat est naturellement OK pour Jules → null"""
             if jules_present
             else ""
         )
@@ -544,6 +616,45 @@ JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
             f"{plats_saison_notes.get(saison_actuelle, '')}"
         )
 
+        # Section légumes/fruits de saison automatique (depuis produits_de_saison.json)
+        # Ne s'injecte QUE si l'utilisateur n'a pas rempli legumes_souhaites manuellement
+        saison_produits_section = ""
+        if not legumes_souhaites:
+            try:
+                import json
+                from pathlib import Path
+
+                json_path = Path(__file__).resolve().parents[4] / "data" / "reference" / "produits_de_saison.json"
+                if json_path.exists():
+                    with open(json_path, encoding="utf-8") as f:
+                        data_saison = json.load(f)
+                    mois_courant = semaine_debut.month
+                    noms_mois = {
+                        1: "JANVIER", 2: "FÉVRIER", 3: "MARS", 4: "AVRIL",
+                        5: "MAI", 6: "JUIN", 7: "JUILLET", 8: "AOÛT",
+                        9: "SEPTEMBRE", 10: "OCTOBRE", 11: "NOVEMBRE", 12: "DÉCEMBRE",
+                    }
+                    legumes_saison = [
+                        p["nom"] for p in data_saison.get("produits", [])
+                        if p.get("categorie") == "legume" and mois_courant in p.get("mois", [])
+                    ]
+                    fruits_saison = [
+                        p["nom"] for p in data_saison.get("produits", [])
+                        if p.get("categorie") == "fruit" and mois_courant in p.get("mois", [])
+                    ]
+                    if legumes_saison:
+                        saison_produits_section = (
+                            f"\nLÉGUMES DE SAISON ({noms_mois.get(mois_courant, '')}) — UTILISER EN PRIORITÉ pour les champs legumes :\n"
+                            f"- {', '.join(legumes_saison)}"
+                        )
+                    if fruits_saison:
+                        saison_produits_section += (
+                            f"\nFRUITS DE SAISON ({noms_mois.get(mois_courant, '')}) — UTILISER EN PRIORITÉ pour desserts et goûter :\n"
+                            f"- {', '.join(fruits_saison)}"
+                        )
+            except Exception as e:
+                logger.debug("Produits de saison non chargés: %s", e)
+
         # Section ingrédients interdits (allergies)
         allergies: list[str] = prefs.get("allergies", [])
         allergies_section = (
@@ -556,7 +667,7 @@ JULES ({jules_age_mois} mois — mange les mêmes plats adaptés) :
         prompt = f"""GENERATE A 7-DAY MEAL PLAN (MONDAY-SUNDAY) IN JSON FORMAT ONLY.
 
 CONTEXT:
-{context}{saison_section}{oms_section}{jules_section}{allergies_section}{robots_section}{favoris_section}{legumes_section}{feculents_section}{plats_section}{restes_section}{recettes_section}
+{context}{saison_section}{saison_produits_section}{oms_section}{jules_section}{allergies_section}{robots_section}{favoris_section}{legumes_section}{feculents_section}{plats_section}{cuisines_section}{restes_section}{recettes_section}
 
 OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
 {{"items": [
@@ -590,25 +701,27 @@ OUTPUT ONLY THIS JSON STRUCTURE (no other text, no markdown, no code blocks):
     "diner_dessert_est_recette": false,
     "diner_proteine_accompagnement": null,
     "diner_est_reste": false,
-    "diner_reste_source": null
+    "diner_reste_source": null,
+    "dejeuner_plat_jules": "couper petit",
+    "diner_plat_jules": null
   }}
 ]}}
 
 RULES:
 1. Return ONLY valid JSON with exactly 7 items (one per day: Lundi→Dimanche)
 2. dejeuner and diner (le PLAT principal): ONLY the main dish/recipe name — NEVER include sides, accompaniments, or ingredients in this field. Correct: "Poulet curry", "Filet de saumon", "Gratin dauphinois". FORBIDDEN: "Poulet curry, riz basmati, carottes vapeur" or "Saumon avec haricots verts". Sides go ONLY in legumes/feculents fields. Max 40 chars, no parentheses.
-3. petit_dejeuner: TOUJOURS un petit-déjeuner français classique — tartines, pain, céréales, viennoiseries, yaourt, fruit, jus. En semaine: texte court simple (tartines beurre, céréales lait, pain confiture, yaourt fruit). Le week-end: peut être est_recette=true pour des préparations spéciales (crêpes, gaufres, pain perdu, pancakes, granola maison). ABSOLUMENT INTERDIT dans petit_dejeuner: omelette, œufs brouillés, œufs sur le plat, quiche, tout plat salé cuisiné — ce sont des plats de repas, PAS des petits-déjeuners.
-4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed
+3. petit_dejeuner: TOUJOURS un petit-déjeuner français classique SAIN. PRIVILÉGIER : tartines pain complet/céréales, porridge flocons avoine, muesli non sucré, yaourt nature + fruit frais, pain complet beurre confiture. LIMITER (PNNS) : céréales sucrées du commerce (Chocapic, Frosties, etc.), viennoiseries (max 2x/semaine le week-end). En semaine: texte court simple (tartines pain complet, porridge, muesli fruit, yaourt fruit). Le week-end: peut être est_recette=true pour des préparations MAISON (crêpes, gaufres, pain perdu, pancakes, granola maison). ABSOLUMENT INTERDIT: omelette, œufs brouillés, œufs sur le plat, quiche, tout plat salé cuisiné.
+4. entree/dessert: optional — include only if the meal complexity warrants it; est_recette=true only if real preparation steps needed. DESSERTS (PNNS) : PRIVILÉGIER le fait maison et les fruits (compote maison, tarte aux fruits, cl afoutis, mousse chocolat maison, salade de fruits). LIMITER : crèmes dessert industrielles, glaces, gâteaux du commerce. Ne PAS mettre un dessert sucré à chaque repas — alterner fruit, yaourt, et dessert élaboré.
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
-6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
-7. PROTEINS — strictly follow the OMS balance section above: MAX {nb_poisson_blanc}x TOTAL white fish (bar, merlu, lieu noir, cabillaud, sole = ALL are white fish — they share ONE common quota of {nb_poisson_blanc}), {nb_poisson_gras}x fatty fish total, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. ALL white fish species together count as ONE pool: if nb_poisson_blanc=1 you can have cabillaud OR bar OR merlu — only ONE species total, NOT one of each. Same rule for fatty fish. Spread each protein type throughout the week, never two consecutive identical proteins.
+6. gouter: MANDATORY — always a non-null short text representing the cereal product. PRIVILÉGIER FAIT MAISON (PNNS) : pain complet, cake maison, galette avoine maison, biscuits maison, pain d'épices maison, crêpes maison, muffins maison. LIMITER : biscuits industriels, gâteaux du commerce, barres chocolatées. gouter_laitage MANDATORY (yaourt nature, fromage frais, fromage blanc — éviter crèmes dessert sucrées). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote maison — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a HEALTHY cereal product fait maison de préférence. gouter and gouter_gateau should match. Inclure régulièrement des fruits à coque non salés (noix, amandes, noisettes) dans le goûter (PNNS : aliments délaissés à réintroduire).
+7. PROTEINS — strictly follow the PNNS balance section above. Weekly protein budget: {nb_poisson_blanc}x white fish, {nb_poisson_gras}x fatty fish, max {viande_rouge_max}x red meat + 1x pork (total meat ≤ {viande_rouge_max + 1} meals = PNNS 500g cap), min {nb_vegetarien}x vegetarian/legumes secs (PNNS: légumineuses ≥ 2x/week), max 1x comfort meal, remaining days=POULTRY (poulet 3-4x, dinde 1-2x, canard 0-1x, pintade/lapin 0-1x). Charcuterie (jambon, lardons, saucisse) max 2 usages/week across all fields (PNNS 150g cap). NEVER more than 2 consecutive chicken meals. Prefer féculents complets at least once/day. Alternate viande/volaille/poisson/œufs/légumes secs throughout the week.
 8. 4-PORTIONS STRATEGY (MANDATORY MINIMUM: 3 LUNCHES MUST BE LEFTOVERS) — for sauces/gratins/soups/stews/lasagnes/risottos/currys/woks/poêlées/cocottes/tajines/mijotés/rôtis/boulettes: set dejeuner_est_reste=true the NEXT DAY with dejeuner_reste_source="dîner de [JOUR]". MANDATORY: at least 3 of the 6 lunches (Mardi→Dimanche) MUST be leftovers — NOT optional. Plan your dinners intentionally: choose at least 3-4 dinner dishes that ARE reheatable. CRITICAL: dejeuner_reste_source MUST reference the IMMEDIATELY PREVIOUS day — never a future day, never the same day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. Mercredi's lunch → "dîner de Mardi". IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste MUST ALWAYS be false — dinners are ALWAYS fresh preparations, NEVER leftovers. This field is permanently banned from ever being true in this app; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source). RISOTTO STAYS RULE: for RESTES of dishes like risotto, quiche, gratin — feculents=null (the dish already contains its own starch — adding "Riz vapeur" or similar is FORBIDDEN).
 9. null is valid ONLY for entree, laitage, dessert, reste_source, proteine_accompagnement. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): copy legumes, feculents AND proteine_accompagnement from the original dish — do NOT return null for legumes/feculents. Example: if the source was 'Bœuf bourguignon' with legumes='Poêlée de légumes' and feculents='Pâtes', the reste must also have legumes='Poêlée de légumes' and feculents='Pâtes'. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null). CRITICAL VEGETABLE EXCEPTION: If a vegetable or ingredient is ALREADY IN THE DISH NAME, you MUST NOT repeat it in the legumes field. Instead use a DIFFERENT vegetable. EXAMPLES: 'Risotto aux asperges' → legumes=null OR legumes='Salade verte' — ABSOLUTELY FORBIDDEN: legumes='Asperges vapeur'. 'Dinde aux champignons' → legumes MUST NOT be 'Champignons sautés' — use 'Haricots verts', 'Brocoli', 'Courgettes' instead. 'Bœuf haché aux poivrons' → legumes MUST NOT be 'Poivrons grillés' — use 'Salade verte', 'Haricots verts', 'Courgettes' instead. 'Poulet aux courgettes' → legumes must NOT be 'Courgettes sautées' — use 'Haricots verts' or 'Salade' instead. General rule: NEVER put a variant of the SAME ingredient in both the dish name AND the legumes field.
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
 12. PNNS4 ASSIETTE ÉQUILIBRÉE — for every dejeuner and diner that is NOT a reste AND NOT a dish-as-starch (see Rule 17), the meal MUST include BOTH:
-    a) legumes field: ≥ half the plate (haricots verts, courgettes sautées, brocoli vapeur, carottes, épinards, poêlée de légumes...) — NEVER null
-    b) feculents field: ~1/4 of the plate (riz, pâtes, pommes de terre, semoule, quinoa...) — NEVER null
+    a) legumes field: ≥ half the plate (haricots verts, courgettes sautées, brocoli vapeur, carottes, épinards, poêlée de légumes...) — NEVER null. PNNS: 5 fruits et légumes/jour = au moins 3 portions de légumes/jour (midi + soir + entrée/gouter).
+    b) feculents field: ~1/4 of the plate (riz, pâtes, pommes de terre, semoule, quinoa...) — NEVER null. Prefer COMPLET versions at least once per day (riz complet, pâtes complètes, pain complet).
     EXCEPTION: for dishes that ARE their own starch (see Rule 17), set feculents=null and legumes=side vegetable. NEVER leave legumes null except when the vegetable is literally in the dish name (see Rule 9).
 13. NO DISH REPETITION — Never plan the exact same main dish (dejeuner or diner) more than once across the 7 days. This includes CONCEPTUALLY IDENTICAL dishes with slightly different names: 'Rôti de poulet aux herbes' and 'Poulet rôti aux légumes' are BOTH roasted chicken — only ONE per week. 'Filet de saumon grillé' and 'Pavé de saumon' are BOTH salmon — only ONE per week. Rule: same protein + same cooking method = forbidden repetition. Vary BOTH the protein source AND the cooking technique throughout the week.
 14. PROTEIN MANDATORY — every dejeuner and diner MUST contain a protein source. If the main dish has NO visible protein in its name, you MUST fill proteine_accompagnement. MANDATORY EXAMPLES: 'Gratin dauphinois' → proteine_accompagnement='Jambon blanc' (NEVER null); 'Tarte aux poireaux' → 'Lardons' or 'Saumon poché'; 'Risotto aux légumes' → 'Crevettes sautées' or 'Blanc de poulet'; 'Ratatouille' → 'Blanc de poulet grillé'; 'Soupe de légumes' → 'Pain complet fromage' or 'Œuf dur'; 'Poêlée de légumes' → 'Blanc de dinde'. Rule: a dish with no animal or legume protein keyword in its name ALWAYS needs proteine_accompagnement. For restes, copy proteine_accompagnement from the source dish. Never plan a meal with zero protein across all fields.
@@ -625,15 +738,26 @@ RULES:
     - 'Lentilles à la tomate' / 'Dal' / 'Pois chiches' / 'Salade de lentilles' / 'Soupe de lentilles' / 'Lentilles vinaigrette': feculents=null (toutes les préparations à base de légumineuses = féculent+protéine combinés — JAMAIS ajouter riz ou autre féculent en accompagnement)
     In ALL these cases: legumes MUST be filled with a vegetable side (e.g. 'Salade verte', 'Haricots verts', 'Épinards') — NEVER another cold salad alongside a lentil salad (e.g. 'Carottes râpées' with 'Salade de lentilles' = FORBIDDEN, both are cold salads — use a COOKED vegetable instead: 'Haricots verts', 'Brocoli vapeur', 'Courgettes sautées').
     PROTEIN CHECK: quiche, tarte salée, gratin, risotto, lasagnes have no obvious standalone protein → ALWAYS fill proteine_accompagnement (see Rule 14 examples).
-18. VEGETABLE COHERENCE — legumes MUST make culinary sense with the main dish. Think like a real chef:
-    - Roast chicken (poulet rôti) → haricots verts, petits pois, carottes glacées, haricots plats, ratatouille
-    - Grilled fish (poisson grillé, filet de cabillaud, lieu noir) → haricots verts, courgettes, épinards vapeur, fenouil braisé
-    - Beef stew (bœuf bourguignon, daube) → carottes, champignons, navets (these ARE part of the dish — note: add them to legumes only if not already in dish components)
-    - Pot-au-feu → carottes, navets, poireaux (these are IN the dish — legumes='Légumes du bouillon' or 'Salade verte en entrée')
-    - Pasta (pâtes bolognaise, carbonara, pesto) → salade verte, courgettes sautées — NEVER put a heavy steamed vegetable with pasta that already has a rich sauce
-    - Mediterranean dishes (ratatouille, poulet basquaise, moussaka) → salade verte or tomatoes — AVOID Nordic/Northern vegetables (choux de Bruxelles, endives)
-    - ABSOLUTELY FORBIDDEN incoherent pairings: 'Épinards' with 'Poulet basquaise'; 'Choux de Bruxelles' with 'Filet de sole meunière'; 'Carottes vapeur' with 'Moules marinières' (maritime dish needs maritime vegetables: fenouil, céleri)
-    - If the requested legumes list (LÉGUMES À INCLURE) conflicts with the dish, still use them but match them to the MOST coherent dish available that week."""
+18. VEGETABLE & STARCH COHERENCE — legumes AND feculents MUST make culinary sense with the main dish. Think like a real chef:
+    LÉGUMES :
+    - Poulet rôti → haricots verts, petits pois, carottes glacées, haricots plats, ratatouille
+    - Poisson grillé (cabillaud, lieu noir, sole) → haricots verts, courgettes, épinards vapeur, fenouil braisé
+    - Bœuf bourguignon, daube → carottes, champignons, navets (partie du plat — legumes='Légumes du plat' ou 'Salade verte')
+    - Pot-au-feu → carottes, navets, poireaux (IN the dish — legumes='Légumes du bouillon' ou 'Salade verte en entrée')
+    - Pâtes (bolognaise, carbonara, pesto) → salade verte, courgettes sautées — NEVER heavy steamed vegetable with rich pasta sauce
+    - Plats méditerranéens (ratatouille, poulet basquaise, moussaka) → salade verte, tomates — AVOID Northern vegetables (choux de Bruxelles, endives)
+    - FORBIDDEN: 'Épinards' avec 'Poulet basquaise'; 'Choux de Bruxelles' avec 'Sole meunière'; 'Carottes vapeur' avec 'Moules marinières'
+    FÉCULENTS :
+    - Plats asiatiques (wok, curry, poulet thaï, porc au caramel) → riz basmati, riz thaï, nouilles sautées — JAMAIS semoule/pommes de terre
+    - Plats méditerranéens/maghrébins (tajine, couscous, kefta) → semoule, boulgour — JAMAIS riz basmati
+    - Plats français classiques (poulet rôti, bœuf bourguignon, blanquette) → pommes de terre vapeur, purée, pâtes — cohérent
+    - Plats italiens (osso buco, saltimbocca, piccata) → risotto, polenta, pâtes fraîches — JAMAIS semoule
+    - Plats indiens (curry, korma, dal) → riz basmati, naan — JAMAIS pommes de terre vapeur
+    - Poisson grillé/vapeur → riz vapeur, pommes de terre vapeur, écrasé de pommes de terre — JAMAIS pâtes
+    - Plats mexicains (fajitas, chili) → riz, tortillas — JAMAIS semoule/boulgour
+    - Si le plat EST son propre féculent (risotto, quiche, lasagnes, tartiflette, hachis parmentier, gnocchi) → feculents=null ou 'Salade verte'
+    - If the requested lists (LÉGUMES/FÉCULENTS À INCLURE) conflict with the dish, match them to the MOST coherent dish available that week.
+19. CREATIVITY & VARIETY — Each generation MUST be unique and surprising. Do NOT fall back on the same "safe" dishes every time (avoid always choosing poulet rôti, pâtes bolognaise, saumon grillé as defaults). Explore the full spectrum: cuisines du monde (asiatique, méditerranéenne, mexicaine, indienne, libanaise...), techniques variées (mijoté, grillé, wok, four, vapeur), et des plats moins classiques. Sois CRÉATIF et propose des combinaisons inattendues tout en restant familial."""
 
         logger.info(f"🤖 Generating AI weekly plan starting {semaine_debut}")
 
@@ -644,7 +768,7 @@ RULES:
             item_model=JourPlanning,
             system_prompt="Return ONLY valid JSON. No text before or after JSON. Never use markdown code blocks.",
             max_items=7,
-            temperature=0.5,
+            temperature=0.7,
             max_tokens=3000,
             use_cache=False,
         )
@@ -860,6 +984,7 @@ RULES:
                 proteine_accompagnement=jour_data.dejeuner_proteine_accompagnement,
                 est_reste=jour_data.dejeuner_est_reste,
                 reste_description=jour_data.dejeuner_reste_source,
+                plat_jules=jour_data.dejeuner_plat_jules,
             )
             score_dej = evaluer_equilibre_repas(repas_dej)
             repas_dej.score_equilibre = score_dej["score_equilibre"]
@@ -961,6 +1086,7 @@ RULES:
                 proteine_accompagnement=jour_data.diner_proteine_accompagnement,
                 est_reste=jour_data.diner_est_reste,
                 reste_description=jour_data.diner_reste_source,
+                plat_jules=jour_data.diner_plat_jules,
             )
             score_din = evaluer_equilibre_repas(repas_din)
             repas_din.score_equilibre = score_din["score_equilibre"]

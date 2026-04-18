@@ -137,4 +137,5 @@ export interface GenererPlanningParams {
   plats_souhaites?: string[];
   ingredients_interdits?: string[];
   autoriser_restes?: boolean;
+  cuisines_souhaitees?: string[];
 }

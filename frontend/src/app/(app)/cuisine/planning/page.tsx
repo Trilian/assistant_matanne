@@ -235,16 +235,20 @@ function CarteRepasDraggable({
   repas,
   label,
   onRetirer,
+  onModifierChamp,
 }: {
   repas: RepasPlanning;
   label: string;
   onRetirer: (repas: RepasPlanning) => void;
+  onModifierChamp?: (repasId: number, champ: string, valeur: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: construireIdRepasPlanning(repas.id),
     data: { repasId: repas.id },
   });
   const carteRef = useRef<HTMLDivElement | null>(null);
+  const [champEnEdition, setChampEnEdition] = useState<"legumes" | "feculents" | null>(null);
+  const [valeurEdition, setValeurEdition] = useState("");
 
   const definirRefs = useCallback(
     (node: HTMLDivElement | null) => {
@@ -279,7 +283,11 @@ function CarteRepasDraggable({
         </button>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
-            {repas.recette_id ? (
+            {repas.est_reste && repas.reste_description ? (
+              <span className="font-medium text-amber-700 dark:text-amber-300 break-words">
+                ♻ Reste de {repas.reste_description}
+              </span>
+            ) : repas.recette_id ? (
               <a
                 href={`/cuisine/recettes/${repas.recette_id}`}
                 className="font-medium text-foreground break-words hover:underline hover:text-primary transition-colors"
@@ -294,38 +302,12 @@ function CarteRepasDraggable({
               </span>
             )}
             {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
-            {repas.score_equilibre != null && repas.type_repas !== "petit_dejeuner" && (
-              <span
-                title={
-                  repas.alertes_equilibre?.length
-                    ? `Score équilibre : ${repas.score_equilibre}/100\n${repas.alertes_equilibre.join("\n")}`
-                    : `Score équilibre : ${repas.score_equilibre}/100`
-                }
-                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                  repas.score_equilibre >= 80
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                    : repas.score_equilibre >= 50
-                    ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
-                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-                }`}
-              >
-                ⚖ {repas.score_equilibre}
-              </span>
-            )}
             {repas.genere_par_ia && (
               <span
                 title="Recette générée par l'IA"
                 className="inline-flex items-center text-[11px]"
               >
                 🤖
-              </span>
-            )}
-            {repas.est_reste && (
-              <span
-                title={repas.reste_description ?? "Reste réchauffé"}
-                className="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300"
-              >
-                ♻ Reste
               </span>
             )}
           </div>
@@ -344,6 +326,7 @@ function CarteRepasDraggable({
               </div>
             )}
           {(repas.type_repas === "dejeuner" || repas.type_repas === "diner") &&
+            !repas.est_reste &&
             (repas.entree || repas.laitage || repas.dessert || repas.legumes || repas.feculents || repas.proteine_accompagnement) && (
               <div className="flex flex-col gap-y-0.5 mt-0.5">
                 {repas.entree && (
@@ -361,19 +344,68 @@ function CarteRepasDraggable({
                   )
                 )}
                 {repas.legumes && (
-                  <span
-                    className="text-[10px] break-words text-muted-foreground"
-                    title={`Légumes : ${repas.legumes}`}
-                  >🥦 {repas.legumes}</span>
+                  champEnEdition === "legumes" ? (
+                    <form
+                      className="flex gap-0.5"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (valeurEdition.trim() && onModifierChamp) {
+                          onModifierChamp(repas.id, "legumes", valeurEdition.trim());
+                        }
+                        setChampEnEdition(null);
+                      }}
+                    >
+                      <input
+                        autoFocus
+                        className="text-[10px] w-full rounded border px-1 py-0 bg-background"
+                        value={valeurEdition}
+                        onChange={(e) => setValeurEdition(e.target.value)}
+                        onBlur={() => setChampEnEdition(null)}
+                        onKeyDown={(e) => e.key === "Escape" && setChampEnEdition(null)}
+                      />
+                    </form>
+                  ) : (
+                    <span
+                      className="text-[10px] break-words text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+                      title={`Légumes : ${repas.legumes} — cliquer pour modifier`}
+                      onClick={() => { setChampEnEdition("legumes"); setValeurEdition(repas.legumes || ""); }}
+                    >🥦 {repas.legumes}</span>
+                  )
                 )}
                 {repas.feculents && (
-                  <span
-                    className="text-[10px] break-words text-muted-foreground"
-                    title={`Féculents : ${repas.feculents}`}
-                  >🍚 {repas.feculents}</span>
+                  champEnEdition === "feculents" ? (
+                    <form
+                      className="flex gap-0.5"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (valeurEdition.trim() && onModifierChamp) {
+                          onModifierChamp(repas.id, "feculents", valeurEdition.trim());
+                        }
+                        setChampEnEdition(null);
+                      }}
+                    >
+                      <input
+                        autoFocus
+                        className="text-[10px] w-full rounded border px-1 py-0 bg-background"
+                        value={valeurEdition}
+                        onChange={(e) => setValeurEdition(e.target.value)}
+                        onBlur={() => setChampEnEdition(null)}
+                        onKeyDown={(e) => e.key === "Escape" && setChampEnEdition(null)}
+                      />
+                    </form>
+                  ) : (
+                    <span
+                      className="text-[10px] break-words text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+                      title={`Féculents : ${repas.feculents} — cliquer pour modifier`}
+                      onClick={() => { setChampEnEdition("feculents"); setValeurEdition(repas.feculents || ""); }}
+                    >🍚 {repas.feculents}</span>
+                  )
                 )}
                 {repas.proteine_accompagnement && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Protéine : ${repas.proteine_accompagnement}`}>🥩 {repas.proteine_accompagnement}</span>
+                )}
+                {repas.plat_jules && (
+                  <span className="text-[10px] text-muted-foreground break-words" title={`Jules : ${repas.plat_jules}`}>👶 {repas.plat_jules}</span>
                 )}
                 {repas.laitage && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
@@ -437,6 +469,7 @@ function CaseRepasPlanning({
   repasGlisse,
   onAjouter,
   onRetirer,
+  onModifierChamp,
 }: {
   date: string;
   type: TypeRepas;
@@ -446,6 +479,7 @@ function CaseRepasPlanning({
   repasGlisse: RepasPlanning | null;
   onAjouter: (date: string, type: TypeRepas) => void;
   onRetirer: (repas: RepasPlanning) => void;
+  onModifierChamp?: (repasId: number, champ: string, valeur: string) => void;
 }) {
   const { isOver, setNodeRef } = useDroppable({
     id: construireIdCasePlanning(date, type),
@@ -466,7 +500,7 @@ function CaseRepasPlanning({
         {emoji} {label}
       </div>
       {repas ? (
-        <CarteRepasDraggable repas={repas} label={label} onRetirer={onRetirer} />
+        <CarteRepasDraggable repas={repas} label={label} onRetirer={onRetirer} onModifierChamp={onModifierChamp} />
       ) : (
         <Button
           variant="ghost"
@@ -708,10 +742,22 @@ export default function PagePlanning() {
     [confirmerSuppressionRepas, planifierSuppression]
   );
 
+  const modifierChampRepas = useCallback(
+    async (repasId: number, champ: string, valeur: string) => {
+      try {
+        await mettreAJourRepas(repasId, { [champ]: valeur } as Record<string, string>);
+        invalider(["planning"]);
+      } catch {
+        toast.error("Erreur lors de la modification");
+      }
+    },
+    [invalider]
+  );
+
   const toastIaRef = useRef<string | number | null>(null);
 
   const { mutate: genererIA, isPending: enGeneration } = utiliserMutation(
-    (params?: { legumes_souhaites?: string[]; feculents_souhaites?: string[]; plats_souhaites?: string[]; ingredients_interdits?: string[]; autoriser_restes?: boolean; nb_personnes?: number }) =>
+    (params?: { legumes_souhaites?: string[]; feculents_souhaites?: string[]; plats_souhaites?: string[]; ingredients_interdits?: string[]; autoriser_restes?: boolean; nb_personnes?: number; cuisines_souhaitees?: string[] }) =>
       genererPlanningSemaine({
         date_debut: dateDebut,
         nb_personnes: params?.nb_personnes ?? nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0),
@@ -729,6 +775,7 @@ export default function PagePlanning() {
         plats_souhaites: params?.plats_souhaites ?? [],
         ingredients_interdits: params?.ingredients_interdits ?? [],
         autoriser_restes: params?.autoriser_restes ?? true,
+        cuisines_souhaitees: params?.cuisines_souhaitees ?? [],
       }),
     {
       onSuccess: async (resultat: ResultatGenerationPlanning) => {
@@ -1511,6 +1558,7 @@ export default function PagePlanning() {
                           repasGlisse={repasGlisse}
                           onAjouter={ouvrirDialogue}
                           onRetirer={retirerRepas}
+                          onModifierChamp={modifierChampRepas}
                         />
                       ))}
                     </div>

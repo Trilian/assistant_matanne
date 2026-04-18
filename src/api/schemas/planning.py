@@ -163,6 +163,10 @@ class GenererPlanningRequest(BaseModel):
     autoriser_restes: bool = Field(
         True, description="Proposer des repas 'reste réchauffé' (soir → midi lendemain)"
     )
+    cuisines_souhaitees: list[str] = Field(
+        default_factory=list,
+        description="Cuisines du monde à intégrer (ex: français, italien, japonais, chinois, mexicain, espagnol, américain, breton, basque, alsacien, savoyard, provençal)",
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -175,6 +179,7 @@ class GenererPlanningRequest(BaseModel):
                 "plats_souhaites": ["poulet rôti"],
                 "ingredients_interdits": ["concombre"],
                 "autoriser_restes": True,
+                "cuisines_souhaitees": ["italien", "japonais"],
             }
         }
     }
