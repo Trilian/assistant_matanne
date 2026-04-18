@@ -108,7 +108,7 @@ class PlanningIAGenerationMixin:
         nom_lower = nom_recette.lower()
         valeur_lower = valeur.lower().strip()
         for pattern, feculents_redondants in _FECULENTS_CONSTITUTIFS_PAR_PLAT:
-            if pattern in nom_lower and valeur_lower in feculents_redondants:
+            if pattern in nom_lower and any(token in valeur_lower for token in feculents_redondants):
                 logger.debug(
                     "[planning] Féculent constitutif '%s' supprimé de '%s' (pattern '%s')",
                     valeur,
@@ -334,9 +334,10 @@ class PlanningIAGenerationMixin:
         if autoriser_restes:
             restes_section = (
                 "\nSTRATÉGIE 4 PORTIONS (objectif 3-4 midis issus des dîners) :\n"
-                "Pour les plats en sauce, gratins, soupes, lasagnes, cocottes, tajines, ragoûts, rôtis — "
+                "Pour les plats en sauce, gratins, soupes, lasagnes, cocottes, tajines, ragoûts, rôtis, "
+                "risottos, currys, woks, poêlées — "
                 "cuisiner 4 portions (2 adultes + Jules + 1 extra). "
-                "La portion extra devient le déjeuner du LENDEMAIN ou du surlendemain : "
+                "La portion extra devient le déjeuner du LENDEMAIN : "
                 "dejeuner_est_reste=true, dejeuner_reste_source=\"dîner de [JOUR]\". "
                 "Cible : 3 à 4 déjeuners par semaine issus d'un dîner précédent. "
                 "Les plats qui ne se prêtent PAS aux restes (poisson grillé, salade, omelette) → dejeuner_est_reste=false."
@@ -483,7 +484,7 @@ RULES:
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
 7. PROTEINS — strictly follow the OMS balance section above: MAX {nb_poisson_blanc}x TOTAL white fish (bar, merlu, lieu noir, cabillaud, sole = ALL are white fish — they share ONE common quota of {nb_poisson_blanc}), {nb_poisson_gras}x fatty fish total, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. ALL white fish species together count as ONE pool: if nb_poisson_blanc=1 you can have cabillaud OR bar OR merlu — only ONE species total, NOT one of each. Same rule for fatty fish. Spread each protein type throughout the week, never two consecutive identical proteins.
-8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes: set dejeuner_est_reste=true the following day with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. CRITICAL: dejeuner_reste_source MUST reference ONLY a PREVIOUS day — never a future day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste should almost NEVER be true — dinners are fresh preparations; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source).
+8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes/risottos/currys/woks/poêlées: set dejeuner_est_reste=true the NEXT DAY with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. CRITICAL: dejeuner_reste_source MUST reference the IMMEDIATELY PREVIOUS day — never a future day, never the same day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. Mercredi's lunch → "dîner de Mardi". IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste should almost NEVER be true — dinners are fresh preparations; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source). RISOTTO STAYS RULE: for RESTES of dishes like risotto, quiche, gratin — feculents=null (the dish already contains its own starch — adding "Riz vapeur" or similar is FORBIDDEN).
 9. null is valid ONLY for entree, laitage, dessert, reste_source, proteine_accompagnement. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): copy legumes, feculents AND proteine_accompagnement from the original dish — do NOT return null for legumes/feculents. Example: if the source was 'Bœuf bourguignon' with legumes='Poêlée de légumes' and feculents='Pâtes', the reste must also have legumes='Poêlée de légumes' and feculents='Pâtes'. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null). CRITICAL VEGETABLE EXCEPTION: If a vegetable or ingredient is ALREADY IN THE DISH NAME, you MUST NOT repeat it in the legumes field. Instead use a DIFFERENT vegetable. EXAMPLES: 'Risotto aux asperges' → legumes=null OR legumes='Salade verte' — ABSOLUTELY FORBIDDEN: legumes='Asperges vapeur'. 'Dinde aux champignons' → legumes MUST NOT be 'Champignons sautés' — use 'Haricots verts', 'Brocoli', 'Courgettes' instead. 'Bœuf haché aux poivrons' → legumes MUST NOT be 'Poivrons grillés' — use 'Salade verte', 'Haricots verts', 'Courgettes' instead. 'Poulet aux courgettes' → legumes must NOT be 'Courgettes sautées' — use 'Haricots verts' or 'Salade' instead. General rule: NEVER put a variant of the SAME ingredient in both the dish name AND the legumes field.
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
@@ -673,7 +674,14 @@ RULES:
                     jour_data.dejeuner_legumes = "Légumes de saison"
             if not jour_data.dejeuner_feculents:
                 if jour_data.dejeuner_est_reste and idx > 0:
-                    jour_data.dejeuner_feculents = planning_data[idx - 1].diner_feculents or "Riz vapeur"
+                    # Héritage depuis la source ; ne pas appliquer "Riz vapeur" si le
+                    # reste est lui-même un plat propre-féculent (risotto, quiche…).
+                    _héritage_dej = planning_data[idx - 1].diner_feculents
+                    if _héritage_dej:
+                        jour_data.dejeuner_feculents = _héritage_dej
+                    elif not self._est_plat_propre_feculent(jour_data.dejeuner):
+                        jour_data.dejeuner_feculents = "Riz vapeur"
+                    # else: reste d'un plat propre-féculent → feculents reste None
                 elif not self._est_plat_propre_feculent(jour_data.dejeuner):
                     # Ne pas appliquer de fallback si le plat EST déjà son propre féculent
                     # (quiche, gratin dauphinois, risotto…) — feculents=null est intentionnel
@@ -771,7 +779,11 @@ RULES:
                     jour_data.diner_legumes = "Légumes de saison"
             if not jour_data.diner_feculents:
                 if jour_data.diner_est_reste and idx > 0:
-                    jour_data.diner_feculents = planning_data[idx - 1].diner_feculents or "Riz vapeur"
+                    _héritage_din = planning_data[idx - 1].diner_feculents
+                    if _héritage_din:
+                        jour_data.diner_feculents = _héritage_din
+                    elif not self._est_plat_propre_feculent(jour_data.diner):
+                        jour_data.diner_feculents = "Riz vapeur"
                 elif not self._est_plat_propre_feculent(jour_data.diner):
                     # Ne pas appliquer de fallback si le plat EST déjà son propre féculent
                     # (quiche, gratin dauphinois, risotto…) — feculents=null est intentionnel

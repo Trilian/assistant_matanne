@@ -12,6 +12,23 @@ from datetime import date
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
+# Patterns de plats qui sont leur propre féculent (ex: risotto = riz, quiche = pâte).
+# Utilisé par le validator pour ne pas appliquer le fallback « Riz vapeur » sur ces plats.
+_PLATS_PROPRES_FECULENTS: tuple[str, ...] = (
+    "risotto", "paella", "lasagne", "quiche", "tarte salée", "tarte salee",
+    "tartiflette", "gratin dauphinois", "hachis parmentier", "gnocchi",
+    "polenta", "lentille", "pois chiche", "dal",
+)
+
+
+def _est_plat_propre_feculent_type(nom: str | None) -> bool:
+    """True si le plat est lui-même son propre féculent (risotto, quiche, gratin…)."""
+    if not nom:
+        return False
+    nom_lower = nom.lower()
+    return any(pattern in nom_lower for pattern in _PLATS_PROPRES_FECULENTS)
+
+
 _VALEURS_PLACEHOLDER: set[str] = {
     "",
     "-",
@@ -126,11 +143,13 @@ class JourPlanning(BaseModel):
         # de la sauvegarde — ne pas écraser ici avec des valeurs génériques.
         if not self.dejeuner_est_reste and not _texte_valide(self.dejeuner_legumes):
             self.dejeuner_legumes = "Légumes de saison"
-        if not self.dejeuner_est_reste and not _texte_valide(self.dejeuner_feculents):
+        if not self.dejeuner_est_reste and not _texte_valide(self.dejeuner_feculents) \
+                and not _est_plat_propre_feculent_type(self.dejeuner):
             self.dejeuner_feculents = "Riz vapeur"
         if not self.diner_est_reste and not _texte_valide(self.diner_legumes):
             self.diner_legumes = "Légumes de saison"
-        if not self.diner_est_reste and not _texte_valide(self.diner_feculents):
+        if not self.diner_est_reste and not _texte_valide(self.diner_feculents) \
+                and not _est_plat_propre_feculent_type(self.diner):
             self.diner_feculents = "Riz vapeur"
 
         if not _texte_valide(self.gouter):
