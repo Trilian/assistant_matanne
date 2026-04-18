@@ -1900,6 +1900,34 @@ async def sauvegarder_version_robot(
     return await executer_async(_save)
 
 
+@router.post("/{recette_id}/generer-version-robot/{robot}", response_model=dict)
+@gerer_exception_api
+async def generer_version_robot(
+    recette_id: int,
+    robot: str,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère via l'IA les instructions adaptées à un robot de cuisine.
+
+    Crée ou remplace la VersionRecette pour le robot spécifié.
+    Met à jour le flag compatible_{robot} sur la recette.
+
+    Args:
+        recette_id: ID de la recette source
+        robot: Type de robot (cookeo, monsieur_cuisine, airfryer)
+    """
+    if robot not in ROBOTS_VALIDES:
+        raise HTTPException(status_code=400, detail=f"Robot invalide. Valeurs : {ROBOTS_VALIDES}")
+
+    from src.services.cuisine.version_recette_robot import obtenir_version_recette_robot_service
+
+    def _generate():
+        service = obtenir_version_recette_robot_service()
+        return service.generer_version_robot(recette_id, robot)
+
+    return await executer_async(_generate)
+
+
 # ═══════════════════════════════════════════════════════════
 # ENRICHISSEMENT DES INSTRUCTIONS (étapes + ingrédients via IA)
 # ═══════════════════════════════════════════════════════════

@@ -40,6 +40,7 @@ import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/croch
 import {
   exporterRecettePdf,
   genererVersionJules,
+  genererVersionRobot,
   obtenirRecette,
   supprimerRecette,
   enrichirInstructionsRecette,
@@ -73,6 +74,7 @@ export default function PageDetailRecette({
   const [julesForm, setJulesForm] = useState<AdaptationJulesManuelle>({});
   const [editRobot, setEditRobot] = useState<string | null>(null);
   const [robotForm, setRobotForm] = useState<Partial<AdaptationRobotManuelle>>({});
+  const [modeCuisson, setModeCuisson] = useState<"standard" | "cookeo" | "monsieur_cuisine" | "airfryer">("standard");
 
   const { data: recette, isLoading } = utiliserRequete(
     ["recette", id],
@@ -145,6 +147,17 @@ export default function PageDetailRecette({
         toast.success("Instructions générées par l'IA");
       },
       onError: () => toast.error("Impossible de générer les instructions"),
+    }
+  );
+
+  const { mutate: genererRobot, isPending: enGenerationRobot } = utiliserMutation(
+    (robot: "cookeo" | "monsieur_cuisine" | "airfryer") => genererVersionRobot(Number(id), robot),
+    {
+      onSuccess: () => {
+        invalider(["recette", id]);
+        toast.success("Instructions robot générées par l'IA");
+      },
+      onError: () => toast.error("Impossible de générer les instructions robot"),
     }
   );
 
@@ -363,32 +376,6 @@ export default function PageDetailRecette({
       </div>
 
 
-      {/* Robots de cuisine — éditables */}
-      <CarteRobots
-        recette={recette}
-        editRobot={editRobot}
-        robotForm={robotForm}
-        onEditerRobot={(robot) => {
-          const versionExistante = recette.versions_robots?.find((v) => v.type_version === robot);
-          setRobotForm({
-            robot: robot as "cookeo" | "monsieur_cuisine" | "airfryer",
-            instructions_modifiees: versionExistante?.instructions_modifiees ?? "",
-            modifications_resume: versionExistante?.modifications_resume ?? [],
-          });
-          setEditRobot(robot);
-        }}
-        onAnnulerRobot={() => setEditRobot(null)}
-        onSauvegarderRobot={() => sauvegarderRobot(robotForm as AdaptationRobotManuelle)}
-        enSauvegarde={enSauvegardeRobot}
-        onChangerInstructions={(v) => setRobotForm((f) => ({ ...f, instructions_modifiees: v }))}
-        onChangerResume={(v) =>
-          setRobotForm((f) => ({
-            ...f,
-            modifications_resume: v.split(",").map((s) => s.trim()).filter(Boolean),
-          }))
-        }
-      />
-
       {nutritionDisponible && (
         <Card className="overflow-hidden border-sky-200/70 bg-sky-50/40 dark:border-sky-900/50 dark:bg-sky-950/10">
           <CardHeader>
@@ -458,16 +445,67 @@ export default function PageDetailRecette({
           </CardContent>
         </Card>
 
-        {/* Instructions */}
+        {/* Instructions avec sélecteur de mode cuisson */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-lg">Instructions</CardTitle>
-            {tempsTotal > 0 && (
-              <CardDescription>Temps total : {formaterDuree(tempsTotal)}</CardDescription>
-            )}
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">Instructions</CardTitle>
+                {tempsTotal > 0 && modeCuisson === "standard" && (
+                  <CardDescription>Temps total : {formaterDuree(tempsTotal)}</CardDescription>
+                )}
+              </div>
+              {modeCuisson !== "standard" && editRobot !== modeCuisson && recette.versions_robots?.some((v) => v.type_version === modeCuisson && v.instructions_modifiees) && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => {
+                    const versionExistante = recette.versions_robots?.find((v) => v.type_version === modeCuisson);
+                    setRobotForm({
+                      robot: modeCuisson as "cookeo" | "monsieur_cuisine" | "airfryer",
+                      instructions_modifiees: versionExistante?.instructions_modifiees ?? "",
+                      modifications_resume: versionExistante?.modifications_resume ?? [],
+                    });
+                    setEditRobot(modeCuisson);
+                  }}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+            {/* Sélecteur de mode cuisson */}
+            <div className="flex flex-wrap gap-1.5 pt-2">
+              {([
+                { key: "standard" as const, label: "🍳 Standard", always: true },
+                { key: "cookeo" as const, label: "🍲 Cookeo", always: false },
+                { key: "airfryer" as const, label: "🍟 Air Fryer", always: false },
+                { key: "monsieur_cuisine" as const, label: "🤖 Monsieur Cuisine", always: false },
+              ]).map(({ key, label, always }) => {
+                const compatKey = `compatible_${key}` as keyof typeof recette;
+                const compatible = always || !!recette[compatKey];
+                const hasVersion = always || recette.versions_robots?.some((v) => v.type_version === key);
+                if (!always && !compatible && !hasVersion) return null;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => { setModeCuisson(key); setEditRobot(null); }}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      modeCuisson === key
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </CardHeader>
           <CardContent>
-            {recette.etapes && recette.etapes.length > 0 ? (
+            {modeCuisson === "standard" ? (
+              /* ── Instructions standard ── */
+              recette.etapes && recette.etapes.length > 0 ? (
               <ol className="space-y-3">
                 {recette.etapes.map((etape, i) => (
                   <li key={etape.id ?? i} className="flex gap-3 text-sm">
@@ -505,6 +543,104 @@ export default function PageDetailRecette({
                   {enEnrichissement ? "Génération en cours…" : "Générer via l'IA"}
                 </Button>
               </div>
+            )
+            ) : (
+              /* ── Instructions robot ── */
+              (() => {
+                const version = recette.versions_robots?.find((v) => v.type_version === modeCuisson);
+                const robotLabels: Record<string, string> = { cookeo: "Cookeo", monsieur_cuisine: "Monsieur Cuisine", airfryer: "Air Fryer" };
+                const nomRobot = robotLabels[modeCuisson] ?? modeCuisson;
+
+                if (editRobot === modeCuisson) {
+                  return (
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs font-medium mb-1 text-muted-foreground">Résumé des adaptations (séparées par virgules)</p>
+                        <Input
+                          value={robotForm.modifications_resume?.join(", ") ?? ""}
+                          onChange={(e) =>
+                            setRobotForm((f) => ({
+                              ...f,
+                              modifications_resume: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+                            }))
+                          }
+                          placeholder="cuisson 15 min, mode mijoter…"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium mb-1 text-muted-foreground">Instructions {nomRobot}</p>
+                        <Textarea
+                          value={robotForm.instructions_modifiees ?? ""}
+                          onChange={(e) => setRobotForm((f) => ({ ...f, instructions_modifiees: e.target.value }))}
+                          rows={8}
+                          placeholder={`Instructions pour ${nomRobot}…`}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => sauvegarderRobot(robotForm as AdaptationRobotManuelle)} disabled={enSauvegardeRobot}>
+                          <Check className="h-3 w-3 mr-1" />
+                          {enSauvegardeRobot ? "Sauvegarde…" : "Sauvegarder"}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setEditRobot(null)}>
+                          <X className="h-3 w-3 mr-1" />
+                          Annuler
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (version?.instructions_modifiees) {
+                  return (
+                    <div className="space-y-3">
+                      {!!version.modifications_resume?.length && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {version.modifications_resume.map((m) => (
+                            <Badge key={m} variant="secondary" className="text-xs">{m}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
+                        {version.instructions_modifiees}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-col items-center gap-3 py-6 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Aucune instruction {nomRobot} pour cette recette
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => genererRobot(modeCuisson as "cookeo" | "monsieur_cuisine" | "airfryer")}
+                        disabled={enGenerationRobot}
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {enGenerationRobot ? "Génération en cours…" : "Générer via l'IA"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setRobotForm({
+                            robot: modeCuisson as "cookeo" | "monsieur_cuisine" | "airfryer",
+                            instructions_modifiees: "",
+                            modifications_resume: [],
+                          });
+                          setEditRobot(modeCuisson);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Saisir manuellement
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()
             )}
           </CardContent>
         </Card>
@@ -620,106 +756,6 @@ function CarteAdaptationJules({
             )}
           </>
         ) : null}
-      </CardContent>
-    </Card>
-  );
-}
-
-// ─── Composant : Carte Robots ───────────────────────────────────
-const ROBOTS_LABELS: Record<string, string> = {
-  cookeo: "Cookeo",
-  monsieur_cuisine: "Monsieur Cuisine",
-  airfryer: "Air Fryer",
-};
-
-interface CarteRobotsProps {
-  recette: import("@/types/recettes").Recette;
-  editRobot: string | null;
-  robotForm: Partial<AdaptationRobotManuelle>;
-  onEditerRobot: (robot: string) => void;
-  onAnnulerRobot: () => void;
-  onSauvegarderRobot: () => void;
-  enSauvegarde: boolean;
-  onChangerInstructions: (v: string) => void;
-  onChangerResume: (v: string) => void;
-}
-
-function CarteRobots({
-  recette,
-  editRobot,
-  robotForm,
-  onEditerRobot,
-  onAnnulerRobot,
-  onSauvegarderRobot,
-  enSauvegarde,
-  onChangerInstructions,
-  onChangerResume,
-}: CarteRobotsProps) {
-  const robots = [
-    { key: "cookeo", compatible: recette.compatible_cookeo },
-    { key: "monsieur_cuisine", compatible: recette.compatible_monsieur_cuisine },
-    { key: "airfryer", compatible: recette.compatible_airfryer },
-  ];
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Robots de cuisine</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {robots.map(({ key, compatible }) => {
-          const version = recette.versions_robots?.find((v) => v.type_version === key);
-          const isEditing = editRobot === key;
-          return (
-            <div key={key} className={`rounded-lg border p-3 space-y-2 ${compatible ? "" : "opacity-50"}`}>
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">{ROBOTS_LABELS[key]}</p>
-                <div className="flex gap-1">
-                  {!isEditing && (
-                    <Button variant="ghost" size={compatible ? "icon" : "sm"} className={compatible ? "h-6 w-6" : "h-6 text-xs"} onClick={() => onEditerRobot(key)}>
-                      {compatible ? <Pencil className="h-3 w-3" /> : "+ Ajouter"}
-                    </Button>
-                  )}
-                </div>
-              </div>
-              {isEditing ? (
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Résumé (séparé par virgules)</p>
-                    <Input
-                      value={robotForm.modifications_resume?.join(", ") ?? ""}
-                      onChange={(e) => onChangerResume(e.target.value)}
-                      placeholder="cuisson 15 min, mode mijoter…"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Instructions</p>
-                    <Textarea
-                      value={robotForm.instructions_modifiees ?? ""}
-                      onChange={(e) => onChangerInstructions(e.target.value)}
-                      rows={3}
-                      placeholder={`Instructions pour ${ROBOTS_LABELS[key]}…`}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={onSauvegarderRobot} disabled={enSauvegarde}>
-                      <Check className="h-3 w-3 mr-1" />
-                      {enSauvegarde ? "Sauvegarde…" : "Sauvegarder"}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={onAnnulerRobot}>
-                      <X className="h-3 w-3 mr-1" />
-                      Annuler
-                    </Button>
-                  </div>
-                </div>
-              ) : version ? (
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{version.instructions_modifiees}</p>
-              ) : (
-                <p className="text-xs text-muted-foreground italic">{compatible ? "Aucune instruction spécifique" : "Non configuré"}</p>
-              )}
-            </div>
-          );
-        })}
       </CardContent>
     </Card>
   );

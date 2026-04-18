@@ -282,6 +282,17 @@ export async function sauvegarderVersionRobot(
   return data;
 }
 
+/** Générer via l'IA les instructions adaptées à un robot de cuisine */
+export async function genererVersionRobot(
+  recetteId: number,
+  robot: "cookeo" | "monsieur_cuisine" | "airfryer",
+): Promise<VersionJulesResult> {
+  const { data } = await clientApi.post<VersionJulesResult>(
+    `/recettes/${recetteId}/generer-version-robot/${robot}`,
+  );
+  return data;
+}
+
 // ─── Génération depuis photo ─────────────────────────────
 
 /** Générer une recette à partir d'une photo (Pixtral) */
