@@ -96,6 +96,73 @@ class PlanningIAGenerationMixin:
         return recette.id if recette else None
 
     @staticmethod
+    def _corriger_restes_insuffisants(planning_data: list) -> list:
+        """Corrige un planning où l'IA a généré trop peu de restes.
+
+        Si le nombre de déjeuners marqués 'reste' est < 3, cherche les dîners compatibles
+        (en sauce, mijoté, gratin…) et convertit automatiquement le déjeuner du lendemain
+        en reste, en héritant des accompagnements du dîner source.
+        """
+        _JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+        # Mots-clés indiquant un plat réchauffable
+        _MOTS_COMPATIBLES = {
+            "basquaise", "bourguignon", "blanquette", "daube", "ragoût", "cocotte",
+            "osso buco", "tajine", "curry", "korma", "tikka", "masala", "colombo",
+            "rôti", "rotisserie", "gratin", "lasagnes", "moussaka", "parmentier",
+            "risotto", "soupe", "velouté", "potage", "minestrone", "mijoté",
+            "boulettes", "wok", "poêlée", "sauce", "crumble", "pot-au-feu",
+            "poulet basquaise", "blanquette", "navarin", "pot au feu",
+        }
+        # Mots-clés excluant un plat (non réchauffable)
+        _MOTS_INCOMPATIBLES = {
+            "grillé", "grillée", "vapeur", "poché", "pochée", "omelette",
+            "salade", "tartare", "carpaccio", "sashimi",
+        }
+
+        nb_restes = sum(1 for j in planning_data if j.dejeuner_est_reste)
+        if nb_restes >= 3:
+            return planning_data
+
+        logger.info(
+            f"⚠️ Planning IA : {nb_restes} reste(s) seulement — correction auto (objectif ≥ 3)"
+        )
+
+        for idx in range(1, len(planning_data)):
+            if nb_restes >= 4:
+                break
+            jour = planning_data[idx]
+            prev = planning_data[idx - 1]
+
+            if jour.dejeuner_est_reste:
+                continue
+
+            diner_lower = (prev.diner or "").lower()
+            est_compatible = any(mot in diner_lower for mot in _MOTS_COMPATIBLES)
+            est_incompatible = any(mot in diner_lower for mot in _MOTS_INCOMPATIBLES)
+
+            if est_compatible and not est_incompatible:
+                jour_nom = _JOURS[idx - 1] if idx - 1 < len(_JOURS) else prev.jour
+                jour.dejeuner = prev.diner
+                jour.dejeuner_est_reste = True
+                jour.dejeuner_reste_source = f"dîner de {jour_nom}"
+                jour.dejeuner_legumes = prev.diner_legumes
+                jour.dejeuner_feculents = prev.diner_feculents
+                jour.dejeuner_proteine_accompagnement = prev.diner_proteine_accompagnement
+                nb_restes += 1
+                logger.info(
+                    f"✅ Reste injecté : {jour.jour} déjeuner → '{prev.diner}' "
+                    f"({jour.dejeuner_reste_source})"
+                )
+
+        if nb_restes < 3:
+            logger.warning(
+                f"⚠️ Correction restes : seulement {nb_restes} reste(s) atteint(s) "
+                f"— pas assez de dîners compatibles dans ce planning."
+            )
+
+        return planning_data
+
+    @staticmethod
     def _nettoyer_feculents_constitutifs(valeur: str | None, nom_recette: str) -> str | None:
         """Nullifie un féculent qui est le constituant structurel du plat.
 
@@ -333,14 +400,18 @@ class PlanningIAGenerationMixin:
         # Stratégie 4 portions : dîners en sauce/gratin/soupe → midi du lendemain
         if autoriser_restes:
             restes_section = (
-                "\nSTRATÉGIE 4 PORTIONS (objectif 3-4 midis issus des dîners) :\n"
-                "Pour les plats en sauce, gratins, soupes, lasagnes, cocottes, tajines, ragoûts, rôtis, "
-                "risottos, currys, woks, poêlées — "
+                "\nSTRATÉGIE 4 PORTIONS — MINIMUM OBLIGATOIRE 3 MIDIS RESTES SUR 7 :\n"
+                "Pour TOUT dîner en sauce, gratin, soupe, lasagnes, cocotte, tajine, ragoût, rôti, "
+                "risotto, curry, korma, wok, poêlée, mijoté, boulettes, hachis parmentier, "
+                "pot-au-feu, gratin de légumes, crumble salé, poulet basquaise, blanquette — "
                 "cuisiner 4 portions (2 adultes + Jules + 1 extra). "
-                "La portion extra devient le déjeuner du LENDEMAIN : "
+                "La portion extra DEVIENT OBLIGATOIREMENT le déjeuner du LENDEMAIN : "
                 "dejeuner_est_reste=true, dejeuner_reste_source=\"dîner de [JOUR]\". "
-                "Cible : 3 à 4 déjeuners par semaine issus d'un dîner précédent. "
-                "Les plats qui ne se prêtent PAS aux restes (poisson grillé, salade, omelette) → dejeuner_est_reste=false."
+                "MINIMUM OBLIGATOIRE : au moins 3 des 6 déjeuners (Mardi→Dimanche) DOIVENT être des restes — "
+                "c'est une contrainte non négociable, pas une suggestion. "
+                "STRATÉGIE : choisis INTENTIONNELLEMENT 3 à 4 de tes dîners parmi les plats compatibles restes. "
+                "NON ÉLIGIBLES aux restes (ne jamais mettre est_reste=true) : poisson grillé, poisson vapeur, "
+                "salade, omelette, tartare, carpaccio — plats frais non réchauffables."
             )
         else:
             restes_section = (
@@ -484,7 +555,7 @@ RULES:
 5. laitage: text only (yaourt, fromage blanc, fromage, petits-suisses...) — never est_recette
 6. gouter: MANDATORY — always a non-null short text representing the cereal product (pain, biscuit, cake...). Never leave null. gouter_laitage MANDATORY (yaourt, fromage frais, fromage blanc...). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote (compote pomme, compote poire...) — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a healthy cereal/biscuit product (cake maison, galette avoine, biscuit complet, pain d'épices, tartines, pain au chocolat...). gouter and gouter_gateau should match.
 7. PROTEINS — strictly follow the OMS balance section above: MAX {nb_poisson_blanc}x TOTAL white fish (bar, merlu, lieu noir, cabillaud, sole = ALL are white fish — they share ONE common quota of {nb_poisson_blanc}), {nb_poisson_gras}x fatty fish total, max {viande_rouge_max}x red meat total for the whole week, min {nb_vegetarien}x vegetarian, other days=poultry. ALL white fish species together count as ONE pool: if nb_poisson_blanc=1 you can have cabillaud OR bar OR merlu — only ONE species total, NOT one of each. Same rule for fatty fish. Spread each protein type throughout the week, never two consecutive identical proteins.
-8. 4-PORTIONS STRATEGY — for sauces/gratins/soups/stews/lasagnes/risottos/currys/woks/poêlées: set dejeuner_est_reste=true the NEXT DAY with dejeuner_reste_source="dîner de [JOUR]". Target 3-4 lunches per week from previous evening leftovers. CRITICAL: dejeuner_reste_source MUST reference the IMMEDIATELY PREVIOUS day — never a future day, never the same day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. Mercredi's lunch → "dîner de Mardi". IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste should almost NEVER be true — dinners are fresh preparations; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source). RISOTTO STAYS RULE: for RESTES of dishes like risotto, quiche, gratin — feculents=null (the dish already contains its own starch — adding "Riz vapeur" or similar is FORBIDDEN).
+8. 4-PORTIONS STRATEGY (MANDATORY MINIMUM: 3 LUNCHES MUST BE LEFTOVERS) — for sauces/gratins/soups/stews/lasagnes/risottos/currys/woks/poêlées/cocottes/tajines/mijotés/rôtis/boulettes: set dejeuner_est_reste=true the NEXT DAY with dejeuner_reste_source="dîner de [JOUR]". MANDATORY: at least 3 of the 6 lunches (Mardi→Dimanche) MUST be leftovers — NOT optional. Plan your dinners intentionally: choose at least 3-4 dinner dishes that ARE reheatable. CRITICAL: dejeuner_reste_source MUST reference the IMMEDIATELY PREVIOUS day — never a future day, never the same day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. Mercredi's lunch → "dîner de Mardi". IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste should almost NEVER be true — dinners are fresh preparations; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source). RISOTTO STAYS RULE: for RESTES of dishes like risotto, quiche, gratin — feculents=null (the dish already contains its own starch — adding "Riz vapeur" or similar is FORBIDDEN).
 9. null is valid ONLY for entree, laitage, dessert, reste_source, proteine_accompagnement. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): copy legumes, feculents AND proteine_accompagnement from the original dish — do NOT return null for legumes/feculents. Example: if the source was 'Bœuf bourguignon' with legumes='Poêlée de légumes' and feculents='Pâtes', the reste must also have legumes='Poêlée de légumes' and feculents='Pâtes'. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null). CRITICAL VEGETABLE EXCEPTION: If a vegetable or ingredient is ALREADY IN THE DISH NAME, you MUST NOT repeat it in the legumes field. Instead use a DIFFERENT vegetable. EXAMPLES: 'Risotto aux asperges' → legumes=null OR legumes='Salade verte' — ABSOLUTELY FORBIDDEN: legumes='Asperges vapeur'. 'Dinde aux champignons' → legumes MUST NOT be 'Champignons sautés' — use 'Haricots verts', 'Brocoli', 'Courgettes' instead. 'Bœuf haché aux poivrons' → legumes MUST NOT be 'Poivrons grillés' — use 'Salade verte', 'Haricots verts', 'Courgettes' instead. 'Poulet aux courgettes' → legumes must NOT be 'Courgettes sautées' — use 'Haricots verts' or 'Salade' instead. General rule: NEVER put a variant of the SAME ingredient in both the dish name AND the legumes field.
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
@@ -559,6 +630,10 @@ RULES:
 
         # Planning IA réussi
         logger.info(f"✅ Generated planning with {len(planning_data)} days using AI")
+
+        # Correction auto si l'IA a généré trop peu de restes (< 3)
+        if autoriser_restes:
+            planning_data = self._corriger_restes_insuffisants(planning_data)
 
         # Archiver les plannings existants de la même semaine pour éviter les doublons.
         # (brouillons orphelins laissés par des générations précédentes)
