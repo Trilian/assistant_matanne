@@ -518,6 +518,7 @@ export default function PagePlanning() {
   const [repasGlisse, setRepasGlisse] = useState<RepasPlanning | null>(null);
   const [analysePlanningIa, setAnalysePlanningIa] = useState<AnalysePlanningIaResultat | null>(null);
   const [modalGenerationOuvert, setModalGenerationOuvert] = useState(false);
+  const [modalGenerationInitialPlats, setModalGenerationInitialPlats] = useState<string[]>([]);
   const [vuesSupplementairesOuvertes, setVuesSupplementairesOuvertes] = utiliserStockageLocal<boolean>("planning.vuesSupplementaires", false);
   // Jour de début de semaine persisté en localStorage (0=Dim, 1=Lun … 6=Sam)
   const [jourDebutSemaine, setJourDebutSemaine] = utiliserStockageLocal<number>("planning.jourDebutSemaine", 1);
@@ -1661,6 +1662,26 @@ export default function PagePlanning() {
                     )}
                   </div>
                 </div>
+                {/* Bouton d'action : régénérer la semaine en tenant compte des conseils IA */}
+                <div className="flex justify-end pt-1">
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="bg-violet-600 hover:bg-violet-700 text-white"
+                    onClick={() => {
+                      const platsSuggeres = [
+                        ...(analysePlanningIa.nutrition.aliments_a_privilegier ?? []),
+                        ...(analysePlanningIa.variete.recommandations ?? []),
+                      ].slice(0, 8);
+                      setErreurIA(null);
+                      setModalGenerationInitialPlats(platsSuggeres);
+                      setModalGenerationOuvert(true);
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Régénérer en appliquant ces conseils
+                  </Button>
+                </div>
               </>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -2322,12 +2343,17 @@ export default function PagePlanning() {
       {/* Modal de génération IA */}
       <ModalGenerationPlanning
         ouvert={modalGenerationOuvert}
-        onFermer={() => setModalGenerationOuvert(false)}
+        onFermer={() => {
+          setModalGenerationOuvert(false);
+          setModalGenerationInitialPlats([]);
+        }}
         enGeneration={enGeneration}
         nbPersonnesInitial={nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0)}
         dateDebut={dateDebut}
+        initialPlats={modalGenerationInitialPlats}
         onGenerer={(params) => {
           setModalGenerationOuvert(false);
+          setModalGenerationInitialPlats([]);
           toastIaRef.current = toast.loading(
             "Génération IA en cours… cela peut prendre 1 à 2 minutes ☕",
             { duration: Infinity }

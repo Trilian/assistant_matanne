@@ -29,6 +29,8 @@ interface Props {
   nbPersonnesInitial?: number;
   dateDebut?: string;
   preferences?: ObjetDonnees;
+  /** Plats pré-sélectionnés depuis l'analyse IA (fusionnés avec les préférences sauvegardées) */
+  initialPlats?: string[];
 }
 
 export function ModalGenerationPlanning({
@@ -39,6 +41,7 @@ export function ModalGenerationPlanning({
   nbPersonnesInitial = 4,
   dateDebut,
   preferences,
+  initialPlats,
 }: Props) {
   const [nbPersonnes, setNbPersonnes] = useState(nbPersonnesInitial);
   const [legumes, setLegumes] = useState<string[]>([]);
@@ -59,15 +62,23 @@ export function ModalGenerationPlanning({
     if (!ouvert) return;
     obtenirPreferencesPlanning()
       .then((d) => {
+        const platsSauvegardes = d.plats_souhaites ?? [];
+        // Fusionner les plats initiaux (conseils IA) avec les préférences sauvegardées
+        const platsInitiaux = initialPlats ?? [];
+        const platsFusionnes = [
+          ...platsSauvegardes,
+          ...platsInitiaux.filter((p) => !platsSauvegardes.includes(p)),
+        ];
         setLegumes(d.legumes_souhaites ?? []);
         setFeculents(d.feculents_souhaites ?? []);
-        setPlats(d.plats_souhaites ?? []);
+        setPlats(platsFusionnes);
         setIngredientsInterdits(d.ingredients_interdits ?? []);
         setAutoriserRestes(d.autoriser_restes ?? true);
         setNbPersonnes(d.nb_personnes ?? nbPersonnesInitial);
       })
       .catch(() => {
-        // silencieux — les valeurs vides par défaut sont correctes
+        // silencieux — utiliser initialPlats seuls si les préférences échouent
+        if (initialPlats?.length) setPlats(initialPlats);
       });
   }, [ouvert]); // eslint-disable-line react-hooks/exhaustive-deps
 
