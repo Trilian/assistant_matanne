@@ -181,7 +181,7 @@ export interface NutritionJour {
   proteines: number;
   lipides: number;
   glucides: number;
-  repas: { id: number; type: string; nom_recette: string | null; calories: number | null }[];
+  repas: { id: number; type: string; nom_recette: string | null; calories: number | null; is_estimation?: boolean }[];
 }
 
 export interface NutritionHebdo {
@@ -191,6 +191,7 @@ export interface NutritionHebdo {
   moyenne_calories_par_jour: number;
   par_jour: Record<string, NutritionJour>;
   nb_repas_sans_donnees: number;
+  nb_repas_estimes?: number;
   nb_repas_total: number;
 }
 

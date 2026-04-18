@@ -1916,7 +1916,10 @@ async def nutrition_hebdomadaire(
 
     from src.core.models.planning import Repas
     from src.core.models.recettes import Recette
-    from src.services.cuisine.nutrition import obtenir_service_nutrition
+    from src.services.cuisine.nutrition import (
+        estimer_nutrition_par_type_et_nom,
+        obtenir_service_nutrition,
+    )
 
     def _query() -> dict:
         import datetime as dt
@@ -1943,6 +1946,7 @@ async def nutrition_hebdomadaire(
             totaux = {"calories": 0, "proteines": 0.0, "lipides": 0.0, "glucides": 0.0}
             par_jour: dict[str, dict] = {}
             sans_donnees = 0
+            nb_estimes = 0
 
             for repas in repas_liste:
                 jour = repas.date_repas.isoformat()
@@ -1956,6 +1960,9 @@ async def nutrition_hebdomadaire(
                     }
 
                 recette = repas.recette
+                is_estimation = False
+                cal = prot = lip = gluc = 0
+
                 if recette and recette.calories is not None:
                     portions = repas.portion_ajustee or (recette.portions or 1)
                     # Valeur nutritionnelle = par portion × nombre de portions / portions standard
@@ -1964,7 +1971,21 @@ async def nutrition_hebdomadaire(
                     prot = round((recette.proteines or 0.0) * facteur, 1)
                     lip = round((recette.lipides or 0.0) * facteur, 1)
                     gluc = round((recette.glucides or 0.0) * facteur, 1)
+                elif recette:
+                    # Aucune donnée réelle : estimation par type/nom
+                    estimation = estimer_nutrition_par_type_et_nom(
+                        recette.type_proteines, recette.nom
+                    )
+                    cal = int(estimation["calories"])
+                    prot = round(estimation["proteines"], 1)
+                    lip = round(estimation["lipides"], 1)
+                    gluc = round(estimation["glucides"], 1)
+                    is_estimation = True
+                    nb_estimes += 1
+                else:
+                    sans_donnees += 1
 
+                if cal > 0:
                     totaux["calories"] += cal
                     totaux["proteines"] += prot
                     totaux["lipides"] += lip
@@ -1973,17 +1994,14 @@ async def nutrition_hebdomadaire(
                     par_jour[jour]["proteines"] += prot
                     par_jour[jour]["lipides"] += lip
                     par_jour[jour]["glucides"] += gluc
-                else:
-                    sans_donnees += 1
 
                 par_jour[jour]["repas"].append(
                     {
                         "id": repas.id,
                         "type": repas.type_repas,
                         "nom_recette": recette.nom if recette else None,
-                        "calories": int((recette.calories or 0) * facteur)
-                        if recette and recette.calories
-                        else None,
+                        "calories": cal if cal > 0 else None,
+                        "is_estimation": is_estimation,
                     }
                 )
 
@@ -2012,6 +2030,7 @@ async def nutrition_hebdomadaire(
                 "moyenne_calories_par_jour": moyenne_calories,
                 "par_jour": par_jour,
                 "nb_repas_sans_donnees": sans_donnees,
+                "nb_repas_estimes": nb_estimes,
                 "nb_repas_total": len(repas_liste),
                 "insights": insights,
             }

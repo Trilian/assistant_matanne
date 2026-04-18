@@ -168,9 +168,14 @@ export default function NutritionistePage() {
               </CardContent>
             </Card>
           </div>
+          {nutrition.nb_repas_estimes != null && nutrition.nb_repas_estimes > 0 && (
+            <p className="text-xs text-muted-foreground">
+              📊 Valeurs estimées pour {nutrition.nb_repas_estimes} repas (données réelles non disponibles).
+            </p>
+          )}
           {nutrition.nb_repas_sans_donnees != null && nutrition.nb_repas_sans_donnees > 0 && (
             <p className="text-xs text-muted-foreground">
-              ⚠️ {nutrition.nb_repas_sans_donnees} repas sans données nutritionnelles cette semaine.
+              ⚠️ {nutrition.nb_repas_sans_donnees} repas sans recette associée.
             </p>
           )}
           {/* Répartition par jour */}

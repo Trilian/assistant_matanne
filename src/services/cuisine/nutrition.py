@@ -71,6 +71,75 @@ CONVERSION_GRAMMES: dict[str, float] = {
 BIO_KEYWORDS = {"bio", "agriculture biologique", "ab", "organic", "eu organic"}
 LOCAL_KEYWORDS = {"france", "français", "française", "produit en france", "origine france"}
 
+# ═══════════════════════════════════════════════════════════
+# ESTIMATION NUTRITIONNELLE PAR TYPE / NOM
+# ═══════════════════════════════════════════════════════════
+
+# Valeurs par portion pour un repas adulte complet (protéine principale + accompagnement)
+_NUTRITION_ESTIMEE_PAR_TYPE: dict[str, dict[str, float]] = {
+    "proteines_poisson":       {"calories": 380, "proteines": 32, "lipides": 12, "glucides": 22},
+    "proteines_poisson_blanc": {"calories": 340, "proteines": 30, "lipides":  8, "glucides": 22},
+    "proteines_poisson_gras":  {"calories": 420, "proteines": 34, "lipides": 18, "glucides": 20},
+    "proteines_viande_rouge":  {"calories": 500, "proteines": 40, "lipides": 24, "glucides": 18},
+    "proteines_volaille":      {"calories": 440, "proteines": 38, "lipides": 16, "glucides": 20},
+    "proteines_oeuf":          {"calories": 340, "proteines": 20, "lipides": 22, "glucides": 12},
+    "proteines_legumineuses":  {"calories": 380, "proteines": 18, "lipides":  8, "glucides": 55},
+    "feculents":               {"calories": 430, "proteines": 12, "lipides": 10, "glucides": 75},
+    "legumes_principaux":      {"calories": 280, "proteines": 12, "lipides": 10, "glucides": 38},
+    "mixte":                   {"calories": 400, "proteines": 22, "lipides": 14, "glucides": 48},
+    # Formes courtes (type_proteines générique)
+    "poisson":       {"calories": 380, "proteines": 32, "lipides": 12, "glucides": 22},
+    "poisson_blanc": {"calories": 340, "proteines": 30, "lipides":  8, "glucides": 22},
+    "poisson_gras":  {"calories": 420, "proteines": 34, "lipides": 18, "glucides": 20},
+    "viande_rouge":  {"calories": 500, "proteines": 40, "lipides": 24, "glucides": 18},
+    "volaille":      {"calories": 440, "proteines": 38, "lipides": 16, "glucides": 20},
+}
+
+# Mots-clés dans le nom de recette → type nutritionnel
+_MOT_CLES_NOM_TYPE: list[tuple[list[str], str]] = [
+    (["saumon", "thon", "maquereau", "sardine", "hareng", "truite", "anchois"], "proteines_poisson_gras"),
+    (["cabillaud", "merlu", "colin", "bar", "lieu", "sole", "lotte", "daurade", "turbot"], "proteines_poisson_blanc"),
+    (["filet de", "poisson", "crevette", "coquille"], "proteines_poisson"),
+    (["poulet", "dinde", "canard", "pintade", "lapin", "volaille"], "proteines_volaille"),
+    (["bœuf", "veau", "agneau", "porc", "côte", "gigot", "entrecôte", "steak", "bourguignon"], "proteines_viande_rouge"),
+    (["omelette", "oeufs", "œuf"], "proteines_oeuf"),
+    (["quiche", "tarte salée", "tarte aux"], "proteines_oeuf"),
+    (["lentilles", "pois chiche", "haricots", "dal", "dahl", "fèves"], "proteines_legumineuses"),
+    (["risotto", "pâtes", "lasagne", "gratin", "pizza", "gnocchi", "polenta"], "feculents"),
+    (["salade", "ratatouille", "wok légumes", "poêlée légumes"], "legumes_principaux"),
+    (["crêpe", "pancake", "gâteau", "cake", "madeleine", "biscuit", "tarte sucrée"], "feculents"),
+]
+
+_NUTRITION_DEFAUT: dict[str, float] = {
+    "calories": 420, "proteines": 22, "lipides": 14, "glucides": 48,
+}
+
+
+def estimer_nutrition_par_type_et_nom(
+    type_proteines: str | None,
+    nom: str | None,
+) -> dict[str, float]:
+    """Estime les valeurs nutritionnelles par portion selon le type et le nom de la recette.
+
+    Utilisé comme fallback quand les données réelles sont absentes.
+
+    Returns:
+        Dict ``{"calories": int, "proteines": float, "lipides": float, "glucides": float}``
+    """
+    # 1. Correspondance directe sur type_proteines
+    if type_proteines and type_proteines in _NUTRITION_ESTIMEE_PAR_TYPE:
+        return dict(_NUTRITION_ESTIMEE_PAR_TYPE[type_proteines])
+
+    # 2. Correspondance par mots-clés dans le nom
+    if nom:
+        nom_lower = nom.lower()
+        for mots_cles, type_match in _MOT_CLES_NOM_TYPE:
+            if any(mot in nom_lower for mot in mots_cles):
+                return dict(_NUTRITION_ESTIMEE_PAR_TYPE.get(type_match, _NUTRITION_DEFAUT))
+
+    # 3. Valeur par défaut
+    return dict(_NUTRITION_DEFAUT)
+
 
 def _convertir_en_grammes(quantite: float, unite: str) -> float:
     """Convertit une quantité dans une unité donnée en grammes."""
