@@ -49,6 +49,7 @@ import {
   Map,
   Lightbulb,
   Zap,
+  SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -168,6 +169,7 @@ const LIENS: LienNav[] = [
       { nom: "Plans", chemin: "/vision-maison/plans", Icone: Layers },
       { nom: "Deco", chemin: "/vision-maison/deco", Icone: House },
       { nom: "Jardin Design", chemin: "/vision-maison/jardin", Icone: Sprout },
+      { nom: "Simulateur", chemin: "/vision-maison/simulateur", Icone: SlidersHorizontal },
     ],
   },
   {

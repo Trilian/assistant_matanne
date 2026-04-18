@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Armchair, Building2, Home, Ruler, Search, Trees, Wallet } from "lucide-react";
+import { AlertTriangle, Armchair, Building2, Home, Ruler, Search, SlidersHorizontal, Trees, Wallet } from "lucide-react";
 import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { GrilleBlocsHabitat } from "@/composants/habitat/grille-blocs-habitat";
 import { GrilleIndicateursHabitat } from "@/composants/habitat/grille-indicateurs-habitat";
@@ -47,6 +47,12 @@ const BLOCS = [
     description: "Organiser les zones paysageres du terrain.",
     chemin: "/vision-maison/jardin",
     Icone: Trees,
+  },
+  {
+    titre: "Simulateur",
+    description: "Comparer le cout reel de renover versus demenager, avec votre dossier pre-rempli.",
+    chemin: "/vision-maison/simulateur",
+    Icone: SlidersHorizontal,
   },
 ];
 
