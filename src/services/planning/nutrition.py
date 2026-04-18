@@ -178,7 +178,7 @@ _MOTS_LEGUMES_IMPLICITES: list[str] = [
 
 # Mots-clés pour détecter des féculents implicitement présents dans le nom du plat
 _MOTS_FECULENTS_IMPLICITES: list[str] = [
-    "pâtes", "pates", " riz", "semoule", "pomme de terre", "patate",
+    "pâtes", "pates", " riz", "semoule", "pomme de terre", "pommes de terre", "patate",
     "quinoa", "boulgour", "bulgur", "blé", "ble", "épeautre", "epeautre",
     "orge", "polenta", "fécule", "fecule", "maïs", "mais",
     "gratin", "risotto", "lasagne", "ravioli", "gnocchi",

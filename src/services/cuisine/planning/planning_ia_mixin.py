@@ -53,7 +53,33 @@ _FECULENTS_CONSTITUTIFS_PAR_PLAT: list[tuple[str, frozenset[str]]] = [
     ("lentille",    frozenset({"lentille", "lentilles"})),
     ("pois chiche", frozenset({"pois chiche", "pois chiches"})),
     ("dal",         frozenset({"dal", "dahl"})),
+    # Recettes contenant pommes de terre comme féculent explicite dans leur nom
+    # (ex : « Omelette aux champignons et pommes de terre »)
+    ("pommes de terre", frozenset({"riz", "semoule", "pâtes", "pates", "quinoa", "boulgour", "bulgur"})),
+    ("pomme de terre",  frozenset({"riz", "semoule", "pâtes", "pates", "quinoa", "boulgour", "bulgur"})),
 ]
+
+
+# Mots de cuisine génériques et articles/prépositions courts à exclure
+# du matching mot-à-mot dans _nettoyer_si_inclus_dans_nom
+_MOTS_CUISINE_STOP: frozenset[str] = frozenset({
+    # Articles et prépositions courants français de 3 lettres
+    "aux", "les", "des", "par", "sur", "son", "ses", "mes", "ton", "tes",
+    # Méthodes de cuisson (non discriminantes pour identifier un ingrédient)
+    "vapeur", "sauté", "sautée", "sautés", "sautées",
+    "grillé", "grillée", "grillés", "grillées",
+    "cuit", "cuite", "cuits", "cuites",
+    "poêlé", "poêlée", "poêlés", "poêlées",
+    "rôti", "rôtie", "rôtis", "rôties",
+    # Qualificatifs génériques
+    "frais", "fraîche", "fraîches", "nature", "maison", "saison",
+    "léger", "légère",
+})
+
+# Mots-aliments courts (< 4 caractères) à traiter comme significatifs malgré leur longueur
+_MOTS_COURTS_ALIMENTS: frozenset[str] = frozenset({
+    "riz", "blé", "ble", "soja", "dal",
+})
 
 
 class PlanningIAGenerationMixin:
@@ -199,14 +225,35 @@ class PlanningIAGenerationMixin:
 
     @staticmethod
     def _nettoyer_si_inclus_dans_nom(valeur: str | None, nom_recette: str) -> str | None:
-        """Retourne None si `valeur` est déjà un sous-texte du nom de la recette.
+        """Retourne None si `valeur` est déjà présent (en tout ou en partie significative)
+        dans le nom de la recette.
 
-        Évite les doublons comme « Semoule » dans les légumes/féculents quand la
-        recette s'appelle « Agneau rôti aux légumes de saison, semoule ».
+        Évite les doublons comme :
+        - « Semoule » dans « Agneau rôti aux légumes de saison, semoule »
+        - « Riz basmati » dans « Dinde aux courgettes et riz »
+        - « Courgettes sautées » dans « Dinde aux courgettes et riz »
+        - « Petits pois vapeur » dans « Poulet curry aux petits pois et riz »
+        - « Poêlée de légumes » dans « Poulet sauté aux légumes printaniers »
         """
         if not valeur or not nom_recette:
             return valeur
-        return None if valeur.lower().strip() in nom_recette.lower() else valeur
+        nom_lower = nom_recette.lower()
+        valeur_lower = valeur.lower().strip()
+        # 1. Correspondance exacte (sous-chaîne littérale)
+        if valeur_lower in nom_lower:
+            return None
+        # 2. Matching par mot significatif :
+        #    - mots ≥ 4 caractères OU mots-aliments courts spécifiques (riz, blé…)
+        #    - hors mots génériques de cuisine / articles / prépositions
+        mots = valeur_lower.replace("-", " ").replace("'", " ").split()
+        mots_significatifs = [
+            m for m in mots
+            if (len(m) >= 4 or m in _MOTS_COURTS_ALIMENTS)
+            and m not in _MOTS_CUISINE_STOP
+        ]
+        if mots_significatifs and any(mot in nom_lower for mot in mots_significatifs):
+            return None
+        return valeur
 
     # ═══════════════════════════════════════════════════════════
     # SUGGESTIONS ÉQUILIBRÉES
