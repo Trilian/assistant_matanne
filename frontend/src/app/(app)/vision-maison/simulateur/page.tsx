@@ -35,10 +35,9 @@ const SITUATION = {
 } as const;
 
 // Apport disponible si vente aujourd'hui
-const FRAIS_AGENCE = SITUATION.valeurEstimee * 0.04; // 4 %
-const PRIX_NET_VENDEUR = SITUATION.valeurEstimee - FRAIS_AGENCE;
+// Frais d'agence à la charge de l'acheteur → vendeur reçoit le prix net plein
 const IRA = Math.min(SITUATION.interetsMensuels * 6, SITUATION.creditRestant * 0.03);
-const APPORT_DISPONIBLE = PRIX_NET_VENDEUR - IRA - SITUATION.creditRestant; // ≈ 137 529 €
+const APPORT_DISPONIBLE = SITUATION.valeurEstimee - IRA - SITUATION.creditRestant; // ≈ 153 139 €
 
 // Coûts par défaut des features manquantes (modifiables inline)
 const COUTS_DEFAUT = {
@@ -205,8 +204,9 @@ function TabDemenager() {
             <Info className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
               Apport disponible si vente :{" "}
-              <strong>{eur(APPORT_DISPONIBLE)}</strong> (après remboursement
-              crédit + IRA)
+              <strong>{eur(APPORT_DISPONIBLE)}</strong> — frais d'agence à la
+              charge de l'acheteur, déduction IRA ({eur(IRA, 0)}) +
+              remboursement crédit ({eur(SITUATION.creditRestant)})
             </span>
           </CardContent>
         </Card>
