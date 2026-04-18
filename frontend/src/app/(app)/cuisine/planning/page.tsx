@@ -938,6 +938,17 @@ export default function PagePlanning() {
       .filter((jour) => Boolean(jour.petit_dej || jour.midi || jour.soir));
   }, [datesSemaine, repasParJour]);
 
+  // Noms dédupliqués des déjeuners/dîners pour la section "Conserver" du modal
+  const repasActuelsSemaine = useMemo(() => {
+    const noms = datesSemaine.flatMap((date) =>
+      (repasParJour[date] ?? [])
+        .filter((r) => r.type_repas === "dejeuner" || r.type_repas === "diner")
+        .map((r) => r.recette_nom || r.notes || "")
+        .filter(Boolean)
+    );
+    return Array.from(new Set(noms));
+  }, [datesSemaine, repasParJour]);
+
   function trouverRepas(date: string, type: TypeRepas): RepasPlanning | undefined {
     return repasParJour[date]?.find((r) => r.type_repas === type);
   }
@@ -2351,6 +2362,7 @@ export default function PagePlanning() {
         nbPersonnesInitial={nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0)}
         dateDebut={dateDebut}
         initialPlats={modalGenerationInitialPlats}
+        repasActuels={repasActuelsSemaine}
         onGenerer={(params) => {
           setModalGenerationOuvert(false);
           setModalGenerationInitialPlats([]);

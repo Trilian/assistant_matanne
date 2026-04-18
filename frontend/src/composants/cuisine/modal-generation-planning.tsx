@@ -31,6 +31,8 @@ interface Props {
   preferences?: ObjetDonnees;
   /** Plats pré-sélectionnés depuis l'analyse IA (fusionnés avec les préférences sauvegardées) */
   initialPlats?: string[];
+  /** Repas déjà planifiés cette semaine — cliquables pour les verrouiller dans la prochaine génération */
+  repasActuels?: string[];
 }
 
 export function ModalGenerationPlanning({
@@ -42,6 +44,7 @@ export function ModalGenerationPlanning({
   dateDebut,
   preferences,
   initialPlats,
+  repasActuels,
 }: Props) {
   const [nbPersonnes, setNbPersonnes] = useState(nbPersonnesInitial);
   const [legumes, setLegumes] = useState<string[]>([]);
@@ -326,6 +329,35 @@ export function ModalGenerationPlanning({
               </Button>
             </div>
           </div>
+
+          {/* Repas à conserver de la semaine actuelle */}
+          {repasActuels && repasActuels.length > 0 && (
+            <div className="space-y-2">
+              <Label>
+                Conserver des repas de cette semaine{" "}
+                <span className="text-muted-foreground font-normal text-xs">(cliquez pour verrouiller)</span>
+              </Label>
+              <div className="flex flex-wrap gap-1.5">
+                {repasActuels.map((nom) => {
+                  const estSelectionne = plats.includes(nom);
+                  return (
+                    <button
+                      key={nom}
+                      type="button"
+                      onClick={() => estSelectionne ? retirerPlat(nom) : ajouterPlat(nom)}
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium border transition-colors ${
+                        estSelectionne
+                          ? "bg-emerald-100 border-emerald-400 text-emerald-800 dark:bg-emerald-900/40 dark:border-emerald-600 dark:text-emerald-200"
+                          : "border-dashed border-muted-foreground/40 text-muted-foreground hover:border-emerald-400 hover:text-emerald-700 dark:hover:border-emerald-500 dark:hover:text-emerald-300"
+                      }`}
+                    >
+                      {estSelectionne ? "✓ " : "+ "}{nom}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Plats souhaités */}
           <div className="space-y-2">
