@@ -1498,8 +1498,15 @@ async def valider_courses(
                 # Garder le dernier article pour les métadonnées (prix, rayon)
                 articles_par_ingredient[art.ingredient_id] = art
 
+            from src.core.constants import CATEGORIE_VERS_EMPLACEMENT
+
             for ingredient_id, quantite_totale in quantites_par_ingredient.items():
                 art = articles_par_ingredient[ingredient_id]
+
+                # Résoudre l'ingrédient avant la création inventaire (besoin de categorie)
+                ingredient = (
+                    session.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+                )
 
                 # Incrémenter l'inventaire (ou créer)
                 inv = (
@@ -1510,21 +1517,23 @@ async def valider_courses(
                 if inv:
                     inv.quantite = float(inv.quantite or 0) + quantite_totale
                 else:
+                    categorie_cle = (ingredient.categorie or "").lower().strip() if ingredient else ""
+                    emplacement_initial = CATEGORIE_VERS_EMPLACEMENT.get(
+                        categorie_cle, "Placard"
+                    )
                     session.add(
                         ArticleInventaire(
                             ingredient_id=ingredient_id,
                             quantite=quantite_totale,
                             quantite_min=1.0,
-                            emplacement="Frigo",
+                            emplacement=emplacement_initial,
                         )
                     )
                     session.flush()  # Flush immédiat pour respecter la contrainte UNIQUE
                 articles_sync += 1
 
                 # Mettre à jour l'historique d'achats
-                ingredient = (
-                    session.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
-                )
+                # (ingredient déjà résolu ci-dessus)
                 if ingredient:
                     hist = (
                         session.query(HistoriqueAchats)

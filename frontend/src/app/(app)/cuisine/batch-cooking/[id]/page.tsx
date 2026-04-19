@@ -25,6 +25,7 @@ import {
   BarChart3,
   Thermometer,
   Timer,
+  UtensilsCrossed,
 } from "lucide-react";
 import {
   Card,
@@ -546,6 +547,33 @@ export default function PageDetailBatch() {
           )}
         </CardContent>
       </Card>
+
+      {/* Préparer aussi — accompagnements sans recette */}
+      {(session.preparations_simples ?? []).length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <UtensilsCrossed className="h-4 w-4" />
+              Préparer aussi
+            </CardTitle>
+            <CardDescription>
+              Accompagnements sans recette associée — à préparer en plus lors de cette session
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {(session.preparations_simples ?? []).map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Étapes */}
       {etapes.length > 0 && (

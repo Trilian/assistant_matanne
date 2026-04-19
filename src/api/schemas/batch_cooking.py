@@ -18,6 +18,7 @@ class SessionBatchBase(BaseModel):
     avec_jules: bool = False
     recettes_selectionnees: list[int] = Field(default_factory=list)
     robots_utilises: list[str] = Field(default_factory=list)
+    preparations_simples: list[str] = Field(default_factory=list, description="Préparations sans recette (accompagnements, etc.)")
 
     model_config = {
         "json_schema_extra": {
@@ -39,6 +40,22 @@ class SessionBatchCreate(SessionBatchBase):
     planning_id: int | None = None
 
 
+class RecetteDepuisPlanningItem(BaseModel):
+    """Recette issue du planning, retournée par GET /recettes-depuis-planning."""
+
+    id: int
+    nom: str = Field(max_length=200)
+    type_repas: str = Field(max_length=50)
+    compatible_batch: bool = False
+
+
+class RecettesDepuisPlanningResponse(BaseModel):
+    """Résultat de GET /recettes-depuis-planning."""
+
+    recettes: list[RecetteDepuisPlanningItem]
+    preparations_simples: list[str]
+
+
 class GenererSessionDepuisPlanningRequest(BaseModel):
     """Requête pour générer une session depuis un planning."""
 
@@ -48,10 +65,18 @@ class GenererSessionDepuisPlanningRequest(BaseModel):
         None, description="Nom personnalisé (sinon auto-généré)", max_length=200
     )
     avec_jules: bool = Field(False, description="Jules participe ?")
+    recettes_selectionnees: list[int] | None = Field(
+        None,
+        description="IDs des recettes sélectionnées par l'utilisateur. "
+        "Si fourni, remplace la requête planning.",
+    )
+    preparations_simples: list[str] | None = Field(
+        None,
+        description="Préparations sans recette à inclure (accompagnements, etc.)",
+    )
     jours_cibles: list[int] | None = Field(
         None,
-        description="Jours de la semaine dont les repas seront batchés (0=lun…6=dim). "
-        "Si None, toutes les recettes du planning sont incluses (comportement par défaut).",
+        description="[Déprécié] Jours de la semaine (0=lun…6=dim). Ignoré si recettes_selectionnees fourni.",
     )
 
     model_config = {
@@ -102,6 +127,8 @@ class SessionBatchPatch(BaseModel):
     duree_estimee: int | None = None
     avec_jules: bool | None = None
     recettes_selectionnees: list[int] | None = Field(None, description="IDs des recettes sélectionnées")
+    robots_utilises: list[str] | None = Field(None, description="Robots/appareils utilisés")
+    preparations_simples: list[str] | None = Field(None, description="Préparations sans recette (accompagnements, etc.)")
 
 
 class EtapeBatchResponse(BaseModel):
@@ -135,6 +162,7 @@ class SessionBatchResponse(BaseModel):
     planning_id: int | None = None
     recettes_selectionnees: list[int] = Field(default_factory=list)
     robots_utilises: list[str] = Field(default_factory=list)
+    preparations_simples: list[str] = Field(default_factory=list)
     genere_par_ia: bool = False
     etapes_count: int = 0
     progression: float = 0.0

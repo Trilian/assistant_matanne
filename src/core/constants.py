@@ -199,8 +199,74 @@ EMPLACEMENTS_INVENTAIRE: list[str] = [
 ]
 """Emplacements de stockage normalisés pour l'inventaire."""
 
-EMPLACEMENT_DEFAUT: str = "Frigo"
-"""Emplacement par défaut pour les nouveaux articles."""
+EMPLACEMENT_DEFAUT: str = "Placard"
+"""Emplacement par défaut pour les nouveaux articles (fallback catégorie inconnue)."""
+
+CATEGORIE_VERS_EMPLACEMENT: dict[str, str] = {
+    # Congélateur
+    "surgelés": "Congélateur Tiroir",
+    "surgele": "Congélateur Tiroir",
+    "glaces": "Congélateur Tiroir",
+    # Frigo — frais animaux
+    "viande": "Frigo",
+    "volaille": "Frigo",
+    "bœuf": "Frigo",
+    "porc": "Frigo",
+    "agneau": "Frigo",
+    "poisson": "Frigo",
+    "fruits de mer": "Frigo",
+    "charcuterie": "Frigo",
+    "produits laitiers": "Frigo",
+    "fromage": "Frigo",
+    "yaourt": "Frigo",
+    "crème": "Frigo",
+    "beurre": "Frigo",
+    "lait": "Frigo",
+    "œufs": "Frigo",
+    "oeufs": "Frigo",
+    # Frigo — frais végétal
+    "légumes": "Frigo",
+    "fruits": "Frigo",
+    "herbes fraîches": "Frigo",
+    "herbes": "Frigo",
+    "salade": "Frigo",
+    "fruits et légumes": "Frigo",
+    # Frigo — boulangerie fraîche
+    "boulangerie": "Frigo",
+    "pâtisserie": "Frigo",
+    # Placard — épicerie sèche
+    "épicerie sèche": "Placard",
+    "epicerie seche": "Placard",
+    "épicerie": "Placard",
+    "féculents": "Placard",
+    "féculents & céréales": "Placard",
+    "céréales": "Placard",
+    "légumineuses": "Placard",
+    "conserves": "Placard",
+    "condiments": "Placard",
+    "condiments & sauces": "Placard",
+    "sauces": "Placard",
+    "boissons": "Placard",
+    "noix & graines": "Placard",
+    "noix": "Placard",
+    "graines": "Placard",
+    "petit-déjeuner": "Placard",
+    "petit dejeuner": "Placard",
+    "sucre": "Placard",
+    "farine": "Placard",
+    "chocolat": "Placard",
+    "confiserie": "Placard",
+    "épices": "Placard",
+    "epices": "Placard",
+    "sel": "Placard",
+    "huile": "Placard",
+    "vinaigre": "Placard",
+    "bio & végétal": "Placard",
+    "bio": "Placard",
+    "bébé": "Placard",
+    "bebe": "Placard",
+}
+"""Mapping catégorie d'ingrédient → emplacement de stockage."""
 
 # ═══════════════════════════════════════════════════════════
 # COURSES — MAGASINS

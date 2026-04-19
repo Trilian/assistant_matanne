@@ -31,6 +31,7 @@ export interface SessionBatchCooking {
   planning_id?: number
   recettes_selectionnees: number[]
   robots_utilises: string[]
+  preparations_simples: string[]
   genere_par_ia: boolean
   etapes_count: number
   progression: number
@@ -86,7 +87,22 @@ export interface GenererSessionDepuisPlanningOptions {
   date_session: string
   nom?: string
   avec_jules?: boolean
+  recettes_selectionnees?: number[]
+  preparations_simples?: string[]
+  /** @deprecated remplacé par recettes_selectionnees */
   jours_cibles?: number[]
+}
+
+export interface RecetteDepuisPlanningItem {
+  id: number
+  nom: string
+  type_repas: string
+  compatible_batch: boolean
+}
+
+export interface RecettesDepuisPlanningResponse {
+  recettes: RecetteDepuisPlanningItem[]
+  preparations_simples: string[]
 }
 
 export interface RecetteSessionBatch {

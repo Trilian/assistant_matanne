@@ -186,6 +186,7 @@ class SessionBatchCooking(TimestampMixin, Base):
     # Données session (JSON)
     recettes_selectionnees: Mapped[list[int] | None] = mapped_column(JSONB)
     robots_utilises: Mapped[list[str] | None] = mapped_column(JSONB)
+    preparations_simples: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
 
     # Notes
     notes_avant: Mapped[str | None] = mapped_column(Text)

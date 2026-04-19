@@ -79,8 +79,6 @@ import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
 import { EtiquetteQR } from "@/composants/cuisine/etiquette-qr";
 import type { LucideIcon } from "lucide-react";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
-import { TreemapInventaire } from "@/composants/graphiques/treemap-inventaire";
-import { construireDonneesTreemapInventaire } from "@/bibliotheque/inventaire-treemap";
 import { predireConsommationInventaire } from "@/bibliotheque/api/ia-modules";
 
 const ContenuPhotoFrigoLazy = lazy(() => import("../photo-frigo/page"));
@@ -317,7 +315,6 @@ export default function PageInventaire() {
   });
 
   const nbAlertes = alertes?.length ?? 0;
-  const donneesTreemap = construireDonneesTreemapInventaire(articles ?? []);
   const csvInventaire = articlesFiltres.map((article) => ({
     Emplacement: article.emplacement ?? ongletActif,
     Article: article.nom,
@@ -489,20 +486,6 @@ export default function PageInventaire() {
               <p className="text-sm font-medium">Explication</p>
               <p className="text-xs text-muted-foreground">{predictionStock.raison}</p>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {!!donneesTreemap.length && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Treemap inventaire</CardTitle>
-            <CardDescription>
-              Vue surfacique des categories et principaux articles pour l&apos;emplacement actif.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TreemapInventaire donnees={donneesTreemap} hauteur={300} />
           </CardContent>
         </Card>
       )}

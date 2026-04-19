@@ -1613,6 +1613,7 @@ CREATE TABLE IF NOT EXISTS sessions_batch_cooking (
     planning_id INTEGER,
     recettes_selectionnees JSONB,
     robots_utilises JSONB,
+    preparations_simples JSONB NOT NULL DEFAULT '[]'::jsonb,
     notes_avant TEXT,
     notes_apres TEXT,
     genere_par_ia BOOLEAN NOT NULL DEFAULT FALSE,

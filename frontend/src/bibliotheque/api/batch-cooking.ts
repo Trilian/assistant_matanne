@@ -13,6 +13,7 @@ import type {
   GenererSessionDepuisPlanningOptions,
   GenererSessionDepuisPlanningResult,
   ModifierSessionBatchDTO,
+  RecettesDepuisPlanningResponse,
 } from "@/types/batch-cooking"
 
 /** Lister les sessions de batch cooking */
@@ -117,6 +118,17 @@ export async function genererEtapesSession(
 ): Promise<SessionBatchCooking> {
   const { data } = await clientApi.post<SessionBatchCooking>(
     `/batch-cooking/${id}/generer-etapes`
+  )
+  return data
+}
+
+/** Récupérer les recettes d'un planning + accompagnements sans recette */
+export async function listerRecettesDepuisPlanning(
+  planningId: number
+): Promise<RecettesDepuisPlanningResponse> {
+  const { data } = await clientApi.get<RecettesDepuisPlanningResponse>(
+    "/batch-cooking/recettes-depuis-planning",
+    { params: { planning_id: planningId } }
   )
   return data
 }

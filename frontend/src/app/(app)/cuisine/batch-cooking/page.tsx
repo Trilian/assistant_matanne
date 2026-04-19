@@ -64,6 +64,7 @@ import {
   obtenirConfigBatch,
   mettreAJourConfig,
   genererSessionDepuisPlanning,
+  listerRecettesDepuisPlanning,
 } from "@/bibliotheque/api/batch-cooking";
 import { obtenirPlanningSemaine } from "@/bibliotheque/api/planning";
 import { listerRecettes } from "@/bibliotheque/api/recettes";
@@ -282,13 +283,44 @@ export default function PageBatchCooking() {
   const [pDateSession, setPDateSession] = useState("");
   const [pNom, setPNom] = useState("");
   const [pAvecJules, setPAvecJules] = useState(false);
+  const [etapePlanning, setEtapePlanning] = useState<1 | 2>(1);
+  const [pRecettesDisponibles, setPRecettesDisponibles] = useState<{ id: number; nom: string; type_repas: string; compatible_batch: boolean }[]>([]);
+  const [pPreparationsSimples, setPPreparationsSimples] = useState<string[]>([]);
+  const [pRecettesSelectionnees, setPRecettesSelectionnees] = useState<number[]>([]);
+  const [chargementRecettesPlanning, setChargementRecettesPlanning] = useState(false);
 
   // Initialiser les valeurs par défaut quand on ouvre le dialogue
   function ouvrirDialoguePlanning() {
     setPDateSession(prochainJourBatch(configJoursBatch));
     setPNom("");
     setPAvecJules(configAvecJules);
+    setEtapePlanning(1);
+    setPRecettesDisponibles([]);
+    setPPreparationsSimples([]);
+    setPRecettesSelectionnees([]);
     setDialoguePlanning(true);
+  }
+
+  async function passerAEtape2() {
+    if (!planningCourant?.planning_id || !pDateSession) return;
+    setChargementRecettesPlanning(true);
+    try {
+      const result = await listerRecettesDepuisPlanning(planningCourant.planning_id);
+      setPRecettesDisponibles(result.recettes);
+      setPPreparationsSimples(result.preparations_simples);
+      setPRecettesSelectionnees(result.recettes.map((r) => r.id)); // tout pré-coché
+      setEtapePlanning(2);
+    } catch {
+      toast.error("Erreur lors du chargement des recettes du planning");
+    } finally {
+      setChargementRecettesPlanning(false);
+    }
+  }
+
+  function toggleRecettePlanning(id: number) {
+    setPRecettesSelectionnees((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   }
 
   const { data: planningCourant, isLoading: chargementPlanning } = utiliserRequete(
@@ -297,29 +329,17 @@ export default function PageBatchCooking() {
     { enabled: dialoguePlanning }
   );
 
-  // Calculer jours_cibles depuis la date choisie et la config couverture
-  const jourISOChoisi = pDateSession
-    ? (new Date(pDateSession + "T12:00:00").getDay() + 6) % 7
-    : null;
-  const jours_cibles_selectionnes: number[] | undefined =
-    jourISOChoisi != null
-      ? (configCouvertureJours[String(jourISOChoisi)] ?? undefined)
-      : undefined;
-  const labelsCouverture = jours_cibles_selectionnes
-    ? jours_cibles_selectionnes.map(
-        (j) => JOURS_SEMAINE.find((js) => js.valeur === j)?.long ?? ""
-      )
-    : [];
-
   const { mutate: genererDepuisPlanning, isPending: enGeneration } = utiliserMutation(
     () => {
       if (!planningCourant?.planning_id) throw new Error("Aucun planning actif");
+      if (pRecettesSelectionnees.length === 0) throw new Error("Aucune recette sélectionnée");
       return genererSessionDepuisPlanning({
         planning_id: planningCourant.planning_id,
         date_session: pDateSession || new Date().toISOString().slice(0, 10),
         nom: pNom.trim() || undefined,
         avec_jules: pAvecJules,
-        jours_cibles: jours_cibles_selectionnes,
+        recettes_selectionnees: pRecettesSelectionnees,
+        preparations_simples: pPreparationsSimples.length > 0 ? pPreparationsSimples : undefined,
       });
     },
     {
@@ -816,78 +836,146 @@ export default function PageBatchCooking() {
             <DialogTitle className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-primary" />
               Créer depuis le planning
+              <span className="ml-1 text-sm font-normal text-muted-foreground">
+                Étape {etapePlanning}/2
+              </span>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {chargementPlanning ? (
-              <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Chargement du planning…
-              </div>
-            ) : !planningCourant?.planning_id ? (
-              <p className="text-sm text-destructive">
-                Aucun planning actif cette semaine. Créez d&apos;abord un planning dans l&apos;onglet Planning.
+          {chargementPlanning ? (
+            <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Chargement du planning…
+            </div>
+          ) : !planningCourant?.planning_id ? (
+            <p className="text-sm text-destructive">
+              Aucun planning actif cette semaine. Créez d&apos;abord un planning dans l&apos;onglet Planning.
+            </p>
+          ) : etapePlanning === 1 ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Planning actif :{" "}
+                <span className="font-medium text-foreground">{planningCourant.semaine}</span>
               </p>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  Planning actif :{" "}
-                  <span className="font-medium text-foreground">{planningCourant.semaine}</span>
+
+              <div className="space-y-2">
+                <Label htmlFor="p-date">Date de la session</Label>
+                <Input
+                  id="p-date"
+                  type="date"
+                  value={pDateSession}
+                  onChange={(e) => setPDateSession(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="p-nom">Nom (optionnel)</Label>
+                <Input
+                  id="p-nom"
+                  value={pNom}
+                  onChange={(e) => setPNom(e.target.value)}
+                  placeholder="Auto-généré si vide"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="p-jules" className="flex flex-col gap-0.5">
+                  <span>Avec Jules</span>
+                  <span className="text-xs font-normal text-muted-foreground">Portions adaptées + tâches simples</span>
+                </Label>
+                <Switch
+                  id="p-jules"
+                  checked={pAvecJules}
+                  onCheckedChange={setPAvecJules}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setDialoguePlanning(false)}>
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  disabled={!pDateSession || chargementRecettesPlanning}
+                  onClick={passerAEtape2}
+                >
+                  {chargementRecettesPlanning ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <ChevronRight className="mr-1 h-4 w-4" />
+                  )}
+                  Suivant : choisir les recettes
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Recettes de la semaine — sélectionnez celles à préparer.
+                <span className="ml-1 font-medium text-foreground">
+                  {pRecettesSelectionnees.length}/{pRecettesDisponibles.length} sélectionnée{pRecettesSelectionnees.length > 1 ? "s" : ""}
+                </span>
+              </p>
+
+              {pRecettesDisponibles.length === 0 ? (
+                <p className="text-sm text-amber-600 dark:text-amber-400 py-2">
+                  Aucune recette associée dans le planning de cette semaine.
                 </p>
-
-                <div className="space-y-2">
-                  <Label htmlFor="p-date">Date de la session</Label>
-                  <Input
-                    id="p-date"
-                    type="date"
-                    value={pDateSession}
-                    onChange={(e) => setPDateSession(e.target.value)}
-                  />
-                  {labelsCouverture.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Recettes couvertes :{" "}
-                      <span className="font-medium text-foreground">
-                        {labelsCouverture.join(" · ")}
-                      </span>
-                    </p>
-                  )}
-                  {jours_cibles_selectionnes === undefined && pDateSession && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
-                      Aucune couverture configurée pour ce jour — toutes les recettes du planning seront incluses.
-                    </p>
-                  )}
+              ) : (
+                <div className="max-h-52 overflow-y-auto space-y-1 rounded-md border p-2">
+                  {pRecettesDisponibles.map((r) => {
+                    const selectionne = pRecettesSelectionnees.includes(r.id);
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        className={`w-full flex items-center justify-between gap-2 rounded px-3 py-2 text-left text-sm transition-colors hover:bg-accent ${
+                          selectionne ? "bg-primary/10 font-medium" : ""
+                        }`}
+                        onClick={() => toggleRecettePlanning(r.id)}
+                      >
+                        <span className="min-w-0 truncate">{r.nom}</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {r.compatible_batch && (
+                            <Badge variant="secondary" className="text-xs px-1.5 py-0">batch</Badge>
+                          )}
+                          {selectionne && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="p-nom">Nom (optionnel)</Label>
-                  <Input
-                    id="p-nom"
-                    value={pNom}
-                    onChange={(e) => setPNom(e.target.value)}
-                    placeholder="Auto-généré si vide"
-                  />
+              {pPreparationsSimples.length > 0 && (
+                <div className="rounded-md border border-dashed p-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    Préparer aussi
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {pPreparationsSimples.map((item) => (
+                      <Badge key={item} variant="outline" className="text-xs">
+                        {item}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Accompagnements sans recette — inclus automatiquement dans la session.
+                  </p>
                 </div>
+              )}
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="p-jules" className="flex flex-col gap-0.5">
-                    <span>Avec Jules</span>
-                    <span className="text-xs font-normal text-muted-foreground">Portions adaptées + tâches simples</span>
-                  </Label>
-                  <Switch
-                    id="p-jules"
-                    checked={pAvecJules}
-                    onCheckedChange={setPAvecJules}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setDialoguePlanning(false)}>
+              <div className="flex justify-between gap-2">
+                <Button type="button" variant="outline" onClick={() => setEtapePlanning(1)}>
+                  Retour
+                </Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="ghost" onClick={() => setDialoguePlanning(false)}>
                     Annuler
                   </Button>
                   <Button
                     type="button"
-                    disabled={enGeneration || !pDateSession}
+                    disabled={enGeneration || pRecettesSelectionnees.length === 0}
                     onClick={() => genererDepuisPlanning(undefined)}
                   >
                     {enGeneration ? (
@@ -898,9 +986,9 @@ export default function PageBatchCooking() {
                     Créer la session
                   </Button>
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
