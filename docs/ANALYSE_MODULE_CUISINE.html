@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analyse Complète — Module Cuisine | Assistant Matanne</title>
+<style>
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+    --border: #475569; --text: #e2e8f0; --text-muted: #94a3b8;
+    --accent: #38bdf8; --accent2: #818cf8; --green: #4ade80;
+    --yellow: #fbbf24; --orange: #fb923c; --red: #f87171;
+    --teal: #2dd4bf; --pink: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  .hero { text-align: center; padding: 3rem 1rem 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .hero h1 { font-size: 2.4rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: .5rem; }
+  .hero .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+  .hero .meta { margin-top: 1rem; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+  .hero .meta span { background: var(--surface); padding: .3rem .8rem; border-radius: 6px; font-size: .85rem; border: 1px solid var(--border); }
+
+  /* Score global */
+  .score-global { text-align: center; margin: 2rem 0 3rem; }
+  .score-global .ring { width: 160px; height: 160px; margin: 0 auto 1rem; position: relative; }
+  .score-global .ring svg { transform: rotate(-90deg); }
+  .score-global .ring .value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 700; }
+  .score-global .label { font-size: 1.1rem; color: var(--text-muted); }
+
+  /* Navigation */
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
+  .toc h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent); }
+  .toc ol { columns: 2; column-gap: 2rem; padding-left: 1.2rem; }
+  .toc li { margin-bottom: .4rem; }
+  .toc a { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--border); }
+  .toc a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Sections */
+  section { margin-bottom: 3rem; }
+  section > h2 { font-size: 1.6rem; margin-bottom: 1.2rem; padding-bottom: .5rem; border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: .6rem; }
+  section > h2 .num { background: var(--accent); color: var(--bg); width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .9rem; font-weight: 700; flex-shrink: 0; }
+  h3 { font-size: 1.15rem; margin: 1.2rem 0 .6rem; color: var(--accent2); }
+  h4 { font-size: 1rem; margin: .8rem 0 .4rem; color: var(--teal); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; }
+  .card.warning { border-left: 4px solid var(--yellow); }
+  .card.danger { border-left: 4px solid var(--red); }
+  .card.success { border-left: 4px solid var(--green); }
+  .card.info { border-left: 4px solid var(--accent); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: .8rem 0 1.2rem; font-size: .9rem; }
+  th, td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--surface2); color: var(--accent); font-weight: 600; position: sticky; top: 0; }
+  tr:hover td { background: rgba(56, 189, 248, .05); }
+  td code { background: var(--surface2); padding: .1rem .4rem; border-radius: 4px; font-size: .85rem; }
+
+  /* Score bars */
+  .score-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem; }
+  .score-row .label { width: 200px; flex-shrink: 0; font-size: .9rem; }
+  .score-row .bar-bg { flex: 1; height: 24px; background: var(--surface2); border-radius: 6px; overflow: hidden; position: relative; }
+  .score-row .bar { height: 100%; border-radius: 6px; transition: width .6s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: .75rem; font-weight: 700; color: var(--bg); }
+  .score-row .note { width: 45px; text-align: right; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+
+  /* Tags / Badges */
+  .badge { display: inline-block; padding: .15rem .5rem; border-radius: 4px; font-size: .78rem; font-weight: 600; }
+  .badge-green { background: rgba(74,222,128,.15); color: var(--green); }
+  .badge-yellow { background: rgba(251,191,36,.15); color: var(--yellow); }
+  .badge-red { background: rgba(248,113,113,.15); color: var(--red); }
+  .badge-blue { background: rgba(56,189,248,.15); color: var(--accent); }
+  .badge-purple { background: rgba(129,140,248,.15); color: var(--accent2); }
+  .badge-teal { background: rgba(45,212,191,.15); color: var(--teal); }
+  .badge-orange { background: rgba(251,146,60,.15); color: #fb923c; }
+
+  /* Lists */
+  ul, ol { padding-left: 1.4rem; margin: .5rem 0; }
+  li { margin-bottom: .3rem; }
+  li::marker { color: var(--accent); }
+
+  /* Code */
+  code { font-family: 'Cascadia Code', 'Fira Code', monospace; }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: .8rem 0; font-size: .85rem; }
+
+  /* Flow diagram */
+  .flow { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin: 1rem 0; }
+  .flow .step { background: var(--surface); border: 1px solid var(--border); padding: .5rem 1rem; border-radius: 8px; font-size: .85rem; white-space: nowrap; }
+  .flow .arrow { color: var(--accent); font-size: 1.2rem; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .toc ol { columns: 1; } }
+
+  /* Verdict */
+  .verdict { background: linear-gradient(135deg, rgba(56,189,248,.08), rgba(129,140,248,.08)); border: 1px solid var(--accent); border-radius: 12px; padding: 2rem; margin: 2rem 0; }
+  .verdict h3 { color: var(--accent); margin-bottom: 1rem; font-size: 1.3rem; }
+
+  /* Stats row */
+  .stats { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.5rem; text-align: center; flex: 1; min-width: 140px; }
+  .stat .val { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .stat .lbl { font-size: .8rem; color: var(--text-muted); margin-top: .2rem; }
+
+  /* Footer */
+  footer { text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: .85rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
+<header class="hero">
+  <h1>Analyse Complète — Module Cuisine</h1>
+  <p class="subtitle">Audit technique, fonctionnel, tests et documentation du module cuisine d'Assistant Matanne</p>
+  <div class="meta">
+    <span>📅 19 avril 2026</span>
+    <span>📦 ~120 fichiers analysés</span>
+    <span>🔧 Backend Python + Frontend Next.js</span>
+    <span>🗄️ 28 tables SQL</span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════ SCORE GLOBAL ═══════════════════════════════ -->
+<div class="score-global">
+  <div class="ring">
+    <svg width="160" height="160" viewBox="0 0 160 160">
+      <circle cx="80" cy="80" r="70" fill="none" stroke="#334155" stroke-width="12"/>
+      <circle cx="80" cy="80" r="70" fill="none" stroke="url(#grad)" stroke-width="12" stroke-dasharray="440" stroke-dashoffset="141" stroke-linecap="round"/>
+      <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#818cf8"/></linearGradient></defs>
+    </svg>
+    <span class="value" style="color:var(--accent)">6.8</span>
+  </div>
+  <p class="label">Score global sur 10 — Module mature avec des axes d'amélioration tests et frontend</p>
+</div>
+
+<!-- ═══════════════════════════════════════ STATS ═══════════════════════════════════════ -->
+<div class="stats">
+  <div class="stat"><div class="val">64</div><div class="lbl">Endpoints API</div></div>
+  <div class="stat"><div class="val">18</div><div class="lbl">Pages Frontend</div></div>
+  <div class="stat"><div class="val">28</div><div class="lbl">Tables SQL</div></div>
+  <div class="stat"><div class="val">~75</div><div class="lbl">Tests</div></div>
+  <div class="stat"><div class="val">~6100</div><div class="lbl">Lignes Routes</div></div>
+  <div class="stat"><div class="val">21</div><div class="lbl">Composants UI</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════ TOC ═══════════════════════════════════════ -->
+<nav class="toc">
+  <h2>Sommaire</h2>
+  <ol>
+    <li><a href="#fonctionnalites">Inventaire des fonctionnalités</a></li>
+    <li><a href="#architecture">Architecture technique</a></li>
+    <li><a href="#backend">Analyse Backend détaillée</a></li>
+    <li><a href="#frontend">Analyse Frontend détaillée</a></li>
+    <li><a href="#sql">Schéma de données (SQL)</a></li>
+    <li><a href="#tests">Tests et couverture</a></li>
+    <li><a href="#docs">Documentation</a></li>
+    <li><a href="#bugs">Bugs et problèmes identifiés</a></li>
+    <li><a href="#redondances">Redondances et suppressions recommandées</a></li>
+    <li><a href="#scores">Notation détaillée (10 catégories)</a></li>
+    <li><a href="#plan">Plan d'action prioritaire</a></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════════════════════════════ 1. FONCTIONNALITÉS ════════════════════════ -->
+<section id="fonctionnalites">
+  <h2><span class="num">1</span> Inventaire des fonctionnalités</h2>
+
+  <p>Le module cuisine est le plus riche et central de l'application. Il couvre <strong>11 sous-modules</strong> interconnectés :</p>
+
+  <table>
+    <thead>
+      <tr><th>Sous-module</th><th>Endpoints</th><th>Pages</th><th>Lignes backend</th><th>Statut</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>🍳 <strong>Recettes</strong></td><td>7</td><td>4</td><td>~950</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>📅 <strong>Planning repas</strong></td><td>6</td><td>2</td><td>~700</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>🛒 <strong>Courses</strong></td><td>11</td><td>1</td><td>~800</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>📦 <strong>Inventaire / Stock</strong></td><td>8</td><td>1</td><td>~800</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>🤖 <strong>Suggestions IA</strong></td><td>8</td><td>1</td><td>~900</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>🥘 <strong>Batch Cooking</strong></td><td>12</td><td>2</td><td>~1000</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>♻️ <strong>Anti-Gaspillage</strong></td><td>3</td><td>1</td><td>~450</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>⚙️ <strong>Préférences cuisine</strong></td><td>9</td><td>—</td><td>~500</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>📊 <strong>Nutrition</strong></td><td>intégré</td><td>1</td><td>—</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>🌿 <strong>Calendrier saisonnier</strong></td><td>intégré</td><td>1</td><td>—</td><td><span class="badge badge-green">Complet</span></td></tr>
+      <tr><td>📱 <strong>Mode Tablette</strong></td><td>—</td><td>1</td><td>—</td><td><span class="badge badge-green">Complet</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Fonctionnalités clés par sous-module</h3>
+
+  <div class="grid-2">
+    <div class="card info">
+      <h4>🍳 Recettes</h4>
+      <ul>
+        <li>CRUD complet avec ingredients, étapes, photos</li>
+        <li>Import URL (Marmiton, etc.) et import PDF</li>
+        <li>Détection & fusion de doublons</li>
+        <li>Adaptation Jules (bébé) via IA</li>
+        <li>Versions robot (Cookeo, Monsieur Cuisine, Air Fryer)</li>
+        <li>Génération photo IA + upload</li>
+        <li>Export PDF, score écologique</li>
+        <li>Radar nutritionnel (calories, protéines, lipides, glucides)</li>
+        <li>Patterns alimentaires, repas adaptatif Garmin</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h4>📅 Planning repas</h4>
+      <ul>
+        <li>Grille semaine 7j × 4 types repas + Drag-and-Drop</li>
+        <li>Génération IA avec préférences</li>
+        <li>Score équilibre PNNS par repas</li>
+        <li>Détection de conflits planning</li>
+        <li>Accompagnements (légumes, féculents, protéines, laitage)</li>
+        <li>Adaptation Jules (dessert, plat, notes)</li>
+        <li>Export iCalendar + PDF</li>
+        <li>Mode invités (ajustement portions)</li>
+        <li>WebSocket collaboration temps réel</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h4>🛒 Courses</h4>
+      <ul>
+        <li>Listes multiples avec CRUD articles</li>
+        <li>Tiles style Bring! avec catégories couleur</li>
+        <li>Génération depuis planning (agrégation ingrédients → soustraction stock)</li>
+        <li>Scanner multi-codes-barres</li>
+        <li>Prédictions IA (achats récurrents)</li>
+        <li>Suggestions bio/local/saison</li>
+        <li>Correspondances Carrefour Drive (extension Chrome)</li>
+        <li>QR code partage, export Telegram par magasin</li>
+        <li>Mode invités, idempotency multi-worker</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h4>📦 Inventaire / Stock</h4>
+      <ul>
+        <li>CRUD avec 5 emplacements (Frigo, Congélateur Tiroir/Coffre, Cellier, Placard)</li>
+        <li>Photo-frigo : analyse IA d'image → détection ingrédients</li>
+        <li>Enrichissement OpenFoodFacts (Nutriscore, Ecoscore, Nova)</li>
+        <li>Alertes péremption + stock bas</li>
+        <li>Consolidation multi-sources</li>
+        <li>QR code étiquettes pour organisation</li>
+        <li>Prédiction consommation IA</li>
+        <li>Historique de modifications (audit trail)</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h4>🥘 Batch Cooking</h4>
+      <ul>
+        <li>Sessions planifiées avec sélection recettes depuis planning</li>
+        <li>Génération étapes IA avec parallélisation par robot</li>
+        <li>Vue Swimlane par robot (Gantt-like)</li>
+        <li>Suivi préparations (portions restantes, péremption)</li>
+        <li>Configuration personnalisée (jours, robots, durée max)</li>
+        <li>Préparations simples (riz, pâtes, légumes vapeur)</li>
+        <li>Machine d'état (planifiée → en cours → terminée)</li>
+        <li>Timeline historique des sessions</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h4>🤖 Suggestions IA</h4>
+      <ul>
+        <li>Suggestions recettes contextuelles (Mistral AI)</li>
+        <li>"Qu'est-ce qu'on mange ce soir ?" (menu du jour)</li>
+        <li>Photo-frigo multi-zones avec confiance</li>
+        <li>Substitution ingrédients avec impact goût</li>
+        <li>Prédictions courses (modèle ML)</li>
+        <li>Recettes depuis stock disponible</li>
+        <li>Détection saison et type repas automatique</li>
+        <li>Rate limiting dédié (10 req/min)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card info">
+      <h4>♻️ Anti-Gaspillage</h4>
+      <ul>
+        <li>Score 0-100 avec tendances hebdo</li>
+        <li>Articles urgents (proches péremption)</li>
+        <li>Recettes "rescue" utilisant ingrédients à risque</li>
+        <li>Badges gamification (Premier Pas → Zéro Déchet)</li>
+        <li>Estimation d'économies en EUR</li>
+        <li>Image score téléchargeable</li>
+      </ul>
+    </div>
+    <div class="card info">
+      <h4>📱 Mode Tablette + Extras</h4>
+      <ul>
+        <li>Mode cuisson split/focus avec fullscreen</li>
+        <li>Checklist ingrédients et étapes</li>
+        <li>Timer intégré (ajustable)</li>
+        <li>Synthèse vocale des étapes</li>
+        <li>Calendrier saisonnier (12 mois, 5 catégories)</li>
+        <li>Heatmap nutritionnel + Radar famille</li>
+        <li>Wizard "Ma Semaine" (4 étapes)</li>
+        <li>Feedback semaine (notes 1-5 par repas)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ 2. ARCHITECTURE ═══════════════════════════ -->
+<section id="architecture">
+  <h2><span class="num">2</span> Architecture technique</h2>
+
+  <h3>Flux de données principaux</h3>
+
+  <div class="card">
+    <h4>Flux 1 : Création de recette</h4>
+    <div class="flow">
+      <span class="step">Frontend Form</span><span class="arrow">→</span>
+      <span class="step">Zod validation</span><span class="arrow">→</span>
+      <span class="step">POST /api/v1/recettes</span><span class="arrow">→</span>
+      <span class="step">Pydantic RecetteCreate</span><span class="arrow">→</span>
+      <span class="step">ServiceRecettes.create_complete()</span><span class="arrow">→</span>
+      <span class="step">Normalisation (mojibake, catégories)</span><span class="arrow">→</span>
+      <span class="step">Find/Create Ingrédients</span><span class="arrow">→</span>
+      <span class="step">Persist + Event "recette.creee"</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>Flux 2 : Génération liste de courses</h4>
+    <div class="flow">
+      <span class="step">Planning validé</span><span class="arrow">→</span>
+      <span class="step">POST generer-courses-depuis-planning</span><span class="arrow">→</span>
+      <span class="step">Query repas + recettes</span><span class="arrow">→</span>
+      <span class="step">Agrégation ingrédients</span><span class="arrow">→</span>
+      <span class="step">Soustraction inventaire</span><span class="arrow">→</span>
+      <span class="step">Suggestion rayons + magasins</span><span class="arrow">→</span>
+      <span class="step">ListeCourses créée</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>Flux 3 : Session Batch Cooking</h4>
+    <div class="flow">
+      <span class="step">Sélection recettes planning</span><span class="arrow">→</span>
+      <span class="step">POST generer-depuis-planning</span><span class="arrow">→</span>
+      <span class="step">Calcul parallélisation robots</span><span class="arrow">→</span>
+      <span class="step">Génération étapes IA</span><span class="arrow">→</span>
+      <span class="step">Session (planifiée→en cours→terminée)</span><span class="arrow">→</span>
+      <span class="step">Préparations stockées (frigo/congel)</span><span class="arrow">→</span>
+      <span class="step">Consommation via planning</span>
+    </div>
+  </div>
+
+  <h3>Stack technique</h3>
+  <div class="grid-3">
+    <div class="card">
+      <h4>Backend</h4>
+      <ul>
+        <li>FastAPI + SQLAlchemy 2.0 ORM</li>
+        <li>Pydantic v2 (validation/sérialisation)</li>
+        <li>Mistral AI (suggestions, adaptation)</li>
+        <li>Services avec mixins + <code>@service_factory</code></li>
+        <li>Cache multi-niveaux (<code>@avec_cache</code>)</li>
+        <li>Event bus pub/sub</li>
+        <li>Rate limiting (60/10 req/min)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Frontend</h4>
+      <ul>
+        <li>Next.js 16 (App Router, Turbopack)</li>
+        <li>TypeScript 5 + Tailwind CSS v4</li>
+        <li>TanStack Query v5 (data fetching)</li>
+        <li>Zustand 5 (state)</li>
+        <li>react-hook-form 7 + Zod (forms)</li>
+        <li>dnd-kit (Drag-and-Drop)</li>
+        <li>framer-motion (animations)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Infrastructure</h4>
+      <ul>
+        <li>Supabase PostgreSQL (28 tables cuisine)</li>
+        <li>RLS policies par utilisateur</li>
+        <li>Migrations SQL-file</li>
+        <li>WebSocket (courses temps réel)</li>
+        <li>OpenFoodFacts API (enrichissement)</li>
+        <li>Extension Chrome (Carrefour Drive)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ 3. BACKEND ════════════════════════════════ -->
+<section id="backend">
+  <h2><span class="num">3</span> Analyse Backend détaillée</h2>
+
+  <h3>Routes API — 8 fichiers (~6100 lignes)</h3>
+  <table>
+    <thead><tr><th>Fichier</th><th>Lignes</th><th>Endpoints</th><th>Highlights</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>routes/recettes.py</code></td><td>~950</td><td>7</td>
+        <td>CRUD, import URL/PDF, fusion doublons, export PDF, patterns alimentaires, repas Garmin</td>
+      </tr>
+      <tr>
+        <td><code>routes/courses.py</code></td><td>~800</td><td>11</td>
+        <td>CRUD listes/articles, génération depuis planning, idempotency, suggestion rayons, consolidation</td>
+      </tr>
+      <tr>
+        <td><code>routes/planning.py</code></td><td>~700</td><td>6</td>
+        <td>Semaine/mensuel, conflits, repas CRUD, score équilibre PNNS, auto-création planning</td>
+      </tr>
+      <tr>
+        <td><code>routes/suggestions.py</code></td><td>~900</td><td>8</td>
+        <td>Recettes IA, planning IA, photo-frigo, substitution, prédictions ML, depuis-stock</td>
+      </tr>
+      <tr>
+        <td><code>routes/batch_cooking.py</code></td><td>~1000</td><td>12</td>
+        <td>Sessions CRUD, génération depuis planning, étapes IA, préparations, config, swimlane</td>
+      </tr>
+      <tr>
+        <td><code>routes/anti_gaspillage.py</code></td><td>~450</td><td>3</td>
+        <td>Score, historique 4 semaines, suggestions IA anti-gaspi, badges gamification</td>
+      </tr>
+      <tr>
+        <td><code>routes/inventaire.py</code></td><td>~800</td><td>8</td>
+        <td>CRUD, consolidation multi-sources, barcode batch, enrichissement OpenFoodFacts</td>
+      </tr>
+      <tr>
+        <td><code>routes/preferences.py</code></td><td>~500</td><td>9</td>
+        <td>Prefs cuisine, mode pilote auto, habitudes apprises, defaults planning, notifications</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Schémas Pydantic — 8 fichiers</h3>
+  <table>
+    <thead><tr><th>Fichier</th><th>Classes</th><th>Validators notables</th></tr></thead>
+    <tbody>
+      <tr><td><code>schemas/recettes.py</code></td><td>RecetteCreate, RecettePatch, RecetteResponse, IngredientItem, VersionRecetteResponse, AdaptationJulesManuelle</td><td>normaliser_categorie (8+ mappings), normaliser_instructions (string→list), normaliser_ingredients (format flexible)</td></tr>
+      <tr><td><code>schemas/courses.py</code></td><td>CourseItemBase, CourseListCreate, GenererCoursesRequest, CheckoutCoursesRequest, ScanBarcodeCheckoutRequest, CorrespondanceDriveCreate</td><td>normaliser_rayon, tronquer_unite, idempotency_key</td></tr>
+      <tr><td><code>schemas/planning.py</code></td><td>RepasCreate, RepasResponse, PlanningSemaineResponse, GenererPlanningRequest, SuggestionAccompagnementResponse</td><td>Alias date↔date_repas, populate_by_name</td></tr>
+      <tr><td><code>schemas/suggestions.py</code></td><td>SuggestionRecetteItem, PhotoFrigoResponse, AdaptationRecetteResponse, SubstitutionIngredientResponse</td><td>Confiance 0-1, impact goût, tags substituts</td></tr>
+      <tr><td><code>schemas/batch_cooking.py</code></td><td>SessionBatchCreate, SessionBatchPatch, EtapeBatchResponse, PreparationBatchResponse, ConfigBatchUpdate</td><td>couverture_jours mapping, statut machine d'état</td></tr>
+      <tr><td><code>schemas/anti_gaspillage.py</code></td><td>ArticlePerissable, RecetteRescue, ScoreAntiGaspillage, ReponseAntiGaspillage</td><td>Score 0-100, jours_restants</td></tr>
+      <tr><td><code>schemas/inventaire.py</code></td><td>InventaireItemCreate, InventaireItemUpdate, InventaireItemResponse, ScanBatchRequest, ArticleConsolideResponse</td><td>validate_emplacement (normalisation accents), est_bas/est_expire computed</td></tr>
+      <tr><td><code>schemas/preferences.py</code></td><td>PreferencesBase, PreferencesPatch, PreferencesNotificationsBase, CanauxParCategorie</td><td>Canaux autorisés (push/ntfy/email/telegram), quiet hours HH:MM</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Services métier — Architecture des classes</h3>
+  <div class="card">
+    <h4>ServiceRecettes (src/services/cuisine/recettes/service.py)</h4>
+    <pre>class ServiceRecettes(
+    BaseService[Recette],       # CRUD générique
+    BaseAIService,              # Client Mistral + rate limiting
+    RecipeAIMixin,              # Enrichissement IA
+    RecettesIASuggestionsMixin, # Suggestions
+    RecettesIAVersionsMixin,    # Versions Jules/robots
+    RecetteRechercheMixin,      # Recherche avancée
+    RecetteIOMixin,             # Import URL/PDF
+)</pre>
+    <p>Méthodes clés : <code>create_complete()</code> (normalisation mojibake, find/create ingrédients, event emission), <code>get_by_id_full()</code> (cache), <code>find_existing_recette()</code> (dédup)</p>
+  </div>
+
+  <div class="card">
+    <h4>ServicePlanning (src/services/cuisine/planning/service.py)</h4>
+    <pre>class ServicePlanning(
+    BaseService[Planning],
+    BaseAIService,
+    PlanningAIMixin,            # Suggestions planning
+    PlanningIAGenerationMixin,  # Génération complète
+)</pre>
+    <p>Méthodes clés : <code>creer_planning_avec_choix()</code> (remplacement semaine, adaptation enfants), <code>get_planning_complet()</code> (groupé par jour)</p>
+  </div>
+
+  <div class="card">
+    <h4>ServiceInventaire (src/services/inventaire/service.py)</h4>
+    <pre>class ServiceInventaire(
+    BaseService[ArticleInventaire],
+    BaseAIService,
+    InventoryAIMixin,           # Suggestions IA stock
+    InventaireIOMixin,          # Import/Export CSV/JSON
+    InventaireStatsMixin,       # Alertes, statistiques
+    InventaireStockMixin,       # Historique, modifications
+    InventaireOperationsMixin,  # CRUD, photos, courses IA
+)</pre>
+    <p>6 mixins — architecture la plus complexe. Performance monitorée via <code>@chronometre</code> (alerte >2s).</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ 4. FRONTEND ═══════════════════════════════ -->
+<section id="frontend">
+  <h2><span class="num">4</span> Analyse Frontend détaillée</h2>
+
+  <h3>Pages — 18 fichiers</h3>
+  <table>
+    <thead><tr><th>Page</th><th>Lignes</th><th>Complexité</th><th>Remarques</th></tr></thead>
+    <tbody>
+      <tr><td>cuisine/page.tsx (Hub)</td><td>~320</td><td><span class="badge badge-green">OK</span></td><td>Dashboard KPIs, actions admin, feedback semaine</td></tr>
+      <tr><td>recettes/page.tsx</td><td>~400</td><td><span class="badge badge-yellow">Moyenne</span></td><td>Filtrage avancé, doublons, favoris, import. State filtre complexe</td></tr>
+      <tr><td>recettes/[id]/page.tsx</td><td>~550</td><td><span class="badge badge-yellow">Moyenne</span></td><td>Détail complet, adaptation Jules/robots, photo IA, export PDF</td></tr>
+      <tr><td>recettes/[id]/modifier</td><td>~40</td><td><span class="badge badge-green">OK</span></td><td>Wrapper simple vers FormulaireRecette</td></tr>
+      <tr><td>recettes/nouveau</td><td>~10</td><td><span class="badge badge-green">OK</span></td><td>Délègue tout au composant formulaire</td></tr>
+      <tr><td><strong>courses/page.tsx</strong></td><td><strong>~500</strong></td><td><span class="badge badge-red">Élevée</span></td><td>God component. Scanner, QR, Drive, Telegram, prédictions, invités, bio/local</td></tr>
+      <tr><td><strong>planning/page.tsx</strong></td><td><strong>~1000+</strong></td><td><span class="badge badge-red">Très élevée</span></td><td>God component. DnD, génération IA, nutrition, conflits, export, WebSocket</td></tr>
+      <tr><td>inventaire/page.tsx</td><td>~600</td><td><span class="badge badge-yellow">Moyenne</span></td><td>3 onglets (Stock, Photo-Frigo, Anti-Gaspi), OCR, code-barres</td></tr>
+      <tr><td>batch-cooking/page.tsx</td><td>~600</td><td><span class="badge badge-yellow">Moyenne</span></td><td>Sessions, config robots, timeline, préparations</td></tr>
+      <tr><td>batch-cooking/[id]</td><td>~100</td><td><span class="badge badge-green">OK</span></td><td>Détail session, swimlane</td></tr>
+      <tr><td>anti-gaspillage/page.tsx</td><td>~450</td><td><span class="badge badge-green">OK</span></td><td>Score, urgents, rescue, téléchargement image</td></tr>
+      <tr><td>ma-semaine/page.tsx</td><td>~300</td><td><span class="badge badge-green">OK</span></td><td>Wizard 4 étapes (planning→inventaire→courses→recap)</td></tr>
+      <tr><td>nutrition/page.tsx</td><td>~200</td><td><span class="badge badge-green">OK</span></td><td>Macros hebdo, heatmap, radar. Objectifs codés en dur</td></tr>
+      <tr><td>saisonnier/page.tsx</td><td>~150</td><td><span class="badge badge-green">OK</span></td><td>Calendrier 12 mois, fallback statique</td></tr>
+      <tr><td>photo-frigo/page.tsx</td><td>~300</td><td><span class="badge badge-green">OK</span></td><td>Upload, zones, détection IA, import sélectif</td></tr>
+      <tr><td>tablette/page.tsx</td><td>~400</td><td><span class="badge badge-yellow">Moyenne</span></td><td>Split/focus, timer, synthèse vocale, checklist</td></tr>
+      <tr><td>loading.tsx</td><td>~16</td><td><span class="badge badge-green">OK</span></td><td>Skeleton loader</td></tr>
+      <tr><td>error.tsx</td><td>~30</td><td><span class="badge badge-green">OK</span></td><td>Error boundary</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card danger">
+    <h4>⚠️ God Components — Problème majeur de maintenabilité</h4>
+    <p>Deux pages dépassent 500 lignes et concentrent trop de responsabilités :</p>
+    <ul>
+      <li><strong>planning/page.tsx (~1000 L)</strong> — Devrait être découpé en : CalendarController, MealGrid, AnalysisPanel, GenerationModal</li>
+      <li><strong>courses/page.tsx (~500 L)</strong> — Orchestré par le hook <code>utiliserPageCourses</code> (750 L!) qui retourne 30+ variables. Devrait être découpé en hooks spécialisés</li>
+    </ul>
+    <p>Composants massifs également : <code>FormulaireRecette</code> (~500 L), <code>ModalGenerationPlanning</code> (~500 L), <code>PanneauDetailCourses</code> (~300 L)</p>
+  </div>
+
+  <h3>Composants UI — 21 composants spécifiques cuisine</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Composants Cuisine (12)</h4>
+      <ul>
+        <li><code>badge-ecoscore.tsx</code> — Badge couleur A-E</li>
+        <li><code>badge-nutriscore.tsx</code> — Badge couleur A-E</li>
+        <li><code>carte-mode-invites.tsx</code> — Toggle mode invités</li>
+        <li><code>convertisseur-inline.tsx</code> — Conversion unités masse/volume</li>
+        <li><code>etiquette-qr.tsx</code> — QR code pour étiquetage</li>
+        <li><code>dialogue-feedback-semaine.tsx</code> — Feedback repas hebdo</li>
+        <li><code>dialogue-import-recette.tsx</code> — Import URL/Batch/PDF</li>
+        <li><code>formulaire-recette.tsx</code> — Formulaire création/édition</li>
+        <li><code>frise-flux-cuisine.tsx</code> — Indicateur multi-étapes</li>
+        <li><code>modal-generation-planning.tsx</code> — Options génération IA</li>
+        <li><code>tile-article.tsx</code> — Tile style Bring!</li>
+        <li><code>timeline-batch-cooking.tsx</code> — Timeline sessions</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Composants Courses (9)</h4>
+      <ul>
+        <li><code>dialogue-article-courses.tsx</code> — Formulaire ajout article</li>
+        <li><code>dialogue-qr-courses.tsx</code> — QR partage liste</li>
+        <li><code>filtre-magasins.tsx</code> — Tabs magasins avec compteurs</li>
+        <li><code>panneau-bio-local.tsx</code> — Suggestions bio/local/saison</li>
+        <li><code>panneau-correspondances-drive.tsx</code> — Mapping Carrefour Drive</li>
+        <li><code>panneau-detail-courses.tsx</code> — Zone articles (tiles, voice, scanner)</li>
+        <li><code>panneau-listes-courses.tsx</code> — Gestion multi-listes</li>
+        <li><code>badge-magasin.tsx</code> — Badge magasin couleur</li>
+        <li><code>banniere-hors-ligne.tsx</code> — Mode offline</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>API Clients — 7 fichiers (~1620 lignes)</h3>
+  <table>
+    <thead><tr><th>Client</th><th>Fonctions exportées</th><th>Lignes</th></tr></thead>
+    <tbody>
+      <tr><td><code>recettes.ts</code></td><td>20+ (CRUD, favoris, doublons, import URL/PDF, Jules, robots, saisonnier, photo IA)</td><td>~400</td></tr>
+      <tr><td><code>courses.ts</code></td><td>20+ (CRUD, génération, prédictions, QR, bio/local, Drive, historique prix, Telegram)</td><td>~300</td></tr>
+      <tr><td><code>planning.ts</code></td><td>25+ (semaine/mensuel, repas CRUD, suggestions, génération, nutrition, export)</td><td>~300</td></tr>
+      <tr><td><code>inventaire.ts</code></td><td>15+ (CRUD, consolidé, alertes, photo-frigo, barcode, bulk)</td><td>~250</td></tr>
+      <tr><td><code>batch-cooking.ts</code></td><td>12 (sessions, génération, étapes, préparations, config)</td><td>~180</td></tr>
+      <tr><td><code>anti-gaspillage.ts</code></td><td>3 (score, historique, suggestions IA)</td><td>~40</td></tr>
+      <tr><td><code>preferences.ts</code></td><td>6 (prefs cuisine, notifications, planning defaults)</td><td>~150</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════ 5. SQL ════════════════════════════════════ -->
+<section id="sql">
+  <h2><span class="num">5</span> Schéma de données (28 tables)</h2>
+
+  <h3>Tables principales</h3>
+  <table>
+    <thead><tr><th>Table</th><th>Rôle</th><th>Colonnes clés</th><th>Relations</th></tr></thead>
+    <tbody>
+      <tr><td><code>ingredients</code></td><td>Référentiel ingrédients</td><td>nom, categorie, unite, calories_pour_100g, saison, allergene</td><td>→ recette_ingredients, inventaire</td></tr>
+      <tr><td><code>recettes</code></td><td>Recettes</td><td>nom, temps_prep/cuisson, portions, type_repas, difficulte, 7 flags compatibilité, 4 flags robot, nutrition, IA</td><td>→ ingredients, etapes, versions, historique</td></tr>
+      <tr><td><code>plannings</code></td><td>Plans semaine</td><td>nom, semaine_debut/fin, etat (brouillon/valide/archive), genere_par_ia</td><td>→ repas</td></tr>
+      <tr><td><code>repas</code></td><td>Repas planifiés</td><td>recette_id, date_repas, type_repas, 6 accompagnements FK, dessert_jules, score_equilibre, alertes</td><td>→ planning, recette, 6 × recette FK</td></tr>
+      <tr><td><code>listes_courses</code></td><td>Listes de courses</td><td>nom, etat, archivee</td><td>→ articles_courses</td></tr>
+      <tr><td><code>articles_courses</code></td><td>Articles liste</td><td>ingredient_id, quantite, priorite, achete, rayon_magasin, magasin_cible, prix, suggere_par_ia</td><td>→ liste, ingredient</td></tr>
+      <tr><td><code>inventaire</code></td><td>Stock alimentaire</td><td>ingredient_id, quantite, quantite_min, emplacement, date_peremption, code_barres, prix</td><td>→ ingredient, historique</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Tables Recettes (4)</h3>
+  <table>
+    <thead><tr><th>Table</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td><code>recette_ingredients</code></td><td>N:N recette↔ingrédient (quantite, unite, optionnel). Unique (recette_id, ingredient_id)</td></tr>
+      <tr><td><code>etapes_recette</code></td><td>Instructions ordonnées (groupe_parallele, robots_optionnels, température)</td></tr>
+      <tr><td><code>versions_recette</code></td><td>Variantes bébé/batch/robot (instructions modifiées, notes bébé, JSON)</td></tr>
+      <tr><td><code>historique_recettes</code></td><td>Historique cuisson (date, portions, feedback like/neutral/dislike)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Tables Batch Cooking (4)</h3>
+  <table>
+    <thead><tr><th>Table</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td><code>config_batch_cooking</code></td><td>Configuration utilisateur (jours batch, robots, durée max, couverture jours)</td></tr>
+      <tr><td><code>sessions_batch_cooking</code></td><td>Sessions (statut machine d'état, recettes JSON, robots JSON, portions préparées)</td></tr>
+      <tr><td><code>etapes_batch_cooking</code></td><td>Étapes session (groupe parallèle, robots requis, supervision, température)</td></tr>
+      <tr><td><code>preparations_batch</code></td><td>Préparations stockées (portions initiales/restantes, péremption, localisation)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Tables Support (13)</h3>
+  <table>
+    <thead><tr><th>Table</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td><code>retours_recettes</code></td><td>Feedback utilisateur (like/dislike/neutral, planifie_cette_semaine)</td></tr>
+      <tr><td><code>modeles_courses</code></td><td>Templates listes courses réutilisables (articles_data JSON)</td></tr>
+      <tr><td><code>templates_semaine</code></td><td>Templates planning (nom unique, actif)</td></tr>
+      <tr><td><code>elements_templates</code></td><td>Éléments de template (jour 0-6, heure, type_event)</td></tr>
+      <tr><td><code>historique_inventaire</code></td><td>Audit trail modifications stock</td></tr>
+      <tr><td><code>historique_achats</code></td><td>Apprentissage IA (fréquence, nb achats, prix moyen)</td></tr>
+      <tr><td><code>correspondances_drive</code></td><td>Mapping ingrédient → produit Carrefour Drive (EAN, URL)</td></tr>
+      <tr><td><code>batch_cooking_congelation</code></td><td>Préparations congelées (catégorie viande/poisson/légume/etc.)</td></tr>
+      <tr><td><code>evenements_planning</code></td><td>Événements calendrier (récurrence, rappels)</td></tr>
+      <tr><td colspan="2"><em>+ 4 tables techniques (indexes, contraintes, triggers)</em></td></tr>
+    </tbody>
+  </table>
+
+  <div class="card warning">
+    <h4>⚠️ Observations schéma SQL</h4>
+    <ul>
+      <li><code>historique_achats</code> n'est <strong>pas lié à un user_id</strong> → risque contamination multi-utilisateur</li>
+      <li><code>repas.fruit</code> marqué "legacy migration 005" — à nettoyer</li>
+      <li>12+ colonnes JSONB (recettes_selectionnees, robots_utilises, couverture_jours, etc.) — cohérence schema à surveiller</li>
+      <li><code>preparations_batch</code> manque une contrainte unique sur (session_id, recette_id)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ 6. TESTS ══════════════════════════════════ -->
+<section id="tests">
+  <h2><span class="num">6</span> Tests et couverture</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="val">~75</div><div class="lbl">Tests total</div></div>
+    <div class="stat"><div class="val">7</div><div class="lbl">Fichiers test</div></div>
+    <div class="stat"><div class="val">1.8:1</div><div class="lbl">Ratio tests/endpoints</div></div>
+    <div class="stat"><div class="val" style="color:var(--red)">0</div><div class="lbl">Tests E2E</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Fichier test</th><th>Tests</th><th>Couvert</th><th>Manquant</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>test_routes_recettes.py</code></td><td>13</td>
+        <td><span class="badge badge-green">Schemas, CRUD, pagination</span></td>
+        <td><span class="badge badge-red">Import URL/PDF, IA, doublons</span></td>
+      </tr>
+      <tr>
+        <td><code>test_routes_courses.py</code></td><td>14</td>
+        <td><span class="badge badge-green">Schemas, CRUD, DB réelle</span></td>
+        <td><span class="badge badge-red">WebSocket, barcode, modèles</span></td>
+      </tr>
+      <tr>
+        <td><code>test_routes_planning.py</code></td><td>17</td>
+        <td><span class="badge badge-green">Schemas, transitions, DB</span></td>
+        <td><span class="badge badge-red">Agrégation courses, IA</span></td>
+      </tr>
+      <tr>
+        <td><code>test_routes_inventaire.py</code></td><td>9</td>
+        <td><span class="badge badge-green">Schemas, barcode</span></td>
+        <td><span class="badge badge-red">OpenFoodFacts, alertes, stock bas</span></td>
+      </tr>
+      <tr>
+        <td><code>test_routes_suggestions.py</code></td><td>7+</td>
+        <td><span class="badge badge-green">Params, rate limiting</span></td>
+        <td><span class="badge badge-red">Réponses IA réelles, fallback</span></td>
+      </tr>
+      <tr>
+        <td><code>test_routes_batch_cooking.py</code></td><td>10</td>
+        <td><span class="badge badge-green">CRUD sessions</span></td>
+        <td><span class="badge badge-red">Machine état, parallélisation, preps</span></td>
+      </tr>
+      <tr>
+        <td><code>test_routes_anti_gaspillage.py</code></td><td>5</td>
+        <td><span class="badge badge-green">Paramètres</span></td>
+        <td><span class="badge badge-red">Calcul score, recettes rescue</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card danger">
+    <h4>🚨 Tests manquants critiques</h4>
+    <ul>
+      <li><strong>Aucun test E2E</strong> — Le flux Planning → Repas → Courses → Inventaire n'est jamais testé bout en bout</li>
+      <li><strong>Aucun test WebSocket</strong> — La collaboration temps réel sur les listes de courses est non testée</li>
+      <li><strong>Aucun test d'intégration IA</strong> — Tous les appels Mistral sont mockés, aucune validation des réponses réelles</li>
+      <li><strong>Aucun test cross-module</strong> — Jardin→Recettes, Batch→Préparations→Consommation non validés</li>
+      <li><strong>Aucun test frontend</strong> — Pas de tests Vitest/Playwright spécifiques au module cuisine trouvés</li>
+    </ul>
+  </div>
+
+  <div class="card warning">
+    <h4>⚠️ Analyse qualitative des tests existants</h4>
+    <ul>
+      <li>Les tests vérifient surtout la <strong>validation Pydantic</strong> et l'<strong>existence des endpoints</strong>, pas la logique métier</li>
+      <li>Tests de base de données utilisent SQLite en mémoire — <strong>comportement différent de PostgreSQL</strong> (JSONB, dates, regex)</li>
+      <li>Pattern de test correct (pytest fixtures, classes organisées, assertions claires)</li>
+      <li>Ratio 1.8:1 est faible — recommandé 3-5 tests par endpoint pour une couverture correcte</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ 7. DOCUMENTATION ══════════════════════════ -->
+<section id="docs">
+  <h2><span class="num">7</span> Documentation</h2>
+
+  <table>
+    <thead><tr><th>Document</th><th>Statut</th><th>Détails</th></tr></thead>
+    <tbody>
+      <tr><td>MODULES.md</td><td><span class="badge badge-green">À jour</span></td><td>6 features cuisine listées correctement</td></tr>
+      <tr><td>API_REFERENCE.md</td><td><span class="badge badge-yellow">Partiel</span></td><td>Endpoints listés mais détails d'intégration manquants (photo-frigo, Drive, ML)</td></tr>
+      <tr><td>DATA_MODEL.md</td><td><span class="badge badge-yellow">Incomplet</span></td><td>Ne documente pas les 28 tables cuisine en détail</td></tr>
+      <tr><td>CHANGELOG.md</td><td><span class="badge badge-green">À jour</span></td><td>Entrées cuisine présentes avec dates</td></tr>
+      <tr><td>DEPRECATED.md</td><td><span class="badge badge-green">À jour</span></td><td>OCR/scan tickets correctement marqués refusés</td></tr>
+      <tr><td>TESTING.md</td><td><span class="badge badge-yellow">Partiel</span></td><td>Patterns de test documentés mais couverture cuisine non détaillée</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card danger">
+    <h4>📋 Documentation manquante</h4>
+    <table>
+      <thead><tr><th>Sujet</th><th>Priorité</th><th>Raison</th></tr></thead>
+      <tbody>
+        <tr><td>Algorithme scoring PNNS (score_equilibre)</td><td><span class="badge badge-red">Haute</span></td><td>Score 0-100 sur chaque repas, critères de calcul non expliqués nulle part</td></tr>
+        <tr><td>Workflow batch cooking end-to-end</td><td><span class="badge badge-red">Haute</span></td><td>Feature complexe avec machine d'état, parallélisation, préparations — aucun guide</td></tr>
+        <tr><td>Logique adaptation Jules (bébé)</td><td><span class="badge badge-red">Haute</span></td><td>Règles d'adaptation (pas salé, pas alcool, pas morceaux) non formalisées</td></tr>
+        <tr><td>Intégration Carrefour Drive</td><td><span class="badge badge-yellow">Moyenne</span></td><td>Table + extension Chrome + panneau frontend — zéro doc</td></tr>
+        <tr><td>Modèle ML prédictions courses</td><td><span class="badge badge-yellow">Moyenne</span></td><td>Endpoints /predictions/* sans explication du modèle</td></tr>
+        <tr><td>Intégration OpenFoodFacts</td><td><span class="badge badge-yellow">Moyenne</span></td><td>Enrichissement barcode documenté superficiellement</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ 8. BUGS ═══════════════════════════════════ -->
+<section id="bugs">
+  <h2><span class="num">8</span> Bugs et problèmes identifiés</h2>
+
+  <h3>Erreurs de compilation (Pyright)</h3>
+  <div class="card danger">
+    <h4>52 erreurs de type dans <code>batch_cooking.py</code></h4>
+    <p><strong>Problème principal :</strong> Les dictionnaires <code>REPONSES_*</code> (ex: <code>REPONSES_CRUD_CREATION</code>) ont un type <code>dict[int, dict[str, Any]]</code> mais FastAPI attend <code>Dict[int | str, Dict[str, Any]]</code>. Pyright refuse car <code>int</code> n'est pas assignable à <code>int | str</code> en mode invariant.</p>
+    <p><strong>Impact :</strong> Non bloquant à l'exécution (Python runtime les accepte), mais pollue l'analyse statique.</p>
+    <p><strong>Fix :</strong> Typer les constantes comme <code>dict[int | str, dict[str, Any]]</code> dans <code>schemas/errors.py</code>.</p>
+  </div>
+
+  <div class="card danger">
+    <h4>~20 erreurs <code>Unknown</code> type dans la génération d'étapes batch</h4>
+    <p>Dicts non typés (<code>dict = {}</code>) dans la fonction <code>generer_etapes_session()</code> propagent des types <code>Unknown</code> sur toutes les opérations qui suivent (get, setdefault, sorted).</p>
+    <p><strong>Fix :</strong> Typer explicitement : <code>planning_data: dict[str, dict[str, dict]] = {}</code></p>
+  </div>
+
+  <h3>Problèmes fonctionnels</h3>
+  <table>
+    <thead><tr><th>Bug/Problème</th><th>Fichier</th><th>Sévérité</th><th>Détails</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>historique_achats sans user_id</td>
+        <td><code>models/courses.py</code></td>
+        <td><span class="badge badge-red">Haute</span></td>
+        <td>Données d'apprentissage IA partagées entre utilisateurs → contamination des prédictions</td>
+      </tr>
+      <tr>
+        <td>Score anti-gaspi simpliste</td>
+        <td><code>routes/anti_gaspillage.py</code></td>
+        <td><span class="badge badge-yellow">Moyenne</span></td>
+        <td>Calcul <code>100 - (nb_périmés × 10)</code> ne prend pas en compte le ratio articles totaux/périmés</td>
+      </tr>
+      <tr>
+        <td>Quiet hours minuit</td>
+        <td><code>schemas/preferences.py</code></td>
+        <td><span class="badge badge-yellow">Moyenne</span></td>
+        <td>Plage 22:00→07:00 non gérée correctement (passage de minuit)</td>
+      </tr>
+      <tr>
+        <td>Normalisation ingrédients faux positifs</td>
+        <td><code>services/cuisine/recettes/service.py</code></td>
+        <td><span class="badge badge-yellow">Moyenne</span></td>
+        <td>Matching case-insensitive peut merger "Sel" et "Sel de Guérande"</td>
+      </tr>
+      <tr>
+        <td>Mojibake UTF-8</td>
+        <td><code>services/cuisine/recettes/service.py</code></td>
+        <td><span class="badge badge-yellow">Moyenne</span></td>
+        <td>Normalisation <code>dÃ®ner → dîner</code> en runtime — symptôme de problèmes d'encodage amont non résolus</td>
+      </tr>
+      <tr>
+        <td>Champ <code>fruit</code> legacy</td>
+        <td><code>models/planning.py</code></td>
+        <td><span class="badge badge-blue">Faible</span></td>
+        <td>Marqué "legacy migration 005" mais toujours en base — nettoyage nécessaire</td>
+      </tr>
+      <tr>
+        <td><code>statut</code> = synonym("etat")</td>
+        <td>3 modèles</td>
+        <td><span class="badge badge-blue">Faible</span></td>
+        <td>Dette rétrocompatibilité dans Planning, ListeCourses, Repas</td>
+      </tr>
+      <tr>
+        <td>Pas de validation format code-barres</td>
+        <td><code>routes/inventaire.py</code></td>
+        <td><span class="badge badge-blue">Faible</span></td>
+        <td>Accepte tout string comme code-barres au lieu de valider EAN-13/UPC</td>
+      </tr>
+      <tr>
+        <td>Objectifs nutrition codés en dur</td>
+        <td><code>nutrition/page.tsx</code></td>
+        <td><span class="badge badge-blue">Faible</span></td>
+        <td>Constante OBJECTIFS dans le composant au lieu d'être configurable par profil</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Problèmes de qualité de code frontend</h3>
+  <table>
+    <thead><tr><th>Problème</th><th>Fichier(s)</th><th>Impact</th></tr></thead>
+    <tbody>
+      <tr><td>God component 1000+ lignes</td><td>planning/page.tsx</td><td>Impossible à tester unitairement, difficile à maintenir</td></tr>
+      <tr><td>Hook monstre 750+ lignes</td><td>utiliser-page-courses.ts</td><td>Retourne 30+ variables, mélange state/API/form/keyboard</td></tr>
+      <tr><td>useState au lieu de react-hook-form</td><td>inventaire/page.tsx, formulaire-recette.tsx</td><td>Validation formulaires moins robuste</td></tr>
+      <tr><td>Error handling inégal</td><td>Telegram send, bulk import, voice input</td><td>Erreurs silencieuses possibles pour l'utilisateur</td></tr>
+      <tr><td>Constantes hardcodées dans composants</td><td>batch-cooking/page.tsx, nutrition/page.tsx</td><td>Robots disponibles et objectifs nutrition dans le .tsx au lieu de types/config</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════ 9. REDONDANCES ════════════════════════════ -->
+<section id="redondances">
+  <h2><span class="num">9</span> Redondances et suppressions recommandées</h2>
+
+  <h3>Features auditées — verdicts définitifs (19 avril 2026)</h3>
+  <table>
+    <thead><tr><th>Feature</th><th>Verdict</th><th>Constat &amp; Action</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Correspondances Carrefour Drive</strong><br>(extension Chrome + table + panneau)</td>
+        <td><span class="badge badge-green">✅ Garder</span></td>
+        <td>Feature active : magasin de prédilection, mapping en cours de complétion. Stack complète fonctionnelle (extension Chrome + bridge + table DB + panneau frontend dans page courses). <strong>À faire</strong> : documenter l'extension dans <code>docs/</code> et ajouter les endpoints Drive dans <code>API_REFERENCE.md</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Mode pilote automatique</strong><br>(preferences.py + /outils + /parametres)</td>
+        <td><span class="badge badge-green">✅ Garder</span></td>
+        <td>Wired complet : 2 endpoints backend (<code>GET/POST /preferences/mode-pilote</code>) + UI exposée dans <code>/outils</code> ET <code>/parametres &gt; onglet IA</code>. Feature fonctionnelle à part entière.</td>
+      </tr>
+      <tr>
+        <td><strong>Repas adaptatif Garmin</strong><br>(/garmin-repas-adaptatif)</td>
+        <td><span class="badge badge-red">🔴 Supprimé</span></td>
+        <td>Non utile : les courses et repas sont indépendants de l'activité physique dans ce projet. URL frontend incorrecte (<code>/innovations/</code> vs <code>/recettes/</code>), fonction <code>obtenirSuggestionRepasGarmin</code> jamais appelée dans aucune page. <strong>Supprimé</strong> : endpoint backend + interface + fonction frontend (19/04/2026).</td>
+      </tr>
+      <tr>
+        <td><strong>Templates semaine</strong><br>(templates_semaine + elements_templates)</td>
+        <td><span class="badge badge-orange">🗄️ Archivé</span></td>
+        <td>Feature abandonnée en cours de développement : <code>ServiceTemplates</code> complet (lister, créer, appliquer, copie semaine→template) mais <strong>zéro endpoint API exposé</strong> et <strong>zéro frontend</strong>. Tables SQL et service présents mais inaccessibles. À exposer uniquement si besoin futur identifié.</td>
+      </tr>
+      <tr>
+        <td><strong>Prédictions ML courses</strong><br>(/courses/predictions + cron hebdo)</td>
+        <td><span class="badge badge-green">✅ Garder</span></td>
+        <td>Intégrée de bout en bout : endpoint API + hook <code>utiliser-page-courses.ts</code> + <code>panneau-listes-courses.tsx</code> (top 5 articles suggérés) + cron <code>prediction_courses_weekly</code> (dim. 10h). <strong>Seul bug</strong> : <code>historique_achats</code> sans <code>user_id</code> → déjà en Priorité 1.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Redondances identifiées</h3>
+  <table>
+    <thead><tr><th>Éléments</th><th>Nature</th><th>Recommandation</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>idee_repas_soir()</code> vs <code>mange_ce_soir()</code></td>
+        <td>2 endpoints quasi-identiques</td>
+        <td><span class="badge badge-green">Fusionner</span> — garder un seul endpoint avec paramètre optionnel</td>
+      </tr>
+      <tr>
+        <td><code>etat</code> vs <code>statut</code> (synonym)</td>
+        <td>Double nom pour le même champ dans 3 modèles</td>
+        <td><span class="badge badge-green">Nettoyer</span> — supprimer le synonym après migration du code client</td>
+      </tr>
+      <tr>
+        <td><code>repas.fruit</code> (legacy) vs <code>repas.fruit_gouter</code></td>
+        <td>Ancien champ non supprimé</td>
+        <td><span class="badge badge-green">Supprimer</span> <code>fruit</code> et garder <code>fruit_gouter</code></td>
+      </tr>
+      <tr>
+        <td>Anti-gaspillage en onglet inventaire ET page dédiée</td>
+        <td>Double accès à la même feature</td>
+        <td><span class="badge badge-blue">Garder les deux</span> — l'onglet inventaire est un aperçu, la page est le détail complet</td>
+      </tr>
+      <tr>
+        <td>Photo-frigo en onglet inventaire ET page dédiée</td>
+        <td>Double accès</td>
+        <td><span class="badge badge-blue">Garder les deux</span> — même pattern aperçu/détail, UX cohérente</td>
+      </tr>
+      <tr>
+        <td><code>modeles_courses.articles_data</code> (JSON) vs <code>articles_modele</code> (table)</td>
+        <td>Double structure pour les templates courses</td>
+        <td><span class="badge badge-green">Unifier</span> — utiliser uniquement la table relationnelle <code>articles_modele</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Features à conserver absolument</h3>
+  <div class="card success">
+    <ul>
+      <li>✅ <strong>Recettes avec versions Jules/robots</strong> — Feature différenciante, bien intégrée</li>
+      <li>✅ <strong>Planning semaine avec score PNNS</strong> — Core loop de l'app, bien pensé</li>
+      <li>✅ <strong>Génération courses depuis planning</strong> — Flux critique, bon fonctionnement</li>
+      <li>✅ <strong>Batch cooking</strong> — Feature innovante avec parallélisation robots</li>
+      <li>✅ <strong>Photo-frigo IA</strong> — Feature impressionnante pour un projet personnel</li>
+      <li>✅ <strong>Tiles courses style Bring!</strong> — UX excellente</li>
+      <li>✅ <strong>Mode tablette avec synthèse vocale</strong> — Usage réel en cuisine</li>
+      <li>✅ <strong>Calendrier saisonnier</strong> — Simple, utile, bien fait</li>
+      <li>✅ <strong>Anti-gaspillage avec badges</strong> — Gamification motivante et pertinente</li>
+      <li>✅ <strong>Scanner multi-codes-barres + OpenFoodFacts</strong> — Bonnes intégrations</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ 10. SCORES ════════════════════════════════ -->
+<section id="scores">
+  <h2><span class="num">10</span> Notation détaillée — 10 catégories</h2>
+
+  <div class="score-row">
+    <span class="label">Richesse fonctionnelle</span>
+    <div class="bar-bg"><div class="bar" style="width:90%;background:linear-gradient(90deg,var(--green),var(--teal))">9/10</div></div>
+    <span class="note" style="color:var(--green)">9/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Extrêmement complet pour un projet personnel : 11 sous-modules, 64 endpoints, IA multi-modale, multi-robot, adaptation bébé, photo-frigo, batch cooking, nutrition, saisonnier, tablette avec voix. La richesse fonctionnelle est le point fort majeur.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Architecture backend</span>
+    <div class="bar-bg"><div class="bar" style="width:80%;background:linear-gradient(90deg,var(--green),var(--accent))">8/10</div></div>
+    <span class="note" style="color:var(--green)">8/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Clean separation routes/schemas/models/services. Bons patterns : decorators, mixins, service factory, event bus, cache multi-niveaux. Points perdus : héritage multiple complexe (6 mixins inventaire), dette rétro-compat (synonymes, mojibake), types non annotés dans batch_cooking.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Architecture frontend</span>
+    <div class="bar-bg"><div class="bar" style="width:60%;background:linear-gradient(90deg,var(--yellow),var(--orange))">6/10</div></div>
+    <span class="note" style="color:var(--orange)">6/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Bonne structure globale (App Router, API clients, types, stores). Mais : God components (planning 1000L, courses hook 750L), composants 500L non découpés, error handling inégal, constantes hardcodées, useState au lieu de react-hook-form par endroits.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Qualité du code</span>
+    <div class="bar-bg"><div class="bar" style="width:70%;background:linear-gradient(90deg,var(--green),var(--yellow))">7/10</div></div>
+    <span class="note" style="color:var(--yellow)">7/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Nommage français cohérent, bons validators Pydantic, patterns cache/résilience solides. Points perdus : 52 erreurs Pyright, types Unknown en batch_cooking, constantes hardcodées, dette rétro-compat non résorbée.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Couverture de tests</span>
+    <div class="bar-bg"><div class="bar" style="width:40%;background:linear-gradient(90deg,var(--red),var(--orange))">4/10</div></div>
+    <span class="note" style="color:var(--red)">4/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>~75 tests pour 64 endpoints (ratio 1.8:1). Tests de schemas OK mais pas de tests fonctionnels réels. Aucun test E2E, WebSocket, IA, cross-module, frontend. Tests sur SQLite au lieu de PostgreSQL. Talon d'Achille du module.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Documentation</span>
+    <div class="bar-bg"><div class="bar" style="width:50%;background:linear-gradient(90deg,var(--orange),var(--yellow))">5/10</div></div>
+    <span class="note" style="color:var(--orange)">5/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>API_REFERENCE et MODULES à jour. Mais 4 features majeures non documentées : scoring PNNS, workflow batch cooking, adaptation Jules, intégration Drive. DATA_MODEL incomplet (28 tables non détaillées).</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Sécurité</span>
+    <div class="bar-bg"><div class="bar" style="width:80%;background:linear-gradient(90deg,var(--green),var(--accent))">8/10</div></div>
+    <span class="note" style="color:var(--green)">8/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Auth JWT sur tous les endpoints, rate limiting (60/10), sanitizer anti-XSS, idempotency courses, RLS PostgreSQL. Points perdus : historique_achats sans user_id, pas de validation format barcode.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Performance</span>
+    <div class="bar-bg"><div class="bar" style="width:70%;background:linear-gradient(90deg,var(--green),var(--yellow))">7/10</div></div>
+    <span class="note" style="color:var(--yellow)">7/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Cache multi-niveaux, ETag middleware, eager loading, @chronometre monitoring. Points perdus : calcul statut inventaire en mémoire (devrait être DB-side), God components frontend impactent rendering, lazy loading incomplet.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">Maintenabilité</span>
+    <div class="bar-bg"><div class="bar" style="width:60%;background:linear-gradient(90deg,var(--yellow),var(--orange))">6/10</div></div>
+    <span class="note" style="color:var(--orange)">6/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Bonne modularité backend. Mais : frontend avec fichiers 500-1000L impossibles à tester unitairement, 6 mixins sur un service, dette rétro-compat non résorbée, 5 features potentiellement sous-utilisées.</small>
+  </div>
+
+  <div class="score-row">
+    <span class="label">UX / Expérience utilisateur</span>
+    <div class="bar-bg"><div class="bar" style="width:80%;background:linear-gradient(90deg,var(--green),var(--accent))">8/10</div></div>
+    <span class="note" style="color:var(--green)">8/10</span>
+  </div>
+  <div class="card" style="margin-left:208px;margin-top:-.5rem;margin-bottom:1.2rem">
+    <small>Mode tablette, Bring!-style tiles, DnD planning, synthèse vocale, scanner multi-codes, QR étiquettes, badges gamification, calendrier saisonnier, wizard Ma Semaine. Excellent pour une app familiale. Points perdus : error handling invisible, loading states incohérents.</small>
+  </div>
+
+  <h3>Récapitulatif</h3>
+  <table>
+    <thead><tr><th>Catégorie</th><th>Note</th><th>Appréciation</th></tr></thead>
+    <tbody>
+      <tr><td>Richesse fonctionnelle</td><td style="color:var(--green);font-weight:700">9/10</td><td>Exceptionnel</td></tr>
+      <tr><td>Architecture backend</td><td style="color:var(--green);font-weight:700">8/10</td><td>Très bon</td></tr>
+      <tr><td>Architecture frontend</td><td style="color:var(--orange);font-weight:700">6/10</td><td>Correct, God components</td></tr>
+      <tr><td>Qualité du code</td><td style="color:var(--yellow);font-weight:700">7/10</td><td>Bon, dette technique</td></tr>
+      <tr><td>Couverture de tests</td><td style="color:var(--red);font-weight:700">4/10</td><td>Insuffisant</td></tr>
+      <tr><td>Documentation</td><td style="color:var(--orange);font-weight:700">5/10</td><td>Partielle</td></tr>
+      <tr><td>Sécurité</td><td style="color:var(--green);font-weight:700">8/10</td><td>Très bon</td></tr>
+      <tr><td>Performance</td><td style="color:var(--yellow);font-weight:700">7/10</td><td>Bon</td></tr>
+      <tr><td>Maintenabilité</td><td style="color:var(--orange);font-weight:700">6/10</td><td>À améliorer</td></tr>
+      <tr><td>UX / Expérience utilisateur</td><td style="color:var(--green);font-weight:700">8/10</td><td>Très bon</td></tr>
+      <tr style="background:var(--surface2)"><td><strong>Moyenne globale</strong></td><td style="color:var(--accent);font-weight:700;font-size:1.2rem"><strong>6.8/10</strong></td><td><strong>Module mature, bien pensé fonctionnellement</strong></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════ 11. PLAN D'ACTION ═════════════════════════ -->
+<section id="plan">
+  <h2><span class="num">11</span> Plan d'action prioritaire</h2>
+
+  <div class="verdict">
+    <h3>Verdict global</h3>
+    <p>Le module cuisine est <strong>fonctionnellement exceptionnel</strong> — 11 sous-modules, 64 endpoints, intégrations IA/multimodal, batch cooking, photo-frigo, mode tablette vocal. C'est le cœur de l'application et il fonctionne.</p>
+    <p>Les faiblesses sont concentrées sur <strong>la qualité ingénierie</strong> : tests insuffisants (4/10), documentation partielle (5/10), God components frontend (6/10), et quelques bugs fonctionnels. Le backend est nettement plus solide que le frontend.</p>
+    <p><strong>Recommandation</strong> : Ne pas ajouter de nouvelles features cuisine. Consolider l'existant avec les actions ci-dessous.</p>
+  </div>
+
+  <h3>Priorité 1 — Haute (bugs et risques)</h3>
+  <div class="card danger">
+    <ol>
+      <li><strong>Ajouter <code>user_id</code> à <code>historique_achats</code></strong> — Risque de contamination inter-utilisateurs des prédictions IA courses</li>
+      <li><strong>Fixer les 52 erreurs Pyright dans batch_cooking.py</strong> — Typer les constantes REPONSES_* comme <code>dict[int | str, ...]</code> + annoter les dicts locaux</li>
+      <li><strong>Ajouter <code>PreparationBatch</code> contrainte unique (session_id, recette_id)</strong> — Prévenir duplications silencieuses</li>
+    </ol>
+  </div>
+
+  <h3>Priorité 2 — Moyenne (qualité / maintenabilité)</h3>
+  <div class="card warning">
+    <ol>
+      <li><strong>Refactorer planning/page.tsx</strong> — Découper en CalendarController, MealGrid, AnalysisPanel, GenerationModal (~1000L → 4×250L)</li>
+      <li><strong>Refactorer utiliser-page-courses.ts</strong> — Découper en 4 hooks spécialisés (~750L → 4×200L)</li>
+      <li><strong>Écrire les tests E2E critiques</strong> — Planning → Repas → Courses → Inventaire (flux complet)</li>
+      <li><strong>Documenter scoring PNNS, workflow batch, adaptation Jules</strong></li>
+      <li><strong>Nettoyer la dette</strong> — Supprimer <code>repas.fruit</code> legacy, supprimer synonymes <code>statut</code>→<code>etat</code>, fusionner <code>idee_repas_soir</code>/<code>mange_ce_soir</code></li>
+      <li><strong>✅ Features sous-utilisées auditées (19/04/2026)</strong> — Carrefour Drive ✅ garder, Mode pilote ✅ garder, Prédictions ML ✅ garder, Garmin repas adaptatif 🔴 supprimé, Templates semaine 🗄️ archivé (service présent, zéro API)</li>
+    </ol>
+  </div>
+
+  <h3>Priorité 3 — Basse (améliorations)</h3>
+  <div class="card info">
+    <ol>
+      <li>Objectifs nutrition configurables par profil (au lieu de constantes hardcodées)</li>
+      <li>Validation format code-barres (EAN-13, UPC-A)</li>
+      <li>Score anti-gaspillage ratio-based (articles_périmés / articles_totaux)</li>
+      <li>Gestion passage minuit pour quiet hours</li>
+      <li>Tests WebSocket courses (collaboration temps réel)</li>
+      <li>Unifier modeles_courses.articles_data (JSON) avec articles_modele (table)</li>
+    </ol>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>Analyse générée le 19 avril 2026 — Assistant Matanne — Module Cuisine Audit v1.0</p>
+  <p>~120 fichiers analysés · Backend Python · Frontend Next.js · PostgreSQL 28 tables</p>
+</footer>
+
+</body>
+</html>

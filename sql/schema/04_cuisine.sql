@@ -446,8 +446,7 @@ CREATE TABLE IF NOT EXISTS repas (
     adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
     contexte_meteo VARCHAR(50),
     laitage VARCHAR(200),
-    -- Accompagnements (migrations 005b + 006)
-    fruit VARCHAR(200),
+    -- Accompagnements (migrations 006+)
     legumes VARCHAR(200),
     legumes_recette_id INTEGER,
     feculents VARCHAR(200),
@@ -623,6 +622,9 @@ CREATE INDEX IF NOT EXISTS ix_prep_batch_peremption ON preparations_batch(date_p
 CREATE INDEX IF NOT EXISTS ix_prep_batch_localisation ON preparations_batch(localisation);
 CREATE INDEX IF NOT EXISTS ix_prep_batch_consomme ON preparations_batch(consomme);
 CREATE INDEX IF NOT EXISTS idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_prep_session_recette
+    ON preparations_batch (session_id, recette_id)
+    WHERE session_id IS NOT NULL AND recette_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
 
 

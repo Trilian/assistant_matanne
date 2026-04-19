@@ -1485,6 +1485,7 @@ async def valider_courses(
 
             articles_sync = 0
             now = datetime.now(UTC)
+            user_id_str = str(user.get("id") or "")
 
             # Agréger les quantités par ingredient_id pour éviter les doublons
             # (autoflush=False + UNIQUE INDEX sur inventaire.ingredient_id)
@@ -1537,7 +1538,10 @@ async def valider_courses(
                 if ingredient:
                     hist = (
                         session.query(HistoriqueAchats)
-                        .filter(HistoriqueAchats.article_nom == ingredient.nom)
+                        .filter(
+                            HistoriqueAchats.article_nom == ingredient.nom,
+                            HistoriqueAchats.user_id == user_id_str,
+                        )
                         .first()
                     )
                     if hist:
@@ -1567,6 +1571,7 @@ async def valider_courses(
                     else:
                         session.add(
                             HistoriqueAchats(
+                                user_id=user_id_str,
                                 article_nom=ingredient.nom,
                                 categorie=ingredient.categorie,
                                 rayon_magasin=art.rayon_magasin,
@@ -1952,11 +1957,13 @@ async def obtenir_predictions_courses(
         from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
 
         service = obtenir_service_prediction_courses()
+        user_id_str = str(user.get("id") or "")
         items = service.predire_articles(
             limite=limite,
             inclure_deja_sur_liste=inclure_deja_sur_liste,
             evenements=evenements,
             nb_invites=nb_invites,
+            user_id=user_id_str or None,
         )
         return {
             "items": items,
@@ -1990,9 +1997,11 @@ async def enregistrer_feedback_prediction_courses(
         from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
 
         service = obtenir_service_prediction_courses()
+        user_id_str = str(user.get("id") or "")
         ok = service.enregistrer_feedback(
             article_nom=payload.article_nom,
             accepte=payload.accepte,
+            user_id=user_id_str or None,
         )
         if not ok:
             raise HTTPException(status_code=404, detail="Article historique introuvable")

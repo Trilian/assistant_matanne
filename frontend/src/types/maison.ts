@@ -398,6 +398,183 @@ export interface StatsHubMaison {
 }
 
 // ═══════════════════════════════════════════════════════════
+// Types Simulations Rénovation [PHASE 1]
+// ═══════════════════════════════════════════════════════════
+
+export interface SimulationRenovation {
+  id: number;
+  nom: string;
+  description?: string;
+  type_projet: string; // "conversion_piece", "isolation", "amenagement_terrain", etc.
+  statut: "brouillon" | "en_cours" | "termine" | "archive";
+  pieces_concernees?: string;
+  zones_terrain?: string;
+  projet_id?: number;
+  plan_id?: number;
+  tags?: string;
+  notes?: string;
+  scenarios_count: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ScenarioSimulation {
+  id: number;
+  simulation_id: number;
+  nom: string;
+  description?: string;
+  est_favori: boolean;
+  budget_estime_min?: number;
+  budget_estime_max?: number;
+  budget_materiaux?: number;
+  budget_main_oeuvre?: number;
+  duree_estimee_jours?: number;
+  score_faisabilite?: number; // 0-100
+  analyse_faisabilite?: string;
+  contraintes_techniques?: string;
+  recommandations?: string;
+  impact_dpe?: string; // "D→B", etc.
+  gain_energetique_pct?: number;
+  plus_value_estimee?: number;
+  postes_travaux?: PosteTravaux[];
+  artisans_necessaires?: string;
+  plan_avant_id?: number;
+  plan_apres_id?: number;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PosteTravaux {
+  poste: string;
+  budget_min?: number;
+  budget_max?: number;
+  diy?: boolean;
+  duree?: number; // jours
+}
+
+export interface ComparaisonScenarios {
+  simulation: SimulationRenovation;
+  scenarios: ScenarioSimulation[];
+  meilleur_budget?: number; // ID du scénario
+  meilleur_faisabilite?: number;
+  meilleur_rapport?: number;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Types Plans Maison 2D/3D [PHASE 1]
+// ═══════════════════════════════════════════════════════════
+
+export interface PlanMaison {
+  id: number;
+  nom: string;
+  description?: string;
+  type_plan: "interieur" | "terrain" | "etage_0" | "etage_1" | string;
+  version: number;
+  est_actif: boolean;
+  donnees_canvas?: CanvasData; // Données react-konva JSON
+  echelle_px_par_m: number;
+  largeur_canvas: number;
+  hauteur_canvas: number;
+  etage: number;
+  thumbnail_path?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CanvasData {
+  murs?: Mur[];
+  portes?: Porte[];
+  fenetres?: Fenetre[];
+  meubles?: MeublePlan[];
+  annotations?: Annotation[];
+  [key: string]: unknown;
+}
+
+export interface Mur {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  epaisseur: number; // cm
+  porteur: boolean;
+  couleur?: string;
+  label?: string;
+}
+
+export interface Porte {
+  id: string;
+  x: number;
+  y: number;
+  largeur: number; // cm
+  hauteur: number;
+  cote: "gauche" | "droite" | "double";
+  label?: string;
+}
+
+export interface Fenetre {
+  id: string;
+  x: number;
+  y: number;
+  largeur: number;
+  hauteur: number;
+  double_vitrage: boolean;
+  label?: string;
+}
+
+export interface MeublePlan {
+  id: string;
+  nom: string;
+  type: string; // "canape", "table", "lit", etc.
+  x: number;
+  y: number;
+  largeur: number;
+  hauteur: number;
+  rotation: number; // degrés
+  couleur?: string;
+}
+
+export interface Annotation {
+  id: string;
+  x: number;
+  y: number;
+  texte: string;
+  type: "imaison" | "coffrage" | "warning" | "note";
+  icone?: string;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Types Zones Terrain [PHASE 1]
+// ═══════════════════════════════════════════════════════════
+
+export interface ZoneTerrain {
+  id: number;
+  nom: string;
+  type_zone: "potager" | "pelouse" | "terrasse" | "abri" | "allee" | "parking" | string;
+  description?: string;
+  surface_m2?: number;
+  altitude_min?: number;
+  altitude_max?: number;
+  pente_pct?: number; // %
+  exposition?: "nord" | "sud" | "est" | "ouest";
+  geometrie?: Coordonnee[];
+  lien_jardin: boolean;
+  etat: "existant" | "a_amenager" | "en_travaux";
+  date_amenagement?: string;
+  cout_amenagement?: number;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Coordonnee {
+  x: number;
+  y: number;
+}
+
+// ═══════════════════════════════════════════════════════════
 // Types Briefing Maison (contexte quotidien)
 // ═══════════════════════════════════════════════════════════
 

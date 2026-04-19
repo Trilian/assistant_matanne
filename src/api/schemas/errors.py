@@ -21,7 +21,7 @@ from .common import ErrorResponse
 # RÉPONSES D'ERREUR RÉUTILISABLES
 # ═══════════════════════════════════════════════════════════
 
-REPONSE_401: dict[int, dict[str, Any]] = {
+REPONSE_401: dict[int | str, dict[str, Any]] = {
     401: {
         "description": "Non authentifié — Token JWT manquant ou invalide",
         "model": ErrorResponse,
@@ -33,7 +33,7 @@ REPONSE_401: dict[int, dict[str, Any]] = {
     },
 }
 
-REPONSE_403: dict[int, dict[str, Any]] = {
+REPONSE_403: dict[int | str, dict[str, Any]] = {
     403: {
         "description": "Accès interdit — Rôle insuffisant",
         "model": ErrorResponse,
@@ -45,7 +45,7 @@ REPONSE_403: dict[int, dict[str, Any]] = {
     },
 }
 
-REPONSE_404: dict[int, dict[str, Any]] = {
+REPONSE_404: dict[int | str, dict[str, Any]] = {
     404: {
         "description": "Ressource non trouvée",
         "model": ErrorResponse,
@@ -57,7 +57,7 @@ REPONSE_404: dict[int, dict[str, Any]] = {
     },
 }
 
-REPONSE_422: dict[int, dict[str, Any]] = {
+REPONSE_422: dict[int | str, dict[str, Any]] = {
     422: {
         "description": "Données invalides — Erreur de validation",
         "model": ErrorResponse,
@@ -69,7 +69,7 @@ REPONSE_422: dict[int, dict[str, Any]] = {
     },
 }
 
-REPONSE_429: dict[int, dict[str, Any]] = {
+REPONSE_429: dict[int | str, dict[str, Any]] = {
     429: {
         "description": "Trop de requêtes — Limitation de débit dépassée",
         "model": ErrorResponse,
@@ -81,7 +81,7 @@ REPONSE_429: dict[int, dict[str, Any]] = {
     },
 }
 
-REPONSE_500: dict[int, dict[str, Any]] = {
+REPONSE_500: dict[int | str, dict[str, Any]] = {
     500: {
         "description": "Erreur interne du serveur",
         "model": ErrorResponse,
@@ -93,7 +93,7 @@ REPONSE_500: dict[int, dict[str, Any]] = {
     },
 }
 
-REPONSE_503: dict[int, dict[str, Any]] = {
+REPONSE_503: dict[int | str, dict[str, Any]] = {
     503: {
         "description": "Service temporairement indisponible",
         "model": ErrorResponse,
@@ -138,7 +138,7 @@ REPONSES_AUTH_LOGIN = {**REPONSE_401, **REPONSE_429, **REPONSE_503}
 """Endpoint login (brute-force protection + Supabase)."""
 
 
-def combiner_reponses(*dicts: dict[int, dict[str, Any]]) -> dict[int, dict[str, Any]]:
+def combiner_reponses(*dicts: dict[int | str, dict[str, Any]]) -> dict[int | str, dict[str, Any]]:
     """Combine plusieurs dictionnaires de réponses d'erreur.
 
     Args:
@@ -151,7 +151,7 @@ def combiner_reponses(*dicts: dict[int, dict[str, Any]]) -> dict[int, dict[str, 
         >>> combiner_reponses(REPONSES_AUTH, REPONSE_404, REPONSE_429)
         {401: {...}, 404: {...}, 429: {...}}
     """
-    result: dict[int, dict[str, Any]] = {}
+    result: dict[int | str, dict[str, Any]] = {}
     for d in dicts:
         result.update(d)
     return result

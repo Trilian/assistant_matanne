@@ -54,8 +54,8 @@ class Planning(CreeLeMixin, Base):
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
     semaine_debut: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     semaine_fin: Mapped[date] = mapped_column(Date, nullable=False)
-    etat: Mapped[str] = mapped_column(String(20), nullable=False, default="brouillon", index=True)
-    statut = synonym("etat")
+    statut: Mapped[str] = mapped_column(String(20), nullable=False, default="brouillon", index=True)
+    etat = synonym("statut")  # Alias pour rétro-compatibilité API
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[str | None] = mapped_column(Text)
 
@@ -65,16 +65,16 @@ class Planning(CreeLeMixin, Base):
     )
 
     def _lire_actif(self) -> bool:
-        return self.etat in {"actif", "valide"}
+        return self.statut in {"actif", "valide"}
 
     def _ecrire_actif(self, value: bool | str) -> None:
         if isinstance(value, str):
-            self.etat = value
+            self.statut = value
             return
-        self.etat = "valide" if bool(value) else "archive"
+        self.statut = "valide" if bool(value) else "archive"
 
     # Compat historique: autorise `Planning(..., actif=True)` dans l'ancien code.
-    actif = synonym("etat", descriptor=property(_lire_actif, _ecrire_actif))
+    actif = synonym("statut", descriptor=property(_lire_actif, _ecrire_actif))
 
     def __repr__(self) -> str:
         return f"<Planning(id={self.id}, nom='{self.nom}')>"
@@ -134,10 +134,6 @@ class Repas(Base):
 
     # Laitage / produit laitier (yaourt, fromage blanc, fromage...)
     laitage: Mapped[str | None] = mapped_column(String(200))
-
-    # Fruit entier ou compote (goûter — ex: "Pomme", "Compote poire")
-    # Conservé pour rétro-compatibilité avec migration 005
-    fruit: Mapped[str | None] = mapped_column(String(200))
 
     # Légumes accompagnement (déjeuner/dîner — ex: "Haricots verts", "Courgettes sautées")
     # Conservé pour rétro-compatibilité avec migration 005

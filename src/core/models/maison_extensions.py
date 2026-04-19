@@ -12,6 +12,10 @@ Contient :
 - LigneDevis : Lignes détaillées d'un devis
 - EntretienSaisonnier : Catalogue entretiens saisonniers
 - ReleveCompteur : Relevés de compteurs eau/énergie
+- SimulationRenovation : Simulation de rénovation multi-scénarios
+- ScenarioSimulation : Scénario d'une simulation (variante)
+- PlanMaison : Plan 2D/3D sauvegardé (données canvas JSON)
+- ZoneTerrain : Zone du terrain extérieur
 """
 
 from datetime import date, datetime
@@ -25,6 +29,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    JSON,
     Numeric,
     String,
     Text,
@@ -573,3 +578,217 @@ class ReleveCompteur(CreeLeMixin, Base):
 
     def __repr__(self) -> str:
         return f"<ReleveCompteur(id={self.id}, type='{self.type_compteur}', valeur={self.valeur})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# SIMULATION RÉNOVATION
+# ═══════════════════════════════════════════════════════════
+
+
+class StatutSimulation(StrEnum):
+    """Statut d'une simulation de rénovation."""
+
+    BROUILLON = "brouillon"
+    EN_COURS = "en_cours"
+    TERMINE = "termine"
+    ARCHIVE = "archive"
+
+
+class SimulationRenovation(TimestampMixin, Base):
+    """Simulation de rénovation multi-scénarios.
+
+    Chaque simulation représente un projet de rénovation générique
+    (conversion pièce, isolation, aménagement terrain, déco, chauffage, etc.)
+    et peut contenir plusieurs scénarios à comparer.
+    """
+
+    __tablename__ = "simulations_renovation"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Identification
+    nom: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    type_projet: Mapped[str] = mapped_column(
+        String(100), nullable=False, index=True
+    )  # conversion_piece, isolation, amenagement_terrain, deco, chauffage, ouverture_mur, etc.
+
+    # Statut
+    statut: Mapped[str] = mapped_column(String(30), default="brouillon", index=True)
+
+    # Localisation
+    pieces_concernees: Mapped[str | None] = mapped_column(Text)  # IDs pièces séparés par virgule
+    zones_terrain: Mapped[str | None] = mapped_column(Text)  # IDs zones séparés par virgule
+
+    # Lien projet existant (optionnel)
+    projet_id: Mapped[int | None] = mapped_column(ForeignKey("projets.id"), index=True)
+
+    # Lien plan (optionnel)
+    plan_id: Mapped[int | None] = mapped_column(ForeignKey("plans_maison.id"), index=True)
+
+    # Métadonnées
+    tags: Mapped[str | None] = mapped_column(String(500))  # Tags séparés par virgule
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    # Relations
+    scenarios: Mapped[list["ScenarioSimulation"]] = relationship(
+        back_populates="simulation", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self) -> str:
+        return f"<SimulationRenovation(id={self.id}, nom='{self.nom}', type='{self.type_projet}')>"
+
+
+class ScenarioSimulation(TimestampMixin, Base):
+    """Scénario d'une simulation de rénovation.
+
+    Chaque simulation peut contenir N scénarios (variantes)
+    avec leurs propres budget, durée, faisabilité.
+    """
+
+    __tablename__ = "scenarios_simulation"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    simulation_id: Mapped[int] = mapped_column(
+        ForeignKey("simulations_renovation.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+
+    # Identification
+    nom: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    est_favori: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Budget
+    budget_estime_min: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    budget_estime_max: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    budget_materiaux: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    budget_main_oeuvre: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    # Durée
+    duree_estimee_jours: Mapped[int | None] = mapped_column(Integer)
+
+    # Faisabilité IA
+    score_faisabilite: Mapped[int | None] = mapped_column(Integer)  # 0-100
+    analyse_faisabilite: Mapped[str | None] = mapped_column(Text)  # JSON rapport IA
+    contraintes_techniques: Mapped[str | None] = mapped_column(Text)  # JSON liste contraintes
+    recommandations: Mapped[str | None] = mapped_column(Text)  # JSON recommandations
+
+    # Impact
+    impact_dpe: Mapped[str | None] = mapped_column(String(10))  # ex: "D→B"
+    gain_energetique_pct: Mapped[float | None] = mapped_column(Float)
+    plus_value_estimee: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    # Postes détaillés (JSON)
+    postes_travaux: Mapped[dict | None] = mapped_column(JSON)  # [{poste, budget_min, budget_max, diy}]
+
+    # Artisans nécessaires
+    artisans_necessaires: Mapped[str | None] = mapped_column(Text)  # JSON [{type, optionnel}]
+
+    # Plan avant/après
+    plan_avant_id: Mapped[int | None] = mapped_column(ForeignKey("plans_maison.id"))
+    plan_apres_id: Mapped[int | None] = mapped_column(ForeignKey("plans_maison.id"))
+
+    # Notes
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    # Relations
+    simulation: Mapped["SimulationRenovation"] = relationship(back_populates="scenarios")
+
+    def __repr__(self) -> str:
+        return f"<ScenarioSimulation(id={self.id}, nom='{self.nom}', score={self.score_faisabilite})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# PLANS MAISON (2D/3D)
+# ═══════════════════════════════════════════════════════════
+
+
+class PlanMaison(TimestampMixin, Base):
+    """Plan 2D/3D de la maison sauvegardé.
+
+    Stocke les données du canvas (react-konva) en JSON
+    pour permettre l'édition et le rendu.
+    """
+
+    __tablename__ = "plans_maison"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Identification
+    nom: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    type_plan: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="interieur", index=True
+    )  # interieur, terrain, etage_0, etage_1, etc.
+
+    # Version
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    est_actif: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Données canvas (JSON sérialisé complet)
+    donnees_canvas: Mapped[dict | None] = mapped_column(JSON)  # Murs, portes, fenêtres, meubles, annotations
+
+    # Métadonnées plan
+    echelle_px_par_m: Mapped[float] = mapped_column(Float, default=50.0)  # Pixels par mètre
+    largeur_canvas: Mapped[int] = mapped_column(Integer, default=1200)
+    hauteur_canvas: Mapped[int] = mapped_column(Integer, default=800)
+    etage: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Thumbnail
+    thumbnail_path: Mapped[str | None] = mapped_column(String(500))
+
+    # Notes
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    def __repr__(self) -> str:
+        return f"<PlanMaison(id={self.id}, nom='{self.nom}', type='{self.type_plan}', v{self.version})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# ZONES TERRAIN
+# ═══════════════════════════════════════════════════════════
+
+
+class ZoneTerrain(TimestampMixin, Base):
+    """Zone délimitée du terrain extérieur.
+
+    Permet de modéliser le terrain 2600m² avec ses différentes zones
+    (potager, pelouse, terrasse, abri, allée, etc.) et la topographie.
+    """
+
+    __tablename__ = "zones_terrain"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Identification
+    nom: Mapped[str] = mapped_column(String(200), nullable=False)
+    type_zone: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )  # potager, pelouse, terrasse, abri, allee, parking, piscine, bois, friche, autre
+    description: Mapped[str | None] = mapped_column(Text)
+
+    # Dimensions
+    surface_m2: Mapped[float | None] = mapped_column(Float)
+
+    # Topographie
+    altitude_min: Mapped[float | None] = mapped_column(Float)  # Mètres
+    altitude_max: Mapped[float | None] = mapped_column(Float)
+    pente_pct: Mapped[float | None] = mapped_column(Float)  # Pourcentage de pente
+    exposition: Mapped[str | None] = mapped_column(String(20))  # nord, sud, est, ouest
+
+    # Position sur le plan terrain (JSON polygone)
+    geometrie: Mapped[dict | None] = mapped_column(JSON)  # [{x, y}, ...] points du polygone
+
+    # Lien jardin (optionnel — zone potager = éléments jardin)
+    lien_jardin: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # État actuel
+    etat: Mapped[str] = mapped_column(String(50), default="existant")  # existant, a_amenager, en_travaux
+    date_amenagement: Mapped[date | None] = mapped_column(Date)
+    cout_amenagement: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+
+    # Notes
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    def __repr__(self) -> str:
+        return f"<ZoneTerrain(id={self.id}, nom='{self.nom}', type='{self.type_zone}')>"

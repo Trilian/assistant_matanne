@@ -50,7 +50,7 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
                 .filter(
                     Planning.semaine_debut >= lundi,
                     Planning.semaine_debut <= dimanche,
-                    Planning.etat.in_(["brouillon", "valide", "actif"]),
+                    Planning.statut.in_(["brouillon", "valide", "actif"]),
                 )
                 .order_by(Planning.cree_le.desc())
                 .first()
@@ -70,13 +70,13 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
                 ],
             }
 
-        if planning.etat == "brouillon":
+        if planning.statut == "brouillon":
             return {
                 "etape_actuelle": "valider_planning",
                 "planning": {
                     "id": planning.id,
                     "semaine": str(planning.semaine_debut),
-                    "etat": planning.etat,
+                    "statut": planning.statut,
                 },
                 "courses": None,
                 "actions_suivantes": [
@@ -97,7 +97,7 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
         liste = (
             session.query(ListeCourses)
             .filter(
-                ListeCourses.etat.in_(["brouillon", "active"]),
+                ListeCourses.statut.in_(["brouillon", "active"]),
             )
             .order_by(ListeCourses.cree_le.desc())
             .first()
@@ -121,17 +121,17 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
                 ],
             }
 
-        if liste.etat == "brouillon":
+        if liste.statut == "brouillon":
             return {
                 "etape_actuelle": "confirmer_courses",
                 "planning": {
                     "id": planning.id,
                     "semaine": str(planning.semaine_debut),
-                    "etat": planning.etat,
+                    "statut": planning.statut,
                 },
                 "courses": {
                     "id": liste.id,
-                    "etat": liste.etat,
+                    "statut": liste.statut,
                     "articles": len(liste.articles or []),
                 },
                 "actions_suivantes": [

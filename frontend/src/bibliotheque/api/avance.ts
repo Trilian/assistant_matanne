@@ -48,13 +48,6 @@ export interface RapportMensuelPdfResponse {
   contenu_base64: string;
 }
 
-export interface SuggestionRepasGarminResponse {
-  recette_suggeree: string;
-  raison: string;
-  temps_total_estime_min: number;
-  alternatives: string[];
-}
-
 export interface ModeVacancesResponse {
   actif: boolean;
   checklist_voyage_auto: boolean;
@@ -213,11 +206,6 @@ export async function obtenirRapportMensuelPdf(mois?: string): Promise<RapportMe
   const { data } = await clientApi.get("/innovations/rapport-mensuel/pdf", {
     params: { mois },
   });
-  return data;
-}
-
-export async function obtenirSuggestionRepasGarmin(): Promise<SuggestionRepasGarminResponse> {
-  const { data } = await clientApi.get("/innovations/garmin-repas-adaptatif");
   return data;
 }
 

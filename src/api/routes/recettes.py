@@ -55,12 +55,17 @@ router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
 
 @router.post("/idee-repas", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
 @gerer_exception_api
-async def idee_repas_soir(
+@router.post("/suggestion-repas-ce-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def suggestion_repas_ce_soir(
     body: IdeeRepasSoirRequest,
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ) -> SuggestionRepasSoirResponse:
-    """Alias métier de la suggestion dîner express historiquement exposée via /innovations."""
+    """Suggestion de repas pour ce soir (rapide, dépendant du temps disponible et de l'humeur).
+    
+    Alias métier pour la suggestion express dîner historiquement exposée via `/innovations`.
+    """
     service = obtenir_service_innovations_cuisine()
     result = service.suggerer_repas_ce_soir(
         temps_disponible_min=body.temps_disponible_min,
@@ -69,20 +74,30 @@ async def idee_repas_soir(
     return result or SuggestionRepasSoirResponse()
 
 
-@router.post("/mange-ce-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
+@router.post("/idee-repas-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA, deprecated=True)
+@gerer_exception_api
+async def idee_repas_soir(
+    body: IdeeRepasSoirRequest,
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+) -> SuggestionRepasSoirResponse:
+    """⚠️ DEPRECATED: Utilisez `/suggestion-repas-ce-soir` à la place."""
+    service = obtenir_service_innovations_cuisine()
+    result = service.suggerer_repas_ce_soir(
+        temps_disponible_min=body.temps_disponible_min,
+        humeur=body.humeur,
+    )
+    return result or SuggestionRepasSoirResponse()
+
+
+@router.post("/mange-ce-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA, deprecated=True)
 @gerer_exception_api
 async def mange_ce_soir(
     body: IdeeRepasSoirRequest,
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ) -> SuggestionRepasSoirResponse:
-    """Alias métier pour suggestion dîner rapide ce soir."""
-    service = obtenir_service_innovations_cuisine()
-    result = service.suggerer_repas_ce_soir(
-        temps_disponible_min=body.temps_disponible_min,
-        humeur=body.humeur,
-    )
-    return result or SuggestionRepasSoirResponse()
+    """⚠️ DEPRECATED: Utilisez `/suggestion-repas-ce-soir` à la place."""
 
 
 @router.get(
@@ -97,25 +112,6 @@ async def obtenir_patterns_alimentaires(
     service = obtenir_service_innovations_cuisine()
     result = service.analyser_patterns_alimentaires(periode_jours=periode_jours)
     return result or PatternsAlimentairesResponse()
-
-
-@router.get(
-    "/garmin-repas-adaptatif", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA
-)
-@gerer_exception_api
-async def obtenir_repas_adaptatif_garmin(
-    user: dict[str, Any] = Depends(require_auth),
-) -> SuggestionRepasSoirResponse:
-    """Alias métier pour l'adaptation des repas à la dépense Garmin."""
-    service = obtenir_service_innovations_cuisine()
-    user_id_raw = user.get("id")
-    user_id = (
-        int(user_id_raw)
-        if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit()
-        else None
-    )
-    result = service.proposer_repas_adapte_garmin(user_id=user_id)
-    return result or SuggestionRepasSoirResponse()
 
 
 @router.post("/fusionner", response_model=RecetteResponse, responses=REPONSES_CRUD_ECRITURE)

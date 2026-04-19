@@ -1528,8 +1528,7 @@ CREATE TABLE IF NOT EXISTS repas (
     dessert_jules_recette_id INTEGER,
     contexte_meteo VARCHAR(50),
     laitage VARCHAR(200),
-    -- Accompagnements (migrations 005b + 006)
-    fruit VARCHAR(200),
+    -- Accompagnements (migrations 006+)
     legumes VARCHAR(200),
     legumes_recette_id INTEGER,
     feculents VARCHAR(200),
@@ -1707,6 +1706,9 @@ CREATE INDEX IF NOT EXISTS ix_prep_batch_localisation ON preparations_batch(loca
 CREATE INDEX IF NOT EXISTS ix_prep_batch_consomme ON preparations_batch(consomme);
 CREATE INDEX IF NOT EXISTS idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
 CREATE INDEX IF NOT EXISTS idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_prep_session_recette
+    ON preparations_batch (session_id, recette_id)
+    WHERE session_id IS NOT NULL AND recette_id IS NOT NULL;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1941,6 +1943,7 @@ CREATE INDEX IF NOT EXISTS ix_shopping_items_date ON articles_achats_famille(dat
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS historique_achats (
     id SERIAL PRIMARY KEY,
+    user_id VARCHAR(100),
     article_nom VARCHAR(200) NOT NULL,
     categorie VARCHAR(100),
     rayon_magasin VARCHAR(100),
@@ -1953,6 +1956,9 @@ CREATE TABLE IF NOT EXISTS historique_achats (
 CREATE INDEX IF NOT EXISTS ix_historique_achats_nom ON historique_achats(article_nom);
 CREATE INDEX IF NOT EXISTS ix_historique_achats_date ON historique_achats(derniere_achat);
 CREATE INDEX IF NOT EXISTS ix_historique_achats_nom_date ON historique_achats(article_nom, derniere_achat);
+CREATE INDEX IF NOT EXISTS ix_historique_achats_user_id ON historique_achats(user_id);
+CREATE INDEX IF NOT EXISTS ix_historique_achats_user_nom ON historique_achats(user_id, article_nom);
+COMMENT ON COLUMN historique_achats.user_id IS 'Identifiant de l''utilisateur propriétaire (NULL = données legacy partagées)';
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

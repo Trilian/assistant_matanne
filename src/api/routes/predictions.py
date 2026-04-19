@@ -65,8 +65,10 @@ async def enregistrer_achat(
     from src.services.ia.prediction_courses import obtenir_service_prediction_courses
 
     service = obtenir_service_prediction_courses()
+    user_id_str = str(user.get("id") or "")
     return service.enregistrer_achat(
         article_nom=request.article_nom,
         categorie=request.categorie,
         rayon=request.rayon,
+        user_id=user_id_str or None,
     )

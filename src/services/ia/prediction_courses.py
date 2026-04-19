@@ -22,7 +22,7 @@ class PredictionCoursesService:
 
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
-    def predire_prochaine_liste(self, limite: int = 30, db: Session | None = None) -> list[dict]:
+    def predire_prochaine_liste(self, limite: int = 30, user_id: str | None = None, db: Session | None = None) -> list[dict]:
         """Prédit les articles à acheter en analysant la fréquence d'achat.
 
         Algorithme :
@@ -39,13 +39,17 @@ class PredictionCoursesService:
         seuil_semaine = aujourd_hui + timedelta(days=7)
 
         # Articles avec fréquence connue
+        filtre = [
+            HistoriqueAchats.frequence_jours.isnot(None),
+            HistoriqueAchats.frequence_jours > 0,
+            HistoriqueAchats.nb_achats >= 2,  # Au moins 2 achats pour être fiable
+        ]
+        if user_id:
+            filtre.append(HistoriqueAchats.user_id == user_id)
+
         historique = (
             db.query(HistoriqueAchats)
-            .filter(
-                HistoriqueAchats.frequence_jours.isnot(None),
-                HistoriqueAchats.frequence_jours > 0,
-                HistoriqueAchats.nb_achats >= 2,  # Au moins 2 achats pour être fiable
-            )
+            .filter(*filtre)
             .order_by(HistoriqueAchats.nb_achats.desc())
             .all()
         )
@@ -85,7 +89,7 @@ class PredictionCoursesService:
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
-    def analyser_habitudes(self, db: Session | None = None) -> dict:
+    def analyser_habitudes(self, user_id: str | None = None, db: Session | None = None) -> dict:
         """Analyse les habitudes d'achat et retourne des statistiques.
 
         Returns:
@@ -93,16 +97,26 @@ class PredictionCoursesService:
         """
         from src.core.models.courses import HistoriqueAchats
 
-        total = db.query(func.count(HistoriqueAchats.id)).scalar() or 0
+        filtre = []
+        if user_id:
+            filtre.append(HistoriqueAchats.user_id == user_id)
+
+        total = db.query(func.count(HistoriqueAchats.id)).filter(*filtre).scalar() or 0
         avec_frequence = (
             db.query(func.count(HistoriqueAchats.id))
-            .filter(HistoriqueAchats.frequence_jours.isnot(None))
+            .filter(
+                HistoriqueAchats.frequence_jours.isnot(None),
+                *filtre,
+            )
             .scalar()
             or 0
         )
         freq_moyenne = (
             db.query(func.avg(HistoriqueAchats.frequence_jours))
-            .filter(HistoriqueAchats.frequence_jours.isnot(None))
+            .filter(
+                HistoriqueAchats.frequence_jours.isnot(None),
+                *filtre,
+            )
             .scalar()
         )
 
@@ -133,6 +147,7 @@ class PredictionCoursesService:
         article_nom: str,
         categorie: str | None = None,
         rayon: str | None = None,
+        user_id: str | None = None,
         db: Session | None = None,
     ) -> dict | None:
         """Enregistre un achat et met à jour la fréquence d'achat.
@@ -144,8 +159,12 @@ class PredictionCoursesService:
 
         from src.core.models.courses import HistoriqueAchats
 
+        filtre_achat = [HistoriqueAchats.article_nom == article_nom]
+        if user_id:
+            filtre_achat.append(HistoriqueAchats.user_id == user_id)
+
         existant = (
-            db.query(HistoriqueAchats).filter(HistoriqueAchats.article_nom == article_nom).first()
+            db.query(HistoriqueAchats).filter(*filtre_achat).first()
         )
 
         maintenant = datetime.now(UTC)
@@ -178,6 +197,7 @@ class PredictionCoursesService:
         else:
             nouvel_historique = HistoriqueAchats(
                 article_nom=article_nom,
+                user_id=user_id,
                 categorie=categorie,
                 rayon_magasin=rayon,
                 derniere_achat=maintenant,

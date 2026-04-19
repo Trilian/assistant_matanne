@@ -757,6 +757,218 @@ class ObjetCreate(BaseModel, NomValidatorMixin):
     date_achat: _dt.date | None = None
     duree_garantie_mois: int | None = Field(None, ge=0, le=120)
     marque: str | None = Field(None, max_length=100)
+
+
+# ═══════════════════════════════════════════════════════════
+# SIMULATIONS RÉNOVATION
+# ═══════════════════════════════════════════════════════════
+
+
+class SimulationCreate(BaseModel, NomValidatorMixin):
+    nom: str = Field(..., max_length=200)
+    description: str | None = None
+    type_projet: str = Field(..., max_length=100)
+    pieces_concernees: str | None = Field(None, max_length=500)
+    zones_terrain: str | None = Field(None, max_length=500)
+    projet_id: int | None = None
+    plan_id: int | None = None
+    tags: str | None = Field(None, max_length=500)
+    notes: str | None = None
+
+
+class SimulationPatch(BaseModel):
+    nom: str | None = Field(None, max_length=200)
+    description: str | None = None
+    type_projet: str | None = Field(None, max_length=100)
+    statut: str | None = Field(None, max_length=30)
+    pieces_concernees: str | None = None
+    zones_terrain: str | None = None
+    projet_id: int | None = None
+    plan_id: int | None = None
+    tags: str | None = Field(None, max_length=500)
+    notes: str | None = None
+
+
+class SimulationResponse(IdentifiedResponse):
+    nom: str
+    description: str | None = None
+    type_projet: str
+    statut: str
+    pieces_concernees: str | None = None
+    zones_terrain: str | None = None
+    projet_id: int | None = None
+    plan_id: int | None = None
+    tags: str | None = None
+    notes: str | None = None
+    scenarios_count: int = 0
+
+
+# Scénarios
+
+
+class ScenarioCreate(BaseModel, NomValidatorMixin):
+    nom: str = Field(..., max_length=200)
+    description: str | None = None
+    est_favori: bool = False
+    budget_estime_min: float | None = Field(None, ge=0)
+    budget_estime_max: float | None = Field(None, ge=0)
+    budget_materiaux: float | None = Field(None, ge=0)
+    budget_main_oeuvre: float | None = Field(None, ge=0)
+    duree_estimee_jours: int | None = Field(None, ge=1)
+    impact_dpe: str | None = Field(None, max_length=10)
+    postes_travaux: list[dict] | None = None
+    plan_avant_id: int | None = None
+    plan_apres_id: int | None = None
+    notes: str | None = None
+
+
+class ScenarioPatch(BaseModel):
+    nom: str | None = Field(None, max_length=200)
+    description: str | None = None
+    est_favori: bool | None = None
+    budget_estime_min: float | None = Field(None, ge=0)
+    budget_estime_max: float | None = Field(None, ge=0)
+    budget_materiaux: float | None = Field(None, ge=0)
+    budget_main_oeuvre: float | None = Field(None, ge=0)
+    duree_estimee_jours: int | None = Field(None, ge=1)
+    impact_dpe: str | None = Field(None, max_length=10)
+    postes_travaux: list[dict] | None = None
+    plan_avant_id: int | None = None
+    plan_apres_id: int | None = None
+    notes: str | None = None
+
+
+class ScenarioResponse(IdentifiedResponse):
+    simulation_id: int
+    nom: str
+    description: str | None = None
+    est_favori: bool = False
+    budget_estime_min: float | None = None
+    budget_estime_max: float | None = None
+    budget_materiaux: float | None = None
+    budget_main_oeuvre: float | None = None
+    duree_estimee_jours: int | None = None
+    score_faisabilite: int | None = None
+    analyse_faisabilite: str | None = None
+    contraintes_techniques: str | None = None
+    recommandations: str | None = None
+    impact_dpe: str | None = None
+    gain_energetique_pct: float | None = None
+    plus_value_estimee: float | None = None
+    postes_travaux: list[dict] | None = None
+    artisans_necessaires: str | None = None
+    plan_avant_id: int | None = None
+    plan_apres_id: int | None = None
+    notes: str | None = None
+
+
+class ComparaisonScenariosResponse(BaseModel):
+    simulation: SimulationResponse
+    scenarios: list[ScenarioResponse]
+    meilleur_budget: int | None = None  # ID du scénario le moins cher
+    meilleur_faisabilite: int | None = None  # ID du scénario le plus faisable
+    meilleur_rapport: int | None = None  # ID du meilleur rapport qualité/prix
+
+
+# ═══════════════════════════════════════════════════════════
+# PLANS MAISON (2D/3D)
+# ═══════════════════════════════════════════════════════════
+
+
+class PlanMaisonCreate(BaseModel, NomValidatorMixin):
+    nom: str = Field(..., max_length=200)
+    description: str | None = None
+    type_plan: str = Field("interieur", max_length=50)
+    donnees_canvas: dict | None = None
+    echelle_px_par_m: float = Field(50.0, gt=0)
+    largeur_canvas: int = Field(1200, ge=100, le=10000)
+    hauteur_canvas: int = Field(800, ge=100, le=10000)
+    etage: int = 0
+    notes: str | None = None
+
+
+class PlanMaisonPatch(BaseModel):
+    nom: str | None = Field(None, max_length=200)
+    description: str | None = None
+    type_plan: str | None = Field(None, max_length=50)
+    donnees_canvas: dict | None = None
+    echelle_px_par_m: float | None = Field(None, gt=0)
+    largeur_canvas: int | None = Field(None, ge=100, le=10000)
+    hauteur_canvas: int | None = Field(None, ge=100, le=10000)
+    etage: int | None = None
+    est_actif: bool | None = None
+    notes: str | None = None
+
+
+class PlanMaisonResponse(IdentifiedResponse):
+    nom: str
+    description: str | None = None
+    type_plan: str
+    version: int = 1
+    est_actif: bool = True
+    donnees_canvas: dict | None = None
+    echelle_px_par_m: float = 50.0
+    largeur_canvas: int = 1200
+    hauteur_canvas: int = 800
+    etage: int = 0
+    thumbnail_path: str | None = None
+    notes: str | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# ZONES TERRAIN
+# ═══════════════════════════════════════════════════════════
+
+
+class ZoneTerrainCreate(BaseModel, NomValidatorMixin):
+    nom: str = Field(..., max_length=200)
+    type_zone: str = Field(..., max_length=50)
+    description: str | None = None
+    surface_m2: float | None = Field(None, gt=0)
+    altitude_min: float | None = None
+    altitude_max: float | None = None
+    pente_pct: float | None = Field(None, ge=0, le=100)
+    exposition: str | None = Field(None, max_length=20)
+    geometrie: dict | None = None
+    lien_jardin: bool = False
+    etat: str = Field("existant", max_length=50)
+    date_amenagement: _dt.date | None = None
+    cout_amenagement: float | None = Field(None, ge=0)
+    notes: str | None = None
+
+
+class ZoneTerrainPatch(BaseModel):
+    nom: str | None = Field(None, max_length=200)
+    type_zone: str | None = Field(None, max_length=50)
+    description: str | None = None
+    surface_m2: float | None = Field(None, gt=0)
+    altitude_min: float | None = None
+    altitude_max: float | None = None
+    pente_pct: float | None = Field(None, ge=0, le=100)
+    exposition: str | None = Field(None, max_length=20)
+    geometrie: dict | None = None
+    lien_jardin: bool | None = None
+    etat: str | None = Field(None, max_length=50)
+    date_amenagement: _dt.date | None = None
+    cout_amenagement: float | None = Field(None, ge=0)
+    notes: str | None = None
+
+
+class ZoneTerrainResponse(IdentifiedResponse):
+    nom: str
+    type_zone: str
+    description: str | None = None
+    surface_m2: float | None = None
+    altitude_min: float | None = None
+    altitude_max: float | None = None
+    pente_pct: float | None = None
+    exposition: str | None = None
+    geometrie: dict | None = None
+    lien_jardin: bool = False
+    etat: str = "existant"
+    date_amenagement: _dt.date | None = None
+    cout_amenagement: float | None = None
+    notes: str | None = None
     modele: str | None = Field(None, max_length=100)
 
 

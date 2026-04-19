@@ -38,6 +38,12 @@ import type {
   BriefingMaison,
   AlerteMaison,
   ConseilMaisonHub,
+  SimulationRenovation,
+  ScenarioSimulation,
+  ComparaisonScenarios,
+  PlanMaison,
+  CanvasData,
+  ZoneTerrain,
 } from "@/types/maison";
 
 // ─── Projets ──────────────────────────────────────────────
@@ -1066,6 +1072,230 @@ export interface ReponseComparaisonAbonnements {
   conseils: ConseilAbonnement[];
   economies_potentielles_eur: number;
   resume: string;
+}
+
+// ─── SIMULATIONS RÉNOVATION [PHASE 1] ─────────────────────
+
+/** Lister les simulations de rénovation */
+export async function listerSimulations(
+  page: number = 1,
+  statut?: string,
+  type_projet?: string
+): Promise<{ items: SimulationRenovation[]; total: number; page: number }> {
+  const params = new URLSearchParams();
+  params.append("page", page.toString());
+  if (statut) params.append("statut", statut);
+  if (type_projet) params.append("type_projet", type_projet);
+  const { data } = await clientApi.get(`/maison/simulations?${params}`);
+  return data;
+}
+
+/** Obtenir une simulation par ID avec ses scénarios */
+export async function obtenirSimulation(
+  id: number
+): Promise<SimulationRenovation> {
+  const { data } = await clientApi.get(`/maison/simulations/${id}`);
+  return data;
+}
+
+/** Créer une nouvelle simulation */
+export async function creerSimulation(
+  simulation: Partial<SimulationRenovation>
+): Promise<SimulationRenovation> {
+  const { data } = await clientApi.post("/maison/simulations", simulation);
+  return data;
+}
+
+/** Modifier une simulation */
+export async function modifierSimulation(
+  id: number,
+  updates: Partial<SimulationRenovation>
+): Promise<SimulationRenovation> {
+  const { data } = await clientApi.patch(`/maison/simulations/${id}`, updates);
+  return data;
+}
+
+/** Supprimer une simulation */
+export async function supprimerSimulation(id: number): Promise<void> {
+  await clientApi.delete(`/maison/simulations/${id}`);
+}
+
+/** Dupliquer une simulation avec ses scénarios */
+export async function dupliquerSimulation(
+  id: number
+): Promise<SimulationRenovation> {
+  const { data } = await clientApi.post(
+    `/maison/simulations/${id}/dupliquer`
+  );
+  return data;
+}
+
+// ─── SCÉNARIOS ────────────────────────────────────────────
+
+/** Lister les scénarios d'une simulation */
+export async function listerScenarios(
+  simulationId: number
+): Promise<ScenarioSimulation[]> {
+  const { data } = await clientApi.get(
+    `/maison/simulations/${simulationId}/scenarios`
+  );
+  return data;
+}
+
+/** Obtenir un scénario */
+export async function obtenirScenario(id: number): Promise<ScenarioSimulation> {
+  const { data } = await clientApi.get(`/maison/scenarios/${id}`);
+  return data;
+}
+
+/** Créer un scénario dans une simulation */
+export async function creerScenario(
+  simulationId: number,
+  scenario: Partial<ScenarioSimulation>
+): Promise<ScenarioSimulation> {
+  const { data } = await clientApi.post(
+    `/maison/simulations/${simulationId}/scenarios`,
+    scenario
+  );
+  return data;
+}
+
+/** Modifier un scénario */
+export async function modifierScenario(
+  id: number,
+  updates: Partial<ScenarioSimulation>
+): Promise<ScenarioSimulation> {
+  const { data } = await clientApi.patch(`/maison/scenarios/${id}`, updates);
+  return data;
+}
+
+/** Supprimer un scénario */
+export async function supprimerScenario(id: number): Promise<void> {
+  await clientApi.delete(`/maison/scenarios/${id}`);
+}
+
+/** Comparer tous les scénarios d'une simulation */
+export async function comparerScenarios(
+  simulationId: number
+): Promise<ComparaisonScenarios> {
+  const { data } = await clientApi.get(
+    `/maison/simulations/${simulationId}/comparer`
+  );
+  return data;
+}
+
+// ─── PLANS MAISON [PHASE 1] ───────────────────────────────
+
+/** Lister les plans */
+export async function listerPlans(
+  page: number = 1,
+  type_plan?: string
+): Promise<{ items: PlanMaison[]; total: number; page: number }> {
+  const params = new URLSearchParams();
+  params.append("page", page.toString());
+  if (type_plan) params.append("type_plan", type_plan);
+  const { data } = await clientApi.get(`/maison/plans?${params}`);
+  return data;
+}
+
+/** Obtenir un plan */
+export async function obtenirPlan(id: number): Promise<PlanMaison> {
+  const { data } = await clientApi.get(`/maison/plans/${id}`);
+  return data;
+}
+
+/** Créer un nouveau plan */
+export async function creerPlan(
+  plan: Partial<PlanMaison>
+): Promise<PlanMaison> {
+  const { data } = await clientApi.post("/maison/plans", plan);
+  return data;
+}
+
+/** Modifier un plan */
+export async function modifierPlan(
+  id: number,
+  updates: Partial<PlanMaison>
+): Promise<PlanMaison> {
+  const { data } = await clientApi.patch(`/maison/plans/${id}`, updates);
+  return data;
+}
+
+/** Supprimer un plan */
+export async function supprimerPlan(id: number): Promise<void> {
+  await clientApi.delete(`/maison/plans/${id}`);
+}
+
+/** Dupliquer un plan */
+export async function dupliquerPlan(id: number): Promise<PlanMaison> {
+  const { data } = await clientApi.post(`/maison/plans/${id}/dupliquer`);
+  return data;
+}
+
+/** Charger les données canvas (react-konva) pour édition */
+export async function chargerCanvas(
+  planId: number
+): Promise<{
+  id: number;
+  nom: string;
+  type_plan: string;
+  version: number;
+  echelle_px_par_m: number;
+  largeur_canvas: number;
+  hauteur_canvas: number;
+  etage: number;
+  donnees_canvas?: CanvasData;
+}> {
+  const { data } = await clientApi.get(`/maison/plans/${planId}/canvas`);
+  return data;
+}
+
+/** Sauvegarder les données canvas */
+export async function sauvegarderCanvas(
+  planId: number,
+  donnees: CanvasData
+): Promise<{ message: string }> {
+  const { data } = await clientApi.post(
+    `/maison/plans/${planId}/canvas`,
+    donnees
+  );
+  return data;
+}
+
+// ─── ZONES TERRAIN [PHASE 1] ──────────────────────────────
+
+/** Lister les zones du terrain */
+export async function listerZonesTerrain(
+  page: number = 1,
+  type_zone?: string
+): Promise<{ items: ZoneTerrain[]; total: number; page: number }> {
+  const params = new URLSearchParams();
+  params.append("page", page.toString());
+  if (type_zone) params.append("type_zone", type_zone);
+  const { data } = await clientApi.get(`/maison/zones-terrain?${params}`);
+  return data;
+}
+
+/** Créer une zone du terrain */
+export async function creerZoneTerrain(
+  zone: Partial<ZoneTerrain>
+): Promise<ZoneTerrain> {
+  const { data } = await clientApi.post("/maison/zones-terrain", zone);
+  return data;
+}
+
+/** Modifier une zone du terrain */
+export async function modifierZoneTerrain(
+  id: number,
+  updates: Partial<ZoneTerrain>
+): Promise<ZoneTerrain> {
+  const { data } = await clientApi.patch(`/maison/zones-terrain/${id}`, updates);
+  return data;
+}
+
+/** Supprimer une zone du terrain */
+export async function supprimerZoneTerrain(id: number): Promise<void> {
+  await clientApi.delete(`/maison/zones-terrain/${id}`);
 }
 
 /** Analyse IA des abonnements actuels, conseils d'optimisation (cache 1h côté backend) */

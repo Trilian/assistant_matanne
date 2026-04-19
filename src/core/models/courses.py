@@ -50,8 +50,8 @@ class ListeCourses(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
-    etat: Mapped[str] = mapped_column(String(20), nullable=False, default="brouillon", index=True)
-    statut = synonym("etat")
+    statut: Mapped[str] = mapped_column(String(20), nullable=False, default="brouillon", index=True)
+    etat = synonym("statut")  # Alias pour rétro-compatibilité API
     archivee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
@@ -227,6 +227,7 @@ class HistoriqueAchats(Base):
     __tablename__ = "historique_achats"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String(100), index=True)
     article_nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
     rayon_magasin: Mapped[str | None] = mapped_column(String(100))
@@ -236,7 +237,10 @@ class HistoriqueAchats(Base):
     prix_dernier: Mapped[float | None] = mapped_column(Float, nullable=True)
     prix_moyen: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    __table_args__ = (Index("ix_historique_achats_nom_date", "article_nom", "derniere_achat"),)
+    __table_args__ = (
+        Index("ix_historique_achats_nom_date", "article_nom", "derniere_achat"),
+        Index("ix_historique_achats_user_nom", "user_id", "article_nom"),
+    )
 
     def __repr__(self) -> str:
         return f"<HistoriqueAchats(article={self.article_nom}, freq={self.frequence_jours}j)>"

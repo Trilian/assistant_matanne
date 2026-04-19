@@ -77,6 +77,7 @@ class ServicePredictionCourses:
         inclure_deja_sur_liste: bool = False,
         evenements: list[str] | None = None,
         nb_invites: int = 0,
+        user_id: str | None = None,
         *,
         db: Session | None = None,
     ) -> list[dict[str, Any]]:
@@ -89,9 +90,16 @@ class ServicePredictionCourses:
 
         now = datetime.now(UTC)
 
+        filtre_historique = [
+            HistoriqueAchats.nb_achats >= 2,
+            HistoriqueAchats.frequence_jours.isnot(None),
+        ]
+        if user_id:
+            filtre_historique.append(HistoriqueAchats.user_id == user_id)
+
         historiques = (
             db.query(HistoriqueAchats)
-            .filter(HistoriqueAchats.nb_achats >= 2, HistoriqueAchats.frequence_jours.isnot(None))
+            .filter(*filtre_historique)
             .all()
         )
 
@@ -189,6 +197,7 @@ class ServicePredictionCourses:
         self,
         article_nom: str,
         accepte: bool,
+        user_id: str | None = None,
         *,
         db: Session | None = None,
     ) -> bool:
@@ -196,15 +205,20 @@ class ServicePredictionCourses:
 
         - accepte=True  : renforce la prediction (dernier achat = maintenant)
         - accepte=False : espace la frequence pour reduire les faux positifs
+        - user_id: Isole le feedback a l'utilisateur proprietaire
         """
         if db is None:
             return False
 
         from src.core.models.courses import HistoriqueAchats
 
+        filtre = [HistoriqueAchats.article_nom.ilike(article_nom.strip())]
+        if user_id:
+            filtre.append(HistoriqueAchats.user_id == user_id)
+
         hist = (
             db.query(HistoriqueAchats)
-            .filter(HistoriqueAchats.article_nom.ilike(article_nom.strip()))
+            .filter(*filtre)
             .first()
         )
         if hist is None:
@@ -231,6 +245,7 @@ class ServicePredictionCourses:
         self,
         limite: int = 10,
         contexte_planning: str | None = None,
+        user_id: str | None = None,
         *,
         db: Session | None = None,
     ) -> list[dict[str, Any]]:
@@ -244,9 +259,13 @@ class ServicePredictionCourses:
 
         from src.core.models.courses import HistoriqueAchats
 
+        filtre_ia = [HistoriqueAchats.nb_achats >= 3]
+        if user_id:
+            filtre_ia.append(HistoriqueAchats.user_id == user_id)
+
         historiques = (
             db.query(HistoriqueAchats)
-            .filter(HistoriqueAchats.nb_achats >= 3)
+            .filter(*filtre_ia)
             .order_by(HistoriqueAchats.nb_achats.desc())
             .limit(50)
             .all()

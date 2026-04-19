@@ -1,7 +1,7 @@
 """
 Routes API pour la maison.
 
-Agrégateur : inclut 4 sous-routeurs thématiques via include_router() :
+Agrégateur : inclut 5 sous-routeurs thématiques via include_router() :
 - maison_projets   : Projets domestiques, estimation IA, priorisation IA
   → /projets, /projets/*
 - maison_entretien : Routines, tâches d'entretien, entretien saisonnier, santé appareils
@@ -10,6 +10,8 @@ Agrégateur : inclut 4 sous-routeurs thématiques via include_router() :
   → /artisans
 - maison_jardin    : Jardinage, stocks, nuisibles, calendrier semis
   → /jardin, /stocks, /nuisibles
+- maison_simulations : Simulations rénovation, scénarios, plans 2D/3D, zones terrain [NOUVEAU Phase 1]
+  → /simulations, /scenarios, /plans, /zones-terrain
 
 Endpoints directs (ce fichier) :
 - Briefing quotidien (/briefing)
@@ -751,8 +753,10 @@ from src.api.routes.maison_entretien import router as _entretien_router
 from src.api.routes.maison_finances import router as _finances_router
 from src.api.routes.maison_jardin import router as _jardin_router
 from src.api.routes.maison_projets import router as _projets_router
+from src.api.routes.maison_simulations import router as _simulations_router
 
 router.include_router(_projets_router, tags=["Maison — Projets"])
 router.include_router(_entretien_router, tags=["Maison — Entretien"])
 router.include_router(_finances_router, tags=["Maison — Finances"])
 router.include_router(_jardin_router, tags=["Maison — Jardin"])
+router.include_router(_simulations_router, tags=["Maison — Simulations"])

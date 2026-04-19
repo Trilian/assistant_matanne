@@ -24,6 +24,7 @@ from sqlalchemy import (
     String,
     Text,
     Time,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -406,6 +407,14 @@ class PreparationBatch(TimestampMixin, Base):
     __table_args__ = (
         Index("idx_prep_localisation_peremption", "localisation", "date_peremption"),
         Index("idx_prep_consomme_peremption", "consomme", "date_peremption"),
+        # Unicité partielle : une seule préparation active par (session, recette) quand les deux sont renseignés.
+        Index(
+            "uq_prep_session_recette",
+            "session_id",
+            "recette_id",
+            unique=True,
+            postgresql_where=text("session_id IS NOT NULL AND recette_id IS NOT NULL"),
+        ),
         CheckConstraint("portions_initiales > 0", name="ck_prep_portions_initiales_positive"),
         CheckConstraint("portions_restantes >= 0", name="ck_prep_portions_restantes_positive"),
     )

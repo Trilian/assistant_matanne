@@ -218,7 +218,7 @@ class MoteurAutomationsService:
         return (
             db.query(Planning)
             .filter(
-                Planning.etat.in_(["valide", "actif"]),
+                Planning.statut.in_(["valide", "actif"]),
                 Planning.semaine_debut >= limite,
             )
             .limit(10)
