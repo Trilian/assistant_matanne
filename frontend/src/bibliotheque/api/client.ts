@@ -31,6 +31,10 @@ clientApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// ─── Constantes retry ───
+const DELAI_RETRY_429_MS = 1000;
+const MAX_RETRIES_429 = 2;
+
 // ─── Intercepteur réponse : gestion erreurs + refresh token ───
 // Sérialiser les refreshs pour éviter les race conditions.
 let isRefreshing = false;
@@ -49,6 +53,16 @@ clientApi.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ErreurAPI>) => {
     const requeteOriginale = error.config;
+
+    // Si 429 → attendre et retenter (max MAX_RETRIES_429 tentatives)
+    if (error.response?.status === 429 && requeteOriginale) {
+      const config = requeteOriginale as InternalAxiosRequestConfig & { _retries429?: number };
+      config._retries429 = (config._retries429 ?? 0) + 1;
+      if (config._retries429 <= MAX_RETRIES_429) {
+        await new Promise((resolve) => setTimeout(resolve, DELAI_RETRY_429_MS * config._retries429!));
+        return clientApi(config);
+      }
+    }
 
     // Si 401 et pas déjà un retry → tenter refresh
     if (

@@ -220,50 +220,14 @@ class AnalyseurIA:
         """Corrige les séquences d'échappement invalides dans les chaînes JSON.
 
         Mistral génère parfois des backslashes invalides dans le texte français
-        (ex: ``\\°C``, ``\\e``, ``l\\italienne``). Cette méthode les double
-        pour en faire des backslashes littéraux valides en JSON.
+        (ex: ``\\°C``, ``\\e``, ``l\\italienne``), y compris à l'intérieur de
+        chaînes entre guillemets simples converties plus tard en guillemets doubles.
+        Cette méthode utilise un lookahead négatif pour doubler TOUS les backslashes
+        qui ne commencent pas une séquence d'échappement JSON valide
+        (``\"``, ``\\``, ``\\b``, ``\\f``, ``\\n``, ``\\r``, ``\\t``, ``\\/``,
+        ``\\uXXXX``) — quel que soit le contexte de la chaîne environnante.
         """
-        valides = frozenset('"\\bfnrt/')
-        resultat = []
-        i = 0
-        n = len(texte)
-        in_string = False
-
-        while i < n:
-            char = texte[i]
-
-            if not in_string:
-                if char == '"':
-                    in_string = True
-                resultat.append(char)
-                i += 1
-            else:
-                if char == '\\':
-                    if i + 1 < n:
-                        suivant = texte[i + 1]
-                        if suivant in valides or suivant == 'u':
-                            # Échappement JSON valide — conserver tel quel
-                            resultat.append(char)
-                            resultat.append(suivant)
-                            i += 2
-                        else:
-                            # Échappement invalide — doubler le backslash
-                            resultat.append('\\')
-                            resultat.append('\\')
-                            i += 1
-                    else:
-                        resultat.append('\\')
-                        resultat.append('\\')
-                        i += 1
-                elif char == '"':
-                    in_string = False
-                    resultat.append(char)
-                    i += 1
-                else:
-                    resultat.append(char)
-                    i += 1
-
-        return ''.join(resultat)
+        return re.sub(r'\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})', r'\\\\', texte)
 
     @staticmethod
     def _reparer_intelligemment(texte: str) -> str:

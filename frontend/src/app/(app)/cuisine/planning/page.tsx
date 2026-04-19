@@ -25,6 +25,7 @@ import {
   WifiOff,
   Users,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -65,6 +66,7 @@ import {
   genererPlanningSemaine,
   validerPlanning,
   regenererPlanning,
+  regenererRepasIA,
   exporterPlanningIcal,
   exporterPlanningPdf,
   obtenirNutritionHebdo,
@@ -236,12 +238,14 @@ function CarteRepasDraggable({
   label,
   onRetirer,
   onModifierChamp,
+  onRegenerer,
   nomDinerSource,
 }: {
   repas: RepasPlanning;
   label: string;
   onRetirer: (repas: RepasPlanning) => void;
   onModifierChamp?: (repasId: number, champ: string, valeur: string) => void;
+  onRegenerer?: (repas: RepasPlanning) => void;
   nomDinerSource?: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -431,23 +435,17 @@ function CarteRepasDraggable({
         </div>
       </div>
       <div className="flex items-center gap-0.5 shrink-0">
-        <ConvertisseurInline className="h-5 px-1" />
-        <Button
-          asChild
-          variant="ghost"
-          size="icon"
-          className="h-5 w-5"
-          title="Lancer un minuteur lié à ce repas"
-        >
-          <a
-            href={`/outils/minuteur?repas=${encodeURIComponent(
-              repas.recette_nom || repas.notes || label
-            )}&duree=${repas.type_repas === "diner" ? 35 : repas.type_repas === "dejeuner" ? 30 : 15}`}
-            aria-label="Ouvrir le minuteur pour ce repas"
+        {onRegenerer && !repas.est_reste && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5"
+            title="Régénérer ce repas avec l'IA"
+            onClick={() => onRegenerer(repas)}
           >
-            <Clock className="h-3 w-3" />
-          </a>
-        </Button>
+            <RefreshCw className="h-3 w-3" />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
@@ -472,6 +470,7 @@ function CaseRepasPlanning({
   onAjouter,
   onRetirer,
   onModifierChamp,
+  onRegenerer,
   nomDinerParDescription,
 }: {
   date: string;
@@ -483,6 +482,7 @@ function CaseRepasPlanning({
   onAjouter: (date: string, type: TypeRepas) => void;
   onRetirer: (repas: RepasPlanning) => void;
   onModifierChamp?: (repasId: number, champ: string, valeur: string) => void;
+  onRegenerer?: (repas: RepasPlanning) => void;
   nomDinerParDescription: Record<string, string>;
 }) {
   const { isOver, setNodeRef } = useDroppable({
@@ -504,7 +504,7 @@ function CaseRepasPlanning({
         {emoji} {label}
       </div>
       {repas ? (
-        <CarteRepasDraggable repas={repas} label={label} onRetirer={onRetirer} onModifierChamp={onModifierChamp} nomDinerSource={repas.est_reste && repas.reste_description ? nomDinerParDescription[repas.reste_description] : undefined} />
+        <CarteRepasDraggable repas={repas} label={label} onRetirer={onRetirer} onModifierChamp={onModifierChamp} onRegenerer={onRegenerer} nomDinerSource={repas.est_reste && repas.reste_description ? nomDinerParDescription[repas.reste_description] : undefined} />
       ) : (
         <Button
           variant="ghost"
@@ -855,6 +855,7 @@ export default function PagePlanning() {
     () =>
       genererCoursesDepuisPlanning(dateDebut, {
         nbInvites: contexteInvitesActif ? modeInvites.nbInvites : 0,
+        nbPersonnes: nbPersonnesBase,
         evenements: evenementsModeInvites,
         nomListe:
           contexteInvitesActif && modeInvites.occasion
@@ -930,6 +931,17 @@ export default function PagePlanning() {
         toast.success("Nouveau brouillon généré");
       },
       onError: () => toast.error("Impossible de régénérer le planning"),
+    }
+  );
+
+  const { mutate: regenererUnRepas, isPending: enRegenerationRepas } = utiliserMutation(
+    (repasId: number) => regenererRepasIA(repasId),
+    {
+      onSuccess: (result) => {
+        invalider(["planning"]);
+        toast.success(result.message || "Repas régénéré");
+      },
+      onError: () => toast.error("Impossible de régénérer ce repas"),
     }
   );
 
@@ -1578,6 +1590,7 @@ export default function PagePlanning() {
                           onAjouter={ouvrirDialogue}
                           onRetirer={retirerRepas}
                           onModifierChamp={modifierChampRepas}
+                          onRegenerer={(repas) => regenererUnRepas(repas.id)}
                           nomDinerParDescription={nomDinerParDescription}
                         />
                       ))}

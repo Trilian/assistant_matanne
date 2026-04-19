@@ -262,8 +262,16 @@ class ServiceExportPDF:
                     repas_par_jour[jour_nom].append(
                         {
                             "type": repas.type_repas or "repas",
-                            "recette": repas.recette.nom if repas.recette else "Non défini",
-                            "notes": repas.notes or "",
+                            "recette": (repas.recette.nom if repas.recette else None) or repas.notes or "—",
+                            "entree": repas.entree or "",
+                            "laitage": repas.laitage or "",
+                            "legumes": repas.legumes or "",
+                            "feculents": repas.feculents or "",
+                            "dessert": repas.dessert or "",
+                            "fruit_gouter": repas.fruit_gouter or "",
+                            "gateau_gouter": repas.gateau_gouter or "",
+                            "est_reste": repas.est_reste or False,
+                            "reste_description": repas.reste_description or "",
                         }
                     )
 
@@ -294,44 +302,109 @@ class ServiceExportPDF:
         )
         story.append(Spacer(1, 20))
 
-        # Tableau planning
+        # Tableau planning — 5 colonnes (Jour + 4 types de repas)
         jours_semaine = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
-        table_data = [["Jour", "Déjeuner", "Dîner"]]
+        TYPES_REPAS_COLS = [
+            ("petit_dejeuner", "Petit-déj."),
+            ("dejeuner", "Déjeuner"),
+            ("gouter", "Goûter"),
+            ("diner", "Dîner"),
+        ]
+
+        # Style compact pour les cellules
+        style_cellule = ParagraphStyle(
+            name="CellulePlanning",
+            parent=self.styles["Normal"],
+            fontSize=8,
+            leading=10,
+            spaceAfter=0,
+            spaceBefore=0,
+        )
+        style_detail = ParagraphStyle(
+            name="DetailPlanning",
+            parent=self.styles["Normal"],
+            fontSize=7,
+            leading=9,
+            textColor=colors.HexColor("#666666"),
+            spaceAfter=0,
+            spaceBefore=0,
+        )
+        style_entete = ParagraphStyle(
+            name="EnteteCol",
+            parent=self.styles["Normal"],
+            fontSize=9,
+            leading=11,
+            alignment=TA_CENTER,
+            textColor=colors.white,
+            fontName="Helvetica-Bold",
+        )
+
+        entetes = [Paragraph("Jour", style_entete)] + [
+            Paragraph(label, style_entete) for _, label in TYPES_REPAS_COLS
+        ]
+        table_data = [entetes]
 
         for jour in jours_semaine:
             repas_jour = data.repas_par_jour.get(jour, [])
-            dejeuner = next(
-                (r["recette"] for r in repas_jour if "déj" in r["type"].lower() or "dej" in r["type"].lower()),
-                "-",
-            )
-            diner = next(
-                (
-                    r["recette"]
-                    for r in repas_jour
-                    if "dîn" in r["type"].lower() or "din" in r["type"].lower()
-                ),
-                "-",
-            )
-            table_data.append([jour, dejeuner, diner])
+            ligne = [Paragraph(jour, style_entete)]
+            for type_key, _ in TYPES_REPAS_COLS:
+                repas_type = next((r for r in repas_jour if r["type"] == type_key), None)
+                if repas_type is None:
+                    ligne.append(Paragraph("—", style_cellule))
+                    continue
+                # Nom principal
+                nom = repas_type["recette"]
+                if repas_type.get("est_reste") and repas_type.get("reste_description"):
+                    nom = f"♻ {nom} ({repas_type['reste_description']})"
+                parties = [Paragraph(nom, style_cellule)]
+                # Détails supplémentaires selon le type
+                if type_key in ("dejeuner", "diner"):
+                    for emoji, champ in [
+                        ("🥗", "entree"),
+                        ("🥦", "legumes"),
+                        ("🍞", "feculents"),
+                        ("🍮", "dessert"),
+                        ("🥛", "laitage"),
+                    ]:
+                        val = repas_type.get(champ, "")
+                        if val:
+                            parties.append(Paragraph(f"{emoji} {val}", style_detail))
+                elif type_key == "gouter":
+                    for emoji, champ in [
+                        ("🍪", "gateau_gouter"),
+                        ("🥛", "laitage"),
+                        ("🍎", "fruit_gouter"),
+                    ]:
+                        val = repas_type.get(champ, "")
+                        if val and val.lower() != nom.lower():
+                            parties.append(Paragraph(f"{emoji} {val}", style_detail))
+                ligne.append(parties if len(parties) > 1 else parties[0])
+            table_data.append(ligne)
 
-        table = Table(table_data, colWidths=[3 * cm, 6 * cm, 6 * cm])
+        col_widths = [2.2 * cm, 3.4 * cm, 3.4 * cm, 3.0 * cm, 4.0 * cm]
+        table = Table(table_data, colWidths=col_widths)
         table.setStyle(
             TableStyle(
                 [
                     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.JULES_PRIMARY)),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                    ("FONTSIZE", (0, 0), (-1, 0), 12),
-                    ("FONTSIZE", (0, 1), (-1, -1), 10),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-                    ("TOPPADDING", (0, 0), (-1, -1), 10),
-                    ("GRID", (0, 0), (-1, -1), 1, colors.grey),
+                    ("ALIGN", (0, 0), (0, -1), "CENTER"),
+                    ("ALIGN", (1, 0), (-1, 0), "CENTER"),
+                    ("ALIGN", (1, 1), (-1, -1), "LEFT"),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("FONTSIZE", (0, 0), (-1, 0), 9),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 6),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
                     (
                         "ROWBACKGROUNDS",
                         (0, 1),
                         (-1, -1),
                         [colors.white, colors.HexColor(Couleur.BG_GREY_100)],
                     ),
+                    ("BACKGROUND", (0, 1), (0, -1), colors.HexColor(Couleur.BG_LIGHT_GREEN)),
                 ]
             )
         )

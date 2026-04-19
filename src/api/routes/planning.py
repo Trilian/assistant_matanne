@@ -985,6 +985,62 @@ async def regenerer_planning(
     return await executer_async(_regenerer)
 
 
+@router.post(
+    "/repas/{repas_id}/regenerer-ia",
+    response_model=MessageResponse,
+    responses=REPONSES_IA,
+)
+@gerer_exception_api
+async def regenerer_repas_ia(
+    repas_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Régénère un repas unique via l'IA en proposant une alternative différente."""
+    from src.core.models import Repas
+    from src.services.cuisine.planning import obtenir_service_planning
+
+    def _regenerer_repas() -> MessageResponse:
+        with executer_avec_session() as session:
+            repas = session.query(Repas).filter(Repas.id == repas_id).first()
+            if not repas:
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
+
+            plat_actuel = repas.recette_nom or repas.notes or ""
+            type_repas = repas.type_repas or "diner"
+            date_repas = repas.date_repas
+
+        service = obtenir_service_planning()
+        try:
+            suggestion = service.suggerer_repas_alternatif_ia(
+                plat_actuel=plat_actuel,
+                type_repas=type_repas,
+                date_repas=date_repas,
+            )
+        except Exception as exc:
+            logger.warning("[planning] Erreur IA regenerer_repas_ia repas=%d: %s", repas_id, exc)
+            raise HTTPException(status_code=503, detail="Impossible de générer une alternative IA")
+
+        with executer_avec_session() as session:
+            repas = session.query(Repas).filter(Repas.id == repas_id).first()
+            if not repas:
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
+            repas.recette_nom = suggestion.get("nom", plat_actuel)
+            repas.notes = suggestion.get("nom", plat_actuel)
+            if suggestion.get("legumes"):
+                repas.legumes = suggestion["legumes"]
+            if suggestion.get("feculents"):
+                repas.feculents = suggestion["feculents"]
+            repas.recette_id = None
+            session.commit()
+
+        return MessageResponse(
+            message=f"Repas remplacé : {suggestion.get('nom', plat_actuel)}",
+            id=repas_id,
+            data=suggestion,
+        )
+
+    return await executer_async(_regenerer_repas)
+
 
 
 

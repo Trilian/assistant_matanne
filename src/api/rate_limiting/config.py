@@ -23,7 +23,7 @@ class ConfigLimitationDebit:
 
     # Limites par type d'utilisateur
     requetes_anonyme_par_minute: int = 30
-    requetes_authentifie_par_minute: int = 200
+    requetes_authentifie_par_minute: int = 600
     requetes_premium_par_minute: int = 400
 
     # Limites spécifiques aux endpoints IA

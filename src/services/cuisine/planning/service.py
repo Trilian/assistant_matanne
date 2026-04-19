@@ -395,6 +395,39 @@ class ServicePlanning(
 
     # ═══════════════════════════════════════════════════════════
 
+    def suggerer_repas_alternatif_ia(
+        self,
+        plat_actuel: str,
+        type_repas: str,
+        date_repas: date | None = None,
+    ) -> dict:
+        """Suggère un repas alternatif différent via l'IA pour un slot donné."""
+        from pydantic import BaseModel, Field
+
+        class AlternativeRepas(BaseModel):
+            nom: str = Field(..., min_length=2, max_length=60)
+            legumes: str | None = None
+            feculents: str | None = None
+            notes: str | None = None
+
+        date_ctx = date_repas.strftime("%A %d %B") if date_repas else "cette semaine"
+        prompt = (
+            f"Propose UN seul repas alternatif pour remplacer '{plat_actuel}' "
+            f"(type: {type_repas}, {date_ctx}). "
+            "Retourne un JSON avec: nom (plat principal, max 50 chars), "
+            "legumes (accompagnement légume), feculents (accompagnement féculent). "
+            "Le plat doit être différent et plus varié que l'original. "
+            "ONLY JSON, no explanation."
+        )
+        result = self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=AlternativeRepas,
+            system_prompt="Return ONLY valid JSON. No text before or after JSON.",
+        )
+        if result:
+            return result.model_dump()
+        return {"nom": plat_actuel}
+
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
     def agréger_courses_pour_planning(

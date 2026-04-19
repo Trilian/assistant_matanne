@@ -98,6 +98,18 @@ export async function regenererPlanning(
   return data;
 }
 
+/** Régénérer un repas unique via l'IA */
+export async function regenererRepasIA(
+  repasId: number
+): Promise<{ message: string; id: number; data?: { nom?: string; legumes?: string; feculents?: string } }> {
+  const { data } = await clientApi.post<{
+    message: string;
+    id: number;
+    data?: { nom?: string; legumes?: string; feculents?: string };
+  }>(`/planning/repas/${repasId}/regenerer-ia`);
+  return data;
+}
+
 /** Adapter tous les repas du planning pour Jules */
 export async function adapterPlanningJules(
   planningId: number

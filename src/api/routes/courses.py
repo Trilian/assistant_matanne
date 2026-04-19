@@ -1017,6 +1017,7 @@ async def generer_depuis_planning(
     semaine_debut = donnees.semaine_debut
     semaine_fin = semaine_debut + timedelta(days=6)
     multiplicateur_quantites = _calculer_multiplicateur_invites(donnees.nb_invites)
+    nb_personnes = donnees.nb_personnes
     evenements = [item.strip() for item in donnees.evenements if item.strip()][:6]
 
     def _generate():
@@ -1066,25 +1067,28 @@ async def generer_depuis_planning(
                 rows = (
                     session.query(
                         Ingredient.nom,
-                        func.sum(RecetteIngredient.quantite).label("total_qty"),
+                        RecetteIngredient.quantite,
                         RecetteIngredient.unite,
                         Ingredient.categorie,
+                        Recette.portions,
                     )
                     .join(RecetteIngredient, RecetteIngredient.ingredient_id == Ingredient.id)
+                    .join(Recette, Recette.id == RecetteIngredient.recette_id)
                     .filter(RecetteIngredient.recette_id.in_(recette_ids))
-                    .group_by(Ingredient.nom, RecetteIngredient.unite, Ingredient.categorie)
                     .all()
                 )
 
-                ingredients_list = [
-                    {
-                        "nom": row.nom,
-                        "quantite": float(row.total_qty or 1),
-                        "unite": row.unite or "",
-                        "rayon": None if (not row.categorie or row.categorie.lower() in ("autre", "other")) else row.categorie,
-                    }
-                    for row in rows
-                ]
+                for row in rows:
+                    portions_recette = row.portions or 4
+                    facteur = nb_personnes / portions_recette
+                    ingredients_list.append(
+                        {
+                            "nom": row.nom,
+                            "quantite": float((row.quantite or 1) * facteur),
+                            "unite": row.unite or "",
+                            "rayon": None if (not row.categorie or row.categorie.lower() in ("autre", "other")) else row.categorie,
+                        }
+                    )
 
             # 2b) Ajouter les champs texte libres (laitage, goûter, dessert, entrée)
             # sans recette liée — même logique que service.py agréger_courses_pour_planning
@@ -1113,7 +1117,7 @@ async def generer_depuis_planning(
                         ingredients_list.append(
                             {
                                 "nom": texte.strip(),
-                                "quantite": 1.0,
+                                "quantite": float(nb_personnes),
                                 "unite": "pcs",
                                 "rayon": _rayon_par_champ.get(champ, "autre"),
                             }

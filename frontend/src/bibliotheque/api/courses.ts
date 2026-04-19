@@ -167,6 +167,7 @@ export async function genererCoursesDepuisPlanning(
   options?: {
     soustraireStock?: boolean;
     nomListe?: string;
+    nbPersonnes?: number;
     nbInvites?: number;
     evenements?: string[];
   }
@@ -177,6 +178,7 @@ export async function genererCoursesDepuisPlanning(
       semaine_debut: semaineDebut,
       soustraire_stock: options?.soustraireStock ?? true,
       nom_liste: options?.nomListe ?? "Courses de la semaine",
+      nb_personnes: options?.nbPersonnes ?? 2,
       nb_invites: options?.nbInvites ?? 0,
       evenements: options?.evenements ?? [],
     }

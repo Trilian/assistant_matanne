@@ -235,6 +235,7 @@ class GenererCoursesRequest(BaseModel):
     semaine_debut: date
     soustraire_stock: bool = Field(True, description="Soustraire les quantités en stock")
     nom_liste: str = Field("Courses de la semaine", min_length=1, max_length=200)
+    nb_personnes: int = Field(2, ge=1, le=20, description="Nombre de personnes pour adapter les quantités")
     nb_invites: int = Field(0, ge=0, le=20, description="Nombre d'invités à prendre en compte")
     evenements: list[str] = Field(default_factory=list, description="Événements contextuels")
 
@@ -244,6 +245,7 @@ class GenererCoursesRequest(BaseModel):
                 "semaine_debut": "2026-04-06",
                 "soustraire_stock": True,
                 "nom_liste": "Courses semaine 15",
+                "nb_personnes": 3,
                 "nb_invites": 2,
                 "evenements": ["brunch dimanche"],
             }

@@ -86,6 +86,7 @@ export default function PageCourses() {
     erreursArticle,
     articles,
     articlesNonCoches,
+    articlesCoches,
     ouvrirQrPartage,
     telechargerQr,
     creerListe,
@@ -400,7 +401,7 @@ export default function PageCourses() {
               onClick={() => valider(undefined)}
               disabled={
                 enValidation ||
-                articlesNonCoches.length > 0 ||
+                articlesCoches.length === 0 ||
                 enFinalisationCourses ||
                 enCochageGlobal ||
                 enCochageCategorie ||
@@ -413,7 +414,7 @@ export default function PageCourses() {
               ) : (
                 <CheckCircle2 className="mr-1 h-4 w-4" />
               )}
-              Valider courses
+              Valider {articlesCoches.length} article{articlesCoches.length !== 1 ? "s" : ""}
             </Button>
           </>
           )}

@@ -192,7 +192,7 @@ export default function PageBatchCooking() {
       setConfigAvecJules(configData.avec_jules_par_defaut);
       if (configData.robots_disponibles?.length) setConfigRobots(configData.robots_disponibles);
       if (configData.objectif_portions_semaine) setConfigObjectif(configData.objectif_portions_semaine);
-      if (configData.couverture_jours) setConfigCouvertureJours(configData.couverture_jours as Record<string, number[]>);
+      if (configData.couverture_jours && Object.keys(configData.couverture_jours).length > 0) setConfigCouvertureJours(configData.couverture_jours as Record<string, number[]>);
     }
   }, [configData]);
 

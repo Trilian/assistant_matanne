@@ -93,31 +93,36 @@ RECETTES À PRÉPARER:
             r = repas.get(type_repas, {})
             if r and isinstance(r, dict) and not r.get("est_rechauffe"):
                 nom_safe = _sanitiser_texte(r.get("nom", "Recette"), 200)
-                prompt += f"\n- {jour_safe} {type_repas}: {nom_safe}"
+                ligne = f"\n- {jour_safe} {type_repas}: {nom_safe}"
+                if r.get("legumes"):
+                    ligne += f" + légumes : {_sanitiser_texte(str(r['legumes']), 200)}"
+                if r.get("feculents"):
+                    ligne += f" + féculents : {_sanitiser_texte(str(r['feculents']), 200)}"
+                if r.get("entree"):
+                    ligne += f" + entrée : {_sanitiser_texte(str(r['entree']), 200)}"
+                prompt += ligne
 
     prompt += """
 
-RÉPONDS EN JSON VALIDE avec cette structure:
-{"session": {"duree_estimee_minutes": 120, "conseils_organisation": ["..."]},
- "recettes": [{"nom": "...", "pour_jours": ["Lundi midi"], "portions": 4,
-   "ingredients": [{"nom": "carottes", "quantite": "500g", "decoupe": "rondelles 5mm", "tache_jules": "Laver"}],
-   "etapes_batch": [{"titre": "Découper carottes en rondelles 5mm", "duree_minutes": 10, "robot": null, "temperature": null, "est_passif": false, "detail": "Économe, rondelles régulières 5mm", "jules_participation": false, "tache_jules": null}],
-   "instructions_finition": ["Réchauffer 3min micro-ondes"],
-   "stockage": "Boîte hermétique frigo", "duree_conservation_jours": 3}],
- "moments_jules": [{"temps": "0-15min", "tache": "Laver légumes"}],
- "timeline": [{"debut_min": 0, "fin_min": 15, "tache": "Découper les carottes en rondelles 5mm", "detail": "500g carottes, économe, rondelles régulières 5mm", "robot": null, "track": "vous", "temperature": null},
-              {"debut_min": 0, "fin_min": 40, "tache": "Sauce bolognaise Cookeo", "detail": "Dorer 250g boeuf haché 5min, puis mijoter programme Viande 30min", "robot": "cookeo", "track": "cookeo", "temperature": null}]}
+RÉPONDS EN JSON VALIDE avec UNIQUEMENT cette structure (rien d'autre) :
+{"session": {"duree_estimee_minutes": 120, "conseils_organisation": ["Commencer par les cuissons longues"]},
+ "timeline": [
+   {"debut_min": 0, "fin_min": 15, "tache": "Découper les carottes en rondelles 5mm", "detail": "500g carottes, économe, rondelles régulières 5mm", "track": "vous", "temperature": null},
+   {"debut_min": 0, "fin_min": 40, "tache": "Sauce bolognaise — programme Viande 30min", "detail": "Dorer 250g bœuf haché 5min position dorure, puis programme Viande 30min", "track": "cookeo", "temperature": null},
+   {"debut_min": 40, "fin_min": 80, "tache": "Poulet rôti — cuisson au four", "detail": "Enfourner le poulet dans le four préchauffé à 200°C, cuire 40min", "track": "four", "temperature": 200}
+ ]}
 
-RÈGLES:
-1. Étapes CONCRÈTES: découpe exacte, grammes, °C, durée. Jamais "les légumes" → nommer chaque légume avec quantité précise
-2. Robot utilisé: programme exact, température, vitesse, durée dans le champ detail
-3. PARALLÉLISER: pendant qu'un robot tourne, travailler sur une autre recette. La timeline montre les opérations simultanées
-4. Quantités en grammes/ml (sauf pièces: oeufs, oignons). Finition = réchauffage/assaisonnement jour J
-5. TRACK: chaque entrée timeline doit avoir "track" = "vous" (tâche manuelle) ou le nom exact du robot (ex: "cookeo", "monsieur_cuisine", "airfryer", "four", "plaques")
-6. detail: phrase concrète décrivant exactement comment faire l'étape (grammes, programme, durée, température)"""
+RÈGLES ABSOLUES :
+1. Étapes CONCRÈTES : découpe exacte, grammes, °C, durée précise. Jamais "les légumes" → nommer chaque ingrédient avec quantité exacte
+2. Appareil : programme exact, température, vitesse, durée dans le champ detail. TOUJOURS au SINGULIER : "le four", "le Cookeo", "l'Airfryer" — JAMAIS "les fours" ni le pluriel
+3. PARALLÉLISER : pendant qu'un appareil tourne (passif), travailler sur une autre recette. Les tâches simultanées ont les mêmes debut_min
+4. Quantités en grammes/ml sauf pièces (œufs, oignons). Finition = réchauffage/assaisonnement jour J
+5. TRACK : "vous" pour tâche manuelle, ou le nom exact de l'appareil parmi : cookeo, monsieur_cuisine, airfryer, multicooker, four, plaques
+6. Génère des étapes pour TOUTES les préparations listées : plats principaux, légumes, féculents et entrées mentionnés. N'ajoute rien qui n'est pas listé
+7. Couvre TOUTES les étapes de chaque recette : de la préparation initiale jusqu'à la mise en conservation"""
 
     if avec_jules:
-        prompt += "\n5. Jules 19 mois: UNIQUEMENT laver, mélanger dans un bol, verser (PAS de couteau, PAS de chaleur)"
+        prompt += "\n8. Jules 19 mois : UNIQUEMENT laver, mélanger dans un bol, verser (PAS de couteau, PAS de chaleur)"
 
     prompt += "\n\nRéponds UNIQUEMENT en JSON valide, sans commentaire ni markdown."
 
@@ -128,17 +133,18 @@ def _valider_reponse(response: dict | str | None) -> dict | None:
     """Valide et répare la réponse IA. Retourne un dict valide ou None."""
     if response and isinstance(response, dict):
         logger.info(
-            "Réponse IA dict reçue: %d chars, clés=%s, nb_recettes=%d",
+            "Réponse IA dict reçue: %d chars, clés=%s, nb_etapes_timeline=%d",
             len(str(response)),
             list(response.keys()),
-            len(response.get("recettes", [])),
+            len(response.get("timeline", [])),
         )
-        if "recettes" not in response or not isinstance(response.get("recettes"), list):
-            logger.warning("Réponse IA sans 'recettes' valide. Clés: %s", list(response.keys()))
+        if "timeline" not in response or not isinstance(response.get("timeline"), list):
+            logger.warning("Réponse IA sans 'timeline' valide. Clés: %s", list(response.keys()))
+            # Tentative de récupération depuis une clé imbriquée
             if "session" in response and isinstance(response["session"], dict):
                 inner = response["session"]
-                if isinstance(inner.get("recettes"), list):
-                    response["recettes"] = inner["recettes"]
+                if isinstance(inner.get("timeline"), list):
+                    response["timeline"] = inner["timeline"]
                     return response
             return None
         return response
@@ -286,9 +292,9 @@ class BatchCookingIAMixin:
         if result:
             return _valider_avec_pydantic(result)
 
-        # Tentative 2 : retry avec plus de tokens
+        # Tentative 2 : retry avec plus de tokens, sans cache (réponse précédente invalide)
         logger.warning("Tentative 1 échouée, retry avec max_tokens augmenté")
-        result = self._appel_ia_detail(prompt, max_tokens=_MAX_TOKENS + 8000)
+        result = self._appel_ia_detail(prompt, max_tokens=_MAX_TOKENS + 8000, utiliser_cache=False)
         if result:
             return _valider_avec_pydantic(result)
 
@@ -309,7 +315,7 @@ class BatchCookingIAMixin:
                 chunk_prompt = _construire_prompt_detail(
                     chunk, type_session, avec_jules, robots_section
                 )
-                chunk_result = self._appel_ia_detail(chunk_prompt)
+                chunk_result = self._appel_ia_detail(chunk_prompt, utiliser_cache=False)
                 if chunk_result:
                     resultats.append(chunk_result)
                 else:
@@ -328,19 +334,25 @@ class BatchCookingIAMixin:
         return {}
 
     @avec_resilience(retry=1, timeout_s=120, fallback=None)
-    def _appel_ia_detail(self, prompt: str, max_tokens: int = _MAX_TOKENS) -> dict | None:
+    def _appel_ia_detail(
+        self, prompt: str, max_tokens: int = _MAX_TOKENS, utiliser_cache: bool = True
+    ) -> dict | None:
         """Effectue un appel IA unique pour le batch cooking détaillé."""
         if not self.client:
             return None
 
         logger.info(
-            "Appel IA batch cooking: prompt=%d chars, max_tokens=%d", len(prompt), max_tokens
+            "Appel IA batch cooking: prompt=%d chars, max_tokens=%d, cache=%s",
+            len(prompt),
+            max_tokens,
+            utiliser_cache,
         )
 
         response = self.client.generer_json(
             prompt=prompt,
             system_prompt=_SYSTEM_PROMPT_DETAIL,
             max_tokens=max_tokens,
+            utiliser_cache=utiliser_cache,
         )
 
         return _valider_reponse(response)

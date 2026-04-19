@@ -153,7 +153,42 @@ def _formater_planning_html(repas_tries) -> str:
                 or getattr(repas, "notes", None)
                 or "—"
             )
-            lignes_jour.append(f"{emoji} {libelle} : {html.escape(str(nom_recette))}")
+            # Reste réchauffé
+            if getattr(repas, "est_reste", False) and getattr(repas, "reste_description", None):
+                nom_recette = f"♻ {nom_recette} <i>({html.escape(str(repas.reste_description))})</i>"
+                lignes_jour.append(f"{emoji} {libelle} : {nom_recette}")
+            else:
+                lignes_jour.append(f"{emoji} {libelle} : {html.escape(str(nom_recette))}")
+
+            # Détails supplémentaires selon le type
+            type_repas = getattr(repas, "type_repas", "")
+            if type_repas in ("dejeuner", "diner"):
+                entree = getattr(repas, "entree", None)
+                legumes = getattr(repas, "legumes", None)
+                feculents = getattr(repas, "feculents", None)
+                dessert = getattr(repas, "dessert", None)
+                laitage = getattr(repas, "laitage", None)
+                if entree:
+                    lignes_jour.append(f"  🥗 Entrée : {html.escape(str(entree))}")
+                if legumes:
+                    lignes_jour.append(f"  🥦 Légumes : {html.escape(str(legumes))}")
+                if feculents:
+                    lignes_jour.append(f"  🌾 Féculents : {html.escape(str(feculents))}")
+                if dessert:
+                    lignes_jour.append(f"  🍮 Dessert : {html.escape(str(dessert))}")
+                if laitage:
+                    lignes_jour.append(f"  🥛 Laitage : {html.escape(str(laitage))}")
+            elif type_repas == "gouter":
+                gateau = getattr(repas, "gateau_gouter", None)
+                laitage = getattr(repas, "laitage", None)
+                fruit = getattr(repas, "fruit_gouter", None)
+                nom_principal = getattr(getattr(repas, "recette", None), "nom", None) or getattr(repas, "notes", None) or ""
+                if gateau and gateau.lower() != nom_principal.lower():
+                    lignes_jour.append(f"  🍪 Gâteau : {html.escape(str(gateau))}")
+                if laitage:
+                    lignes_jour.append(f"  🥛 Laitage : {html.escape(str(laitage))}")
+                if fruit:
+                    lignes_jour.append(f"  🍎 Fruit : {html.escape(str(fruit))}")
         blocs.append("\n".join(lignes_jour))
 
     return "\n\n".join(blocs) if blocs else "Aucun repas saisi."

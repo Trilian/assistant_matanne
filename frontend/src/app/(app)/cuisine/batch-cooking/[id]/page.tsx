@@ -83,6 +83,18 @@ const ROBOT_COLORS: Record<string, string> = {
   plaques: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
 };
 
+const ROBOTS_BATCH_OPTIONS = [
+  { valeur: "cookeo", label: "🍲 Cookeo" },
+  { valeur: "monsieur_cuisine", label: "🤖 M. Cuisine" },
+  { valeur: "airfryer", label: "🍟 Airfryer" },
+  { valeur: "multicooker", label: "♨️ Multicooker" },
+  { valeur: "four", label: "🔥 Four" },
+  { valeur: "plaques", label: "🍳 Plaques" },
+  { valeur: "robot_patissier", label: "🎂 Robot pâtissier" },
+  { valeur: "mixeur", label: "🥤 Mixeur" },
+  { valeur: "hachoir", label: "🔪 Hachoir" },
+];
+
 function normaliserTrack(robots: string[]): string {
   if (!robots || robots.length === 0) return "vous";
   const raw = robots[0].toLowerCase().replace(/ /g, "_").replace(".", "");
@@ -245,6 +257,7 @@ export default function PageDetailBatch() {
   const [rechercheRecette, setRechercheRecette] = useState("");
   const [etapesExpandees, setEtapesExpandees] = useState<Set<number>>(new Set());
   const [vueTimeline, setVueTimeline] = useState(false);
+  const [robotsSel, setRobotsSel] = useState<string[]>([]);
 
   function toggleEtape(id: number) {
     setEtapesExpandees((prev) => {
@@ -309,10 +322,36 @@ export default function PageDetailBatch() {
     }
   );
 
+  async function genererAvecRobots() {
+    if (robotsSel.length === 0) {
+      toast.error("Sélectionnez au moins un appareil de cuisine");
+      return;
+    }
+    const robotsActuels = session?.robots_utilises ?? [];
+    const modifies =
+      JSON.stringify([...robotsSel].sort()) !==
+      JSON.stringify([...robotsActuels].sort());
+    if (modifies) {
+      try {
+        await modifierSessionBatch(id, { robots_utilises: robotsSel });
+      } catch {
+        toast.error("Erreur lors de la mise à jour des appareils");
+        return;
+      }
+    }
+    genererEtapesMutation.mutate();
+  }
+
   useEffect(() => {
     if (session?.nom) definirTitrePage(session.nom);
     return () => definirTitrePage(null);
   }, [session?.nom, definirTitrePage]);
+
+  // Initialise la sélection de robots depuis la session (une fois au chargement)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (session?.robots_utilises) setRobotsSel(session.robots_utilises);
+  }, [session?.id]);
 
   if (isLoading) {
     return (
@@ -460,26 +499,53 @@ export default function PageDetailBatch() {
         </CardContent>
       </Card>
 
-      {/* Robots utilisés */}
-      {session.robots_utilises.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              Robots utilisés
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {session.robots_utilises.map((r) => (
-                <Badge key={r} variant="secondary">
-                  {r}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Appareils de cuisine */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            Appareils de cuisine
+          </CardTitle>
+          <CardDescription>
+            Sélectionnez ceux disponibles — l&apos;IA les utilisera pour paralléliser la session
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {ROBOTS_BATCH_OPTIONS.map(({ valeur, label }) => {
+              const actif = robotsSel.includes(valeur);
+              return (
+                <button
+                  key={valeur}
+                  type="button"
+                  onClick={() =>
+                    setRobotsSel((prev) =>
+                      actif ? prev.filter((r) => r !== valeur) : [...prev, valeur]
+                    )
+                  }
+                  className={`px-2.5 py-1.5 text-xs rounded-md border font-medium transition-colors ${
+                    actif
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border bg-background hover:bg-accent text-muted-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          {robotsSel.length === 0 && (
+            <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+              ⚠ Sélectionnez au moins un appareil pour que l&apos;IA puisse planifier la session.
+            </p>
+          )}
+          {robotsSel.length > 1 && (
+            <p className="mt-2 text-xs text-green-700 dark:text-green-400">
+              ✓ {robotsSel.length} appareils · la session sera parallélisée
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Étapes */}
       {etapes.length > 0 && (
@@ -522,8 +588,9 @@ export default function PageDetailBatch() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => genererEtapesMutation.mutate()}
-                  disabled={genererEtapesMutation.isPending}
+                  onClick={genererAvecRobots}
+                  disabled={genererEtapesMutation.isPending || robotsSel.length === 0}
+                  title={robotsSel.length === 0 ? "Sélectionnez au moins un appareil" : undefined}
                 >
                   {genererEtapesMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -669,8 +736,8 @@ export default function PageDetailBatch() {
               Aucune étape générée pour cette session.
             </p>
             <Button
-              onClick={() => genererEtapesMutation.mutate()}
-              disabled={genererEtapesMutation.isPending}
+              onClick={genererAvecRobots}
+              disabled={genererEtapesMutation.isPending || robotsSel.length === 0}
             >
               {genererEtapesMutation.isPending ? (
                 <>
@@ -680,7 +747,9 @@ export default function PageDetailBatch() {
               ) : (
                 <>
                   <Sparkles className="mr-2 h-4 w-4" />
-                  Générer les étapes avec l'IA
+                  {robotsSel.length === 0
+                    ? "Sélectionnez un appareil ci-dessus"
+                    : "Générer les étapes avec l'IA"}
                 </>
               )}
             </Button>
