@@ -4,16 +4,18 @@
 
 "use client";
 
-import { use, useState } from "react";
+import { use, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
   CalendarDays,
+  Camera,
   Clock,
   Users,
   ChefHat,
   Edit,
+  ImageIcon,
   Trash2,
   Heart,
   Printer,
@@ -23,6 +25,7 @@ import {
   Pencil,
   Check,
   X,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -36,17 +39,31 @@ import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Textarea } from "@/composants/ui/textarea";
 import { Input } from "@/composants/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/composants/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import {
   exporterRecettePdf,
+  genererPhotoRecetteIA,
   genererVersionJules,
   genererVersionRobot,
   obtenirRecette,
   supprimerRecette,
   enrichirInstructionsRecette,
-  sauvegarderVersionJulesManuelle,
+  uploaderPhotoRecette,
   sauvegarderVersionRobot,
-  type AdaptationJulesManuelle,
   type AdaptationRobotManuelle,
 } from "@/bibliotheque/api/recettes";
 import { obtenirScoreEcologiqueRecette } from "@/bibliotheque/api/ia-avancee";
@@ -69,12 +86,13 @@ export default function PageDetailRecette({
   const invalider = utiliserInvalidation();
   const { definirTitrePage } = utiliserStoreUI();
 
-  // État local pour les formulaires d'adaptation
-  const [editJules, setEditJules] = useState(false);
-  const [julesForm, setJulesForm] = useState<AdaptationJulesManuelle>({});
+  // État local
   const [editRobot, setEditRobot] = useState<string | null>(null);
   const [robotForm, setRobotForm] = useState<Partial<AdaptationRobotManuelle>>({});
   const [modeCuisson, setModeCuisson] = useState<"standard" | "cookeo" | "monsieur_cuisine" | "airfryer">("standard");
+  const [dialogRobotOuvert, setDialogRobotOuvert] = useState(false);
+  const [robotSelectionne, setRobotSelectionne] = useState<"cookeo" | "monsieur_cuisine" | "airfryer">("cookeo");
+  const inputPhotoRef = useRef<HTMLInputElement | null>(null);
 
   const { data: recette, isLoading } = utiliserRequete(
     ["recette", id],
@@ -115,15 +133,25 @@ export default function PageDetailRecette({
     }
   );
 
-  const { mutate: sauvegarderJules, isPending: enSauvegardeJules } = utiliserMutation(
-    (payload: AdaptationJulesManuelle) => sauvegarderVersionJulesManuelle(Number(id), payload),
+  const { mutate: genererPhotoIA, isPending: enGenerationPhotoIA } = utiliserMutation(
+    () => genererPhotoRecetteIA(Number(id)),
     {
       onSuccess: () => {
         invalider(["recette", id]);
-        setEditJules(false);
-        toast.success("Version Jules sauvegardée");
+        toast.success("Photo générée !");
       },
-      onError: () => toast.error("Erreur lors de la sauvegarde"),
+      onError: () => toast.error("Impossible de générer une photo"),
+    }
+  );
+
+  const { mutate: uploaderPhoto, isPending: enUploadPhoto } = utiliserMutation(
+    (file: File) => uploaderPhotoRecette(Number(id), file),
+    {
+      onSuccess: () => {
+        invalider(["recette", id]);
+        toast.success("Photo mise à jour");
+      },
+      onError: () => toast.error("Erreur lors de l'upload"),
     }
   );
 
@@ -153,8 +181,10 @@ export default function PageDetailRecette({
   const { mutate: genererRobot, isPending: enGenerationRobot } = utiliserMutation(
     (robot: "cookeo" | "monsieur_cuisine" | "airfryer") => genererVersionRobot(Number(id), robot),
     {
-      onSuccess: () => {
+      onSuccess: (_data, robot) => {
         invalider(["recette", id]);
+        setDialogRobotOuvert(false);
+        setModeCuisson(robot);
         toast.success("Instructions robot générées par l'IA");
       },
       onError: () => toast.error("Impossible de générer les instructions robot"),
@@ -262,6 +292,10 @@ export default function PageDetailRecette({
             <Baby className="mr-1 h-4 w-4" />
             {enVersionJules ? "Génération..." : recette.version_jules ? "Regénérer Jules (IA)" : "Version Jules (IA)"}
           </Button>
+          <Button variant="outline" size="sm" onClick={() => setDialogRobotOuvert(true)}>
+            <Sparkles className="mr-1 h-4 w-4" />
+            Générer pour un robot
+          </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-1 h-4 w-4" />
             Imprimer
@@ -290,48 +324,86 @@ export default function PageDetailRecette({
         </div>
       </div>
 
-      {/* Version Jules */}
-      {(recette.version_jules || editJules) && (
-        <CarteAdaptationJules
-          version={recette.version_jules}
-          enEdition={editJules}
-          form={julesForm}
-          onEditer={() => {
-            setJulesForm({
-              instructions_modifiees: recette.version_jules?.instructions_modifiees ?? "",
-              notes_bebe: recette.version_jules?.notes_bebe ?? "",
-              modifications_resume: recette.version_jules?.modifications_resume ?? [],
-              ingredients_modifies: recette.version_jules?.ingredients_modifies ?? {},
-            });
-            setEditJules(true);
-          }}
-          onAnnuler={() => setEditJules(false)}
-          onSauvegarder={() => sauvegarderJules(julesForm)}
-          enSauvegarde={enSauvegardeJules}
-          onChangerInstructions={(v) => setJulesForm((f) => ({ ...f, instructions_modifiees: v }))}
-          onChangerNotes={(v) => setJulesForm((f) => ({ ...f, notes_bebe: v }))}
-          onChangerResume={(v) =>
-            setJulesForm((f) => ({
-              ...f,
-              modifications_resume: v.split(",").map((s) => s.trim()).filter(Boolean),
-            }))
-          }
-        />
+      {/* Version Jules — lecture seule, géré par l'IA */}
+      {recette.version_jules && (
+        <CarteAdaptationJules version={recette.version_jules} />
       )}
 
-      {!recette.version_jules && !editJules && (
-        <div className="print:hidden">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
-            onClick={() => { setJulesForm({}); setEditJules(true); }}
-          >
-            <Baby className="mr-1 h-4 w-4" />
-            Saisir version Jules manuellement
-          </Button>
-        </div>
-      )}
+      {/* Photo du plat */}
+      <div className="print:hidden">
+        <input
+          ref={inputPhotoRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          aria-label="Choisir une photo du plat"
+          title="Choisir une photo du plat"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) uploaderPhoto(file);
+            e.target.value = "";
+          }}
+        />
+        {recette.image_url ? (
+          <div className="relative rounded-xl overflow-hidden">
+            <img
+              src={recette.image_url}
+              alt={recette.nom}
+              className="w-full max-h-64 object-cover"
+            />
+            <div className="absolute bottom-2 right-2 flex gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => genererPhotoIA(undefined)}
+                disabled={enGenerationPhotoIA || enUploadPhoto}
+              >
+                <Sparkles className="h-3.5 w-3.5 mr-1" />
+                {enGenerationPhotoIA ? "Génération..." : "Régénérer"}
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => inputPhotoRef.current?.click()}
+                disabled={enUploadPhoto || enGenerationPhotoIA}
+              >
+                <Upload className="h-3.5 w-3.5 mr-1" />
+                {enUploadPhoto ? "Upload..." : "Changer"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="border-2 border-dashed rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <ImageIcon className="h-8 w-8 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Aucune photo</p>
+                <p className="text-xs">Générée par l'IA ou importée manuellement</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => genererPhotoIA(undefined)}
+                disabled={enGenerationPhotoIA || enUploadPhoto}
+              >
+                <Sparkles className="h-3.5 w-3.5 mr-1" />
+                {enGenerationPhotoIA ? "Génération..." : "Générer avec l'IA"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => inputPhotoRef.current?.click()}
+                disabled={enUploadPhoto || enGenerationPhotoIA}
+              >
+                <Upload className="h-3.5 w-3.5 mr-1" />
+                {enUploadPhoto ? "Upload..." : "Uploader"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Métriques */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -656,106 +728,75 @@ export default function PageDetailRecette({
           }
         }
       `}</style>
+
+      {/* Dialog — Générer instructions pour un robot */}
+      <Dialog open={dialogRobotOuvert} onOpenChange={setDialogRobotOuvert}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Générer des instructions robot</DialogTitle>
+          </DialogHeader>
+          <div className="py-3">
+            <p className="text-sm text-muted-foreground mb-3">
+              Choisissez le robot de cuisine pour adapter cette recette.
+            </p>
+            <Select
+              value={robotSelectionne}
+              onValueChange={(v) => setRobotSelectionne(v as typeof robotSelectionne)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cookeo">🍲 Cookeo</SelectItem>
+                <SelectItem value="monsieur_cuisine">🤖 Monsieur Cuisine</SelectItem>
+                <SelectItem value="airfryer">🍟 Air Fryer</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDialogRobotOuvert(false)}>
+              Annuler
+            </Button>
+            <Button onClick={() => genererRobot(robotSelectionne)} disabled={enGenerationRobot}>
+              <Sparkles className="h-4 w-4 mr-2" />
+              {enGenerationRobot ? "Génération..." : "Générer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 // ─── Composant : Carte Adaptation Jules ────────────────────────
 interface CarteAdaptationJulesProps {
-  version: VersionRecette | null | undefined;
-  enEdition: boolean;
-  form: AdaptationJulesManuelle;
-  onEditer: () => void;
-  onAnnuler: () => void;
-  onSauvegarder: () => void;
-  enSauvegarde: boolean;
-  onChangerInstructions: (v: string) => void;
-  onChangerNotes: (v: string) => void;
-  onChangerResume: (v: string) => void;
+  version: VersionRecette;
 }
 
-function CarteAdaptationJules({
-  version,
-  enEdition,
-  form,
-  onEditer,
-  onAnnuler,
-  onSauvegarder,
-  enSauvegarde,
-  onChangerInstructions,
-  onChangerNotes,
-  onChangerResume,
-}: CarteAdaptationJulesProps) {
+function CarteAdaptationJules({ version }: CarteAdaptationJulesProps) {
   return (
     <Card className="border-emerald-200/70 bg-emerald-50/30 dark:border-emerald-800/50 dark:bg-emerald-950/10">
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Baby className="h-4 w-4 text-emerald-600" />
           Version Jules
-          {!enEdition && (
-            <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={onEditer}>
-              <Pencil className="h-3 w-3" />
-            </Button>
-          )}
+          <span className="ml-auto text-xs font-normal text-muted-foreground">Générée par l'IA</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        {enEdition ? (
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs font-medium mb-1 text-muted-foreground">Résumé des adaptations (séparées par virgules)</p>
-              <Input
-                value={form.modifications_resume?.join(", ") ?? ""}
-                onChange={(e) => onChangerResume(e.target.value)}
-                placeholder="sans sel, champignons mixés, …"
-              />
-            </div>
-            <div>
-              <p className="text-xs font-medium mb-1 text-muted-foreground">Instructions adaptées</p>
-              <Textarea
-                value={form.instructions_modifiees ?? ""}
-                onChange={(e) => onChangerInstructions(e.target.value)}
-                rows={4}
-                placeholder="Instructions simplifiées pour Jules…"
-              />
-            </div>
-            <div>
-              <p className="text-xs font-medium mb-1 text-muted-foreground">Notes bébé</p>
-              <Textarea
-                value={form.notes_bebe ?? ""}
-                onChange={(e) => onChangerNotes(e.target.value)}
-                rows={2}
-                placeholder="Mixé, sans sel, texture adaptée…"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={onSauvegarder} disabled={enSauvegarde}>
-                <Check className="h-3 w-3 mr-1" />
-                {enSauvegarde ? "Sauvegarde…" : "Sauvegarder"}
-              </Button>
-              <Button size="sm" variant="ghost" onClick={onAnnuler}>
-                <X className="h-3 w-3 mr-1" />
-                Annuler
-              </Button>
-            </div>
-          </div>
-        ) : version ? (
-          <>
-            {!!version.modifications_resume?.length && (
-              <ul className="list-disc pl-4 space-y-0.5">
-                {version.modifications_resume.map((a) => <li key={a}>{a}</li>)}
-              </ul>
-            )}
-            {version.instructions_modifiees && (
-              <p className="text-muted-foreground whitespace-pre-line">{version.instructions_modifiees}</p>
-            )}
-            {version.notes_bebe && (
-              <p className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 rounded p-2">
-                {version.notes_bebe}
-              </p>
-            )}
-          </>
-        ) : null}
+        {!!version.modifications_resume?.length && (
+          <ul className="list-disc pl-4 space-y-0.5">
+            {version.modifications_resume.map((a) => <li key={a}>{a}</li>)}
+          </ul>
+        )}
+        {version.instructions_modifiees && (
+          <p className="text-muted-foreground whitespace-pre-line">{version.instructions_modifiees}</p>
+        )}
+        {version.notes_bebe && (
+          <p className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 rounded p-2">
+            {version.notes_bebe}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

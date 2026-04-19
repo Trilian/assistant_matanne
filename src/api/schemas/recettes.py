@@ -218,6 +218,7 @@ class RecettePatch(BaseModel):
     instructions_cookeo: str | None = None
     instructions_monsieur_cuisine: str | None = None
     instructions_airfryer: str | None = None
+    url_image: str | None = None
 
     @field_validator("categorie", mode="before")
     @classmethod

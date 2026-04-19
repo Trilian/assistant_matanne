@@ -4,11 +4,11 @@
 
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Plus, Trash2, Loader2, Camera } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Loader2, Camera, Sparkles, Baby } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -19,6 +19,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/composants/ui/card";
+import { Textarea } from "@/composants/ui/textarea";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/composants/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -28,7 +35,7 @@ import {
 } from "@/composants/ui/select";
 import { schemaRecette, type DonneesRecette } from "@/bibliotheque/validateurs-cuisine";
 import { utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
-import { creerRecette, genererDepuisPhoto, modifierRecette } from "@/bibliotheque/api/recettes";
+import { creerRecette, genererDepuisPhoto, genererVersionJules, modifierRecette, sauvegarderVersionJulesManuelle } from "@/bibliotheque/api/recettes";
 import type { Recette } from "@/types/recettes";
 
 interface PropsFormulaireRecette {
@@ -41,6 +48,14 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
   const invalider = utiliserInvalidation();
   const estEdition = !!recetteExistante;
   const inputPhotoRef = useRef<HTMLInputElement | null>(null);
+
+  // État pour l'onglet Jules (édition uniquement)
+  const [julesForm, setJulesForm] = useState({
+    instructions_modifiees: recetteExistante?.version_jules?.instructions_modifiees ?? "",
+    notes_bebe: recetteExistante?.version_jules?.notes_bebe ?? "",
+    modifications_resume: (recetteExistante?.version_jules?.modifications_resume ?? []).join(", "),
+  });
+  const [enRegenerationJules, setEnRegenerationJules] = useState(false);
 
   const {
     register,
@@ -96,8 +111,10 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
         ? modifierRecette(recetteExistante!.id, donnees)
         : creerRecette(donnees),
     {
-      onSuccess: (recette) => {
+      onSuccess: async (recette) => {
+        await _sauvegarderJulesSiRempli(recette.id);
         invalider(["recettes"]);
+        invalider(["recette", String(recette.id)]);
         router.push(`/cuisine/recettes/${recette.id}`);
       },
     }
@@ -112,6 +129,20 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
       },
     }
   );
+
+  // Sauvegarde Jules lors du submit si les champs sont remplis
+  async function _sauvegarderJulesSiRempli(recetteId: number) {
+    if (!estEdition) return;
+    const { instructions_modifiees, notes_bebe, modifications_resume } = julesForm;
+    if (!instructions_modifiees && !notes_bebe) return;
+    await sauvegarderVersionJulesManuelle(recetteId, {
+      instructions_modifiees: instructions_modifiees || undefined,
+      notes_bebe: notes_bebe || undefined,
+      modifications_resume: modifications_resume
+        ? modifications_resume.split(",").map((s) => s.trim()).filter(Boolean)
+        : [],
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -195,7 +226,17 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
           </CardContent>
         </Card>
       ) : (
-        <>
+        <Tabs defaultValue="recette" className="space-y-4">
+          {estEdition && (
+            <TabsList>
+              <TabsTrigger value="recette">🍽️ Recette</TabsTrigger>
+              <TabsTrigger value="jules">
+                <Baby className="h-3.5 w-3.5 mr-1.5" />
+                Version Jules
+              </TabsTrigger>
+            </TabsList>
+          )}
+
           {!estEdition && (
             <Card>
               <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -233,10 +274,11 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
             </Card>
           )}
 
-          <form
-            onSubmit={handleSubmit((data) => sauvegarder(data))}
-            className="space-y-6"
-          >
+          <TabsContent value="recette">
+            <form
+              onSubmit={handleSubmit((data) => sauvegarder(data))}
+              className="space-y-6"
+            >
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Infos principales */}
           <Card className="lg:col-span-2">
@@ -461,8 +503,91 @@ export function FormulaireRecette({ recetteExistante, modeSimple = false }: Prop
           </Button>
         </div>
         </form>
-        </>
-      )}
+          </TabsContent>
+
+          {estEdition && (
+            <TabsContent value="jules" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Baby className="h-4 w-4 text-emerald-600" />
+                    Version Jules
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Adaptation de la recette pour Jules (sans sel, sans alcool, texture adaptée).
+                    Gérez manuellement ou régénérez via l'IA.
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="jules-resume">Résumé des adaptations</Label>
+                    <input
+                      id="jules-resume"
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      placeholder="sans sel, champignons mixés, sauce à part…"
+                      value={julesForm.modifications_resume}
+                      onChange={(e) => setJulesForm((f) => ({ ...f, modifications_resume: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground">Séparées par des virgules</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="jules-instructions">Instructions adaptées</Label>
+                    <Textarea
+                      id="jules-instructions"
+                      rows={5}
+                      placeholder="Instructions simplifiées pour Jules…"
+                      value={julesForm.instructions_modifiees}
+                      onChange={(e) => setJulesForm((f) => ({ ...f, instructions_modifiees: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="jules-notes">Notes bébé</Label>
+                    <Textarea
+                      id="jules-notes"
+                      rows={2}
+                      placeholder="Mixé, sans sel, servir tiède…"
+                      value={julesForm.notes_bebe}
+                      onChange={(e) => setJulesForm((f) => ({ ...f, notes_bebe: e.target.value }))}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={enRegenerationJules}
+                      onClick={async () => {
+                        setEnRegenerationJules(true);
+                        try {
+                          await genererVersionJules(recetteExistante!.id);
+                          // Recharger la page pour afficher la nouvelle version
+                          router.refresh();
+                        } finally {
+                          setEnRegenerationJules(false);
+                        }
+                      }}
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      {enRegenerationJules ? "Génération..." : "Régénérer via l'IA"}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={isPending}
+                      onClick={async () => {
+                        await _sauvegarderJulesSiRempli(recetteExistante!.id);
+                        invalider(["recette", String(recetteExistante!.id)]);
+                      }}
+                    >
+                      Enregistrer les modifications Jules
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+        </Tabs>
+        )}
     </div>
   );
 }

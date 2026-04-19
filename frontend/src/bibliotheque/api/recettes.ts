@@ -338,3 +338,21 @@ export async function enrichirInstructionsRecette(recetteId: number): Promise<{ 
   return data;
 }
 
+// ─── Photo du plat ───────────────────────────────────────────
+
+/** Générer une photo du plat via IA (HuggingFace → Pollinations fallback) */
+export async function genererPhotoRecetteIA(recetteId: number): Promise<{ url_image: string }> {
+  const { data } = await clientApi.post<{ url_image: string }>(`/recettes/${recetteId}/generer-photo`);
+  return data;
+}
+
+/** Uploader manuellement une photo du plat */
+export async function uploaderPhotoRecette(recetteId: number, file: File): Promise<{ url_image: string }> {
+  const formData = new FormData();
+  formData.append("photo", file);
+  const { data } = await clientApi.post<{ url_image: string }>(`/recettes/${recetteId}/photo`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+

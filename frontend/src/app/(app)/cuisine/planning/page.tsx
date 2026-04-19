@@ -365,6 +365,7 @@ function CarteRepasDraggable({
                       }}
                     >
                       <input
+                        aria-label="Modifier les légumes"
                         autoFocus
                         className="text-[10px] w-full rounded border px-1 py-0 bg-background"
                         value={valeurEdition}
@@ -394,6 +395,7 @@ function CarteRepasDraggable({
                       }}
                     >
                       <input
+                        aria-label="Modifier les féculents"
                         autoFocus
                         className="text-[10px] w-full rounded border px-1 py-0 bg-background"
                         value={valeurEdition}

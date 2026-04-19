@@ -2099,6 +2099,118 @@ async def generer_recette_depuis_photo(
     return await _generate_async()
 
 
+# ══════════════════════════════════════════════════════════════
+# PHOTO DU PLAT
+# ══════════════════════════════════════════════════════════════
+
+
+@router.post("/{recette_id}/generer-photo", responses={**REPONSES_IA, **REPONSES_CRUD_LECTURE})
+@gerer_exception_api
+async def generer_photo_recette(
+    recette_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une photo du plat via IA (HuggingFace → Pollinations fallback) et met à jour la recette."""
+    import logging
+
+    from src.core.models import Recette as RecetteORM
+    from src.services.integrations.images.generator import obtenir_service_generateur_images
+
+    logger_r = logging.getLogger(__name__)
+
+    def _charger_nom():
+        with executer_avec_session() as session:
+            recette = session.query(RecetteORM).filter(RecetteORM.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
+            return recette.nom
+
+    nom = await executer_async(_charger_nom)
+
+    service_images = obtenir_service_generateur_images()
+
+    def _generer():
+        return service_images.generer_image_recette(nom)
+
+    url_image = await executer_async(_generer)
+
+    if not url_image:
+        raise HTTPException(
+            status_code=503,
+            detail="Impossible de générer une image pour cette recette",
+        )
+
+    def _mettre_a_jour():
+        with executer_avec_session() as session:
+            recette = session.query(RecetteORM).filter(RecetteORM.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
+            recette.url_image = url_image
+            session.commit()
+            logger_r.info(f"Photo générée pour recette {recette_id}: {url_image}")
+            return {"url_image": url_image}
+
+    return await executer_async(_mettre_a_jour)
+
+
+@router.post("/{recette_id}/photo", responses={**REPONSES_CRUD_CREATION, **REPONSES_CRUD_LECTURE})
+@gerer_exception_api
+async def uploader_photo_recette(
+    recette_id: int,
+    photo: UploadFile = File(..., description="Photo du plat (JPEG, PNG, WebP — max 10 MB)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Upload une photo du plat vers Supabase Storage et met à jour l'URL de la recette."""
+    import logging
+    import os
+    import time
+
+    from src.core.models import Recette as RecetteORM
+
+    logger_r = logging.getLogger(__name__)
+
+    TYPES_IMAGES = {"image/jpeg", "image/png", "image/webp"}
+    if photo.content_type not in TYPES_IMAGES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Type non autorisé: {photo.content_type}. Utilisez JPEG, PNG ou WebP.",
+        )
+
+    content = await photo.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Image trop volumineuse (max 10 MB)")
+
+    try:
+        from supabase import create_client
+
+        supabase_url = os.getenv("SUPABASE_URL")
+        supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
+
+        if not supabase_url or not supabase_key:
+            raise HTTPException(status_code=503, detail="Supabase Storage non configuré")
+
+        client = create_client(supabase_url, supabase_key)
+        safe_filename = (photo.filename or "photo").replace("/", "_").replace("\\", "_")
+        path = f"{user['id']}/{int(time.time())}_{safe_filename}"
+        client.storage.from_("photos").upload(path, content, {"content-type": photo.content_type})
+        public_url = client.storage.from_("photos").get_public_url(path)
+
+    except ImportError:
+        raise HTTPException(status_code=503, detail="SDK Supabase non disponible")
+
+    def _mettre_a_jour():
+        with executer_avec_session() as session:
+            recette = session.query(RecetteORM).filter(RecetteORM.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
+            recette.url_image = public_url
+            session.commit()
+            logger_r.info(f"Photo uploadée pour recette {recette_id}: {public_url}")
+            return {"url_image": public_url}
+
+    return await executer_async(_mettre_a_jour)
+
+
 def _parse_minutes(valeur: str | None) -> int:
     """Parse une chaÃ®ne '15 min', '1h30' etc. en nombre de minutes."""
     if not valeur:

@@ -54,6 +54,7 @@ export interface ModifierSessionBatchDTO {
   duree_estimee?: number
   avec_jules?: boolean
   recettes_selectionnees?: number[]
+  robots_utilises?: string[]
 }
 
 export interface PreparationBatch {
