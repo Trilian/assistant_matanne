@@ -21,7 +21,7 @@ Exemple d'utilisation:
 
 # Types et schemas
 # Constantes
-from .constantes import MAPPING_RAYONS, PRIORITES
+from .constantes import MAPPING_FAMILLES, MAPPING_RAYONS, PRIORITES
 
 # Service de base
 from .service import (
@@ -32,6 +32,7 @@ from .service import (
 # Service intelligent
 from .suggestion import (
     ServiceCoursesIntelligentes,
+    detecter_famille,
     obtenir_service_courses_intelligentes,
 )
 from .types import (
@@ -52,6 +53,7 @@ __all__ = [
     # ═══════════════════════════════════════════════════════════
     # CONSTANTES
     # ═══════════════════════════════════════════════════════════
+    "MAPPING_FAMILLES",
     "MAPPING_RAYONS",
     "PRIORITES",
     # ═══════════════════════════════════════════════════════════
@@ -63,6 +65,7 @@ __all__ = [
     # SERVICE INTELLIGENT (NOMS FRANCAIS)
     # ═══════════════════════════════════════════════════════════
     "ServiceCoursesIntelligentes",
+    "detecter_famille",
     "obtenir_service_courses_intelligentes",
     # ═══════════════════════════════════════════════════════════
     # ALIASES UTILISÉS (COMPATIBILITÉ)

@@ -251,7 +251,21 @@ export function PanneauDetailCourses({
               />
             ) : (
               <div className="space-y-6">
-                {categoriesTriees.map((categorie) => (
+                {categoriesTriees.map((categorie) => {
+                  const articlesCat = groupesNonCoches[categorie];
+                  const parFamille: Record<string, ArticleCourses[]> = {};
+                  for (const article of articlesCat) {
+                    const famille = article.famille_produit || "";
+                    (parFamille[famille] ??= []).push(article);
+                  }
+                  const familles = Object.keys(parFamille).sort((a, b) => {
+                    if (!a) return 1;
+                    if (!b) return -1;
+                    return a.localeCompare(b);
+                  });
+                  const afficherFamilles = familles.length > 1 || (familles.length === 1 && familles[0] !== "");
+
+                  return (
                   <div key={categorie}>
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <h3 className="text-sm font-semibold">{categorie}</h3>
@@ -265,9 +279,55 @@ export function PanneauDetailCourses({
                         Cocher catégorie
                       </Button>
                     </div>
+                    {afficherFamilles ? (
+                      <div className="space-y-3">
+                        {familles.map((famille) => (
+                          <div key={famille}>
+                            {famille && (
+                              <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                                {famille}
+                              </p>
+                            )}
+                            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                              <AnimatePresence mode="popLayout">
+                              {parFamille[famille].map((article, idx) => (
+                                <ItemAnime key={article.id} index={idx}>
+                                <TileArticle
+                                  key={article.id}
+                                  nom={article.nom}
+                                  quantite={article.quantite}
+                                  unite={article.unite}
+                                  categorie={article.categorie}
+                                  magasinCible={article.magasin_cible}
+                                  driveMappe={article.drive_mappe}
+                                  prixEstime={article.prix_estime}
+                                  estSelectionne={articlesSelectionnes.has(article.id)}
+                                  onClick={() => {
+                                    if (modeSelection) {
+                                      onBasculerSelectionArticle(article.id);
+                                    } else {
+                                      onCocherArticle(article.id, true);
+                                    }
+                                  }}
+                                  onLongPress={() => {
+                                    if (modeSelection) {
+                                      onBasculerSelectionArticle(article.id);
+                                    } else {
+                                      onSupprimerArticle(article);
+                                    }
+                                  }}
+                                />
+                                </ItemAnime>
+                              ))}
+                              </AnimatePresence>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
                     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
                       <AnimatePresence mode="popLayout">
-                      {groupesNonCoches[categorie].map((article, idx) => (
+                      {articlesCat.map((article, idx) => (
                         <ItemAnime key={article.id} index={idx}>
                         <TileArticle
                           key={article.id}
@@ -298,8 +358,10 @@ export function PanneauDetailCourses({
                       ))}
                       </AnimatePresence>
                     </div>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
 
                 {articlesCoches.length > 0 && (
                   <div>

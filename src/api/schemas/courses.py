@@ -77,9 +77,12 @@ class ArticleResponse(BaseModel):
     id: int
     nom: str = Field(max_length=200)
     quantite: float
+    unite: str | None = Field(None, max_length=50)
     coche: bool = False
     categorie: str | None = Field(None, max_length=100)
     magasin_cible: str | None = Field(None, max_length=50)
+    famille_produit: str | None = Field(None, max_length=50)
+    sous_famille_produit: str | None = Field(None, max_length=50)
     prix_estime: float | None = None
 
 

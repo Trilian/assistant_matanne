@@ -423,13 +423,14 @@ export function utiliserPageCourses() {
   const { mutate: valider, isPending: enValidation } = utiliserMutation(
     () => validerCourses(listeSelectionnee!),
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
         queryClient.setQueryData(["courses", String(listeSelectionnee)], (old: ListeCourses | undefined) =>
           old ? { ...old, etat: "terminee" } : old,
         );
         invalider(["courses"]);
         invalider(["inventaire"]);
-        toast.success("Courses validées ! Stock mis à jour.");
+        const msg = data?.message || "Courses validées ! Stock mis à jour.";
+        toast.success(msg);
       },
       onError: () => toast.error("Erreur lors de la validation"),
     },

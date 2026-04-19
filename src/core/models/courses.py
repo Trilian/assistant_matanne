@@ -104,6 +104,8 @@ class ArticleCourses(CreeLeMixin, Base):
     # Organisation
     rayon_magasin: Mapped[str | None] = mapped_column(String(100), index=True)
     magasin_cible: Mapped[str | None] = mapped_column(String(50), index=True)
+    famille_produit: Mapped[str | None] = mapped_column(String(50), index=True)
+    sous_famille_produit: Mapped[str | None] = mapped_column(String(50))
     prix_unitaire: Mapped[float | None] = mapped_column(Float, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text)
 

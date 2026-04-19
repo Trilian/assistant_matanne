@@ -1,9 +1,9 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
--- Version    : 4.2 (migrations 001-007 intégrées)
--- Généré le  : 2026-04-14 00:00 UTC
--- Source     : sql/schema/*.sql (21 fichiers)
+-- Version    : 4.0 (régénéré automatiquement)
+-- Généré le  : 2026-04-19 06:04 UTC
+-- Source     : sql/schema/*.sql (21 fichiers, ~5138 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -1245,6 +1245,7 @@ CREATE TABLE IF NOT EXISTS config_batch_cooking (
     avec_jules_par_defaut BOOLEAN NOT NULL DEFAULT TRUE,
     robots_disponibles JSONB NOT NULL DEFAULT '["four", "plaques"]',
     preferences_stockage JSONB,
+    -- Mapping jour_batch → jours couverts, ex: {"2": [2, 3, 4], "6": [6, 0, 1, 2]}
     couverture_jours JSONB,
     objectif_portions_semaine INTEGER NOT NULL DEFAULT 20,
     notes TEXT,
@@ -1289,14 +1290,6 @@ CREATE TABLE IF NOT EXISTS etapes_recette (
     CONSTRAINT ck_ordre_positif CHECK (ordre > 0)
 );
 CREATE INDEX IF NOT EXISTS ix_etapes_recette_recette ON etapes_recette(recette_id);
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'uq_etapes_recette_recette_ordre'
-  ) THEN
-    ALTER TABLE etapes_recette
-      ADD CONSTRAINT uq_etapes_recette_recette_ordre UNIQUE (recette_id, ordre);
-  END IF;
-END $$;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1451,6 +1444,8 @@ CREATE TABLE IF NOT EXISTS articles_courses (
     achete_le TIMESTAMP WITH TIME ZONE,
     rayon_magasin VARCHAR(100),
     magasin_cible VARCHAR(50),
+    famille_produit VARCHAR(50),
+    sous_famille_produit VARCHAR(50),
     prix_unitaire FLOAT,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -1463,6 +1458,7 @@ CREATE INDEX IF NOT EXISTS ix_articles_courses_ingredient_id ON articles_courses
 CREATE INDEX IF NOT EXISTS ix_articles_courses_priorite ON articles_courses(priorite);
 CREATE INDEX IF NOT EXISTS ix_articles_courses_achete ON articles_courses(achete);
 CREATE INDEX IF NOT EXISTS ix_articles_courses_cree_le ON articles_courses(cree_le);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_famille_produit ON articles_courses(famille_produit);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1535,6 +1531,7 @@ CREATE TABLE IF NOT EXISTS repas (
     adaptation_auto BOOLEAN NOT NULL DEFAULT TRUE,
     contexte_meteo VARCHAR(50),
     laitage VARCHAR(200),
+    -- Accompagnements (migrations 005b + 006)
     fruit VARCHAR(200),
     legumes VARCHAR(200),
     legumes_recette_id INTEGER,
@@ -1542,40 +1539,47 @@ CREATE TABLE IF NOT EXISTS repas (
     feculents_recette_id INTEGER,
     proteine_accompagnement VARCHAR(200),
     proteine_accompagnement_recette_id INTEGER,
+    -- Goûter PNNS
     fruit_gouter VARCHAR(100),
     gateau_gouter VARCHAR(100),
+    -- Équilibre PNNS calculé
     score_equilibre SMALLINT,
     alertes_equilibre JSONB,
+    -- Restes
     est_reste BOOLEAN NOT NULL DEFAULT FALSE,
     reste_description VARCHAR(200),
     CONSTRAINT fk_repas_planning FOREIGN KEY (planning_id) REFERENCES plannings(id) ON DELETE CASCADE,
-    CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE
-    SET NULL,
-        CONSTRAINT fk_repas_entree_recette FOREIGN KEY (entree_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT fk_repas_dessert_recette FOREIGN KEY (dessert_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT fk_repas_dessert_jules_recette FOREIGN KEY (dessert_jules_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT fk_repas_legumes_recette FOREIGN KEY (legumes_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT fk_repas_feculents_recette FOREIGN KEY (feculents_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT fk_repas_proteine_acc_recette FOREIGN KEY (proteine_accompagnement_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-        CONSTRAINT ck_repas_portions_valides CHECK (
-            portion_ajustee IS NULL
-            OR (
-                portion_ajustee > 0
-                AND portion_ajustee <= 20
-            )
+    CONSTRAINT fk_repas_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_entree_recette FOREIGN KEY (entree_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_dessert_recette FOREIGN KEY (dessert_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_dessert_jules_recette FOREIGN KEY (dessert_jules_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_legumes_recette FOREIGN KEY (legumes_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_feculents_recette FOREIGN KEY (feculents_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_repas_proteine_acc_recette FOREIGN KEY (proteine_accompagnement_recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT ck_repas_portions_valides CHECK (
+        portion_ajustee IS NULL
+        OR (
+            portion_ajustee > 0
+            AND portion_ajustee <= 20
         )
+    )
 );
+COMMENT ON COLUMN repas.fruit IS 'Fruit entier ou compote (goûter) — texte libre, ex: Pomme, Compote poire';
+COMMENT ON COLUMN repas.legumes IS 'Légumes accompagnement (déjeuner/dîner) — texte libre, ex: Haricots verts, Courgettes sautées';
+COMMENT ON COLUMN repas.legumes_recette_id IS 'Recette liée pour les légumes (optionnel, sinon texte libre dans `legumes`)';
+COMMENT ON COLUMN repas.feculents IS 'Féculents accompagnement — texte libre (ex: Riz basmati, Pommes de terre vapeur)';
+COMMENT ON COLUMN repas.feculents_recette_id IS 'Recette liée pour les féculents (optionnel)';
+COMMENT ON COLUMN repas.proteine_accompagnement IS 'Protéine quand le plat est féculent/légume (ex: Escalope de dinde, Lentilles)';
+COMMENT ON COLUMN repas.proteine_accompagnement_recette_id IS 'Recette liée pour la protéine accompagnement';
+COMMENT ON COLUMN repas.fruit_gouter IS 'Fruit frais ou compote au goûter (PNNS) — ex: Pomme, Compote poire sans sucre';
+COMMENT ON COLUMN repas.gateau_gouter IS 'Gâteau/biscuit sain au goûter (PNNS) — ex: Cake maison, Barre céréales';
+COMMENT ON COLUMN repas.score_equilibre IS 'Score PNNS calculé 0-100 (NULL=non applicable). Vert≥80, Orange 50-79, Rouge<50';
+COMMENT ON COLUMN repas.alertes_equilibre IS 'Liste alertes équilibre : ["Pas de légumes", "Féculents manquants", "Protéine manquante"]';
 CREATE INDEX IF NOT EXISTS ix_repas_planning ON repas(planning_id);
 CREATE INDEX IF NOT EXISTS idx_repas_planning_id ON repas(planning_id);
 CREATE INDEX IF NOT EXISTS ix_repas_recette ON repas(recette_id);
 CREATE INDEX IF NOT EXISTS ix_repas_date ON repas(date_repas);
 CREATE INDEX IF NOT EXISTS ix_repas_type ON repas(type_repas);
-
--- Colonnes ajoutées post-création (idempotent pour bases existantes)
-DO $$ BEGIN
-    ALTER TABLE repas ADD COLUMN IF NOT EXISTS est_reste BOOLEAN NOT NULL DEFAULT FALSE;
-    ALTER TABLE repas ADD COLUMN IF NOT EXISTS reste_description VARCHAR(200);
-END $$;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -5235,19 +5239,6 @@ GRANT SELECT,
 GRANT USAGE,
     SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 -- ============================================================================
-
--- ============================================================================
--- NORMALISATION DES CATÉGORIES DE RECETTES (idempotent)
--- Corrige les valeurs NULL, minuscules et variantes vers les formes canoniques.
--- ============================================================================
-UPDATE recettes SET categorie = 'Entrée'         WHERE LOWER(TRIM(categorie)) IN ('entrée', 'entree', 'entrées', 'entrees', 'starter');
-UPDATE recettes SET categorie = 'Dessert'        WHERE LOWER(TRIM(categorie)) IN ('dessert', 'desserts');
-UPDATE recettes SET categorie = 'Accompagnement' WHERE LOWER(TRIM(categorie)) IN ('accompagnement', 'accompagnements', 'garniture');
-UPDATE recettes SET categorie = 'Boisson'        WHERE LOWER(TRIM(categorie)) IN ('boisson', 'boissons', 'drink');
-UPDATE recettes SET categorie = 'Petit-déjeuner' WHERE LOWER(TRIM(categorie)) IN ('petit-déjeuner', 'petit déjeuner', 'petit_dejeuner', 'breakfast');
-UPDATE recettes SET categorie = 'Goûter'         WHERE LOWER(TRIM(categorie)) IN ('goûter', 'gouter', 'goûters');
-UPDATE recettes SET categorie = 'Snack'          WHERE LOWER(TRIM(categorie)) IN ('snack', 'snacks', 'apéro', 'apero', 'amuse-bouche');
-UPDATE recettes SET categorie = 'Plat'           WHERE categorie IS NULL OR LOWER(TRIM(categorie)) IN ('plat', 'plats', 'principal', 'plat principal');
 
 -- Source: 99_footer.sql
 -- ============================================================================

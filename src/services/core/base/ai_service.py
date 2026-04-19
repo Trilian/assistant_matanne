@@ -356,17 +356,43 @@ class BaseAIService(
         if not response:
             return fallback or {}
 
+        # Stratégie 1: Parse direct (response_format=json_object → JSON valide attendu)
+        try:
+            cleaned = AnalyseurIA._nettoyer_basique(response)
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, dict):
+                logger.info("✅ JSON parsé vers dict (parse direct)")
+                return parsed
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        # Stratégie 2: Extraction JSON dans du texte
         try:
             json_str = AnalyseurIA._extraire_objet_json(response)
             parsed = json.loads(json_str)
             if isinstance(parsed, dict):
-                logger.info("✅ JSON parsé vers dict")
+                logger.info("✅ JSON parsé vers dict (extraction)")
                 return parsed
-            logger.warning("Réponse IA parsée mais non-dict: %s", type(parsed).__name__)
-            return fallback or {}
-        except Exception as e:
-            logger.error(f"❌ Erreur parsing dict: {e}")
-            return fallback or {}
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        # Stratégie 3: Réparation intelligente (JSON tronqué/malformé)
+        try:
+            repaired = AnalyseurIA._reparer_intelligemment(response)
+            parsed = json.loads(repaired)
+            if isinstance(parsed, dict):
+                logger.info("✅ JSON parsé vers dict (réparation)")
+                return parsed
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        logger.error(
+            "❌ Erreur parsing dict: toutes stratégies échouées. "
+            "Réponse brute (%d chars): %s",
+            len(response),
+            response[:300],
+        )
+        return fallback or {}
 
     call_with_dict_parsing_sync = sync_wrapper(call_with_dict_parsing)
 

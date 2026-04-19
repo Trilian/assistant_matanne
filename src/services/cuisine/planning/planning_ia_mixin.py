@@ -113,6 +113,38 @@ class PlanningIAGenerationMixin:
         return recette.id
 
     @staticmethod
+    def _persister_adaptation_jules(
+        db: Session, recette_id: int | None, adaptation: str | None
+    ) -> None:
+        """Crée ou met à jour une VersionRecette bébé pour persister l'adaptation Jules
+        au niveau de la recette (plutôt que seulement dans le planning)."""
+        if not recette_id or not adaptation:
+            return
+        from src.core.models.recettes import VersionRecette
+
+        version = (
+            db.query(VersionRecette)
+            .filter(
+                VersionRecette.recette_base_id == recette_id,
+                VersionRecette.type_version == "bebe",
+            )
+            .first()
+        )
+        if version:
+            # Ne pas écraser une adaptation manuelle plus détaillée
+            if not version.notes_bebe or len(version.notes_bebe) <= len(adaptation):
+                version.notes_bebe = adaptation
+        else:
+            db.add(
+                VersionRecette(
+                    recette_base_id=recette_id,
+                    type_version="bebe",
+                    notes_bebe=adaptation,
+                    modifications_resume=[adaptation],
+                )
+            )
+
+    @staticmethod
     def _trouver_recette_seule(db: Session, nom: str) -> int | None:
         """Retourne l'id d'une recette existante ou None si non trouvée (sans créer de stub).
         Utilisé pour les repas « Reste » afin d'éviter la création d'une fausse recette."""
@@ -234,6 +266,8 @@ class PlanningIAGenerationMixin:
         - « Courgettes sautées » dans « Dinde aux courgettes et riz »
         - « Petits pois vapeur » dans « Poulet curry aux petits pois et riz »
         - « Poêlée de légumes » dans « Poulet sauté aux légumes printaniers »
+        - « Haricots verts vapeur » quand le plat contient déjà des légumes
+          (ex : « Poulet curry coco légumes »)
         """
         if not valeur or not nom_recette:
             return valeur
@@ -242,7 +276,17 @@ class PlanningIAGenerationMixin:
         # 1. Correspondance exacte (sous-chaîne littérale)
         if valeur_lower in nom_lower:
             return None
-        # 2. Matching par mot significatif :
+        # 2. Si le plat contient déjà "légumes" dans son nom et que la valeur
+        #    est un légume (pas un féculent), le plat intègre déjà ses légumes.
+        _LEGUMES_GENERIQUES = {"légumes", "legumes"}
+        _FECULENTS_KEYWORDS = {
+            "riz", "pâtes", "pates", "semoule", "pomme de terre", "pommes de terre",
+            "quinoa", "boulgour", "bulgur", "polenta", "pain", "blé", "ble",
+        }
+        est_valeur_feculent = any(kw in valeur_lower for kw in _FECULENTS_KEYWORDS)
+        if not est_valeur_feculent and any(mot in nom_lower for mot in _LEGUMES_GENERIQUES):
+            return None
+        # 3. Matching par mot significatif :
         #    - mots ≥ 4 caractères OU mots-aliments courts spécifiques (riz, blé…)
         #    - hors mots génériques de cuisine / articles / prépositions
         mots = valeur_lower.replace("-", " ").replace("'", " ").split()
@@ -716,7 +760,7 @@ RULES:
 6. gouter: MANDATORY — always a non-null short text representing the cereal product. PRIVILÉGIER FAIT MAISON (PNNS) : pain complet, cake maison, galette avoine maison, biscuits maison, pain d'épices maison, crêpes maison, muffins maison. LIMITER : biscuits industriels, gâteaux du commerce, barres chocolatées. gouter_laitage MANDATORY (yaourt nature, fromage frais, fromage blanc — éviter crèmes dessert sucrées). gouter_fruit MANDATORY — whole fruit (pomme, poire, banane, raisin, clémentine...) OR compote maison — NEVER a juice. gouter_gateau MANDATORY — same as gouter: a HEALTHY cereal product fait maison de préférence. gouter and gouter_gateau should match. Inclure régulièrement des fruits à coque non salés (noix, amandes, noisettes) dans le goûter (PNNS : aliments délaissés à réintroduire).
 7. PROTEINS — strictly follow the PNNS balance section above. Weekly protein budget: {nb_poisson_blanc}x white fish, {nb_poisson_gras}x fatty fish, max {viande_rouge_max}x red meat + 1x pork (total meat ≤ {viande_rouge_max + 1} meals = PNNS 500g cap), min {nb_vegetarien}x vegetarian/legumes secs (PNNS: légumineuses ≥ 2x/week), max 1x comfort meal, remaining days=POULTRY (poulet 3-4x, dinde 1-2x, canard 0-1x, pintade/lapin 0-1x). Charcuterie (jambon, lardons, saucisse) max 2 usages/week across all fields (PNNS 150g cap). NEVER more than 2 consecutive chicken meals. Prefer féculents complets at least once/day. Alternate viande/volaille/poisson/œufs/légumes secs throughout the week.
 8. 4-PORTIONS STRATEGY (MANDATORY MINIMUM: 3 LUNCHES MUST BE LEFTOVERS) — for sauces/gratins/soups/stews/lasagnes/risottos/currys/woks/poêlées/cocottes/tajines/mijotés/rôtis/boulettes: set dejeuner_est_reste=true the NEXT DAY with dejeuner_reste_source="dîner de [JOUR]". MANDATORY: at least 3 of the 6 lunches (Mardi→Dimanche) MUST be leftovers — NOT optional. Plan your dinners intentionally: choose at least 3-4 dinner dishes that ARE reheatable. CRITICAL: dejeuner_reste_source MUST reference the IMMEDIATELY PREVIOUS day — never a future day, never the same day. Example: Mardi's lunch can only reference "dîner de Lundi", NEVER "dîner de Mercredi" or later. Mercredi's lunch → "dîner de Mardi". IMPORTANT: A reste of a viande rouge dish still counts as 1 viande rouge occurrence in your max {viande_rouge_max} total — plan accordingly. ABSOLUTE RULES FOR RESTES: (a) NEVER set est_reste=true without a non-null reste_source — if you cannot name a real previous meal as the source, set est_reste=false; (b) diner_est_reste MUST ALWAYS be false — dinners are ALWAYS fresh preparations, NEVER leftovers. This field is permanently banned from ever being true in this app; (c) NEVER set any est_reste=true on Dimanche diner (last meal of the week — no identifiable source). RISOTTO STAYS RULE: for RESTES of dishes like risotto, quiche, gratin — feculents=null (the dish already contains its own starch — adding "Riz vapeur" or similar is FORBIDDEN).
-9. null is valid ONLY for entree, laitage, dessert, reste_source, proteine_accompagnement. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): copy legumes, feculents AND proteine_accompagnement from the original dish — do NOT return null for legumes/feculents. Example: if the source was 'Bœuf bourguignon' with legumes='Poêlée de légumes' and feculents='Pâtes', the reste must also have legumes='Poêlée de légumes' and feculents='Pâtes'. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the ingredient is already literally named in the dish (e.g. if dejeuner="Agneau rôti aux légumes, semoule" then feculents=null because "semoule" is already in the name; if dejeuner="Omelette aux poivrons et pommes de terre" then legumes=null AND feculents=null). CRITICAL VEGETABLE EXCEPTION: If a vegetable or ingredient is ALREADY IN THE DISH NAME, you MUST NOT repeat it in the legumes field. Instead use a DIFFERENT vegetable. EXAMPLES: 'Risotto aux asperges' → legumes=null OR legumes='Salade verte' — ABSOLUTELY FORBIDDEN: legumes='Asperges vapeur'. 'Dinde aux champignons' → legumes MUST NOT be 'Champignons sautés' — use 'Haricots verts', 'Brocoli', 'Courgettes' instead. 'Bœuf haché aux poivrons' → legumes MUST NOT be 'Poivrons grillés' — use 'Salade verte', 'Haricots verts', 'Courgettes' instead. 'Poulet aux courgettes' → legumes must NOT be 'Courgettes sautées' — use 'Haricots verts' or 'Salade' instead. General rule: NEVER put a variant of the SAME ingredient in both the dish name AND the legumes field.
+9. null is valid ONLY for entree, laitage, dessert, reste_source, proteine_accompagnement. For RESTES (dejeuner_est_reste=true or diner_est_reste=true): copy legumes, feculents AND proteine_accompagnement from the original dish — do NOT return null for legumes/feculents. Example: if the source was 'Bœuf bourguignon' with legumes='Poêlée de légumes' and feculents='Pâtes', the reste must also have legumes='Poêlée de légumes' and feculents='Pâtes'. For all other meals (non-restes): legumes and feculents are MANDATORY (never null) — fill them with what is in the dish — EXCEPT when the dish ALREADY CONTAINS vegetables or starches in its name or composition. CRITICAL: if the dish name contains "légumes", "aux légumes", "de légumes", "légumes de saison", or any specific vegetable name → legumes=null (the dish already provides vegetables, adding more is redundant). EXAMPLES where legumes=null: 'Poulet curry coco légumes' → legumes=null (dish already has vegetables). 'Poêlée de tofu légumes croquants' → legumes=null. 'Bœuf bourguignon' → legumes=null (carrots, mushrooms, onions are IN the dish). 'Pot-au-feu' → legumes=null (full of vegetables). 'Ratatouille' → legumes=null (dish IS vegetables). EXAMPLES where legumes is filled: 'Poulet rôti' → legumes='Haricots verts vapeur' (plain roasted chicken needs a vegetable side). 'Saumon grillé' → legumes='Épinards sautés' (plain fish needs a side). 'Steak de bœuf grillé' → legumes='Salade verte' (plain meat needs a side). VEGETABLE DUPLICATION EXCEPTION: If a SPECIFIC vegetable is in the dish name, NEVER repeat it in legumes. 'Risotto aux asperges' → legumes MUST NOT be 'Asperges vapeur'. 'Poulet aux courgettes' → legumes MUST NOT be 'Courgettes sautées'. 'Dinde aux champignons' → legumes MUST NOT be 'Champignons sautés'. General rule: a dish that already has vegetables in its name or composition does NOT need additional vegetable sides — set legumes=null.
 10. No explanations, no text, ONLY JSON
 11. MANDATORY — PLATS À INCLURE: every dish listed in the "PLATS À INCLURE" section MUST appear at least once as dejeuner or diner. Do NOT ignore them.
 12. PNNS4 ASSIETTE ÉQUILIBRÉE — for every dejeuner and diner that is NOT a reste AND NOT a dish-as-starch (see Rule 17), the meal MUST include BOTH:
@@ -769,7 +813,7 @@ RULES:
             system_prompt="Return ONLY valid JSON. No text before or after JSON. Never use markdown code blocks.",
             max_items=7,
             temperature=0.7,
-            max_tokens=3000,
+            max_tokens=4500,
             use_cache=False,
         )
 
@@ -997,6 +1041,9 @@ RULES:
             db.add(repas_dej)
             repas_generes.append(repas_dej)
 
+            # Persister l'adaptation Jules au niveau recette
+            self._persister_adaptation_jules(db, recette_dej_id, jour_data.dejeuner_plat_jules)
+
             # Goûter (obligatoire — fallback si l'IA a quand même renvoyé null)
             if not jour_data.gouter:
                 jour_data.gouter = "Fruit de saison"
@@ -1098,6 +1145,9 @@ RULES:
                 )
             db.add(repas_din)
             repas_generes.append(repas_din)
+
+            # Persister l'adaptation Jules au niveau recette
+            self._persister_adaptation_jules(db, recette_din_id, jour_data.diner_plat_jules)
 
         # Vérification hebdomadaire de la distribution des protéines (OMS)
         bilan_proteines = analyser_distribution_proteines_semaine(

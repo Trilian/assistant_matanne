@@ -23,6 +23,8 @@ export interface ArticleCourses {
   prix_estime?: number;
   magasin?: string;
   magasin_cible?: string;
+  famille_produit?: string;
+  sous_famille_produit?: string;
   drive_mappe?: boolean;
   ordre?: number;
 }

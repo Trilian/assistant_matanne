@@ -62,6 +62,22 @@ def _normaliser_ingredient(nom: str) -> str:
     return key.strip()
 
 
+def detecter_famille(nom: str) -> tuple[str | None, str | None]:
+    """Détecte la famille et sous-famille d'un ingrédient par son nom.
+
+    Returns:
+        (famille, sous_famille) ou (None, None) si non trouvé.
+    """
+    from src.services.cuisine.courses.constantes import MAPPING_FAMILLES
+
+    nom_normalise = nom.casefold().strip()
+    # Priorité aux clés les plus longues (ex: "lait d'avoine" avant "lait")
+    for mot_cle in sorted(MAPPING_FAMILLES, key=len, reverse=True):
+        if mot_cle.casefold() in nom_normalise:
+            return MAPPING_FAMILLES[mot_cle]
+    return None, None
+
+
 def _parser_texte_courses(texte: str, source_label: str) -> list[tuple[str, float, str]]:
     """Parse un texte de dessert/entrée en items achetables individuels.
 
@@ -530,6 +546,7 @@ class ServiceCoursesIntelligentes(BaseAIService):
 
         for nom, data in agregat.items():
             rayon = self._determiner_rayon(nom)
+            famille, sous_famille = detecter_famille(nom)
 
             recettes_set: set[str] = data["recettes"]
 
@@ -539,6 +556,8 @@ class ServiceCoursesIntelligentes(BaseAIService):
                     quantite=float(data["quantite"]),
                     unite=str(data["unite"]),
                     rayon=rayon,
+                    famille_produit=famille,
+                    sous_famille_produit=sous_famille,
                     recettes_source=list(recettes_set),
                     priorite=self._determiner_priorite(rayon),
                 )

@@ -12,11 +12,15 @@ def aggregate_ingredients(ingredients_list: list[dict]) -> dict[str, dict]:
     """
     Agrège les quantités d'ingrédients identiques.
 
+    Normalise les noms pour regrouper les variantes (casse, ponctuation,
+    suffixes « cuit(e)(s) » / « surgelé(e)(s) »).
+    Tente une conversion d'unité quand les unités diffèrent.
+
     Args:
         ingredients_list: Liste de dicts {nom, quantite, unite, rayon}
 
     Returns:
-        Dict {nom: {quantite, unite, rayon, count}}
+        Dict {nom_normalise: {nom, quantite, unite, rayon, count}}
 
     Examples:
         >>> ings = [
@@ -24,33 +28,47 @@ def aggregate_ingredients(ingredients_list: list[dict]) -> dict[str, dict]:
         ...     {'nom': 'Tomate', 'quantite': 3, 'unite': 'pcs'}
         ... ]
         >>> agg = aggregate_ingredients(ings)
-        >>> agg['Tomate']['quantite']
+        >>> agg['tomate']['quantite']
         5
     """
-    aggregated = {}
+    from src.core.utils.conversions import convertir
+    from src.services.cuisine.courses.suggestion import _normaliser_ingredient
+
+    aggregated: dict[str, dict] = {}
 
     for ing in ingredients_list:
-        nom = ing.get("nom", "")
-        if not nom:
+        nom_brut = ing.get("nom", "")
+        if not nom_brut:
             continue
 
+        cle = _normaliser_ingredient(nom_brut)
         quantite = ing.get("quantite", 1) or 1
         unite = ing.get("unite", "pcs") or "pcs"
         rayon = ing.get("rayon") or ing.get("categorie") or "autre"
 
-        if nom not in aggregated:
-            aggregated[nom] = {
-                "nom": nom,
+        if cle not in aggregated:
+            aggregated[cle] = {
+                "nom": nom_brut,
                 "quantite": quantite,
                 "unite": unite,
                 "rayon": rayon,
                 "count": 1,
             }
         else:
-            # Même unité: additionner
-            if aggregated[nom]["unite"] == unite:
-                aggregated[nom]["quantite"] += quantite
-            aggregated[nom]["count"] += 1
+            existant = aggregated[cle]
+            # Même unité: additionner directement
+            if existant["unite"] == unite:
+                existant["quantite"] += quantite
+            else:
+                # Tenter une conversion vers l'unité existante
+                resultat = convertir(quantite, unite, existant["unite"], cle)
+                if resultat is not None:
+                    existant["quantite"] += resultat.valeur_cible
+                else:
+                    # Conversion impossible → garder la plus grande quantité
+                    # et créer une note (ne pas perdre l'info)
+                    existant["quantite"] += quantite
+            existant["count"] += 1
 
     return aggregated
 

@@ -492,6 +492,10 @@ class ServicePlanning(
             ):
                 continue
 
+            # Sauter les restes (ingrédients déjà comptés via le repas source)
+            if getattr(repas, "est_reste", False):
+                continue
+
             # Plat principal
 
             _ajouter_ingredients_recette(repas.recette_id)
@@ -508,28 +512,57 @@ class ServicePlanning(
 
             _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette_id", None))
 
-            # Texte libre entrées/desserts → articles directs
+            # Accompagnements (FK recettes si liées)
 
-            for champ in ("entree", "dessert", "dessert_jules"):
+            _ajouter_ingredients_recette(getattr(repas, "legumes_recette_id", None))
+
+            _ajouter_ingredients_recette(getattr(repas, "feculents_recette_id", None))
+
+            _ajouter_ingredients_recette(getattr(repas, "proteine_accompagnement_recette_id", None))
+
+            # Texte libre entrées/desserts/accompagnements → articles directs
+
+            _champs_texte_avec_fk = [
+                ("entree", "entree_recette_id"),
+                ("dessert", "dessert_recette_id"),
+                ("dessert_jules", "dessert_jules_recette_id"),
+                ("legumes", "legumes_recette_id"),
+                ("feculents", "feculents_recette_id"),
+                ("proteine_accompagnement", "proteine_accompagnement_recette_id"),
+                ("laitage", None),
+                ("fruit_gouter", None),
+                ("gateau_gouter", None),
+                ("fruit", None),
+            ]
+
+            # Mapping champ → rayon pour un meilleur classement en courses
+            _rayon_par_champ = {
+                "legumes": "fruits_legumes",
+                "feculents": "epicerie",
+                "proteine_accompagnement": "boucherie",
+                "laitage": "cremerie",
+                "fruit_gouter": "fruits",
+                "gateau_gouter": "epicerie",
+                "fruit": "fruits",
+                "entree": "autre",
+                "dessert": "autre",
+                "dessert_jules": "autre",
+            }
+
+            for champ, fk_field in _champs_texte_avec_fk:
                 texte = getattr(repas, champ, None)
-
-                fk_field = (
-                    f"{champ}_recette_id"
-                    if champ != "dessert_jules"
-                    else "dessert_jules_recette_id"
-                )
-
-                fk = getattr(repas, fk_field, None)
+                fk = getattr(repas, fk_field, None) if fk_field else None
 
                 if texte and not fk:
                     nom = texte.strip()
+                    rayon = _rayon_par_champ.get(champ, "autre")
 
                     if nom and nom not in ingredients_aggregated:
                         ingredients_aggregated[nom] = {
                             "nom": nom,
                             "quantite": 1,
                             "unite": "pcs",
-                            "rayon": "autre",
+                            "rayon": rayon,
                             "priorite": "basse",
                             "repas_count": 1,
                         }

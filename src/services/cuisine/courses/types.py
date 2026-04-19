@@ -58,6 +58,8 @@ class ArticleCourse(BaseModel):
     quantite: float = Field(description="Quantite necessaire")
     unite: str = Field(default="", description="Unite de mesure")
     rayon: str = Field(default="Autre", description="Rayon du magasin")
+    famille_produit: str | None = Field(default=None, description="Famille de produit")
+    sous_famille_produit: str | None = Field(default=None, description="Sous-famille de produit")
     recettes_source: list[str] = Field(
         default_factory=list, description="Recettes necessitant cet ingredient"
     )

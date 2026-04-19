@@ -264,7 +264,7 @@ _PLANNING_DEFAULTS_DEFAULT: dict[str, Any] = {
     "plats_souhaites": [],
     "ingredients_interdits": [],
     "autoriser_restes": True,
-    "nb_personnes": 4,
+    "nb_personnes": 2,
     "cuisines_souhaitees": [],
 }
 

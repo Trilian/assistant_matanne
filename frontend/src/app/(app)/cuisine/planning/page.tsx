@@ -285,7 +285,10 @@ function CarteRepasDraggable({
           <div className="flex items-center gap-1">
             {repas.est_reste && repas.reste_description ? (
               <span className="font-medium text-amber-700 dark:text-amber-300 break-words">
-                ♻ Reste de {repas.reste_description}
+                ♻ {repas.recette_nom || repas.notes || "Reste"}{" "}
+                <span className="font-normal text-xs text-muted-foreground">
+                  (reste du {repas.reste_description})
+                </span>
               </span>
             ) : repas.recette_id ? (
               <a

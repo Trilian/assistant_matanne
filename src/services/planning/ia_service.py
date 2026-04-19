@@ -98,18 +98,19 @@ class PlanningAIService(BaseAIService):
 4. Éléments trop répétés (si max 2x semaine = ok)
 5. Recommandations de variété
 
-Réponds en JSON avec ces clés exactes:
+Réponds UNIQUEMENT en JSON valide avec ces clés exactes:
 {{
-  "score_variete": <int 0-100>,
-  "proteins_bien_repartis": <bool>,
-  "types_cuisines": ["française", "asiatique"],  // liste plate de strings
-  "repetitions_problematiques": ["..."],
-  "recommandations": ["..."]
+  "score_variete": 75,
+  "proteins_bien_repartis": true,
+  "types_cuisines": ["française", "asiatique"],
+  "repetitions_problematiques": ["poulet 3 fois"],
+  "recommandations": ["ajouter du poisson"]
 }}"""
 
         result = await self.call_with_dict_parsing(
             prompt=prompt,
-            system_prompt="Tu es nutritionniste expert. Évalue la variété de manière objective.",
+            system_prompt="Tu es nutritionniste expert. Évalue la variété de manière objective. Réponds uniquement en JSON valide.",
+            max_tokens=3000,
         )
 
         types_cuisines_raw = result.get("types_cuisines") or []
@@ -163,11 +164,20 @@ Analyse:
 5. Aliments à privilégier
 6. Aliments à limiter
 
-Format JSON."""
+Réponds UNIQUEMENT en JSON valide avec ces clés exactes:
+{{
+  "calories_jour": {{"lundi": 2100, "mardi": 1900}},
+  "proteines_equilibree": true,
+  "fruits_legumes_quota": 0.7,
+  "equilibre_fibre": true,
+  "aliments_a_privilegier": ["légumes verts", "poisson"],
+  "aliments_a_limiter": ["charcuterie"]
+}}"""
 
         result = await self.call_with_dict_parsing(
             prompt=prompt,
-            system_prompt="Tu es diététicienne experte. Fournis une analyse nutritionnelle précise.",
+            system_prompt="Tu es diététicienne experte. Fournis une analyse nutritionnelle précise. Réponds uniquement en JSON valide.",
+            max_tokens=3000,
         )
 
         return OptimisationNutrition(
@@ -211,11 +221,19 @@ Identifie:
 4. Alternatives rapides (≤20 min) pour remplacer
 5. Charge globale (léger/normal/chargé)
 
-Format JSON."""
+Réponds UNIQUEMENT en JSON valide avec ces clés exactes:
+{{
+  "nb_recettes_complexes": 3,
+  "suggestions_simplification": ["Remplacer le risotto par des pâtes"],
+  "gain_temps_minutes": 45,
+  "recettes_simples_substitution": ["Pâtes carbonara rapide"],
+  "charge_globale": "normal"
+}}"""
 
         result = await self.call_with_dict_parsing(
             prompt=prompt,
-            system_prompt="Tu es expert culinaire pragmatique. Propose des simplifications réalistes.",
+            system_prompt="Tu es expert culinaire pragmatique. Propose des simplifications réalistes. Réponds uniquement en JSON valide.",
+            max_tokens=3000,
         )
 
         return SimplificationSemaine(

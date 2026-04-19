@@ -305,6 +305,8 @@ async def ajouter_article(
         {"message": "Article ajouté", "id": 12}
         ```
     """
+    from sqlalchemy import func
+
     from src.core.models import ArticleCourses, Ingredient, ListeCourses
 
     def _add():
@@ -314,12 +316,62 @@ async def ajouter_article(
             if not liste:
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            # Trouver ou créer l'ingrédient
-            ingredient = session.query(Ingredient).filter(Ingredient.nom == donnees.nom).first()
+            # Normaliser le nom pour la déduplication
+            from src.services.cuisine.courses.suggestion import (
+                _normaliser_ingredient,
+                detecter_famille,
+            )
+
+            nom_normalise = _normaliser_ingredient(donnees.nom)
+            nom_affiche = nom_normalise.capitalize()
+
+            # Trouver ou créer l'ingrédient (recherche insensible à la casse)
+            ingredient = (
+                session.query(Ingredient)
+                .filter(func.lower(Ingredient.nom) == nom_normalise.lower())
+                .first()
+            )
             if not ingredient:
-                ingredient = Ingredient(nom=donnees.nom, unite=donnees.unite or "pcs")
+                ingredient = Ingredient(nom=nom_affiche, unite=donnees.unite or "pcs")
                 session.add(ingredient)
                 session.flush()
+
+            # Chercher un article existant non coché avec le même ingrédient dans cette liste
+            article_existant = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste_id,
+                    ArticleCourses.ingredient_id == ingredient.id,
+                    ArticleCourses.achete.is_(False),
+                )
+                .first()
+            )
+
+            if article_existant:
+                # Même unité (ou compatible) → sommer la quantité
+                from src.core.utils.conversions import convertir, normaliser_unite
+
+                unite_existante = normaliser_unite(ingredient.unite or "pcs")
+                unite_nouvelle = normaliser_unite(donnees.unite or ingredient.unite or "pcs")
+                qte_ajout = donnees.quantite or 1.0
+
+                if unite_existante == unite_nouvelle:
+                    article_existant.quantite_necessaire += qte_ajout
+                else:
+                    # Tenter une conversion vers l'unité existante
+                    resultat = convertir(qte_ajout, unite_nouvelle, unite_existante, nom_normalise)
+                    if resultat is not None:
+                        article_existant.quantite_necessaire += resultat.valeur_cible
+                    else:
+                        # Conversion impossible → créer un article séparé
+                        article_existant = None
+
+                if article_existant:
+                    session.commit()
+                    return MessageResponse(
+                        message=f"Quantité mise à jour ({article_existant.quantite_necessaire})",
+                        id=article_existant.id,
+                    )
 
             # Auto-assignation magasin si non spécifié
             magasin = donnees.magasin_cible
@@ -328,6 +380,13 @@ async def ajouter_article(
 
                 magasin = CATEGORIE_VERS_MAGASIN.get(donnees.categorie.lower())
 
+            # Détection famille / sous-famille + consolidation magasin
+            from src.core.constants import FAMILLE_VERS_MAGASIN_PREFERE
+
+            famille, sous_famille = detecter_famille(donnees.nom)
+            if not magasin and famille and famille in FAMILLE_VERS_MAGASIN_PREFERE:
+                magasin = FAMILLE_VERS_MAGASIN_PREFERE[famille]
+
             article = ArticleCourses(
                 liste_id=liste_id,
                 ingredient_id=ingredient.id,
@@ -335,6 +394,8 @@ async def ajouter_article(
                 priorite="moyenne",
                 rayon_magasin=donnees.categorie,
                 magasin_cible=magasin,
+                famille_produit=famille,
+                sous_famille_produit=sous_famille,
                 prix_unitaire=donnees.prix_estime,
             )
             session.add(article)
@@ -384,6 +445,8 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
             if not liste:
                 raise HTTPException(status_code=404, detail="Liste non trouvée")
 
+            from src.core.constants import CATEGORIE_VERS_MAGASIN, FAMILLE_VERS_MAGASIN_PREFERE
+
             return {
                 "id": liste.id,
                 "nom": liste.nom,
@@ -395,6 +458,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
                         "id": a.id,
                         "nom": a.ingredient.nom if a.ingredient else "Article",
                         "quantite": a.quantite_necessaire,
+                        "unite": (a.ingredient.unite if a.ingredient else None) or "pcs",
                         "coche": a.achete,
                         "categorie": (
                             _rayon_valide(a.rayon_magasin)
@@ -402,7 +466,20 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
                             or _suggerer_rayon_depuis_nom(a.ingredient.nom if a.ingredient else None)
                             or "autre"
                         ),
-                        "magasin_cible": a.magasin_cible,
+                        "magasin_cible": (
+                            a.magasin_cible
+                            or (FAMILLE_VERS_MAGASIN_PREFERE.get(a.famille_produit) if a.famille_produit else None)
+                            or CATEGORIE_VERS_MAGASIN.get(
+                                (
+                                    _rayon_valide(a.rayon_magasin)
+                                    or _rayon_valide(a.ingredient.categorie if a.ingredient else None)
+                                    or _suggerer_rayon_depuis_nom(a.ingredient.nom if a.ingredient else None)
+                                    or ""
+                                ).lower()
+                            )
+                        ),
+                        "famille_produit": a.famille_produit,
+                        "sous_famille_produit": a.sous_famille_produit,
                         "prix_estime": a.prix_unitaire,
                     }
                     for a in (liste.articles or [])
@@ -922,6 +999,7 @@ async def generer_depuis_planning(
 
     from sqlalchemy import func
 
+    from src.core.constants import CATEGORIE_VERS_MAGASIN
     from src.core.models import (
         ArticleCourses,
         ArticleInventaire,
@@ -931,7 +1009,6 @@ async def generer_depuis_planning(
         RecetteIngredient,
     )
     from src.core.models.planning import Repas
-    from src.core.constants import CATEGORIE_VERS_MAGASIN
     from src.services.cuisine.planning.agregation import (
         aggregate_ingredients,
         sort_ingredients_by_rayon,
@@ -1078,6 +1155,12 @@ async def generer_depuis_planning(
                 # Mettre à jour le dict pour que par_rayon reflète le bon rayon
                 art["rayon"] = rayon_article or "Autre"
                 magasin_article = CATEGORIE_VERS_MAGASIN.get((rayon_article or "").lower()) if rayon_article else None
+
+                # Détection famille / sous-famille
+                from src.services.cuisine.courses.suggestion import detecter_famille
+
+                famille, sous_famille = detecter_famille(art["nom"])
+
                 session.add(
                     ArticleCourses(
                         liste_id=liste.id,
@@ -1085,10 +1168,26 @@ async def generer_depuis_planning(
                         quantite_necessaire=art["quantite"],
                         rayon_magasin=rayon_article,
                         magasin_cible=magasin_article,
+                        famille_produit=famille,
+                        sous_famille_produit=sous_famille,
                         priorite="moyenne",
                         suggere_par_ia=False,
                     )
                 )
+
+            # Consolidation magasin par famille : tous les articles d'une même
+            # famille doivent pointer vers le même magasin préféré.
+            from src.core.constants import FAMILLE_VERS_MAGASIN_PREFERE
+
+            session.flush()
+            articles_crees = (
+                session.query(ArticleCourses)
+                .filter(ArticleCourses.liste_id == liste.id)
+                .all()
+            )
+            for ac in articles_crees:
+                if ac.famille_produit and ac.famille_produit in FAMILLE_VERS_MAGASIN_PREFERE:
+                    ac.magasin_cible = FAMILLE_VERS_MAGASIN_PREFERE[ac.famille_produit]
 
             session.commit()
 
@@ -1345,29 +1444,44 @@ async def valider_courses(
             articles_sync = 0
             now = datetime.now(UTC)
 
+            # Agréger les quantités par ingredient_id pour éviter les doublons
+            # (autoflush=False + UNIQUE INDEX sur inventaire.ingredient_id)
+            quantites_par_ingredient: dict[int, float] = {}
+            articles_par_ingredient: dict[int, ArticleCourses] = {}
             for art in articles_achetes:
-                # Incrémenter l'inventaire
+                quantites_par_ingredient[art.ingredient_id] = (
+                    quantites_par_ingredient.get(art.ingredient_id, 0.0)
+                    + float(art.quantite_necessaire or 1)
+                )
+                # Garder le dernier article pour les métadonnées (prix, rayon)
+                articles_par_ingredient[art.ingredient_id] = art
+
+            for ingredient_id, quantite_totale in quantites_par_ingredient.items():
+                art = articles_par_ingredient[ingredient_id]
+
+                # Incrémenter l'inventaire (ou créer)
                 inv = (
                     session.query(ArticleInventaire)
-                    .filter(ArticleInventaire.ingredient_id == art.ingredient_id)
+                    .filter(ArticleInventaire.ingredient_id == ingredient_id)
                     .first()
                 )
                 if inv:
-                    inv.quantite = float(inv.quantite or 0) + float(art.quantite_necessaire or 1)
+                    inv.quantite = float(inv.quantite or 0) + quantite_totale
                 else:
                     session.add(
                         ArticleInventaire(
-                            ingredient_id=art.ingredient_id,
-                            quantite=float(art.quantite_necessaire or 1),
+                            ingredient_id=ingredient_id,
+                            quantite=quantite_totale,
                             quantite_min=1.0,
                             emplacement="Frigo",
                         )
                     )
+                    session.flush()  # Flush immédiat pour respecter la contrainte UNIQUE
                 articles_sync += 1
 
                 # Mettre à jour l'historique d'achats
                 ingredient = (
-                    session.query(Ingredient).filter(Ingredient.id == art.ingredient_id).first()
+                    session.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
                 )
                 if ingredient:
                     hist = (

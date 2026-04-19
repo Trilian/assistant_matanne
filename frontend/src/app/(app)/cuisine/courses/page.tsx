@@ -402,6 +402,9 @@ export default function PageCourses() {
                 enValidation ||
                 articlesNonCoches.length > 0 ||
                 enFinalisationCourses ||
+                enCochageGlobal ||
+                enCochageCategorie ||
+                enCochageSelection ||
                 detailListe?.etat === "brouillon"
               }
             >

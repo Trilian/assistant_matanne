@@ -213,6 +213,39 @@ MAGASINS_DISPONIBLES: list[str] = [
 ]
 """Magasins configurés pour la répartition des courses."""
 
+FAMILLE_VERS_MAGASIN_PREFERE: dict[str, str] = {
+    # Viandes & Poissons → Grand Frais
+    "Volaille": "grand_frais",
+    "Bœuf": "grand_frais",
+    "Porc": "grand_frais",
+    "Agneau & Veau": "grand_frais",
+    "Viande": "grand_frais",
+    "Poisson": "grand_frais",
+    "Fruits de mer": "grand_frais",
+    "Charcuterie": "grand_frais",
+    "Fromage": "grand_frais",
+    "Produits laitiers": "grand_frais",
+    # Fruits & Légumes → Bio Coop
+    "Légumes": "bio_coop",
+    "Fruits": "bio_coop",
+    "Herbes fraîches": "bio_coop",
+    # Épicerie → Carrefour Drive
+    "Féculents & Céréales": "carrefour_drive",
+    "Légumineuses": "carrefour_drive",
+    "Épicerie sèche": "carrefour_drive",
+    "Condiments & Sauces": "carrefour_drive",
+    "Conserves": "carrefour_drive",
+    "Noix & Graines": "carrefour_drive",
+    "Petit-déjeuner": "carrefour_drive",
+    "Boissons": "carrefour_drive",
+    "Surgelés": "carrefour_drive",
+    "Bébé": "carrefour_drive",
+    # Mixte
+    "Boulangerie": "grand_frais",
+    "Bio & Végétal": "bio_coop",
+}
+"""Mapping famille de produits → magasin préféré pour consolidation."""
+
 CATEGORIE_VERS_MAGASIN: dict[str, str] = {
     # Bio Coop — fruits et légumes bio, gâteaux sains
     "fruits": "bio_coop",
@@ -306,5 +339,6 @@ __all__ = [
     "EMPLACEMENT_DEFAUT",
     # Courses — Magasins
     "MAGASINS_DISPONIBLES",
+    "FAMILLE_VERS_MAGASIN_PREFERE",
     "CATEGORIE_VERS_MAGASIN",
 ]

@@ -69,7 +69,7 @@ export function ModalGenerationPlanning({
   onFermer,
   onGenerer,
   enGeneration,
-  nbPersonnesInitial = 4,
+  nbPersonnesInitial = 2,
   dateDebut,
   preferences,
   initialPlats,

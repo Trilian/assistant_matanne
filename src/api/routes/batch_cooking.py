@@ -440,10 +440,20 @@ async def generer_etapes_session(
                     nom_recette = recette_cache.get(repas.recette_id, "Recette")
                     type_key = _TYPE_REPAS_MAP.get(repas.type_repas, "midi")
                     jour_key = _JOURS_FR[repas.date_repas.weekday()]
-                    planning_data.setdefault(jour_key, {})[type_key] = {
+                    repas_data: dict = {
                         "nom": nom_recette,
                         "est_rechauffe": False,
                     }
+                    # Inclure les accompagnements pour que l'IA planifie leur préparation
+                    if getattr(repas, "legumes", None):
+                        repas_data["legumes"] = repas.legumes
+                    if getattr(repas, "feculents", None):
+                        repas_data["feculents"] = repas.feculents
+                    if getattr(repas, "proteine_accompagnement", None):
+                        repas_data["proteine_accompagnement"] = repas.proteine_accompagnement
+                    if getattr(repas, "entree", None):
+                        repas_data["entree"] = repas.entree
+                    planning_data.setdefault(jour_key, {})[type_key] = repas_data
             if not planning_data:
                 # Pas de planning lié ou planning vide → construire depuis les IDs
                 recettes_objs = (

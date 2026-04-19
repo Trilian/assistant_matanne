@@ -359,6 +359,8 @@ CREATE TABLE IF NOT EXISTS articles_courses (
     achete_le TIMESTAMP WITH TIME ZONE,
     rayon_magasin VARCHAR(100),
     magasin_cible VARCHAR(50),
+    famille_produit VARCHAR(50),
+    sous_famille_produit VARCHAR(50),
     prix_unitaire FLOAT,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -371,6 +373,7 @@ CREATE INDEX IF NOT EXISTS ix_articles_courses_ingredient_id ON articles_courses
 CREATE INDEX IF NOT EXISTS ix_articles_courses_priorite ON articles_courses(priorite);
 CREATE INDEX IF NOT EXISTS ix_articles_courses_achete ON articles_courses(achete);
 CREATE INDEX IF NOT EXISTS ix_articles_courses_cree_le ON articles_courses(cree_le);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_famille_produit ON articles_courses(famille_produit);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

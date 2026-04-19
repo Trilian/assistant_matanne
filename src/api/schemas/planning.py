@@ -140,7 +140,7 @@ class GenererPlanningRequest(BaseModel):
     date_debut: DateType | None = Field(
         None, description="Début de semaine (défaut: lundi courant)"
     )
-    nb_personnes: int = Field(4, ge=1, le=20, description="Nombre de personnes")
+    nb_personnes: int = Field(2, ge=1, le=20, description="Nombre de personnes")
     preferences: dict[str, Any] | None = Field(
         None, description="Préférences (allergies, régime, etc.)"
     )
