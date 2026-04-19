@@ -77,9 +77,14 @@ async def obtenir_anti_gaspillage(
                 or 0
             )
 
-            # Score: 100 si aucun périmé, diminue de 10 par article
+            # Total articles en inventaire (dénominateur pour le ratio)
+            total_articles = (
+                session.query(func.count(ArticleInventaire.id)).scalar() or 0
+            )
+
+            # Score ratio-based : 100 si aucun périmé, proportionnel au ratio périmés/total
             articles_sauves = max(0, len(articles_urgents) - articles_perimes_mois)
-            score = max(0, 100 - (articles_perimes_mois * 10))
+            score = max(0, 100 - round((articles_perimes_mois / max(1, total_articles)) * 100))
 
             # Recettes rescue: trouver des recettes dont les ingrédients
             # correspondent à ceux qui sont bientôt périmés
@@ -271,7 +276,12 @@ async def obtenir_historique_gaspillage(
                     or 0
                 )
                 sauves = max(0, a_utiliser - perimes)
-                score_sem = max(0, 100 - (perimes * 10))
+
+                # Total articles inventaire cette semaine (pour ratio)
+                total_sem = (
+                    session.query(func.count(ArticleInventaire.id)).scalar() or 0
+                )
+                score_sem = max(0, 100 - round((perimes / max(1, total_sem)) * 100))
 
                 historique_semaines.append(
                     {

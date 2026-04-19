@@ -19,6 +19,10 @@ export interface Preferences {
   viande_rouge_max: number;
   robots: string[];
   magasins_preferes: string[];
+  objectif_calories: number;
+  objectif_proteines: number;
+  objectif_lipides: number;
+  objectif_glucides: number;
 }
 
 /** Récupérer les préférences */

@@ -88,6 +88,18 @@ class InventaireItemCreate(BaseModel, QuantiteStricteValidatorMixin):
             )
         return emplacement_normalise
 
+    @field_validator("code_barres")
+    @classmethod
+    def validate_code_barres(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        stripped = v.strip()
+        if not stripped.isdigit() or not (8 <= len(stripped) <= 14):
+            raise ValueError(
+                "Code-barres invalide. Format attendu : 8 à 14 chiffres (EAN-8, UPC-A, EAN-13, ITF-14)"
+            )
+        return stripped
+
     model_config = {
         "json_schema_extra": {
             "example": {
@@ -168,6 +180,18 @@ class InventaireItemUpdate(BaseModel):
                 f"Valeurs acceptées: {', '.join(EMPLACEMENTS_INVENTAIRE)}"
             )
         return emplacement_normalise
+
+    @field_validator("code_barres")
+    @classmethod
+    def validate_code_barres(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        stripped = v.strip()
+        if not stripped.isdigit() or not (8 <= len(stripped) <= 14):
+            raise ValueError(
+                "Code-barres invalide. Format attendu : 8 à 14 chiffres (EAN-8, UPC-A, EAN-13, ITF-14)"
+            )
+        return stripped
 
 
 # ═══════════════════════════════════════════════════════════
@@ -270,6 +294,20 @@ class ScanBatchRequest(BaseModel):
         max_length=50,
         description="Liste de codes-barres (max 50)",
     )
+
+    @field_validator("codes")
+    @classmethod
+    def validate_codes(cls, v: list[str]) -> list[str]:
+        valides = []
+        for code in v:
+            stripped = code.strip()
+            if not stripped.isdigit() or not (8 <= len(stripped) <= 14):
+                raise ValueError(
+                    f"Code-barres invalide : '{code}'. "
+                    "Format attendu : 8 à 14 chiffres (EAN-8, UPC-A, EAN-13, ITF-14)"
+                )
+            valides.append(stripped)
+        return valides
 
     model_config = {"json_schema_extra": {"example": {"codes": ["3270190204302", "3017620422003"]}}}
 

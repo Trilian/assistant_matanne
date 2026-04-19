@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@sentry/core": "^10.49.0"
+  }
+}

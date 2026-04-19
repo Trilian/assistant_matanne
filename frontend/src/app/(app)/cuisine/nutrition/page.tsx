@@ -33,11 +33,12 @@ import {
   obtenirNutritionHebdo,
   type NutritionHebdo,
 } from "@/bibliotheque/api/planning";
+import { obtenirPreferences } from "@/bibliotheque/api/preferences";
 import { HeatmapNutritionnel } from "@/composants/graphiques/heatmap-nutritionnel";
 import { RadarNutritionFamille } from "@/composants/graphiques/radar-nutrition-famille";
 
-// Objectifs quotidiens de référence (adulte moyen)
-const OBJECTIFS = {
+// Valeurs par défaut utilisées pendant le chargement des préférences
+const OBJECTIFS_DEFAUT = {
   calories: 2000,
   proteines: 60,
   lipides: 70,
@@ -106,11 +107,23 @@ function ContenuNutrition() {
     () => obtenirNutritionHebdo(semaine)
   );
 
+  const { data: prefs } = utiliserRequete(
+    ["preferences"],
+    obtenirPreferences
+  );
+
+  const objectifs = {
+    calories: prefs?.objectif_calories ?? OBJECTIFS_DEFAUT.calories,
+    proteines: prefs?.objectif_proteines ?? OBJECTIFS_DEFAUT.proteines,
+    lipides: prefs?.objectif_lipides ?? OBJECTIFS_DEFAUT.lipides,
+    glucides: prefs?.objectif_glucides ?? OBJECTIFS_DEFAUT.glucides,
+  };
+
   const jours = data ? Object.entries(data.par_jour ?? {}).sort(([a], [b]) => a.localeCompare(b)) : [];
 
   const donneesHeatmap = jours.map(([dateIso, valeur]) => {
-    const caloriesPct = Math.min(100, (valeur.calories / OBJECTIFS.calories) * 100);
-    const proteinesPct = Math.min(100, (valeur.proteines / OBJECTIFS.proteines) * 100);
+    const caloriesPct = Math.min(100, (valeur.calories / objectifs.calories) * 100);
+    const proteinesPct = Math.min(100, (valeur.proteines / objectifs.proteines) * 100);
     const score = Math.round((caloriesPct * 0.6) + (proteinesPct * 0.4));
     return {
       date: dateIso,
@@ -273,25 +286,25 @@ function ContenuNutrition() {
                     <CardContent className="space-y-2">
                       <BarreProgression
                         valeur={jour.calories}
-                        objectif={OBJECTIFS.calories}
+                        objectif={objectifs.calories}
                         label="Calories"
                         unite="kcal"
                       />
                       <BarreProgression
                         valeur={jour.proteines}
-                        objectif={OBJECTIFS.proteines}
+                        objectif={objectifs.proteines}
                         label="Protéines"
                         unite="g"
                       />
                       <BarreProgression
                         valeur={jour.lipides}
-                        objectif={OBJECTIFS.lipides}
+                        objectif={objectifs.lipides}
                         label="Lipides"
                         unite="g"
                       />
                       <BarreProgression
                         valeur={jour.glucides}
-                        objectif={OBJECTIFS.glucides}
+                        objectif={objectifs.glucides}
                         label="Glucides"
                         unite="g"
                       />

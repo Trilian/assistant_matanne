@@ -93,6 +93,9 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // Explicitement déclarer le répertoire de traçage pour les fichiers de sortie
+  // Nécessaire dans une monorepo pour éviter de confondre la racine du workspace
+  outputFileTracingRoot: process.cwd(),
 };
 
 let config = withBundleAnalyzer(nextConfig);

@@ -401,6 +401,10 @@ CREATE TABLE IF NOT EXISTS preferences_utilisateurs (
     nb_poisson_gras INTEGER NOT NULL DEFAULT 1,
     vegetarien_par_semaine INTEGER NOT NULL DEFAULT 1,
     viande_rouge_max INTEGER NOT NULL DEFAULT 2,
+    objectif_calories INTEGER NOT NULL DEFAULT 2000,
+    objectif_proteines INTEGER NOT NULL DEFAULT 60,
+    objectif_lipides INTEGER NOT NULL DEFAULT 70,
+    objectif_glucides INTEGER NOT NULL DEFAULT 260,
     robots JSONB NOT NULL DEFAULT '[]',
     magasins_preferes JSONB NOT NULL DEFAULT '[]',
     taille_vetements_anne JSONB NOT NULL DEFAULT '{}',
@@ -1217,8 +1221,7 @@ CREATE TABLE IF NOT EXISTS modeles_courses (
     utilisateur_id VARCHAR(100),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    actif BOOLEAN NOT NULL DEFAULT TRUE,
-    articles_data JSONB
+    actif BOOLEAN NOT NULL DEFAULT TRUE
 );
 CREATE INDEX IF NOT EXISTS ix_modeles_courses_nom ON modeles_courses(nom);
 CREATE INDEX IF NOT EXISTS ix_modeles_courses_utilisateur_id ON modeles_courses(utilisateur_id);

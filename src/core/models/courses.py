@@ -135,7 +135,6 @@ class ModeleCourses(TimestampMixin, Base):
         description: Description
         utilisateur_id: ID utilisateur (support multi-user)
         actif: Si le modèle est actif
-        articles_data: Données JSON pour flexibilité
     """
 
     __tablename__ = "modeles_courses"
@@ -149,9 +148,6 @@ class ModeleCourses(TimestampMixin, Base):
 
     # Métadonnées
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
-
-    # Données articles (JSON)
-    articles_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Relations
     articles: Mapped[list["ArticleModele"]] = relationship(

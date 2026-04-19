@@ -101,6 +101,12 @@ class PreferenceUtilisateur(TimestampMixin, Base):
     vegetarien_par_semaine: Mapped[int] = mapped_column(Integer, default=1)
     viande_rouge_max: Mapped[int] = mapped_column(Integer, default=2)
 
+    # Objectifs nutritionnels quotidiens (configurables par profil)
+    objectif_calories: Mapped[int] = mapped_column(Integer, default=2000)
+    objectif_proteines: Mapped[int] = mapped_column(Integer, default=60)
+    objectif_lipides: Mapped[int] = mapped_column(Integer, default=70)
+    objectif_glucides: Mapped[int] = mapped_column(Integer, default=260)
+
     # Équipements et magasins (JSONB - stocke des listes)
     robots: Mapped[list[str]] = mapped_column(JSONB, default=list)
     magasins_preferes: Mapped[list[str]] = mapped_column(JSONB, default=list)

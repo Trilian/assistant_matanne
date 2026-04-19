@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analyse complète — Module Jeux | Assistant Matanne</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --border: #475569;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --orange: #fb923c;
+    --red: #f87171;
+    --pink: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 2rem;
+  }
+  .header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: .5rem;
+  }
+  .header .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+  .header .date { color: var(--text-muted); font-size: .85rem; margin-top: .5rem; }
+  .badge-row { display: flex; gap: .5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .3rem .75rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+    background: var(--surface2); border: 1px solid var(--border);
+  }
+
+  /* Score card row */
+  .score-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    transition: transform .15s;
+  }
+  .score-card:hover { transform: translateY(-2px); }
+  .score-card .label { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-bottom: .5rem; }
+  .score-card .value { font-size: 2rem; font-weight: 800; }
+  .score-card .bar { height: 4px; border-radius: 2px; margin-top: .5rem; background: var(--surface2); }
+  .score-card .bar-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
+  .score-10 .value { color: var(--green); }
+  .score-9 .value { color: var(--green); }
+  .score-8 .value { color: var(--accent); }
+  .score-7 .value { color: var(--yellow); }
+  .score-6 .value { color: var(--orange); }
+  .score-5 .value { color: var(--orange); }
+  .score-4 .value { color: var(--red); }
+
+  /* Note globale */
+  .global-score {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #1e293b, #1e1b4b);
+    border: 2px solid var(--accent2);
+    border-radius: 16px;
+    margin-bottom: 2rem;
+  }
+  .global-score .big { font-size: 4rem; font-weight: 900; color: var(--accent); }
+  .global-score .mention { font-size: 1.2rem; color: var(--yellow); margin-top: .25rem; }
+
+  /* Sections */
+  section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  section h3 { font-size: 1.15rem; margin: 1.25rem 0 .75rem; color: var(--accent); }
+  section h4 { font-size: 1rem; margin: 1rem 0 .5rem; color: var(--accent2); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: .9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: .6rem .8rem;
+    border-bottom: 1px solid var(--surface2);
+  }
+  th { color: var(--text-muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+  tr:hover td { background: rgba(56, 189, 248, .04); }
+
+  /* Status badges */
+  .status {
+    display: inline-block;
+    padding: .15rem .6rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+  }
+  .status-ok { background: rgba(74,222,128,.15); color: var(--green); }
+  .status-warn { background: rgba(251,191,36,.15); color: var(--yellow); }
+  .status-err { background: rgba(248,113,113,.15); color: var(--red); }
+  .status-info { background: rgba(56,189,248,.15); color: var(--accent); }
+  .status-dead { background: rgba(148,163,184,.15); color: var(--text-muted); }
+
+  .sev-high { color: var(--red); font-weight: 700; }
+  .sev-med { color: var(--orange); font-weight: 700; }
+  .sev-low { color: var(--yellow); font-weight: 700; }
+
+  /* Code */
+  code {
+    background: var(--surface2);
+    padding: .15rem .4rem;
+    border-radius: 4px;
+    font-size: .85em;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+  }
+  pre {
+    background: #0d1117;
+    border: 1px solid var(--surface2);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: .82rem;
+    line-height: 1.5;
+    margin: .75rem 0;
+  }
+  pre code { background: none; padding: 0; }
+
+  /* Lists */
+  ul, ol { padding-left: 1.5rem; margin: .5rem 0; }
+  li { margin: .3rem 0; }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: rgba(56, 189, 248, .06);
+    padding: 1rem 1.25rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1rem 0;
+  }
+  .callout-warn { border-left-color: var(--yellow); background: rgba(251,191,36,.06); }
+  .callout-err { border-left-color: var(--red); background: rgba(248,113,113,.06); }
+  .callout-ok { border-left-color: var(--green); background: rgba(74,222,128,.06); }
+  .callout strong { color: inherit; }
+
+  /* Progress rings (CSS only) */
+  .ring { display: inline-flex; align-items: center; gap: .5rem; }
+
+  /* Recommendation cards */
+  .reco-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .reco-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+  .reco-card .reco-title { font-weight: 700; margin-bottom: .5rem; display: flex; align-items: center; gap: .5rem; }
+  .reco-card .reco-prio { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* File tree */
+  .file-tree {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: .82rem;
+    background: #0d1117;
+    border: 1px solid var(--surface2);
+    border-radius: 8px;
+    padding: 1rem;
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* Feature matrix */
+  .feat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+  .feat-col { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+  .feat-col h4 { margin-top: 0; color: var(--pink); }
+  .feat-col ul { list-style: none; padding: 0; }
+  .feat-col li { padding: .25rem 0; }
+  .feat-col li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+
+  /* TOC */
+  .toc { columns: 2; column-gap: 2rem; }
+  .toc a { color: var(--accent); text-decoration: none; display: block; padding: .2rem 0; }
+  .toc a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    body { padding: 1rem; }
+    .header h1 { font-size: 1.8rem; }
+    .score-row { grid-template-columns: repeat(2, 1fr); }
+    .feat-grid { grid-template-columns: 1fr; }
+    .toc { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ════════════════════════ HEADER ════════════════════════ -->
+<div class="header">
+  <h1>🎮 Analyse complète — Module Jeux</h1>
+  <div class="subtitle">Audit technique, fonctionnel et qualité du module Paris Sportifs / Loto / EuroMillions</div>
+  <div class="date">Assistant Matanne — 19 avril 2026</div>
+  <div class="badge-row">
+    <span class="badge">🎯 Paris Sportifs</span>
+    <span class="badge">🎰 Loto</span>
+    <span class="badge">⭐ EuroMillions</span>
+    <span class="badge">📊 Dashboard</span>
+    <span class="badge">💰 Bankroll</span>
+    <span class="badge">🤖 IA Mistral</span>
+  </div>
+</div>
+
+<!-- ════════════════════════ NOTE GLOBALE ════════════════════════ -->
+<div class="global-score">
+  <div style="font-size:.9rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;">Note globale</div>
+  <div class="big">7.3<span style="font-size:1.5rem;color:var(--text-muted)">/10</span></div>
+  <div class="mention">Module solide et riche, mais nettoyage et tests à renforcer</div>
+</div>
+
+<!-- ════════════════════════ NOTES PAR CATÉGORIE ════════════════════════ -->
+<div class="score-row">
+  <div class="score-card score-9">
+    <div class="label">Fonctionnalités</div>
+    <div class="value">9</div>
+    <div class="bar"><div class="bar-fill" style="width:90%;background:var(--green)"></div></div>
+  </div>
+  <div class="score-card score-8">
+    <div class="label">Frontend UX</div>
+    <div class="value">8</div>
+    <div class="bar"><div class="bar-fill" style="width:80%;background:var(--accent)"></div></div>
+  </div>
+  <div class="score-card score-8">
+    <div class="label">Intégration IA</div>
+    <div class="value">8</div>
+    <div class="bar"><div class="bar-fill" style="width:80%;background:var(--accent)"></div></div>
+  </div>
+  <div class="score-card score-8">
+    <div class="label">Performance</div>
+    <div class="value">8</div>
+    <div class="bar"><div class="bar-fill" style="width:80%;background:var(--accent)"></div></div>
+  </div>
+  <div class="score-card score-8">
+    <div class="label">Documentation</div>
+    <div class="value">8</div>
+    <div class="bar"><div class="bar-fill" style="width:80%;background:var(--accent)"></div></div>
+  </div>
+  <div class="score-card score-7">
+    <div class="label">Architecture</div>
+    <div class="value">7</div>
+    <div class="bar"><div class="bar-fill" style="width:70%;background:var(--yellow)"></div></div>
+  </div>
+  <div class="score-card score-7">
+    <div class="label">Sécurité &amp; Validation</div>
+    <div class="value">7</div>
+    <div class="bar"><div class="bar-fill" style="width:70%;background:var(--yellow)"></div></div>
+  </div>
+  <div class="score-card score-7">
+    <div class="label">Bugs &amp; Stabilité</div>
+    <div class="value">7</div>
+    <div class="bar"><div class="bar-fill" style="width:70%;background:var(--yellow)"></div></div>
+  </div>
+  <div class="score-card score-6">
+    <div class="label">Cohérence / Redondances</div>
+    <div class="value">6</div>
+    <div class="bar"><div class="bar-fill" style="width:60%;background:var(--orange)"></div></div>
+  </div>
+  <div class="score-card score-5">
+    <div class="label">Tests</div>
+    <div class="value">5</div>
+    <div class="bar"><div class="bar-fill" style="width:50%;background:var(--orange)"></div></div>
+  </div>
+</div>
+
+<!-- ════════════════════════ TABLE DES MATIÈRES ════════════════════════ -->
+<section>
+  <h2>📑 Table des matières</h2>
+  <div class="toc">
+    <a href="#archi">1. Architecture &amp; structure</a>
+    <a href="#features">2. Inventaire des fonctionnalités</a>
+    <a href="#bugs">3. Bugs &amp; problèmes identifiés</a>
+    <a href="#deprecated">4. Code mort &amp; vestiges à supprimer</a>
+    <a href="#redundancy">5. Redondances &amp; duplication</a>
+    <a href="#tests">6. État des tests</a>
+    <a href="#docs">7. Documentation</a>
+    <a href="#security">8. Sécurité &amp; validation</a>
+    <a href="#perf">9. Performance</a>
+    <a href="#ia">10. Intégration IA</a>
+    <a href="#ux">11. Frontend &amp; UX</a>
+    <a href="#recos">12. Recommandations</a>
+    <a href="#verdict">13. Verdict final</a>
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 1 : ARCHITECTURE ════════════════════════ -->
+<section id="archi">
+  <h2>🏗️ 1. Architecture &amp; structure des fichiers</h2>
+
+  <h3>Vue d'ensemble</h3>
+  <p>Le module Jeux est organisé en <strong>3 sous-modules</strong> (Paris Sportifs, Loto, EuroMillions) avec un dashboard agrégé, un gestionnaire de bankroll et une page performance. L'architecture suit un pattern de <strong>router agrégé</strong>.</p>
+
+  <h3>Arborescence des fichiers</h3>
+  <div class="file-tree">
+<strong>Backend</strong> (Python)
+├── src/api/routes/
+│   ├── jeux.py                    # Agrégateur + tendances-loto (~50 lignes)
+│   ├── jeux_paris.py              # Équipes, Matchs, Paris CRUD (~400 lignes)
+│   ├── jeux_loto.py               # Tirages, Grilles, Stats, IA (~400 lignes)
+│   ├── jeux_euromillions.py       # Tirages, Grilles, Stats, IA (~350 lignes)
+│   └── jeux_dashboard.py          # Dashboard, KPIs, Performance (~700 lignes)
+├── src/api/schemas/
+│   └── jeux.py                    # 19+ modèles Pydantic (~490 lignes)
+├── src/core/models/
+│   └── jeux.py                    # 20 modèles ORM + 8 enums (~730 lignes)
+├── src/services/jeux/
+│   ├── __init__.py                # Lazy loading facade
+│   ├── bankroll_manager.py        # Critère de Kelly
+│   ├── cron_jobs.py               # Jobs paris sportifs
+│   ├── cron_jobs_loteries.py      # Jobs Loto + EuroMillions
+│   ├── euromillions_ia.py         # Façade IA EuroMillions
+│   ├── series_statistiques.py     # Détection patterns/biais
+│   ├── service_ia.py              # Façade innovations IA
+│   ├── stats_personnelles.py      # ROI, stats joueur
+│   └── _internal/                 # ~20 services internes
+│       ├── ai_service.py          # JeuxAIService (Mistral)
+│       ├── backtest_service.py    # Backtesting grilles
+│       ├── euromillions_crud_service.py
+│       ├── football_data.py       # Intégration football-data.org
+│       ├── loto_crud_service.py
+│       ├── loto_data.py           # Intégration FDJ
+│       ├── notification_service.py
+│       ├── odds_data.py           # Cotes bookmakers
+│       ├── paris_crud_service.py
+│       ├── paris_mutations.py
+│       ├── paris_queries.py
+│       ├── prediction_service.py
+│       ├── scheduler_service.py
+│       ├── series_service.py
+│       └── sync_service.py
+└── sql/INIT_COMPLET.sql           # 15 tables jeux
+
+<strong>Frontend</strong> (Next.js / TypeScript)
+├── frontend/src/app/(app)/jeux/
+│   ├── page.tsx                   # Hub dashboard (~370 lignes)
+│   ├── error.tsx                  # Error boundary (~52 lignes)
+│   ├── loading.tsx                # Skeleton loading (~20 lignes)
+│   ├── paris/page.tsx             # Paris sportifs (~800+ lignes)
+│   ├── loto/page.tsx              # Loto (~500 lignes)
+│   ├── euromillions/page.tsx      # EuroMillions (~600 lignes)
+│   ├── bankroll/page.tsx          # Bankroll (~60 lignes)
+│   └── performance/page.tsx       # Performance (~350 lignes)
+├── frontend/src/composants/jeux/  # 14 composants dédiés
+├── frontend/src/bibliotheque/api/jeux.ts    # Client API (~350 lignes)
+├── frontend/src/types/jeux.ts               # Interfaces TS (~330 lignes)
+└── frontend/src/bibliotheque/validateurs-jeux.ts  # Zod (minimal)
+
+<strong>Tests</strong>
+├── tests/services/test_jeux_avances.py          # IA, grilles, notifications
+├── tests/services/test_cron_jobs_jeux.py         # 6 cron jobs
+├── tests/core/models/test_jeux.py                # Modèles ORM
+├── tests/api/test_routes_dashboard_jeux.py       # Dashboard endpoints
+├── tests/api/test_routes_jeux.py                 # 18 routes CRUD
+├── frontend/src/app/(app)/jeux/jeux-hub.test.tsx
+├── frontend/src/app/(app)/jeux/paris/paris.test.tsx
+├── frontend/src/app/(app)/jeux/loto/loto.test.tsx
+└── frontend/src/app/(app)/jeux/euromillions/euromillions.test.tsx
+
+<strong>SQL</strong> — 15 tables
+  jeux_equipes, jeux_matchs, jeux_paris_sportifs, jeux_cotes_historique,
+  jeux_tirages_loto, jeux_grilles_loto, jeux_stats_loto,
+  jeux_tirages_euromillions, jeux_grilles_euromillions, jeux_stats_euromillions,
+  jeux_series, jeux_alertes, jeux_historique,
+  jeux_bankroll_historique, jeux_configuration
+  </div>
+
+  <h3>Métriques quantitatives</h3>
+  <table>
+    <tr><th>Composant</th><th>Fichiers</th><th>Lignes estimées</th></tr>
+    <tr><td>API Routes (backend)</td><td>5</td><td>~1 900</td></tr>
+    <tr><td>Schemas Pydantic</td><td>1</td><td>~490</td></tr>
+    <tr><td>Modèles ORM</td><td>1</td><td>~730</td></tr>
+    <tr><td>Services backend</td><td>~28</td><td>~3 500</td></tr>
+    <tr><td>Pages frontend</td><td>8</td><td>~2 750</td></tr>
+    <tr><td>Composants frontend</td><td>14</td><td>~1 800</td></tr>
+    <tr><td>Client API + types + Zod</td><td>3</td><td>~700</td></tr>
+    <tr><td>Tests backend</td><td>5</td><td>~600</td></tr>
+    <tr><td>Tests frontend</td><td>4</td><td>~300</td></tr>
+    <tr><td>SQL (tables + index)</td><td>15 tables</td><td>~400</td></tr>
+    <tr><td><strong>TOTAL</strong></td><td><strong>~70 fichiers</strong></td><td><strong>~13 200 lignes</strong></td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>Verdict Architecture : 7/10</strong> — Bon layering avec lazy-loading des services et pattern agrégateur cohérent. Pénalisé par les vestiges de code mort (jeu responsable) et 12 self-assignments inutiles dans les services internes.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 2 : FONCTIONNALITÉS ════════════════════════ -->
+<section id="features">
+  <h2>⚡ 2. Inventaire complet des fonctionnalités</h2>
+
+  <div class="feat-grid">
+    <div class="feat-col">
+      <h4>🎯 Paris Sportifs</h4>
+      <ul>
+        <li>CRUD complet (créer, lister, modifier, supprimer)</li>
+        <li>Gestion équipes avec stats (V/N/D, buts, forme)</li>
+        <li>Fiche match avec prédictions IA</li>
+        <li>Heatmap évolution des cotes</li>
+        <li>Value Bets (edge, EV, proba estimée)</li>
+        <li>Détection séries (loi des séries)</li>
+        <li>Mode Expert avec filtres avancés</li>
+        <li>Paris virtuels (simulation)</li>
+        <li>Détection biais cognitifs (hot hand, gambler's fallacy)</li>
+        <li>Tailles de mise Kelly fractionnel (25%)</li>
+        <li>Notifications résultats (push + Telegram)</li>
+        <li>Backtest des stratégies</li>
+      </ul>
+    </div>
+    <div class="feat-col">
+      <h4>🎰 Loto</h4>
+      <ul>
+        <li>Historique tirages FDJ</li>
+        <li>Grilles jouées (réelles + virtuelles)</li>
+        <li>Statistiques fréquences numeros</li>
+        <li>Numéros en retard (delayed numbers)</li>
+        <li>Heatmap fréquences 1-49</li>
+        <li>Génération grille (statistique, aléatoire, IA)</li>
+        <li>Grille IA pondérée (chauds/froids/équilibre)</li>
+        <li>Analyse qualité d'une grille</li>
+        <li>Backtest des stratégies</li>
+        <li>Export CSV des tirages</li>
+        <li>Pré-remplissage URL (deep linking)</li>
+        <li>Mode Simple et Expert</li>
+      </ul>
+    </div>
+    <div class="feat-col">
+      <h4>⭐ EuroMillions</h4>
+      <ul>
+        <li>Historique tirages (5 numéros + 2 étoiles)</li>
+        <li>Grilles jouées + création</li>
+        <li>Statistiques numéros ET étoiles séparées</li>
+        <li>Double heatmap (numéros 1-50, étoiles 1-12)</li>
+        <li>Génération IA avec 4 stratégies (équilibrée, fréquences, retards, IA créative)</li>
+        <li>Vue Expert avec filtres qualité + stratégie</li>
+        <li>Backtest spécifique EuroMillions</li>
+        <li>Pré-remplissage URL (numéros + étoiles)</li>
+        <li>Code MyMillion tracké</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Fonctionnalités transverses</h3>
+  <table>
+    <tr><th>Fonctionnalité</th><th>Statut</th><th>Détail</th></tr>
+    <tr><td>Dashboard agrégé</td><td><span class="status status-ok">OK</span></td><td>Opportunités, matchs du jour, KPIs, analyse IA</td></tr>
+    <tr><td>Bankroll management</td><td><span class="status status-ok">OK</span></td><td>Critère de Kelly fractionnel, historique, validation mises (cap 5%)</td></tr>
+    <tr><td>Page Performance</td><td><span class="status status-ok">OK</span></td><td>ROI, taux réussite, séries, graphiques mensuels, breakdowns</td></tr>
+    <tr><td>Résumé mensuel IA</td><td><span class="status status-ok">OK</span></td><td>Généré après le 28 du mois via Mistral</td></tr>
+    <tr><td>6 Cron Jobs automatisés</td><td><span class="status status-ok">OK</span></td><td>Scraping cotes, résultats, FDJ, séries, backtest</td></tr>
+    <tr><td>Notifications Push + Telegram</td><td><span class="status status-ok">OK</span></td><td>Paris gagnés, résultats tirages</td></tr>
+    <tr><td>Budget séparé famille/jeux</td><td><span class="status status-warn">⚠️</span></td><td>Documenté séparé, mais <code>sync_jeux_budget</code> écrit dans BudgetFamille</td></tr>
+    <tr><td>Jeu responsable</td><td><span class="status status-dead">SUPPRIMÉ</span></td><td>Retiré du codebase (vestige BudgetResponsableResponse existe encore)</td></tr>
+    <tr><td>OCR tickets</td><td><span class="status status-dead">SUPPRIMÉ</span></td><td>Correctement retiré, aucun vestige</td></tr>
+  </table>
+
+  <div class="callout callout-ok">
+    <strong>Verdict Fonctionnalités : 9/10</strong> — Module extrêmement complet avec 3 types de jeux, IA avancée, backtest, mode expert, bankroll Kelly, détection de biais cognitifs. L'un des modules les plus riches de l'application. Seul point : quelques vestiges de features supprimées.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 3 : BUGS ════════════════════════ -->
+<section id="bugs">
+  <h2>🐛 3. Bugs &amp; problèmes identifiés</h2>
+
+  <table>
+    <tr><th>#</th><th>Sévérité</th><th>Problème</th><th>Fichier</th><th>Impact</th></tr>
+    <tr>
+      <td>1</td>
+      <td><span class="sev-high">HAUTE</span></td>
+      <td><strong><code>sync_jeux_budget</code> contredit l'architecture</strong><br>
+        Le cron job <code>_job_sync_jeux_budget()</code> écrit les gains/pertes jeux directement dans la table <code>BudgetFamille</code>. Cela contredit la décision architecturale documentée partout (DEPRECATED.md, user-guide, préférences utilisateur) que <strong>les budgets jeux et famille sont séparés</strong>.
+      </td>
+      <td><code>src/services/core/cron/jobs.py</code> L2166-2227<br>
+          <code>src/services/core/cron/jobs_schedule.py</code> L119<br>
+          <code>src/api/routes/jeux_paris.py</code> L818
+      </td>
+      <td>Les gains/pertes paris sont insérés comme lignes dans BudgetFamille chaque nuit à 22h. Pollution du budget familial.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+      <td><strong><code>BudgetResponsableResponse</code> — vestige "jeu responsable"</strong><br>
+        Le schema Pydantic contient encore <code>cooldown_actif</code>, <code>auto_exclusion_jusqu_a</code>, <code>limite</code> — tous des attributs du module "jeu responsable" pourtant supprimé du codebase. Le <code>DashboardJeuxResponse</code> inclut un champ <code>budget: BudgetResponsableResponse</code>.
+      </td>
+      <td><code>src/api/schemas/jeux.py</code> L419-433</td>
+      <td>Données fantômes renvoyées dans le dashboard (toujours valeurs par défaut). Confusion pour les consommateurs de l'API.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><span class="sev-low">BASSE</span></td>
+      <td><strong>12 self-assignments circulaires</strong><br>
+        Pattern <code>obtenir_x = obtenir_x</code> présent dans tous les services <code>_internal/</code>. C'est un no-op complet — la variable est réassignée à elle-même.
+      </td>
+      <td><code>src/services/jeux/_internal/*.py</code> (12 fichiers)</td>
+      <td>Aucun impact fonctionnel. Code mort qui ajoute du bruit.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><span class="sev-low">BASSE</span></td>
+      <td><strong>Encodage UTF-8 corrompu dans commentaires</strong><br>
+        Les séparateurs de sections dans les routes utilisent des caractères box-drawing mal encodés (<code>â•â•â•</code> au lieu de <code>═══</code>).
+      </td>
+      <td><code>src/api/routes/jeux_paris.py</code>, <code>jeux_dashboard.py</code>, <code>jeux_euromillions.py</code></td>
+      <td>Visuel uniquement. Le code fonctionne correctement.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+      <td><strong>Validation Zod manquante pour Loto et EuroMillions</strong><br>
+        Seul <code>schemaPariSportif</code> existe côté frontend. Il manque les schémas Zod pour la création de grilles Loto (5 numéros 1-49 + chance 1-10) et EuroMillions (5 numéros 1-50 + 2 étoiles 1-12). Les formulaires front envoient des données sans validation client.
+      </td>
+      <td><code>frontend/src/bibliotheque/validateurs-jeux.ts</code></td>
+      <td>La validation Pydantic backend rattrape les erreurs, mais l'UX est dégradée (erreurs serveur au lieu de feedback instantané).</td>
+    </tr>
+  </table>
+
+  <h3>Détail Bug #1 — sync_jeux_budget</h3>
+  <pre><code># src/services/core/cron/jobs.py L2166-2227
+def _job_sync_jeux_budget() -> None:
+    """JOB-2 — Synchronise les gains/pertes jeux vers le budget famille."""
+    ...
+    with obtenir_contexte_db() as session:
+        mises = session.query(func.sum(PariSportif.mise))...
+        gains = session.query(func.sum(PariSportif.gain))...
+        net = float(gains) - float(mises)
+
+        # ⚠️ ÉCRIT DIRECTEMENT DANS BudgetFamille !
+        session.add(BudgetFamille(
+            date=today - timedelta(days=1),
+            categorie="jeux",
+            description="Sync jeux auto",
+            montant=abs(net),
+        ))
+        session.commit()</code></pre>
+
+  <div class="callout callout-err">
+    <strong>Recommandation Bug #1 :</strong> Supprimer le cron job <code>sync_jeux_budget</code> et sa planification. Le budget jeux a sa propre table <code>jeux_bankroll_historique</code> et le dashboard unifié (<code>/api/v1/dashboard/budget-unifie</code>) agrège déjà les données des deux budgets en lecture seule.<br>
+    <strong>Fichiers à modifier :</strong> <code>jobs.py</code>, <code>jobs_schedule.py</code>, <code>admin_constants.py</code>, <code>jeux_paris.py</code> (marqueur sync).
+  </div>
+
+  <h3>Détail Bug #2 — BudgetResponsableResponse</h3>
+  <pre><code># src/api/schemas/jeux.py L419-433
+class BudgetResponsableResponse(BaseModel):
+    limite: float = 50.0                  # ← Vestige jeu responsable
+    mises_cumulees: float = 0.0
+    pourcentage_utilise: float = 0.0
+    reste_disponible: float = 50.0
+    cooldown_actif: bool = False           # ← N'existe plus
+    auto_exclusion_jusqu_a: date | None = None  # ← N'existe plus
+
+class DashboardJeuxResponse(BaseModel):
+    ...
+    budget: BudgetResponsableResponse = Field(...)  # ← Inclus dans dashboard</code></pre>
+
+  <div class="callout callout-warn">
+    <strong>Recommandation Bug #2 :</strong> Supprimer la classe <code>BudgetResponsableResponse</code> et le champ <code>budget</code> de <code>DashboardJeuxResponse</code>. Le "jeu responsable" a été explicitement retiré du codebase et de la roadmap.
+  </div>
+
+  <div class="callout">
+    <strong>Verdict Bugs &amp; Stabilité : 7/10</strong> — Aucun bug fonctionnel critique (pas de crash, pas de données corrompues). Mais le sync budget contredit l'architecture documentée et les vestiges du jeu responsable polluent l'API.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 4 : CODE MORT ════════════════════════ -->
+<section id="deprecated">
+  <h2>🗑️ 4. Code mort &amp; vestiges à supprimer</h2>
+
+  <table>
+    <tr><th>Élément</th><th>Localisation</th><th>Raison de suppression</th><th>Priorité</th></tr>
+    <tr>
+      <td><code>BudgetResponsableResponse</code></td>
+      <td><code>src/api/schemas/jeux.py</code> L419-426</td>
+      <td>Module "jeu responsable" supprimé du codebase et de la roadmap</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+    </tr>
+    <tr>
+      <td>Champ <code>budget</code> dans <code>DashboardJeuxResponse</code></td>
+      <td><code>src/api/schemas/jeux.py</code> L433</td>
+      <td>Référence le schema supprimé ci-dessus</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+    </tr>
+    <tr>
+      <td><code>_job_sync_jeux_budget()</code></td>
+      <td><code>src/services/core/cron/jobs.py</code> L2166-2227</td>
+      <td>Contredit "budgets séparés". Écriture non souhaitée dans BudgetFamille</td>
+      <td><span class="sev-high">HAUTE</span></td>
+    </tr>
+    <tr>
+      <td>Planification du job sync</td>
+      <td><code>src/services/core/cron/jobs_schedule.py</code> L119</td>
+      <td>Planifie le job à supprimer</td>
+      <td><span class="sev-high">HAUTE</span></td>
+    </tr>
+    <tr>
+      <td>Référence sync dans admin</td>
+      <td><code>src/api/routes/admin_constants.py</code> L40</td>
+      <td>Label admin pour le job à supprimer</td>
+      <td><span class="sev-high">HAUTE</span></td>
+    </tr>
+    <tr>
+      <td>Marqueur sync dans paris route</td>
+      <td><code>src/api/routes/jeux_paris.py</code> L818</td>
+      <td>Référence au job sync pour tracking</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+    </tr>
+    <tr>
+      <td>12× <code>obtenir_x = obtenir_x</code></td>
+      <td><code>src/services/jeux/_internal/*.py</code></td>
+      <td>Self-assignments qui ne font rien</td>
+      <td><span class="sev-low">BASSE</span></td>
+    </tr>
+    <tr>
+      <td>Référence dans docs</td>
+      <td><code>docs/CRON_JOBS.md</code> L102, <code>docs/INTER_MODULES.md</code> L155</td>
+      <td>Documentation du job à supprimer</td>
+      <td><span class="sev-low">BASSE</span></td>
+    </tr>
+  </table>
+
+  <div class="callout callout-err">
+    <strong>Action requise :</strong> 8 éléments de code mort à supprimer. La priorité #1 est le cron job <code>sync_jeux_budget</code> qui écrit activement des données non souhaitées dans la table BudgetFamille.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 5 : REDONDANCES ════════════════════════ -->
+<section id="redundancy">
+  <h2>🔄 5. Redondances &amp; duplication</h2>
+
+  <h3>Duplication Loto ↔ EuroMillions (~70% similaire)</h3>
+  <p>Les modules Loto et EuroMillions partagent une grande partie de leur logique :</p>
+  <table>
+    <tr><th>Fonctionnalité</th><th>Loto</th><th>EuroMillions</th><th>Similitude</th></tr>
+    <tr><td>CRUD tirages/grilles</td><td><code>loto_crud_service.py</code></td><td><code>euromillions_crud_service.py</code></td><td>90%</td></tr>
+    <tr><td>Statistiques fréquences</td><td><code>loto/stats</code></td><td><code>euromillions/stats</code></td><td>85%</td></tr>
+    <tr><td>Heatmap composant</td><td><code>HeatmapNumeros</code></td><td><code>HeatmapNumeros</code> (même)</td><td>100%</td></tr>
+    <tr><td>Backtest</td><td><code>backtest_service.py</code></td><td>Même service paramétré</td><td>80%</td></tr>
+    <tr><td>Génération IA</td><td><code>generer-grille-ia-ponderee</code></td><td><code>generer-grille-ia</code></td><td>70%</td></tr>
+    <tr><td>Page frontend</td><td><code>loto/page.tsx</code> (~500 lignes)</td><td><code>euromillions/page.tsx</code> (~600 lignes)</td><td>65%</td></tr>
+    <tr><td>Modèle ORM</td><td><code>TirageLoto</code> + <code>GrilleLoto</code></td><td><code>TirageEuromillions</code> + <code>GrilleEuromillions</code></td><td>75%</td></tr>
+  </table>
+
+  <div class="callout callout-warn">
+    <strong>Constat :</strong> La duplication Loto/EuroMillions représente ~2 000 lignes de code redondant. Un refactoring vers une base commune (abstract <code>LotteryService</code>, composant <code>LoteriePage</code> paramétrable) pourrait réduire de ~40% le code.<br>
+    <strong>Mais :</strong> Ce n'est pas urgent. Les deux modules fonctionnent indépendamment et leur séparation facilite l'évolution indépendante (ex: étoiles EuroMillions vs numéro chance Loto).
+  </div>
+
+  <h3>Autres redondances mineures</h3>
+  <ul>
+    <li><strong>Dashboard KPIs</strong> : calculés dans <code>jeux_dashboard.py</code> ET dérivables depuis <code>stats_personnelles.py</code> — double source de calcul ROI</li>
+    <li><strong>Forme des équipes</strong> : calculée dynamiquement dans la route <code>jeux_paris.py</code> ET stockée dans la colonne <code>forme_recente</code> du modèle <code>Equipe</code></li>
+    <li><strong>Stats Loto</strong> : cache <code>StatistiquesLoto</code> (table SQL) ET calcul à la volée dans les routes — pas toujours synchronisés</li>
+  </ul>
+
+  <div class="callout">
+    <strong>Verdict Cohérence / Redondances : 6/10</strong> — Duplication significative Loto/EuroMillions, vestiges jeu responsable, double calcul de certaines métriques. Fonctionnel mais peu DRY.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 6 : TESTS ════════════════════════ -->
+<section id="tests">
+  <h2>🧪 6. État des tests</h2>
+
+  <h3>Tests Backend (Python — pytest)</h3>
+  <table>
+    <tr><th>Fichier</th><th>Type</th><th>Couverture</th><th>Statut</th></tr>
+    <tr>
+      <td><code>tests/services/test_jeux_avances.py</code></td>
+      <td>Unit</td>
+      <td>IA grid generation, grid analysis, grid validation, push notifications, notification types</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>tests/services/test_cron_jobs_jeux.py</code></td>
+      <td>Unit</td>
+      <td>6 cron jobs (scraping cotes, résultats, opportunités, séries, FDJ, backtest)</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>tests/core/models/test_jeux.py</code></td>
+      <td>Unit</td>
+      <td>Enums, modèles ORM (Equipe, Match, PariSportif, TirageLoto, GrilleLoto)</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>tests/api/test_routes_dashboard_jeux.py</code></td>
+      <td>Intégration</td>
+      <td>Dashboard endpoints, formats réponse, filtres</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>tests/api/test_routes_jeux.py</code></td>
+      <td>Intégration</td>
+      <td>18 routes CRUD (GET/POST/PATCH/DELETE), filtres, pagination</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+  </table>
+
+  <h3>Tests Frontend (TypeScript — Vitest)</h3>
+  <table>
+    <tr><th>Fichier</th><th>Couverture</th><th>Statut</th></tr>
+    <tr>
+      <td><code>jeux-hub.test.tsx</code></td>
+      <td>Hub page : titre, sections, stats, liens navigation</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>paris/paris.test.tsx</code></td>
+      <td>Liste paris mockée, stats</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>loto/loto.test.tsx</code></td>
+      <td>Tirages, grilles, stats mockées</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td><code>euromillions/euromillions.test.tsx</code></td>
+      <td>Tirages, grilles, stats, heatmap, backtest</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+  </table>
+
+  <h3>Lacunes de test</h3>
+  <table>
+    <tr><th>Élément non testé</th><th>Impact</th><th>Priorité</th></tr>
+    <tr>
+      <td><code>BankrollManager</code> (critère de Kelly, cap 5%, validation mises)</td>
+      <td>Logique financière critique non couverte</td>
+      <td><span class="sev-high">HAUTE</span></td>
+    </tr>
+    <tr>
+      <td><code>SeriesStatistiquesService</code> (détection patterns, biais cognitifs)</td>
+      <td>Algorithme complexe non vérifié par tests</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+    </tr>
+    <tr>
+      <td><code>StatsPersonnellesService</code> (ROI, win rate, patterns)</td>
+      <td>Calculs agrégés non vérifiés</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+    </tr>
+    <tr>
+      <td>Services CRUD Loto &amp; EuroMillions</td>
+      <td>Operations base de données</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+    </tr>
+    <tr>
+      <td>Composants frontend (14 composants, 0 tests unitaires)</td>
+      <td>Heatmaps, GenerateurGrille, BankrollWidget non testés</td>
+      <td><span class="sev-low">BASSE</span></td>
+    </tr>
+    <tr>
+      <td>Validation des inputs (Zod manquant pour Loto/EuroMillions)</td>
+      <td>Pas de test de schéma validation</td>
+      <td><span class="sev-med">MOYENNE</span></td>
+    </tr>
+  </table>
+
+  <div class="callout callout-warn">
+    <strong>Verdict Tests : 5/10</strong> — Les routes API et les modèles sont bien testés (18 routes, 6 cron jobs, enums). Mais les services métier critiques (BankrollManager, SeriesStatistiques, StatsPersonnelles) n'ont aucun test unitaire dédié. Les 14 composants frontend ne sont pas testés individuellement.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 7 : DOCUMENTATION ════════════════════════ -->
+<section id="docs">
+  <h2>📚 7. Documentation</h2>
+
+  <table>
+    <tr><th>Document</th><th>Contenu jeux</th><th>À jour ?</th></tr>
+    <tr>
+      <td><code>docs/user-guide/Jeux.md</code></td>
+      <td>Guide utilisateur complet : Paris, Loto, EuroMillions, Bankroll, Performance, IA</td>
+      <td><span class="status status-ok">OUI</span></td>
+    </tr>
+    <tr>
+      <td><code>docs/DEPRECATED.md</code></td>
+      <td>OCR tickets (retiré), Fusion budget (refusé), Jeu responsable (retiré)</td>
+      <td><span class="status status-ok">OUI</span></td>
+    </tr>
+    <tr>
+      <td><code>docs/CHANGELOG.md</code></td>
+      <td>"Consolidation paris, loto, Euromillions, analyses IA et tableaux de bord dédiés"</td>
+      <td><span class="status status-ok">OUI</span></td>
+    </tr>
+    <tr>
+      <td><code>docs/CRON_JOBS.md</code></td>
+      <td>6 jobs documentés (Loto, résultats, sync, purge)</td>
+      <td><span class="status status-warn">PARTIEL</span> — Documente encore <code>sync_jeux_budget</code> qui contredit l'archi</td>
+    </tr>
+    <tr>
+      <td><code>docs/INTER_MODULES.md</code></td>
+      <td>Bridge jeux → budget documenté</td>
+      <td><span class="status status-warn">PARTIEL</span> — Même problème sync</td>
+    </tr>
+    <tr>
+      <td><code>data/seed/paris_sportifs.csv</code></td>
+      <td>Données de référence : ligues, stats par championnat, ROI par type</td>
+      <td><span class="status status-ok">OUI</span></td>
+    </tr>
+  </table>
+
+  <h3>Points positifs</h3>
+  <ul>
+    <li>Guide utilisateur très complet et bien structuré</li>
+    <li>Mention explicite que les budgets sont séparés dans le guide</li>
+    <li>Features supprimées bien documentées dans DEPRECATED.md avec raisons</li>
+  </ul>
+
+  <h3>Points à améliorer</h3>
+  <ul>
+    <li>CRON_JOBS.md et INTER_MODULES.md documentent encore <code>sync_jeux_budget</code></li>
+    <li>Pas de documentation technique des services internes (architecture interne du module)</li>
+    <li>Pas de diagramme de flux pour les cron jobs jeux</li>
+  </ul>
+
+  <div class="callout">
+    <strong>Verdict Documentation : 8/10</strong> — Bien documenté côté utilisateur et deprecated features. La doc technique des cron jobs contient une incohérence (sync_jeux_budget) à corriger.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 8 : SÉCURITÉ ════════════════════════ -->
+<section id="security">
+  <h2>🔒 8. Sécurité &amp; validation</h2>
+
+  <h3>Points positifs</h3>
+  <table>
+    <tr><th>Mesure</th><th>Implémentation</th><th>Statut</th></tr>
+    <tr>
+      <td>Auth sur tous endpoints</td>
+      <td><code>Depends(require_auth)</code> sur chaque route jeux</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Validation Pydantic backend</td>
+      <td>19+ modèles avec <code>Field</code> constraints, types stricts</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Check constraints SQL</td>
+      <td>Numéros 1-50, étoiles 1-12, mises ≥ 0</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Rate limiting</td>
+      <td>60 req/min standard, 10 req/min IA</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Pagination sécurisée</td>
+      <td>Cursor-based avec <code>page_size</code> limité (max 100)</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+    <tr>
+      <td>Bankroll cap</td>
+      <td>Mise maximale 5% du bankroll (hard cap)</td>
+      <td><span class="status status-ok">OK</span></td>
+    </tr>
+  </table>
+
+  <h3>Points faibles</h3>
+  <table>
+    <tr><th>Lacune</th><th>Impact</th></tr>
+    <tr>
+      <td>Validation Zod manquante pour grilles Loto/EuroMillions côté frontend</td>
+      <td>Données envoyées sans validation client → erreurs serveur 422 au lieu de feedback UX</td>
+    </tr>
+    <tr>
+      <td>Pas de validation <code>user_id</code> dans certains endpoints (ex: bankroll)</td>
+      <td>Potentiellement accessible avec un user_id différent (mitigé par auth JWT)</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>Verdict Sécurité &amp; Validation : 7/10</strong> — Bonne couverture backend (auth, Pydantic, SQL constraints, rate limiting). Validation frontend lacunaire sur les grilles Loto/EuroMillions.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 9 : PERFORMANCE ════════════════════════ -->
+<section id="perf">
+  <h2>⚡ 9. Performance</h2>
+
+  <h3>Optimisations en place</h3>
+  <table>
+    <tr><th>Optimisation</th><th>Détail</th></tr>
+    <tr>
+      <td>Index stratégiques SQL</td>
+      <td>
+        <code>ix_jeux_series_value</code> (frequence × serie_actuelle DESC)<br>
+        <code>ix_jeux_alertes_notifie</code> (WHERE notifie = FALSE — partial index)<br>
+        <code>idx_bankroll_historique_user</code> (user_id, date DESC)<br>
+        Index sur <code>(match_id, cree_le)</code>, <code>(date_tirage DESC)</code>
+      </td>
+    </tr>
+    <tr>
+      <td>Cache stats JSONB</td>
+      <td><code>jeux_stats_loto</code> et <code>jeux_stats_euromillions</code> stockent les fréquences pré-calculées en JSONB</td>
+    </tr>
+    <tr>
+      <td>Pagination cursor-based</td>
+      <td>Matchs paginés par cursor (tie-breaker: id) — O(1) au lieu de O(n) pour OFFSET</td>
+    </tr>
+    <tr>
+      <td>Lazy loading services</td>
+      <td><code>__getattr__</code> dans <code>__init__.py</code> — services chargés à la demande</td>
+    </tr>
+    <tr>
+      <td>Singleton via @service_factory</td>
+      <td>Chaque service instancié une seule fois via le registre</td>
+    </tr>
+    <tr>
+      <td>TanStack Query frontend</td>
+      <td>Cache client avec staleTime/gcTime pour éviter les re-fetch</td>
+    </tr>
+    <tr>
+      <td>Dynamic imports Recharts</td>
+      <td>Graphiques chargés dynamiquement pour réduire le bundle initial</td>
+    </tr>
+  </table>
+
+  <div class="callout callout-ok">
+    <strong>Verdict Performance : 8/10</strong> — Index bien pensés (partial index, composite, expression index), cache JSONB pour stats lourdes, pagination cursor, lazy loading. Bonnes pratiques respectées.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 10 : IA ════════════════════════ -->
+<section id="ia">
+  <h2>🤖 10. Intégration IA (Mistral)</h2>
+
+  <h3>Fonctionnalités IA</h3>
+  <table>
+    <tr><th>Fonctionnalité</th><th>Endpoint</th><th>Détail</th></tr>
+    <tr>
+      <td>Génération grille Loto IA pondérée</td>
+      <td><code>POST /loto/generer-grille-ia-ponderee</code></td>
+      <td>3 modes : chauds, froids, équilibré. Analyse + confiance 0-1</td>
+    </tr>
+    <tr>
+      <td>Génération grille Loto IA avancée</td>
+      <td><code>POST /loto/generer-grille-ia-avancee</code></td>
+      <td>Mistral en direct pour analyse créative</td>
+    </tr>
+    <tr>
+      <td>Analyse qualité grille joueur</td>
+      <td><code>POST /loto/analyser-grille-loto</code></td>
+      <td>Note 0-10, points forts/faibles, recommandations, appréciation</td>
+    </tr>
+    <tr>
+      <td>Génération grille EuroMillions IA</td>
+      <td><code>POST /euromillions/generer-grille-ia</code></td>
+      <td>4 stratégies : équilibrée, fréquences, retards, IA créative</td>
+    </tr>
+    <tr>
+      <td>Prédiction match</td>
+      <td><code>GET /paris/prediction/{match_id}</code></td>
+      <td>Probabilités, confiance, raisons textuelles, conseil</td>
+    </tr>
+    <tr>
+      <td>Analyse IA dashboard</td>
+      <td><code>GET /dashboard</code></td>
+      <td>Résumé IA dans le dashboard (points clés, recommandations, confiance)</td>
+    </tr>
+    <tr>
+      <td>Détection patterns comportementaux</td>
+      <td><code>GET /analyse-patterns/{user_id}</code></td>
+      <td>Hot hand fallacy, gambler's fallacy, régression — alertes biais cognitifs</td>
+    </tr>
+    <tr>
+      <td>Résumé mensuel IA</td>
+      <td><code>GET /resume-mensuel/{year}/{month}</code></td>
+      <td>Analyse complète du mois avec points forts/faibles, KPIs, recommandations</td>
+    </tr>
+    <tr>
+      <td>Tendances Loto</td>
+      <td><code>GET /tendances-loto</code></td>
+      <td>Analyse statistique via IA des tendances émergentes</td>
+    </tr>
+    <tr>
+      <td>Backtest IA</td>
+      <td><code>GET /backtest</code></td>
+      <td>Évaluation rétrospective des stratégies de génération</td>
+    </tr>
+  </table>
+
+  <h3>Architecture IA</h3>
+  <ul>
+    <li><strong>BaseAIService</strong> : rate limiting intégré, cache sémantique, parsing JSON/Pydantic automatique</li>
+    <li><strong>JeuxAIService</strong> : service dédié dans <code>_internal/ai_service.py</code></li>
+    <li><strong>Façades</strong> : <code>service_ia.py</code> et <code>euromillions_ia.py</code> comme points d'entrée</li>
+    <li><strong>CircuitBreaker</strong> : résilience sur les appels Mistral</li>
+    <li><strong>Rate limiting IA</strong> : 10 req/min pour protéger le quota Mistral</li>
+  </ul>
+
+  <div class="callout callout-ok">
+    <strong>Verdict Intégration IA : 8/10</strong> — 10 fonctionnalités IA distinctes, bien intégrées avec rate limiting, cache et circuit breaker. Très riche pour un module de jeux. Détection de biais cognitifs particulièrement impressionnante.
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 11 : FRONTEND UX ════════════════════════ -->
+<section id="ux">
+  <h2>🎨 11. Frontend &amp; UX</h2>
+
+  <h3>Pages du module</h3>
+  <table>
+    <tr><th>Page</th><th>Lignes</th><th>Features UX</th></tr>
+    <tr>
+      <td>Hub (<code>/jeux</code>)</td>
+      <td>~370</td>
+      <td>Dashboard widgets, KPIs, opportunités, analyse IA, navigation tabs, animations Motion</td>
+    </tr>
+    <tr>
+      <td>Paris (<code>/jeux/paris</code>)</td>
+      <td>~800+</td>
+      <td>Mode Simple/Expert, Drawer match détail, Dialog création pari, HeatmapCotes, BankrollWidget, DetectionPatternModal, prefill URL</td>
+    </tr>
+    <tr>
+      <td>Loto (<code>/jeux/loto</code>)</td>
+      <td>~500</td>
+      <td>Mode Simple/Expert, HeatmapNumeros, numéros retard, GenerateurGrille (3 stratégies), GrilleIAPonderee, BacktestCard, export CSV, prefill URL</td>
+    </tr>
+    <tr>
+      <td>EuroMillions (<code>/jeux/euromillions</code>)</td>
+      <td>~600</td>
+      <td>Double heatmap (numéros + étoiles), badges info, génération IA 4 stratégies, vue expert, prefill URL</td>
+    </tr>
+    <tr>
+      <td>Bankroll (<code>/jeux/bankroll</code>)</td>
+      <td>~60</td>
+      <td>Widget Kelly fractionnel, liens performance</td>
+    </tr>
+    <tr>
+      <td>Performance (<code>/jeux/performance</code>)</td>
+      <td>~350</td>
+      <td>KPIs globaux, graphiques ROI mensuel, bankroll cumulé, breakdowns championnat/type, confiance IA, résumé mensuel</td>
+    </tr>
+    <tr>
+      <td>Error boundary</td>
+      <td>~52</td>
+      <td>Gestion erreur gracieuse avec retry</td>
+    </tr>
+    <tr>
+      <td>Loading skeleton</td>
+      <td>~20</td>
+      <td>Skeleton adapté au layout jeux</td>
+    </tr>
+  </table>
+
+  <h3>14 Composants dédiés</h3>
+  <table>
+    <tr><th>Composant</th><th>Rôle</th><th>Lignes</th></tr>
+    <tr><td><code>BankrollWidget</code></td><td>Kelly fractionnel + graphique bankroll</td><td>~150</td></tr>
+    <tr><td><code>HeatmapNumeros</code></td><td>Heatmap gradient froid→chaud</td><td>~88</td></tr>
+    <tr><td><code>HeatmapCotes</code></td><td>Courbe évolution des cotes Recharts</td><td>~110</td></tr>
+    <tr><td><code>GenerateurGrille</code></td><td>Génération (statistique/aléatoire/IA)</td><td>~132</td></tr>
+    <tr><td><code>GrilleIAPonderee</code></td><td>IA pondérée avec analyse</td><td>~150</td></tr>
+    <tr><td><code>DetectionPatternModal</code></td><td>Alertes biais cognitifs</td><td>~180</td></tr>
+    <tr><td><code>StatsPersonnelles</code></td><td>ROI, win rate, patterns, évolution</td><td>~200</td></tr>
+    <tr><td><code>TableauMatchsExpert</code></td><td>Vue expert matchs + prédictions</td><td>—</td></tr>
+    <tr><td><code>TableauLotoExpert</code></td><td>Vue expert analyses Loto</td><td>—</td></tr>
+    <tr><td><code>TableauEuromillionsExpert</code></td><td>Vue expert analyses EuroMillions</td><td>—</td></tr>
+    <tr><td><code>BacktestResultatCard</code></td><td>Métriques backtest</td><td>~55</td></tr>
+    <tr><td><code>BacktestEuromillionsVue</code></td><td>Backtest spécifique EuroMillions</td><td>—</td></tr>
+    <tr><td><code>GraphiqueROI</code></td><td>Graphique ROI dynamique</td><td>—</td></tr>
+  </table>
+
+  <h3>Points UX remarquables</h3>
+  <ul>
+    <li>✅ <strong>Mode Simple / Expert</strong> sur Paris, Loto et EuroMillions — accessibilité progressive</li>
+    <li>✅ <strong>Deep linking via URL</strong> — préfill grilles depuis liens Telegram/Chrome extension</li>
+    <li>✅ <strong>Animations Motion</strong> — transitions fluides sur le hub</li>
+    <li>✅ <strong>Error boundary</strong> + <strong>Loading skeleton</strong> — gestion états dégradés</li>
+    <li>✅ <strong>Responsive</strong> — navigation sidebar + barre mobile</li>
+    <li>✅ <strong>Graphiques Recharts</strong> chargés dynamiquement (code splitting)</li>
+  </ul>
+
+  <div class="callout callout-ok">
+    <strong>Verdict Frontend UX : 8/10</strong> — UI riche et bien pensée. Mode expert pour les power users, deep linking, heatmaps visuelles, gestion des états dégradés. La page Paris sportifs est particulièrement complète (~800+ lignes).
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 12 : RECOMMANDATIONS ════════════════════════ -->
+<section id="recos">
+  <h2>📋 12. Recommandations</h2>
+
+  <div class="reco-grid">
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-high">P0</span> Supprimer sync_jeux_budget
+      </div>
+      <p>Retirer le cron job <code>_job_sync_jeux_budget()</code> qui écrit dans <code>BudgetFamille</code>. Nettoyer les 5 fichiers référencés. Mettre à jour CRON_JOBS.md et INTER_MODULES.md.</p>
+      <p><strong>Effort :</strong> ~30 min | <strong>Impact :</strong> Aligne le code sur l'architecture documentée</p>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-med">P1</span> Supprimer BudgetResponsableResponse
+      </div>
+      <p>Retirer le schema Pydantic et le champ <code>budget</code> du <code>DashboardJeuxResponse</code>. Retirer les références frontend au champ budget du dashboard.</p>
+      <p><strong>Effort :</strong> ~15 min | <strong>Impact :</strong> API propre, pas de données fantômes</p>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-med">P1</span> Ajouter validation Zod Loto/EuroMillions
+      </div>
+      <p>Créer <code>schemaGrilleLoto</code> (5 numéros 1-49, chance 1-10) et <code>schemaGrilleEuromillions</code> (5 numéros 1-50, 2 étoiles 1-12) dans <code>validateurs-jeux.ts</code>.</p>
+      <p><strong>Effort :</strong> ~20 min | <strong>Impact :</strong> Feedback utilisateur instantané au lieu d'erreurs 422</p>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-med">P1</span> Tests BankrollManager
+      </div>
+      <p>Ajouter des tests unitaires pour <code>calculer_mise_kelly()</code>, <code>suggerer_mise()</code>, <code>valider_mise()</code> (cap 5%). Logique financière critique.</p>
+      <p><strong>Effort :</strong> ~45 min | <strong>Impact :</strong> Sécurise la logique de gestion de bankroll</p>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-low">P2</span> Supprimer self-assignments
+      </div>
+      <p>Retirer les 12 lignes <code>obtenir_x = obtenir_x</code> dans <code>src/services/jeux/_internal/*.py</code>.</p>
+      <p><strong>Effort :</strong> ~10 min | <strong>Impact :</strong> Code plus propre</p>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-low">P2</span> Tests services métier
+      </div>
+      <p>Ajouter tests pour <code>SeriesStatistiquesService</code>, <code>StatsPersonnellesService</code>, et <code>ParisCrudService</code>. Renforcera la note tests de 5 → 7+.</p>
+      <p><strong>Effort :</strong> ~2h | <strong>Impact :</strong> Couverture services critique</p>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-low">P3</span> Refactoring Loto/EuroMillions commun
+      </div>
+      <p>Extraire une base <code>LotteryService</code> abstraite et un composant <code>LoteriePage</code> paramétrable pour mutualiser ~2000 lignes de code dupliqué.</p>
+      <p><strong>Effort :</strong> ~1 jour | <strong>Impact :</strong> -40% code dupliqué (pas urgent)</p>
+    </div>
+
+    <div class="reco-card">
+      <div class="reco-title">
+        <span class="sev-low">P3</span> Corriger encodage commentaires
+      </div>
+      <p>Re-encoder les séparateurs de sections en ASCII/UTF-8 propre dans les 3 fichiers de routes.</p>
+      <p><strong>Effort :</strong> ~5 min | <strong>Impact :</strong> Lisibilité du code</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ SECTION 13 : VERDICT ════════════════════════ -->
+<section id="verdict">
+  <h2>⚖️ 13. Verdict final</h2>
+
+  <h3>Tableau récapitulatif des notes</h3>
+  <table>
+    <tr><th>Catégorie</th><th>Note</th><th>Commentaire</th></tr>
+    <tr>
+      <td>🎯 Fonctionnalités</td>
+      <td style="color:var(--green);font-weight:800;font-size:1.2rem">9/10</td>
+      <td>Module parmi les plus riches de l'app. 3 types de jeux, IA avancée, backtest, bankroll Kelly, mode expert, détection biais cognitifs. Très impressionnant.</td>
+    </tr>
+    <tr>
+      <td>🎨 Frontend UX</td>
+      <td style="color:var(--accent);font-weight:800;font-size:1.2rem">8/10</td>
+      <td>Mode simple/expert, deep linking, heatmaps, animations, error boundaries. Page Paris très complète.</td>
+    </tr>
+    <tr>
+      <td>🤖 Intégration IA</td>
+      <td style="color:var(--accent);font-weight:800;font-size:1.2rem">8/10</td>
+      <td>10 fonctions IA distinctes. Génération grilles, prédictions, analyse patterns, résumé mensuel, détection biais.</td>
+    </tr>
+    <tr>
+      <td>⚡ Performance</td>
+      <td style="color:var(--accent);font-weight:800;font-size:1.2rem">8/10</td>
+      <td>Index stratégiques, partial indexes, cache JSONB, pagination cursor, lazy loading services.</td>
+    </tr>
+    <tr>
+      <td>📚 Documentation</td>
+      <td style="color:var(--accent);font-weight:800;font-size:1.2rem">8/10</td>
+      <td>Guide utilisateur complet, DEPRECATED bien maintenu. Incohérence sync_jeux_budget dans CRON_JOBS.md.</td>
+    </tr>
+    <tr>
+      <td>🏗️ Architecture</td>
+      <td style="color:var(--yellow);font-weight:800;font-size:1.2rem">7/10</td>
+      <td>Bon layering, lazy-loading, singletons. Pénalisé par code mort (vestiges jeu responsable) et self-assignments.</td>
+    </tr>
+    <tr>
+      <td>🔒 Sécurité &amp; Validation</td>
+      <td style="color:var(--yellow);font-weight:800;font-size:1.2rem">7/10</td>
+      <td>Auth JWT partout, Pydantic strict, SQL constraints, rate limiting. Zod manquant pour Loto/EuroMillions.</td>
+    </tr>
+    <tr>
+      <td>🐛 Bugs &amp; Stabilité</td>
+      <td style="color:var(--yellow);font-weight:800;font-size:1.2rem">7/10</td>
+      <td>Aucun crash. Mais sync_jeux_budget contredit l'architecture et BudgetResponsable est un vestige.</td>
+    </tr>
+    <tr>
+      <td>🔄 Cohérence / Redondances</td>
+      <td style="color:var(--orange);font-weight:800;font-size:1.2rem">6/10</td>
+      <td>Duplication Loto/EuroMillions (~70%), double calcul ROI, vestiges. Fonctionnel mais peu DRY.</td>
+    </tr>
+    <tr>
+      <td>🧪 Tests</td>
+      <td style="color:var(--orange);font-weight:800;font-size:1.2rem">5/10</td>
+      <td>Routes et modèles testés, mais 0 tests unitaires pour BankrollManager, SeriesStatistiques, StatsPersonnelles. 14 composants non testés.</td>
+    </tr>
+  </table>
+
+  <div class="global-score" style="margin-top:2rem">
+    <div style="font-size:.9rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;">Note globale pondérée</div>
+    <div class="big">7.3<span style="font-size:1.5rem;color:var(--text-muted)">/10</span></div>
+    <div class="mention">Module solide et fonctionnellement très riche</div>
+    <div style="color:var(--text-muted);margin-top:1rem;font-size:.9rem;">
+      Pondération : Fonctionnalités (×2), Tests (×1.5), Architecture (×1.5), Bug (×1.5), les autres (×1)
+    </div>
+  </div>
+
+  <h3>Résumé en 3 points</h3>
+  <div class="callout callout-ok">
+    <strong>✅ Forces :</strong> Module extrêmement riche avec 3 types de jeux, 10 fonctions IA, bankroll Kelly, détection biais cognitifs, mode expert, backtest, deep linking. L'un des modules les plus complets et innovants de l'application.
+  </div>
+  <div class="callout callout-err">
+    <strong>🔴 Action urgente :</strong> Supprimer <code>sync_jeux_budget</code> qui écrit activement dans BudgetFamille (contredit l'architecture "budgets séparés"). Supprimer <code>BudgetResponsableResponse</code> (vestige jeu responsable).
+  </div>
+  <div class="callout callout-warn">
+    <strong>⚠️ À renforcer :</strong> Tests unitaires des services métier (BankrollManager surtout), validation Zod pour grilles Loto/EuroMillions, et nettoyage des 12 self-assignments.
+  </div>
+
+  <h3>Faut-il supprimer des fonctionnalités ?</h3>
+  <table>
+    <tr><th>Fonctionnalité</th><th>Verdict</th><th>Raison</th></tr>
+    <tr>
+      <td><code>sync_jeux_budget</code> (cron job)</td>
+      <td><span class="status status-err">SUPPRIMER</span></td>
+      <td>Contredit l'architecture documentée. Le dashboard unifié existe déjà pour la vue consolidée.</td>
+    </tr>
+    <tr>
+      <td><code>BudgetResponsableResponse</code></td>
+      <td><span class="status status-err">SUPPRIMER</span></td>
+      <td>Vestige du module "jeu responsable" explicitement retiré du codebase.</td>
+    </tr>
+    <tr>
+      <td>12 self-assignments</td>
+      <td><span class="status status-err">SUPPRIMER</span></td>
+      <td>Code mort — no-op complet.</td>
+    </tr>
+    <tr>
+      <td>Paris Sportifs</td>
+      <td><span class="status status-ok">GARDER</span></td>
+      <td>Module principal, très utilisé, bien intégré.</td>
+    </tr>
+    <tr>
+      <td>Loto</td>
+      <td><span class="status status-ok">GARDER</span></td>
+      <td>Complet avec IA, backtest, stats. Fonctionnel.</td>
+    </tr>
+    <tr>
+      <td>EuroMillions</td>
+      <td><span class="status status-ok">GARDER</span></td>
+      <td>Similaire au Loto mais avec étoiles. Garde sa valeur propre malgré duplication.</td>
+    </tr>
+    <tr>
+      <td>Bankroll management</td>
+      <td><span class="status status-ok">GARDER</span></td>
+      <td>Critère de Kelly = best practice industrie. Important pour le money management.</td>
+    </tr>
+    <tr>
+      <td>Détection biais cognitifs</td>
+      <td><span class="status status-ok">GARDER</span></td>
+      <td>Fonctionnalité différenciante et utile. Bien intégrée dans la page Paris.</td>
+    </tr>
+    <tr>
+      <td>Backtest</td>
+      <td><span class="status status-ok">GARDER</span></td>
+      <td>Permet de valider les stratégies objectivement. Valeur analytique forte.</td>
+    </tr>
+    <tr>
+      <td>Deep linking / Prefill URL</td>
+      <td><span class="status status-ok">GARDER</span></td>
+      <td>Essentiel pour l'intégration Telegram/Chrome extension.</td>
+    </tr>
+  </table>
+
+  <div style="text-align:center;margin-top:2rem;padding:1.5rem;color:var(--text-muted);font-size:.85rem;border-top:1px solid var(--surface2)">
+    Analyse générée le 19 avril 2026 — Assistant Matanne — Module Jeux v2026.4
+  </div>
+</section>
+
+</div><!-- .container -->
+</body>
+</html>

@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from enum import Enum, StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -180,6 +180,31 @@ class PreferencesNotification(BaseModel):
     # Horaires de silence (avec alias anglais)
     heures_silencieuses_debut: int | None = Field(default=22, alias="quiet_hours_start")
     heures_silencieuses_fin: int | None = Field(default=7, alias="quiet_hours_end")
+
+    @field_validator("heures_silencieuses_debut", "heures_silencieuses_fin", mode="before")
+    @classmethod
+    def normaliser_heure(cls, v: object) -> int | None:
+        """Accepte int, str 'HH:MM' ou str digits pour les heures de silence."""
+        if v is None:
+            return None
+        if isinstance(v, int):
+            return v
+        if isinstance(v, str):
+            stripped = v.strip()
+            # Format "HH:MM" — extraire la partie heures
+            if ":" in stripped:
+                heures_part = stripped.split(":", 1)[0]
+                if heures_part.isdigit():
+                    h = int(heures_part)
+                    if 0 <= h <= 23:
+                        return h
+            # Format digits purs
+            if stripped.isdigit():
+                h = int(stripped)
+                if 0 <= h <= 23:
+                    return h
+            raise ValueError(f"Format d'heure invalide : '{v}'. Attendu : int 0-23 ou 'HH:MM'")
+        raise ValueError(f"Type inattendu pour l'heure : {type(v)}")
 
     # Fréquence
     max_par_heure: int = Field(default=5, alias="max_per_hour")

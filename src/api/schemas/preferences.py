@@ -24,6 +24,12 @@ class PreferencesBase(BaseModel):
     robots: list[str] = Field(default_factory=list)
     magasins_preferes: list[str] = Field(default_factory=list)
 
+    # Objectifs nutritionnels quotidiens (configurables par profil)
+    objectif_calories: int = Field(2000, ge=1200, le=5000, description="Objectif calories quotidien (kcal)")
+    objectif_proteines: int = Field(60, ge=20, le=300, description="Objectif protéines quotidien (g)")
+    objectif_lipides: int = Field(70, ge=20, le=300, description="Objectif lipides quotidien (g)")
+    objectif_glucides: int = Field(260, ge=50, le=800, description="Objectif glucides quotidien (g)")
+
     model_config = {
         "json_schema_extra": {
             "example": {
@@ -65,6 +71,10 @@ class PreferencesPatch(BaseModel):
     viande_rouge_max: int | None = None
     robots: list[str] | None = None
     magasins_preferes: list[str] | None = None
+    objectif_calories: int | None = None
+    objectif_proteines: int | None = None
+    objectif_lipides: int | None = None
+    objectif_glucides: int | None = None
 
 
 class PreferencesResponse(PreferencesBase):
