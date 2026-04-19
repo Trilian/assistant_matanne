@@ -116,7 +116,6 @@ def configurer_jobs_planifies(planifier_job) -> None:
         CronTrigger(day_of_week="fri", hour=16, minute=0),
         replace_existing=True,
     )
-    planifier_job("sync_jeux_budget", CronTrigger(hour=22, minute=0), replace_existing=True)
     planifier_job(
         "analyse_nutrition_hebdo",
         CronTrigger(day_of_week="sun", hour=20, minute=0),

@@ -789,7 +789,7 @@ async def modifier_pari(
     """Met Ã  jour un pari (statut, gain, etc.)."""
     from decimal import Decimal
 
-    from src.core.models import BudgetFamille, HistoriqueJeux, PariSportif
+    from src.core.models import HistoriqueJeux, PariSportif
 
     def _query():
         with executer_avec_session() as session:
@@ -808,43 +808,12 @@ async def modifier_pari(
                 pari.notes = payload["notes"]
 
             statut_change = ancien_statut != pari.statut
-            sync_budget = False
             mise = Decimal(str(pari.mise or 0))
             gain = Decimal(str(pari.gain or 0))
             event_payload: dict[str, Any] | None = None
 
-            # IM-8 : synchroniser pertes + gains vers budget/finances avec logique idempotente.
+            # Mise à jour de l'historique jeux (budgets jeux/famille séparés).
             if statut_change and not pari.est_virtuel:
-                marqueur_sync = f"sync_jeux_budget:auto:pari:{pari.id}:"
-                (
-                    session.query(BudgetFamille)
-                    .filter(BudgetFamille.notes.like(f"{marqueur_sync}%"))
-                    .delete(synchronize_session=False)
-                )
-
-                if pari.statut == "perdu" and mise > 0:
-                    session.add(
-                        BudgetFamille(
-                            date=date.today(),
-                            categorie="jeux_paris_perte",
-                            description=f"Perte pari #{pari.id}",
-                            montant=float(mise),
-                            notes=f"{marqueur_sync}perte",
-                        )
-                    )
-                    sync_budget = True
-                elif pari.statut == "gagne" and gain > 0:
-                    session.add(
-                        BudgetFamille(
-                            date=date.today(),
-                            categorie="jeux_paris_gain",
-                            description=f"Gain pari #{pari.id}",
-                            montant=float(gain),
-                            notes=f"{marqueur_sync}gain",
-                        )
-                    )
-                    sync_budget = True
-
                 historique = (
                     session.query(HistoriqueJeux)
                     .filter(HistoriqueJeux.date == date.today(), HistoriqueJeux.type_jeu == "paris")
@@ -893,7 +862,6 @@ async def modifier_pari(
                 "statut": pari.statut,
                 "gain": float(pari.gain) if pari.gain else None,
                 "mise": float(pari.mise),
-                "sync_budget": sync_budget,
                 "_event_payload": event_payload,
             }
 

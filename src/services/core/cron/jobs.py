@@ -2163,68 +2163,7 @@ def _job_prediction_courses_weekly() -> None:
         logger.exception("Erreur JOB-1 prediction_courses_weekly")
 
 
-def _job_sync_jeux_budget() -> None:
-    """JOB-2 — Synchronise les gains/pertes jeux vers le budget famille."""
 
-    try:
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import BudgetFamille, PariSportif
-
-        today = date.today()
-
-        debut_jour = datetime.combine(today - timedelta(days=1), datetime.min.time(), tzinfo=UTC)
-
-        fin_jour = datetime.combine(today, datetime.min.time(), tzinfo=UTC)
-
-        with obtenir_contexte_db() as session:
-            mises = (
-                session.query(func.sum(PariSportif.mise))
-                .filter(PariSportif.cree_le >= debut_jour, PariSportif.cree_le < fin_jour)
-                .scalar()
-                or 0
-            )
-
-            gains = (
-                session.query(func.sum(PariSportif.gain))
-                .filter(PariSportif.cree_le >= debut_jour, PariSportif.cree_le < fin_jour)
-                .scalar()
-                or 0
-            )
-
-            net = float(gains) - float(mises)
-
-            if net == 0:
-                logger.info("JOB-2: aucun mouvement jeux à synchroniser")
-
-                return
-
-            existe = (
-                session.query(BudgetFamille)
-                .filter(
-                    BudgetFamille.date == (today - timedelta(days=1)),
-                    BudgetFamille.categorie == "jeux",
-                    BudgetFamille.description == "Sync jeux auto",
-                )
-                .first()
-            )
-
-            if existe is None:
-                session.add(
-                    BudgetFamille(
-                        date=today - timedelta(days=1),
-                        categorie="jeux",
-                        description="Sync jeux auto",
-                        montant=abs(net),
-                        notes=f"Net jeux J-1: {net:.2f} EUR (gains={float(gains):.2f}, mises={float(mises):.2f})",
-                    )
-                )
-
-                session.commit()
-
-        logger.info("JOB-2 exécuté: net jeux J-1 synchronisé (%.2f EUR)", net)
-
-    except Exception:
-        logger.exception("Erreur JOB-2 sync_jeux_budget")
 
 
 def _job_analyse_nutrition_hebdo() -> None:
@@ -4334,7 +4273,7 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "astuce_anti_gaspillage": ("Astuce anti-gaspillage", _job_astuce_anti_gaspillage),
     # Jobs existants (conservés)
     "prediction_courses_weekly": ("Prédiction courses hebdo", _job_prediction_courses_weekly),
-    "sync_jeux_budget": ("Sync jeux -> budget", _job_sync_jeux_budget),
+
     "analyse_nutrition_hebdo": ("Analyse nutrition hebdo", _job_analyse_nutrition_hebdo),
     "alertes_energie": ("Alertes énergie", _job_alertes_energie),
     "nettoyage_logs": ("Nettoyage logs > 90j", _job_nettoyage_logs),
@@ -5685,7 +5624,9 @@ def _job_sync_resultats_paris_auto() -> None:
     """Synchronise automatiquement les résultats de paris après les matchs."""
 
     try:
-        executer_job_par_id("sync_jeux_budget", source="cron")
+        from src.services.jeux._internal.paris_sync import sync_resultats_matchs
+
+        sync_resultats_matchs()
 
         logger.info("CRON sync_resultats_paris_auto exécuté")
 

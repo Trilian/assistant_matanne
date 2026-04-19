@@ -37,7 +37,6 @@ _LABELS_JOBS: dict[str, str] = {
     "rapport_maison_mensuel": "J5 Rapport maison mensuel (1er/mois 09h30)",
     "sync_openfoodfacts": "J6 Sync cache OpenFoodFacts (dim 03h00)",
     "prediction_courses_weekly": "JOB-1 Prédiction courses hebdo (dim 10h00)",
-    "sync_jeux_budget": "JOB-2 Sync jeux -> budget (22h00)",
     "analyse_nutrition_hebdo": "JOB-3 Analyse nutrition hebdo (dim 20h00)",
     "alertes_energie": "JOB-4 Alertes énergie (07h00)",
     "nettoyage_logs": "JOB-5 Nettoyage logs > 90j (dim 04h00)",
