@@ -416,21 +416,11 @@ class NotificationJeuxResponse(BaseModel):
 # ═══════════════════════════════════════════════════════════
 
 
-class BudgetResponsableResponse(BaseModel):
-    limite: float = 50.0
-    mises_cumulees: float = 0.0
-    pourcentage_utilise: float = 0.0
-    reste_disponible: float = 50.0
-    cooldown_actif: bool = False
-    auto_exclusion_jusqu_a: date | None = None
-
-
 class DashboardJeuxResponse(BaseModel):
     opportunites: list[SerieJeuxResponse] = Field(default_factory=list)
     matchs_jour: list[dict] = Field(default_factory=list)
     value_bets: list[ValueBetResponse] = Field(default_factory=list)
     loto_retard: list[NumeroRetardResponse] = Field(default_factory=list)
-    budget: BudgetResponsableResponse = Field(default_factory=BudgetResponsableResponse)
     kpis: KPIsJeuxResponse = Field(default_factory=KPIsJeuxResponse)
     analyse_ia: AnalyseIAResponse | None = None
 

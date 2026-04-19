@@ -1294,7 +1294,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | AnalyseIARequest | 2 |
 | AnalyseIAResponse | 6 |
 | BacktestResponse | 7 |
-| BudgetResponsableResponse | 6 |
 | CotesMatch | 3 |
 | DashboardJeuxResponse | 7 |
 | EquipeResponse | 12 |

@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Ã‰QUIPES
+# ÉQUIPES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -41,7 +41,7 @@ async def lister_equipes(
     search: str | None = Query(None, description="Recherche par nom"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les Ã©quipes de football."""
+    """Liste les équipes de football."""
     from src.core.models import Equipe
 
     def _query():
@@ -82,14 +82,14 @@ async def lister_equipes(
 @router.get("/equipes/{equipe_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_equipe(equipe_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """RÃ©cupÃ¨re une Ã©quipe avec sa forme rÃ©cente."""
+    """Récupère une équipe avec sa forme récente."""
     from src.core.models import Equipe
 
     def _query():
         with executer_avec_session() as session:
             equipe = session.query(Equipe).filter(Equipe.id == equipe_id).first()
             if not equipe:
-                raise HTTPException(status_code=404, detail="Ã‰quipe non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Équipe non trouvée")
 
             return {
                 "id": equipe.id,
@@ -122,7 +122,7 @@ async def lister_matchs(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     championnat: str | None = Query(None, description="Filtrer par championnat"),
-    joue: bool | None = Query(None, description="Filtrer par statut jouÃ©/non jouÃ©"),
+    joue: bool | None = Query(None, description="Filtrer par statut joué/non joué"),
     date_debut: date | None = Query(None, description="Date minimum"),
     date_fin: date | None = Query(None, description="Date maximum"),
     cursor: str | None = Query(None, description="Curseur pour pagination cursor-based"),
@@ -200,14 +200,14 @@ async def lister_matchs(
 @router.get("/matchs/{match_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_match(match_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """RÃ©cupÃ¨re un match avec ses paris."""
+    """Récupère un match avec ses paris."""
     from src.core.models import Match
 
     def _query():
         with executer_avec_session() as session:
             match = session.query(Match).filter(Match.id == match_id).first()
             if not match:
-                raise HTTPException(status_code=404, detail="Match non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Match non trouvé")
 
             return {
                 "id": match.id,
@@ -271,17 +271,17 @@ async def lister_matchs_expert(
     date_max: date | None = Query(None, description="Date maximum"),
     ev_min: float | None = Query(None, description="Expected Value minimum (0-1)"),
     confidence_min: float | None = Query(None, description="Confiance IA minimum (0-1)"),
-    pattern: str | None = Query(None, description="Pattern statistique dÃ©tectÃ©"),
-    search: str | None = Query(None, description="Recherche Ã©quipe"),
+    pattern: str | None = Query(None, description="Pattern statistique détecté"),
+    search: str | None = Query(None, description="Recherche équipe"),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Liste les matchs avec filtres avancÃ©s pour la vue Expert.
+    Liste les matchs avec filtres avancés pour la vue Expert.
 
     Filtre par championnat, dates, EV, confiance IA, patterns statistiques.
-    Retourne toutes les donnÃ©es nÃ©cessaires pour l'analyse experte.
+    Retourne toutes les données nécessaires pour l'analyse experte.
     """
     from sqlalchemy import and_, func, or_
 
@@ -310,7 +310,7 @@ async def lister_matchs_expert(
             if date_max:
                 query = query.filter(Match.date_match <= date_max)
 
-            # Filtres uniquement sur matchs non jouÃ©s avec prÃ©dictions
+            # Filtres uniquement sur matchs non joués avec prédictions
             query = query.filter(Match.joue == False)
             query = query.filter(Match.prediction_resultat.isnot(None))
 
@@ -318,13 +318,13 @@ async def lister_matchs_expert(
             if confidence_min is not None:
                 query = query.filter(Match.prediction_confiance >= confidence_min)
 
-            # Filtre par Expected Value (calculÃ©: meilleure_proba * meilleure_cote - 1)
+            # Filtre par Expected Value (calculé: meilleure_proba * meilleure_cote - 1)
             if ev_min is not None:
-                # Filtre approximatif - le calcul exact EV nÃ©cessite de dÃ©terminer meilleure cote/proba
+                # Filtre approximatif - le calcul exact EV nécessite de déterminer meilleure cote/proba
                 # On utilise la confiance comme proxy pour filtrage initial
                 query = query.filter(Match.prediction_confiance >= (ev_min / 0.20 + 0.5))
 
-            # Filtre par recherche Ã©quipe
+            # Filtre par recherche équipe
             if search:
                 safe_search = search.replace("%", "\\%").replace("_", "\\_")
                 query = query.filter(
@@ -340,7 +340,7 @@ async def lister_matchs_expert(
             total = query.count()
             items = query.offset((page - 1) * page_size).limit(page_size).all()
 
-            # Construction des rÃ©sultats avec calcul EV
+            # Construction des résultats avec calcul EV
             matchs_data = []
             for m in items:
                 # Calcul Expected Value
@@ -357,7 +357,7 @@ async def lister_matchs_expert(
                     if ev is None or ev_ext > ev:
                         ev = ev_ext
 
-                # Filtre final par EV (aprÃ¨s calcul exact)
+                # Filtre final par EV (après calcul exact)
                 if ev_min is not None and (ev is None or ev < ev_min):
                     total -= 1
                     continue
@@ -428,7 +428,7 @@ async def lister_matchs_expert(
 @gerer_exception_api
 async def obtenir_bankroll(
     user_id: int,
-    bankroll_initiale: float = Query(1000, description="Bankroll de dÃ©part"),
+    bankroll_initiale: float = Query(1000, description="Bankroll de départ"),
     jours: int = Query(30, description="Historique sur N jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -489,11 +489,11 @@ async def obtenir_bankroll(
 async def suggerer_mise_kelly(
     bankroll: float = Query(..., description="Bankroll actuelle"),
     edge: float = Query(..., description="Expected value (EV)"),
-    cote: float = Query(..., description="Cote dÃ©cimale"),
+    cote: float = Query(..., description="Cote décimale"),
     confiance_ia: float = Query(70, description="Confiance de l'IA (0-100)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """SuggÃ¨re une mise optimale selon le critÃ¨re de Kelly fractionnaire."""
+    """Suggère une mise optimale selon le critère de Kelly fractionnaire."""
     from src.services.jeux.bankroll_manager import get_bankroll_manager
 
     def _query():
@@ -527,7 +527,7 @@ async def lister_paris(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     statut: str | None = Query(None, description="en_attente, gagne, perdu, annule"),
-    est_virtuel: bool | None = Query(None, description="Paris virtuels ou rÃ©els"),
+    est_virtuel: bool | None = Query(None, description="Paris virtuels ou réels"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les paris sportifs."""
@@ -578,7 +578,7 @@ async def lister_paris(
 @router.get("/paris/stats", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def statistiques_paris(
-    est_virtuel: bool | None = Query(None, description="Stats paris virtuels ou rÃ©els"),
+    est_virtuel: bool | None = Query(None, description="Stats paris virtuels ou réels"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne les statistiques des paris sportifs."""
@@ -610,7 +610,7 @@ async def statistiques_paris(
                 .all()
             )
 
-            # Taux de rÃ©ussite
+            # Taux de réussite
             resolus = sum(count for stat, count in par_statut if stat in ("gagne", "perdu"))
             gagnes = next((count for stat, count in par_statut if stat == "gagne"), 0)
             taux_reussite = (gagnes / resolus * 100) if resolus > 0 else 0
@@ -634,12 +634,12 @@ async def analyser_patterns_utilisateur(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Analyse les patterns de paris de l'utilisateur pour dÃ©tecter les biais cognitifs.
+    Analyse les patterns de paris de l'utilisateur pour détecter les biais cognitifs.
 
     Retourne:
-    - regression_moyenne: Alerte si sÃ©rie exceptionnelle (hot/cold streak)
+    - regression_moyenne: Alerte si série exceptionnelle (hot/cold streak)
     - hot_hand: Alerte si clustering de victoires (illusion main chaude)
-    - gamblers_fallacy: Alerte si augmentation mise aprÃ¨s perte (erreur du parieur)
+    - gamblers_fallacy: Alerte si augmentation mise après perte (erreur du parieur)
     """
     from src.services.jeux.series_statistiques import SeriesStatistiquesService
 
@@ -741,7 +741,7 @@ async def creer_pari(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """CrÃ©e un nouveau pari sportif."""
+    """Crée un nouveau pari sportif."""
     from decimal import Decimal
 
     from src.core.models import Match, PariSportif
@@ -752,7 +752,7 @@ async def creer_pari(
 
             match = session.query(Match).filter(Match.id == payload["match_id"]).first()
             if not match:
-                raise HTTPException(status_code=404, detail="Match non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Match non trouvé")
 
             pari = PariSportif(
                 match_id=payload["match_id"],
@@ -786,7 +786,7 @@ async def modifier_pari(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met Ã  jour un pari (statut, gain, etc.)."""
+    """Met à jour un pari (statut, gain, etc.)."""
     from decimal import Decimal
 
     from src.core.models import HistoriqueJeux, PariSportif
@@ -795,7 +795,7 @@ async def modifier_pari(
         with executer_avec_session() as session:
             pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
             if not pari:
-                raise HTTPException(status_code=404, detail="Pari non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Pari non trouvé")
 
             ancien_statut = pari.statut
             ancien_gain = Decimal(str(pari.gain or 0))
@@ -896,16 +896,16 @@ async def supprimer_pari(
         with executer_avec_session() as session:
             pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
             if not pari:
-                raise HTTPException(status_code=404, detail="Pari non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Pari non trouvé")
             session.delete(pari)
             session.commit()
-            return MessageResponse(message="Pari supprimÃ©")
+            return MessageResponse(message="Pari supprimé")
 
     return await executer_async(_query)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SÃ‰RIES & ALERTES
+# SÉRIES & ALERTES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -916,7 +916,7 @@ async def lister_series(
     seuil: float = Query(2.0, ge=0),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """DÃ©tecte les opportunitÃ©s (sÃ©ries avec value >= seuil)."""
+    """Détecte les opportunités (séries avec value >= seuil)."""
     from src.services.jeux import obtenir_series_service
 
     def _query():
@@ -947,7 +947,7 @@ async def lister_alertes(
     type_jeu: str | None = Query(None, description="paris, loto, euromillions"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les alertes non notifiÃ©es."""
+    """Liste les alertes non notifiées."""
     from src.services.jeux import obtenir_series_service
 
     def _query():
@@ -975,7 +975,7 @@ async def lister_alertes(
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# PRÃ‰DICTIONS & VALUE BETS
+# PRÉDICTIONS & VALUE BETS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -985,7 +985,7 @@ async def prediction_match(
     match_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """PrÃ©diction IA pour un match donnÃ©."""
+    """Prédiction IA pour un match donné."""
     from src.core.models import Match
     from src.services.jeux import obtenir_prediction_service
 
@@ -993,9 +993,9 @@ async def prediction_match(
         with executer_avec_session() as session:
             match = session.query(Match).filter(Match.id == match_id).first()
             if not match:
-                raise HTTPException(status_code=404, detail="Match non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Match non trouvé")
 
-            # Construire les donnÃ©es de forme
+            # Construire les données de forme
             forme_dom = {
                 "victoires": match.equipe_domicile.victoires if match.equipe_domicile else 0,
                 "nuls": match.equipe_domicile.nuls if match.equipe_domicile else 0,
@@ -1155,7 +1155,7 @@ async def obtenir_historique_cotes(
     match_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """RÃ©cupÃ¨re l'historique des cotes d'un match pour heatmap."""
+    """Récupère l'historique des cotes d'un match pour heatmap."""
     from src.core.models import CoteHistorique
 
     def _query():

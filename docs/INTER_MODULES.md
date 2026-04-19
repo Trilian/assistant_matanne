@@ -152,7 +152,6 @@ flowchart LR
 | Job | Source → Destination |
 | ----- | --------------------- |
 | `sync_recoltes_inventaire` | Récoltes jardin → Inventaire cuisine |
-| `sync_jeux_budget` | Gains/pertes jeux → Budget famille |
 | `sync_entretien_budget` | Coûts entretien → Dépenses |
 | `sync_charges_dashboard` | Charges fixes → Métriques dashboard |
 | `suggestions_activites_meteo` | Météo → Activités |

@@ -74,7 +74,7 @@ async def lister_tirages_euromillions(
 async def lister_grilles_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les grilles Euromillions jouÃ©es."""
+    """Liste les grilles Euromillions jouées."""
     from src.services.jeux import obtenir_euromillions_crud_service
 
     def _query():
@@ -102,11 +102,11 @@ async def creer_grille_euromillions(
     numeros = payload.get("numeros", [])
     etoiles = payload.get("etoiles", [])
     if len(numeros) != 5 or len(etoiles) != 2:
-        raise HTTPException(status_code=400, detail="5 numÃ©ros et 2 Ã©toiles requis")
+        raise HTTPException(status_code=400, detail="5 numéros et 2 étoiles requis")
     if not all(1 <= n <= 50 for n in numeros):
-        raise HTTPException(status_code=400, detail="NumÃ©ros entre 1 et 50")
+        raise HTTPException(status_code=400, detail="Numéros entre 1 et 50")
     if not all(1 <= e <= 12 for e in etoiles):
-        raise HTTPException(status_code=400, detail="Ã‰toiles entre 1 et 12")
+        raise HTTPException(status_code=400, detail="Étoiles entre 1 et 12")
 
     def _query():
         svc = obtenir_euromillions_crud_service()
@@ -130,7 +130,7 @@ async def creer_grille_euromillions(
 async def stats_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Statistiques des numÃ©ros Euromillions."""
+    """Statistiques des numéros Euromillions."""
     from src.core.models.jeux import StatistiquesEuromillions
 
     def _query():
@@ -173,7 +173,7 @@ async def stats_euromillions(
 @gerer_exception_api
 async def lister_grilles_expert_euromillions(
     strategie: str | None = Query(None, description="equilibree, frequences, retards, ia_creative"),
-    qualite_min: float | None = Query(None, ge=0, le=100, description="Seuil de qualitÃ©"),
+    qualite_min: float | None = Query(None, ge=0, le=100, description="Seuil de qualité"),
     date_min: str | None = Query(None, description="Date min YYYY-MM-DD"),
     date_max: str | None = Query(None, description="Date max YYYY-MM-DD"),
     search: str | None = Query(None, description="Recherche texte"),
@@ -184,7 +184,7 @@ async def lister_grilles_expert_euromillions(
     """
     Liste les grilles Euromillions avec analyse expert.
 
-    Retourne qualitÃ©, distribution, backtest pour chaque grille.
+    Retourne qualité, distribution, backtest pour chaque grille.
     """
     from src.core.models.jeux import GrilleEuromillions
 
@@ -258,12 +258,12 @@ async def generer_grille_ia_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    GÃ©nÃ¨re une grille Euromillions avec IA.
-    StratÃ©gies disponibles:
-    - equilibree: Mix frÃ©quences + retards (dÃ©faut)
-    - frequences: NumÃ©ros chauds
-    - retards: NumÃ©ros en retard
-    - ia_creative: GÃ©nÃ©ration crÃ©ative par Mistral
+    Génère une grille Euromillions avec IA.
+    Stratégies disponibles:
+    - equilibree: Mix fréquences + retards (défaut)
+    - frequences: Numéros chauds
+    - retards: Numéros en retard
+    - ia_creative: Génération créative par Mistral
     """
     from src.services.jeux.euromillions_ia import obtenir_euromillions_ia_service
 
@@ -272,14 +272,14 @@ async def generer_grille_ia_euromillions(
         strategie = payload.get("strategie", "equilibree")
         # Calculer stats une seule fois
         stats = service.calculer_statistiques(jours=365)
-        # GÃ©nÃ©rer selon stratÃ©gie
+        # Générer selon stratégie
         if strategie == "frequences":
             grille = service.generer_grille_frequences(stats)
         elif strategie == "retards":
             grille = service.generer_grille_retards(stats)
         elif strategie == "ia_creative":
             grille = service.generer_grille_ia_creative(stats)
-        else:  # equilibree par dÃ©faut
+        else:  # equilibree par défaut
             grille = service.generer_grille_equilibree(stats)
         return {
             "numeros": grille.numeros,
@@ -303,7 +303,7 @@ async def generer_grille_euromillions(
     payload: GenererGrilleRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """GÃ©nÃ¨re une grille Euromillions (statistique, alÃ©atoire ou IA)."""
+    """Génère une grille Euromillions (statistique, aléatoire ou IA)."""
     import random
 
     def _query():

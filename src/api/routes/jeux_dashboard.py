@@ -31,7 +31,7 @@ router = APIRouter()
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# DASHBOARD AGRÃ‰GÃ‰
+# DASHBOARD AGRÉGÉ
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -40,7 +40,7 @@ router = APIRouter()
 async def dashboard_jeux(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Dashboard agrÃ©gÃ© : opportunitÃ©s, matchs du jour, budget, KPIs."""
+    """Dashboard agrégé : opportunités, matchs du jour, budget, KPIs."""
     from sqlalchemy import func
 
     from src.core.models import Match, PariSportif
@@ -53,7 +53,7 @@ async def dashboard_jeux(
         with executer_avec_session() as session:
             series_svc = obtenir_series_service()
             loto_data_svc = obtenir_loto_data_service()
-            # 1. OpportunitÃ©s (sÃ©ries avec value >= 2.0)
+            # 1. Opportunités (séries avec value >= 2.0)
             opportunites_raw = series_svc.detecter_opportunites(seuil=2.0)
             opportunites = [
                 {
@@ -96,7 +96,7 @@ async def dashboard_jeux(
                 }
                 for m in matchs_jour
             ]
-            # 3. Loto numÃ©ros en retard
+            # 3. Loto numéros en retard
             try:
                 numeros_retard_raw = loto_data_svc.obtenir_numeros_en_retard(seuil_value=2.0)
                 loto_retard = [
@@ -180,16 +180,16 @@ async def dashboard_jeux(
 @gerer_exception_api
 async def obtenir_stats_personnelles(
     user_id: int,
-    periode: int = Query(30, description="PÃ©riode en jours"),
+    periode: int = Query(30, description="Période en jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    RÃ©cupÃ¨re les statistiques personnelles d'un utilisateur.
+    Récupère les statistiques personnelles d'un utilisateur.
     Retourne:
     - ROI global
     - Win rate par type
     - Meilleurs patterns
-    - Ã‰volution mensuelle
+    - Évolution mensuelle
     """
 
     def _query():
@@ -200,7 +200,7 @@ async def obtenir_stats_personnelles(
         winrate_data = service.calculer_win_rate(user_id, jours=periode)
         patterns_data = service.analyser_patterns_gagnants(
             user_id, jours=periode * 3
-        )  # 3Ã— pÃ©riode pour patterns
+        )  # 3× période pour patterns
         evolution_data = service.obtenir_evolution_mensuelle(user_id, mois=6)
         return {
             "roi": roi_data,
@@ -220,7 +220,7 @@ async def obtenir_stats_personnelles(
 @router.get("/performance", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def performance_jeux(
-    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois (dÃ©faut: 6)"),
+    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois (défaut: 6)"),
     type_jeu: str | None = Query(None, description="paris ou loto"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -297,7 +297,7 @@ async def performance_jeux(
                 if worst_roi is None or roi_m < worst_roi:
                     worst_roi, worst_mois = roi_m, label
 
-            # SÃ©ries gagnantes/perdantes
+            # Séries gagnantes/perdantes
             paris_ordonnes = (
                 base_q.filter(PariSportif.statut.in_(["gagne", "perdu"]))
                 .order_by(PariSportif.cree_le)
@@ -380,11 +380,11 @@ async def performance_jeux(
 @gerer_exception_api
 async def performance_par_confiance(
     mois: int | None = Query(
-        None, ge=1, le=24, description="Nombre de mois Ã  analyser (dÃ©faut: 6)"
+        None, ge=1, le=24, description="Nombre de mois à analyser (défaut: 6)"
     ),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Distribution taux de rÃ©ussite par tranche de confiance IA (0-25%, 25-50%, 50-75%, 75-100%)."""
+    """Distribution taux de réussite par tranche de confiance IA (0-25%, 25-50%, 50-75%, 75-100%)."""
     from sqlalchemy import func
 
     from src.core.models import PariSportif
@@ -449,17 +449,17 @@ async def performance_par_confiance(
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# RÃ‰SUMÃ‰ MENSUEL IA
+# RÉSUMÉ MENSUEL IA
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/resume-mensuel", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def resume_mensuel(
-    mois: str | None = Query(None, description="Format YYYY-MM (dÃ©faut: mois courant)"),
+    mois: str | None = Query(None, description="Format YYYY-MM (défaut: mois courant)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """RÃ©sumÃ© mensuel IA avec analyse Mistral enrichie."""
+    """Résumé mensuel IA avec analyse Mistral enrichie."""
     from sqlalchemy import func
 
     from src.core.models import PariSportif
@@ -509,32 +509,32 @@ async def resume_mensuel(
 
             mois_str = f"{annee}-{mois_num:02d}"
 
-            # GÃ©nÃ©rer le rÃ©sumÃ© IA enrichi
+            # Générer le résumé IA enrichi
             try:
                 ai_svc = obtenir_jeux_ai_service()
                 resume = ai_svc.generer_resume_mensuel(mois_str, kpis)
                 return resume
             except Exception as e:
-                logger.warning(f"Erreur IA rÃ©sumÃ© mensuel, fallback: {e}")
-                # Fallback simple si IA Ã©choue
+                logger.warning(f"Erreur IA résumé mensuel, fallback: {e}")
+                # Fallback simple si IA échoue
                 points_forts = []
                 points_faibles = []
                 if roi > 0:
                     points_forts.append(f"ROI positif de {roi:.1f}%")
                 else:
-                    points_faibles.append(f"ROI nÃ©gatif de {roi:.1f}%")
+                    points_faibles.append(f"ROI négatif de {roi:.1f}%")
                 if taux >= 50:
-                    points_forts.append(f"Taux de rÃ©ussite de {taux:.1f}%")
+                    points_forts.append(f"Taux de réussite de {taux:.1f}%")
                 elif resolus > 0:
-                    points_faibles.append(f"Taux de rÃ©ussite bas: {taux:.1f}%")
+                    points_faibles.append(f"Taux de réussite bas: {taux:.1f}%")
 
                 return {
                     "mois": mois_str,
-                    "analyse": f"En {mois_num:02d}/{annee}, vous avez placÃ© {total} paris pour un ROI de {roi:.1f}%.",
+                    "analyse": f"En {mois_num:02d}/{annee}, vous avez placé {total} paris pour un ROI de {roi:.1f}%.",
                     "points_forts": points_forts or ["Aucun point fort ce mois"],
-                    "points_faibles": points_faibles or ["Performances Ã  amÃ©liorer"],
+                    "points_faibles": points_faibles or ["Performances à améliorer"],
                     "recommandations": [
-                        "Continuez Ã  privilÃ©gier les value bets avec edge > 5%",
+                        "Continuez à privilégier les value bets avec edge > 5%",
                         "Fixez-vous un budget mensuel et respectez-le",
                     ],
                     "kpis": kpis,
@@ -554,7 +554,7 @@ async def analyse_ia(
     payload: AnalyseIARequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """DÃ©clenche une analyse IA (paris ou loto)."""
+    """Déclenche une analyse IA (paris ou loto)."""
     from src.services.jeux import obtenir_jeux_ai_service
 
     def _query():
@@ -562,7 +562,7 @@ async def analyse_ia(
         if payload.type == "paris":
             result = svc.analyser_paris(
                 opportunites=payload.data.get("opportunites", []),
-                competition=payload.data.get("competition", "GÃ©nÃ©ral"),
+                competition=payload.data.get("competition", "Général"),
             )
         else:
             result = svc.analyser_loto(
@@ -594,7 +594,7 @@ async def backtest_jeux(
     nb_tirages: int = Query(100, ge=10, le=1000),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Backtest des stratÃ©gies sur les donnÃ©es historiques."""
+    """Backtest des stratégies sur les données historiques."""
     from src.services.jeux import (
         obtenir_backtest_service,
         obtenir_euromillions_crud_service,
@@ -629,7 +629,7 @@ async def backtest_jeux(
             "taux_reussite": result.taux_reussite if result else 0.0,
             "tirages_moyens": result.tirages_moyens_avant_realisation if result else 0.0,
             "seuil_value": seuil_value,
-            "avertissement": "Les performances passÃ©es ne prÃ©jugent pas des rÃ©sultats futurs.",
+            "avertissement": "Les performances passées ne préjugent pas des résultats futurs.",
         }
 
     return await executer_async(_query)
@@ -684,7 +684,7 @@ async def marquer_notification_lue(
         svc = obtenir_notification_jeux_service()
         success = svc.marquer_lue(notification_id)
         if not success:
-            raise HTTPException(status_code=404, detail="Notification non trouvÃ©e")
-        return MessageResponse(message="Notification marquÃ©e comme lue")
+            raise HTTPException(status_code=404, detail="Notification non trouvée")
+        return MessageResponse(message="Notification marquée comme lue")
 
     return await executer_async(_query)

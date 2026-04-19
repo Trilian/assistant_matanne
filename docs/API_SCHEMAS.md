@@ -293,7 +293,6 @@ Les schémas ci-dessous sont déjà présents dans `src/api/schemas/fonctionnali
 | AnalyseIARequest | 2 |
 | AnalyseIAResponse | 6 |
 | BacktestResponse | 7 |
-| BudgetResponsableResponse | 6 |
 | CotesMatch | 3 |
 | DashboardJeuxResponse | 7 |
 | EquipeResponse | 12 |

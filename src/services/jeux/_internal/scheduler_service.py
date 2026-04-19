@@ -58,8 +58,6 @@ from .sync_service import SyncService, obtenir_sync_service
 
 # Alias legacy patchable in old tests
 
-obtenir_sync_service = obtenir_sync_service
-
 
 logger = logging.getLogger(__name__)
 

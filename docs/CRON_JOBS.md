@@ -99,7 +99,7 @@ BackgroundScheduler(
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
 | `garmin_sync_matinal` | Quotidien 06:00 | Sync données Garmin (profils connectés, lookback 2j) | Service interne |
-| `sync_jeux_budget` | Quotidien 22:00 | Sync gains/pertes jeux → budget famille | Service interne |
+
 | `sync_recoltes_inventaire` | Quotidien 06:15 | Auto-sync récoltes jardin → inventaire cuisine | Service interne |
 | `suggestions_activites_meteo` | Quotidien 07:15 | Suggestions activités selon prévisions météo | ntfy + push |
 | `sync_veille_habitat` | Quotidien 12:15 | Sync alertes emploi habitat + push meilleurs résultats | Service interne |
