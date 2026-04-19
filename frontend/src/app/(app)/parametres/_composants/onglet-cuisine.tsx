@@ -79,6 +79,10 @@ export function OngletCuisine() {
         aliments_favoris: form.aliments_favoris.split(",").map((s) => s.trim()).filter(Boolean),
         robots: form.robots.split(",").map((s) => s.trim()).filter(Boolean),
         magasins_preferes: form.magasins_preferes.split(",").map((s) => s.trim()).filter(Boolean),
+        objectif_calories: prefs?.objectif_calories ?? 2000,
+        objectif_proteines: prefs?.objectif_proteines ?? 75,
+        objectif_lipides: prefs?.objectif_lipides ?? 65,
+        objectif_glucides: prefs?.objectif_glucides ?? 250,
       }),
     {
       onSuccess: () => {
