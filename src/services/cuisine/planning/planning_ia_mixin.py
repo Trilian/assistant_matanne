@@ -1040,7 +1040,6 @@ RULES:
                 proteine_accompagnement=jour_data.dejeuner_proteine_accompagnement,
                 est_reste=jour_data.dejeuner_est_reste,
                 reste_description=jour_data.dejeuner_reste_source,
-                plat_jules=jour_data.dejeuner_plat_jules,
             )
             score_dej = evaluer_equilibre_repas(repas_dej)
             repas_dej.score_equilibre = score_dej["score_equilibre"]
@@ -1145,7 +1144,6 @@ RULES:
                 proteine_accompagnement=jour_data.diner_proteine_accompagnement,
                 est_reste=jour_data.diner_est_reste,
                 reste_description=jour_data.diner_reste_source,
-                plat_jules=jour_data.diner_plat_jules,
             )
             score_din = evaluer_equilibre_repas(repas_din)
             repas_din.score_equilibre = score_din["score_equilibre"]
