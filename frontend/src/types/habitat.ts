@@ -263,3 +263,23 @@ export interface ResultatMarcheHabitat {
   repartition_types: RepartitionTypeMarcheHabitat[];
   transactions: TransactionMarcheHabitat[];
 }
+
+// ─── Baromètre national ──────────────────────────────────────────────────────
+
+export interface BarometreVilleHabitat {
+  ville: string;
+  code_postal: string;
+  departement: string;
+  prix_m2_median: number;
+  nb_transactions: number;
+  evolution_3m_pct?: number | null;
+  historique: HistoriqueMarcheHabitatPoint[];
+  est_locale: boolean;
+}
+
+export interface BarometreHabitat {
+  type_local: string;
+  villes: BarometreVilleHabitat[];
+  rang_local?: number | null;
+  updated_at: string;
+}

@@ -5,24 +5,23 @@ import { Stage, Layer, Rect, Circle, Text, Group, Line } from 'react-konva'
 import { KonvaEventObject } from 'konva/lib/Node'
 import { CanvasData, Mur, Porte, Fenetre, MeublePlan, Annotation, PlanMaison } from '@/types/maison'
 import { chargerCanvas, sauvegarderCanvas } from '@/bibliotheque/api/maison'
+import { Button } from '@/composants/ui/button'
+import { Card } from '@/composants/ui/card'
+import { Input } from '@/composants/ui/input'
 import {
-  Button,
-  Card,
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+} from '@/composants/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/composants/ui'
-import { Plus, Trash2, Move, Square, DoorOpen, Window, Armchair, Type, Save, ZoomIn, ZoomOut } from 'lucide-react'
+} from '@/composants/ui/tooltip'
+import { Trash2, Move, Square, DoorOpen, Type, Save, ZoomIn, ZoomOut } from 'lucide-react'
 
 interface EditeurPlan2DProps {
   planId: number
@@ -49,6 +48,7 @@ export function EditeurPlan2D({
   readOnly = false,
   onSave,
 }: EditeurPlan2DProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stageRef = useRef<any>(null)
   const [plan, setPlan] = useState<PlanMaison | null>(null)
   const [donnees, setDonnees] = useState<CanvasData>({
@@ -119,7 +119,7 @@ export function EditeurPlan2D({
       }
       setDonnees((prev) => ({
         ...prev,
-        murs: [...prev.murs, nouveauMur],
+        murs: [...(prev.murs ?? []), nouveauMur],
       }))
     },
     []
@@ -138,7 +138,7 @@ export function EditeurPlan2D({
       }
       setDonnees((prev) => ({
         ...prev,
-        portes: [...prev.portes, nouvellePorte],
+        portes: [...(prev.portes ?? []), nouvellePorte],
       }))
     },
     []
@@ -156,7 +156,7 @@ export function EditeurPlan2D({
       }
       setDonnees((prev) => ({
         ...prev,
-        fenetres: [...prev.fenetres, nouvelleFenetre],
+        fenetres: [...(prev.fenetres ?? []), nouvelleFenetre],
       }))
     },
     []
@@ -177,7 +177,7 @@ export function EditeurPlan2D({
       }
       setDonnees((prev) => ({
         ...prev,
-        meubles: [...prev.meubles, nouveauMeuble],
+        meubles: [...(prev.meubles ?? []), nouveauMeuble],
       }))
     },
     []
@@ -195,7 +195,7 @@ export function EditeurPlan2D({
       }
       setDonnees((prev) => ({
         ...prev,
-        annotations: [...prev.annotations, nouvelleAnnotation],
+        annotations: [...(prev.annotations ?? []), nouvelleAnnotation],
       }))
     },
     []
@@ -207,27 +207,31 @@ export function EditeurPlan2D({
     const { type, id } = elementSelectionne
     setDonnees((prev) => {
       const key = (type + 's') as keyof CanvasData
+      type WithId = { id: string }
       return {
         ...prev,
-        [key]: (prev[key] as any[]).filter((el: any) => el.id !== id),
+        [key]: ((prev[key] ?? []) as WithId[]).filter((el) => el.id !== id),
       }
     })
     setElementSelectionne(null)
   }, [elementSelectionne])
 
   const mettreAJourElement = useCallback(
-    (updates: Record<string, any>) => {
+    (updates: Record<string, unknown>) => {
       if (!elementSelectionne) return
 
       const { type, id } = elementSelectionne
       const key = (type + 's') as keyof CanvasData
 
-      setDonnees((prev) => ({
-        ...prev,
-        [key]: (prev[key] as any[]).map((el: any) =>
-          el.id === id ? { ...el, ...updates } : el
-        ),
-      }))
+      setDonnees((prev) => {
+        type WithId = { id: string }
+        return {
+          ...prev,
+          [key]: ((prev[key] ?? []) as WithId[]).map((el) =>
+            el.id === id ? { ...el, ...updates } : el
+          ),
+        }
+      })
     },
     [elementSelectionne]
   )
@@ -251,7 +255,7 @@ export function EditeurPlan2D({
     [toolActuel, ajouterPorte, ajouterFenetre, ajouterAnnotation]
   )
 
-  const handleMouseMove = useCallback((e: KonvaEventObject<MouseEvent>) => {
+  const handleMouseMove = useCallback((_e: KonvaEventObject<MouseEvent>) => {
     // Déplacement en zoom: tenir la molette ou espace + drag
   }, [])
 
@@ -355,7 +359,7 @@ export function EditeurPlan2D({
                   onClick={() => setToolActuel('fenetre')}
                   disabled={readOnly}
                 >
-                  <Window size={16} />
+                  <Square size={16} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Fenêtre</TooltipContent>
@@ -445,7 +449,7 @@ export function EditeurPlan2D({
 
       {/* ─── CANVAS PRINCIPAL ─────────────────────────────────────── */}
       <Card className="overflow-hidden">
-        <div className="bg-gray-100" style={{ height: '600px', position: 'relative' }}>
+        <div className="bg-gray-100 h-[600px] relative">
           <Stage
             ref={stageRef}
             width={plan?.largeur_canvas || 1000}
@@ -460,7 +464,7 @@ export function EditeurPlan2D({
           >
             <Layer>
               {/* Murs */}
-              {donnees.murs.map((mur) => (
+              {(donnees.murs ?? []).map((mur) => (
                 <Group key={mur.id}>
                   <Line
                     points={[mur.x1, mur.y1, mur.x2, mur.y2]}
@@ -489,7 +493,7 @@ export function EditeurPlan2D({
               ))}
 
               {/* Portes */}
-              {donnees.portes.map((porte) => (
+              {(donnees.portes ?? []).map((porte) => (
                 <Group
                   key={porte.id}
                   onClick={() =>
@@ -522,7 +526,7 @@ export function EditeurPlan2D({
               ))}
 
               {/* Fenêtres */}
-              {donnees.fenetres.map((fenetre) => (
+              {(donnees.fenetres ?? []).map((fenetre) => (
                 <Group
                   key={fenetre.id}
                   onClick={() =>
@@ -558,7 +562,7 @@ export function EditeurPlan2D({
               ))}
 
               {/* Meubles */}
-              {donnees.meubles.map((meuble) => (
+              {(donnees.meubles ?? []).map((meuble) => (
                 <Group
                   key={meuble.id}
                   onClick={() =>
@@ -589,7 +593,7 @@ export function EditeurPlan2D({
               ))}
 
               {/* Annotations */}
-              {donnees.annotations.map((annotation) => (
+              {(donnees.annotations ?? []).map((annotation) => (
                 <Group
                   key={annotation.id}
                   onClick={() =>
@@ -643,7 +647,7 @@ export function EditeurPlan2D({
                       min={1}
                       max={100}
                       defaultValue={
-                        donnees.murs.find((m) => m.id === elementSelectionne.id)
+                        (donnees.murs ?? []).find((m) => m.id === elementSelectionne.id)
                           ?.epaisseur
                       }
                       onChange={(e) =>
@@ -657,7 +661,7 @@ export function EditeurPlan2D({
                     <label className="text-sm font-medium">Label</label>
                     <Input
                       defaultValue={
-                        donnees.murs.find((m) => m.id === elementSelectionne.id)
+                        (donnees.murs ?? []).find((m) => m.id === elementSelectionne.id)
                           ?.label
                       }
                       onChange={(e) =>
@@ -674,7 +678,7 @@ export function EditeurPlan2D({
                     <label className="text-sm font-medium">Côté</label>
                     <Select
                       defaultValue={
-                        donnees.portes.find((p) => p.id === elementSelectionne.id)
+                        (donnees.portes ?? []).find((p) => p.id === elementSelectionne.id)
                           ?.cote || 'gauche'
                       }
                       onValueChange={(val) =>
@@ -695,7 +699,7 @@ export function EditeurPlan2D({
                     <label className="text-sm font-medium">Label</label>
                     <Input
                       defaultValue={
-                        donnees.portes.find((p) => p.id === elementSelectionne.id)
+                        (donnees.portes ?? []).find((p) => p.id === elementSelectionne.id)
                           ?.label
                       }
                       onChange={(e) =>
@@ -711,7 +715,7 @@ export function EditeurPlan2D({
                   <input
                     type="checkbox"
                     defaultChecked={
-                      donnees.fenetres.find((f) => f.id === elementSelectionne.id)
+                      (donnees.fenetres ?? []).find((f) => f.id === elementSelectionne.id)
                         ?.double_vitrage
                     }
                     onChange={(e) =>
@@ -730,7 +734,7 @@ export function EditeurPlan2D({
                     <label className="text-sm font-medium">Nom</label>
                     <Input
                       defaultValue={
-                        donnees.meubles.find((m) => m.id === elementSelectionne.id)
+                        (donnees.meubles ?? []).find((m) => m.id === elementSelectionne.id)
                           ?.nom
                       }
                       onChange={(e) =>
@@ -742,7 +746,7 @@ export function EditeurPlan2D({
                     <label className="text-sm font-medium">Type</label>
                     <Input
                       defaultValue={
-                        donnees.meubles.find((m) => m.id === elementSelectionne.id)
+                        (donnees.meubles ?? []).find((m) => m.id === elementSelectionne.id)
                           ?.type
                       }
                       onChange={(e) =>
@@ -757,7 +761,7 @@ export function EditeurPlan2D({
                       min={0}
                       max={360}
                       defaultValue={
-                        donnees.meubles.find((m) => m.id === elementSelectionne.id)
+                        (donnees.meubles ?? []).find((m) => m.id === elementSelectionne.id)
                           ?.rotation || 0
                       }
                       onChange={(e) =>
@@ -775,7 +779,7 @@ export function EditeurPlan2D({
                   <label className="text-sm font-medium">Texte</label>
                   <Input
                     defaultValue={
-                      donnees.annotations.find(
+                      (donnees.annotations ?? []).find(
                         (a) => a.id === elementSelectionne.id
                       )?.texte
                     }
@@ -795,11 +799,12 @@ export function EditeurPlan2D({
                   <div className="flex gap-2 items-center">
                     <input
                       type="color"
+                      aria-label="Couleur"
                       defaultValue={
                         elementSelectionne.type === 'mur'
-                          ? donnees.murs.find((m) => m.id === elementSelectionne.id)
+                          ? (donnees.murs ?? []).find((m) => m.id === elementSelectionne.id)
                               ?.couleur || '#8B7355'
-                          : donnees.meubles.find(
+                          : (donnees.meubles ?? []).find(
                               (m) => m.id === elementSelectionne.id
                             )?.couleur || '#D2B48C'
                       }
@@ -809,9 +814,9 @@ export function EditeurPlan2D({
                     />
                     <span className="text-sm text-gray-500">
                       {elementSelectionne.type === 'mur'
-                        ? donnees.murs.find((m) => m.id === elementSelectionne.id)
+                        ? (donnees.murs ?? []).find((m) => m.id === elementSelectionne.id)
                             ?.couleur
-                        : donnees.meubles.find(
+                        : (donnees.meubles ?? []).find(
                             (m) => m.id === elementSelectionne.id
                           )?.couleur}
                     </span>
@@ -824,7 +829,7 @@ export function EditeurPlan2D({
                   <input
                     type="checkbox"
                     defaultChecked={
-                      donnees.murs.find((m) => m.id === elementSelectionne.id)
+                      (donnees.murs ?? []).find((m) => m.id === elementSelectionne.id)
                         ?.porteur
                     }
                     onChange={(e) =>
@@ -841,3 +846,4 @@ export function EditeurPlan2D({
     </div>
   )
 }
+

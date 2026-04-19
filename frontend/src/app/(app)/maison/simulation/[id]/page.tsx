@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
+import React, { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -11,20 +11,19 @@ import {
   modifierSimulation,
 } from '@/bibliotheque/api/maison'
 import { ComparateurScenarios } from '@/composants/maison/comparateur-scenarios'
+import { Button } from '@/composants/ui/button'
+import { Card } from '@/composants/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
 import {
-  Button,
-  Card,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/composants/ui'
-import { ArrowLeft, Download, Edit, Save } from 'lucide-react'
+} from '@/composants/ui/select'
+import { ArrowLeft, Download } from 'lucide-react'
+
+type StatutSimulation = 'brouillon' | 'en_cours' | 'termine' | 'archive'
 
 /**
  * Page détail d'une simulation
@@ -35,8 +34,6 @@ export default function SimulationDetailPage() {
   const simulationId = parseInt(params.id as string)
   const queryClient = useQueryClient()
   const [scenarioSelectionne, setScenarioSelectionne] = useState<number | null>(null)
-  const [isPending, startTransition] = useTransition()
-  const [statutFiltre, setStatutFiltre] = useState('en_cours')
 
   // Récupérer la simulation
   const { data: simulation, isLoading, error } = useQuery({
@@ -62,7 +59,7 @@ export default function SimulationDetailPage() {
 
   // Mettre à jour le statut
   const { mutate: updateStatut } = useMutation({
-    mutationFn: (newStatut: string) =>
+    mutationFn: (newStatut: StatutSimulation) =>
       modifierSimulation(simulationId, { statut: newStatut }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['simulation', simulationId] })
@@ -143,7 +140,7 @@ export default function SimulationDetailPage() {
             <ComparateurScenarios
               scenarios={scenarios}
               comparaison={comparaison}
-              scenarioSelectionnéId={scenarioSelectionne}
+                scenarioSelectionnéId={scenarioSelectionne ?? undefined}
               onSelectScenario={(id) => {
                 setScenarioSelectionne(id)
                 // Rediriger vers l'édition du plan du scénario
@@ -188,7 +185,7 @@ export default function SimulationDetailPage() {
                 <label className="text-sm font-medium">Statut</label>
                 <Select
                   value={simulation.statut}
-                  onValueChange={(val) => updateStatut(val)}
+                  onValueChange={(val) => updateStatut(val as StatutSimulation)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -205,17 +202,27 @@ export default function SimulationDetailPage() {
               <div>
                 <label className="text-sm font-medium">Pièces concernées</label>
                 <div className="text-sm text-gray-600 mt-2">
-                  {simulation.pieces_concernees && simulation.pieces_concernees.length > 0
+                  {Array.isArray(simulation.pieces_concernees)
                     ? simulation.pieces_concernees.join(', ')
-                    : 'À définir'}
+                    : simulation.pieces_concernees || 'À définir'}
                 </div>
               </div>
 
               <div>
                 <label className="text-sm font-medium">Données</label>
                 <div className="space-y-2 text-sm text-gray-600">
-                  <div>Créée le {new Date(simulation.cree_le).toLocaleDateString('fr-FR')}</div>
-                  <div>Modifiée le {new Date(simulation.modifie_le).toLocaleDateString('fr-FR')}</div>
+                  <div>
+                    Créée le{' '}
+                    {simulation.created_at
+                      ? new Date(simulation.created_at).toLocaleDateString('fr-FR')
+                      : 'N/A'}
+                  </div>
+                  <div>
+                    Modifiée le{' '}
+                    {simulation.updated_at
+                      ? new Date(simulation.updated_at).toLocaleDateString('fr-FR')
+                      : 'N/A'}
+                  </div>
                 </div>
               </div>
             </div>

@@ -4,28 +4,12 @@
 
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo, useCallback, lazy, Suspense, type ReactNode } from "react";
 import {
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-  Plus,
   X,
   Loader2,
-  Download,
-  Search,
-  Clock,
-  ShoppingCart,
-  CookingPot,
-  CalendarDays,
   GripVertical,
-  Wifi,
-  WifiOff,
-  Users,
-  AlertTriangle,
-  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -43,7 +27,6 @@ import {
   DialogTitle,
 } from "@/composants/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/composants/ui/sheet";
-import { Input } from "@/composants/ui/input";
 import {
   Tabs,
   TabsContent,
@@ -52,65 +35,52 @@ import {
 } from "@/composants/ui/tabs";
 import {
   utiliserRequete,
-  utiliserMutation,
   utiliserInvalidation,
 } from "@/crochets/utiliser-api";
 import {
   obtenirPlanningSemaine,
   obtenirPlanningMensuel,
   obtenirConflitsPlanning,
-  definirRepas,
-  supprimerRepas,
   mettreAJourRepas,
   obtenirSuggestionsAccompagnements,
-  genererPlanningSemaine,
-  validerPlanning,
-  regenererPlanning,
-  regenererRepasIA,
   exporterPlanningIcal,
   exporterPlanningPdf,
   obtenirNutritionHebdo,
   obtenirSuggestionsRapides,
-  type ResultatGenerationPlanning,
 } from "@/bibliotheque/api/planning";
 import { toast } from "sonner";
-import { genererCoursesDepuisPlanning, type GenererCoursesResult } from "@/bibliotheque/api/courses";
-import { envoyerPlanningTelegram } from "@/bibliotheque/api/telegram";
-import { genererSessionDepuisPlanning } from "@/bibliotheque/api/batch-cooking";
+import type { GenererCoursesResult } from "@/bibliotheque/api/courses";
 import type { GenererSessionDepuisPlanningResult } from "@/types/batch-cooking";
 import type {
   TypeRepas,
   RepasPlanning,
   CreerRepasPlanningDTO,
-  SuggestionAccompagnement,
   SuggestionRecettePlanning,
 } from "@/types/planning";
-// Imported from dedicated component files:
-// CarteRepasDraggable, CaseRepasPlanning, PanneauAnalyseIAPlanning, AnalysePlanningIaResultat
-import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
-import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
 import { CalendrierMosaiqueRepas } from "@/composants/planning/calendrier-mosaique-repas";
 import { CalendrierColonnesPlanning } from "@/composants/planning/calendrier-colonnes-planning";
-import { CarteRepasDraggable, construireIdRepasPlanning } from "@/composants/planning/carte-repas-draggable";
-import { CaseRepasPlanning, construireIdCasePlanning } from "@/composants/planning/case-repas-planning";
-import { PanneauAnalyseIAPlanning, type AnalysePlanningIaResultat } from "@/composants/planning/panneau-analyse-ia";
+import { EnTetePlanning } from "@/composants/planning/en-tete-planning";
+import {
+  SectionAnalyseIaPlanning,
+  ContenuDialogueCoursesPlanning,
+  ContenuDialogueBatchPlanning,
+  ContenuDialogueModePreparationPlanning,
+} from "@/composants/planning/blocs-planning";
+import { DialogueAjoutRepasPlanning } from "@/composants/planning/dialogue-ajout-repas-planning";
+import { CaseRepasPlanning } from "@/composants/planning/case-repas-planning";
+import { type AnalysePlanningIaResultat } from "@/composants/planning/panneau-analyse-ia";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
-import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
-import { utiliserWebSocket } from "@/crochets/utiliser-websocket";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
+import { utiliserPlanningNavigation } from "@/crochets/utiliser-planning-navigation";
+import { utiliserPlanningDialogue } from "@/crochets/utiliser-planning-dialogue";
+import { utiliserPresencePlanning } from "@/crochets/utiliser-presence-planning";
+import { utiliserPlanningMutations } from "@/crochets/utiliser-planning-mutations";
+import { utiliserPlanningDnd } from "@/crochets/utiliser-planning-dnd";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
-import { obtenirFluxCuisine, type FluxCuisine } from "@/bibliotheque/api/ia-bridges";
-import {
-  analyserVarietePlanningRepas,
-  optimiserNutritionPlanningRepas,
-  suggererSimplificationPlanningRepas,
-  type AnalyseVarieteResponse,
-  type OptimisationNutritionPlanningResponse,
-  type SimplificationPlanningResponse,
-} from "@/bibliotheque/api/ia-modules";
+import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
 import { useIsMobile } from "@/crochets/use-mobile";
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import {
@@ -125,27 +95,15 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
-  useDraggable,
-  useDroppable,
   useSensor,
   useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
 } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import { ModalGenerationPlanning } from "@/composants/cuisine/modal-generation-planning";
 
 const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
 const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
 const ContenuSaisonnierLazy = lazy(() => import("../saisonnier/page"));
 
-// Noms des jours indexés 0=Dimanche … 6=Samedi (aligné sur Date.getDay())
-const NOMS_JOURS_SEMAINE = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-
-// Construit le tableau ordonné de 7 jours à partir d'un jour de début (0-6)
-function construireJoursOrdonnes(jourDebut: number): string[] {
-  return Array.from({ length: 7 }, (_, i) => NOMS_JOURS_SEMAINE[(jourDebut + i) % 7]);
-}
 const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
   { valeur: "petit_dejeuner", label: "Petit-déj", emoji: "🌅" },
@@ -153,8 +111,6 @@ const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
   { valeur: "gouter", label: "Goûter", emoji: "🍪" },
   { valeur: "diner", label: "Dîner", emoji: "🌙" },
 ];
-
-// CarteRepasDraggable, CaseRepasPlanning, PanneauAnalyseIAPlanning → composants dédiés dans @/composants/planning/
 
 function ResponsiveOverlay({
   open,
@@ -199,77 +155,72 @@ function ResponsiveOverlay({
   );
 }
 
-/**
- * Retourne la date du premier jour de la semaine courante + offset semaines.
- * @param offset  décalage de semaines (0 = semaine en cours)
- * @param jourDebut  0=Dimanche, 1=Lundi … 6=Samedi
- */
-function getDebutDeSemaine(offset: number, jourDebut: number): string {
-  const now = new Date();
-  const jour = now.getDay(); // 0=dim, 1=lun …
-  // Nombre de jours à soustraire pour revenir au jour de début voulu
-  let diff = ((jour - jourDebut + 7) % 7);
-  // Si diff === 0 on est pile le bon jour, aucun recul
-  const debut = new Date(now);
-  debut.setDate(now.getDate() - diff + offset * 7);
-  return debut.toISOString().split("T")[0];
-}
-
-function getDatesDeSemaine(dateDebut: string): string[] {
-  const dates: string[] = [];
-  const lundi = new Date(dateDebut);
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(lundi);
-    d.setDate(lundi.getDate() + i);
-    dates.push(d.toISOString().split("T")[0]);
-  }
-  return dates;
-}
-
-// construireIdCasePlanning et construireIdRepasPlanning sont importés depuis @/composants/planning/
-
-
-
 export default function PagePlanning() {
   const [vuePlanning, setVuePlanning] = useState<"planning" | "ma-semaine" | "nutrition" | "saisonnier">("planning");
   const { contexte: modeInvites, mettreAJour: mettreAJourModeInvites, reinitialiser: reinitialiserModeInvites } = utiliserModeInvites();
   const { utilisateur } = utiliserAuth();
-  const [modeAffichage, setModeAffichage] = useState<"semaine" | "mois">("semaine");
-  const [offsetSemaine, setOffsetSemaine] = useState(0);
-  const [offsetMois, setOffsetMois] = useState(0);
-  const [dialogueOuvert, setDialogueOuvert] = useState(false);
-  const [repasEnCours, setRepasEnCours] = useState<{
-    date: string;
-    type_repas: TypeRepas;
-  } | null>(null);
-  const [notesRepas, setNotesRepas] = useState("");
-  const [ongletDialogue, setOngletDialogue] = useState<"suggestions" | "libre">("suggestions");
-  const [rechercheRecette, setRechercheRecette] = useState("");
-  // Étape 2 du dialogue : accompagnements nutritionnels
-  const [repasIdCree, setRepasIdCree] = useState<number | null>(null);
-  const [dialogueEtape, setDialogueEtape] = useState<"choisir" | "equilibre">("choisir");
-  const [legumesForm, setLegumesForm] = useState("");
-  const [feculentsForm, setFeculentsForm] = useState("");
-  const [proteineForm, setProteineForm] = useState("");
-  const [laitageForm, setLaitageForm] = useState("");
-  const [dessertForm, setDessertForm] = useState("");
-  const [fruitGouter, setFruitGouter] = useState("");
-  const [gateauGouter, setGateauGouter] = useState("");
-  const [nomRepasAjoute, setNomRepasAjoute] = useState("");
-  const [suggestionsIA, setSuggestionsIA] = useState<SuggestionAccompagnement | null>(null);
-  const [enSuggestionIA, setEnSuggestionIA] = useState(false);
+  const {
+    modeAffichage,
+    setModeAffichage,
+    setOffsetSemaine,
+    dateDebut,
+    datesSemaine,
+    jours,
+    moisSelectionne,
+    moisLabel,
+    moisLabelComplet,
+    jourDebutSemaine,
+    setJourDebutSemaine,
+    reinitialiserPeriode,
+    allerPrecedent,
+    allerSuivant,
+  } = utiliserPlanningNavigation();
+  const {
+    dialogueOuvert,
+    setDialogueOuvert,
+    repasEnCours,
+    notesRepas,
+    setNotesRepas,
+    ongletDialogue,
+    setOngletDialogue,
+    rechercheRecette,
+    setRechercheRecette,
+    repasIdCree,
+    setRepasIdCree,
+    dialogueEtape,
+    setDialogueEtape,
+    legumesForm,
+    setLegumesForm,
+    feculentsForm,
+    setFeculentsForm,
+    proteineForm,
+    setProteineForm,
+    laitageForm,
+    setLaitageForm,
+    dessertForm,
+    setDessertForm,
+    fruitGouter,
+    setFruitGouter,
+    gateauGouter,
+    setGateauGouter,
+    nomRepasAjoute,
+    setNomRepasAjoute,
+    suggestionsIA,
+    setSuggestionsIA,
+    enSuggestionIA,
+    setEnSuggestionIA,
+    ouvrirDialogue,
+    reinitialiserDialogue,
+  } = utiliserPlanningDialogue();
   const [coursesDialogue, setCoursesDialogue] = useState(false);
   const [coursesResultat, setCoursesResultat] = useState<GenererCoursesResult | null>(null);
   const [batchDialogue, setBatchDialogue] = useState(false);
   const [batchResultat, setBatchResultat] = useState<GenererSessionDepuisPlanningResult | null>(null);
   const [choixModePrepa, setChoixModePrepa] = useState(false);
-  const [repasGlisse, setRepasGlisse] = useState<RepasPlanning | null>(null);
   const [analysePlanningIa, setAnalysePlanningIa] = useState<AnalysePlanningIaResultat | null>(null);
   const [modalGenerationOuvert, setModalGenerationOuvert] = useState(false);
   const [modalGenerationInitialPlats, setModalGenerationInitialPlats] = useState<string[]>([]);
   const [vuesSupplementairesOuvertes, setVuesSupplementairesOuvertes] = utiliserStockageLocal<boolean>("planning.vuesSupplementaires", false);
-  // Jour de début de semaine persisté en localStorage (0=Dim, 1=Lun … 6=Sam)
-  const [jourDebutSemaine, setJourDebutSemaine] = utiliserStockageLocal<number>("planning.jourDebutSemaine", 1);
   const [nbPersonnesBase, setNbPersonnesBase] = utiliserStockageLocal<number>("planning.nbPersonnes", 2);
   // Panneau invités : ouvert uniquement si l'utilisateur l'active, fermé par défaut
   const [panneauInvitesOuvert, setPanneauInvitesOuvert] = utiliserStockageLocal<boolean>("planning.panneauInvites", false);
@@ -285,57 +236,12 @@ export default function PagePlanning() {
   );
 
   const invalider = utiliserInvalidation();
-  const queryClient = useQueryClient();
-  const { planifierSuppression } = utiliserSuppressionAnnulable({ ttlMs: 8000 });
-  const dateDebut = getDebutDeSemaine(offsetSemaine, jourDebutSemaine);
-  const datesSemaine = getDatesDeSemaine(dateDebut);
-  const moisDate = new Date();
-  moisDate.setMonth(moisDate.getMonth() + offsetMois);
-  const moisSelectionne = `${moisDate.getFullYear()}-${String(moisDate.getMonth() + 1).padStart(2, "0")}`;
-  const jours = construireJoursOrdonnes(jourDebutSemaine);
-  const identifiantPresencePlanning = String(utilisateur?.id ?? utilisateur?.email ?? "");
-  const nomPresencePlanning = String(utilisateur?.nom ?? "Membre du foyer");
-  const baseWsPlanning = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws");
-  const salonPlanningId = Number(dateDebut.replaceAll("-", ""));
-  // Ne connecter le WebSocket qu'une fois l'identité résolue pour éviter les
-  // reconnexions multiples (planning-local → vrai UUID).
-  const urlWsPlanning = identifiantPresencePlanning
-    ? `${baseWsPlanning}/api/v1/ws/planning/${salonPlanningId}?user=${encodeURIComponent(identifiantPresencePlanning)}&username=${encodeURIComponent(nomPresencePlanning)}`
-    : null;
   const {
-    connecte: synchroPlanningActive,
-    utilisateurs: participantsPlanning,
-    envoyer: diffuserPlanning,
-    mode: modeSynchroPlanning,
-  } = utiliserWebSocket({
-    url: urlWsPlanning,
-    gestionnaires: {
-      repas_added: (message) => {
-        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
-          invalider(["planning"]);
-          invalider(["planning", "nutrition"]);
-        }
-      },
-      repas_updated: (message) => {
-        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
-          invalider(["planning"]);
-          invalider(["planning", "nutrition"]);
-        }
-      },
-      repas_removed: (message) => {
-        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
-          invalider(["planning"]);
-          invalider(["planning", "nutrition"]);
-        }
-      },
-      slot_swapped: (message) => {
-        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
-          invalider(["planning"]);
-        }
-      },
-    },
-    maxTentatives: 3,
-  });
+    identifiantPresencePlanning,
+    synchroPlanningActive,
+    diffuserPlanning,
+    modeSynchroPlanning,
+  } = utiliserPresencePlanning(utilisateur, dateDebut, invalider);
 
   // ─── Requêtes ───
   const { data: planning, isLoading } = utiliserRequete(
@@ -405,280 +311,6 @@ export default function PagePlanning() {
     return Array.from(new Set([...libellesFamille, ...libellesCalendrier])).slice(0, 6);
   }, [evenementsCalendrier, evenementsFamille]);
 
-  // ─── Mutations ───
-  const { mutate: ajouterRepas, isPending: enAjout } = utiliserMutation(
-    (dto: CreerRepasPlanningDTO) => definirRepas(dto),
-    {
-      onSuccess: (resultat, dto) => {
-        invalider(["planning"]);
-        diffuserPlanning({
-          action: "repas_added",
-          data: { date: dto.date, type_repas: dto.type_repas },
-          user_id: identifiantPresencePlanning,
-        });
-        // Pour déj/dîner/goûter : passer à l'étape accompagnements
-        if (dto.type_repas !== "petit_dejeuner" && "id" in resultat && typeof (resultat as { id: number }).id === "number") {
-          setRepasIdCree((resultat as { id: number }).id);
-          setDialogueEtape("equilibre");
-          toast.success("Repas ajouté — ajoutez les accompagnements !");
-        } else {
-          setDialogueOuvert(false);
-          setNotesRepas("");
-          toast.success("Repas ajouté");
-        }
-      },
-      onError: () => toast.error("Erreur lors de l'ajout"),
-    }
-  );
-
-  const { mutate: confirmerSuppressionRepas } = utiliserMutation((repas: RepasPlanning) => supprimerRepas(repas.id), {
-    onSuccess: (_resultat, repas) => {
-      invalider(["planning"]);
-      diffuserPlanning({
-        action: "repas_removed",
-        data: { repas_id: repas.id, date: repas.date_repas || repas.date, type_repas: repas.type_repas },
-        user_id: identifiantPresencePlanning,
-      });
-      toast.success("Repas retiré");
-    },
-    onError: () => toast.error("Erreur lors de la suppression"),
-  });
-
-  const retirerRepas = useCallback(
-    (repas: RepasPlanning) => {
-      const libelle = repas.recette_nom || repas.notes || `${repas.type_repas} du ${repas.date_repas || repas.date}`;
-      planifierSuppression(`repas-${repas.id}`, {
-        libelle,
-        onConfirmer: () => confirmerSuppressionRepas(repas),
-        onErreur: () => toast.error("Erreur lors de la suppression"),
-      });
-    },
-    [confirmerSuppressionRepas, planifierSuppression]
-  );
-
-  const modifierChampRepas = useCallback(
-    async (repasId: number, champ: string, valeur: string) => {
-      try {
-        await mettreAJourRepas(repasId, { [champ]: valeur } as Record<string, string>);
-        invalider(["planning"]);
-      } catch {
-        toast.error("Erreur lors de la modification");
-      }
-    },
-    [invalider]
-  );
-
-  const toastIaRef = useRef<string | number | null>(null);
-
-  const { mutate: genererIA, isPending: enGeneration } = utiliserMutation(
-    (params?: { legumes_souhaites?: string[]; feculents_souhaites?: string[]; plats_souhaites?: string[]; ingredients_interdits?: string[]; autoriser_restes?: boolean; nb_personnes?: number; cuisines_souhaitees?: string[] }) =>
-      genererPlanningSemaine({
-        date_debut: dateDebut,
-        nb_personnes: params?.nb_personnes ?? nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0),
-        preferences:
-          contexteInvitesActif || evenementsModeInvites.length > 0
-            ? {
-                mode_invites: contexteInvitesActif,
-                nb_invites: contexteInvitesActif ? modeInvites.nbInvites : 0,
-                occasion: modeInvites.occasion || undefined,
-                evenements: evenementsModeInvites,
-              }
-            : undefined,
-        legumes_souhaites: params?.legumes_souhaites ?? [],
-        feculents_souhaites: params?.feculents_souhaites ?? [],
-        plats_souhaites: params?.plats_souhaites ?? [],
-        ingredients_interdits: params?.ingredients_interdits ?? [],
-        autoriser_restes: params?.autoriser_restes ?? true,
-        cuisines_souhaitees: params?.cuisines_souhaitees ?? [],
-      }),
-    {
-      onSuccess: async (resultat: ResultatGenerationPlanning) => {
-        if (toastIaRef.current !== null) {
-          toast.dismiss(toastIaRef.current);
-          toastIaRef.current = null;
-        }
-
-        // Pré-peupler le flux pour afficher le bandeau brouillon immédiatement
-        if (resultat.planning_id) {
-          queryClient.setQueryData(["flux", "cuisine", String(resultat.planning_id)], {
-            etape_actuelle: "valider_planning",
-            planning: {
-              id: resultat.planning_id,
-              semaine: resultat.date_debut,
-              etat: "brouillon",
-            },
-            courses: null,
-            actions_suivantes: [],
-          });
-        }
-
-        // Forcer un rechargement immédiat du planning (refetchQueries garantit un vrai appel GET
-        // contrairement à invalider qui se contente de marquer comme stale).
-        void queryClient.refetchQueries({ queryKey: ["planning", dateDebut], exact: true });
-        // Invalider les sous-requêtes planning (nutrition, conflits…) pour qu'elles se rechargent aussi.
-        invalider(["planning"]);
-        // Second rechargement décalé de 3 s pour absorber les race conditions Railway (transaction non encore committée).
-        setTimeout(() => {
-          void queryClient.refetchQueries({ queryKey: ["planning", dateDebut], exact: true });
-        }, 3000);
-        // L'invalidation du flux sera faite par validerBrouillonPlanning.onSuccess.
-
-        if (!resultat.genere_par_ia) {
-          const msg = "Le planning a été créé sans IA. Réessayez ou vérifiez la clé Mistral.";
-          setErreurIA(msg);
-          toast.error(msg, { duration: 8000 });
-        } else {
-          setErreurIA(null);
-          toast.success("Planning généré par l'IA !", { duration: 5000 });
-        }
-
-        if (resultat?.planning_id) {
-          try {
-            await envoyerPlanningTelegram(resultat.planning_id);
-          } catch {
-            // Ne bloque pas le flux principal si Telegram échoue.
-            if (resultat.genere_par_ia) {
-              toast.info("Planning généré, notification Telegram non envoyée.");
-            }
-          }
-        }
-      },
-      onError: (erreur) => {
-        if (toastIaRef.current !== null) {
-          toast.dismiss(toastIaRef.current);
-          toastIaRef.current = null;
-        }
-        // Le backend a peut-être quand même créé le planning (timeout Axios côté client
-        // avant que le serveur réponde) — on invalide pour récupérer le nouveau brouillon.
-        invalider(["planning"]);
-        invalider(["flux", "cuisine"]);
-        const detail =
-          (erreur as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-        const msg = detail ?? "Erreur lors de la génération IA";
-        setErreurIA(msg);
-        toast.error(msg, { duration: 6000 });
-      },
-    }
-  );
-
-  const { mutate: genererCourses, isPending: enGenerationCourses } = utiliserMutation(
-    () =>
-      genererCoursesDepuisPlanning(dateDebut, {
-        nbInvites: contexteInvitesActif ? modeInvites.nbInvites : 0,
-        nbPersonnes: nbPersonnesBase,
-        evenements: evenementsModeInvites,
-        nomListe:
-          contexteInvitesActif && modeInvites.occasion
-            ? `Courses ${modeInvites.occasion}`
-            : undefined,
-      }),
-    {
-      onSuccess: (result) => {
-        setCoursesResultat(result);
-        setCoursesDialogue(true);
-        toast.success(`${result.total_articles} articles ajoutés !`);
-      },
-      onError: (err) => {
-        const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-        toast.error(detail ?? "Erreur lors de la génération des courses", { duration: 8000 });
-      },
-    }
-  );
-
-  const { mutate: analyserPlanningIA, isPending: enAnalysePlanningIA } = utiliserMutation(
-    async () => {
-      if (planningPourAnalyseIa.length === 0) {
-        throw new Error("Ajoutez au moins un repas sur la semaine avant l'analyse IA.");
-      }
-
-      const [variete, nutritionIA, simplification] = await Promise.all([
-        analyserVarietePlanningRepas({ planning_repas: planningPourAnalyseIa }),
-        optimiserNutritionPlanningRepas({ planning_repas: planningPourAnalyseIa }),
-        suggererSimplificationPlanningRepas({
-          planning_repas: planningPourAnalyseIa,
-          nb_heures_cuisine_max: 4,
-        }),
-      ]);
-
-      return { variete, nutrition: nutritionIA, simplification };
-    },
-    {
-      onSuccess: (resultat) => {
-        setAnalysePlanningIa(resultat);
-        toast.success("Analyse IA du planning prête");
-      },
-      onError: (erreur) => {
-        toast.error(erreur instanceof Error ? erreur.message : "Erreur lors de l'analyse IA");
-      },
-    }
-  );
-
-  const { mutate: validerBrouillonPlanning, isPending: enValidationPlanning } = utiliserMutation(
-    (planningId: number) => validerPlanning(planningId),
-    {
-      onSuccess: () => {
-        // Fermeture immédiate du bandeau sans attendre le refetch.
-        // setQueriesData (match partiel) couvre toutes les keys ["flux","cuisine","<id>"]
-        // même si planning_id n'est pas encore résolu dans la closure.
-        queryClient.setQueriesData<FluxCuisine>(
-          { queryKey: ["flux", "cuisine"] },
-          (old) => old?.etape_actuelle === "valider_planning" ? { ...old, etape_actuelle: "generer_courses" } : old
-        );
-        invalider(["planning"]);
-        invalider(["flux", "cuisine"]);
-        toast.success("Planning validé, vous pouvez confirmer la liste de courses ensuite.");
-      },
-      onError: () => toast.error("Impossible de valider ce planning"),
-    }
-  );
-
-  const { mutate: regenererBrouillonPlanning, isPending: enRegenerationPlanning } = utiliserMutation(
-    (planningId: number) => regenererPlanning(planningId),
-    {
-      onSuccess: () => {
-        invalider(["planning"]);
-        invalider(["flux", "cuisine"]);
-        toast.success("Nouveau brouillon généré");
-      },
-      onError: () => toast.error("Impossible de régénérer le planning"),
-    }
-  );
-
-  const { mutate: regenererUnRepas, isPending: enRegenerationRepas } = utiliserMutation(
-    (repasId: number) => regenererRepasIA(repasId),
-    {
-      onSuccess: (result) => {
-        invalider(["planning"]);
-        toast.success(result.message || "Repas régénéré");
-      },
-      onError: () => toast.error("Impossible de régénérer ce repas"),
-    }
-  );
-
-  const { mutate: genererBatch, isPending: enGenerationBatch } = utiliserMutation(
-    () => {
-      if (!planning) throw new Error("Pas de planning");
-      if (!planning.planning_id) {
-        throw new Error("Planning sans identifiant. Générez d'abord un planning persistant.");
-      }
-      // Date session = dimanche de cette semaine
-      const dimanche = new Date(dateDebut);
-      dimanche.setDate(dimanche.getDate() + 6);
-      return genererSessionDepuisPlanning({
-        planning_id: planning.planning_id,
-        date_session: dimanche.toISOString().split("T")[0],
-      });
-    },
-    {
-      onSuccess: (result) => {
-        setBatchResultat(result);
-        setBatchDialogue(true);
-        toast.success(`Session batch créée avec ${result.nb_recettes} recettes !`);
-      },
-      onError: () => toast.error("Erreur lors de la création de la session batch"),
-    }
-  );
-
   // ─── Helpers ───
   const repasParJour = useMemo(() => {
     const map: Record<string, RepasPlanning[]> = {};
@@ -726,6 +358,57 @@ export default function PagePlanning() {
       .filter((jour) => Boolean(jour.petit_dej || jour.midi || jour.soir));
   }, [datesSemaine, repasParJour]);
 
+  const {
+    repasGlisse,
+    setRepasGlisse,
+    handleDragStart,
+    handleDragEnd,
+  } = utiliserPlanningDnd({
+    repasPlanning: planning?.repas,
+    identifiantPresencePlanning,
+    diffuserPlanning,
+  });
+
+  const {
+    ajouterRepas,
+    enAjout,
+    retirerRepas,
+    modifierChampRepas,
+    lancerGenerationIA,
+    enGeneration,
+    genererCourses,
+    enGenerationCourses,
+    analyserPlanningIA,
+    enAnalysePlanningIA,
+    validerBrouillonPlanning,
+    enValidationPlanning,
+    regenererBrouillonPlanning,
+    enRegenerationPlanning,
+    regenererUnRepas,
+    enGenerationBatch,
+    genererBatch,
+  } = utiliserPlanningMutations({
+    dateDebut,
+    nbPersonnesBase,
+    contexteInvitesActif,
+    modeInvites,
+    evenementsModeInvites,
+    identifiantPresencePlanning,
+    diffuserPlanning,
+    setRepasIdCree,
+    setDialogueEtape,
+    setDialogueOuvert,
+    setNotesRepas,
+    setErreurIA,
+    setCoursesResultat,
+    setCoursesDialogue,
+    planningPourAnalyseIa,
+    setAnalysePlanningIa,
+    planningId: planning?.planning_id,
+    setBatchResultat,
+    setBatchDialogue,
+  });
+
   // Noms dédupliqués des déjeuners/dîners pour la section "Conserver" du modal
   const repasActuelsSemaine = useMemo(() => {
     const noms = datesSemaine.flatMap((date) =>
@@ -741,99 +424,6 @@ export default function PagePlanning() {
     return repasParJour[date]?.find((r) => r.type_repas === type);
   }
 
-  function ouvrirDialogue(date: string, type: TypeRepas) {
-    setRepasEnCours({ date, type_repas: type });
-    setNotesRepas("");
-    setRechercheRecette("");
-    setOngletDialogue("suggestions");
-    setRepasIdCree(null);
-    setDialogueEtape("choisir");
-    setLegumesForm("");
-    setFeculentsForm("");
-    setProteineForm("");
-    setLaitageForm("");
-    setDessertForm("");
-    setFruitGouter("");
-    setGateauGouter("");
-    setNomRepasAjoute("");
-    setSuggestionsIA(null);
-    setDialogueOuvert(true);
-  }
-
-  const deplacerRepas = useCallback(
-    async (dateCible: string, typeCible: TypeRepas, repasSource?: RepasPlanning | null) => {
-      const repasActif = repasSource ?? repasGlisse;
-      if (!repasActif) return;
-
-      const dateSource = (repasActif.date_repas || repasActif.date || "").split("T")[0];
-      if (dateSource === dateCible && repasActif.type_repas === typeCible) {
-        setRepasGlisse(null);
-        return;
-      }
-
-      try {
-        await definirRepas({
-          date: dateCible,
-          type_repas: typeCible,
-          recette_id: repasActif.recette_id,
-          notes: repasActif.notes ?? repasActif.recette_nom,
-          portions: repasActif.portions,
-        });
-
-        await supprimerRepas(repasActif.id);
-        invalider(["planning"]);
-        diffuserPlanning({
-          action: "slot_swapped",
-          data: {
-            repas_id: repasActif.id,
-            date_source: dateSource,
-            type_source: repasActif.type_repas,
-            date_cible: dateCible,
-            type_cible: typeCible,
-          },
-          user_id: identifiantPresencePlanning,
-        });
-        toast.success("Repas déplacé");
-      } catch {
-        toast.error("Impossible de déplacer ce repas");
-      } finally {
-        setRepasGlisse(null);
-      }
-    },
-    [repasGlisse, invalider, diffuserPlanning]
-  );
-
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      const repasId = Number(String(event.active.id).replace("repas::", ""));
-      const repas = planning?.repas?.find((item) => item.id === repasId) ?? null;
-      setRepasGlisse(repas);
-    },
-    [planning?.repas]
-  );
-
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      const repasId = Number(String(active.id).replace("repas::", ""));
-      const repas = planning?.repas?.find((item) => item.id === repasId) ?? repasGlisse;
-
-      if (!over || !repas) {
-        setRepasGlisse(null);
-        return;
-      }
-
-      const [prefixe, dateCible, typeCible] = String(over.id).split("::");
-      if (prefixe !== "case" || !dateCible || !typeCible) {
-        setRepasGlisse(null);
-        return;
-      }
-
-      void deplacerRepas(dateCible, typeCible as TypeRepas, repas);
-    },
-    [deplacerRepas, planning?.repas, repasGlisse]
-  );
-
   const choisirRecette = useCallback(
     (recette: SuggestionRecettePlanning) => {
       if (!repasEnCours) return;
@@ -848,6 +438,81 @@ export default function PagePlanning() {
     [repasEnCours, ajouterRepas]
   );
 
+  const ajouterTexteLibre = useCallback(() => {
+    if (!repasEnCours) return;
+    setNomRepasAjoute(notesRepas);
+    ajouterRepas({
+      date: repasEnCours.date,
+      type_repas: repasEnCours.type_repas,
+      notes: notesRepas,
+    });
+  }, [repasEnCours, notesRepas, ajouterRepas]);
+
+  const demanderSuggestionsAccompagnements = useCallback(async () => {
+    if (!repasIdCree) return;
+    setEnSuggestionIA(true);
+    try {
+      const s = await obtenirSuggestionsAccompagnements(repasIdCree);
+      setSuggestionsIA(s);
+      if (s.legumes[0]) setLegumesForm(s.legumes[0]);
+      if (s.feculents[0]) setFeculentsForm(s.feculents[0]);
+      if (s.proteines[0]) setProteineForm(s.proteines[0]);
+    } catch {
+      toast.error("Impossible de générer des suggestions");
+    } finally {
+      setEnSuggestionIA(false);
+    }
+  }, [repasIdCree, setEnSuggestionIA, setSuggestionsIA, setLegumesForm, setFeculentsForm, setProteineForm]);
+
+  const passerEquilibre = useCallback(() => {
+    invalider(["planning"]);
+    setDialogueOuvert(false);
+    setDialogueEtape("choisir");
+    setRepasIdCree(null);
+  }, [invalider, setDialogueOuvert, setDialogueEtape, setRepasIdCree]);
+
+  const confirmerEquilibre = useCallback(async () => {
+    if (!repasIdCree || !repasEnCours) return;
+    const payload: Partial<CreerRepasPlanningDTO> =
+      repasEnCours.type_repas === "gouter"
+        ? {
+            laitage: laitageForm || undefined,
+            fruit_gouter: fruitGouter || undefined,
+            gateau_gouter: gateauGouter || undefined,
+          }
+        : {
+            legumes: legumesForm || undefined,
+            feculents: feculentsForm || undefined,
+            proteine_accompagnement: proteineForm || undefined,
+            laitage: laitageForm || undefined,
+            dessert: dessertForm || undefined,
+          };
+    try {
+      await mettreAJourRepas(repasIdCree, payload);
+      invalider(["planning"]);
+      toast.success("Accompagnements enregistrés");
+      setDialogueOuvert(false);
+      setDialogueEtape("choisir");
+      setRepasIdCree(null);
+    } catch {
+      toast.error("Impossible de sauvegarder les accompagnements");
+    }
+  }, [
+    repasIdCree,
+    repasEnCours,
+    laitageForm,
+    fruitGouter,
+    gateauGouter,
+    legumesForm,
+    feculentsForm,
+    proteineForm,
+    dessertForm,
+    invalider,
+    setDialogueOuvert,
+    setDialogueEtape,
+    setRepasIdCree,
+  ]);
+
   const suggestionsFiltrees = useMemo(() => {
     if (!suggestions) return [];
     if (!rechercheRecette.trim()) return suggestions;
@@ -858,16 +523,6 @@ export default function PagePlanning() {
         (s.categorie ?? "").toLowerCase().includes(q)
     );
   }, [suggestions, rechercheRecette]);
-
-  const moisLabel = new Date(dateDebut).toLocaleDateString("fr-FR", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const moisLabelComplet = moisDate.toLocaleDateString("fr-FR", {
-    month: "long",
-    year: "numeric",
-  });
 
   const resumePeriode =
     modeAffichage === "semaine"
@@ -921,255 +576,54 @@ export default function PagePlanning() {
 
         <TabsContent value="planning" className="mt-4 space-y-6">
       {/* ─── En-tête ─── */}
-      <Card className="overflow-hidden border-orange-200/70 bg-[linear-gradient(135deg,rgba(255,247,237,0.96),rgba(255,255,255,0.92))] shadow-sm dark:border-orange-900/60 dark:bg-[linear-gradient(135deg,rgba(24,16,10,0.96),rgba(9,14,22,0.94))]">
-        <CardContent className="flex flex-col gap-5 p-5">
-          {/* ─ Ligne 1 : titre + badges ─ */}
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-1.5">
-              <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">📅 Planning repas</h1>
-              <p className="text-sm leading-6 text-muted-foreground">
-                {resumePeriode} — organisez la semaine, gardez la synchro foyer et lancez courses ou préparation depuis un seul écran.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-              <Badge variant="secondary" className="bg-white/80 text-orange-900 dark:bg-white/10 dark:text-orange-100">
-                <CalendarDays className="mr-1 h-3.5 w-3.5" />
-                Planification hebdo
-              </Badge>
-              <Badge variant={synchroPlanningActive ? "default" : modeSynchroPlanning === "polling" ? "secondary" : "outline"}>
-                {synchroPlanningActive ? (
-                  <span className="inline-flex items-center gap-1"><Wifi className="h-3 w-3" /> Synchro live</span>
-                ) : (
-                  <span className="inline-flex items-center gap-1"><WifiOff className="h-3 w-3" /> {modeSynchroPlanning === "polling" ? "Fallback réseau" : "Hors temps réel"}</span>
-                )}
-              </Badge>
-              {contexteInvitesActif ? (
-                <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
-                  Invités : +{modeInvites.nbInvites}
-                </Badge>
-              ) : null}
-            </div>
-          </div>
-
-          {/* ─ Ligne 2 : stats pleine largeur ─ */}
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
-            {statsPlanning.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-white/5"
-              >
-                <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{stat.label}</p>
-                <p className="mt-1 text-xl font-semibold">{stat.valeur}</p>
-              </div>
-            ))}
-            {/* Personnes — ajustable */}
-            <div className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-white/5">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Personnes</p>
-              <div className="mt-1 flex items-center gap-2">
-                <button
-                  type="button"
-                  className="flex h-6 w-6 items-center justify-center rounded-full border text-sm leading-none hover:bg-muted"
-                  onClick={() => setNbPersonnesBase(Math.max(1, nbPersonnesBase - 1))}
-                  aria-label="Réduire le nombre de personnes"
-                >−</button>
-                <span className="text-xl font-semibold">{nbPersonnes} pers.</span>
-                <button
-                  type="button"
-                  className="flex h-6 w-6 items-center justify-center rounded-full border text-sm leading-none hover:bg-muted"
-                  onClick={() => setNbPersonnesBase(nbPersonnesBase + 1)}
-                  aria-label="Augmenter le nombre de personnes"
-                >+</button>
-              </div>
-              {contexteInvitesActif && (
-                <p className="text-[10px] text-muted-foreground mt-0.5">dont {modeInvites.nbInvites} invité(s)</p>
-              )}
-            </div>
-          </div>
-
-          {/* ─ Ligne 3 : navigation + actions pleine largeur ─ */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Navigation temporelle */}
-            <div className="flex items-center gap-1.5">
-              <div className="rounded-xl border border-white/60 bg-white/80 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
-                <div className="flex items-center gap-0.5">
-                  <Button
-                    variant={modeAffichage === "semaine" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setModeAffichage("semaine")}
-                  >
-                    Semaine
-                  </Button>
-                  <Button
-                    variant={modeAffichage === "mois" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setModeAffichage("mois")}
-                  >
-                    Mois
-                  </Button>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  if (modeAffichage === "semaine") {
-                    setOffsetSemaine((o) => o - 1);
-                  } else {
-                    setOffsetMois((o) => o - 1);
-                  }
-                }}
-                aria-label="Semaine précédente"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setOffsetSemaine(0);
-                  setOffsetMois(0);
-                }}
-                title="Revenir à la semaine en cours"
-              >
-                Cette semaine
-              </Button>
-              {/* Sélecteur du jour de début de semaine */}
-              <Select
-                value={String(jourDebutSemaine)}
-                onValueChange={(v) => {
-                  setJourDebutSemaine(Number(v));
-                  setOffsetSemaine(0);
-                }}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="h-9 w-auto gap-1 border-white/60 bg-white/80 text-xs dark:border-white/10 dark:bg-white/5"
-                  title="Changer le jour de début de semaine"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {NOMS_JOURS_SEMAINE.map((nom, idx) => (
-                    <SelectItem key={idx} value={String(idx)}>
-                      Sem. {nom.toLowerCase()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  if (modeAffichage === "semaine") {
-                    setOffsetSemaine((o) => o + 1);
-                  } else {
-                    setOffsetMois((o) => o + 1);
-                  }
-                }}
-                aria-label="Semaine suivante"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => {
-                  setErreurIA(null);
-                  setModalGenerationOuvert(true);
-                }}
-                disabled={enGeneration}
-              >
-                {enGeneration ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="mr-2 h-4 w-4" />
-                )}
-                {enGeneration ? "Génération en cours…" : "Générer IA"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (!planning?.planning_id) {
-                    toast.error("Planning non persisté: générez un planning avant export PDF");
-                    return;
-                  }
-                  exporterPlanningPdf(planning.planning_id).catch(() => toast.error("Erreur d'export PDF"));
-                }}
-                title="Exporter en PDF"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                PDF
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => exporterPlanningIcal(2).catch(() => toast.error("Erreur d'export"))}
-                title="Exporter en iCalendar"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                iCal
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => genererCourses(undefined)}
-                disabled={enGenerationCourses}
-                title="Générer la liste de courses depuis le planning"
-              >
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                {enGenerationCourses ? "Génération..." : "Courses"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setChoixModePrepa(true)}
-                disabled={!planning}
-                title="Mode préparation — batch cooking ou jour par jour"
-              >
-                <CookingPot className="mr-2 h-4 w-4" />
-                Préparation
-              </Button>
-              {/* Bouton mode invités */}
-              <Button
-                variant={contexteInvitesActif ? "default" : "outline"}
-                size="sm"
-                onClick={() => setPanneauInvitesOuvert((v) => !v)}
-                title="Mode invités — adapter portions, planning et courses"
-                className={contexteInvitesActif ? "bg-amber-500 text-white hover:bg-amber-600 border-transparent" : ""}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Invités
-                {contexteInvitesActif && (
-                  <span className="ml-1 rounded-full bg-white/30 px-1.5 text-xs font-semibold">
-                    +{modeInvites.nbInvites}
-                  </span>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Erreur IA — bandeau persistant sous les actions */}
-          {erreurIA && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 text-sm text-orange-800 dark:border-orange-800 dark:bg-orange-950/30 dark:text-orange-300">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span className="flex-1">{erreurIA}</span>
-              <button
-                type="button"
-                aria-label="Fermer"
-                className="rounded p-0.5 hover:bg-orange-200 dark:hover:bg-orange-800"
-                onClick={() => setErreurIA(null)}
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        <EnTetePlanning
+          resumePeriode={resumePeriode}
+          synchroPlanningActive={synchroPlanningActive}
+          modeSynchroPlanning={modeSynchroPlanning}
+          contexteInvitesActif={contexteInvitesActif}
+          nbInvites={modeInvites.nbInvites}
+          statsPlanning={statsPlanning}
+          nbPersonnesBase={nbPersonnesBase}
+          nbPersonnes={nbPersonnes}
+          setNbPersonnesBase={setNbPersonnesBase}
+          modeAffichage={modeAffichage}
+          setModeAffichage={setModeAffichage}
+          allerPrecedent={allerPrecedent}
+          reinitialiserPeriode={reinitialiserPeriode}
+          jourDebutSemaine={jourDebutSemaine}
+          setJourDebutSemaine={setJourDebutSemaine}
+          setOffsetSemaine={setOffsetSemaine}
+          nomsJoursSemaine={[
+            "Dimanche",
+            "Lundi",
+            "Mardi",
+            "Mercredi",
+            "Jeudi",
+            "Vendredi",
+            "Samedi",
+          ]}
+          allerSuivant={allerSuivant}
+          onOuvrirGenerationIa={() => {
+            setErreurIA(null);
+            setModalGenerationOuvert(true);
+          }}
+          enGeneration={enGeneration}
+          onExporterPdf={() => {
+            if (!planning?.planning_id) {
+              toast.error("Planning non persisté: générez un planning avant export PDF");
+              return;
+            }
+            exporterPlanningPdf(planning.planning_id).catch(() => toast.error("Erreur d'export PDF"));
+          }}
+          onExporterIcal={() => exporterPlanningIcal(2).catch(() => toast.error("Erreur d'export"))}
+          onGenererCourses={() => genererCourses(undefined)}
+          enGenerationCourses={enGenerationCourses}
+          onOuvrirChoixModePrepa={() => setChoixModePrepa(true)}
+          planningExiste={Boolean(planning)}
+          onTogglePanneauInvites={() => setPanneauInvitesOuvert((v) => !v)}
+          erreurIA={erreurIA}
+          setErreurIA={setErreurIA}
+        />
 
       {/* Mode invités — panneau collapsible, caché par défaut */}
       {panneauInvitesOuvert && (
@@ -1372,126 +826,17 @@ export default function PagePlanning() {
       )}
 
       {modeAffichage === "semaine" && (
-        <Card className="border-violet-200/70 bg-violet-50/40 dark:border-violet-900/50 dark:bg-violet-950/10">
-          <CardHeader className="pb-3">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <CardTitle className="text-base">🧠 Analyse IA de la semaine</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Vérifiez en un clic la variété, l'équilibre nutritionnel et la charge cuisine du planning actuel.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => analyserPlanningIA(undefined)}
-                disabled={enAnalysePlanningIA || planningPourAnalyseIa.length === 0}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                {enAnalysePlanningIA ? "Analyse..." : "Analyser la semaine"}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {analysePlanningIa ? (
-              <>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-lg border bg-background/80 p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Variété</p>
-                    <p className="mt-1 text-2xl font-bold text-violet-600">{analysePlanningIa.variete.score_variete}/100</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {(analysePlanningIa.variete.types_cuisines ?? []).length} styles culinaires détectés
-                    </p>
-                  </div>
-                  <div className="rounded-lg border bg-background/80 p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Fruits & légumes</p>
-                    <p className="mt-1 text-2xl font-bold text-emerald-600">
-                      {Math.round(analysePlanningIa.nutrition.fruits_legumes_quota * 100)}%
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">Objectif hebdo estimé</p>
-                  </div>
-                  <div className="rounded-lg border bg-background/80 p-3">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Charge cuisine</p>
-                    <p className="mt-1 text-2xl font-bold text-amber-600">
-                      {analysePlanningIa.simplification.gain_temps_minutes} min
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Gain potentiel ({analysePlanningIa.simplification.charge_globale})
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant={analysePlanningIa.variete.proteins_bien_repartis ? "default" : "secondary"}>
-                    Protéines {analysePlanningIa.variete.proteins_bien_repartis ? "bien réparties" : "à renforcer"}
-                  </Badge>
-                  <Badge variant={analysePlanningIa.nutrition.equilibre_fibre ? "default" : "secondary"}>
-                    Fibres {analysePlanningIa.nutrition.equilibre_fibre ? "OK" : "à surveiller"}
-                  </Badge>
-                  <Badge variant="outline">
-                    {analysePlanningIa.simplification.nb_recettes_complexes} recette(s) complexes
-                  </Badge>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-2">
-                  <div className="rounded-lg border bg-background/80 p-3 space-y-2">
-                    <p className="text-sm font-semibold">À privilégier</p>
-                    <p className="text-xs text-muted-foreground">
-                      {(analysePlanningIa.nutrition.aliments_a_privilegier ?? []).join(" · ") || "RAS"}
-                    </p>
-                    {(analysePlanningIa.variete.recommandations ?? []).length > 0 && (
-                      <>
-                        <p className="text-sm font-semibold pt-1">Idées de variété</p>
-                        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-                          {(analysePlanningIa.variete.recommandations ?? []).slice(0, 3).map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </>
-                    )}
-                  </div>
-                  <div className="rounded-lg border bg-background/80 p-3 space-y-2">
-                    <p className="text-sm font-semibold">Charge & simplification</p>
-                    <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
-                      {(analysePlanningIa.simplification.suggestions_simplification ?? []).slice(0, 3).map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                    {(analysePlanningIa.variete.repetitions_problematiques ?? []).length > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        Répétitions à surveiller : {(analysePlanningIa.variete.repetitions_problematiques ?? []).join(", ")}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {/* Bouton d'action : régénérer la semaine en tenant compte des conseils IA */}
-                <div className="flex justify-end pt-1">
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="bg-violet-600 hover:bg-violet-700 text-white"
-                    onClick={() => {
-                      const platsSuggeres = [
-                        ...(analysePlanningIa.nutrition.aliments_a_privilegier ?? []),
-                        ...(analysePlanningIa.variete.recommandations ?? []),
-                      ].slice(0, 8);
-                      setErreurIA(null);
-                      setModalGenerationInitialPlats(platsSuggeres);
-                      setModalGenerationOuvert(true);
-                    }}
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Régénérer en appliquant ces conseils
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Lancez l'analyse pour obtenir un score de variété, un bilan nutritionnel et des suggestions de simplification.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <SectionAnalyseIaPlanning
+          analysePlanningIa={analysePlanningIa}
+          enAnalysePlanningIA={enAnalysePlanningIA}
+          nbLignesAnalyse={planningPourAnalyseIa.length}
+          onAnalyser={() => analyserPlanningIA(undefined)}
+          onRegenererAvecConseils={(platsSuggeres) => {
+            setErreurIA(null);
+            setModalGenerationInitialPlats(platsSuggeres);
+            setModalGenerationOuvert(true);
+          }}
+        />
       )}
 
       {/* ─── Nutrition hebdomadaire ─── */}
@@ -1535,429 +880,53 @@ export default function PagePlanning() {
         onOpenChange={(open) => {
           setDialogueOuvert(open);
           if (!open) {
-            setDialogueEtape("choisir");
-            setRepasIdCree(null);
-            setSuggestionsIA(null);
+            reinitialiserDialogue();
           }
         }}
         title={dialogueEtape === "equilibre" ? "⚖ Équilibre du repas" : "Ajouter un repas"}
         contentClassName="sm:max-w-lg"
       >
-        {repasEnCours && (
-          <p className="text-sm text-muted-foreground -mt-2">
-            {jours[datesSemaine.indexOf(repasEnCours.date)]}{" "}
-            {new Date(repasEnCours.date).toLocaleDateString("fr-FR", {
-              day: "numeric",
-              month: "long",
-            })}{" "}
-            — {TYPES_REPAS.find((t) => t.valeur === repasEnCours.type_repas)?.emoji}{" "}
-            {TYPES_REPAS.find((t) => t.valeur === repasEnCours.type_repas)?.label}
-          </p>
-        )}
-
-        {/* ─── Étape 1 : Choisir la recette / texte ─── */}
-        {dialogueEtape === "choisir" && (
-          <Tabs value={ongletDialogue} onValueChange={(v) => setOngletDialogue(v as "suggestions" | "libre")}>
-            <TabsList className="w-full">
-              <TabsTrigger value="suggestions" className="flex-1">
-                <Search className="h-3.5 w-3.5 mr-1.5" />
-                Recettes
-              </TabsTrigger>
-              <TabsTrigger value="libre" className="flex-1">
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Texte libre
-              </TabsTrigger>
-            </TabsList>
-
-            {/* ─── Onglet suggestions de recettes ─── */}
-            <TabsContent value="suggestions" className="space-y-3 mt-3">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Rechercher une recette..."
-                  value={rechercheRecette}
-                  onChange={(e) => setRechercheRecette(e.target.value)}
-                  className="flex-1"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  title="Surprise du chef — choisit une recette au hasard"
-                  disabled={!suggestions || suggestions.length === 0 || enAjout}
-                  onClick={() => {
-                    if (!suggestions || suggestions.length === 0) return;
-                    const idx = Math.floor(Math.random() * suggestions.length);
-                    choisirRecette(suggestions[idx]);
-                  }}
-                >
-                  🎲
-                </Button>
-              </div>
-              <div className="max-h-64 overflow-y-auto space-y-1.5">
-                {chargeSuggestions ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-14 w-full" />
-                  ))
-                ) : suggestionsFiltrees.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-6">
-                    Aucune recette trouvée
-                  </p>
-                ) : (
-                  suggestionsFiltrees.map((recette) => (
-                    <button
-                      key={recette.id}
-                      onClick={() => choisirRecette(recette)}
-                      disabled={enAjout}
-                      className="w-full flex items-center justify-between rounded-md border p-3 text-left hover:bg-accent transition-colors disabled:opacity-50"
-                    >
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{recette.nom}</p>
-                        {recette.categorie && (
-                          <Badge variant="outline" className="text-[10px] mt-0.5">
-                            {recette.categorie}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-2">
-                        {recette.temps_total > 0 && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {recette.temps_total} min
-                          </span>
-                        )}
-                        <ConvertisseurInline />
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-
-            {/* ─── Onglet texte libre ─── */}
-            <TabsContent value="libre" className="space-y-4 mt-3">
-              <p className="text-xs text-muted-foreground rounded-md border border-dashed px-3 py-2">
-                💡 Pour les plats complexes (gratin, lasagnes, risotto…), préférez l'onglet <span className="font-medium">Recettes</span> afin de lier une fiche recette et activer le suivi nutritionnel complet.
-              </p>
-              <Input
-                value={notesRepas}
-                onChange={(e) => setNotesRepas(e.target.value)}
-                placeholder="Ex: Quiche lorraine"
-              />
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setDialogueOuvert(false)}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  disabled={enAjout || !notesRepas.trim()}
-                  onClick={() => {
-                    if (repasEnCours) {
-                      setNomRepasAjoute(notesRepas);
-                      ajouterRepas({
-                        date: repasEnCours.date,
-                        type_repas: repasEnCours.type_repas,
-                        notes: notesRepas,
-                      });
-                    }
-                  }}
-                >
-                  {enAjout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Ajouter
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
-
-        {/* ─── Étape 2 : Accompagnements nutritionnels ─── */}
-        {dialogueEtape === "equilibre" && repasIdCree != null && repasEnCours && (
-          <div className="space-y-4 mt-2">
-            {repasEnCours.type_repas === "gouter" ? (
-              <>
-                <p className="text-xs text-muted-foreground">Complétez le goûter (PNNS4 : laitage + fruit + gâteau sain).</p>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🥛 Laitage</label>
-                    <Input
-                      value={laitageForm}
-                      onChange={(e) => setLaitageForm(e.target.value)}
-                      placeholder="Ex: Yaourt nature, fromage blanc…"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🍎 Fruit</label>
-                    <Input
-                      value={fruitGouter}
-                      onChange={(e) => setFruitGouter(e.target.value)}
-                      placeholder="Ex: Pomme, Compote poire…"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🍪 Gâteau / biscuit sain</label>
-                    <Input
-                      value={gateauGouter}
-                      onChange={(e) => setGateauGouter(e.target.value)}
-                      placeholder="Ex: Cake maison, biscuit complet…"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Équilibrez l'assiette (PNNS4 : ≥½ légumes, ¼ féculents, ¼ protéines).</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={enSuggestionIA}
-                    onClick={async () => {
-                      setEnSuggestionIA(true);
-                      try {
-                        const s = await obtenirSuggestionsAccompagnements(repasIdCree);
-                        setSuggestionsIA(s);
-                        if (s.legumes[0]) setLegumesForm(s.legumes[0]);
-                        if (s.feculents[0]) setFeculentsForm(s.feculents[0]);
-                        if (s.proteines[0]) setProteineForm(s.proteines[0]);
-                      } catch {
-                        toast.error("Impossible de générer des suggestions");
-                      } finally {
-                        setEnSuggestionIA(false);
-                      }
-                    }}
-                  >
-                    {enSuggestionIA ? (
-                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                    ) : (
-                      <span className="mr-1.5">✨</span>
-                    )}
-                    Suggérer
-                  </Button>
-                </div>
-
-                {/* Détection plat féculent : avertissement + protéine en priorité */}
-                {(() => {
-                  const MOTS_FECULENTS_PLAT = [
-                    "gratin", "lasagne", "lasagnes", "risotto", "tartiflette",
-                    "purée", "puree", "pâtes", "pasta", "gnocchi", "ravioli",
-                    "raviolis", "pizza", "quiche", "hachis parmentier",
-                    "carbonara", "bolognaise", "polenta", "macaroni", "semoule",
-                    "tarte salée", "tourte", "flamiche",
-                  ];
-                  const estFeculent = MOTS_FECULENTS_PLAT.some((m) =>
-                    nomRepasAjoute.toLowerCase().includes(m)
-                  );
-                  if (!estFeculent) return null;
-                  const PROTEINES_RAPIDES = [
-                    "Entrecôte", "Côtelettes d'agneau", "Escalope de veau",
-                    "Filet mignon", "Saucisses", "Merguez", "Poulet rôti",
-                    "Blanc de poulet",
-                  ];
-                  return (
-                    <div className="rounded-md border border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30 p-3 space-y-2">
-                      <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">
-                        🥩 Plat féculent détecté — ajoutez une protéine
-                      </p>
-                      <p className="text-xs text-amber-700 dark:text-amber-300">
-                        <span className="font-medium">{nomRepasAjoute}</span> n'apporte pas de protéine. Associez une viande ou une autre source.
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {PROTEINES_RAPIDES.map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            onClick={() => setProteineForm(p)}
-                            className={`rounded-full border px-2.5 py-0.5 text-[11px] transition-colors ${
-                              proteineForm === p
-                                ? "border-amber-500 bg-amber-100 font-semibold text-amber-800 dark:bg-amber-900/50 dark:text-amber-200"
-                                : "border-border bg-background hover:bg-accent text-foreground"
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
-                      <Input
-                        value={proteineForm}
-                        onChange={(e) => setProteineForm(e.target.value)}
-                        placeholder="Ou saisissez une autre protéine…"
-                        className="mt-1 border-amber-300 focus:border-amber-500"
-                      />
-                    </div>
-                  );
-                })()}
-
-                {suggestionsIA && (
-                  <div className="rounded-md border bg-muted/30 p-3 space-y-2 text-xs">
-                    {suggestionsIA.legumes.length > 0 && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">🥦 Légumes :</span>{" "}
-                        <span className="flex flex-wrap gap-1 mt-1">
-                          {suggestionsIA.legumes.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setLegumesForm(s)}
-                              className="rounded bg-background border px-2 py-0.5 hover:bg-accent transition-colors"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </span>
-                      </div>
-                    )}
-                    {suggestionsIA.feculents.length > 0 && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">🍚 Féculents :</span>{" "}
-                        <span className="flex flex-wrap gap-1 mt-1">
-                          {suggestionsIA.feculents.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setFeculentsForm(s)}
-                              className="rounded bg-background border px-2 py-0.5 hover:bg-accent transition-colors"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </span>
-                      </div>
-                    )}
-                    {suggestionsIA.proteines.length > 0 && (
-                      <div>
-                        <span className="font-medium text-muted-foreground">🥩 Protéines :</span>{" "}
-                        <span className="flex flex-wrap gap-1 mt-1">
-                          {suggestionsIA.proteines.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setProteineForm(s)}
-                              className="rounded bg-background border px-2 py-0.5 hover:bg-accent transition-colors"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🥦 Légumes</label>
-                    <Input
-                      value={legumesForm}
-                      onChange={(e) => setLegumesForm(e.target.value)}
-                      placeholder="Ex: Haricots verts, Courgettes sautées…"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🍚 Féculents</label>
-                    <Input
-                      value={feculentsForm}
-                      onChange={(e) => setFeculentsForm(e.target.value)}
-                      placeholder="Ex: Riz vapeur, Pommes de terre…"
-                      className="mt-1"
-                    />
-                  </div>
-                  {(() => {
-                    const MOTS_FECULENTS_PLAT = [
-                      "gratin", "lasagne", "lasagnes", "risotto", "tartiflette",
-                      "purée", "puree", "pâtes", "pasta", "gnocchi", "ravioli",
-                      "raviolis", "pizza", "quiche", "hachis parmentier",
-                      "carbonara", "bolognaise", "polenta", "macaroni", "semoule",
-                      "tarte salée", "tourte", "flamiche",
-                    ];
-                    const estFeculent = MOTS_FECULENTS_PLAT.some((m) =>
-                      nomRepasAjoute.toLowerCase().includes(m)
-                    );
-                    // Si féculent, le champ protéine est déjà affiché dans le bloc d'alerte ci-dessus
-                    if (estFeculent) return null;
-                    return (
-                      <div>
-                        <label className="text-xs font-medium text-muted-foreground">🥩 Protéine accompagnement</label>
-                        <Input
-                          value={proteineForm}
-                          onChange={(e) => setProteineForm(e.target.value)}
-                          placeholder="Ex: Filet de poulet, Œufs durs… (si plat principal = féculent)"
-                          className="mt-1"
-                        />
-                      </div>
-                    );
-                  })()}
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🥛 Laitage</label>
-                    <Input
-                      value={laitageForm}
-                      onChange={(e) => setLaitageForm(e.target.value)}
-                      placeholder="Ex: Yaourt nature, Fromage blanc…"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">🍮 Dessert / Fruit</label>
-                    <Input
-                      value={dessertForm}
-                      onChange={(e) => setDessertForm(e.target.value)}
-                      placeholder="Ex: Compote, Fruit frais, Tarte aux pommes…"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  invalider(["planning"]);
-                  setDialogueOuvert(false);
-                  setDialogueEtape("choisir");
-                  setRepasIdCree(null);
-                }}
-              >
-                Passer
-              </Button>
-              <Button
-                size="sm"
-                disabled={enAjout}
-                onClick={async () => {
-                  if (!repasIdCree) return;
-                  const payload: Partial<CreerRepasPlanningDTO> =
-                    repasEnCours.type_repas === "gouter"
-                      ? {
-                          laitage: laitageForm || undefined,
-                          fruit_gouter: fruitGouter || undefined,
-                          gateau_gouter: gateauGouter || undefined,
-                        }
-                      : {
-                          legumes: legumesForm || undefined,
-                          feculents: feculentsForm || undefined,
-                          proteine_accompagnement: proteineForm || undefined,
-                          laitage: laitageForm || undefined,
-                          dessert: dessertForm || undefined,
-                        };
-                  try {
-                    await mettreAJourRepas(repasIdCree, payload);
-                    invalider(["planning"]);
-                    toast.success("Accompagnements enregistrés");
-                    setDialogueOuvert(false);
-                    setDialogueEtape("choisir");
-                    setRepasIdCree(null);
-                  } catch {
-                    toast.error("Impossible de sauvegarder les accompagnements");
-                  }
-                }}
-              >
-                Confirmer
-              </Button>
-            </div>
-          </div>
-        )}
+        <DialogueAjoutRepasPlanning
+          repasEnCours={repasEnCours}
+          jours={jours}
+          datesSemaine={datesSemaine}
+          typesRepas={TYPES_REPAS}
+          dialogueEtape={dialogueEtape}
+          ongletDialogue={ongletDialogue}
+          setOngletDialogue={setOngletDialogue}
+          rechercheRecette={rechercheRecette}
+          setRechercheRecette={setRechercheRecette}
+          suggestions={suggestions}
+          chargeSuggestions={chargeSuggestions}
+          suggestionsFiltrees={suggestionsFiltrees}
+          enAjout={enAjout}
+          choisirRecette={choisirRecette}
+          notesRepas={notesRepas}
+          setNotesRepas={setNotesRepas}
+          onAnnulerAjout={() => setDialogueOuvert(false)}
+          onAjouterTexteLibre={ajouterTexteLibre}
+          repasIdCree={repasIdCree}
+          nomRepasAjoute={nomRepasAjoute}
+          enSuggestionIA={enSuggestionIA}
+          onDemanderSuggestions={demanderSuggestionsAccompagnements}
+          suggestionsIA={suggestionsIA}
+          legumesForm={legumesForm}
+          setLegumesForm={setLegumesForm}
+          feculentsForm={feculentsForm}
+          setFeculentsForm={setFeculentsForm}
+          proteineForm={proteineForm}
+          setProteineForm={setProteineForm}
+          laitageForm={laitageForm}
+          setLaitageForm={setLaitageForm}
+          dessertForm={dessertForm}
+          setDessertForm={setDessertForm}
+          fruitGouter={fruitGouter}
+          setFruitGouter={setFruitGouter}
+          gateauGouter={gateauGouter}
+          setGateauGouter={setGateauGouter}
+          onPasserEquilibre={passerEquilibre}
+          onConfirmerEquilibre={confirmerEquilibre}
+        />
       </ResponsiveOverlay>
 
       {/* ─── Dialogue résultat courses ─── */}
@@ -1968,49 +937,14 @@ export default function PagePlanning() {
         contentClassName="sm:max-w-md"
       >
         {coursesResultat && (
-          <div className="space-y-4">
-            <div className="text-sm space-y-1">
-              <p className="font-medium">
-                ✅ {coursesResultat.total_articles} articles ajoutés
-              </p>
-              {coursesResultat.contexte && coursesResultat.contexte.nb_invites > 0 && (
-                <p className="text-muted-foreground">
-                  👥 Quantités ajustées pour {coursesResultat.contexte.nb_invites} invité(s)
-                </p>
-              )}
-              {coursesResultat.articles_en_stock > 0 && (
-                <p className="text-muted-foreground">
-                  📦 {coursesResultat.articles_en_stock} articles déjà en stock (non ajoutés)
-                </p>
-              )}
-            </div>
-            {Object.keys(coursesResultat.par_rayon ?? {}).length > 0 && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Par rayon :</p>
-                <div className="grid grid-cols-2 gap-1">
-                  {Object.entries(coursesResultat.par_rayon ?? {}).map(([rayon, count]) => (
-                    <div key={rayon} className="flex items-center justify-between text-sm rounded-md bg-muted/50 px-2 py-1">
-                      <span className="capitalize truncate">{rayon.replace(/_/g, " ")}</span>
-                      <Badge variant="secondary" className="ml-1 text-xs">{count}</Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setCoursesDialogue(false)}>
-                Fermer
-              </Button>
-              <Button
-                onClick={() => {
-                  setCoursesDialogue(false);
-                  window.location.href = `/cuisine/courses`;
-                }}
-              >
-                Voir la liste
-              </Button>
-            </div>
-          </div>
+          <ContenuDialogueCoursesPlanning
+            coursesResultat={coursesResultat}
+            onFermer={() => setCoursesDialogue(false)}
+            onVoirListe={() => {
+              setCoursesDialogue(false);
+              window.location.href = `/cuisine/courses`;
+            }}
+          />
         )}
       </ResponsiveOverlay>
 
@@ -2022,59 +956,14 @@ export default function PagePlanning() {
         contentClassName="sm:max-w-md"
       >
         {batchResultat && (
-          <div className="space-y-4">
-            <div className="text-sm space-y-1">
-              <p className="font-medium">
-                ✅ {batchResultat.nom}
-              </p>
-              <p className="text-muted-foreground">
-                📖 {batchResultat.nb_recettes} recette{batchResultat.nb_recettes > 1 ? "s" : ""} sélectionnée{batchResultat.nb_recettes > 1 ? "s" : ""}
-              </p>
-              <p className="text-muted-foreground">
-                ⏱️ Durée estimée : {batchResultat.duree_estimee} minutes
-              </p>
-            </div>
-            {(batchResultat.robots_utilises ?? []).length > 0 && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Robots compatibles :</p>
-                <div className="flex flex-wrap gap-1">
-                  {batchResultat.robots_utilises.map((robot) => (
-                    <Badge key={robot} variant="outline" className="text-xs">
-                      {robot}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            {(batchResultat.recettes ?? []).length > 0 && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Recettes :</p>
-                <div className="max-h-40 overflow-y-auto space-y-1">
-                  {batchResultat.recettes.map((r) => (
-                    <div
-                      key={r.id}
-                      className="text-sm rounded-md bg-muted/50 px-2 py-1"
-                    >
-                      {r.nom} ({r.portions} portions)
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setBatchDialogue(false)}>
-                Fermer
-              </Button>
-              <Button
-                onClick={() => {
-                  setBatchDialogue(false);
-                  window.location.href = `/cuisine/batch-cooking/${batchResultat.session_id}`;
-                }}
-              >
-                Voir la session
-              </Button>
-            </div>
-          </div>
+          <ContenuDialogueBatchPlanning
+            batchResultat={batchResultat}
+            onFermer={() => setBatchDialogue(false)}
+            onVoirSession={() => {
+              setBatchDialogue(false);
+              window.location.href = `/cuisine/batch-cooking/${batchResultat.session_id}`;
+            }}
+          />
         )}
       </ResponsiveOverlay>
       {/* ─── Dialog choix mode préparation ─── */}
@@ -2084,60 +973,17 @@ export default function PagePlanning() {
         title="🍳 Mode de préparation"
         contentClassName="sm:max-w-md"
       >
-        <div className="space-y-3 pt-2">
-          <p className="text-sm text-muted-foreground">
-            Choisissez comment vous souhaitez préparer les repas de cette semaine.
-          </p>
-
-          {/* Option 1 : Batch cooking */}
-          <button
-            className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
-            onClick={() => {
-              setChoixModePrepa(false);
-              genererBatch(undefined);
-            }}
-            disabled={enGenerationBatch}
-          >
-            <div className="flex items-start gap-3">
-              <div className="rounded-md bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors shrink-0">
-                <CookingPot className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">Batch Cooking</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Préparez tout en une seule session le week-end. Idéal pour gagner du temps en semaine.
-                </p>
-                {enGenerationBatch && (
-                  <p className="text-xs text-primary mt-1 flex items-center gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Génération en cours…
-                  </p>
-                )}
-              </div>
-            </div>
-          </button>
-
-          {/* Option 2 : Jour par jour */}
-          <button
-            className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
-            onClick={() => {
-              setChoixModePrepa(false);
-              window.location.href = "/cuisine/ma-semaine";
-            }}
-          >
-            <div className="flex items-start gap-3">
-              <div className="rounded-md bg-orange-100 dark:bg-orange-900/30 p-2 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors shrink-0">
-                <CalendarDays className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">Jour par jour</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Suivez le wizard "Ma Semaine" pour préparer chaque jour avec flexibilité.
-                </p>
-              </div>
-            </div>
-          </button>
-        </div>
+        <ContenuDialogueModePreparationPlanning
+          enGenerationBatch={enGenerationBatch}
+          onChoisirBatch={() => {
+            setChoixModePrepa(false);
+            genererBatch(undefined);
+          }}
+          onChoisirJourParJour={() => {
+            setChoixModePrepa(false);
+            window.location.href = "/cuisine/ma-semaine";
+          }}
+        />
       </ResponsiveOverlay>
         </TabsContent>
       </Tabs>
@@ -2157,11 +1003,7 @@ export default function PagePlanning() {
         onGenerer={(params) => {
           setModalGenerationOuvert(false);
           setModalGenerationInitialPlats([]);
-          toastIaRef.current = toast.loading(
-            "Génération IA en cours… cela peut prendre 1 à 2 minutes ☕",
-            { duration: Infinity }
-          );
-          genererIA(params);
+          lancerGenerationIA(params);
         }}
       />
     </div>

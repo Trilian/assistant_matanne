@@ -2,12 +2,24 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { analyserPlanHabitat, historiquePlanHabitat, listerPlansHabitat } from "@/bibliotheque/api/habitat";
+import dynamic from "next/dynamic";
+import { Box, Sparkles } from "lucide-react";
+import { analyserPlanHabitat, historiquePlanHabitat, listerPiecesHabitat, listerPlansHabitat } from "@/bibliotheque/api/habitat";
 import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Textarea } from "@/composants/ui/textarea";
 import { utiliserMutationAvecInvalidation, utiliserRequete } from "@/crochets/utiliser-api";
+
+const Plan3DHabitat = dynamic(() => import("@/composants/habitat/plan-3d-habitat"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[420px] items-center justify-center rounded-xl border text-sm text-muted-foreground">
+      Chargement de la vue 3D...
+    </div>
+  ),
+});
 
 export default function PlansHabitatPage() {
   const [planSelectionne, setPlanSelectionne] = useState<number | null>(null);
@@ -17,6 +29,11 @@ export default function PlansHabitatPage() {
   const { data: historique } = utiliserRequete(
     ["habitat", "plans", String(planActif?.id ?? "aucun"), "historique"],
     () => historiquePlanHabitat(planActif?.id ?? 0),
+    { enabled: Boolean(planActif?.id) }
+  );
+  const { data: piecesPlanActif } = utiliserRequete(
+    ["habitat", "plans", String(planActif?.id ?? "aucun"), "pieces"],
+    () => listerPiecesHabitat(planActif?.id ?? 0),
     { enabled: Boolean(planActif?.id) }
   );
 
@@ -74,55 +91,78 @@ export default function PlansHabitatPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Analyse IA</CardTitle>
-            <CardDescription>Mistral pour le diagnostic, Hugging Face en option pour la variante visuelle.</CardDescription>
+            <CardDescription>Mistral pour le diagnostic + visualisation 3D instantanee du plan actif.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={4} />
-            <div className="flex gap-2">
-              <Button
-                disabled={!planActif || analyseMutation.isPending}
-                onClick={() => planActif && analyseMutation.mutate({ planId: planActif.id, generer_image: false })}
-              >
-                {analyseMutation.isPending ? "Analyse..." : "Analyser"}
-              </Button>
-              <Button
-                variant="outline"
-                disabled={!planActif || analyseMutation.isPending}
-                onClick={() => planActif && analyseMutation.mutate({ planId: planActif.id, generer_image: true })}
-              >
-                Analyse + image
-              </Button>
-            </div>
+            <Tabs defaultValue="analyse" className="w-full">
+              <TabsList variant="line" className="w-full justify-start">
+                <TabsTrigger value="analyse" className="gap-1.5">
+                  <Sparkles className="h-4 w-4" /> Analyse IA
+                </TabsTrigger>
+                <TabsTrigger value="visualisation" className="gap-1.5">
+                  <Box className="h-4 w-4" /> Vue 3D
+                </TabsTrigger>
+              </TabsList>
 
-            {analyseMutation.data && (
-              <div className="rounded-xl border p-4">
-                <p className="font-medium">{analyseMutation.data.analyse.resume}</p>
-                <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Points forts</p>
-                    <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                      {analyseMutation.data.analyse.points_forts.map((item) => <li key={item}>• {item}</li>)}
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Risques</p>
-                    <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                      {analyseMutation.data.analyse.risques.map((item) => <li key={item}>• {item}</li>)}
-                    </ul>
-                  </div>
+              <TabsContent value="analyse" className="space-y-4 pt-3">
+                <Textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={4} />
+                <div className="flex gap-2">
+                  <Button
+                    disabled={!planActif || analyseMutation.isPending}
+                    onClick={() => planActif && analyseMutation.mutate({ planId: planActif.id, generer_image: false })}
+                  >
+                    {analyseMutation.isPending ? "Analyse..." : "Analyser"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    disabled={!planActif || analyseMutation.isPending}
+                    onClick={() => planActif && analyseMutation.mutate({ planId: planActif.id, generer_image: true })}
+                  >
+                    Analyse + image
+                  </Button>
                 </div>
-                {analyseMutation.data.image?.image_base64 && (
-                  <Image
-                    src={analyseMutation.data.image.image_base64}
-                    alt="Variante visuelle du plan"
-                    width={1200}
-                    height={800}
-                    unoptimized
-                    className="mt-4 rounded-xl border"
-                  />
+
+                {analyseMutation.data && (
+                  <div className="rounded-xl border p-4">
+                    <p className="font-medium">{analyseMutation.data.analyse.resume}</p>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <div>
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Points forts</p>
+                        <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                          {analyseMutation.data.analyse.points_forts.map((item) => <li key={item}>• {item}</li>)}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Risques</p>
+                        <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                          {analyseMutation.data.analyse.risques.map((item) => <li key={item}>• {item}</li>)}
+                        </ul>
+                      </div>
+                    </div>
+                    {analyseMutation.data.image?.image_base64 && (
+                      <Image
+                        src={analyseMutation.data.image.image_base64}
+                        alt="Variante visuelle du plan"
+                        width={1200}
+                        height={800}
+                        unoptimized
+                        className="mt-4 rounded-xl border"
+                      />
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
+              </TabsContent>
+
+              <TabsContent value="visualisation" className="space-y-3 pt-3">
+                {!planActif ? (
+                  <div className="flex h-[420px] items-center justify-center rounded-xl border border-dashed text-sm text-muted-foreground">
+                    Selectionnez un plan pour ouvrir la visualisation 3D.
+                  </div>
+                ) : (
+                  <Plan3DHabitat pieces={piecesPlanActif ?? []} nomPlan={planActif.nom} />
+                )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

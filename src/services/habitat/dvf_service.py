@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from statistics import median
 from typing import Any
@@ -299,6 +300,133 @@ class DVFHabitatService:
             "historique": historique,
             "repartition_types": repartition,
             "transactions": transactions[:25],
+        }
+
+    # ─── Baromètre national ──────────────────────────────────────────────
+
+    _VILLES_REFERENCE: list[dict[str, str]] = [
+        {"ville": "Paris", "code_postal": "75001", "departement": "75"},
+        {"ville": "Lyon", "code_postal": "69001", "departement": "69"},
+        {"ville": "Marseille", "code_postal": "13001", "departement": "13"},
+        {"ville": "Bordeaux", "code_postal": "33000", "departement": "33"},
+        {"ville": "Toulouse", "code_postal": "31000", "departement": "31"},
+        {"ville": "Nantes", "code_postal": "44000", "departement": "44"},
+        {"ville": "Strasbourg", "code_postal": "67000", "departement": "67"},
+        {"ville": "Annecy", "code_postal": "74000", "departement": "74"},
+        {"ville": "Grenoble", "code_postal": "38000", "departement": "38"},
+        {"ville": "Rennes", "code_postal": "35000", "departement": "35"},
+    ]
+
+    def _barometre_fetch_ville(
+        self,
+        config: dict[str, str],
+        type_local: str | None,
+        limite: int,
+    ) -> dict[str, Any] | None:
+        """Charge l'historique DVF pour une ville et calcule les indicateurs du baromètre."""
+        try:
+            result = self.obtenir_historique_marche(
+                departement=config["departement"],
+                code_postal=config["code_postal"],
+                type_local=type_local,
+                limite=limite,
+            )
+        except Exception as exc:
+            logger.warning("Baromètre: échec fetch %s: %s", config["ville"], exc)
+            return None
+
+        prix_m2_median = result["resume"].get("prix_m2_median")
+        if prix_m2_median is None:
+            return None
+
+        historique: list[dict[str, Any]] = result.get("historique", [])
+
+        # Évolution : moyenne 3 derniers mois vs 3 mois précédents
+        evolution_pct: float | None = None
+        if len(historique) >= 6:
+            recent = [h["prix_m2_median"] for h in historique[-3:] if h.get("prix_m2_median")]
+            precedent = [h["prix_m2_median"] for h in historique[-6:-3] if h.get("prix_m2_median")]
+            if recent and precedent:
+                moy_recent = sum(recent) / len(recent)
+                moy_prec = sum(precedent) / len(precedent)
+                if moy_prec > 0:
+                    evolution_pct = round((moy_recent - moy_prec) / moy_prec * 100, 1)
+
+        return {
+            "ville": config["ville"],
+            "code_postal": config["code_postal"],
+            "departement": config["departement"],
+            "prix_m2_median": round(prix_m2_median, 0),
+            "nb_transactions": result["resume"].get("nb_transactions", 0),
+            "evolution_3m_pct": evolution_pct,
+            "historique": historique[-12:],
+            "est_locale": False,
+        }
+
+    def obtenir_barometre(
+        self,
+        *,
+        type_local: str | None = None,
+        ma_commune: str | None = None,
+        mon_code_postal: str | None = None,
+        limite_par_ville: int = 80,
+    ) -> dict[str, Any]:
+        """Baromètre national : compare le prix/m² de villes de référence (DVF)."""
+
+        villes = list(self._VILLES_REFERENCE)
+
+        # Inclure la zone locale si fournie et non déjà dans les références
+        config_locale: dict[str, str] | None = None
+        if ma_commune and mon_code_postal:
+            dept_local = (
+                self._normaliser_departement(
+                    mon_code_postal[:3] if mon_code_postal.startswith(("97", "98")) else mon_code_postal[:2]
+                )
+                or "74"
+            )
+            depts_existants = {v["departement"] for v in villes}
+            if dept_local not in depts_existants:
+                config_locale = {
+                    "ville": ma_commune,
+                    "code_postal": mon_code_postal,
+                    "departement": dept_local,
+                }
+                villes.append(config_locale)
+
+        resultats: list[dict[str, Any]] = []
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            future_map = {
+                executor.submit(
+                    self._barometre_fetch_ville, config, type_local, limite_par_ville
+                ): config
+                for config in villes
+            }
+            for future in as_completed(future_map, timeout=60):
+                config = future_map[future]
+                try:
+                    res = future.result()
+                    if res is not None:
+                        if config_locale and config["code_postal"] == config_locale["code_postal"]:
+                            res["est_locale"] = True
+                        resultats.append(res)
+                except Exception as exc:
+                    logger.warning("Baromètre: résultat manquant pour %s: %s", config["ville"], exc)
+
+        # Trier par prix décroissant
+        resultats.sort(key=lambda x: x["prix_m2_median"] or 0, reverse=True)
+
+        # Calculer position de la zone locale dans le classement
+        rang_local: int | None = None
+        for idx, ville in enumerate(resultats):
+            if ville.get("est_locale"):
+                rang_local = idx + 1
+                break
+
+        return {
+            "type_local": type_local or "Toutes typologies",
+            "villes": resultats,
+            "rang_local": rang_local,
+            "updated_at": datetime.utcnow().isoformat(),
         }
 
 

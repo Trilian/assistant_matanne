@@ -1,7 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Input, Card, Tabs, TabsContent, TabsList, TabsTrigger, Badge } from '@/composants/ui'
+import { Input } from '@/composants/ui/input'
+import { Card } from '@/composants/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
+import { Badge } from '@/composants/ui/badge'
 import { Search, Armchair, UtensilsCrossed, Sofa, Bed, Wind, Lightbulb } from 'lucide-react'
 
 interface Meuble {

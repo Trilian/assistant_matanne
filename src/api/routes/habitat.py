@@ -221,6 +221,31 @@ async def marche_dvf(
     )
 
 
+@router.get("/marche/barometre", responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def marche_barometre(
+    type_local: str | None = Query(None),
+    ma_commune: str | None = Query(None),
+    mon_code_postal: str | None = Query(None),
+    limite_par_ville: int = Query(80, ge=25, le=150),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Baromètre national : compare prix/m² de villes de référence via DVF.
+
+    Paramètres optionnels `ma_commune` / `mon_code_postal` permettent d'inclure
+    la zone locale dans la comparaison pour se situer par rapport aux références.
+    """
+
+    return await executer_async(
+        lambda: obtenir_service_dvf_habitat().obtenir_barometre(
+            type_local=type_local,
+            ma_commune=ma_commune,
+            mon_code_postal=mon_code_postal,
+            limite_par_ville=limite_par_ville,
+        )
+    )
+
+
 @router.get("/scenarios", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_scenarios(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:

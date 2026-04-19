@@ -1,23 +1,25 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { ScenarioSimulation, ComparaisonScenarios } from '@/types/maison'
+import { Card } from '@/composants/ui/card'
 import {
-  Card,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  Badge,
-  Button,
+} from '@/composants/ui/table'
+import { Badge } from '@/composants/ui/badge'
+import { Button } from '@/composants/ui/button'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/composants/ui'
+} from '@/composants/ui/dialog'
 import { Check, TrendingUp, Clock, CreditCard, AlertCircle, Target } from 'lucide-react'
 
 interface ComparatorScenariosProps {
@@ -29,18 +31,23 @@ interface ComparatorScenariosProps {
 }
 
 // Utilitaires
-const formatBudget = (min: number, max: number) => {
+const formatBudget = (min?: number, max?: number) => {
+  if (typeof min !== 'number' || typeof max !== 'number') {
+    return 'N/A'
+  }
   return `${(min / 1000).toFixed(1)}k - ${(max / 1000).toFixed(1)}k €`
 }
 
-const formatDuree = (jours: number) => {
+const formatDuree = (jours?: number) => {
+  if (typeof jours !== 'number') return 'N/A'
   if (jours < 1) return `${Math.round(jours * 24)}h`
   if (jours < 30) return `${Math.round(jours)}j`
   const mois = Math.round(jours / 30)
   return `${mois}m`
 }
 
-const getColorFaisabilite = (score: number) => {
+const getColorFaisabilite = (score?: number) => {
+  if (typeof score !== 'number') return 'bg-gray-100 text-gray-800'
   if (score >= 80) return 'bg-green-100 text-green-800'
   if (score >= 50) return 'bg-yellow-100 text-yellow-800'
   return 'bg-red-100 text-red-800'
@@ -66,7 +73,7 @@ export function ComparateurScenarios({
   onSelectScenario,
   readOnly = false,
 }: ComparatorScenariosProps) {
-  const [scenarioDetailId, setScenarioDetailId] = useState<number | null>(null)
+  const [_scenarioDetailId, setScenarioDetailId] = useState<number | null>(null)
   
   if (!scenarios || scenarios.length === 0) {
     return (
@@ -78,9 +85,9 @@ export function ComparateurScenarios({
   }
 
   // Identifier les meilleurs scénarios
-  const meilleurBudget = comparaison?.meilleur_budget_id ?? scenarios[0]?.id
-  const meilleurFaisabilite = comparaison?.meilleur_faisabilite_id ?? scenarios[0]?.id
-  const meilleurRapport = comparaison?.meilleur_rapport_id ?? scenarios[0]?.id
+  const meilleurBudget = comparaison?.meilleur_budget ?? scenarios[0]?.id
+  const meilleurFaisabilite = comparaison?.meilleur_faisabilite ?? scenarios[0]?.id
+  const meilleurRapport = comparaison?.meilleur_rapport ?? scenarios[0]?.id
 
   return (
     <div className="space-y-6">
@@ -131,7 +138,9 @@ export function ComparateurScenarios({
                   <div className="text-xs font-semibold text-purple-600">MEILLEUR RAPPORT</div>
                   <div className="font-semibold">{s.nom}</div>
                   <div className="text-xs text-gray-600">
-                    {((100 - s.score_faisabilite) / 1000).toFixed(2)}€ par %
+                    {typeof s.score_faisabilite === 'number'
+                      ? `${((100 - s.score_faisabilite) / 1000).toFixed(2)}€ par %`
+                      : 'N/A'}
                   </div>
                 </div>
               </div>
@@ -196,9 +205,13 @@ export function ComparateurScenarios({
                 <TableCell className="text-right">
                   <div className="font-medium flex items-center justify-end gap-1">
                     <Clock size={14} className="text-gray-400" />
-                    {formatDuree(scenario.duree)}
+                    {formatDuree(scenario.duree_estimee_jours)}
                   </div>
-                  <div className="text-xs text-gray-500">~{Math.round(scenario.duree)} jours</div>
+                  <div className="text-xs text-gray-500">
+                    {typeof scenario.duree_estimee_jours === 'number'
+                      ? `~${Math.round(scenario.duree_estimee_jours)} jours`
+                      : 'Durée non définie'}
+                  </div>
                 </TableCell>
 
                 {/* Faisabilité */}
@@ -251,18 +264,22 @@ export function ComparateurScenarios({
                           <div>
                             <label className="text-sm font-medium">Budget min.</label>
                             <div className="text-lg font-semibold">
-                              {(scenario.budget_estime_min / 1000).toFixed(1)}k €
+                              {typeof scenario.budget_estime_min === 'number'
+                                ? `${(scenario.budget_estime_min / 1000).toFixed(1)}k €`
+                                : 'N/A'}
                             </div>
                           </div>
                           <div>
                             <label className="text-sm font-medium">Budget max.</label>
                             <div className="text-lg font-semibold">
-                              {(scenario.budget_estime_max / 1000).toFixed(1)}k €
+                              {typeof scenario.budget_estime_max === 'number'
+                                ? `${(scenario.budget_estime_max / 1000).toFixed(1)}k €`
+                                : 'N/A'}
                             </div>
                           </div>
                           <div>
                             <label className="text-sm font-medium">Durée estimée</label>
-                            <div className="text-lg font-semibold">{formatDuree(scenario.duree)}</div>
+                            <div className="text-lg font-semibold">{formatDuree(scenario.duree_estimee_jours)}</div>
                           </div>
                           <div>
                             <label className="text-sm font-medium">Faisabilité</label>
@@ -275,7 +292,7 @@ export function ComparateurScenarios({
                           <div>
                             <label className="text-sm font-medium mb-2 block">Postes de travaux</label>
                             <div className="space-y-2">
-                              {(scenario.postes_travaux as any[]).map((poste, idx) => (
+                              {(scenario.postes_travaux as Array<{ poste?: string; budget_min?: number; budget_max?: number; duree_semaines?: number; priorite?: string; diy?: boolean }>).map((poste, idx) => (
                                 <div key={idx} className="p-2 bg-gray-50 rounded text-sm">
                                   <div className="font-medium">{poste.poste}</div>
                                   <div className="text-xs text-gray-600">

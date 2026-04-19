@@ -18,6 +18,7 @@ import type {
   ResumeJardinHabitat,
   ScenarioHabitat,
   ZoneJardinHabitat,
+  BarometreHabitat,
 } from "@/types/habitat";
 
 export async function obtenirHubHabitat(): Promise<HabitatHub> {
@@ -88,6 +89,16 @@ export async function obtenirMarcheHabitat(payload?: {
   limite?: number;
 }): Promise<ResultatMarcheHabitat> {
   const { data } = await clientApi.get("/vision-maison/marche/dvf", { params: payload ?? {} });
+  return data;
+}
+
+export async function obtenirBarometreHabitat(payload?: {
+  type_local?: string;
+  ma_commune?: string;
+  mon_code_postal?: string;
+  limite_par_ville?: number;
+}): Promise<BarometreHabitat> {
+  const { data } = await clientApi.get("/vision-maison/marche/barometre", { params: payload ?? {} });
   return data;
 }
 

@@ -471,7 +471,7 @@ export interface PlanMaison {
   description?: string;
   type_plan: "interieur" | "terrain" | "etage_0" | "etage_1" | string;
   version: number;
-  est_actif: boolean;
+  est_actif?: boolean;
   donnees_canvas?: CanvasData; // Données react-konva JSON
   echelle_px_par_m: number;
   largeur_canvas: number;

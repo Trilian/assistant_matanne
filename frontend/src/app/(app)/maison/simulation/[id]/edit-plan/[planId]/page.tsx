@@ -1,13 +1,20 @@
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
 import { obtenirPlan, modifierPlan } from '@/bibliotheque/api/maison'
 import { EditeurPlan2D } from '@/composants/maison/editeur-plan-2d'
 import { CatalogueMeubles } from '@/composants/maison/catalogue-meubles'
-import { Button, Card, Dialog, DialogContent, DialogHeader, DialogTitle, Input } from '@/composants/ui'
-import { ArrowLeft, Save, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react'
+import { Button } from '@/composants/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/composants/ui/dialog'
+import { Input } from '@/composants/ui/input'
+import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
 
 /**
@@ -33,7 +40,7 @@ export default function EditPlanPage() {
 
   // Sauvegarder les modifications du plan
   const { mutate: savePlan } = useMutation({
-    mutationFn: (data: any) => modifierPlan(planId, data),
+    mutationFn: (data: Record<string, unknown>) => modifierPlan(planId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plan', planId] })
     },

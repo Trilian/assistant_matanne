@@ -9,29 +9,33 @@ import {
   supprimerSimulation,
   dupliquerSimulation,
 } from '@/bibliotheque/api/maison'
-import { SimulationRenovation } from '@/types/maison'
+import type { SimulationRenovation } from '@/types/maison'
+import { Button } from '@/composants/ui/button'
+import { Card } from '@/composants/ui/card'
+import { Input } from '@/composants/ui/input'
 import {
-  Button,
-  Card,
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+} from '@/composants/ui/select'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+} from '@/composants/ui/dialog'
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
-} from '@/composants/ui'
-import { Plus, Edit, Copy, Trash2, Eye, ChevronRight, Filter } from 'lucide-react'
+} from '@/composants/ui/alert-dialog'
+import { Plus, Copy, Trash2, Eye, Filter } from 'lucide-react'
 
 /**
  * Page liste des simulations de rénovation
@@ -56,7 +60,7 @@ export default function SimulationListPage() {
 
   // Créer une simulation
   const { mutate: creer, isPending: isCreating } = useMutation({
-    mutationFn: (data: any) => creerSimulation(data),
+    mutationFn: (data: Record<string, unknown>) => creerSimulation(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['simulations'] })
       setIsDialogOpen(false)
@@ -235,7 +239,9 @@ export default function SimulationListPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Créée le</span>
                     <span className="text-xs">
-                      {new Date(simulation.cree_le).toLocaleDateString('fr-FR')}
+                      {simulation.created_at
+                        ? new Date(simulation.created_at).toLocaleDateString('fr-FR')
+                        : 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -298,7 +304,7 @@ export default function SimulationListPage() {
       )}
 
       {/* Dialog suppression */}
-      <AlertDialog open={!!simulationASupprimer} onOpenChange={(open) => !open && setSimulationASupprimer(null)}>
+      <AlertDialog open={!!simulationASupprimer} onOpenChange={(open: boolean) => !open && setSimulationASupprimer(null)}>
         <AlertDialogContent>
           <AlertDialogTitle>Supprimer la simulation ?</AlertDialogTitle>
           <AlertDialogDescription>
