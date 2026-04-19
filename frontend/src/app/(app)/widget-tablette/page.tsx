@@ -183,7 +183,6 @@ export default function WidgetTablettePage() {
             ) : (
               <ul className="space-y-2 text-base text-zinc-100 md:text-lg">
                 {repasAujourdhui
-                  .slice(0, 3)
                   .map((repas: { id?: number | string; type_repas?: string; recette_nom?: string }, index: number) => (
                   <li key={`${repas.id}-${index}`}>
                     {(repas.type_repas ?? 'repas').toString()} - {(repas.recette_nom ?? 'Repas').toString()}

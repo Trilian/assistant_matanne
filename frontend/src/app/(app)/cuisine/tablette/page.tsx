@@ -280,9 +280,6 @@ export default function PageTabletteCuisine() {
             {dateRepas ? <Badge variant="secondary">{dateRepas}</Badge> : null}
           </div>
           <h2 className="text-2xl font-semibold lg:text-3xl">{titreRecette}</h2>
-          {repasCourant?.plat_jules ? (
-            <p className="mt-1 text-sm text-orange-100">Version Jules : {repasCourant.plat_jules}</p>
-          ) : null}
         </div>
       </div>
 

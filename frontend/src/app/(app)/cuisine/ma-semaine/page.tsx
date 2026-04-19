@@ -17,7 +17,6 @@ import {
   AlertCircle,
   Loader2,
   CookingPot,
-  Baby,
   Flame,
   UtensilsCrossed,
   Wind,
@@ -99,24 +98,8 @@ function ApplianceIcons({ repas }: { repas: RepasPlanning }) {
   );
 }
 
-function JulesRow({ repas }: { repas: RepasPlanning }) {
-  if (!repas.plat_jules && !repas.notes_jules) return null;
-  return (
-    <div className="flex items-start gap-2 ml-4 mt-1 text-xs">
-      <Baby className="h-3.5 w-3.5 text-purple-500 shrink-0 mt-0.5" />
-      <div className="min-w-0">
-        <span className="font-medium text-purple-700 dark:text-purple-300">
-          Jules :
-        </span>{" "}
-        <span className="text-muted-foreground">{repas.plat_jules ?? repas.notes_jules}</span>
-        {repas.adaptation_auto && (
-          <Badge variant="outline" className="ml-1 text-[9px] px-1 py-0 border-purple-300 text-purple-600 dark:text-purple-400">
-            auto
-          </Badge>
-        )}
-      </div>
-    </div>
-  );
+function JulesRow(_: { repas: RepasPlanning }) {
+  return null;
 }
 
 const TYPE_REPAS_LABEL: Record<string, string> = {

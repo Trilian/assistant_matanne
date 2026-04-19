@@ -236,11 +236,13 @@ function CarteRepasDraggable({
   label,
   onRetirer,
   onModifierChamp,
+  nomDinerSource,
 }: {
   repas: RepasPlanning;
   label: string;
   onRetirer: (repas: RepasPlanning) => void;
   onModifierChamp?: (repasId: number, champ: string, valeur: string) => void;
+  nomDinerSource?: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: construireIdRepasPlanning(repas.id),
@@ -285,7 +287,7 @@ function CarteRepasDraggable({
           <div className="flex items-center gap-1">
             {repas.est_reste && repas.reste_description ? (
               <span className="font-medium text-amber-700 dark:text-amber-300 break-words">
-                ♻ {repas.recette_nom || repas.notes || "Reste"}{" "}
+                ♻ {nomDinerSource || repas.recette_nom || repas.notes || "Reste"}{" "}
                 <span className="font-normal text-xs text-muted-foreground">
                   (reste du {repas.reste_description})
                 </span>
@@ -407,9 +409,6 @@ function CarteRepasDraggable({
                 {repas.proteine_accompagnement && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Protéine : ${repas.proteine_accompagnement}`}>🥩 {repas.proteine_accompagnement}</span>
                 )}
-                {repas.plat_jules && (
-                  <span className="text-[10px] text-muted-foreground break-words" title={`Jules : ${repas.plat_jules}`}>👶 {repas.plat_jules}</span>
-                )}
                 {repas.laitage && (
                   <span className="text-[10px] text-muted-foreground break-words" title={`Laitage : ${repas.laitage}`}>🥛 {repas.laitage}</span>
                 )}
@@ -473,6 +472,7 @@ function CaseRepasPlanning({
   onAjouter,
   onRetirer,
   onModifierChamp,
+  nomDinerParDescription,
 }: {
   date: string;
   type: TypeRepas;
@@ -483,6 +483,7 @@ function CaseRepasPlanning({
   onAjouter: (date: string, type: TypeRepas) => void;
   onRetirer: (repas: RepasPlanning) => void;
   onModifierChamp?: (repasId: number, champ: string, valeur: string) => void;
+  nomDinerParDescription: Record<string, string>;
 }) {
   const { isOver, setNodeRef } = useDroppable({
     id: construireIdCasePlanning(date, type),
@@ -503,7 +504,7 @@ function CaseRepasPlanning({
         {emoji} {label}
       </div>
       {repas ? (
-        <CarteRepasDraggable repas={repas} label={label} onRetirer={onRetirer} onModifierChamp={onModifierChamp} />
+        <CarteRepasDraggable repas={repas} label={label} onRetirer={onRetirer} onModifierChamp={onModifierChamp} nomDinerSource={repas.est_reste && repas.reste_description ? nomDinerParDescription[repas.reste_description] : undefined} />
       ) : (
         <Button
           variant="ghost"
@@ -968,6 +969,21 @@ export default function PagePlanning() {
     }
     return map;
   }, [planning]);
+
+  const nomDinerParDescription = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (let i = 0; i < datesSemaine.length; i++) {
+      const dateKey = datesSemaine[i];
+      const jourNom = jours[i];
+      const diner = planning?.repas?.find(
+        (r) => (r.date_repas || r.date || "").split("T")[0] === dateKey && r.type_repas === "diner"
+      );
+      if (diner) {
+        map[`dîner de ${jourNom}`] = diner.recette_nom || diner.notes || "";
+      }
+    }
+    return map;
+  }, [planning?.repas, datesSemaine, jours]);
 
   const planningPourAnalyseIa = useMemo(() => {
     return datesSemaine
@@ -1562,6 +1578,7 @@ export default function PagePlanning() {
                           onAjouter={ouvrirDialogue}
                           onRetirer={retirerRepas}
                           onModifierChamp={modifierChampRepas}
+                          nomDinerParDescription={nomDinerParDescription}
                         />
                       ))}
                     </div>

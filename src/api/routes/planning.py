@@ -329,9 +329,6 @@ async def obtenir_planning_semaine(
                         "dessert_recette_nom": recettes_map.get(r.dessert_recette_id)
                         if r.dessert_recette_id
                         else None,
-                        "plat_jules": getattr(r, "plat_jules", None),
-                        "notes_jules": getattr(r, "notes_jules", None),
-                        "adaptation_auto": getattr(r, "adaptation_auto", True),
                         "est_reste": getattr(r, "est_reste", False),
                         "reste_description": getattr(r, "reste_description", None),
                         "score_equilibre": getattr(r, "score_equilibre", None),
@@ -916,9 +913,6 @@ async def copier_planning(
                     dessert_recette_id=repas.dessert_recette_id,
                     dessert_jules=repas.dessert_jules,
                     dessert_jules_recette_id=repas.dessert_jules_recette_id,
-                    plat_jules=repas.plat_jules,
-                    notes_jules=repas.notes_jules,
-                    adaptation_auto=repas.adaptation_auto,
                 )
                 session.add(nouveau_repas)
                 nb_copies += 1
@@ -991,63 +985,7 @@ async def regenerer_planning(
     return await executer_async(_regenerer)
 
 
-@router.post(
-    "/{planning_id}/adapter-jules",
-    response_model=MessageResponse,
-    responses=REPONSES_CRUD_ECRITURE,
-)
-@gerer_exception_api
-async def adapter_planning_jules(
-    planning_id: int,
-    user: dict[str, Any] = Depends(require_auth),
-) -> MessageResponse:
-    """Adapte TOUS les repas d'une semaine pour Jules (IM1).
 
-    Génère une version Jules pour chaque repas du planning, en tenant compte de:
-    - L'âge de Jules
-    - Ses aliments exclus
-    - Les règles de nutrition pédiatrique
-
-    Les adaptations sont auto-persistées dans les champs plat_jules / notes_jules
-    de chaque repas.
-
-    Args:
-        planning_id: ID du planning à adapter
-
-    Returns:
-        Message avec résumé des adaptations (nombre réussi, erreurs)
-
-    Example:
-        ```
-        POST /api/v1/planning/15/adapter-jules
-        Response:
-        {
-            "message": "5 repas adaptés pour Jules, 0 erreurs",
-            "nb_adapte": 5,
-            "nb_erreurs": 0
-        }
-        ```
-    """
-    from src.services.famille import obtenir_version_recette_jules_service
-
-    def _adapter():
-        try:
-            service = obtenir_version_recette_jules_service()
-            result = service.adapter_planning(planning_id)
-
-            return MessageResponse(
-                message=result.get("summary", "Planning adapté"),
-                id=planning_id,
-                data={
-                    "nb_adapte": result.get("adapte", 0),
-                    "nb_erreurs": result.get("erreurs", 0),
-                    "details": result.get("details", []),
-                },
-            )
-        except ValueError as e:
-            raise HTTPException(status_code=404, detail=str(e))
-
-    return await executer_async(_adapter)
 
 
 @router.get(
@@ -1553,9 +1491,6 @@ async def generer_planning_ia(
                         "dessert": getattr(r, "dessert", None),
                         "dessert_recette_id": getattr(r, "dessert_recette_id", None),
                         "dessert_recette_nom": rec_dessert.nom if rec_dessert else None,
-                        "plat_jules": getattr(r, "plat_jules", None),
-                        "notes_jules": getattr(r, "notes_jules", None),
-                        "adaptation_auto": getattr(r, "adaptation_auto", True),
                         "est_reste": getattr(r, "est_reste", False),
                         "reste_description": getattr(r, "reste_description", None),
                         "score_equilibre": getattr(r, "score_equilibre", None),

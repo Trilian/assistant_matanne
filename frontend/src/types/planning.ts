@@ -31,9 +31,6 @@ export interface RepasPlanning {
   dessert?: string;
   dessert_recette_id?: number;
   dessert_recette_nom?: string;
-  plat_jules?: string;
-  notes_jules?: string;
-  adaptation_auto?: boolean;
   compatible_cookeo?: boolean;
   compatible_monsieur_cuisine?: boolean;
   compatible_airfryer?: boolean;

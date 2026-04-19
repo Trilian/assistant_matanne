@@ -121,9 +121,6 @@ export function CalendrierColonnesPlanning({
                           {repas.portions ? <Badge variant="outline">{repas.portions} pers.</Badge> : null}
                           {repas.nutri_score ? <Badge variant="secondary">Nutri {repas.nutri_score}</Badge> : null}
                         </div>
-                        {repas.plat_jules ? (
-                          <p className="text-xs text-muted-foreground">Version Jules : {repas.plat_jules}</p>
-                        ) : null}
                       </div>
                     ) : (
                       <p className="mt-3 text-sm text-muted-foreground">Créneau libre</p>

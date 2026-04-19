@@ -30,6 +30,7 @@ const TYPE_REPAS_LABEL: Record<string, string> = {
   dejeuner: "Déjeuner",
   diner: "Dîner",
   petit_dejeuner: "Matin",
+  gouter: "Goûter",
 };
 
 function lundi(offset = 0): string {

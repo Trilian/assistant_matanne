@@ -354,6 +354,42 @@ class AnalyseurIA:
         return None
 
 
+def _valider_items(
+    items_raw: list,
+    modele_item: type[BaseModel],
+) -> list[BaseModel]:
+    """Valide une liste de dicts en instances Pydantic, item par item.
+
+    Contrairement à une compréhension de liste, cette fonction ne s'arrête
+    pas au premier item invalide : les items qui échouent à la validation
+    sont journalisés puis ignorés, et les items valides sont retournés.
+
+    Args:
+        items_raw:   Liste de dicts bruts issus du JSON IA.
+        modele_item: Modèle Pydantic cible.
+
+    Returns:
+        Liste (possiblement partielle) d'instances validées.
+    """
+    valides: list[BaseModel] = []
+    for idx, item in enumerate(items_raw):
+        if not isinstance(item, dict):
+            logger.warning(
+                f"[parser] Item #{idx} ignoré pour {modele_item.__name__}: "
+                f"type inattendu {type(item).__name__}"
+            )
+            continue
+        try:
+            valides.append(modele_item.model_validate(item))
+        except Exception as exc:
+            nom = item.get("nom") or item.get("jour") or f"#{idx}"
+            logger.warning(
+                f"[parser] Item '{nom}' ignoré pour {modele_item.__name__}: "
+                f"{str(exc)[:150]}"
+            )
+    return valides
+
+
 def analyser_liste_reponse(
     reponse: str,
     modele_item: type[BaseModel],
@@ -361,16 +397,20 @@ def analyser_liste_reponse(
     items_secours: list[dict] | None = None,
 ) -> list[BaseModel]:
     """
-    Parse une réponse contenant une liste
+    Parse une réponse contenant une liste.
+
+    Chaque stratégie valide les items un par un via :func:`_valider_items`
+    afin qu'un seul item invalide ne fasse pas échouer tout le batch.
 
     Args:
-        reponse: Réponse IA
-        modele_item: Modèle d'un item
-        cle_liste: Clé contenant la liste
-        items_secours: Liste fallback
+        reponse: Réponse brute IA.
+        modele_item: Modèle Pydantic d'un item.
+        cle_liste: Clé JSON contenant la liste (défaut ``"items"``).
+        items_secours: Liste fallback si toutes les stratégies échouent.
 
     Returns:
-        Liste d'items validés
+        Liste d'items validés (peut être partielle si certains items
+        retournés par l'IA sont invalides).
     """
 
     # LOG: Première partie de la réponse pour diagnostiquer
@@ -385,36 +425,33 @@ def analyser_liste_reponse(
 
         # Si c'est une liste directe
         if isinstance(items_data, list):
-            logger.info(f"✅ Parser directe liste pour {modele_item.__name__}")
-            return [modele_item(**item) for item in items_data]
+            result = _valider_items(items_data, modele_item)
+            if result:
+                logger.info(f"✅ [S1] Liste directe — {len(result)}/{len(items_data)} items valides pour {modele_item.__name__}")
+                return result
 
         # Si c'est un dict avec la clé attendue
         if isinstance(items_data, dict) and cle_liste in items_data:
             items_list = items_data[cle_liste]
             if isinstance(items_list, list):
-                logger.info(f"✅ Parser liste avec clé '{cle_liste}' pour {modele_item.__name__}")
-                result = [modele_item(**item) for item in items_list]
-                logger.info(f"✅ Successfully parsed {len(result)} items")
-                return result
+                result = _valider_items(items_list, modele_item)
+                if result:
+                    logger.info(f"✅ [S1] Clé '{cle_liste}' — {len(result)}/{len(items_list)} items valides pour {modele_item.__name__}")
+                    return result
 
         # Stratégie 1b: dict avec clé différente — chercher la première valeur qui est une liste de dicts
         if isinstance(items_data, dict):
             for key, val in items_data.items():
                 if isinstance(val, list) and val and isinstance(val[0], dict):
-                    try:
-                        result = [modele_item(**item) for item in val]
-                        logger.info(f"✅ Parser liste avec clé alternative '{key}' pour {modele_item.__name__}")
+                    result = _valider_items(val, modele_item)
+                    if result:
+                        logger.info(f"✅ [S1b] Clé alternative '{key}' — {len(result)}/{len(val)} items valides pour {modele_item.__name__}")
                         return result
-                    except Exception:
-                        pass
     except Exception as e:
-        logger.debug(f"Stratégie 1 échouée: {str(e)[:100]}")
-        pass
+        logger.warning(f"[parser] Stratégie 1 échouée pour {modele_item.__name__}: {str(e)[:150]}")
 
     # Stratégie 2: Chercher [{ json objects }] pattern directement
     try:
-        import re
-
         # Chercher pattern: [ { ... }, { ... } ]
         pattern = r"\[\s*\{.*?\}\s*\]"
         match = re.search(pattern, reponse, re.DOTALL)
@@ -422,38 +459,43 @@ def analyser_liste_reponse(
             json_str = match.group(0)
             items_list = json.loads(json_str)
             if isinstance(items_list, list):
-                logger.info(f"✅ Regex array pattern found for {modele_item.__name__}")
-                result = [modele_item(**item) for item in items_list]
-                logger.info(f"✅ Successfully parsed {len(result)} items from regex")
-                return result
+                result = _valider_items(items_list, modele_item)
+                if result:
+                    logger.info(f"✅ [S2] Regex array — {len(result)}/{len(items_list)} items valides pour {modele_item.__name__}")
+                    return result
     except Exception as e:
-        logger.debug(f"Stratégie 2 (regex) échouée: {str(e)[:100]}")
-        pass
+        logger.warning(f"[parser] Stratégie 2 (regex) échouée pour {modele_item.__name__}: {str(e)[:150]}")
 
-    # Stratégie 3: Utiliser la clé de liste comme fallback via enveloppe dynamique
+    # Stratégie 3: Enveloppe dynamique avec validation per-item
+    # On utilise list[dict] pour l'enveloppe afin d'éviter que Pydantic rejette le batch
+    # entier à cause d'un seul item invalide, puis on valide les dicts un par un.
     try:
-        EnvelopeListe = create_model(
-            "EnvelopeListe",
-            **{cle_liste: (list[modele_item], ...)},
+        EnveloppeDict = create_model(
+            "EnveloppeDict",
+            **{cle_liste: (list[dict], ...)},
         )
 
         donnees_enveloppe = AnalyseurIA.analyser(
-            reponse, EnvelopeListe, valeur_secours={cle_liste: items_secours or []}, strict=False
+            reponse,
+            EnveloppeDict,
+            valeur_secours={cle_liste: items_secours or []},
+            strict=False,
         )
-        items_result = getattr(donnees_enveloppe, cle_liste, [])
-        if items_result:
-            logger.info(f"✅ Envelope parser successful: {len(items_result)} items")
-        return items_result
+        items_bruts: list[dict] = getattr(donnees_enveloppe, cle_liste, [])
+        if items_bruts:
+            result = _valider_items(items_bruts, modele_item)
+            if result:
+                logger.info(f"✅ [S3] Enveloppe dict — {len(result)}/{len(items_bruts)} items valides pour {modele_item.__name__}")
+                return result
     except Exception as e:
-        logger.warning(f"Stratégie 3 (envelope) échouée: {e}")
+        logger.warning(f"[parser] Stratégie 3 (enveloppe) échouée pour {modele_item.__name__}: {str(e)[:150]}")
 
     # Fallback final: retourner items_secours
     if items_secours:
-        logger.warning(f"Utilisation fallback avec {len(items_secours)} items")
-        try:
-            return [modele_item(**item) for item in items_secours]
-        except Exception as e:
-            logger.debug(f"Échec instantiation items_secours: {e}")
+        logger.warning(f"[parser] Utilisation fallback ({len(items_secours)} items) pour {modele_item.__name__}")
+        result = _valider_items(items_secours, modele_item)
+        if result:
+            return result
 
     logger.warning(
         f"[PARSE_FAIL] Impossible de parser liste pour {modele_item.__name__}. "

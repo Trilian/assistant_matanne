@@ -510,14 +510,6 @@ Adapte cette recette pour Jules."""
                 try:
                     result = self.generer_version_jules(repas.recette_id, profil_data)
 
-                    # Mettre à jour le repas avec la version Jules
-
-                    repas.plat_jules = result.get("instructions_modifiees")
-
-                    repas.notes_jules = result.get("notes_bebe")
-
-                    repas.adaptation_auto = True
-
                     adapte_details = {
                         "repas_id": repas.id,
                         "date": repas.date_repas.isoformat(),
@@ -531,18 +523,16 @@ Adapte cette recette pour Jules."""
                     adaptations["adapte"] += 1
 
                     logger.info(
-                        f"✅ Repas {repas.id} ({result.get('recette_nom')}) adapté pour Jules"
+                        f"✅ Version Jules générée pour recette {repas.recette_id} ({result.get('recette_nom')})"
                     )
 
                 except Exception as e:
-                    logger.error(f"❌ Erreur adaptation repas {repas.id}: {e}")
+                    logger.error(f"❌ Erreur génération version Jules recette {repas.recette_id}: {e}")
 
                     adaptations["erreurs"] += 1
 
-            session.commit()
-
             adaptations["summary"] = (
-                f"{adaptations['adapte']} repas adaptés, {adaptations['erreurs']} erreurs"
+                f"{adaptations['adapte']} versions Jules générées sur les recettes, {adaptations['erreurs']} erreurs"
             )
 
             return adaptations

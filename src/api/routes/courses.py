@@ -990,14 +990,14 @@ async def generer_depuis_planning(
 ):
     """Génère une liste de courses depuis le planning de la semaine.
 
-    1. Récupère tous les Repas de la semaine avec recette_id
-    2. Extrait et agrège les ingrédients via RecetteIngredient
+    1. Récupère tous les Repas de la semaine (avec recette OU champs texte libres)
+    2. Extrait et agrège les ingrédients via RecetteIngredient + champs texte libres
     3. Soustrait le stock existant si demandé
     4. Crée une ListeCourses avec les ArticleCourses
     """
     from datetime import timedelta
 
-    from sqlalchemy import func
+    from sqlalchemy import func, or_
 
     from src.core.constants import CATEGORIE_VERS_MAGASIN
     from src.core.models import (
@@ -1021,13 +1021,22 @@ async def generer_depuis_planning(
 
     def _generate():
         with executer_avec_session() as session:
-            # 1) Récupérer tous les repas de la semaine avec une recette liée
+            # 1) Récupérer tous les repas de la semaine ayant au moins une recette
+            # ou un champ texte libre (laitage, goûter, dessert…)
             repas_list = (
                 session.query(Repas)
                 .filter(
                     Repas.date_repas >= semaine_debut,
                     Repas.date_repas <= semaine_fin,
-                    Repas.recette_id.isnot(None),
+                    or_(
+                        Repas.recette_id.isnot(None),
+                        Repas.laitage.isnot(None),
+                        Repas.fruit_gouter.isnot(None),
+                        Repas.gateau_gouter.isnot(None),
+                        Repas.dessert.isnot(None),
+                        Repas.dessert_jules.isnot(None),
+                        Repas.entree.isnot(None),
+                    ),
                 )
                 .all()
             )
@@ -1035,7 +1044,7 @@ async def generer_depuis_planning(
             if not repas_list:
                 raise HTTPException(
                     status_code=404,
-                    detail="Aucun repas avec recette trouvé pour cette semaine",
+                    detail="Aucun repas trouvé pour cette semaine",
                 )
 
             # Collecter tous les recette_ids (plat + entrée + desserts)
@@ -1050,45 +1059,74 @@ async def generer_depuis_planning(
                 if r.dessert_jules_recette_id:
                     recette_ids.add(r.dessert_jules_recette_id)
 
-            # 2) Extraire les ingrédients de toutes les recettes
-            rows = (
-                session.query(
-                    Ingredient.nom,
-                    func.sum(RecetteIngredient.quantite).label("total_qty"),
-                    RecetteIngredient.unite,
-                    Ingredient.categorie,
-                )
-                .join(RecetteIngredient, RecetteIngredient.ingredient_id == Ingredient.id)
-                .filter(RecetteIngredient.recette_id.in_(recette_ids))
-                .group_by(Ingredient.nom, RecetteIngredient.unite, Ingredient.categorie)
-                .all()
-            )
+            # 2a) Extraire les ingrédients des recettes liées
+            ingredients_list: list[dict] = []
 
-            if not rows:
-                # Les recettes du planning n'ont aucun ingrédient enregistré.
-                recette_noms = (
-                    session.query(Recette.nom)
-                    .filter(Recette.id.in_(recette_ids))
+            if recette_ids:
+                rows = (
+                    session.query(
+                        Ingredient.nom,
+                        func.sum(RecetteIngredient.quantite).label("total_qty"),
+                        RecetteIngredient.unite,
+                        Ingredient.categorie,
+                    )
+                    .join(RecetteIngredient, RecetteIngredient.ingredient_id == Ingredient.id)
+                    .filter(RecetteIngredient.recette_id.in_(recette_ids))
+                    .group_by(Ingredient.nom, RecetteIngredient.unite, Ingredient.categorie)
                     .all()
                 )
-                noms = ", ".join(r.nom for r in recette_noms) if recette_noms else str(recette_ids)
+
+                ingredients_list = [
+                    {
+                        "nom": row.nom,
+                        "quantite": float(row.total_qty or 1),
+                        "unite": row.unite or "",
+                        "rayon": None if (not row.categorie or row.categorie.lower() in ("autre", "other")) else row.categorie,
+                    }
+                    for row in rows
+                ]
+
+            # 2b) Ajouter les champs texte libres (laitage, goûter, dessert, entrée)
+            # sans recette liée — même logique que service.py agréger_courses_pour_planning
+            _rayon_par_champ = {
+                "laitage": "cremerie",
+                "fruit_gouter": "fruits_legumes",
+                "gateau_gouter": "epicerie",
+                "dessert": "autre",
+                "dessert_jules": "autre",
+                "entree": "autre",
+            }
+            _champs_texte_avec_fk = [
+                ("entree", "entree_recette_id"),
+                ("dessert", "dessert_recette_id"),
+                ("dessert_jules", "dessert_jules_recette_id"),
+                ("laitage", None),
+                ("fruit_gouter", None),
+                ("gateau_gouter", None),
+            ]
+
+            for r in repas_list:
+                for champ, fk_field in _champs_texte_avec_fk:
+                    texte = getattr(r, champ, None)
+                    fk = getattr(r, fk_field, None) if fk_field else None
+                    if texte and not fk:
+                        ingredients_list.append(
+                            {
+                                "nom": texte.strip(),
+                                "quantite": 1.0,
+                                "unite": "pcs",
+                                "rayon": _rayon_par_champ.get(champ, "autre"),
+                            }
+                        )
+
+            if not ingredients_list:
                 raise HTTPException(
                     status_code=422,
                     detail=(
-                        f"Les recettes du planning n'ont pas d'ingrédients enregistrés : {noms}. "
-                        "Ajoutez des ingrédients aux recettes avant de générer la liste de courses."
+                        "Aucun ingrédient trouvé pour les repas de cette semaine. "
+                        "Ajoutez des ingrédients aux recettes ou renseignez les champs laitage/goûter/dessert."
                     ),
                 )
-
-            ingredients_list = [
-                {
-                    "nom": row.nom,
-                    "quantite": float(row.total_qty or 1),
-                    "unite": row.unite or "",
-                    "rayon": None if (not row.categorie or row.categorie.lower() in ("autre", "other")) else row.categorie,
-                }
-                for row in rows
-            ]
 
             # 3) Agréger les ingrédients identiques
             aggregated = aggregate_ingredients(ingredients_list)

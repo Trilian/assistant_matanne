@@ -699,18 +699,6 @@ async def obtenir_dashboard_cuisine(
                     0, round(100 - (articles_a_risque / total_inventaire * 100))
                 )
 
-            # Repas Jules aujourd'hui (adaptations bÃ©bÃ©)
-            repas_jules = [
-                {
-                    "type_repas": r.type_repas,
-                    "plat_jules": r.plat_jules,
-                    "notes_jules": r.notes_jules,
-                    "adaptation_auto": r.adaptation_auto,
-                }
-                for r in repas_jour
-                if r.plat_jules
-            ]
-
             return {
                 "repas_aujourd_hui": repas_aujourd_hui,
                 "repas_semaine_count": int(repas_semaine_count),
@@ -718,7 +706,6 @@ async def obtenir_dashboard_cuisine(
                 "articles_courses_restants": int(articles_courses_restants),
                 "alertes_inventaire": int(alertes_inventaire),
                 "score_anti_gaspillage": score_anti_gaspillage,
-                "repas_jules_aujourd_hui": repas_jules,
                 "batch_en_cours": batch_session is not None,
                 "batch_session_id": batch_session.id if batch_session else None,
             }

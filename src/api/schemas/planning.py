@@ -69,9 +69,6 @@ class RepasResponse(RepasBase, IdentifiedResponse):
     """Schéma de réponse pour un repas."""
 
     recette_nom: str | None = Field(None, max_length=200)
-    plat_jules: str | None = Field(None, max_length=200)
-    notes_jules: str | None = Field(None, max_length=1000)
-    adaptation_auto: bool = True
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False
     compatible_airfryer: bool = False

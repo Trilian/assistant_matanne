@@ -159,13 +159,6 @@ class DashboardBudgetUnifieResponse(BaseModel):
     totaux: DashboardBudgetUnifieTotaux = Field(default_factory=DashboardBudgetUnifieTotaux)
 
 
-class RepasJulesItem(BaseModel):
-    type_repas: str = ""
-    plat_jules: str | None = None
-    notes_jules: str | None = None
-    adaptation_auto: bool = False
-
-
 class DashboardCuisineResponse(BaseModel):
     repas_aujourd_hui: list[dict[str, Any]] = Field(default_factory=list)
     repas_semaine_count: int = 0
@@ -173,7 +166,6 @@ class DashboardCuisineResponse(BaseModel):
     articles_courses_restants: int = 0
     alertes_inventaire: int = 0
     score_anti_gaspillage: int = 0
-    repas_jules_aujourd_hui: list[RepasJulesItem] = Field(default_factory=list)
     batch_en_cours: bool = False
     batch_session_id: int | None = None
 

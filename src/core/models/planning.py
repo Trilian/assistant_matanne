@@ -167,11 +167,6 @@ class Repas(Base):
     # Alertes texte : ["Pas de légumes", "Protéine manquante", ...]
     alertes_equilibre: Mapped[list | None] = mapped_column(JSONB)
 
-    # Adaptation Jules
-    plat_jules: Mapped[str | None] = mapped_column(Text)
-    notes_jules: Mapped[str | None] = mapped_column(Text)
-    adaptation_auto: Mapped[bool] = mapped_column(Boolean, default=True)
-
     # Contexte apprentissage
     contexte_meteo: Mapped[str | None] = mapped_column(String(50))
 

@@ -172,9 +172,11 @@ class RecetteEnrichieIA(BaseModel):
     """Recette enrichie par l'IA lors de la génération du planning (étapes + ingrédients)."""
 
     nom: str = Field(..., min_length=1, max_length=200)
-    temps_preparation: int = Field(20, ge=1, le=300)
+    # ge=0 : une recette "sans préparation" (ex: fromage, pain) est valide avec 0 min
+    temps_preparation: int = Field(20, ge=0, le=300)
     temps_cuisson: int = Field(20, ge=0, le=300)
-    portions: int = Field(4, ge=1, le=20)
+    # le=50 : Mistral peut retourner >20 pour des recettes en grande quantité ; on borne plutôt que de rejeter
+    portions: int = Field(4, ge=1, le=50)
     difficulte: str = Field("moyen", pattern="^(facile|moyen|difficile)$")
     ingredients: list[dict] = Field(default_factory=list)
     etapes: list[str] = Field(default_factory=list)
@@ -198,6 +200,12 @@ class RecetteEnrichieIA(BaseModel):
         if isinstance(v, float):
             return int(v)
         return v
+
+    @field_validator("portions", mode="after")
+    @classmethod
+    def borner_portions(cls, v: int) -> int:
+        """Borne les portions dans [1, 50] sans lever d'erreur — l'IA peut retourner des valeurs hors plage."""
+        return max(1, min(v, 50))
 
 
 class SuggestionRecettesDay(BaseModel):
