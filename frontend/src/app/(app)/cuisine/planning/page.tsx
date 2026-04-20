@@ -4,19 +4,12 @@
 
 "use client";
 
-import { useState, useMemo, useCallback, lazy, Suspense, type ReactNode } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import {
   X,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/composants/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/composants/ui/sheet";
 import {
   Tabs,
   TabsContent,
@@ -49,12 +42,9 @@ import type {
 } from "@/types/planning";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { EnTetePlanning } from "@/composants/planning/en-tete-planning";
-import {
-  SectionAnalyseIaPlanning,
-  ContenuDialogueCoursesPlanning,
-  ContenuDialogueBatchPlanning,
-  ContenuDialogueModePreparationPlanning,
-} from "@/composants/planning/blocs-planning";
+import { SectionAnalyseIaPlanning } from "@/composants/planning/blocs-planning";
+import { ResponsiveOverlay } from "@/composants/planning/responsive-overlay";
+import { DialoguesResultatsPlanning } from "@/composants/planning/dialogues-resultats-planning";
 import { DialogueAjoutRepasPlanning } from "@/composants/planning/dialogue-ajout-repas-planning";
 import { BanniereBrouillonConflits } from "@/composants/planning/banniere-brouillon-conflits";
 import { SectionNutritionHebdo } from "@/composants/planning/section-nutrition-hebdo";
@@ -74,7 +64,7 @@ import { utiliserPlanningDnd } from "@/crochets/utiliser-planning-dnd";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
-import { useIsMobile } from "@/crochets/use-mobile";
+
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import {
   Select,
@@ -89,51 +79,6 @@ import { ModalGenerationPlanning } from "@/composants/cuisine/modal-generation-p
 const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
 const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
 const ContenuSaisonnierLazy = lazy(() => import("../saisonnier/page"));
-
-
-
-function ResponsiveOverlay({
-  open,
-  onOpenChange,
-  title,
-  children,
-  contentClassName,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  children: ReactNode;
-  contentClassName?: string;
-}) {
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent
-          side="bottom"
-          className={`max-h-[92vh] overflow-y-auto rounded-t-3xl border-x-0 border-b-0 px-0 ${contentClassName ?? ""}`}
-        >
-          <SheetHeader className="pb-2">
-            <SheetTitle>{title}</SheetTitle>
-          </SheetHeader>
-          <div className="px-4 pb-4">{children}</div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={contentClassName}>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        {children}
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export default function PagePlanning() {
   const [vuePlanning, setVuePlanning] = useState<"planning" | "ma-semaine" | "nutrition" | "saisonnier">("planning");
@@ -724,62 +669,18 @@ export default function PagePlanning() {
         />
       </ResponsiveOverlay>
 
-      {/* ─── Dialogue résultat courses ─── */}
-      <ResponsiveOverlay
-        open={coursesDialogue}
-        onOpenChange={setCoursesDialogue}
-        title="🛒 Liste de courses générée"
-        contentClassName="sm:max-w-md"
-      >
-        {coursesResultat && (
-          <ContenuDialogueCoursesPlanning
-            coursesResultat={coursesResultat}
-            onFermer={() => setCoursesDialogue(false)}
-            onVoirListe={() => {
-              setCoursesDialogue(false);
-              window.location.href = `/cuisine/courses`;
-            }}
-          />
-        )}
-      </ResponsiveOverlay>
-
-      {/* ─── Dialogue résultat batch ─── */}
-      <ResponsiveOverlay
-        open={batchDialogue}
-        onOpenChange={setBatchDialogue}
-        title="🍳 Session batch créée"
-        contentClassName="sm:max-w-md"
-      >
-        {batchResultat && (
-          <ContenuDialogueBatchPlanning
-            batchResultat={batchResultat}
-            onFermer={() => setBatchDialogue(false)}
-            onVoirSession={() => {
-              setBatchDialogue(false);
-              window.location.href = `/cuisine/batch-cooking/${batchResultat.session_id}`;
-            }}
-          />
-        )}
-      </ResponsiveOverlay>
-      {/* ─── Dialog choix mode préparation ─── */}
-      <ResponsiveOverlay
-        open={choixModePrepa}
-        onOpenChange={setChoixModePrepa}
-        title="🍳 Mode de préparation"
-        contentClassName="sm:max-w-md"
-      >
-        <ContenuDialogueModePreparationPlanning
-          enGenerationBatch={enGenerationBatch}
-          onChoisirBatch={() => {
-            setChoixModePrepa(false);
-            genererBatch(undefined);
-          }}
-          onChoisirJourParJour={() => {
-            setChoixModePrepa(false);
-            window.location.href = "/cuisine/ma-semaine";
-          }}
-        />
-      </ResponsiveOverlay>
+      <DialoguesResultatsPlanning
+        coursesDialogue={coursesDialogue}
+        setCoursesDialogue={setCoursesDialogue}
+        coursesResultat={coursesResultat}
+        batchDialogue={batchDialogue}
+        setBatchDialogue={setBatchDialogue}
+        batchResultat={batchResultat}
+        choixModePrepa={choixModePrepa}
+        setChoixModePrepa={setChoixModePrepa}
+        enGenerationBatch={enGenerationBatch}
+        genererBatch={genererBatch}
+      />
         </TabsContent>
       </Tabs>
 
