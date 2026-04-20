@@ -6,7 +6,6 @@
 
 import { useState, useMemo, useCallback, lazy, Suspense, type ReactNode } from "react";
 import {
-  ChevronDown,
   X,
   Loader2,
   GripVertical,
@@ -59,8 +58,7 @@ import type {
 } from "@/types/planning";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
-import { CalendrierMosaiqueRepas } from "@/composants/planning/calendrier-mosaique-repas";
-import { CalendrierColonnesPlanning } from "@/composants/planning/calendrier-colonnes-planning";
+
 import { EnTetePlanning } from "@/composants/planning/en-tete-planning";
 import {
   SectionAnalyseIaPlanning,
@@ -71,6 +69,7 @@ import {
 import { DialogueAjoutRepasPlanning } from "@/composants/planning/dialogue-ajout-repas-planning";
 import { BanniereBrouillonConflits } from "@/composants/planning/banniere-brouillon-conflits";
 import { SectionNutritionHebdo } from "@/composants/planning/section-nutrition-hebdo";
+import { VuesSupplementairesPlanning } from "@/composants/planning/vues-supplementaires-planning";
 import { CaseRepasPlanning } from "@/composants/planning/case-repas-planning";
 import { type AnalysePlanningIaResultat } from "@/composants/planning/panneau-analyse-ia";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
@@ -744,26 +743,12 @@ export default function PagePlanning() {
       )}
 
       {modeAffichage === "semaine" && !isLoading && (
-        <div className="animate-in fade-in slide-in-from-bottom-1 duration-500 delay-300">
-          <button
-            type="button"
-            onClick={() => setVuesSupplementairesOuvertes(!vuesSupplementairesOuvertes)}
-            className="flex w-full items-center justify-between rounded-xl border border-dashed bg-muted/30 px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-          >
-            <span className="font-medium">Vues supplémentaires — mosaïque &amp; colonnes</span>
-            <ChevronDown
-              className={`h-4 w-4 shrink-0 transition-transform duration-200 ${
-                vuesSupplementairesOuvertes ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {vuesSupplementairesOuvertes && (
-            <div className="mt-3 space-y-4">
-              <CalendrierMosaiqueRepas dates={datesSemaine} repasParJour={repasParJour} />
-              <CalendrierColonnesPlanning dates={datesSemaine} repasParJour={repasParJour} />
-            </div>
-          )}
-        </div>
+        <VuesSupplementairesPlanning
+          dates={datesSemaine}
+          repasParJour={repasParJour}
+          ouvert={vuesSupplementairesOuvertes}
+          onToggle={() => setVuesSupplementairesOuvertes(!vuesSupplementairesOuvertes)}
+        />
       )}
 
       {modeAffichage === "semaine" && (
