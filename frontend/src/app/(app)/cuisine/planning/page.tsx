@@ -8,17 +8,8 @@ import { useState, useMemo, useCallback, lazy, Suspense, type ReactNode } from "
 import {
   X,
   Loader2,
-  GripVertical,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/composants/ui/card";
-import { Skeleton } from "@/composants/ui/skeleton";
-import { Badge } from "@/composants/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -57,8 +48,6 @@ import type {
   SuggestionRecettePlanning,
 } from "@/types/planning";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
-import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
-
 import { EnTetePlanning } from "@/composants/planning/en-tete-planning";
 import {
   SectionAnalyseIaPlanning,
@@ -70,7 +59,10 @@ import { DialogueAjoutRepasPlanning } from "@/composants/planning/dialogue-ajout
 import { BanniereBrouillonConflits } from "@/composants/planning/banniere-brouillon-conflits";
 import { SectionNutritionHebdo } from "@/composants/planning/section-nutrition-hebdo";
 import { VuesSupplementairesPlanning } from "@/composants/planning/vues-supplementaires-planning";
-import { CaseRepasPlanning } from "@/composants/planning/case-repas-planning";
+import {
+  GrillePlanningHebdo,
+  TYPES_REPAS,
+} from "@/composants/planning/grille-planning-hebdo";
 import { type AnalysePlanningIaResultat } from "@/composants/planning/panneau-analyse-ia";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
@@ -91,27 +83,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/composants/ui/select";
-import {
-  closestCenter,
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+
 import { ModalGenerationPlanning } from "@/composants/cuisine/modal-generation-planning";
 
 const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
 const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
 const ContenuSaisonnierLazy = lazy(() => import("../saisonnier/page"));
 
-const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];
-const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
-  { valeur: "petit_dejeuner", label: "Petit-déj", emoji: "🌅" },
-  { valeur: "dejeuner", label: "Déjeuner", emoji: "☀️" },
-  { valeur: "gouter", label: "Goûter", emoji: "🍪" },
-  { valeur: "diner", label: "Dîner", emoji: "🌙" },
-];
+
 
 function ResponsiveOverlay({
   open,
@@ -227,14 +206,6 @@ export default function PagePlanning() {
   const [panneauInvitesOuvert, setPanneauInvitesOuvert] = utiliserStockageLocal<boolean>("planning.panneauInvites", false);
   // Message d'erreur IA affiché sous le bouton "Générer IA" (plus fiable qu'un toast)
   const [erreurIA, setErreurIA] = useState<string | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    })
-  );
 
   const invalider = utiliserInvalidation();
   const {
@@ -654,93 +625,24 @@ export default function PagePlanning() {
       />
 
       {/* ─── Grille Planning ─── */}
-      {modeAffichage === "mois" ? (
-        chargementMensuel ? (
-          <Skeleton className="h-[520px] w-full" />
-        ) : planningMensuel ? (
-          <div className="animate-in fade-in slide-in-from-bottom-1 duration-500">
-            <CalendrierMensuel mois={planningMensuel.mois} parJour={planningMensuel.par_jour} />
-          </div>
-        ) : null
-      ) : isLoading ? (
-        <div className="grid gap-2">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Skeleton key={i} className={`h-24 w-full animate-in fade-in slide-in-from-bottom-1 duration-500 ${STAGGER_DELAYS[i % STAGGER_DELAYS.length]}`} />
-          ))}
-        </div>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={() => setRepasGlisse(null)}
-        >
-          <div className="space-y-2" data-planning-grid>
-            <div className="rounded-2xl border border-dashed bg-muted/35 px-3 py-2 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground/80">Astuce :</span> utilisez la poignée <GripVertical className="inline h-3 w-3" /> pour déplacer un repas par glisser-déposer, y compris sur mobile.
-            </div>
-            {datesSemaine.map((date, idx) => {
-              const dateObj = new Date(date);
-              const estAujourdhui =
-                date === new Date().toISOString().split("T")[0];
-
-              return (
-                <Card
-                  key={date}
-                  className={`${estAujourdhui ? "border-primary" : ""} animate-in fade-in slide-in-from-bottom-1 duration-500 ${STAGGER_DELAYS[idx % STAGGER_DELAYS.length]}`}
-                >
-                  <CardHeader className="py-2 px-4">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium">
-                        {jours[idx]}{" "}
-                        <span className="text-muted-foreground font-normal">
-                          {dateObj.toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                          })}
-                        </span>
-                      </CardTitle>
-                      {estAujourdhui && (
-                        <Badge variant="default" className="text-xs">
-                          Aujourd'hui
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="py-2 px-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {TYPES_REPAS.map(({ valeur, label, emoji }) => (
-                        <CaseRepasPlanning
-                          key={valeur}
-                          date={date}
-                          type={valeur}
-                          label={label}
-                          emoji={emoji}
-                          repas={trouverRepas(date, valeur)}
-                          repasGlisse={repasGlisse}
-                          onAjouter={ouvrirDialogue}
-                          onRetirer={retirerRepas}
-                          onModifierChamp={modifierChampRepas}
-                          onRegenerer={(repas) => regenererUnRepas(repas.id)}
-                          nomDinerParDescription={nomDinerParDescription}
-                        />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-          <DragOverlay>
-            {repasGlisse ? (
-              <div className="rounded-md border bg-background px-3 py-2 text-sm shadow-xl">
-                {repasGlisse.recette_nom || repasGlisse.notes || "Repas"}
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      )}
+      <GrillePlanningHebdo
+        modeAffichage={modeAffichage}
+        chargementMensuel={chargementMensuel}
+        planningMensuel={planningMensuel}
+        isLoading={isLoading}
+        repasGlisse={repasGlisse}
+        setRepasGlisse={setRepasGlisse}
+        handleDragStart={handleDragStart}
+        handleDragEnd={handleDragEnd}
+        datesSemaine={datesSemaine}
+        jours={jours}
+        trouverRepas={trouverRepas}
+        onAjouter={ouvrirDialogue}
+        onRetirer={retirerRepas}
+        onModifierChamp={modifierChampRepas}
+        onRegenerer={(repas) => regenererUnRepas(repas.id)}
+        nomDinerParDescription={nomDinerParDescription}
+      />
 
       {modeAffichage === "semaine" && !isLoading && (
         <VuesSupplementairesPlanning
