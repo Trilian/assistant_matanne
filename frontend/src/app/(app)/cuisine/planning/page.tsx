@@ -43,9 +43,8 @@ import type {
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { EnTetePlanning } from "@/composants/planning/en-tete-planning";
 import { SectionAnalyseIaPlanning } from "@/composants/planning/blocs-planning";
-import { ResponsiveOverlay } from "@/composants/planning/responsive-overlay";
 import { DialoguesResultatsPlanning } from "@/composants/planning/dialogues-resultats-planning";
-import { DialogueAjoutRepasPlanning } from "@/composants/planning/dialogue-ajout-repas-planning";
+import { OverlayDialogueAjoutRepas } from "@/composants/planning/overlay-dialogue-ajout-repas";
 import { BanniereBrouillonConflits } from "@/composants/planning/banniere-brouillon-conflits";
 import { SectionNutritionHebdo } from "@/composants/planning/section-nutrition-hebdo";
 import { VuesSupplementairesPlanning } from "@/composants/planning/vues-supplementaires-planning";
@@ -615,59 +614,48 @@ export default function PagePlanning() {
       <SectionNutritionHebdo nutrition={nutrition} />
 
       {/* ─── Dialogue ajout repas avec sélecteur de recettes ─── */}
-      <ResponsiveOverlay
-        open={dialogueOuvert}
-        onOpenChange={(open) => {
-          setDialogueOuvert(open);
-          if (!open) {
-            reinitialiserDialogue();
-          }
-        }}
-        title={dialogueEtape === "equilibre" ? "⚖ Équilibre du repas" : "Ajouter un repas"}
-        contentClassName="sm:max-w-lg"
-      >
-        <DialogueAjoutRepasPlanning
-          repasEnCours={repasEnCours}
-          jours={jours}
-          datesSemaine={datesSemaine}
-          typesRepas={TYPES_REPAS}
-          dialogueEtape={dialogueEtape}
-          ongletDialogue={ongletDialogue}
-          setOngletDialogue={setOngletDialogue}
-          rechercheRecette={rechercheRecette}
-          setRechercheRecette={setRechercheRecette}
-          suggestions={suggestions}
-          chargeSuggestions={chargeSuggestions}
-          suggestionsFiltrees={suggestionsFiltrees}
-          enAjout={enAjout}
-          choisirRecette={choisirRecette}
-          notesRepas={notesRepas}
-          setNotesRepas={setNotesRepas}
-          onAnnulerAjout={() => setDialogueOuvert(false)}
-          onAjouterTexteLibre={ajouterTexteLibre}
-          repasIdCree={repasIdCree}
-          nomRepasAjoute={nomRepasAjoute}
-          enSuggestionIA={enSuggestionIA}
-          onDemanderSuggestions={demanderSuggestionsAccompagnements}
-          suggestionsIA={suggestionsIA}
-          legumesForm={legumesForm}
-          setLegumesForm={setLegumesForm}
-          feculentsForm={feculentsForm}
-          setFeculentsForm={setFeculentsForm}
-          proteineForm={proteineForm}
-          setProteineForm={setProteineForm}
-          laitageForm={laitageForm}
-          setLaitageForm={setLaitageForm}
-          dessertForm={dessertForm}
-          setDessertForm={setDessertForm}
-          fruitGouter={fruitGouter}
-          setFruitGouter={setFruitGouter}
-          gateauGouter={gateauGouter}
-          setGateauGouter={setGateauGouter}
-          onPasserEquilibre={passerEquilibre}
-          onConfirmerEquilibre={confirmerEquilibre}
-        />
-      </ResponsiveOverlay>
+      <OverlayDialogueAjoutRepas
+        dialogueOuvert={dialogueOuvert}
+        setDialogueOuvert={setDialogueOuvert}
+        reinitialiserDialogue={reinitialiserDialogue}
+        dialogueEtape={dialogueEtape}
+        repasEnCours={repasEnCours}
+        jours={jours}
+        datesSemaine={datesSemaine}
+        ongletDialogue={ongletDialogue}
+        setOngletDialogue={setOngletDialogue}
+        rechercheRecette={rechercheRecette}
+        setRechercheRecette={setRechercheRecette}
+        suggestions={suggestions}
+        chargeSuggestions={chargeSuggestions}
+        suggestionsFiltrees={suggestionsFiltrees}
+        enAjout={enAjout}
+        choisirRecette={choisirRecette}
+        notesRepas={notesRepas}
+        setNotesRepas={setNotesRepas}
+        onAjouterTexteLibre={ajouterTexteLibre}
+        repasIdCree={repasIdCree}
+        nomRepasAjoute={nomRepasAjoute}
+        enSuggestionIA={enSuggestionIA}
+        demanderSuggestionsAccompagnements={demanderSuggestionsAccompagnements}
+        suggestionsIA={suggestionsIA}
+        legumesForm={legumesForm}
+        setLegumesForm={setLegumesForm}
+        feculentsForm={feculentsForm}
+        setFeculentsForm={setFeculentsForm}
+        proteineForm={proteineForm}
+        setProteineForm={setProteineForm}
+        laitageForm={laitageForm}
+        setLaitageForm={setLaitageForm}
+        dessertForm={dessertForm}
+        setDessertForm={setDessertForm}
+        fruitGouter={fruitGouter}
+        setFruitGouter={setFruitGouter}
+        gateauGouter={gateauGouter}
+        setGateauGouter={setGateauGouter}
+        passerEquilibre={passerEquilibre}
+        confirmerEquilibre={confirmerEquilibre}
+      />
 
       <DialoguesResultatsPlanning
         coursesDialogue={coursesDialogue}
