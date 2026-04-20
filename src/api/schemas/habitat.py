@@ -89,6 +89,12 @@ class PlanHabitatCreate(BaseModel):
     notes: str | None = None
 
 
+class PlanHabitatCanvasPayload(BaseModel):
+    donnees_canvas: dict = Field(default_factory=dict)
+    largeur_canvas: int = Field(default=1200, ge=400, le=4000)
+    hauteur_canvas: int = Field(default=800, ge=300, le=3000)
+
+
 class PlanHabitatAnalyseCreate(BaseModel):
     prompt_utilisateur: str | None = Field(None, max_length=2000)
     generer_image: bool = False

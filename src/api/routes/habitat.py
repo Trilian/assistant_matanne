@@ -25,6 +25,7 @@ from src.api.schemas.habitat import (
     PieceHabitatCreate,
     PlanHabitatConfiguration3DUpdate,
     PlanHabitatAnalyseCreate,
+    PlanHabitatCanvasPayload,
     PlanHabitatCreate,
     ProjetDecoDepenseCreate,
     ProjetDecoHabitatCreate,
@@ -69,6 +70,19 @@ REPONSES_CRUD_SUPPRESSION_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES
 
 def _to_float(value: Decimal | None) -> float | None:
     return float(value) if value is not None else None
+
+
+def _charger_canvas_plan(plan: PlanHabitat) -> dict[str, Any]:
+    donnees = cast(dict[str, Any], plan.donnees_pieces or {})
+    return {
+        "id": plan.id,
+        "nom": plan.nom,
+        "type_plan": plan.type_plan,
+        "version": plan.version,
+        "largeur_canvas": int(donnees.get("largeur_canvas") or 1200),
+        "hauteur_canvas": int(donnees.get("hauteur_canvas") or 800),
+        "donnees_canvas": cast(dict[str, Any], donnees.get("canvas_2d") or {}),
+    }
 
 
 @router.get("/hub", responses=REPONSES_CRUD_LECTURE_TYPED)
@@ -627,6 +641,50 @@ async def creer_plan(
             session.add(plan)
             session.flush()
             return {"id": plan.id, "nom": plan.nom, "type_plan": plan.type_plan}
+
+    return await executer_async(_query)
+
+
+@router.get("/plans/{plan_id}/canvas", responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def charger_canvas_plan(
+    plan_id: int, user: dict[str, Any] = Depends(require_auth)
+) -> dict[str, Any]:
+    """Charge le canvas 2D du plan Habitat pour l'éditeur technique."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            plan = session.query(PlanHabitat).filter(PlanHabitat.id == plan_id).first()
+            if not plan:
+                raise HTTPException(status_code=404, detail="Plan non trouve")
+            return _charger_canvas_plan(plan)
+
+    return await executer_async(_query)
+
+
+@router.post("/plans/{plan_id}/canvas", responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def sauvegarder_canvas_plan(
+    plan_id: int,
+    payload: PlanHabitatCanvasPayload,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Sauvegarde le canvas 2D du plan Habitat dans la même source de vérité."""
+
+    def _query() -> MessageResponse:
+        with executer_avec_session() as session:
+            plan = session.query(PlanHabitat).filter(PlanHabitat.id == plan_id).first()
+            if not plan:
+                raise HTTPException(status_code=404, detail="Plan non trouve")
+
+            donnees = cast(dict[str, Any], plan.donnees_pieces or {})
+            donnees["canvas_2d"] = payload.donnees_canvas
+            donnees["largeur_canvas"] = payload.largeur_canvas
+            donnees["hauteur_canvas"] = payload.hauteur_canvas
+            plan.donnees_pieces = donnees
+            plan.version = int(plan.version or 1) + 1
+            session.flush()
+            return MessageResponse(message="Canvas 2D sauvegarde")
 
     return await executer_async(_query)
 

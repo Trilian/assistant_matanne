@@ -1,3 +1,5 @@
+import type { CanvasData } from "@/types/maison";
+
 export interface ScenarioHabitat {
   id: number;
   nom: string;
@@ -60,7 +62,20 @@ export interface PlanHabitat {
   surface_totale_m2?: number;
   budget_estime?: number;
   version: number;
+  largeur_canvas?: number;
+  hauteur_canvas?: number;
+  donnees_canvas?: CanvasData;
   suggestions_ia?: SuggestionPieceHabitat[];
+}
+
+export interface PlanHabitatCanvas {
+  id: number;
+  nom: string;
+  type_plan: string;
+  version: number;
+  largeur_canvas: number;
+  hauteur_canvas: number;
+  donnees_canvas: CanvasData;
 }
 
 export interface PieceHabitat3DConfiguration {
@@ -192,8 +207,28 @@ export interface AnalysePlanHabitat {
   risques: string[];
   budget_estime?: number;
   circulation_note?: number;
+  faisabilite?: FaisabilitePlanHabitat | null;
   suggestions_pieces: SuggestionPieceHabitat[];
   prompt_image?: string | null;
+}
+
+export interface FaisabiliteDomaineHabitat {
+  score: number;
+  niveau_risque: string;
+  verdict: string;
+  points_vigilance: string[];
+  actions_recommandees: string[];
+  budget_estime_min?: number;
+  budget_estime_max?: number;
+}
+
+export interface FaisabilitePlanHabitat {
+  score_global: number;
+  synthese: string;
+  priorites_travaux: string[];
+  budget_travaux_estime_min?: number;
+  budget_travaux_estime_max?: number;
+  domaines: Record<string, FaisabiliteDomaineHabitat>;
 }
 
 export interface HistoriquePlanHabitat {

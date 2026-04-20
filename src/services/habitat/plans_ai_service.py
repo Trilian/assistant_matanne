@@ -26,6 +26,25 @@ class SuggestionPieceIA(BaseModel):
     actions: list[str] = Field(default_factory=list)
 
 
+class FaisabiliteDomaineIA(BaseModel):
+    score: float = Field(default=5.0, ge=0, le=10)
+    niveau_risque: str = Field(default="modere")
+    verdict: str
+    points_vigilance: list[str] = Field(default_factory=list)
+    actions_recommandees: list[str] = Field(default_factory=list)
+    budget_estime_min: float | None = None
+    budget_estime_max: float | None = None
+
+
+class FaisabilitePlanIA(BaseModel):
+    score_global: float = Field(default=5.0, ge=0, le=10)
+    synthese: str
+    priorites_travaux: list[str] = Field(default_factory=list)
+    budget_travaux_estime_min: float | None = None
+    budget_travaux_estime_max: float | None = None
+    domaines: dict[str, FaisabiliteDomaineIA] = Field(default_factory=dict)
+
+
 class AnalysePlanIA(BaseModel):
     resume: str
     points_forts: list[str] = Field(default_factory=list)
@@ -34,6 +53,7 @@ class AnalysePlanIA(BaseModel):
     circulation_note: float | None = Field(default=None, ge=0, le=10)
     suggestions_pieces: list[SuggestionPieceIA] = Field(default_factory=list)
     prompt_image: str | None = None
+    faisabilite: FaisabilitePlanIA | None = None
 
 
 class PlansHabitatAIService(BaseAIService):
@@ -81,6 +101,126 @@ class PlansHabitatAIService(BaseAIService):
             logger.debug("Vision plan Habitat indisponible: %s", exc)
             return None
 
+    def _extraire_resume_canvas(self, plan: PlanHabitat) -> dict[str, Any]:
+        donnees = plan.donnees_pieces or {}
+        canvas = donnees.get("canvas_2d") or {}
+        murs = canvas.get("murs") or []
+        portes = canvas.get("portes") or []
+        fenetres = canvas.get("fenetres") or []
+        meubles = canvas.get("meubles") or []
+        annotations = canvas.get("annotations") or []
+        annotations_techniques = [
+            annotation.get("texte")
+            for annotation in annotations
+            if annotation.get("type") in {"warning", "coffrage", "imaison"}
+            and annotation.get("texte")
+        ]
+        return {
+            "largeur_canvas": donnees.get("largeur_canvas") or 1200,
+            "hauteur_canvas": donnees.get("hauteur_canvas") or 800,
+            "nb_murs": len(murs),
+            "nb_murs_porteurs": sum(1 for mur in murs if mur.get("porteur")),
+            "nb_portes": len(portes),
+            "nb_fenetres": len(fenetres),
+            "nb_meubles": len(meubles),
+            "annotations_techniques": annotations_techniques,
+        }
+
+    def _construire_fallback_faisabilite(
+        self, plan: PlanHabitat, resume_canvas: dict[str, Any]
+    ) -> FaisabilitePlanIA:
+        budget_reference = float(plan.budget_estime or 0) or None
+        budget_min = round(budget_reference * 0.8, 2) if budget_reference else None
+        budget_max = round(budget_reference * 1.2, 2) if budget_reference else None
+        murs_porteurs = int(resume_canvas.get("nb_murs_porteurs") or 0)
+        points_structure = [
+            "Valider les reprises de charge avant ouverture ou suppression de cloison."
+            if murs_porteurs
+            else "Aucun mur porteur explicite dans le canvas, contrôle terrain recommandé.",
+            "Relever les portées et réservations avant chiffrage final.",
+        ]
+        return FaisabilitePlanIA(
+            score_global=5.8,
+            synthese="Pré-analyse exploitable, mais plusieurs validations métier restent nécessaires avant engagement travaux.",
+            priorites_travaux=[
+                "Confirmer la structure porteuse",
+                "Valider les réseaux techniques",
+                "Sécuriser l'enveloppe thermique et les autorisations",
+            ],
+            budget_travaux_estime_min=budget_min,
+            budget_travaux_estime_max=budget_max,
+            domaines={
+                "structure": FaisabiliteDomaineIA(
+                    score=5.5,
+                    niveau_risque="modere" if murs_porteurs else "a_verifier",
+                    verdict="Faisable sous réserve d'un relevé structurel et d'une validation des reprises de charge.",
+                    points_vigilance=points_structure,
+                    actions_recommandees=[
+                        "Faire valider les murs porteurs par un BE structure si ouverture prévue.",
+                        "Relever précisément portées, poutres et refends sur site.",
+                    ],
+                    budget_estime_min=budget_min,
+                    budget_estime_max=budget_max,
+                ),
+                "electricite": FaisabiliteDomaineIA(
+                    score=6.0,
+                    niveau_risque="modere",
+                    verdict="Reconfiguration probable du tableau et des circuits si redistribution des pièces.",
+                    points_vigilance=[
+                        "Anticiper prises, éclairage et courants faibles dans les nouvelles zones.",
+                        "Vérifier la capacité du tableau avant ajout de nouveaux usages.",
+                    ],
+                    actions_recommandees=[
+                        "Prévoir un schéma pièce par pièce avant devis.",
+                    ],
+                ),
+                "chauffage": FaisabiliteDomaineIA(
+                    score=6.1,
+                    niveau_risque="modere",
+                    verdict="Le chauffage reste adaptable mais impose de recalculer émetteurs et circulation d'air.",
+                    points_vigilance=[
+                        "Contrôler l'équilibrage si pièces agrandies ou fusionnées.",
+                    ],
+                    actions_recommandees=[
+                        "Refaire un zonage chauffage/ventilation avec l'implantation cible.",
+                    ],
+                ),
+                "thermique": FaisabiliteDomaineIA(
+                    score=5.7,
+                    niveau_risque="modere",
+                    verdict="L'enveloppe peut suivre le projet, mais les ouvertures et ponts thermiques doivent être revus.",
+                    points_vigilance=[
+                        "Vérifier l'impact des ouvertures et de la redistribution sur l'isolation.",
+                    ],
+                    actions_recommandees=[
+                        "Préciser les performances visées avant figer les matériaux.",
+                    ],
+                ),
+                "urbanisme": FaisabiliteDomaineIA(
+                    score=6.4,
+                    niveau_risque="faible",
+                    verdict="Faisabilité administrative probable pour un réaménagement intérieur, à confirmer si façade ou surface modifiée.",
+                    points_vigilance=[
+                        "Déclarer toute modification de façade ou création d'ouverture.",
+                    ],
+                    actions_recommandees=[
+                        "Lister en amont les travaux visibles depuis l'extérieur.",
+                    ],
+                ),
+                "terrain": FaisabiliteDomaineIA(
+                    score=6.0,
+                    niveau_risque="a_verifier",
+                    verdict="Le terrain paraît compatible, mais les altimétries et accès doivent être rapprochés du plan retenu.",
+                    points_vigilance=[
+                        "Vérifier les raccordements et les interfaces intérieur/extérieur.",
+                    ],
+                    actions_recommandees=[
+                        "Confronter le plan aux zones jardin et aux niveaux existants.",
+                    ],
+                ),
+            },
+        )
+
     def analyser_plan(
         self,
         session: Session,
@@ -91,6 +231,7 @@ class PlansHabitatAIService(BaseAIService):
     ) -> dict[str, Any]:
         plan, pieces = self._charger_plan(session, plan_id)
         contexte_image = self._extraire_contexte_image(plan.image_importee_url)
+        resume_canvas = self._extraire_resume_canvas(plan)
 
         scenario_service = ScenariosHabitatService()
         score_scenario = None
@@ -110,6 +251,7 @@ Budget estime actuel: {float(plan.budget_estime or 0)}
 Version: {plan.version}
 Score scenario associe: {score_scenario}
 Contraintes: {plan.contraintes or {}}
+Resume canvas 2D: {resume_canvas}
 Pieces: {
             [
                 {
@@ -138,6 +280,29 @@ Retourne uniquement un JSON avec:
   "risques": ["..."],
   "budget_estime": 0,
   "circulation_note": 0,
+    "faisabilite": {
+        "score_global": 0,
+        "synthese": "...",
+        "priorites_travaux": ["..."],
+        "budget_travaux_estime_min": 0,
+        "budget_travaux_estime_max": 0,
+        "domaines": {
+            "structure": {
+                "score": 0,
+                "niveau_risque": "faible|modere|eleve|a_verifier",
+                "verdict": "...",
+                "points_vigilance": ["..."],
+                "actions_recommandees": ["..."],
+                "budget_estime_min": 0,
+                "budget_estime_max": 0
+            },
+            "electricite": {},
+            "chauffage": {},
+            "thermique": {},
+            "urbanisme": {},
+            "terrain": {}
+        }
+    },
   "suggestions_pieces": [
     {"nom": "...", "type_piece": "...", "surface_m2": 0, "actions": ["..."]}
   ],
@@ -145,6 +310,7 @@ Retourne uniquement un JSON avec:
 }
 """
 
+        fallback_faisabilite = self._construire_fallback_faisabilite(plan, resume_canvas)
         fallback = {
             "resume": "Analyse indisponible, utiliser la version structurelle du plan.",
             "points_forts": ["Base exploitable pour une etude manuelle"],
@@ -153,6 +319,7 @@ Retourne uniquement un JSON avec:
             "circulation_note": 5.0,
             "suggestions_pieces": [],
             "prompt_image": None,
+            "faisabilite": fallback_faisabilite.model_dump(),
         }
         analyse = self.call_with_parsing_sync(
             prompt=prompt,
@@ -164,6 +331,8 @@ Retourne uniquement un JSON avec:
         )
         if analyse is None:
             analyse = AnalysePlanIA(**fallback)
+        elif analyse.faisabilite is None:
+            analyse.faisabilite = fallback_faisabilite
 
         plan.budget_estime = analyse.budget_estime or plan.budget_estime
         if analyse.suggestions_pieces:

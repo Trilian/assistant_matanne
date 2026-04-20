@@ -1,4 +1,5 @@
 import { clientApi } from "./client";
+import type { CanvasData } from "@/types/maison";
 import type {
   AlerteHabitat,
   AnnonceHabitat,
@@ -8,6 +9,7 @@ import type {
   HistoriquePlanHabitat,
   PieceHabitat,
   PlanHabitatConfiguration3DServeur,
+  PlanHabitatCanvas,
   PointCarteHabitat,
   PlanHabitat,
   ProjetDecoHabitat,
@@ -106,6 +108,23 @@ export async function obtenirBarometreHabitat(payload?: {
 export async function listerPlansHabitat(): Promise<PlanHabitat[]> {
   const { data } = await clientApi.get("/vision-maison/plans");
   return data.items ?? [];
+}
+
+export async function chargerCanvasHabitat(planId: number): Promise<PlanHabitatCanvas> {
+  const { data } = await clientApi.get(`/vision-maison/plans/${planId}/canvas`);
+  return data;
+}
+
+export async function sauvegarderCanvasHabitat(
+  planId: number,
+  payload: { donnees_canvas: CanvasData; largeur_canvas?: number; hauteur_canvas?: number }
+): Promise<{ message: string }> {
+  const { data } = await clientApi.post(`/vision-maison/plans/${planId}/canvas`, {
+    donnees_canvas: payload.donnees_canvas,
+    largeur_canvas: payload.largeur_canvas ?? 1200,
+    hauteur_canvas: payload.hauteur_canvas ?? 800,
+  });
+  return data;
 }
 
 export async function analyserPlanHabitat(
