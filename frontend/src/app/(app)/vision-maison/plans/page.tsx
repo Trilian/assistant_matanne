@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Box, Sparkles } from "lucide-react";
-import { analyserPlanHabitat, historiquePlanHabitat, listerPiecesHabitat, listerPlansHabitat } from "@/bibliotheque/api/habitat";
+import {
+  analyserPlanHabitat,
+  historiquePlanHabitat,
+  listerPiecesHabitat,
+  listerPlansHabitat,
+  obtenirConfiguration3DHabitat,
+  sauvegarderConfiguration3DHabitat,
+} from "@/bibliotheque/api/habitat";
 import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Textarea } from "@/composants/ui/textarea";
-import { utiliserMutationAvecInvalidation, utiliserRequete } from "@/crochets/utiliser-api";
+import { utiliserMutation, utiliserMutationAvecInvalidation, utiliserRequete } from "@/crochets/utiliser-api";
+import type { PlanHabitatConfiguration3DServeur } from "@/types/habitat";
 
 const Plan3DHabitat = dynamic(() => import("@/composants/habitat/plan-3d-habitat"), {
   ssr: false,
@@ -23,6 +31,7 @@ const Plan3DHabitat = dynamic(() => import("@/composants/habitat/plan-3d-habitat
 
 export default function PlansHabitatPage() {
   const [planSelectionne, setPlanSelectionne] = useState<number | null>(null);
+  const [afficherComparaisonIA, setAfficherComparaisonIA] = useState(false);
   const [prompt, setPrompt] = useState("Optimiser la circulation, les rangements et le cout travaux.");
   const { data: plans } = utiliserRequete(["habitat", "plans"], listerPlansHabitat);
   const planActif = (plans ?? []).find((plan) => plan.id === planSelectionne) ?? (plans ?? [])[0] ?? null;
@@ -36,11 +45,32 @@ export default function PlansHabitatPage() {
     () => listerPiecesHabitat(planActif?.id ?? 0),
     { enabled: Boolean(planActif?.id) }
   );
+  const { data: configuration3D } = utiliserRequete(
+    ["habitat", "plans", String(planActif?.id ?? "aucun"), "configuration-3d"],
+    () => obtenirConfiguration3DHabitat(planActif?.id ?? 0),
+    { enabled: Boolean(planActif?.id) }
+  );
 
   const analyseMutation = utiliserMutationAvecInvalidation(
     ({ planId, generer_image }: { planId: number; generer_image: boolean }) =>
       analyserPlanHabitat(planId, { prompt_utilisateur: prompt, generer_image }),
     [["habitat", "plans"], ["habitat", "plans", String(planActif?.id ?? "aucun"), "historique"]]
+  );
+  const sauvegardeConfigurationMutation = utiliserMutation(
+    ({ planId, payload }: { planId: number; payload: Omit<PlanHabitatConfiguration3DServeur, "plan_id"> }) =>
+      sauvegarderConfiguration3DHabitat(planId, payload)
+  );
+
+  const piecesVarianteIA = useMemo(
+    () =>
+      (analyseMutation.data?.analyse.suggestions_pieces ?? []).map((suggestion, index) => ({
+        id: -(index + 1),
+        plan_id: planActif?.id ?? 0,
+        nom: suggestion.nom,
+        type_piece: suggestion.type_piece,
+        surface_m2: suggestion.surface_m2,
+      })),
+    [analyseMutation.data?.analyse.suggestions_pieces, planActif?.id]
   );
 
   return (
@@ -159,7 +189,36 @@ export default function PlansHabitatPage() {
                     Selectionnez un plan pour ouvrir la visualisation 3D.
                   </div>
                 ) : (
-                  <Plan3DHabitat pieces={piecesPlanActif ?? []} nomPlan={planActif.nom} />
+                  <>
+                    {piecesVarianteIA.length > 0 && (
+                      <div className="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs text-muted-foreground">
+                        <span>{piecesVarianteIA.length} piece(s) proposee(s) par l'analyse IA.</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={afficherComparaisonIA ? "default" : "outline"}
+                          onClick={() => setAfficherComparaisonIA((precedent) => !precedent)}
+                        >
+                          {afficherComparaisonIA ? "Masquer comparaison" : "Comparer avec variante IA"}
+                        </Button>
+                      </div>
+                    )}
+                    <Plan3DHabitat
+                      pieces={piecesPlanActif ?? []}
+                      nomPlan={planActif.nom}
+                      planId={planActif.id}
+                      piecesVariante={piecesVarianteIA}
+                      afficherComparaison={afficherComparaisonIA}
+                      configurationServeur={configuration3D ?? null}
+                      sauvegardeServeurEnCours={sauvegardeConfigurationMutation.isPending}
+                      onSauvegarderConfigurationServeur={async (payload) => {
+                        await sauvegardeConfigurationMutation.mutateAsync({
+                          planId: planActif.id,
+                          payload,
+                        });
+                      }}
+                    />
+                  </>
                 )}
               </TabsContent>
             </Tabs>

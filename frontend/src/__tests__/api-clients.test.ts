@@ -52,10 +52,16 @@ describe("API Preferences", () => {
     aliments_exclus: ["coriandre"],
     aliments_favoris: ["pâtes"],
     poisson_par_semaine: 2,
+    nb_poisson_blanc: 1,
+    nb_poisson_gras: 1,
     vegetarien_par_semaine: 1,
     viande_rouge_max: 2,
     robots: ["Thermomix"],
     magasins_preferes: ["Leclerc"],
+    objectif_calories: 2000,
+    objectif_proteines: 60,
+    objectif_lipides: 70,
+    objectif_glucides: 260,
   };
 
   it("obtenirPreferences appelle GET /preferences", async () => {

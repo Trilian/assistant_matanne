@@ -94,6 +94,34 @@ class PlanHabitatAnalyseCreate(BaseModel):
     generer_image: bool = False
 
 
+class PlanHabitatPiece3DConfig(BaseModel):
+    id: int = Field(..., ge=1)
+    x: float
+    z: float
+    width: float = Field(..., ge=1.8, le=12)
+    depth: float = Field(..., ge=1.8, le=12)
+    nom: str | None = Field(None, min_length=1, max_length=200)
+    type_piece: str | None = Field(None, max_length=50)
+
+
+class PlanHabitatConfiguration3D(BaseModel):
+    layout_edition: list[PlanHabitatPiece3DConfig] = Field(default_factory=list)
+    palette_par_type: dict[str, str] = Field(default_factory=dict)
+
+
+class PlanHabitatVariante3D(BaseModel):
+    id: str | None = Field(None, min_length=1, max_length=120)
+    nom: str = Field(..., min_length=1, max_length=120)
+    source: str = Field(default="manuel", max_length=50)
+    configuration: PlanHabitatConfiguration3D
+
+
+class PlanHabitatConfiguration3DUpdate(BaseModel):
+    configuration_courante: PlanHabitatConfiguration3D = Field(default_factory=PlanHabitatConfiguration3D)
+    variantes: list[PlanHabitatVariante3D] = Field(default_factory=list)
+    variante_active_id: str | None = Field(None, min_length=1, max_length=120)
+
+
 class PieceHabitatCreate(BaseModel):
     nom: str = Field(..., min_length=1, max_length=200)
     type_piece: str | None = Field(None, max_length=50)

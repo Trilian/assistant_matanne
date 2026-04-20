@@ -38,6 +38,7 @@ from src.core.models import GrilleLoto, StatistiquesLoto, TirageLoto
 from src.services.core.base import BaseService
 from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
+from src.services.jeux._internal.loterie_base import LoterieCrudBase
 
 logger = logging.getLogger(__name__)
 
@@ -59,90 +60,63 @@ COUT_GRILLE = Decimal("2.20")
 # ═══════════════════════════════════════════════════════════
 
 
-class LotoCrudService(BaseService[GrilleLoto]):
+class LotoCrudService(LoterieCrudBase, BaseService[GrilleLoto]):
     """Service CRUD pour les tirages et grilles Loto.
 
-
-
-    Hérite de BaseService[GrilleLoto] pour le CRUD générique sur les grilles.
-
-    Les méthodes spécialisées gèrent les tirages et la synchronisation.
-
+    Hérite de LoterieCrudBase pour les opérations CRUD communes
+    et de BaseService[GrilleLoto] pour le CRUD générique.
     """
 
-    def __init__(self):
+    _tirage_cls = TirageLoto
+    _grille_cls = GrilleLoto
+    _cout_defaut = COUT_GRILLE
+    _nom_jeu = "loto"
 
+    def __init__(self):
         super().__init__(model=GrilleLoto, cache_ttl=120)
+
+    # ── Méthodes template LoterieCrudBase ────────────────
+
+    def _champs_secondaires_tirage(self, data: dict[str, Any]) -> dict[str, int] | None:
+        chance = data.get("numero_chance")
+        return {"numero_chance": chance} if chance is not None else None
+
+    def _serialiser_tirage(self, t: Any) -> dict[str, Any]:
+        return {
+            "id": t.id,
+            "date_tirage": t.date_tirage,
+            "numero_1": t.numero_1,
+            "numero_2": t.numero_2,
+            "numero_3": t.numero_3,
+            "numero_4": t.numero_4,
+            "numero_5": t.numero_5,
+            "numero_chance": t.numero_chance,
+            "jackpot_euros": t.jackpot_euros,
+        }
+
+    def _serialiser_grille(self, g: Any) -> dict[str, Any]:
+        return {
+            "id": g.id,
+            "numeros": [g.numero_1, g.numero_2, g.numero_3, g.numero_4, g.numero_5],
+            "numero_chance": g.numero_chance,
+            "date_creation": g.date_creation,
+            "strategie": g.source_prediction,
+            "note": g.notes,
+        }
 
     # ── Lecture ──────────────────────────────────────────
 
     @avec_session_db
     @avec_gestion_erreurs(default_return=[])
     def charger_tirages(self, limite: int | None = None, db: Session | None = None) -> list[dict]:
-        """Charge les tirages depuis la base de données.
-
-
-
-        Args:
-
-            limite: Nombre max de tirages (None = tous)
-
-
-
-        Returns:
-
-            Liste de dictionnaires tirage
-
-        """
-
-        query = db.query(TirageLoto).order_by(TirageLoto.date_tirage.desc())
-
-        if limite:
-            query = query.limit(limite)
-
-        tirages = query.all()
-
-        return [
-            {
-                "id": t.id,
-                "date_tirage": t.date_tirage,
-                "numero_1": t.numero_1,
-                "numero_2": t.numero_2,
-                "numero_3": t.numero_3,
-                "numero_4": t.numero_4,
-                "numero_5": t.numero_5,
-                "numero_chance": t.numero_chance,
-                "jackpot_euros": t.jackpot_euros,
-            }
-            for t in tirages
-        ]
+        """Charge les tirages depuis la base de données."""
+        return self._charger_tirages_impl(db, limite=limite)
 
     @avec_session_db
     @avec_gestion_erreurs(default_return=[])
     def charger_grilles_utilisateur(self, db: Session | None = None) -> list[dict]:
-        """Charge les grilles enregistrées par l'utilisateur.
-
-
-
-        Returns:
-
-            Liste de dictionnaires grille
-
-        """
-
-        grilles = db.query(GrilleLoto).order_by(GrilleLoto.date_creation.desc()).all()
-
-        return [
-            {
-                "id": g.id,
-                "numeros": [g.numero_1, g.numero_2, g.numero_3, g.numero_4, g.numero_5],
-                "numero_chance": g.numero_chance,
-                "date_creation": g.date_creation,
-                "strategie": g.strategie,
-                "note": g.note,
-            }
-            for g in grilles
-        ]
+        """Charge les grilles enregistrées par l'utilisateur."""
+        return self._charger_grilles_impl(db)
 
     # ── Écriture ────────────────────────────────────────
 
@@ -186,8 +160,8 @@ class LotoCrudService(BaseService[GrilleLoto]):
             numero_4=numeros_tries[3],
             numero_5=numeros_tries[4],
             numero_chance=numero_chance,
-            strategie=strategie,
-            note=note,
+            source_prediction=strategie,
+            notes=note,
         )
 
         db.add(grille)
@@ -396,7 +370,7 @@ class LotoCrudService(BaseService[GrilleLoto]):
             try:
                 # Parser la date
 
-                date_tirage = self._parser_date_tirage(tirage_api.get("date"))
+                date_tirage = self._parser_date(tirage_api.get("date"))
 
                 if not date_tirage:
                     continue
@@ -559,24 +533,7 @@ class LotoCrudService(BaseService[GrilleLoto]):
 
         return {}
 
-    # ── Utilitaires privés ───────────────────────────────
-
-    @staticmethod
-    def _parser_date_tirage(date_value: Any) -> date | None:
-        """Parse une date de tirage depuis différents formats."""
-
-        if isinstance(date_value, date):
-            return date_value
-
-        if isinstance(date_value, str):
-            for fmt in ("%Y-%m-%d", "%d/%m/%Y"):
-                try:
-                    return datetime.strptime(date_value, fmt).date()
-
-                except ValueError:
-                    continue
-
-        return None
+    # _parser_date est hérité de LoterieCrudBase
 
 
 # ═══════════════════════════════════════════════════════════

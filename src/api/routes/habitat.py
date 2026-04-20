@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 from typing import Any, cast
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -22,6 +23,7 @@ from src.api.schemas.habitat import (
     CritereScenarioCreate,
     GenerationImageHabitatCreate,
     PieceHabitatCreate,
+    PlanHabitatConfiguration3DUpdate,
     PlanHabitatAnalyseCreate,
     PlanHabitatCreate,
     ProjetDecoDepenseCreate,
@@ -650,6 +652,75 @@ async def lister_pieces(
                     }
                     for p in items
                 ]
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/plans/{plan_id}/configuration-3d", responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def obtenir_configuration_3d_plan(
+    plan_id: int, user: dict[str, Any] = Depends(require_auth)
+) -> dict[str, Any]:
+    """Retourne la configuration 3D persistée d'un plan et ses variantes."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            plan = session.query(PlanHabitat).filter(PlanHabitat.id == plan_id).first()
+            if not plan:
+                raise HTTPException(status_code=404, detail="Plan non trouve")
+
+            donnees = cast(dict[str, Any], plan.donnees_pieces or {})
+            configuration_3d = cast(dict[str, Any], donnees.get("configuration_3d") or {})
+            return {
+                "plan_id": plan.id,
+                "configuration_courante": configuration_3d.get(
+                    "configuration_courante",
+                    {"layout_edition": [], "palette_par_type": {}},
+                ),
+                "variantes": configuration_3d.get("variantes", []),
+                "variante_active_id": configuration_3d.get("variante_active_id"),
+            }
+
+    return await executer_async(_query)
+
+
+@router.put("/plans/{plan_id}/configuration-3d", responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def sauvegarder_configuration_3d_plan(
+    plan_id: int,
+    payload: PlanHabitatConfiguration3DUpdate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Sauvegarde la configuration 3D d'un plan et ses variantes nommées."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            plan = session.query(PlanHabitat).filter(PlanHabitat.id == plan_id).first()
+            if not plan:
+                raise HTTPException(status_code=404, detail="Plan non trouve")
+
+            donnees = cast(dict[str, Any], plan.donnees_pieces or {})
+            variantes = []
+            for variante in payload.variantes:
+                data = variante.model_dump()
+                if not data.get("id"):
+                    data["id"] = uuid4().hex[:12]
+                variantes.append(data)
+
+            donnees["configuration_3d"] = {
+                "configuration_courante": payload.configuration_courante.model_dump(),
+                "variantes": variantes,
+                "variante_active_id": payload.variante_active_id,
+            }
+            plan.donnees_pieces = donnees
+            session.flush()
+
+            return {
+                "plan_id": plan.id,
+                "configuration_courante": donnees["configuration_3d"]["configuration_courante"],
+                "variantes": donnees["configuration_3d"]["variantes"],
+                "variante_active_id": donnees["configuration_3d"].get("variante_active_id"),
             }
 
     return await executer_async(_query)

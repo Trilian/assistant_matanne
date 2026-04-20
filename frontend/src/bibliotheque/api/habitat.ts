@@ -7,6 +7,7 @@ import type {
   HabitatHub,
   HistoriquePlanHabitat,
   PieceHabitat,
+  PlanHabitatConfiguration3DServeur,
   PointCarteHabitat,
   PlanHabitat,
   ProjetDecoHabitat,
@@ -123,6 +124,19 @@ export async function historiquePlanHabitat(planId: number): Promise<HistoriqueP
 export async function listerPiecesHabitat(planId: number): Promise<PieceHabitat[]> {
   const { data } = await clientApi.get(`/vision-maison/plans/${planId}/pieces`);
   return data.items ?? [];
+}
+
+export async function obtenirConfiguration3DHabitat(planId: number): Promise<PlanHabitatConfiguration3DServeur> {
+  const { data } = await clientApi.get(`/vision-maison/plans/${planId}/configuration-3d`);
+  return data;
+}
+
+export async function sauvegarderConfiguration3DHabitat(
+  planId: number,
+  payload: Omit<PlanHabitatConfiguration3DServeur, "plan_id">
+): Promise<PlanHabitatConfiguration3DServeur> {
+  const { data } = await clientApi.put(`/vision-maison/plans/${planId}/configuration-3d`, payload);
+  return data;
 }
 
 export async function listerProjetsDecoHabitat(): Promise<ProjetDecoHabitat[]> {

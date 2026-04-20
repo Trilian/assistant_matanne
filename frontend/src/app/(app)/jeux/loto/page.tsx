@@ -1,17 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
-import { BoutonExportCsv } from "@/composants/ui/bouton-export-csv";
 import {
-  Table,
-  TableBody,
   TableCell,
   TableHead,
-  TableHeader,
   TableRow,
 } from "@/composants/ui/table";
 import { Skeleton } from "@/composants/ui/skeleton";
@@ -23,40 +19,21 @@ import {
   obtenirStatsLoto,
   obtenirNumerosRetard,
   genererGrilleLoto,
-  obtenirBacktest,
   genererGrilleIAPonderee,
   analyserGrilleJoueur,
 } from "@/bibliotheque/api/jeux";
-import type { TirageLoto, GrilleLoto, StatsLoto, NumeroRetard, BacktestResultat } from "@/types/jeux";
-import { HeatmapNumeros } from "@/composants/jeux/heatmap-numeros";
+import type { TirageLoto, GrilleLoto, StatsLoto, NumeroRetard } from "@/types/jeux";
 import { GenerateurGrille } from "@/composants/jeux/generateur-grille";
 import { GrilleIAPonderee } from "@/composants/jeux/grille-ia-ponderee";
-import { BacktestResultatCard } from "@/composants/jeux/backtest-resultat";
 import { TableauLotoExpert } from "@/composants/jeux/tableau-loto-expert";
-import { StatsPersonnelles } from "@/composants/jeux/stats-personnelles";
-import { TooltipProvider } from "@/composants/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
-
-function formaterDate(iso: string) {
-  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
-}
-
-function parseListeNumeros(raw: string | null, min: number, max: number, attendu: number): number[] {
-  if (!raw) return [];
-  const nums = raw
-    .split(",")
-    .map((v) => Number(v.trim()))
-    .filter((n) => Number.isInteger(n) && n >= min && n <= max);
-  const uniq = Array.from(new Set(nums)).sort((a, b) => a - b);
-  return uniq.length === attendu ? uniq : [];
-}
+import { PageLoterie, NumeroBoule } from "@/composants/jeux/page-loterie";
+import { formaterDate, parseListeNumeros } from "@/composants/jeux/helpers-loterie";
 
 export default function LotoPage() {
-  const [showBacktest, setShowBacktest] = useState(false);
-  const [modeVue, setModeVue] = useState<"simple" | "expert">("simple");
   const { user } = utiliserAuth();
   const search = useSearchParams();
+  const userIdNumerique = user?.id != null && Number.isFinite(Number(user.id)) ? Number(user.id) : undefined;
 
   const numerosPrefill = useMemo(
     () => parseListeNumeros(search.get("numeros"), 1, 49, 5),
@@ -72,26 +49,17 @@ export default function LotoPage() {
     ["jeux", "loto", "tirages"],
     listerTirages
   );
-
   const { data: grilles = [], isLoading: chargementGrilles } = utiliserRequete<GrilleLoto[]>(
     ["jeux", "loto", "grilles"],
     listerGrilles
   );
-
   const { data: stats, isLoading: chStats } = utiliserRequete<StatsLoto>(
     ["jeux", "loto", "stats"],
     obtenirStatsLoto
   );
-
   const { data: retard = [], isLoading: chRetard } = utiliserRequete<NumeroRetard[]>(
     ["jeux", "loto", "retard"],
     () => obtenirNumerosRetard(2.0)
-  );
-
-  const { data: backtest, isLoading: chBacktest } = utiliserRequete<BacktestResultat>(
-    ["jeux", "backtest-loto"],
-    () => obtenirBacktest("loto", 2.0),
-    { enabled: showBacktest }
   );
 
   const donneesExportTirages = useMemo(
@@ -106,64 +74,42 @@ export default function LotoPage() {
     [tirages]
   );
 
+  const retardSet = useMemo(() => new Set(retard.map((r) => r.numero)), [retard]);
+
   return (
-    <TooltipProvider>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">🎱 Loto</h1>
-          <div className="flex items-center gap-2 flex-wrap">
-            <BoutonExportCsv
-              data={donneesExportTirages}
-              filename="loto-tirages.csv"
-              label="Exporter CSV"
-            />
-            <Button
-              variant={modeVue === "simple" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setModeVue("simple")}
-            >
-              🎯 Simple
-            </Button>
-            <Button
-              variant={modeVue === "expert" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setModeVue("expert")}
-            >
-              📊 Expert
-            </Button>
-          </div>
-        </div>
-
-        <Tabs defaultValue="grilles">
-          <TabsList>
-            <TabsTrigger value="grilles">🎱 Grilles</TabsTrigger>
-            <TabsTrigger value="stats">📊 Mes Stats</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="grilles" className="space-y-6 mt-6">
-            {modeVue === "expert" ? (
-              <TableauLotoExpert />
-            ) : (
-              <>
-
-        {numerosPrefill.length === 5 && (
+    <PageLoterie
+      titre="Loto"
+      emoji="🎱"
+      nomJeu="loto"
+      maxNumeroPrincipal={49}
+      colonnesHeatmap={7}
+      donneesExport={donneesExportTirages}
+      fichierExport="loto-tirages.csv"
+      stats={stats}
+      chargementStats={chStats}
+      retardPrincipal={retard}
+      tirages={tirages}
+      chargementTirages={chargementTirages}
+      grilles={grilles}
+      chargementGrilles={chargementGrilles}
+      userId={userIdNumerique}
+      expertViewSlot={<TableauLotoExpert />}
+      generateurSlot={<GenerateurGrille typeJeu="loto" genererFn={genererGrilleLoto} />}
+      prefillSlot={
+        numerosPrefill.length === 5 ? (
           <Card className="border-emerald-300">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Pré-remplissage rapide d'une grille</CardTitle>
+              <CardTitle className="text-base">Pré-remplissage rapide d{"'"}une grille</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-1.5 items-center">
                 {numerosPrefill.map((n) => (
-                  <span key={n} className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-                    {n}
-                  </span>
+                  <NumeroBoule key={n} numero={n} />
                 ))}
                 {chancePrefill && (
                   <>
                     <span className="mx-2 text-muted-foreground">|</span>
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500 text-white text-sm font-bold">
-                      {chancePrefill}
-                    </span>
+                    <NumeroBoule numero={chancePrefill} variant="secondary" />
                   </>
                 )}
               </div>
@@ -180,29 +126,9 @@ export default function LotoPage() {
               </Button>
             </CardContent>
           </Card>
-        )}
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Fréquences des numéros</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {chStats ? (
-              <Skeleton className="h-40 w-full" />
-            ) : stats ? (
-              <HeatmapNumeros
-                frequences={stats.frequences_numeros}
-                maxNumero={49}
-                colonnes={7}
-                numerosRetard={retard}
-                label={`Loto — ${stats.total_tirages} tirages analysés`}
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">Aucune statistique disponible</p>
-            )}
-          </CardContent>
-        </Card>
-
+        ) : undefined
+      }
+      retardSlot={
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Numéros en retard</CardTitle>
@@ -229,9 +155,8 @@ export default function LotoPage() {
             )}
           </CardContent>
         </Card>
-
-        <GenerateurGrille typeJeu="loto" genererFn={genererGrilleLoto} />
-
+      }
+      extraComponentsSlot={
         <GrilleIAPonderee
           onGenerer={async (mode) => {
             try {
@@ -251,136 +176,77 @@ export default function LotoPage() {
             }
           }}
         />
-
-        <div>
-          <Button variant="outline" size="sm" onClick={() => setShowBacktest(!showBacktest)} className="mb-3">
-            📊 Backtest {showBacktest ? "▲" : "▼"}
-          </Button>
-          {showBacktest && <BacktestResultatCard data={backtest} isLoading={chBacktest} />}
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Derniers tirages</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {chargementTirages ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-              </div>
-            ) : tirages.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">Aucun tirage enregistré</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Numéros</TableHead>
-                    <TableHead>N° Chance</TableHead>
-                    <TableHead className="text-right">Jackpot</TableHead>
-                    <TableHead className="text-right">Gagnants rang 1</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tirages.map((t) => {
-                    const retardSet = new Set(retard.map((r) => r.numero));
-                    return (
-                      <TableRow key={t.id}>
-                        <TableCell>{formaterDate(t.date_tirage)}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1.5">
-                            {t.numeros.map((n, i) => (
-                              <span
-                                key={i}
-                                className={`inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${retardSet.has(n) ? "bg-orange-400 text-white" : "bg-primary text-primary-foreground"}`}
-                              >
-                                {n}
-                              </span>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {t.numero_chance != null ? (
-                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500 text-white text-sm font-bold">
-                              {t.numero_chance}
-                            </span>
-                          ) : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {t.jackpot_euros ? `${(t.jackpot_euros / 1_000_000).toFixed(1)} M€` : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">{t.gagnants_rang1 ?? "-"}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Mes grilles</CardTitle></CardHeader>
-          <CardContent>
-            {chargementGrilles ? (
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-              </div>
-            ) : grilles.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">Aucune grille enregistrée</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tirage</TableHead>
-                    <TableHead>Numéros</TableHead>
-                    <TableHead>N° Chance</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead>Type</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {grilles.map((g) => (
-                    <TableRow key={g.id}>
-                      <TableCell>#{g.tirage_id ?? "-"}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-1.5">
-                          {g.numeros.map((n, i) => (
-                            <span key={i} className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-secondary-foreground text-sm font-bold">
-                              {n}
-                            </span>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {g.numero_chance != null ? (
-                          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500 text-white text-sm font-bold">
-                            {g.numero_chance}
-                          </span>
-                        ) : "-"}
-                      </TableCell>
-                      <TableCell>{g.source_prediction ?? "Manuel"}</TableCell>
-                      <TableCell>
-                        <Badge variant={g.est_virtuelle ? "secondary" : "default"}>
-                          {g.est_virtuelle ? "Virtuelle" : "Réelle"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
+      }
+      tiragesHeaderSlot={
+        <TableRow>
+          <TableHead>Date</TableHead>
+          <TableHead>Numéros</TableHead>
+          <TableHead>N° Chance</TableHead>
+          <TableHead className="text-right">Jackpot</TableHead>
+          <TableHead className="text-right">Gagnants rang 1</TableHead>
+        </TableRow>
+      }
+      tiragesBodySlot={
+        <>
+          {tirages.map((t) => (
+            <TableRow key={t.id}>
+              <TableCell>{formaterDate(t.date_tirage)}</TableCell>
+              <TableCell>
+                <div className="flex gap-1.5">
+                  {t.numeros.map((n, i) => (
+                    <NumeroBoule key={i} numero={n} variant={retardSet.has(n) ? "highlight" : "primary"} />
                   ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-              </>
-            )}
-          </TabsContent>
-
-          <TabsContent value="stats" className="mt-6">
-            {user && <StatsPersonnelles userId={user.id} />}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </TooltipProvider>
+                </div>
+              </TableCell>
+              <TableCell>
+                {t.numero_chance != null ? (
+                  <NumeroBoule numero={t.numero_chance} variant="secondary" />
+                ) : "-"}
+              </TableCell>
+              <TableCell className="text-right">
+                {t.jackpot_euros ? `${(t.jackpot_euros / 1_000_000).toFixed(1)} M€` : "-"}
+              </TableCell>
+              <TableCell className="text-right">{t.gagnants_rang1 ?? "-"}</TableCell>
+            </TableRow>
+          ))}
+        </>
+      }
+      grillesHeaderSlot={
+        <TableRow>
+          <TableHead>Tirage</TableHead>
+          <TableHead>Numéros</TableHead>
+          <TableHead>N° Chance</TableHead>
+          <TableHead>Source</TableHead>
+          <TableHead>Type</TableHead>
+        </TableRow>
+      }
+      grillesBodySlot={
+        <>
+          {grilles.map((g) => (
+            <TableRow key={g.id}>
+              <TableCell>#{g.tirage_id ?? "-"}</TableCell>
+              <TableCell>
+                <div className="flex gap-1.5">
+                  {g.numeros.map((n, i) => (
+                    <NumeroBoule key={i} numero={n} size="sm" />
+                  ))}
+                </div>
+              </TableCell>
+              <TableCell>
+                {g.numero_chance != null ? (
+                  <NumeroBoule numero={g.numero_chance} variant="secondary" />
+                ) : "-"}
+              </TableCell>
+              <TableCell>{g.source_prediction ?? "Manuel"}</TableCell>
+              <TableCell>
+                <Badge variant={g.est_virtuelle ? "secondary" : "default"}>
+                  {g.est_virtuelle ? "Virtuelle" : "Réelle"}
+                </Badge>
+              </TableCell>
+            </TableRow>
+          ))}
+        </>
+      }
+    />
   );
 }

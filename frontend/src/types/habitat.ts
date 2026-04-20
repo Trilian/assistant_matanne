@@ -63,6 +63,35 @@ export interface PlanHabitat {
   suggestions_ia?: SuggestionPieceHabitat[];
 }
 
+export interface PieceHabitat3DConfiguration {
+  id: number;
+  x: number;
+  z: number;
+  width: number;
+  depth: number;
+  nom?: string;
+  type_piece?: string;
+}
+
+export interface PlanHabitatConfiguration3D {
+  layout_edition: PieceHabitat3DConfiguration[];
+  palette_par_type: Record<string, string>;
+}
+
+export interface PlanHabitatVariante3D {
+  id: string;
+  nom: string;
+  source: string;
+  configuration: PlanHabitatConfiguration3D;
+}
+
+export interface PlanHabitatConfiguration3DServeur {
+  plan_id: number;
+  configuration_courante: PlanHabitatConfiguration3D;
+  variantes: PlanHabitatVariante3D[];
+  variante_active_id?: string | null;
+}
+
 export interface PieceHabitat {
   id: number;
   plan_id: number;
