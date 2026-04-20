@@ -4,11 +4,7 @@
 
 "use client";
 
-import { useState, useMemo, useCallback, lazy, Suspense } from "react";
-import {
-  X,
-  Loader2,
-} from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/composants/ui/button";
 import {
   Tabs,
@@ -73,11 +69,8 @@ import {
   SelectValue,
 } from "@/composants/ui/select";
 
-import { ModalGenerationPlanning } from "@/composants/cuisine/modal-generation-planning";
-
-const ContenuNutritionLazy = lazy(() => import("../nutrition/page"));
-const ContenuMaSemaineLazy = lazy(() => import("../ma-semaine/page"));
-const ContenuSaisonnierLazy = lazy(() => import("../saisonnier/page"));
+import { OngletsVuesSecondaires } from "@/composants/planning/onglets-vues-secondaires";
+import { OverlayModalGenerationPlanning } from "@/composants/planning/overlay-modal-generation-planning";
 
 export default function PagePlanning() {
   const [vuePlanning, setVuePlanning] = useState<"planning" | "ma-semaine" | "nutrition" | "saisonnier">("planning");
@@ -472,23 +465,7 @@ export default function PagePlanning() {
           <TabsTrigger value="saisonnier">🌿 Saisonnier</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="ma-semaine" className="mt-4">
-          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
-            <ContenuMaSemaineLazy />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="nutrition" className="mt-4">
-          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
-            <ContenuNutritionLazy />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="saisonnier" className="mt-4">
-          <Suspense fallback={<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}>
-            <ContenuSaisonnierLazy />
-          </Suspense>
-        </TabsContent>
+        <OngletsVuesSecondaires />
 
         <TabsContent value="planning" className="mt-4 space-y-6">
       {/* ─── En-tête ─── */}
@@ -672,23 +649,16 @@ export default function PagePlanning() {
         </TabsContent>
       </Tabs>
 
-      {/* Modal de génération IA */}
-      <ModalGenerationPlanning
+      <OverlayModalGenerationPlanning
         ouvert={modalGenerationOuvert}
-        onFermer={() => {
-          setModalGenerationOuvert(false);
-          setModalGenerationInitialPlats([]);
-        }}
+        setModalGenerationOuvert={setModalGenerationOuvert}
+        setModalGenerationInitialPlats={setModalGenerationInitialPlats}
         enGeneration={enGeneration}
         nbPersonnesInitial={nbPersonnesBase + (contexteInvitesActif ? modeInvites.nbInvites : 0)}
         dateDebut={dateDebut}
-        initialPlats={modalGenerationInitialPlats}
-        repasActuels={repasActuelsSemaine}
-        onGenerer={(params) => {
-          setModalGenerationOuvert(false);
-          setModalGenerationInitialPlats([]);
-          lancerGenerationIA(params);
-        }}
+        modalGenerationInitialPlats={modalGenerationInitialPlats}
+        repasActuelsSemaine={repasActuelsSemaine}
+        lancerGenerationIA={lancerGenerationIA}
       />
     </div>
   );
