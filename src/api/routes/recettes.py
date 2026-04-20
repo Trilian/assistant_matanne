@@ -74,31 +74,6 @@ async def suggestion_repas_ce_soir(
     return result or SuggestionRepasSoirResponse()
 
 
-@router.post("/idee-repas-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA, deprecated=True)
-@gerer_exception_api
-async def idee_repas_soir(
-    body: IdeeRepasSoirRequest,
-    user: dict[str, Any] = Depends(require_auth),
-    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
-) -> SuggestionRepasSoirResponse:
-    """⚠️ DEPRECATED: Utilisez `/suggestion-repas-ce-soir` à la place."""
-    service = obtenir_service_innovations_cuisine()
-    result = service.suggerer_repas_ce_soir(
-        temps_disponible_min=body.temps_disponible_min,
-        humeur=body.humeur,
-    )
-    return result or SuggestionRepasSoirResponse()
-
-
-@router.post("/mange-ce-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA, deprecated=True)
-@gerer_exception_api
-async def mange_ce_soir(
-    body: IdeeRepasSoirRequest,
-    user: dict[str, Any] = Depends(require_auth),
-    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
-) -> SuggestionRepasSoirResponse:
-    """⚠️ DEPRECATED: Utilisez `/suggestion-repas-ce-soir` à la place."""
-
 
 @router.get(
     "/patterns-alimentaires", response_model=PatternsAlimentairesResponse, responses=REPONSES_IA

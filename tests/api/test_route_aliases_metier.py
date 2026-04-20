@@ -44,15 +44,6 @@ def mock_innovations_service():
         yield service
 
 
-def test_alias_recettes_mange_ce_soir_est_expose(client: TestClient, mock_innovations_service) -> None:
-    response = client.post(
-        "/api/v1/recettes/mange-ce-soir",
-        json={"temps_disponible_min": 20, "humeur": "rapide"},
-    )
-
-    assert response.status_code == 200
-
-
 def test_alias_planning_planification_auto_est_expose(client: TestClient, mock_innovations_service) -> None:
     response = client.get("/api/v1/planning/planification-auto")
 

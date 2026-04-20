@@ -478,7 +478,6 @@ CREATE TABLE IF NOT EXISTS repas (
         )
     )
 );
-COMMENT ON COLUMN repas.fruit IS 'Fruit entier ou compote (goûter) — texte libre, ex: Pomme, Compote poire';
 COMMENT ON COLUMN repas.legumes IS 'Légumes accompagnement (déjeuner/dîner) — texte libre, ex: Haricots verts, Courgettes sautées';
 COMMENT ON COLUMN repas.legumes_recette_id IS 'Recette liée pour les légumes (optionnel, sinon texte libre dans `legumes`)';
 COMMENT ON COLUMN repas.feculents IS 'Féculents accompagnement — texte libre (ex: Riz basmati, Pommes de terre vapeur)';
